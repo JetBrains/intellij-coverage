@@ -1,0 +1,19 @@
+<project name="IDEA Coverage Agent" default="all">
+  <property name="idea.base.dir" value="../.."/>
+  <property name="jar.dst.dir" value="${idea.base.dir}/lib"/>
+  <property name="jar.dst.file" value="${jar.dst.dir}/coverage-agent.jar"/>
+  <property name="build.rt.classes.dir" value="${idea.base.dir}/out/classes/production/coverage"/>
+  <target name="all">
+    <jar destfile="${jar.dst.file}">
+      <manifest>
+        <attribute name="Premain-Class" value="com.intellij.rt.coverage.instrumentation.Instrumentator"/>
+        <attribute name="Boot-Class-Path" value="coverage-agent.jar asm.jar asm-tree-3.0.jar oromatcher.jar trove4j.jar asm-commons.jar"/>
+      </manifest>
+
+      <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/data/**"/>
+      <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/instrumentation/**"/>
+      <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/util/**"/>
+    </jar>
+  </target>
+</project>
+
