@@ -21,7 +21,7 @@
     <copy todir="${dist}" file="${basedir}/lib/asm-tree-3.0.jar"/>
     <copy todir="${dist}" file="${basedir}/lib/asm-commons.jar"/>
     <copy todir="${dist}" file="${basedir}/lib/oromatcher.jar"/>
-    <copy todir="${dist}" file="${basedir}/lib/trov4j.jar"/>
+    <copy todir="${dist}" file="${basedir}/lib/trove4j.jar"/>
   </target>
 </project>
 
