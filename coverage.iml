@@ -7,35 +7,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module-library">
-      <library name="asm">
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/asm-tree-3.0.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/asm.jar!/" />
-          <root url="jar://$MODULE_DIR$/lib/asm-commons.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/oromatcher.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/trove4j.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
+    <orderEntry type="library" name="asm" level="project" />
+    <orderEntry type="library" name="oromatcher" level="project" />
+    <orderEntry type="library" name="trov4j" level="project" />
   </component>
 </module>
 
