@@ -33,7 +33,7 @@
     <converter id="SelenaRunConfToDiana" />
   </component>
   <component name="ProjectKey">
-    <option name="state" value="app7.labs.intellij.net:1666://" />
+    <option name="state" value="app7.labs.intellij.net:1666:////Coverage/CoverageAgent/.idea/misc.xml" />
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
