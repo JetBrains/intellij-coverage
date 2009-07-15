@@ -81,6 +81,7 @@ public class ClassData implements CoverageData {
   public void merge(final CoverageData data) {
     ClassData classData = (ClassData)data;
     for (TIntObjectIterator it = classData.myLines.iterator(); it.hasNext();) {
+      it.advance();
       int key = it.key();
       final LineData mergedData = (LineData)classData.myLines.get(key);
       final LineData lineData = (LineData)myLines.get(key);
