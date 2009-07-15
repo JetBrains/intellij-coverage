@@ -22,12 +22,12 @@ public class Instrumentator {
 
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
     final String[] args = tokenize(argsString);
-    final ProjectData data = ProjectData.createProjectData(new File(args[0]), Boolean.valueOf(args[1]).booleanValue(), Boolean.valueOf(args[2]).booleanValue());
-    final boolean isSample = Boolean.valueOf(args[3]).booleanValue();
+    final ProjectData data = ProjectData.createProjectData(new File(args[0]), Boolean.valueOf(args[1]).booleanValue(), Boolean.valueOf(args[2]).booleanValue(), Boolean.valueOf(args[3]).booleanValue());
+    final boolean isSample = Boolean.valueOf(args[4]).booleanValue();
     final List includePatterns = new ArrayList();
     final Perl5Compiler pc = new Perl5Compiler();
     final String excludes = "-exclude";
-    int i = 4;
+    int i = 5;
     for (; i < args.length; i++) {
       if (excludes.equals(args[i])) break;
       includePatterns.add(pc.compile(args[i]));

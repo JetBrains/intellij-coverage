@@ -4,6 +4,7 @@ package com.intellij.rt.coverage.data;
 import com.intellij.rt.coverage.instrumentation.ClassFinder;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.SourceLineCounter;
+import com.intellij.rt.coverage.util.ProjectDataLoader;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIterator;
 import gnu.trove.TIntObjectProcedure;
@@ -46,7 +47,7 @@ public class ProjectData implements CoverageData, Serializable {
     return ourProjectData;
   }
 
-  public static ProjectData createProjectData(final File dataFile, final boolean traceLines, boolean calcUnloaded) throws IOException {
+  public static ProjectData createProjectData(final File dataFile, final boolean traceLines, boolean calcUnloaded, boolean mergeWithExisting) throws IOException {
     ourProjectData = new ProjectData();
     ourProjectData.myAppendUnloaded = calcUnloaded;
     ourProjectData.myTraceLines = traceLines;
@@ -55,6 +56,8 @@ public class ProjectData implements CoverageData, Serializable {
       final File parentDir = dataFile.getParentFile();
       if (parentDir != null && !parentDir.exists()) parentDir.mkdirs();
       dataFile.createNewFile();
+    } else if (mergeWithExisting) {
+      ourProjectData.merge(ProjectDataLoader.load(dataFile));
     }
     if (traceLines) new TIntHashSet();//instrument TIntHashSet
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
