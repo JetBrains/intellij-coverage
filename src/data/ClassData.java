@@ -88,7 +88,7 @@ public class ClassData implements CoverageData {
         lineData.merge(mergedData);
       }
       else {
-        myLines.put(key, mergedData);
+        addLine(key, mergedData.getMethodSignature()).merge(mergedData);
       }
     }
   }
