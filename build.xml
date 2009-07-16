@@ -19,14 +19,15 @@
     </jar>
 
     <delete file="${src.dst}"/>
-    <mkdir dir="${dist}/src/com/intellij/rt/coverage"/>
-    <copy todir="${dist}/src/com/intellij/rt/coverage" includeemptydirs="true">
+    <property name ="temp.src" value="${dist}/src/com/intellij/rt/coverage"/>
+    <mkdir dir="${temp.src}"/>
+    <copy todir="${temp.src}" includeemptydirs="true">
         <fileset dir="${basedir}/src" includes="data/**"/>
         <fileset dir="${basedir}/src" includes="instrumentation/**"/>
         <fileset dir="${basedir}/src" includes="util/**"/>
     </copy>
     <zip destfile="${src.dst}">
-       <fileset dir="${dist}/src" includes="com/intellij/rt/coverage"/>
+       <fileset dir="${dist}/src" includes="com/intellij/rt/coverage/**"/>
     </zip>
     <delete dir="${dist}/src"/>
 
