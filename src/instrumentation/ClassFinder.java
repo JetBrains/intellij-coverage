@@ -19,10 +19,23 @@ import java.util.zip.ZipFile;
 public class ClassFinder {
   private List myIncludePatterns;
   private List myExcludePatterns;
+  private Set myClassloaders;
 
   public ClassFinder(final List includePatterns, final List excludePatterns) {
     myIncludePatterns = includePatterns;
     myExcludePatterns = excludePatterns;
+    myClassloaders = new HashSet();
+  }
+
+  public void addClassLoader(ClassLoader cl) {
+    if (cl != null) {
+        if (cl instanceof URLClassLoader) {
+          myClassloaders.add(cl);
+        }
+        if (cl.getParent() != null) {
+            addClassLoader(cl.getParent());
+        }
+    }
   }
 
   public Collection findMatchedClasses() {
@@ -52,28 +65,24 @@ public class ClassFinder {
 
       result.addAll(extractEntries(System.getProperty("java.class.path")));
       result.addAll(extractEntries(System.getProperty("sun.boot.class.path")));
-      collectClassloaderEntries(getClass().getClassLoader(), result);
+      collectClassloaderEntries(result);
       return result;
     }
 
-    private void collectClassloaderEntries(final ClassLoader cl, final Set result) {
-      if (cl == null) return;
-      if (cl instanceof URLClassLoader) {
-        URL[] urls = ((URLClassLoader)cl).getURLs();
-        for (int i=0; i<urls.length; i++) {
-          URL url = urls[i];
-          if (!"file".equals(url.getProtocol())) continue;
+    private void collectClassloaderEntries(final Set result) {
+        for (Iterator iterator = myClassloaders.iterator(); iterator.hasNext();) {
+            URLClassLoader cl = (URLClassLoader) iterator.next();
+            URL[] urls = cl.getURLs();
+            for (int i=0; i<urls.length; i++) {
+              URL url = urls[i];
+              if (!"file".equals(url.getProtocol())) continue;
 
-          String path = fixPath(url.getPath());
-          if (path != null) {
-            result.add(path);
-          }
+              String path = fixPath(url.getPath());
+              if (path != null) {
+                result.add(path);
+              }
+            }
         }
-      }
-
-      if (cl.getParent() != null) {
-        collectClassloaderEntries(cl.getParent(), result);
-      }
     }
 
     private String fixPath(final String path) {

@@ -32,12 +32,14 @@ public class Instrumentator {
       if (excludes.equals(args[i])) break;
       includePatterns.add(pc.compile(args[i]));
     }
-    data.setIncludePatterns(includePatterns);
     final List excludePatterns = new ArrayList();
     for (; i < args.length; i++) {
       excludePatterns.add(pc.compile(args[i]));
     }
-    data.setExcludePatterns(excludePatterns);
+
+    final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
+    data.setClassFinder(cf);
+
     final Perl5Matcher pm = new Perl5Matcher();
     instrumentation.addTransformer(new ClassFileTransformer() {
       public byte[] transform(ClassLoader loader,
@@ -56,6 +58,8 @@ public class Instrumentator {
           for (Iterator it = excludePatterns.iterator(); it.hasNext();) {
             if (pm.matches(className, (Pattern)it.next())) return null;
           }
+
+          cf.addClassLoader(loader);
           if (includePatterns.isEmpty() && loader != null) {
             return instrument(classfileBuffer, isSample, data);
           }

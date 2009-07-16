@@ -29,8 +29,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   private boolean myTraceLines;
   private Map myTrace;
-  private List myIncludePatterns;
-  private List myExcludePatterns;
+  private ClassFinder myClassFinder;
   private boolean myAppendUnloaded;
 
   public ClassData getClassData(final String name) {
@@ -41,6 +40,10 @@ public class ProjectData implements CoverageData, Serializable {
     final ClassData classData = new ClassData(name);
     myClasses.put(name, classData);
     return classData;
+  }
+
+  public void setClassFinder(ClassFinder cf) {
+    myClassFinder = cf;
   }
 
   public static ProjectData getProjectData() {
@@ -203,16 +206,13 @@ public class ProjectData implements CoverageData, Serializable {
     return ourProjectData.myDict.get(className);
   }
 
-  public void setIncludePatterns(List includePatterns) {
-    myIncludePatterns = includePatterns;
-  }
-
-  public void setExcludePatterns(List excludePatterns) {
-    myExcludePatterns = excludePatterns;
-  }
-
    private static void appendUnloaded() {
-    Collection matchedClasses = new ClassFinder(ourProjectData.myIncludePatterns, ourProjectData.myExcludePatterns).findMatchedClasses();
+    if (ourProjectData.myClassFinder == null) {
+        System.err.println("ClassFinder is not set");
+        return;
+    }
+
+    Collection matchedClasses = ourProjectData.myClassFinder.findMatchedClasses();
 
     for (Iterator matchedClassIterator = matchedClasses.iterator(); matchedClassIterator.hasNext();) {
       String className = (String)matchedClassIterator.next();
