@@ -23,6 +23,9 @@ public class ClassFinder {
 
   public void addClassLoader(ClassLoader cl) {
     if (cl != null) {
+      // workaround for TeamCity own tests
+      if (cl.getClass().getName().equals("jetbrains.buildServer.agent.AgentClassLoader")) return;
+
       if (cl instanceof URLClassLoader) {
         myClassloaders.add(cl);
       }
