@@ -1,9 +1,10 @@
 <project name="IDEA Coverage Agent" default="all">
   <property name="dist" value="${basedir}/dist"/>
   <property name="jar.dst.file" value="${dist}/coverage-agent.jar"/>
+  <property name="src.dst" value="${dist}/coverage-src.zip"/>
   <property name="build.rt.classes.dir" value="${basedir}/classes"/>
   <target name="all">
-    <delete dir="{jar.dst.dir}"/>
+    <delete dir="${jar.dst.file}"/>
     <mkdir dir="${dist}"/>
 
     <jar destfile="${jar.dst.file}">
@@ -16,6 +17,18 @@
       <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/instrumentation/**"/>
       <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/util/**"/>
     </jar>
+
+    <delete file="${src.dst}"/>
+    <mkdir dir="${dist}/src/com/intellij/rt/coverage"/>
+    <copy todir="${dist}/src/com/intellij/rt/coverage" includeemptydirs="true">
+        <fileset dir="${basedir}/src" includes="data/**"/>
+        <fileset dir="${basedir}/src" includes="instrumentation/**"/>
+        <fileset dir="${basedir}/src" includes="util/**"/>
+    </copy>
+    <zip destfile="${src.dst}">
+       <fileset dir="${dist}/src" includes="com/intellij/rt/coverage"/>
+    </zip>
+    <delete dir="${dist}/src"/>
 
     <copy todir="${dist}" file="${basedir}/lib/asm.jar"/>
     <copy todir="${dist}" file="${basedir}/lib/asm-tree-3.0.jar"/>
