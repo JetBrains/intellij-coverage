@@ -1,10 +1,11 @@
 package com.intellij.rt.coverage.data;
 
 
+import com.intellij.rt.coverage.instrumentation.ClassEntry;
 import com.intellij.rt.coverage.instrumentation.ClassFinder;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
-import com.intellij.rt.coverage.util.SourceLineCounter;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
+import com.intellij.rt.coverage.util.SourceLineCounter;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIterator;
 import gnu.trove.TIntObjectProcedure;
@@ -13,7 +14,10 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 import java.io.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 public class ProjectData implements CoverageData, Serializable {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/ProjectData";
@@ -215,15 +219,15 @@ public class ProjectData implements CoverageData, Serializable {
     Collection matchedClasses = ourProjectData.myClassFinder.findMatchedClasses();
 
     for (Iterator matchedClassIterator = matchedClasses.iterator(); matchedClassIterator.hasNext();) {
-      String className = (String)matchedClassIterator.next();
-      ClassData cd = ourProjectData.getClassData(className);
+      ClassEntry classEntry = (ClassEntry) matchedClassIterator.next();
+      ClassData cd = ourProjectData.getClassData(classEntry.getClassName());
       if (cd != null) continue;
       try {
-        ClassReader reader = new ClassReader(className);
+        ClassReader reader = new ClassReader(classEntry.getClassInputStream());
         SourceLineCounter slc = new SourceLineCounter(new EmptyVisitor(), cd, ourProjectData.myTraceLines);
         reader.accept(slc, 0);
         if (slc.getNSourceLines() > 0) { // ignore classes without executable code
-          final ClassData classData = ourProjectData.createClassData(className);
+          final ClassData classData = ourProjectData.createClassData(classEntry.getClassName());
           slc.getSourceLines().forEachEntry(new TIntObjectProcedure() {
             public boolean execute(int line, Object methodSig) {
               final LineData ld = classData.addLine(line, (String)methodSig);
