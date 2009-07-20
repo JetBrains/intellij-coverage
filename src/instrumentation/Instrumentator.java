@@ -1,6 +1,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
@@ -57,10 +58,7 @@ public class Instrumentator {
           className = className.replace('\\', '.').replace('/', '.');
 
           // apply include and exclude patterns to parent class name only
-          int innerClassIdx = className.indexOf('$');
-          if (innerClassIdx != -1) {
-            className = className.substring(0, innerClassIdx);
-          }
+          className = ClassNameUtil.getOuterClassName(className);
           for (Iterator it = excludePatterns.iterator(); it.hasNext();) {
             if (pm.matches(className, (Pattern)it.next())) return null;
           }
