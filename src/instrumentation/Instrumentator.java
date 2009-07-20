@@ -55,6 +55,12 @@ public class Instrumentator {
             className = className.substring(0, className.length() - 6);
           }
           className = className.replace('\\', '.').replace('/', '.');
+
+          // apply include and exclude patterns to parent class name only
+          int innerClassIdx = className.indexOf('$');
+          if (innerClassIdx != -1) {
+            className = className.substring(0, innerClassIdx);
+          }
           for (Iterator it = excludePatterns.iterator(); it.hasNext();) {
             if (pm.matches(className, (Pattern)it.next())) return null;
           }
