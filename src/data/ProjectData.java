@@ -56,16 +56,16 @@ public class ProjectData implements CoverageData, Serializable {
 
   public static ProjectData createProjectData(final File dataFile, final boolean traceLines, boolean calcUnloaded, boolean mergeWithExisting) throws IOException {
     ourProjectData = new ProjectData();
-    ourProjectData.myAppendUnloaded = calcUnloaded;
-    ourProjectData.myTraceLines = traceLines;
-    ourProjectData.myDataFile = dataFile;
     if (!dataFile.exists()) {
       final File parentDir = dataFile.getParentFile();
       if (parentDir != null && !parentDir.exists()) parentDir.mkdirs();
       dataFile.createNewFile();
     } else if (mergeWithExisting) {
-      ourProjectData.merge(ProjectDataLoader.load(dataFile));
+      ourProjectData = ProjectDataLoader.load(dataFile);
     }
+    ourProjectData.myAppendUnloaded = calcUnloaded;
+    ourProjectData.myTraceLines = traceLines;
+    ourProjectData.myDataFile = dataFile;
     if (traceLines) new TIntHashSet();//instrument TIntHashSet
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {

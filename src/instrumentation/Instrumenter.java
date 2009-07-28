@@ -28,8 +28,7 @@ public abstract class Instrumenter extends ClassAdapter {
       return;
     }
     final String className = name.replace('/', '.');
-    myClassData = myProjectData.getClassData(className);
-    if (((access & Opcodes.ACC_INTERFACE) == 0) && myClassData == null) {
+    if ((access & Opcodes.ACC_INTERFACE) == 0) {
       myProcess = true;
       myEnum = (access & Opcodes.ACC_ENUM) != 0;
       myClassData = myProjectData.createClassData(className);
