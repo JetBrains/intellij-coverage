@@ -32,6 +32,7 @@ public class ProjectData implements CoverageData, Serializable {
   private String myCurrentTestName;
 
   private boolean myTraceLines;
+  private boolean mySampling;
   private Map myTrace;
   private ClassFinder myClassFinder;
   private boolean myAppendUnloaded;
@@ -54,7 +55,11 @@ public class ProjectData implements CoverageData, Serializable {
     return ourProjectData;
   }
 
-  public static ProjectData createProjectData(final File dataFile, final boolean traceLines, boolean calcUnloaded, boolean mergeWithExisting) throws IOException {
+  public boolean isSampling() {
+    return mySampling;
+  }
+
+  public static ProjectData createProjectData(final File dataFile, final boolean traceLines, boolean calcUnloaded, boolean mergeWithExisting, boolean isSampling) throws IOException {
     ourProjectData = new ProjectData();
     if (!dataFile.exists()) {
       final File parentDir = dataFile.getParentFile();
@@ -64,6 +69,7 @@ public class ProjectData implements CoverageData, Serializable {
       ourProjectData = ProjectDataLoader.load(dataFile);
     }
     ourProjectData.myAppendUnloaded = calcUnloaded;
+    ourProjectData.mySampling = isSampling;
     ourProjectData.myTraceLines = traceLines;
     ourProjectData.myDataFile = dataFile;
     if (traceLines) new TIntHashSet();//instrument TIntHashSet
@@ -224,7 +230,7 @@ public class ProjectData implements CoverageData, Serializable {
       if (cd != null) continue;
       try {
         ClassReader reader = new ClassReader(classEntry.getClassInputStream());
-        SourceLineCounter slc = new SourceLineCounter(new EmptyVisitor(), cd, ourProjectData.myTraceLines);
+        SourceLineCounter slc = new SourceLineCounter(new EmptyVisitor(), cd, !ourProjectData.isSampling());
         reader.accept(slc, 0);
         if (slc.getNSourceLines() > 0) { // ignore classes without executable code
           final ClassData classData = ourProjectData.createClassData(classEntry.getClassName());

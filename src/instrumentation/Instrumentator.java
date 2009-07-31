@@ -23,8 +23,7 @@ public class Instrumentator {
 
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
     final String[] args = tokenize(argsString);
-    final ProjectData data = ProjectData.createProjectData(new File(args[0]), Boolean.valueOf(args[1]).booleanValue(), Boolean.valueOf(args[2]).booleanValue(), Boolean.valueOf(args[3]).booleanValue());
-    final boolean isSample = Boolean.valueOf(args[4]).booleanValue();
+    final ProjectData data = ProjectData.createProjectData(new File(args[0]), Boolean.valueOf(args[1]).booleanValue(), Boolean.valueOf(args[2]).booleanValue(), Boolean.valueOf(args[3]).booleanValue(), Boolean.valueOf(args[4]).booleanValue());
     final List includePatterns = new ArrayList();
     final Perl5Compiler pc = new Perl5Compiler();
     final String excludes = "-exclude";
@@ -65,11 +64,11 @@ public class Instrumentator {
 
           cf.addClassLoader(loader);
           if (includePatterns.isEmpty() && loader != null) {
-            return instrument(classfileBuffer, isSample, data);
+            return instrument(classfileBuffer, data);
           }
           for (Iterator it = includePatterns.iterator(); it.hasNext();) {
             if (pm.matches(className, (Pattern)it.next())) {
-              return instrument(classfileBuffer, isSample, data);
+              return instrument(classfileBuffer, data);
             }
           }
         }
@@ -81,10 +80,10 @@ public class Instrumentator {
     });
   }
 
-  private static byte[] instrument(final byte[] classfileBuffer, final boolean sample, final ProjectData data) {
+  private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data) {
     final ClassReader cr = new ClassReader(classfileBuffer);
     final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-    final ClassAdapter cv = sample ? (ClassAdapter)new SamplingInstrumenter(data, cw) : new ClassInstrumenter(data, cw);
+    final ClassAdapter cv = data.isSampling() ? (ClassAdapter)new SamplingInstrumenter(data, cw) : new ClassInstrumenter(data, cw);
     cr.accept(cv, 0);
     return cw.toByteArray();
   }
