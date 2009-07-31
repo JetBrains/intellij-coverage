@@ -24,7 +24,7 @@ public class ProjectDataLoader {
       TIntObjectHashMap dict = new TIntObjectHashMap();
       final int classCount = CoverageIOUtil.readINT(in);
       for (int c = 0; c < classCount; c++) {
-        final ClassData classInfo = projectInfo.createClassData(CoverageIOUtil.readUTFFast(in));
+        final ClassData classInfo = projectInfo.getOrCreateClassData(CoverageIOUtil.readUTFFast(in));
         dict.put(c, classInfo);
       }
       for (int c = 0; c < classCount; c++) {

@@ -41,9 +41,12 @@ public class ProjectData implements CoverageData, Serializable {
     return (ClassData)myClasses.get(name);
   }
 
-  public ClassData createClassData(String name) {
-    final ClassData classData = new ClassData(name);
-    myClasses.put(name, classData);
+  public ClassData getOrCreateClassData(String name) {
+    ClassData classData = (ClassData) myClasses.get(name);
+    if (classData == null) {
+      classData = new ClassData(name);
+      myClasses.put(name, classData);
+    }
     return classData;
   }
 
@@ -233,7 +236,7 @@ public class ProjectData implements CoverageData, Serializable {
         SourceLineCounter slc = new SourceLineCounter(new EmptyVisitor(), cd, !ourProjectData.isSampling());
         reader.accept(slc, 0);
         if (slc.getNSourceLines() > 0) { // ignore classes without executable code
-          final ClassData classData = ourProjectData.createClassData(classEntry.getClassName());
+          final ClassData classData = ourProjectData.getOrCreateClassData(classEntry.getClassName());
           slc.getSourceLines().forEachEntry(new TIntObjectProcedure() {
             public boolean execute(int line, Object methodSig) {
               final LineData ld = classData.addLine(line, (String)methodSig);

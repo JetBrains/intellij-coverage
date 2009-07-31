@@ -31,7 +31,7 @@ public abstract class Instrumenter extends ClassAdapter {
     if ((access & Opcodes.ACC_INTERFACE) == 0) {
       myProcess = true;
       myEnum = (access & Opcodes.ACC_ENUM) != 0;
-      myClassData = myProjectData.createClassData(className);
+      myClassData = myProjectData.getOrCreateClassData(className);
 
       myClassVisitor.visitField(Opcodes.ACC_STATIC, "__class__data__", ClassData.CLASS_DATA_TYPE, null, null).visitEnd();
     }
