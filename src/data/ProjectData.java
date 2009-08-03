@@ -102,9 +102,9 @@ public class ProjectData implements CoverageData, Serializable {
             }
           }
         } catch (OutOfMemoryError e) {
-          System.err.println("Out of memory error occurred, try to increase memory available for the JVM, or make include / exclude patterns more specific");
+          System.err.println("coverage agent: out of memory error occurred, try to increase memory available for the JVM, or make include / exclude patterns more specific");
         } catch (Throwable e) {
-          System.err.println("Unexpected error: " + e.toString());
+          System.err.println("coverage agent: unexpected error: " + e.toString());
           e.printStackTrace();
         }
       }
