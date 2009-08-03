@@ -20,6 +20,12 @@ public class ClassEntry {
 
   public InputStream getClassInputStream() {
     String resourceName = myClassName.replace('.', '/') + ".class";
+    InputStream is = getResourceStream(resourceName);
+    if (is != null) return is;
+    return getResourceStream("/" + resourceName);
+  }
+
+  private InputStream getResourceStream(final String resourceName) {
     if (myClassLoader == null) {
       return getClass().getResourceAsStream(resourceName);
     }
