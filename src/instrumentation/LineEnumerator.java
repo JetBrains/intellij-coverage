@@ -76,7 +76,7 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
     myCurrentJump = 0;
     myCurrentSwitch = 0;
     myHasExecutableLines = true;
-    myClassData.addLine(myCurrentLine, myMethodName + mySignature);
+    myClassData.getOrCreateLine(myCurrentLine, myMethodName + mySignature);
   }
 
 

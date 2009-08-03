@@ -239,7 +239,7 @@ public class ProjectData implements CoverageData, Serializable {
           final ClassData classData = ourProjectData.getOrCreateClassData(classEntry.getClassName());
           slc.getSourceLines().forEachEntry(new TIntObjectProcedure() {
             public boolean execute(int line, Object methodSig) {
-              final LineData ld = classData.addLine(line, (String)methodSig);
+              final LineData ld = classData.getOrCreateLine(line, (String)methodSig);
               ld.setStatus(LineCoverage.NONE);
               return true;
             }

@@ -20,7 +20,7 @@ public class SamplingInstrumenter extends Instrumenter {
                                                      final String[] exceptions) {
     return new MethodAdapter(mv) {
       public void visitLineNumber(final int line, final Label start) {
-        myClassData.addLine(line, name + desc);
+        myClassData.getOrCreateLine(line, name + desc);
         mv.visitFieldInsn(Opcodes.GETSTATIC, myClassData.getName().replace('.', '/'), "__class__data__", ClassData.CLASS_DATA_TYPE);
         mv.visitIntInsn(Opcodes.SIPUSH, line);
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, ClassData.CLASS_DATA_OWNER, "touchLine", "(I)V");

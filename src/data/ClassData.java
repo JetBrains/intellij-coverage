@@ -37,9 +37,11 @@ public class ClassData implements CoverageData {
     if (myLineMask != null) {
       for (int i = 0; i < myLineMask.length; i++) {
         if (myLines.containsKey(i)) {
-          ((LineData)myLines.get(i)).setHits(myLineMask[i]);
+          final LineData lineData = (LineData) myLines.get(i);
+          lineData.setHits(lineData.getHits() + myLineMask[i]);
         }
       }
+      myLineMask = null;
     }
     if (myLines == null) {
       myLines = new TIntObjectHashMap();
@@ -89,7 +91,7 @@ public class ClassData implements CoverageData {
         lineData.merge(mergedData);
       }
       else {
-        addLine(key, mergedData.getMethodSignature()).merge(mergedData);
+        getOrCreateLine(key, mergedData.getMethodSignature()).merge(mergedData);
       }
     }
   }
@@ -124,9 +126,12 @@ public class ClassData implements CoverageData {
     }
   }
 
-  public LineData addLine(final int line, final String methodSig) {
-    final LineData lineData = new LineData(line, methodSig);
-    myLines.put(line, lineData);
+  public LineData getOrCreateLine(final int line, final String methodSig) {
+    LineData lineData = (LineData) myLines.get(line);
+    if (lineData == null) {
+      lineData = new LineData(line, methodSig);
+      myLines.put(line, lineData);
+    }
     myStatus.put(methodSig, null);
     if (line > myMaxLineNumber) myMaxLineNumber = line;
     return lineData;

@@ -35,7 +35,7 @@ public class ProjectDataLoader {
           final int lineCount = CoverageIOUtil.readINT(in);
           for (int l = 0; l < lineCount; l++) {
             final int line = CoverageIOUtil.readINT(in);
-            final LineData lineInfo = classInfo.addLine(line, methodSig);
+            final LineData lineInfo = classInfo.getOrCreateLine(line, methodSig);
             lineInfo.setTestName(CoverageIOUtil.readUTFFast(in));
             final int hits = CoverageIOUtil.readINT(in);
             lineInfo.setHits(hits);
