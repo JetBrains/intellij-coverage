@@ -78,27 +78,34 @@ public class ProjectData implements CoverageData, Serializable {
     if (traceLines) new TIntHashSet();//instrument TIntHashSet
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
-        if (ourProjectData.myAppendUnloaded) {
-          appendUnloaded();
-        }
-
-        DataOutputStream os = null;
         try {
-          os = new DataOutputStream(new FileOutputStream(ourProjectData.myDataFile));
-          ourProjectData.save(os);
-        }
-        catch (IOException e) {
-          System.err.println("coverage agent: error writing file " + dataFile.getPath() + ": " + e.getMessage());
-        }
-        finally {
+          if (ourProjectData.myAppendUnloaded) {
+            appendUnloaded();
+          }
+
+          DataOutputStream os = null;
           try {
-            if (os != null) {
-              os.close();
-            }
+            os = new DataOutputStream(new FileOutputStream(ourProjectData.myDataFile));
+            ourProjectData.save(os);
           }
           catch (IOException e) {
             System.err.println("coverage agent: error writing file " + dataFile.getPath() + ": " + e.getMessage());
           }
+          finally {
+            try {
+              if (os != null) {
+                os.close();
+              }
+            }
+            catch (IOException e) {
+              System.err.println("coverage agent: error writing file " + dataFile.getPath() + ": " + e.getMessage());
+            }
+          }
+        } catch (OutOfMemoryError e) {
+          System.err.println("Out of memory error occurred, try to increase memory available for the JVM, or make include / exclude patterns more specific");
+        } catch (Throwable e) {
+          System.err.println("Unexpected error: " + e.toString());
+          e.printStackTrace();
         }
       }
     }));
