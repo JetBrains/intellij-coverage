@@ -23,18 +23,26 @@ public class Instrumentator {
 
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
     final String[] args = tokenize(argsString);
-    final ProjectData data = ProjectData.createProjectData(new File(args[0]), Boolean.valueOf(args[1]).booleanValue(), Boolean.valueOf(args[2]).booleanValue(), Boolean.valueOf(args[3]).booleanValue(), Boolean.valueOf(args[4]).booleanValue());
+    final boolean traceLines = Boolean.valueOf(args[1]).booleanValue();
+    final boolean sampling = Boolean.valueOf(args[4]).booleanValue();
+    final ProjectData data = ProjectData.createProjectData(new File(args[0]), traceLines, Boolean.valueOf(args[2]).booleanValue(), Boolean.valueOf(args[3]).booleanValue(), sampling);
     final List includePatterns = new ArrayList();
     final Perl5Compiler pc = new Perl5Compiler();
+    System.out.println("---- IDEA coverage runner ---- ");
+    System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
     final String excludes = "-exclude";
     int i = 5;
+    System.out.println("include patterns:");
     for (; i < args.length; i++) {
       if (excludes.equals(args[i])) break;
       includePatterns.add(pc.compile(args[i]));
+      System.out.println(args[i]);
     }
+    System.out.println("exclude patterns:");
     final List excludePatterns = new ArrayList();
     for (; i < args.length; i++) {
       excludePatterns.add(pc.compile(args[i]));
+      System.out.println(args[i]);
     }
 
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
