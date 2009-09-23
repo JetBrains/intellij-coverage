@@ -1,4 +1,4 @@
-package com.intellij.rt.coverage.instrumentation;
+package com.intellij.rt.coverage.util;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class ErrorReporter {
       StringBuffer buf = new StringBuffer();
       buf.append("[");
       buf.append(myDateFormat.format(new Date()));
-      buf.append("]: ");
+      buf.append("] (Coverage): ");
       buf.append(message);
 
       System.err.println(buf.toString() + ": " + t.toString());

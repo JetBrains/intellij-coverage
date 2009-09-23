@@ -7,7 +7,7 @@ package com.intellij.rt.coverage.util;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.ErrorReporter;
+import com.intellij.rt.coverage.util.ErrorReporter;
 import gnu.trove.TIntObjectHashMap;
 
 import java.io.DataInputStream;

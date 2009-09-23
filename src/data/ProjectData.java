@@ -3,7 +3,7 @@ package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.instrumentation.ClassEntry;
 import com.intellij.rt.coverage.instrumentation.ClassFinder;
-import com.intellij.rt.coverage.instrumentation.ErrorReporter;
+import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.SourceLineCounter;
