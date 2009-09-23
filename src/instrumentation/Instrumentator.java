@@ -81,7 +81,7 @@ public class Instrumentator {
           }
         }
         catch (Exception e) {
-          e.printStackTrace();
+          ErrorReporter.reportError("Error during class instrumentation: " + className, e);
         }
         return null;
       }

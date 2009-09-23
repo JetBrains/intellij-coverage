@@ -7,6 +7,7 @@ package com.intellij.rt.coverage.util;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.ErrorReporter;
 import gnu.trove.TIntObjectHashMap;
 
 import java.io.DataInputStream;
@@ -64,7 +65,7 @@ public class ProjectDataLoader {
       }
     }
     catch (IOException e) {
-      e.printStackTrace();
+      ErrorReporter.reportError("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath(), e);
       return projectInfo;
     }
     finally {
@@ -72,7 +73,7 @@ public class ProjectDataLoader {
         in.close();
       }
       catch (IOException e) {
-        e.printStackTrace();
+        ErrorReporter.reportError("Failed to close file: " + sessionDataFile.getAbsolutePath(), e);
       }
     }
     return projectInfo;

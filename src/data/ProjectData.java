@@ -3,6 +3,7 @@ package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.instrumentation.ClassEntry;
 import com.intellij.rt.coverage.instrumentation.ClassFinder;
+import com.intellij.rt.coverage.instrumentation.ErrorReporter;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.SourceLineCounter;
@@ -89,7 +90,7 @@ public class ProjectData implements CoverageData, Serializable {
             ourProjectData.save(os);
           }
           catch (IOException e) {
-            System.err.println("coverage agent: error writing file " + dataFile.getPath() + ": " + e.getMessage());
+            ErrorReporter.reportError("Error writing file " + dataFile.getPath(), e);
           }
           finally {
             try {
@@ -98,14 +99,13 @@ public class ProjectData implements CoverageData, Serializable {
               }
             }
             catch (IOException e) {
-              System.err.println("coverage agent: error writing file " + dataFile.getPath() + ": " + e.getMessage());
+              ErrorReporter.reportError("Error writing file " + dataFile.getPath(), e);
             }
           }
         } catch (OutOfMemoryError e) {
-          System.err.println("coverage agent: out of memory error occurred, try to increase memory available for the JVM, or make include / exclude patterns more specific");
+          ErrorReporter.reportError("Out of memory error occured, try to increase memory available for the JVM, or make include / exclude patterns more specific", e);
         } catch (Throwable e) {
-          System.err.println("coverage agent: unexpected error: " + e.toString());
-          e.printStackTrace();
+          ErrorReporter.reportError("Unexpected error", e);
         }
       }
     }));
@@ -179,7 +179,7 @@ public class ProjectData implements CoverageData, Serializable {
       }
     }
     catch (IOException e) {
-      System.err.println("coverage agent: error writing traces to file " + traceFile.getPath() + ": " + e.getMessage());
+      ErrorReporter.reportError("Error writing traces to file " + traceFile.getPath(), e);
     }
     finally {
       myTrace = null;
