@@ -80,7 +80,7 @@ public class Instrumentator {
             }
           }
         }
-        catch (Exception e) {
+        catch (Throwable e) {
           ErrorReporter.reportError("Error during class instrumentation: " + className, e);
         }
         return null;
