@@ -49,7 +49,6 @@ public class Instrumentator {
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
     data.setClassFinder(cf);
 
-    final Perl5Matcher pm = new Perl5Matcher();
     instrumentation.addTransformer(new ClassFileTransformer() {
       public byte[] transform(ClassLoader loader,
                               String className,
@@ -64,6 +63,8 @@ public class Instrumentator {
             className = className.substring(0, className.length() - 6);
           }
           className = className.replace('\\', '.').replace('/', '.');
+
+          final Perl5Matcher pm = new Perl5Matcher();
 
           // apply include and exclude patterns to parent class name only
           className = ClassNameUtil.getOuterClassName(className);
