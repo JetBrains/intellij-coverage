@@ -20,7 +20,7 @@ public class LineData implements CoverageData {
   private List mySwitches;
   private SwitchData[] mySwitchesArray;
 
-  private int myStatus = -1;
+  private byte myStatus = -1;
   private String myUniqueTestName = null;
   private boolean myMayBeUnique = true;
 
@@ -192,7 +192,7 @@ public class LineData implements CoverageData {
     return myMethodSignature;
   }
 
-  public void setStatus(final int status) {
+  public void setStatus(final byte status) {
     myStatus = status;
   }
 

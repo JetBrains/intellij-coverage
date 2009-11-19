@@ -8,7 +8,7 @@ package com.intellij.rt.coverage.data;
  * @author ven
  */
 public interface LineCoverage {
-  int FULL = 2;
-  int PARTIAL = 1;
-  int NONE = 0;
+  byte FULL = 2;
+  byte PARTIAL = 1;
+  byte NONE = 0;
 }

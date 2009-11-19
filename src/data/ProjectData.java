@@ -3,10 +3,7 @@ package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.instrumentation.ClassEntry;
 import com.intellij.rt.coverage.instrumentation.ClassFinder;
-import com.intellij.rt.coverage.util.ErrorReporter;
-import com.intellij.rt.coverage.util.CoverageIOUtil;
-import com.intellij.rt.coverage.util.ProjectDataLoader;
-import com.intellij.rt.coverage.util.SourceLineCounter;
+import com.intellij.rt.coverage.util.*;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIterator;
 import gnu.trove.TIntObjectProcedure;
@@ -43,10 +40,11 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public ClassData getOrCreateClassData(String name) {
-    ClassData classData = (ClassData) myClasses.get(name);
+    String reusedName = StringsPool.getFromPool(name);
+    ClassData classData = (ClassData) myClasses.get(reusedName);
     if (classData == null) {
-      classData = new ClassData(name);
-      myClasses.put(name, classData);
+      classData = new ClassData(reusedName);
+      myClasses.put(reusedName, classData);
     }
     return classData;
   }

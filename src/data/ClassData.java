@@ -2,6 +2,7 @@ package com.intellij.rt.coverage.data;
 
 
 import com.intellij.rt.coverage.util.CoverageIOUtil;
+import com.intellij.rt.coverage.util.StringsPool;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntObjectIterator;
 
@@ -127,12 +128,13 @@ public class ClassData implements CoverageData {
   }
 
   public LineData getOrCreateLine(final int line, final String methodSig) {
+    String reusedSign = StringsPool.getFromPool(methodSig);
     LineData lineData = (LineData) myLines.get(line);
     if (lineData == null) {
-      lineData = new LineData(line, methodSig);
+      lineData = new LineData(line, reusedSign);
       myLines.put(line, lineData);
     }
-    myStatus.put(methodSig, null);
+    myStatus.put(reusedSign, null);
     if (line > myMaxLineNumber) myMaxLineNumber = line;
     return lineData;
   }
