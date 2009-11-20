@@ -40,9 +40,9 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public ClassData getOrCreateClassData(String name) {
-    String reusedName = StringsPool.getFromPool(name);
-    ClassData classData = (ClassData) myClasses.get(reusedName);
+    ClassData classData = (ClassData) myClasses.get(name);
     if (classData == null) {
+      String reusedName = StringsPool.getFromPool(name);
       classData = new ClassData(reusedName);
       myClasses.put(reusedName, classData);
     }

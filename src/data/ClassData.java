@@ -128,13 +128,12 @@ public class ClassData implements CoverageData {
   }
 
   public LineData getOrCreateLine(final int line, final String methodSig) {
-    String reusedSign = StringsPool.getFromPool(methodSig);
     LineData lineData = (LineData) myLines.get(line);
     if (lineData == null) {
-      lineData = new LineData(line, reusedSign);
+      lineData = new LineData(line, StringsPool.getFromPool(methodSig));
       myLines.put(line, lineData);
     }
-    myStatus.put(reusedSign, null);
+    myStatus.put(lineData.getMethodSignature(), null);
     if (line > myMaxLineNumber) myMaxLineNumber = line;
     return lineData;
   }
