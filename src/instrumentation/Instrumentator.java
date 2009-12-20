@@ -3,6 +3,7 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
+import org.apache.oro.text.regex.MalformedPatternException;
 import org.apache.oro.text.regex.Pattern;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
@@ -36,13 +37,13 @@ public class Instrumentator {
     System.out.println("include patterns:");
     for (; i < args.length; i++) {
       if (excludes.equals(args[i])) break;
-      includePatterns.add(pc.compile(args[i]));
+      includePatterns.add(compileRegex(args[i], pc));
       System.out.println(args[i]);
     }
     System.out.println("exclude patterns:");
     final List excludePatterns = new ArrayList();
     for (; i < args.length; i++) {
-      excludePatterns.add(pc.compile(args[i]));
+      excludePatterns.add(compileRegex(args[i], pc));
       System.out.println(args[i]);
     }
 
@@ -96,6 +97,11 @@ public class Instrumentator {
         return null;
       }
     });
+  }
+
+  private static Pattern compileRegex(final String regex, final Perl5Compiler compiler) throws MalformedPatternException {
+    // Perl5Compiler.READ_ONLY_MASK is required in case of multithreaded access to Pattern
+    return compiler.compile(regex, Perl5Compiler.READ_ONLY_MASK);
   }
 
   private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data) {
