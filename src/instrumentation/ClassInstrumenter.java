@@ -9,9 +9,9 @@ public class ClassInstrumenter extends Instrumenter {
     super(projectData, classVisitor);
   }
 
-  protected MethodVisitor createMethodLineEnumerator(MethodVisitor mv, boolean staticInitializer, String name, String desc, int access, String signature,
+  protected MethodVisitor createMethodLineEnumerator(MethodVisitor mv, String name, String desc, int access, String signature,
                                            String[] exceptions) {
-    return new LineEnumerator(myClassData, staticInitializer, mv, access, name, desc, signature, exceptions);
+    return new LineEnumerator(myClassData, mv, access, name, desc, signature, exceptions);
   }
 
   protected void initLineData() {

@@ -1,6 +1,5 @@
 package com.intellij.rt.coverage.instrumentation;
 
-import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 import org.objectweb.asm.*;
 
@@ -12,7 +11,6 @@ public class SamplingInstrumenter extends Instrumenter {
   }
 
   protected MethodVisitor createMethodLineEnumerator(final MethodVisitor mv,
-                                                     final boolean staticInitializer,
                                                      final String name,
                                                      final String desc,
                                                      final int access,
@@ -21,19 +19,11 @@ public class SamplingInstrumenter extends Instrumenter {
     return new MethodAdapter(mv) {
       public void visitLineNumber(final int line, final Label start) {
         myClassData.getOrCreateLine(line, name + desc);
-        mv.visitFieldInsn(Opcodes.GETSTATIC, myClassData.getName().replace('.', '/'), "__class__data__", ClassData.CLASS_DATA_TYPE);
+        mv.visitLdcInsn(myClassData.getName());
         mv.visitIntInsn(Opcodes.SIPUSH, line);
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, ClassData.CLASS_DATA_OWNER, "touchLine", "(I)V");
-
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchLine", "(Ljava/lang/String;I)V");
         if (mySize < line) mySize = line;
         super.visitLineNumber(line, start);
-      }
-
-      public void visitCode() {
-        if (staticInitializer) {
-          createClassDataField(mv);
-        }
-        super.visitCode();
       }
     };
   }

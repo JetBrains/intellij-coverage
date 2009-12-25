@@ -1,6 +1,5 @@
 package com.intellij.rt.coverage.instrumentation;
 
-import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodAdapter;
@@ -44,20 +43,10 @@ public class TouchCounter extends MethodAdapter implements Opcodes {
     myCurrentJumpIdx = 0;
     myCurrentSwitchIdx = 0;
 
-    loadClassData();
-    mv.visitIntInsn(SIPUSH, line);
-    mv.visitMethodInsn(INVOKEVIRTUAL, ClassData.CLASS_DATA_OWNER, "touch", "(I)V");
-
-    mv.visitFieldInsn(GETSTATIC, ProjectData.PROJECT_DATA_OWNER, "ourProjectData", ProjectData.PROJECT_DATA_TYPE);
     mv.visitLdcInsn(myEnumerator.getClassName());
-    mv.visitIntInsn(SIPUSH, line);
-    mv.visitMethodInsn(INVOKEVIRTUAL, ProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/String;I)V");
-
+    mv.visitIntInsn(Opcodes.SIPUSH, line);
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/String;I)V");
     super.visitLineNumber(line, start);
-  }
-
-  private void loadClassData() {
-    mv.visitFieldInsn(GETSTATIC, myEnumerator.getClassName().replace('.', '/'), "__class__data__", ClassData.CLASS_DATA_TYPE);
   }
 
   public void visitLabel(Label label) {
@@ -107,20 +96,20 @@ public class TouchCounter extends MethodAdapter implements Opcodes {
 
     final Integer key = myEnumerator.getSwitchKey(label);
     if (key != null) {
-      loadClassData();
+      mv.visitLdcInsn(myEnumerator.getClassName());
       mv.visitVarInsn(ILOAD, getLineVariableNumber());
       mv.visitVarInsn(ILOAD, getSwitchVariableNumber());
       mv.visitIntInsn(SIPUSH, key.intValue());
-      mv.visitMethodInsn(INVOKEVIRTUAL, ClassData.CLASS_DATA_OWNER, "touch", "(III)V");
+      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchSwitch", "(Ljava/lang/String;III)V");
     }
   }
 
   private void touchBranch(final boolean trueHit) {
-    loadClassData();
+    mv.visitLdcInsn(myEnumerator.getClassName());
     mv.visitVarInsn(ILOAD, getLineVariableNumber());
     mv.visitVarInsn(ILOAD, getJumpVariableNumber());
     mv.visitInsn(trueHit ? ICONST_0 : ICONST_1);
-    mv.visitMethodInsn(INVOKEVIRTUAL, ClassData.CLASS_DATA_OWNER, "touch", "(IIZ)V");
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchJump", "(Ljava/lang/String;IIZ)V");
 
     mv.visitIntInsn(SIPUSH, -1);
     mv.visitVarInsn(ISTORE, getJumpVariableNumber());
@@ -159,10 +148,6 @@ public class TouchCounter extends MethodAdapter implements Opcodes {
 
     mv.visitInsn(ICONST_0);
     mv.visitVarInsn(ISTORE, getSwitchVariableNumber());
-
-    if (myEnumerator.isStaticInitializer()) {
-      Instrumenter.createClassDataField(mv, myEnumerator.getClassName());
-    }
 
     super.visitCode();
   }

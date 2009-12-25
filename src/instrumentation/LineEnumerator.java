@@ -27,7 +27,6 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
   private Set myJumps;
   private Map mySwitches;
 
-  private final boolean myStaticInitializer;
   private final MethodVisitor myWriterMethodVisitor;
   private final boolean myIsReferencedType;
   private boolean myRemoveNotNullJumps;
@@ -44,7 +43,7 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
 
   private boolean myHasInstructions;
 
-  public LineEnumerator(final ClassData classData, final boolean staticInitializer, final MethodVisitor mv,
+  public LineEnumerator(final ClassData classData, final MethodVisitor mv,
                         final int access,
                         final String name,
                         final String desc,
@@ -52,7 +51,6 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
                         final String[] exceptions) {
     super(new MethodNode(access, name, desc, signature, exceptions));
     myClassData = classData;
-    myStaticInitializer = staticInitializer;
     myWriterMethodVisitor = mv;
     myAccess = access;
     myMethodName = name;
@@ -65,7 +63,7 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
 
   public void visitEnd() {
     super.visitEnd();
-    methodNode.accept(!myHasExecutableLines && !myStaticInitializer ? myWriterMethodVisitor : new TouchCounter(this, myAccess, mySignature));
+    methodNode.accept(!myHasExecutableLines ? myWriterMethodVisitor : new TouchCounter(this, myAccess, mySignature));
   }
 
 
@@ -86,10 +84,6 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
 
   public MethodVisitor getWV() {
     return myWriterMethodVisitor;
-  }
-
-  public boolean isStaticInitializer() {
-    return myStaticInitializer;
   }
 
   public void visitJumpInsn(final int opcode, final Label label) {

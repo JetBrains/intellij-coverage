@@ -11,9 +11,6 @@ import java.io.IOException;
 import java.util.*;
 
 public class ClassData implements CoverageData {
-  public static final String CLASS_DATA_TYPE = "Lcom/intellij/rt/coverage/data/ClassData;";
-  public static final String CLASS_DATA_OWNER = "com/intellij/rt/coverage/data/ClassData";
-
   private final String myClassName;
 
   private TIntObjectHashMap myLines = new TIntObjectHashMap();
@@ -128,6 +125,8 @@ public class ClassData implements CoverageData {
   }
 
   public LineData getOrCreateLine(final int line, final String methodSig) {
+    //create lines again if class was loaded again by another class loader; may be myLinesArray should be cleared
+    if (myLines == null) myLines = new TIntObjectHashMap();
     LineData lineData = (LineData) myLines.get(line);
     if (lineData == null) {
       lineData = new LineData(line, StringsPool.getFromPool(methodSig));
@@ -164,14 +163,17 @@ public class ClassData implements CoverageData {
     return (LineData)myLines.get(line);
   }
 
+  /** @noinspection UnusedDeclaration*/
   public Object[] getLines() {
     return myLines.getValues();
   }
 
+  /** @noinspection UnusedDeclaration*/
   public boolean containsLine(int line) {
     return myLines.containsKey(line);
   }
 
+  /** @noinspection UnusedDeclaration*/
   public Collection getMethodSigs() {
     return myStatus.keySet();
   }
