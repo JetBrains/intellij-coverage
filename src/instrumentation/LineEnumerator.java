@@ -87,6 +87,10 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
   }
 
   public void visitJumpInsn(final int opcode, final Label label) {
+    if (!myHasExecutableLines) {
+      super.visitJumpInsn(opcode, label);
+      return;
+    }
     if (opcode != GOTO && opcode != JSR && !myMethodName.equals("<clinit>")) {
       if (myJumps == null) myJumps = new HashSet();
       myJumps.add(label);
@@ -122,6 +126,7 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
 
   public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
     super.visitLookupSwitchInsn(dflt, keys, labels);
+    if (!myHasExecutableLines) return;
     rememberSwitchLabels(dflt, labels);
     myClassData.addLineSwitch(myCurrentLine, myCurrentSwitch++, keys);
     myState = SEEN_NOTHING;
@@ -130,6 +135,7 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
 
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
     super.visitTableSwitchInsn(min, max, dflt, labels);
+    if (!myHasExecutableLines) return;
     rememberSwitchLabels(dflt, labels);
     myClassData.addLineSwitch(myCurrentLine, myCurrentSwitch++, min, max);
     myState = SEEN_NOTHING;
@@ -156,6 +162,7 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
 
   public void visitInsn(final int opcode) {
     super.visitInsn(opcode);
+    if (!myHasExecutableLines) return;
     //remove } lines from coverage report
     if (opcode == RETURN && !myHasInstructions) {
       myClassData.removeLine(myCurrentLine);
@@ -189,12 +196,14 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
 
   public void visitIntInsn(final int opcode, final int operand) {
     super.visitIntInsn(opcode, operand);
+    if (!myHasExecutableLines) return;
     myState = SEEN_NOTHING;
     myHasInstructions = true;
   }
 
   public void visitVarInsn(final int opcode, final int var) {
     super.visitVarInsn(opcode, var);
+    if (!myHasExecutableLines) return;
     if (opcode == ILOAD) {
       myState = ILOAD_SEEN;
     } else {
@@ -205,12 +214,14 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
 
   public void visitTypeInsn(final int opcode, final String type) {
     super.visitTypeInsn(opcode, type);
+    if (!myHasExecutableLines) return;
     myState = SEEN_NOTHING;
     myHasInstructions = true;
   }
 
   public void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
     super.visitFieldInsn(opcode, owner, name, desc);
+    if (!myHasExecutableLines) return;
     if (opcode == Opcodes.GETSTATIC && name.equals("$assertionsDisabled")) {
       myState = GETSTATIC_SEEN;
     } else {
@@ -221,30 +232,35 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
 
   public void visitMethodInsn(final int opcode, final String owner, final String name, final String desc) {
     super.visitMethodInsn(opcode, owner, name, desc);
+    if (!myHasExecutableLines) return;
     myState = SEEN_NOTHING;
     myHasInstructions = true;
   }
 
   public void visitLdcInsn(final Object cst) {
     super.visitLdcInsn(cst);
+    if (!myHasExecutableLines) return;
     myState = SEEN_NOTHING;
     myHasInstructions = true;
   }
 
   public void visitIincInsn(final int var, final int increment) {
     super.visitIincInsn(var, increment);
+    if (!myHasExecutableLines) return;
     myState = SEEN_NOTHING;
     myHasInstructions = true;
   }
 
   public void visitMultiANewArrayInsn(final String desc, final int dims) {
     super.visitMultiANewArrayInsn(desc, dims);
+    if (!myHasExecutableLines) return;
     myState = SEEN_NOTHING;
     myHasInstructions = true;
   }
 
   public AnnotationVisitor visitAnnotation(final String anno, final boolean visible) {
     final AnnotationVisitor visitor = super.visitAnnotation(anno, visible);
+    if (!myHasExecutableLines) return visitor;
     if (myIsReferencedType && anno.equals("Lorg/jetbrains/annotations/NotNull;")) {
       myRemoveNotNullJumps = true;
     }
