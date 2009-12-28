@@ -7,7 +7,6 @@ package com.intellij.rt.coverage.util;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.util.ErrorReporter;
 import gnu.trove.TIntObjectHashMap;
 
 import java.io.DataInputStream;
@@ -22,7 +21,7 @@ public class ProjectDataLoader {
     DataInputStream in = null;
     try {
       in = new DataInputStream(new FileInputStream(sessionDataFile));
-      TIntObjectHashMap dict = new TIntObjectHashMap();
+      TIntObjectHashMap dict = new TIntObjectHashMap(1000, 0.99f);
       final int classCount = CoverageIOUtil.readINT(in);
       for (int c = 0; c < classCount; c++) {
         final ClassData classInfo = projectInfo.getOrCreateClassData(CoverageIOUtil.readUTFFast(in));
@@ -37,6 +36,7 @@ public class ProjectDataLoader {
           for (int l = 0; l < lineCount; l++) {
             final int line = CoverageIOUtil.readINT(in);
             final LineData lineInfo = classInfo.getOrCreateLine(line, methodSig);
+            classInfo.registerMethodSignature(lineInfo);
             lineInfo.setTestName(CoverageIOUtil.readUTFFast(in));
             final int hits = CoverageIOUtil.readINT(in);
             lineInfo.setHits(hits);

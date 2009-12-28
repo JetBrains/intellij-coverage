@@ -13,12 +13,12 @@ import java.util.*;
 public class ClassData implements CoverageData {
   private final String myClassName;
 
-  private TIntObjectHashMap myLines = new TIntObjectHashMap();
+  private TIntObjectHashMap myLines = new TIntObjectHashMap(4, 0.99f);
   private LineData[] myLinesArray;
   
   private int myMaxLineNumber;
 
-  private final Map myStatus = new HashMap();
+  private Map myStatus;
 
   private int[] myLineMask;
 
@@ -89,7 +89,9 @@ public class ClassData implements CoverageData {
         lineData.merge(mergedData);
       }
       else {
-        getOrCreateLine(key, mergedData.getMethodSignature()).merge(mergedData);
+        final LineData createdLineData = getOrCreateLine(key, mergedData.getMethodSignature());
+        registerMethodSignature(createdLineData);
+        createdLineData.merge(mergedData);
       }
     }
   }
@@ -132,9 +134,13 @@ public class ClassData implements CoverageData {
       lineData = new LineData(line, StringsPool.getFromPool(methodSig));
       myLines.put(line, lineData);
     }
-    myStatus.put(lineData.getMethodSignature(), null);
     if (line > myMaxLineNumber) myMaxLineNumber = line;
     return lineData;
+  }
+
+  public void registerMethodSignature(LineData lineData) {
+    if (myStatus == null) myStatus = new HashMap();
+    myStatus.put(lineData.getMethodSignature(), null);
   }
 
   public void addLineJump(final int line, final int jump) {
