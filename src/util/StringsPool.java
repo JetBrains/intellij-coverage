@@ -7,9 +7,11 @@ import gnu.trove.TLongObjectHashMap;
  */
 public class StringsPool {
   private final static TLongObjectHashMap myReusableStrings = new TLongObjectHashMap(30000);
+  private final static String EMPTY = "";
 
   public static String getFromPool(String value) {
     if (value == null) return null;
+    if (value.length() == 0) return EMPTY;
 
     final long hash = StringHash.calc(value);
     String reused = (String) myReusableStrings.get(hash);

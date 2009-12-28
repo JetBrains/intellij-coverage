@@ -37,7 +37,10 @@ public class ProjectDataLoader {
             final int line = CoverageIOUtil.readINT(in);
             final LineData lineInfo = classInfo.getOrCreateLine(line, methodSig);
             classInfo.registerMethodSignature(lineInfo);
-            lineInfo.setTestName(CoverageIOUtil.readUTFFast(in));
+            String testName = CoverageIOUtil.readUTFFast(in);
+            if (testName != null && testName.length() > 0) {
+              lineInfo.setTestName(testName);
+            }
             final int hits = CoverageIOUtil.readINT(in);
             lineInfo.setHits(hits);
             if (hits > 0) {
