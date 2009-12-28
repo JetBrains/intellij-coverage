@@ -65,6 +65,12 @@ public class Instrumentator {
           }
           className = className.replace('\\', '.').replace('/', '.');
 
+          //do not instrument itself
+          //and do not instrument reflection which is used during instrumented method invocation (inside methods touch from ProjectData)
+          if (className.startsWith("com.intellij.rt.coverage") || className.startsWith("java.lang.reflect")) {
+            return null;
+          }
+
           final Perl5Matcher pm = new Perl5Matcher();
 
           // apply include and exclude patterns to parent class name only

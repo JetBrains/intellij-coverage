@@ -22,10 +22,6 @@ public abstract class Instrumenter extends ClassAdapter {
   }
 
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-    if (name.startsWith("com/intellij/rt/coverage")) { //do not instrument itself
-      super.visit(version, access, name, signature, superName, interfaces);
-      return;
-    }
     final String className = name.replace('/', '.');
     if ((access & Opcodes.ACC_INTERFACE) == 0) {
       myProcess = true;
