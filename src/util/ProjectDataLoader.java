@@ -9,10 +9,7 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import gnu.trove.TIntObjectHashMap;
 
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 
 public class ProjectDataLoader {
 
@@ -20,7 +17,7 @@ public class ProjectDataLoader {
     final ProjectData projectInfo = new ProjectData();
     DataInputStream in = null;
     try {
-      in = new DataInputStream(new FileInputStream(sessionDataFile));
+      in = new DataInputStream(new BufferedInputStream(new FileInputStream(sessionDataFile)));
       TIntObjectHashMap dict = new TIntObjectHashMap(1000, 0.99f);
       final int classCount = CoverageIOUtil.readINT(in);
       for (int c = 0; c < classCount; c++) {
