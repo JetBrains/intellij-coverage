@@ -66,8 +66,16 @@ public class Instrumentator {
           className = className.replace('\\', '.').replace('/', '.');
 
           //do not instrument itself
-          //and do not instrument reflection which is used during instrumented method invocation (inside methods touch from ProjectData)
-          if (className.startsWith("com.intellij.rt.coverage") || className.startsWith("java.lang.reflect")) {
+          //and do not instrument packages which are used during instrumented method invocation
+          //(inside methods touch, save, etc from ProjectData)
+          if (className.startsWith("com.intellij.rt.coverage")
+           || className.startsWith("java.lang")
+           || className.startsWith("java.util")
+           || className.startsWith("java.io")
+           || className.startsWith("java.text")
+           || className.startsWith("gnu.trove")
+           || className.startsWith("org.objectweb.asm")
+           || className.startsWith("org.apache.oro.text.regex")) {
             return null;
           }
 
