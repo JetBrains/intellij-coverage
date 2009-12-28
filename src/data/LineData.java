@@ -33,7 +33,7 @@ public class LineData implements CoverageData {
     return myHits;
   }
 
-  JumpsAndSwitches getJumpsAndSwitches() {
+  JumpsAndSwitches getOrCreateJumpsAndSwitches() {
     if (myJumpsAndSwitches == null) {
       myJumpsAndSwitches = new JumpsAndSwitches();
     }
@@ -47,34 +47,37 @@ public class LineData implements CoverageData {
       return myStatus;
     }
 
-    List jumps = getJumpsAndSwitches().getJumps();
-    if (jumps != null) {
-      for (Iterator it = jumps.iterator(); it.hasNext();) {
-        final JumpData jumpData = (JumpData)it.next();
-        if ((jumpData.getFalseHits() > 0 ? 1 : 0) + (jumpData.getTrueHits() > 0 ? 1 : 0) < 2){
-          myStatus = LineCoverage.PARTIAL;
-          return myStatus;
-        }
-      }
-    }
-
-    List switches = getJumpsAndSwitches().getSwitches();
-    if (switches != null) {
-      for (Iterator it = switches.iterator(); it.hasNext();) {
-        final SwitchData switchData = (SwitchData)it.next();
-        if (switchData.getDefaultHits() == 0){
-          myStatus = LineCoverage.PARTIAL;
-          return myStatus;
-        }
-        for (int i = 0; i < switchData.getHits().length; i++) {
-          int hit = switchData.getHits()[i];
-          if (hit == 0){
+    if (myJumpsAndSwitches != null) {
+      List jumps = getOrCreateJumpsAndSwitches().getJumps();
+      if (jumps != null) {
+        for (Iterator it = jumps.iterator(); it.hasNext();) {
+          final JumpData jumpData = (JumpData)it.next();
+          if ((jumpData.getFalseHits() > 0 ? 1 : 0) + (jumpData.getTrueHits() > 0 ? 1 : 0) < 2){
             myStatus = LineCoverage.PARTIAL;
             return myStatus;
           }
         }
       }
+
+      List switches = getOrCreateJumpsAndSwitches().getSwitches();
+      if (switches != null) {
+        for (Iterator it = switches.iterator(); it.hasNext();) {
+          final SwitchData switchData = (SwitchData)it.next();
+          if (switchData.getDefaultHits() == 0){
+            myStatus = LineCoverage.PARTIAL;
+            return myStatus;
+          }
+          for (int i = 0; i < switchData.getHits().length; i++) {
+            int hit = switchData.getHits()[i];
+            if (hit == 0){
+              myStatus = LineCoverage.PARTIAL;
+              return myStatus;
+            }
+          }
+        }
+      }
     }
+
     myStatus = LineCoverage.FULL;
     return myStatus;
   }
@@ -84,23 +87,31 @@ public class LineData implements CoverageData {
     CoverageIOUtil.writeUTF(os, myUniqueTestName != null ? myUniqueTestName : "");
     CoverageIOUtil.writeINT(os, myHits);
     if (myHits > 0) {
-      getJumpsAndSwitches().save(os);
+      if (myJumpsAndSwitches != null) {
+        getOrCreateJumpsAndSwitches().save(os);
+      } else {
+        new JumpsAndSwitches().save(os);
+      }
     }
   }
 
   public void merge(final CoverageData data) {
     LineData lineData = (LineData)data;
     myHits += lineData.myHits;
-    getJumpsAndSwitches().merge(lineData.getJumpsAndSwitches());
-    if (lineData.myMethodSignature != null) myMethodSignature = lineData.myMethodSignature;
+    if (myJumpsAndSwitches != null || lineData.myJumpsAndSwitches != null) {
+      getOrCreateJumpsAndSwitches().merge(lineData.getOrCreateJumpsAndSwitches());
+    }
+    if (lineData.myMethodSignature != null) {
+      myMethodSignature = lineData.myMethodSignature;
+    }
   }
 
   public JumpData addJump(final int jump) {
-    return getJumpsAndSwitches().addJump(jump);
+    return getOrCreateJumpsAndSwitches().addJump(jump);
   }
 
   public JumpData getJumpData(int jump) {
-    return getJumpsAndSwitches().getJumpData(jump);
+    return getOrCreateJumpsAndSwitches().getJumpData(jump);
   }
 
   public void touchBrunch(final int jump, final boolean hit) {
@@ -116,11 +127,11 @@ public class LineData implements CoverageData {
   }
 
   public SwitchData addSwitch(final int switchNumber, final int[] keys) {
-    return getJumpsAndSwitches().addSwitch(switchNumber, keys);
+    return getOrCreateJumpsAndSwitches().addSwitch(switchNumber, keys);
   }
 
   public SwitchData getSwitchData(int switchNumber) {
-    return getJumpsAndSwitches().getSwitchData(switchNumber);
+    return getOrCreateJumpsAndSwitches().getSwitchData(switchNumber);
   }
 
   public SwitchData addSwitch(final int switchNumber, final int min, final int max) {
@@ -167,11 +178,13 @@ public class LineData implements CoverageData {
   }
 
   public List getJumps() {
-    return getJumpsAndSwitches().getJumps();
+    if (myJumpsAndSwitches == null) return null;
+    return getOrCreateJumpsAndSwitches().getJumps();
   }
 
   public List getSwitches() {
-    return getJumpsAndSwitches().getSwitches();
+    if (myJumpsAndSwitches == null) return null;
+    return getOrCreateJumpsAndSwitches().getSwitches();
   }
 
   public void setHits(final int hits) {
@@ -194,10 +207,12 @@ public class LineData implements CoverageData {
   }
 
   public void removeJump(final int jump) {
-    getJumpsAndSwitches().removeJump(jump);
+    if (myJumpsAndSwitches == null) return;
+    getOrCreateJumpsAndSwitches().removeJump(jump);
   }
 
   public void fillArrays() {
-    getJumpsAndSwitches().fillArrays();
+    if (myJumpsAndSwitches == null) return;
+    getOrCreateJumpsAndSwitches().fillArrays();
   }
 }
