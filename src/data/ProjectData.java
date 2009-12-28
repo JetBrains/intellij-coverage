@@ -213,6 +213,10 @@ public class ProjectData implements CoverageData, Serializable {
     return myCurrentTestName;
   }
 
+  /** @noinspection UnusedDeclaration*/
+  public Map getClasses() {
+    return myClasses;
+  }
 
   public static int getDictValue(String className) {
     return ourProjectData.myDict.get(className);
