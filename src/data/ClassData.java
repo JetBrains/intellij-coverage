@@ -139,7 +139,7 @@ public class ClassData implements CoverageData {
   }
 
   public void registerMethodSignature(LineData lineData) {
-    if (myStatus == null) myStatus = new HashMap();
+    initStatusMap();
     myStatus.put(lineData.getMethodSignature(), null);
   }
 
@@ -181,7 +181,12 @@ public class ClassData implements CoverageData {
 
   /** @noinspection UnusedDeclaration*/
   public Collection getMethodSigs() {
+    initStatusMap();
     return myStatus.keySet();
+  }
+
+  private void initStatusMap() {
+    if (myStatus == null) myStatus = new HashMap();
   }
 
   public Integer getStatus(String methodSignature) {
