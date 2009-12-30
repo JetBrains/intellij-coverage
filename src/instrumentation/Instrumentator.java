@@ -99,14 +99,6 @@ public class Instrumentator {
         }
         catch (Throwable e) {
           ErrorReporter.reportError("Error during class instrumentation: " + className, e);
-          ErrorReporter.reportError("Error details: ");
-          if (classBeingRedefined != null) {
-            ErrorReporter.reportError("Class being redefined class loader: " + classBeingRedefined.getClassLoader());
-          }
-
-          if (loader != null) {
-            ErrorReporter.reportError("Current class loader: " + loader);
-          }
         }
         return null;
       }

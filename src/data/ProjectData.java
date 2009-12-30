@@ -4,14 +4,12 @@ package com.intellij.rt.coverage.data;
 import com.intellij.rt.coverage.instrumentation.ClassEntry;
 import com.intellij.rt.coverage.instrumentation.ClassFinder;
 import com.intellij.rt.coverage.util.*;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIterator;
-import gnu.trove.TIntObjectProcedure;
-import gnu.trove.TObjectIntHashMap;
+import gnu.trove.*;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.commons.EmptyVisitor;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,11 +18,13 @@ import java.util.Map;
 
 public class ProjectData implements CoverageData, Serializable {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/ProjectData";
-  private static final Class[] TRACE_LINE_PARAMS = new Class[]{String.class, int.class};
-  private static final Class[] TOUCH_JUMP_PARAMS = new Class[] {int.class, int.class, boolean.class};
-  private static final Class[] TOUCH_SWITCH_PARAMS = new Class[] {int.class, int.class, int.class};
-  private static final Class[] TOUCH_LINE_PARAMS = new Class[] {int.class};
 
+  private static final MethodCaller TOUCH_LINE_METHOD = new MethodCaller("touchLine", new Class[] {int.class});
+  private static final MethodCaller TOUCH_SWITCH_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, int.class});
+  private static final MethodCaller TOUCH_JUMP_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, boolean.class});
+  private static final MethodCaller TOUCH_METHOD = new MethodCaller("touch", new Class[] {int.class});
+  private static final MethodCaller GET_CLASS_DATA_METHOD = new MethodCaller("getClassData", new Class[]{String.class});
+  private static MethodCaller TRACE_LINE_METHOD = new MethodCaller("traceLine", new Class[]{String.class, int.class});
 
   public static ProjectData ourProjectData;
 
@@ -40,10 +40,7 @@ public class ProjectData implements CoverageData, Serializable {
   private ClassFinder myClassFinder;
   private boolean myAppendUnloaded;
   private File myTracesDir;
-  private static Method ourGetClassMethod;
   private static Object ourProjectDataObject;
-  private static Method ourTraceLineMethod;
-  private static Map ourTouchMethods;
 
   public ClassData getClassData(final String name) {
     return (ClassData)myClasses.get(name);
@@ -266,9 +263,12 @@ public class ProjectData implements CoverageData, Serializable {
   // -------------------------------------------------------------------------------------------------- //
 
   public static void touchLine(String className, int line) {
-    touch("touchLine",
+    if (ourProjectData != null) {
+      ourProjectData.getClassData(className).touchLine(line);
+      return;
+    }
+    touch(TOUCH_LINE_METHOD,
           className,
-          TOUCH_LINE_PARAMS,
           new Object[]{new Integer(line)});
   }
 
@@ -277,9 +277,8 @@ public class ProjectData implements CoverageData, Serializable {
       ourProjectData.getClassData(className).touch(line, switchNumber, key);
       return;
     }
-    touch("touch",
+    touch(TOUCH_SWITCH_METHOD,
           className,
-          TOUCH_SWITCH_PARAMS,
           new Object[]{new Integer(line), new Integer(switchNumber), new Integer(key)});
   }
 
@@ -288,9 +287,8 @@ public class ProjectData implements CoverageData, Serializable {
       ourProjectData.getClassData(className).touch(line, jump, hit);
       return;
     }
-    touch("touch",
+    touch(TOUCH_JUMP_METHOD,
           className,
-          TOUCH_JUMP_PARAMS,
           new Object[]{new Integer(line), new Integer(jump), new Boolean(hit)});
   }
 
@@ -301,44 +299,25 @@ public class ProjectData implements CoverageData, Serializable {
       return;
     }
 
-    touch("touch",
+    touch(TOUCH_METHOD,
           classFQName,
-          TOUCH_LINE_PARAMS,
           new Object[]{new Integer(line)});
     try {
       final Object projectData = getProjectDataObject();
-      if (ourTraceLineMethod == null) {
-        ourTraceLineMethod = projectData.getClass().getDeclaredMethod("traceLine", TRACE_LINE_PARAMS);
-      }
-      ourTraceLineMethod.invoke(projectData, new Object[]{classFQName,  new Integer(line)});
+      TRACE_LINE_METHOD.invoke(projectData, new Object[]{classFQName,  new Integer(line)});
     } catch (Exception e) {
       ErrorReporter.reportError("Error tracing class " + classFQName, e);
     }
   }
 
-  private static void touch(final String touchMethodName, String className, final Class[] paramTypes, final Object[] paramValues) {
+  private static void touch(final MethodCaller methodCaller, String className, final Object[] paramValues) {
     try {
       final Object projectDataObject = getProjectDataObject();
-      if (ourGetClassMethod == null) {
-        ourGetClassMethod = projectDataObject.getClass().getMethod("getClassData", new Class[]{String.class});
-      }
-      final Object classData = ourGetClassMethod.invoke(projectDataObject, new Object[]{className});
-      final Class classDataClass = classData.getClass();
-      final Method touchMethod = getTouchMethod(touchMethodName, paramTypes, classDataClass);
-      touchMethod.invoke(classData, paramValues);
+      final Object classData = GET_CLASS_DATA_METHOD.invoke(projectDataObject, new Object[]{className});
+      methodCaller.invoke(classData, paramValues);
     } catch (Exception e) {
-      ErrorReporter.reportError("Error in project data collection: " + touchMethodName, e);
+      ErrorReporter.reportError("Error in project data collection: " + methodCaller.myMethodName, e);
     }
-  }
-
-  private static Method getTouchMethod(String touchMethodName, Class[] paramTypes, Class classDataClass) throws NoSuchMethodException {
-    if (ourTouchMethods == null) ourTouchMethods = new HashMap();
-    Object touchMethod = ourTouchMethods.get(paramTypes);
-    if (touchMethod == null) {
-      touchMethod = classDataClass.getDeclaredMethod(touchMethodName, paramTypes);
-      ourTouchMethods.put(paramTypes, touchMethod);
-    }
-    return (Method) touchMethod;
   }
 
   private static Object getProjectDataObject() throws ClassNotFoundException, IllegalAccessException, NoSuchFieldException {
@@ -362,4 +341,28 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
   // ----------------------------------------------------------------------------------------------- //
+  private static class MethodCaller {
+    private Method myMethod;
+    private String myMethodName;
+    private Class[] myParamTypes;
+
+    private MethodCaller(final String methodName, final Class[] paramTypes) {
+      myMethodName = methodName;
+      myParamTypes = paramTypes;
+    }
+
+    public Object invoke(Object thisObj, final Object[] paramValues) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+      if (myMethod == null) {
+        myMethod = findMethod(thisObj.getClass(), myMethodName, myParamTypes);
+      }
+      return myMethod.invoke(thisObj, paramValues);
+    }
+
+    private static Method findMethod(final Class clazz, String name, Class[] paramTypes) throws NoSuchMethodException {
+      Method m = clazz.getDeclaredMethod(name, paramTypes);
+      // speedup method invocation by calling setAccessible(true)
+      m.setAccessible(true);
+      return m;
+    }
+  }
 }
