@@ -43,8 +43,17 @@ public class ProjectData implements CoverageData, Serializable {
   private File myTracesDir;
   private static Object ourProjectDataObject;
 
+  private LastClassData myLastClassData;
+
   public ClassData getClassData(final String name) {
-    return (ClassData)myClasses.get(name);
+    final LastClassData lastClassData = myLastClassData;
+    if (lastClassData != null) {
+      final ClassData data = lastClassData.getClassData(name);
+      if (data != null) return data;
+    }
+    final ClassData data = (ClassData) myClasses.get(name);
+    myLastClassData = new LastClassData(name, data);
+    return data;
   }
 
   public ClassData getOrCreateClassData(String name) {
@@ -358,6 +367,24 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
   // ----------------------------------------------------------------------------------------------- //
+
+  private static class LastClassData {
+    private String myClassName;
+    private ClassData myClassData;
+
+    private LastClassData(String className, ClassData classData) {
+      myClassName = className;
+      myClassData = classData;
+    }
+
+    public ClassData getClassData(String name) {
+      if (name == myClassName) {
+        return myClassData;
+      }
+      return null;
+    }
+  }
+
   private static class MethodCaller {
     private Method myMethod;
     private String myMethodName;
