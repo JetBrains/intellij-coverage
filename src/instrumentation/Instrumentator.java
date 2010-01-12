@@ -68,7 +68,7 @@ public class Instrumentator {
           //do not instrument itself
           //and do not instrument packages which are used during instrumented method invocation
           //(inside methods touch, save, etc from ProjectData)
-          if (className.startsWith("com.intellij.rt.coverage")
+          if (className.startsWith("com.intellij.rt")
            || className.startsWith("java.lang")
            || className.startsWith("java.util")
            || className.startsWith("java.io")

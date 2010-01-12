@@ -24,7 +24,7 @@ public class ProjectData implements CoverageData, Serializable {
   private static final MethodCaller TOUCH_JUMP_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, boolean.class});
   private static final MethodCaller TOUCH_METHOD = new MethodCaller("touch", new Class[] {int.class});
   private static final MethodCaller GET_CLASS_DATA_METHOD = new MethodCaller("getClassData", new Class[]{String.class});
-  private static MethodCaller TRACE_LINE_METHOD = new MethodCaller("traceLine", new Class[]{String.class, int.class});
+  private static MethodCaller TRACE_LINE_METHOD = new MethodCaller("traceLine", new Class[]{Object.class, int.class});
 
   public static ProjectData ourProjectData;
 
@@ -32,6 +32,7 @@ public class ProjectData implements CoverageData, Serializable {
   private final Map myClasses = new HashMap(1000);
   private final TObjectIntHashMap myDict = new TObjectIntHashMap();
 
+  /** @noinspection UnusedDeclaration*/
   private String myCurrentTestName;
 
   private boolean myTraceLines;
@@ -163,9 +164,9 @@ public class ProjectData implements CoverageData, Serializable {
        os = new DataOutputStream(new FileOutputStream(traceFile));
        os.writeInt(myTrace.size());
        for (Iterator it = myTrace.keySet().iterator(); it.hasNext();) {
-         final String className = (String) it.next();
-         os.writeUTF(className);
-         final TIntHashSet lines = (TIntHashSet) myTrace.get(className);
+         final Object classData = it.next();
+         os.writeUTF(classData.toString());
+         final TIntHashSet lines = (TIntHashSet) myTrace.get(classData);
          os.writeInt(lines.size());
          for (TIntIterator linesIt = lines.iterator(); linesIt.hasNext();) {
            os.writeInt(linesIt.next());
@@ -206,8 +207,13 @@ public class ProjectData implements CoverageData, Serializable {
     return myTracesDir;
   }
 
-  public String getCurrentTestName() {
-    return myCurrentTestName;
+  public static String getCurrentTestName() {
+    try {
+      final Object projectDataObject = getProjectDataObject();
+      return (String) projectDataObject.getClass().getDeclaredField("myCurrentTestName").get(projectDataObject);
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   /** @noinspection UnusedDeclaration*/
@@ -262,61 +268,72 @@ public class ProjectData implements CoverageData, Serializable {
 
   // -------------------------------------------------------------------------------------------------- //
 
-  public static void touchLine(String className, int line) {
+  public static void touchLine(Object classData, int line) {
     if (ourProjectData != null) {
-      ourProjectData.getClassData(className).touchLine(line);
+      ((ClassData) classData).touchLine(line);
       return;
     }
     touch(TOUCH_LINE_METHOD,
-          className,
+          classData,
           new Object[]{new Integer(line)});
   }
 
-  public static void touchSwitch(String className, int line, int switchNumber, int key) {
+  public static void touchSwitch(Object classData, int line, int switchNumber, int key) {
     if (ourProjectData != null) {
-      ourProjectData.getClassData(className).touch(line, switchNumber, key);
+      ((ClassData) classData).touch(line, switchNumber, key);
       return;
     }
     touch(TOUCH_SWITCH_METHOD,
-          className,
+          classData,
           new Object[]{new Integer(line), new Integer(switchNumber), new Integer(key)});
   }
 
-  public static void touchJump(String className, int line, int jump, boolean hit) {
+  public static void touchJump(Object classData, int line, int jump, boolean hit) {
     if (ourProjectData != null) {
-      ourProjectData.getClassData(className).touch(line, jump, hit);
+      ((ClassData) classData).touch(line, jump, hit);
       return;
     }
     touch(TOUCH_JUMP_METHOD,
-          className,
+          classData,
           new Object[]{new Integer(line), new Integer(jump), new Boolean(hit)});
   }
 
-  public static void trace(String classFQName, int line) {
+  public static void trace(Object classData, int line) {
     if (ourProjectData != null) {
-      ourProjectData.getClassData(classFQName).touch(line);
-      ourProjectData.traceLine(classFQName, line);
+      ((ClassData) classData).touch(line);
+      ourProjectData.traceLine(classData, line);
       return;
     }
 
     touch(TOUCH_METHOD,
-          classFQName,
+          classData,
           new Object[]{new Integer(line)});
     try {
       final Object projectData = getProjectDataObject();
-      TRACE_LINE_METHOD.invoke(projectData, new Object[]{classFQName,  new Integer(line)});
+      TRACE_LINE_METHOD.invoke(projectData, new Object[]{classData,  new Integer(line)});
     } catch (Exception e) {
-      ErrorReporter.reportError("Error tracing class " + classFQName, e);
+      ErrorReporter.reportError("Error tracing class " + classData.toString(), e);
     }
   }
 
-  private static void touch(final MethodCaller methodCaller, String className, final Object[] paramValues) {
+  private static void touch(final MethodCaller methodCaller, Object classData, final Object[] paramValues) {
     try {
-      final Object projectDataObject = getProjectDataObject();
-      final Object classData = GET_CLASS_DATA_METHOD.invoke(projectDataObject, new Object[]{className});
       methodCaller.invoke(classData, paramValues);
     } catch (Exception e) {
       ErrorReporter.reportError("Error in project data collection: " + methodCaller.myMethodName, e);
+    }
+  }
+
+  public static Object loadClassData(String className) {
+    if (ourProjectData != null) {
+      return ourProjectData.getClassData(className);
+    }
+    try {
+      final Object projectDataObject = getProjectDataObject();
+      return GET_CLASS_DATA_METHOD.invoke(projectDataObject, new Object[]{className});
+    } catch (Exception e) {
+      ErrorReporter.reportError("Error in class data loading: " + className, e);
+      return null;
     }
   }
 
@@ -328,13 +345,13 @@ public class ProjectData implements CoverageData, Serializable {
     return ourProjectDataObject;
   }
 
-  public void traceLine(String classFQName, int line) {
+  public void traceLine(Object classData, int line) {
     if (myTrace != null) {
       synchronized (myTrace) {
-        TIntHashSet lines = (TIntHashSet) myTrace.get(classFQName);
+        TIntHashSet lines = (TIntHashSet) myTrace.get(classData);
         if (lines == null) {
           lines = new TIntHashSet();
-          myTrace.put(classFQName, lines);
+          myTrace.put(classData, lines);
         }
         lines.add(line);
       }

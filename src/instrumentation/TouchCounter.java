@@ -43,9 +43,9 @@ public class TouchCounter extends MethodAdapter implements Opcodes {
     myCurrentJumpIdx = 0;
     myCurrentSwitchIdx = 0;
 
-    mv.visitLdcInsn(myEnumerator.getClassName());
+    mv.visitVarInsn(ALOAD, getCurrentClassDataNumber());
     mv.visitIntInsn(Opcodes.SIPUSH, line);
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/String;I)V");
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/Object;I)V");
     super.visitLineNumber(line, start);
   }
 
@@ -96,20 +96,20 @@ public class TouchCounter extends MethodAdapter implements Opcodes {
 
     final Integer key = myEnumerator.getSwitchKey(label);
     if (key != null) {
-      mv.visitLdcInsn(myEnumerator.getClassName());
+      mv.visitVarInsn(ALOAD, getCurrentClassDataNumber());
       mv.visitVarInsn(ILOAD, getLineVariableNumber());
       mv.visitVarInsn(ILOAD, getSwitchVariableNumber());
       mv.visitIntInsn(SIPUSH, key.intValue());
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchSwitch", "(Ljava/lang/String;III)V");
+      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchSwitch", "(Ljava/lang/Object;III)V");
     }
   }
 
   private void touchBranch(final boolean trueHit) {
-    mv.visitLdcInsn(myEnumerator.getClassName());
+    mv.visitVarInsn(ALOAD, getCurrentClassDataNumber());
     mv.visitVarInsn(ILOAD, getLineVariableNumber());
     mv.visitVarInsn(ILOAD, getJumpVariableNumber());
     mv.visitInsn(trueHit ? ICONST_0 : ICONST_1);
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchJump", "(Ljava/lang/String;IIZ)V");
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchJump", "(Ljava/lang/Object;IIZ)V");
 
     mv.visitIntInsn(SIPUSH, -1);
     mv.visitVarInsn(ISTORE, getJumpVariableNumber());
@@ -148,6 +148,10 @@ public class TouchCounter extends MethodAdapter implements Opcodes {
 
     mv.visitInsn(ICONST_0);
     mv.visitVarInsn(ISTORE, getSwitchVariableNumber());
+
+    mv.visitLdcInsn(myEnumerator.getClassName());
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)Ljava/lang/Object;");
+    mv.visitVarInsn(ASTORE, getCurrentClassDataNumber());
 
     super.visitCode();
   }
@@ -235,7 +239,7 @@ public class TouchCounter extends MethodAdapter implements Opcodes {
   }
 
   private int adjustVariable(final int var) {
-    return (var >= getLineVariableNumber()) ? var + 3 : var;
+    return (var >= getLineVariableNumber()) ? var + 4 : var;
   }
 
   public int getLineVariableNumber() {
@@ -250,12 +254,16 @@ public class TouchCounter extends MethodAdapter implements Opcodes {
     return myVariablesCount + 2;
   }
 
+  public int getCurrentClassDataNumber() {
+    return myVariablesCount + 3;
+  }
 
   public void visitMaxs(int maxStack, int maxLocals) {
     if (myStartLabel != null && myEndLabel != null) {
       mv.visitLocalVariable("__line__number__", "I", null, myStartLabel, myEndLabel, getLineVariableNumber());
       mv.visitLocalVariable("__jump__number__", "I", null, myStartLabel, myEndLabel, getJumpVariableNumber());
       mv.visitLocalVariable("__switch__number__", "I", null, myStartLabel, myEndLabel, getSwitchVariableNumber());
+      mv.visitLocalVariable("__class__data__", "Ljava/lang/Object;", null, myStartLabel, myEndLabel, getCurrentClassDataNumber());
     }
     super.visitMaxs(maxStack, maxLocals);
   }

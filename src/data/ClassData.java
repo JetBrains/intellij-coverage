@@ -223,4 +223,8 @@ public class ClassData implements CoverageData {
     }
     myLines = null;
   }
+
+  public String toString() {
+    return myClassName;
+  }
 }
