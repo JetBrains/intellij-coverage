@@ -11,7 +11,7 @@ import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
-import java.io.File;
+import java.io.*;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
@@ -24,7 +24,15 @@ import java.util.List;
 public class Instrumentator {
 
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
-    final String[] args = tokenize(argsString);
+    String[] args = tokenize(argsString);
+    if (args.length == 1) {
+      try {
+        args = readArgsFromFile(args[0]);
+      } catch (IOException e) {
+        ErrorReporter.reportError("Arguments were not passed correctly", e);
+        return;
+      }
+    }
     final boolean traceLines = Boolean.valueOf(args[1]).booleanValue();
     final boolean sampling = Boolean.valueOf(args[4]).booleanValue();
     final ProjectData data = ProjectData.createProjectData(new File(args[0]), traceLines, Boolean.valueOf(args[2]).booleanValue(), Boolean.valueOf(args[3]).booleanValue(), sampling);
@@ -103,6 +111,20 @@ public class Instrumentator {
         return null;
       }
     });
+  }
+
+  private static String[] readArgsFromFile(String arg) throws IOException {
+    final List result = new ArrayList();
+    final File file = new File(arg);
+    final BufferedReader reader = new BufferedReader(new FileReader(file));
+    try {
+      while(reader.ready()) {
+        result.add(reader.readLine());
+      }
+    } finally {
+      reader.close();
+    }
+    return (String[]) result.toArray(new String[result.size()]);
   }
 
   private static Pattern compileRegex(final String regex, final Perl5Compiler compiler) throws MalformedPatternException {
