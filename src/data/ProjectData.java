@@ -1,13 +1,9 @@
 package com.intellij.rt.coverage.data;
 
 
-import com.intellij.rt.coverage.util.CoverageIOUtil;
-import com.intellij.rt.coverage.util.ErrorReporter;
-import com.intellij.rt.coverage.util.ProjectDataLoader;
-import com.intellij.rt.coverage.util.StringsPool;
+import com.intellij.rt.coverage.util.*;
 import gnu.trove.TIntHashSet;
 import gnu.trove.TIntIterator;
-import gnu.trove.TObjectIntHashMap;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -30,7 +26,6 @@ public class ProjectData implements CoverageData, Serializable {
 
   private File myDataFile;
   private final Map myClasses = new HashMap(1000);
-  private final TObjectIntHashMap myDict = new TObjectIntHashMap();
 
   /** @noinspection UnusedDeclaration*/
   private String myCurrentTestName;
@@ -57,9 +52,8 @@ public class ProjectData implements CoverageData, Serializable {
   public ClassData getOrCreateClassData(String name) {
     ClassData classData = (ClassData) myClasses.get(name);
     if (classData == null) {
-      String reusedName = StringsPool.getFromPool(name);
-      classData = new ClassData(reusedName);
-      myClasses.put(reusedName, classData);
+      classData = new ClassData(name);
+      myClasses.put(name, classData);
     }
     return classData;
   }
@@ -72,14 +66,12 @@ public class ProjectData implements CoverageData, Serializable {
     return mySampling;
   }
 
-  public static ProjectData createProjectData(final File dataFile, final boolean traceLines, boolean mergeWithExisting, boolean isSampling) throws IOException {
-    ourProjectData = new ProjectData();
+  public static ProjectData createProjectData(final File dataFile, final ProjectData initialData, boolean traceLines, boolean isSampling) throws IOException {
+    ourProjectData = initialData == null ? new ProjectData() : initialData;
     if (!dataFile.exists()) {
       final File parentDir = dataFile.getParentFile();
       if (parentDir != null && !parentDir.exists()) parentDir.mkdirs();
       dataFile.createNewFile();
-    } else if (mergeWithExisting) {
-      ourProjectData = ProjectDataLoader.load(dataFile);
     }
     ourProjectData.mySampling = isSampling;
     ourProjectData.myTraceLines = traceLines;
@@ -87,21 +79,10 @@ public class ProjectData implements CoverageData, Serializable {
     return ourProjectData;
   }
 
-  public void save(DataOutputStream os) throws IOException {
+  public void save(DataOutputStream os, DictionaryLookup dictionaryLookup) throws IOException {
     final HashMap classes = new HashMap(myClasses);
-    CoverageIOUtil.writeINT(os, classes.size());
-    initAndSaveDict(os, classes);
     for (Iterator it = classes.values().iterator(); it.hasNext();) {
-      ((ClassData)it.next()).save(os);
-    }
-  }
-
-  private void initAndSaveDict(DataOutputStream os, HashMap classes) throws IOException {
-    int i = 0;
-    for (Iterator it = classes.keySet().iterator(); it.hasNext();) {
-      String className = (String)it.next();
-      myDict.put(className, i++);
-      CoverageIOUtil.writeUTF(os, className);
+      ((ClassData)it.next()).save(os, dictionaryLookup);
     }
   }
 
@@ -191,9 +172,6 @@ public class ProjectData implements CoverageData, Serializable {
     return myClasses;
   }
 
-  public static int getDictValue(String className) {
-    return ourProjectData.myDict.get(className);
-  }
 
 
   // -----------------------  used from instrumentation  ------------------------------------------------//

@@ -8,11 +8,12 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineCoverage;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.ClassEntry;
-import com.intellij.rt.coverage.instrumentation.ClassFinder;
+import com.intellij.rt.coverage.instrumentation.util.StringsPool;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
+import com.intellij.rt.coverage.util.DictionaryLookup;
 import com.intellij.rt.coverage.util.ErrorReporter;
-import com.intellij.rt.coverage.instrumentation.SourceLineCounter;
 import gnu.trove.TIntObjectProcedure;
+import gnu.trove.TObjectIntHashMap;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.commons.EmptyVisitor;
 
@@ -21,7 +22,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class SaverHook implements Runnable {
   private final File myDataFile;
@@ -40,10 +43,24 @@ public class SaverHook implements Runnable {
         appendUnloaded();
       }
 
+      final ProjectData projectData = ProjectData.getProjectData();
       DataOutputStream os = null;
       try {
         os = new DataOutputStream(new FileOutputStream(myDataFile));
-        ProjectData.ourProjectData.save(os);
+        final TObjectIntHashMap dict = new TObjectIntHashMap();
+        int i = 0;
+        final Map classes = new HashMap(projectData.getClasses());
+        CoverageIOUtil.writeINT(os, classes.size());
+        for (Iterator it = classes.keySet().iterator(); it.hasNext();) {
+          String className = (String) it.next();
+          dict.put(className, i++);
+          CoverageIOUtil.writeUTF(os, className);
+        }
+        projectData.save(os, new DictionaryLookup() {
+          public int getDictionaryIndex(String className) {
+            return dict.get(className);
+          }
+        });
       }
       catch (IOException e) {
         ErrorReporter.reportError("Error writing file " + myDataFile.getPath(), e);
@@ -78,10 +95,10 @@ public class SaverHook implements Runnable {
         SourceLineCounter slc = new SourceLineCounter(new EmptyVisitor(), cd, !ProjectData.getProjectData().isSampling());
         reader.accept(slc, 0);
         if (slc.getNSourceLines() > 0) { // ignore classes without executable code
-          final ClassData classData = ProjectData.getProjectData().getOrCreateClassData(classEntry.getClassName());
+          final ClassData classData = ProjectData.getProjectData().getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
           slc.getSourceLines().forEachEntry(new TIntObjectProcedure() {
             public boolean execute(int line, Object methodSig) {
-              final LineData ld = classData.getOrCreateLine(line, (String)methodSig);
+              final LineData ld = classData.getOrCreateLine(line, StringsPool.getFromPool((String)methodSig));
               classData.registerMethodSignature(ld);
               ld.setStatus(LineCoverage.NONE);
               return true;

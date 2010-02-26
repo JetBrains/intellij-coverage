@@ -2,6 +2,7 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
+import com.intellij.rt.coverage.instrumentation.util.StringsPool;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -74,7 +75,7 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
     myCurrentJump = 0;
     myCurrentSwitch = 0;
     myHasExecutableLines = true;
-    myClassData.getOrCreateLine(myCurrentLine, myMethodName + mySignature);
+    myClassData.getOrCreateLine(myCurrentLine, StringsPool.getFromPool(myMethodName + mySignature));
   }
 
 

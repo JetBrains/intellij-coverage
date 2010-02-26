@@ -5,7 +5,6 @@
 package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.ClassData;
-import com.intellij.rt.coverage.data.ProjectData;
 import gnu.trove.TIntObjectHashMap;
 
 import java.io.DataInput;
@@ -157,10 +156,10 @@ public class CoverageIOUtil {
   }
 
 
-  public static String collapse(String methodSignature) {
+  public static String collapse(String methodSignature, final DictionaryLookup dictionaryLookup) {
     return processWithDictionary(methodSignature, new Consumer() {
       protected String consume(String type) {
-        return String.valueOf(ProjectData.getDictValue(type));
+        return String.valueOf(dictionaryLookup.getDictionaryIndex(type));
       }
     });
   }

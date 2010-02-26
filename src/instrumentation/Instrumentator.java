@@ -1,6 +1,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import org.objectweb.asm.ClassAdapter;
@@ -37,7 +38,11 @@ public class Instrumentator {
     final boolean sampling = Boolean.valueOf(args[4]).booleanValue();
     final File dataFile = new File(args[0]);
     final boolean calcUnloaded = Boolean.valueOf(args[2]).booleanValue();
-    final ProjectData data = ProjectData.createProjectData(dataFile, traceLines, Boolean.valueOf(args[3]).booleanValue(), sampling);
+    ProjectData initialData = null;
+    if (Boolean.valueOf(args[3]).booleanValue()) {
+      initialData = ProjectDataLoader.load(dataFile);
+    }
+    final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling);
     final List includePatterns = new ArrayList();
     System.out.println("---- IDEA coverage runner ---- ");
     System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));

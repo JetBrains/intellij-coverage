@@ -1,6 +1,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.util.StringsPool;
 import org.objectweb.asm.*;
 
 public class SamplingInstrumenter extends Instrumenter {
@@ -36,7 +37,7 @@ public class SamplingInstrumenter extends Instrumenter {
       }
 
       public void visitLineNumber(final int line, final Label start) {
-        myClassData.getOrCreateLine(line, name + desc);
+        myClassData.getOrCreateLine(line, StringsPool.getFromPool(name + desc));
         mv.visitVarInsn(Opcodes.ALOAD, getCurrentClassDataNumber());
         mv.visitIntInsn(Opcodes.SIPUSH, line);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchLine", "(" + OBJECT_TYPE + "I)V");

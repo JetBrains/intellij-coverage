@@ -2,6 +2,7 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.util.StringsPool;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -26,7 +27,7 @@ public abstract class Instrumenter extends ClassAdapter {
     if ((access & Opcodes.ACC_INTERFACE) == 0) {
       myProcess = true;
       myEnum = (access & Opcodes.ACC_ENUM) != 0;
-      myClassData = myProjectData.getOrCreateClassData(className);
+      myClassData = myProjectData.getOrCreateClassData(StringsPool.getFromPool(className));
     }
     super.visit(version, access, name, signature, superName, interfaces);
   }

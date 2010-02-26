@@ -2,7 +2,7 @@ package com.intellij.rt.coverage.data;
 
 
 import com.intellij.rt.coverage.util.CoverageIOUtil;
-import com.intellij.rt.coverage.util.StringsPool;
+import com.intellij.rt.coverage.util.DictionaryLookup;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntObjectIterator;
 
@@ -30,8 +30,8 @@ public class ClassData implements CoverageData {
     return myClassName;
   }
 
-  public void save(final DataOutputStream os) throws IOException {
-    CoverageIOUtil.writeINT(os, ProjectData.getDictValue(myClassName));
+  public void save(final DataOutputStream os, DictionaryLookup dictionaryLookup) throws IOException {
+    CoverageIOUtil.writeINT(os, dictionaryLookup.getDictionaryIndex(myClassName));
     if (myLineMask != null) {
       for (int i = 0; i < myLineMask.length; i++) {
         if (myLines.containsKey(i)) {
@@ -48,7 +48,7 @@ public class ClassData implements CoverageData {
         if (data != null) myLines.put(line, data);
       }
     }
-    final Map sigLines = prepareSignaturesMap();
+    final Map sigLines = prepareSignaturesMap(dictionaryLookup);
     final Set sigs = sigLines.keySet();
     CoverageIOUtil.writeINT(os, sigs.size());
     for (Iterator it = sigs.iterator(); it.hasNext();) {
@@ -57,17 +57,17 @@ public class ClassData implements CoverageData {
       final List lines = (List)sigLines.get(sig);
       CoverageIOUtil.writeINT(os, lines.size());
       for (int i = 0; i < lines.size(); i++) {
-        ((LineData)lines.get(i)).save(os);
+        ((LineData)lines.get(i)).save(os, dictionaryLookup);
       }
     }
   }
 
-  private Map prepareSignaturesMap() {
+  private Map prepareSignaturesMap(DictionaryLookup dictionaryLookup) {
     final Map sigLines = new HashMap();
     final Object[] values = myLines.getValues();
     for (int i = 0; i < values.length; i++) {
       final LineData lineData = (LineData)values[i];
-      final String sig = CoverageIOUtil.collapse(lineData.getMethodSignature());
+      final String sig = CoverageIOUtil.collapse(lineData.getMethodSignature(), dictionaryLookup);
       List lines = (List)sigLines.get(sig);
       if (lines == null) {
         lines = new ArrayList();
@@ -131,7 +131,7 @@ public class ClassData implements CoverageData {
     if (myLines == null) myLines = new TIntObjectHashMap();
     LineData lineData = (LineData) myLines.get(line);
     if (lineData == null) {
-      lineData = new LineData(line, StringsPool.getFromPool(methodSig));
+      lineData = new LineData(line, methodSig);
       myLines.put(line, lineData);
     }
     if (line > myMaxLineNumber) myMaxLineNumber = line;

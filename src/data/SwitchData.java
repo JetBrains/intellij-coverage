@@ -1,6 +1,7 @@
 package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.util.CoverageIOUtil;
+import com.intellij.rt.coverage.util.DictionaryLookup;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class SwitchData implements CoverageData {
     return myHits;
   }
 
-  public void save(final DataOutputStream os) throws IOException {
+  public void save(final DataOutputStream os, DictionaryLookup dictionaryLookup) throws IOException {
     CoverageIOUtil.writeINT(os, myDefaultHits);
     CoverageIOUtil.writeINT(os, myHits.length);
     for (int i = 0; i < myHits.length; i++) {

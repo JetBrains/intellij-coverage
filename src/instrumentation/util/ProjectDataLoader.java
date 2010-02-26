@@ -2,11 +2,13 @@
  * User: anna
  * Date: 05-May-2009
  */
-package com.intellij.rt.coverage.util;
+package com.intellij.rt.coverage.instrumentation.util;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
+import com.intellij.rt.coverage.util.ErrorReporter;
 import gnu.trove.TIntObjectHashMap;
 
 import java.io.*;
@@ -21,7 +23,7 @@ public class ProjectDataLoader {
       TIntObjectHashMap dict = new TIntObjectHashMap(1000, 0.99f);
       final int classCount = CoverageIOUtil.readINT(in);
       for (int c = 0; c < classCount; c++) {
-        final ClassData classInfo = projectInfo.getOrCreateClassData(CoverageIOUtil.readUTFFast(in));
+        final ClassData classInfo = projectInfo.getOrCreateClassData(StringsPool.getFromPool(CoverageIOUtil.readUTFFast(in)));
         dict.put(c, classInfo);
       }
       for (int c = 0; c < classCount; c++) {
@@ -32,7 +34,7 @@ public class ProjectDataLoader {
           final int lineCount = CoverageIOUtil.readINT(in);
           for (int l = 0; l < lineCount; l++) {
             final int line = CoverageIOUtil.readINT(in);
-            final LineData lineInfo = classInfo.getOrCreateLine(line, methodSig);
+            final LineData lineInfo = classInfo.getOrCreateLine(line, StringsPool.getFromPool(methodSig));
             classInfo.registerMethodSignature(lineInfo);
             String testName = CoverageIOUtil.readUTFFast(in);
             if (testName != null && testName.length() > 0) {
