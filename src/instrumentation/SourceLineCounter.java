@@ -2,7 +2,7 @@
  * User: anna
  * Date: 27-Jun-2008
  */
-package com.intellij.rt.coverage.util;
+package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ClassData;
 import gnu.trove.TIntObjectHashMap;

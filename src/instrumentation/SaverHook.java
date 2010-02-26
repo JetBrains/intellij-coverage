@@ -2,12 +2,16 @@
  * User: anna
  * Date: 26-Feb-2010
  */
-package com.intellij.rt.coverage.data;
+package com.intellij.rt.coverage.instrumentation;
 
+import com.intellij.rt.coverage.data.ClassData;
+import com.intellij.rt.coverage.data.LineCoverage;
+import com.intellij.rt.coverage.data.LineData;
+import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.ClassEntry;
 import com.intellij.rt.coverage.instrumentation.ClassFinder;
 import com.intellij.rt.coverage.util.ErrorReporter;
-import com.intellij.rt.coverage.util.SourceLineCounter;
+import com.intellij.rt.coverage.instrumentation.SourceLineCounter;
 import gnu.trove.TIntObjectProcedure;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.commons.EmptyVisitor;

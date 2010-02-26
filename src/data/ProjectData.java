@@ -181,6 +181,7 @@ public class ProjectData implements CoverageData, Serializable {
       final Object projectDataObject = getProjectDataObject();
       return (String) projectDataObject.getClass().getDeclaredField("myCurrentTestName").get(projectDataObject);
     } catch (Exception e) {
+      ErrorReporter.reportError("Current test name was not retrieved:", e);
       return null;
     }
   }

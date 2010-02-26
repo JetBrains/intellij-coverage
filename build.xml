@@ -1,21 +1,26 @@
 <project name="IDEA Coverage Agent" default="all">
   <property name="dist" value="${basedir}/dist"/>
-  <property name="jar.dst.file" value="${dist}/coverage-agent.jar"/>
+  <property name="coverage.data.jar" value="${dist}/coverage-agent.jar"/>
+  <property name="instrumenter.jar" value="${dist}/instrumenter.jar"/>
   <property name="src.dst" value="${dist}/coverage-src.zip"/>
   <property name="build.rt.classes.dir" value="${basedir}/classes"/>
   <target name="all">
-    <delete dir="${jar.dst.file}"/>
+    <delete dir="${coverage.data.jar}"/>
+    <delete dir="${instrumenter.jar}"/>
     <mkdir dir="${dist}"/>
 
-    <jar destfile="${jar.dst.file}">
+    <jar destfile="${coverage.data.jar}">
       <manifest>
-        <attribute name="Premain-Class" value="com.intellij.rt.coverage.instrumentation.Instrumentator"/>
-        <attribute name="Boot-Class-Path" value="coverage-agent.jar asm.jar asm-tree-3.0.jar asm-commons.jar oromatcher.jar trove4j.jar"/>
+        <attribute name="Premain-Class" value="com.intellij.rt.coverage.main.CoveragePremain"/>
+        <attribute name="Boot-Class-Path" value="coverage-agent.jar oromatcher.jar trove4j.jar"/>
       </manifest>
 
       <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/data/**"/>
-      <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/instrumentation/**"/>
+      <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/main/**"/>
       <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/util/**"/>
+    </jar>
+    <jar destfile="${instrumenter.jar}">
+      <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/instrumentation/**"/>
     </jar>
 
     <delete file="${src.dst}"/>
@@ -24,6 +29,7 @@
     <copy todir="${temp.src}" includeemptydirs="true">
         <fileset dir="${basedir}/src" includes="data/**"/>
         <fileset dir="${basedir}/src" includes="instrumentation/**"/>
+        <fileset dir="${basedir}/src" includes="main/**"/>
         <fileset dir="${basedir}/src" includes="util/**"/>
     </copy>
     <zip destfile="${src.dst}">
