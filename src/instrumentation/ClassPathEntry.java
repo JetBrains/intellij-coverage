@@ -1,12 +1,11 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.util.ClassNameUtil;
-import org.apache.oro.text.regex.Pattern;
-import org.apache.oro.text.regex.Perl5Matcher;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -76,14 +75,13 @@ public class ClassPathEntry {
 
     protected boolean shouldInclude(final String className) {
       String outerClassName = ClassNameUtil.getOuterClassName(className);
-      final Perl5Matcher pm = new Perl5Matcher();
       for (Iterator it = myExcludePatterns.iterator(); it.hasNext();) {
         Pattern e = (Pattern)it.next();
-        if (pm.matches(outerClassName, e)) return false;
+        if (e.matcher(outerClassName).matches()) return false;
       }
       for (Iterator it = myIncludePatterns.iterator(); it.hasNext();) {
         Pattern e = (Pattern)it.next();
-        if (pm.matches(outerClassName, e)) return true;
+        if (e.matcher(outerClassName).matches()) return true;
       }
       return myIncludePatterns.isEmpty();
     }

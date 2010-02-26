@@ -3,10 +3,6 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
-import org.apache.oro.text.regex.MalformedPatternException;
-import org.apache.oro.text.regex.Pattern;
-import org.apache.oro.text.regex.Perl5Compiler;
-import org.apache.oro.text.regex.Perl5Matcher;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -22,6 +18,7 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 
 public class Instrumentator {
@@ -42,7 +39,6 @@ public class Instrumentator {
     final boolean calcUnloaded = Boolean.valueOf(args[2]).booleanValue();
     final ProjectData data = ProjectData.createProjectData(dataFile, traceLines, Boolean.valueOf(args[3]).booleanValue(), sampling);
     final List includePatterns = new ArrayList();
-    final Perl5Compiler pc = new Perl5Compiler();
     System.out.println("---- IDEA coverage runner ---- ");
     System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
     final String excludes = "-exclude";
@@ -50,13 +46,13 @@ public class Instrumentator {
     System.out.println("include patterns:");
     for (; i < args.length; i++) {
       if (excludes.equals(args[i])) break;
-      includePatterns.add(compileRegex(args[i], pc));
+      includePatterns.add(Pattern.compile(args[i]));
       System.out.println(args[i]);
     }
     System.out.println("exclude patterns:");
     final List excludePatterns = new ArrayList();
     for (; i < args.length; i++) {
-      excludePatterns.add(compileRegex(args[i], pc));
+      excludePatterns.add(Pattern.compile(args[i]));
       System.out.println(args[i]);
     }
 
@@ -92,12 +88,10 @@ public class Instrumentator {
             return null;
           }
 
-          final Perl5Matcher pm = new Perl5Matcher();
-
           // apply include and exclude patterns to parent class name only
           className = ClassNameUtil.getOuterClassName(className);
           for (Iterator it = excludePatterns.iterator(); it.hasNext();) {
-            if (pm.matches(className, (Pattern)it.next())) return null;
+            if (((Pattern)it.next()).matcher((className)).matches()) return null;
           }
 
           cf.addClassLoader(loader);
@@ -105,7 +99,7 @@ public class Instrumentator {
             return instrument(classfileBuffer, data);
           }
           for (Iterator it = includePatterns.iterator(); it.hasNext();) {
-            if (pm.matches(className, (Pattern)it.next())) {
+            if (((Pattern)it.next()).matcher(className).matches()) {
               return instrument(classfileBuffer, data);
             }
           }
@@ -130,11 +124,6 @@ public class Instrumentator {
       reader.close();
     }
     return (String[]) result.toArray(new String[result.size()]);
-  }
-
-  private static Pattern compileRegex(final String regex, final Perl5Compiler compiler) throws MalformedPatternException {
-    // Perl5Compiler.READ_ONLY_MASK is required in case of multithreaded access to Pattern
-    return compiler.compile(regex, Perl5Compiler.READ_ONLY_MASK);
   }
 
   private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data) {

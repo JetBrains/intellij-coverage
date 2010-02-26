@@ -12,7 +12,7 @@
     <jar destfile="${coverage.data.jar}">
       <manifest>
         <attribute name="Premain-Class" value="com.intellij.rt.coverage.main.CoveragePremain"/>
-        <attribute name="Boot-Class-Path" value="coverage-agent.jar oromatcher.jar trove4j.jar"/>
+        <attribute name="Boot-Class-Path" value="coverage-agent.jar trove4j.jar"/>
       </manifest>
 
       <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/data/**"/>
@@ -40,7 +40,6 @@
     <copy todir="${dist}" file="${basedir}/lib/asm.jar"/>
     <copy todir="${dist}" file="${basedir}/lib/asm-tree-3.0.jar"/>
     <copy todir="${dist}" file="${basedir}/lib/asm-commons.jar"/>
-    <copy todir="${dist}" file="${basedir}/lib/oromatcher.jar"/>
     <copy todir="${dist}" file="${basedir}/lib/trove4j.jar"/>
   </target>
 </project>
