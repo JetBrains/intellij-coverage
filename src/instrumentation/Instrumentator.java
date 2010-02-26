@@ -1,6 +1,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.SaverHook;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import org.apache.oro.text.regex.MalformedPatternException;
@@ -35,7 +36,9 @@ public class Instrumentator {
     }
     final boolean traceLines = Boolean.valueOf(args[1]).booleanValue();
     final boolean sampling = Boolean.valueOf(args[4]).booleanValue();
-    final ProjectData data = ProjectData.createProjectData(new File(args[0]), traceLines, Boolean.valueOf(args[2]).booleanValue(), Boolean.valueOf(args[3]).booleanValue(), sampling);
+    final File dataFile = new File(args[0]);
+    final boolean calcUnloaded = Boolean.valueOf(args[2]).booleanValue();
+    final ProjectData data = ProjectData.createProjectData(dataFile, traceLines, Boolean.valueOf(args[3]).booleanValue(), sampling);
     final List includePatterns = new ArrayList();
     final Perl5Compiler pc = new Perl5Compiler();
     System.out.println("---- IDEA coverage runner ---- ");
@@ -56,7 +59,7 @@ public class Instrumentator {
     }
 
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
-    data.setClassFinder(cf);
+    Runtime.getRuntime().addShutdownHook(new Thread(new SaverHook(dataFile, calcUnloaded, cf)));
 
     instrumentation.addTransformer(new ClassFileTransformer() {
       public byte[] transform(ClassLoader loader,

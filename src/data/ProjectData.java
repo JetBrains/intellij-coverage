@@ -1,17 +1,17 @@
 package com.intellij.rt.coverage.data;
 
 
-import com.intellij.rt.coverage.instrumentation.ClassEntry;
-import com.intellij.rt.coverage.instrumentation.ClassFinder;
-import com.intellij.rt.coverage.util.*;
-import gnu.trove.*;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.commons.EmptyVisitor;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
+import com.intellij.rt.coverage.util.ErrorReporter;
+import com.intellij.rt.coverage.util.ProjectDataLoader;
+import com.intellij.rt.coverage.util.StringsPool;
+import gnu.trove.TIntHashSet;
+import gnu.trove.TIntIterator;
+import gnu.trove.TObjectIntHashMap;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -38,8 +38,6 @@ public class ProjectData implements CoverageData, Serializable {
   private boolean myTraceLines;
   private boolean mySampling;
   private Map myTrace;
-  private ClassFinder myClassFinder;
-  private boolean myAppendUnloaded;
   private File myTracesDir;
   private static Object ourProjectDataObject;
 
@@ -66,10 +64,6 @@ public class ProjectData implements CoverageData, Serializable {
     return classData;
   }
 
-  public void setClassFinder(ClassFinder cf) {
-    myClassFinder = cf;
-  }
-
   public static ProjectData getProjectData() {
     return ourProjectData;
   }
@@ -78,7 +72,7 @@ public class ProjectData implements CoverageData, Serializable {
     return mySampling;
   }
 
-  public static ProjectData createProjectData(final File dataFile, final boolean traceLines, boolean calcUnloaded, boolean mergeWithExisting, boolean isSampling) throws IOException {
+  public static ProjectData createProjectData(final File dataFile, final boolean traceLines, boolean mergeWithExisting, boolean isSampling) throws IOException {
     ourProjectData = new ProjectData();
     if (!dataFile.exists()) {
       final File parentDir = dataFile.getParentFile();
@@ -87,43 +81,9 @@ public class ProjectData implements CoverageData, Serializable {
     } else if (mergeWithExisting) {
       ourProjectData = ProjectDataLoader.load(dataFile);
     }
-    ourProjectData.myAppendUnloaded = calcUnloaded;
     ourProjectData.mySampling = isSampling;
     ourProjectData.myTraceLines = traceLines;
     ourProjectData.myDataFile = dataFile;
-    if (traceLines) new TIntHashSet();//instrument TIntHashSet
-    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-      public void run() {
-        try {
-          if (ourProjectData.myAppendUnloaded) {
-            appendUnloaded();
-          }
-
-          DataOutputStream os = null;
-          try {
-            os = new DataOutputStream(new FileOutputStream(ourProjectData.myDataFile));
-            ourProjectData.save(os);
-          }
-          catch (IOException e) {
-            ErrorReporter.reportError("Error writing file " + dataFile.getPath(), e);
-          }
-          finally {
-            try {
-              if (os != null) {
-                os.close();
-              }
-            }
-            catch (IOException e) {
-              ErrorReporter.reportError("Error writing file " + dataFile.getPath(), e);
-            }
-          }
-        } catch (OutOfMemoryError e) {
-          ErrorReporter.reportError("Out of memory error occured, try to increase memory available for the JVM, or make include / exclude patterns more specific", e);
-        } catch (Throwable e) {
-          ErrorReporter.reportError("Unexpected error", e);
-        }
-      }
-    }));
     return ourProjectData;
   }
 
@@ -232,40 +192,6 @@ public class ProjectData implements CoverageData, Serializable {
 
   public static int getDictValue(String className) {
     return ourProjectData.myDict.get(className);
-  }
-
-   private static void appendUnloaded() {
-    if (ourProjectData.myClassFinder == null) {
-        System.err.println("ClassFinder is not set");
-        return;
-    }
-
-    Collection matchedClasses = ourProjectData.myClassFinder.findMatchedClasses();
-
-    for (Iterator matchedClassIterator = matchedClasses.iterator(); matchedClassIterator.hasNext();) {
-      ClassEntry classEntry = (ClassEntry) matchedClassIterator.next();
-      ClassData cd = ourProjectData.getClassData(classEntry.getClassName());
-      if (cd != null) continue;
-      try {
-        ClassReader reader = new ClassReader(classEntry.getClassInputStream());
-        SourceLineCounter slc = new SourceLineCounter(new EmptyVisitor(), cd, !ourProjectData.isSampling());
-        reader.accept(slc, 0);
-        if (slc.getNSourceLines() > 0) { // ignore classes without executable code
-          final ClassData classData = ourProjectData.getOrCreateClassData(classEntry.getClassName());
-          slc.getSourceLines().forEachEntry(new TIntObjectProcedure() {
-            public boolean execute(int line, Object methodSig) {
-              final LineData ld = classData.getOrCreateLine(line, (String)methodSig);
-              classData.registerMethodSignature(ld);
-              ld.setStatus(LineCoverage.NONE);
-              return true;
-            }
-          });
-        }
-      }
-      catch (IOException e) {
-        // failed to read class
-      }
-    }
   }
 
 
@@ -409,4 +335,5 @@ public class ProjectData implements CoverageData, Serializable {
       return m;
     }
   }
+
 }
