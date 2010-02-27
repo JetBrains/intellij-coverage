@@ -4,9 +4,6 @@
  */
 package com.intellij.rt.coverage.util;
 
-import com.intellij.rt.coverage.data.ClassData;
-import gnu.trove.TIntObjectHashMap;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -164,21 +161,12 @@ public class CoverageIOUtil {
     });
   }
 
-  public static String expand(String methodSignature, final TIntObjectHashMap map) {
-    return processWithDictionary(methodSignature, new Consumer() {
-      protected String consume(String type) {
-        return ((ClassData)map.get(Integer.parseInt(type))).getName();
-      }
-    });
-  }
-
-
   private static final Pattern TYPE_PATTERN = Pattern.compile("(L.*;)*");
 
-  private static abstract class Consumer {
+  public static abstract class Consumer {
     protected abstract String consume(String str);
   }
-  private static String processWithDictionary(String methodSignature, Consumer consumer) {
+  public static String processWithDictionary(String methodSignature, Consumer consumer) {
     final Matcher matcher = TYPE_PATTERN.matcher(methodSignature);
     while (matcher.find()) {
       String s = matcher.group();

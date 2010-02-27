@@ -1,7 +1,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
+import com.intellij.rt.coverage.util.LinesUtil;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.util.LinesUtil;
 import org.objectweb.asm.*;
 
 public class SamplingInstrumenter extends Instrumenter {

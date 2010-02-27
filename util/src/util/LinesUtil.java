@@ -2,7 +2,7 @@
  * User: anna
  * Date: 26-Feb-2010
  */
-package com.intellij.rt.coverage.instrumentation.util;
+package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.LineData;
 import gnu.trove.TIntObjectHashMap;

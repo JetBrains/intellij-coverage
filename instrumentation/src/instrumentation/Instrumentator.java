@@ -1,7 +1,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
+import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import org.objectweb.asm.ClassAdapter;

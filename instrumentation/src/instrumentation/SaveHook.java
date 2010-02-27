@@ -4,12 +4,12 @@
  */
 package com.intellij.rt.coverage.instrumentation;
 
+import com.intellij.rt.coverage.util.LinesUtil;
+import com.intellij.rt.coverage.util.StringsPool;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineCoverage;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.util.LinesUtil;
-import com.intellij.rt.coverage.instrumentation.util.StringsPool;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.DictionaryLookup;
 import com.intellij.rt.coverage.util.ErrorReporter;

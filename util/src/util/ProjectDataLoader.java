@@ -2,7 +2,7 @@
  * User: anna
  * Date: 05-May-2009
  */
-package com.intellij.rt.coverage.instrumentation.util;
+package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
@@ -20,7 +20,7 @@ public class ProjectDataLoader {
     DataInputStream in = null;
     try {
       in = new DataInputStream(new BufferedInputStream(new FileInputStream(sessionDataFile)));
-      TIntObjectHashMap dict = new TIntObjectHashMap(1000, 0.99f);
+      final TIntObjectHashMap dict = new TIntObjectHashMap(1000, 0.99f);
       final int classCount = CoverageIOUtil.readINT(in);
       for (int c = 0; c < classCount; c++) {
         final ClassData classInfo = projectInfo.getOrCreateClassData(StringsPool.getFromPool(CoverageIOUtil.readUTFFast(in)));
@@ -32,7 +32,7 @@ public class ProjectDataLoader {
         final TIntObjectHashMap lines = new TIntObjectHashMap(4, 0.99f);
         int maxLine = 1;
         for (int m = 0; m < methCount; m++) {
-          String methodSig = CoverageIOUtil.expand(CoverageIOUtil.readUTFFast(in), dict);
+          final String methodSig = expand(in, dict);
           final int lineCount = CoverageIOUtil.readINT(in);
           for (int l = 0; l < lineCount; l++) {
             final int line = CoverageIOUtil.readINT(in);
@@ -87,5 +87,13 @@ public class ProjectDataLoader {
       }
     }
     return projectInfo;
+  }
+
+  private static String expand(DataInputStream in, final TIntObjectHashMap dict) throws IOException {
+    return CoverageIOUtil.processWithDictionary(CoverageIOUtil.readUTFFast(in), new CoverageIOUtil.Consumer() {
+      protected String consume(String type) {
+        return ((ClassData) dict.get(Integer.parseInt(type))).getName();
+      }
+    });
   }
 }

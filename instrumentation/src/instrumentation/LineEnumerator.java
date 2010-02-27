@@ -90,7 +90,7 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
       super.visitJumpInsn(opcode, label);
       return;
     }
-    if (opcode != GOTO && opcode != JSR && !myMethodName.equals("<clinit>")) {
+    if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR && !myMethodName.equals("<clinit>")) {
       if (myJumps == null) myJumps = new HashSet();
       myJumps.add(label);
       myLastJump = label;
@@ -99,7 +99,7 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
         lineData.addJump(myCurrentJump++);
       }
     }
-    if (myState == GETSTATIC_SEEN && opcode == IFNE) {
+    if (myState == GETSTATIC_SEEN && opcode == Opcodes.IFNE) {
       myState = SEEN_NOTHING;
       final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
       if (lineData != null && isJump(label)) {
@@ -108,10 +108,10 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
         myLastJump = null;
       }
     }
-    if (myState == ILOAD_SEEN && opcode == IFNE) {
+    if (myState == ILOAD_SEEN && opcode == Opcodes.IFNE) {
       myState = IFNE_SEEN;
     }
-    else if (myState == ICONST_1_SEEN && opcode == GOTO) {
+    else if (myState == ICONST_1_SEEN && opcode == Opcodes.GOTO) {
       myState = GOTO_SEEN;
     }
     else {
@@ -172,24 +172,24 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
     super.visitInsn(opcode);
     if (!myHasExecutableLines) return;
     //remove } lines from coverage report
-    if (opcode == RETURN && !myHasInstructions) {
+    if (opcode == Opcodes.RETURN && !myHasInstructions) {
       myClassInstrumenter.removeLine(myCurrentLine);
     } else {
       myHasInstructions = true;
     }
 
     //remove previous jump -> which is wrapper to throw IllegalStateException("method can't return null")
-    if (myRemoveNotNullJumps && opcode == ARETURN) {
+    if (myRemoveNotNullJumps && opcode == Opcodes.ARETURN) {
       final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
       if (lineData != null) {
         lineData.removeJump(myCurrentJump--);
         myJumps.remove(myLastJump);
       }
     }
-    if (opcode == ICONST_1 && myState == IFNE_SEEN) {
+    if (opcode == Opcodes.ICONST_1 && myState == IFNE_SEEN) {
       myState = ICONST_1_SEEN;
     }
-    else if (opcode == ICONST_0 && myState == GOTO_SEEN) {
+    else if (opcode == Opcodes.ICONST_0 && myState == GOTO_SEEN) {
       final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
       if (lineData != null) {
         lineData.removeJump(myCurrentJump--);
@@ -212,7 +212,7 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
   public void visitVarInsn(final int opcode, final int var) {
     super.visitVarInsn(opcode, var);
     if (!myHasExecutableLines) return;
-    if (opcode == ILOAD) {
+    if (opcode == Opcodes.ILOAD) {
       myState = ILOAD_SEEN;
     } else {
       myState = SEEN_NOTHING;

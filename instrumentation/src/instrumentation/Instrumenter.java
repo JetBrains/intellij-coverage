@@ -1,9 +1,9 @@
 package com.intellij.rt.coverage.instrumentation;
 
+import com.intellij.rt.coverage.util.StringsPool;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.util.StringsPool;
 import gnu.trove.TIntObjectHashMap;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;

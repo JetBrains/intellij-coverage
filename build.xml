@@ -3,7 +3,7 @@
   <property name="coverage.data.jar" value="${dist}/coverage-agent.jar"/>
   <property name="instrumenter.jar" value="${dist}/instrumenter.jar"/>
   <property name="src.dst" value="${dist}/coverage-src.zip"/>
-  <property name="build.rt.classes.dir" value="${basedir}/classes"/>
+  <property name="build.rt.classes.dir" value="${basedir}/out/production"/>
   <target name="all">
     <delete dir="${coverage.data.jar}"/>
     <delete dir="${instrumenter.jar}"/>
@@ -15,22 +15,27 @@
         <attribute name="Boot-Class-Path" value="coverage-agent.jar"/>
       </manifest>
 
-      <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/data/**"/>
-      <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/main/**"/>
-      <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/util/**"/>
+      <fileset dir="${build.rt.classes.dir}/coverage" includes="com/intellij/rt/coverage/data/**"/>
+      <fileset dir="${build.rt.classes.dir}/coverage" includes="com/intellij/rt/coverage/main/**"/>
+      <fileset dir="${build.rt.classes.dir}/coverage" includes="com/intellij/rt/coverage/util/**"/>
     </jar>
     <jar destfile="${instrumenter.jar}">
-      <fileset dir="${build.rt.classes.dir}" includes="com/intellij/rt/coverage/instrumentation/**"/>
+      <fileset dir="${build.rt.classes.dir}/instrumentation" includes="com/intellij/rt/coverage/instrumentation/**"/>
+      <fileset dir="${build.rt.classes.dir}/util" includes="com/intellij/rt/coverage/util/**"/>
     </jar>
 
     <delete file="${src.dst}"/>
     <property name ="temp.src" value="${dist}/src/com/intellij/rt/coverage"/>
     <mkdir dir="${temp.src}"/>
     <copy todir="${temp.src}" includeemptydirs="true">
+        <!-- coverage module src -->
         <fileset dir="${basedir}/src" includes="data/**"/>
-        <fileset dir="${basedir}/src" includes="instrumentation/**"/>
         <fileset dir="${basedir}/src" includes="main/**"/>
         <fileset dir="${basedir}/src" includes="util/**"/>
+        <!-- instrumentation module src -->
+        <fileset dir="${basedir}/instrumentation/src" includes="instrumentation/**"/>
+        <!-- util module src -->
+        <fileset dir="${basedir}/util/src" includes="util/**"/>
     </copy>
     <zip destfile="${src.dst}">
        <fileset dir="${dist}/src" includes="com/intellij/rt/coverage/**"/>

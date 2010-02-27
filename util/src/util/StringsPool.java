@@ -1,4 +1,4 @@
-package com.intellij.rt.coverage.instrumentation.util;
+package com.intellij.rt.coverage.util;
 
 import gnu.trove.TLongObjectHashMap;
 
