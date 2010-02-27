@@ -1,8 +1,6 @@
 package com.intellij.rt.coverage.instrumentation;
 
-import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
-import com.intellij.rt.coverage.instrumentation.util.StringsPool;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -12,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class LineEnumerator extends MethodAdapter implements Opcodes {
-  private final ClassData myClassData;
+  private final ClassInstrumenter myClassInstrumenter;
   private final int myAccess;
   private final String myMethodName;
   private final String mySignature;
@@ -44,14 +42,14 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
 
   private boolean myHasInstructions;
 
-  public LineEnumerator(final ClassData classData, final MethodVisitor mv,
+  public LineEnumerator(ClassInstrumenter classInstrumenter, final MethodVisitor mv,
                         final int access,
                         final String name,
                         final String desc,
                         final String signature,
                         final String[] exceptions) {
     super(new MethodNode(access, name, desc, signature, exceptions));
-    myClassData = classData;
+    myClassInstrumenter = classInstrumenter;
     myWriterMethodVisitor = mv;
     myAccess = access;
     myMethodName = name;
@@ -75,12 +73,12 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
     myCurrentJump = 0;
     myCurrentSwitch = 0;
     myHasExecutableLines = true;
-    myClassData.getOrCreateLine(myCurrentLine, StringsPool.getFromPool(myMethodName + mySignature));
+    myClassInstrumenter.getOrCreateLineData(myCurrentLine, myMethodName, mySignature);
   }
 
 
   public String getClassName() {
-    return myClassData.getName();
+    return myClassInstrumenter.getClassName();
   }
 
   public MethodVisitor getWV() {
@@ -96,11 +94,14 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
       if (myJumps == null) myJumps = new HashSet();
       myJumps.add(label);
       myLastJump = label;
-      myClassData.addLineJump(myCurrentLine, myCurrentJump++);
+      final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
+      if (lineData != null) {
+        lineData.addJump(myCurrentJump++);
+      }
     }
     if (myState == GETSTATIC_SEEN && opcode == IFNE) {
       myState = SEEN_NOTHING;
-      final LineData lineData = myClassData.getLineData(myCurrentLine);
+      final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
       if (lineData != null && isJump(label)) {
         lineData.removeJump(myCurrentJump--);
         myJumps.remove(myLastJump);
@@ -129,7 +130,10 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
     super.visitLookupSwitchInsn(dflt, keys, labels);
     if (!myHasExecutableLines) return;
     rememberSwitchLabels(dflt, labels);
-    myClassData.addLineSwitch(myCurrentLine, myCurrentSwitch++, keys);
+    final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
+    if (lineData != null) {
+      lineData.addSwitch(myCurrentSwitch++, keys);
+    }
     myState = SEEN_NOTHING;
     myHasInstructions = true;
   }
@@ -138,7 +142,10 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
     super.visitTableSwitchInsn(min, max, dflt, labels);
     if (!myHasExecutableLines) return;
     rememberSwitchLabels(dflt, labels);
-    myClassData.addLineSwitch(myCurrentLine, myCurrentSwitch++, min, max);
+    final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
+    if (lineData != null) {
+      lineData.addSwitch(myCurrentSwitch++, min, max);
+    }
     myState = SEEN_NOTHING;
     myHasInstructions = true;
   }
@@ -166,14 +173,14 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
     if (!myHasExecutableLines) return;
     //remove } lines from coverage report
     if (opcode == RETURN && !myHasInstructions) {
-      myClassData.removeLine(myCurrentLine);
+      myClassInstrumenter.removeLine(myCurrentLine);
     } else {
       myHasInstructions = true;
     }
 
     //remove previous jump -> which is wrapper to throw IllegalStateException("method can't return null")
     if (myRemoveNotNullJumps && opcode == ARETURN) {
-      final LineData lineData = myClassData.getLineData(myCurrentLine);
+      final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
       if (lineData != null) {
         lineData.removeJump(myCurrentJump--);
         myJumps.remove(myLastJump);
@@ -183,7 +190,7 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
       myState = ICONST_1_SEEN;
     }
     else if (opcode == ICONST_0 && myState == GOTO_SEEN) {
-      final LineData lineData = myClassData.getLineData(myCurrentLine);
+      final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
       if (lineData != null) {
         lineData.removeJump(myCurrentJump--);
         myJumps.remove(myLastJump);

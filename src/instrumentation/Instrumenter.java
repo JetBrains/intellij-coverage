@@ -1,8 +1,10 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ClassData;
+import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.util.StringsPool;
+import gnu.trove.TIntObjectHashMap;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -11,6 +13,9 @@ import org.objectweb.asm.Opcodes;
 public abstract class Instrumenter extends ClassAdapter {
   protected final ProjectData myProjectData;
   protected final ClassVisitor myClassVisitor;
+
+  protected TIntObjectHashMap myLines = new TIntObjectHashMap(4, 0.99f);
+  protected int myMaxLineNumber;
 
   protected ClassData myClassData;
   protected boolean myProcess;
@@ -59,4 +64,23 @@ public abstract class Instrumenter extends ClassAdapter {
   }
 
   protected abstract void initLineData();
+
+  protected void getOrCreateLineData(int line, String name, String desc) {
+    //create lines again if class was loaded again by another class loader; may be myLinesArray should be cleared
+    if (myLines == null) myLines = new TIntObjectHashMap();
+    LineData lineData = (LineData) myLines.get(line);
+    if (lineData == null) {
+      lineData = new LineData(line, StringsPool.getFromPool(name + desc));
+      myLines.put(line, lineData);
+    }
+    if (line > myMaxLineNumber) myMaxLineNumber = line;
+  }
+
+  public void removeLine(final int line) {
+    myLines.remove(line);
+  }
+
+  public int getMaxLineNumber() {
+    return myMaxLineNumber;
+  }
 }

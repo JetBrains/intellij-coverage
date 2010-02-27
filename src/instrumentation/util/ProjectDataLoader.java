@@ -29,12 +29,19 @@ public class ProjectDataLoader {
       for (int c = 0; c < classCount; c++) {
         final ClassData classInfo = (ClassData)dict.get(CoverageIOUtil.readINT(in));
         final int methCount = CoverageIOUtil.readINT(in);
+        final TIntObjectHashMap lines = new TIntObjectHashMap(4, 0.99f);
+        int maxLine = 1;
         for (int m = 0; m < methCount; m++) {
           String methodSig = CoverageIOUtil.expand(CoverageIOUtil.readUTFFast(in), dict);
           final int lineCount = CoverageIOUtil.readINT(in);
           for (int l = 0; l < lineCount; l++) {
             final int line = CoverageIOUtil.readINT(in);
-            final LineData lineInfo = classInfo.getOrCreateLine(line, StringsPool.getFromPool(methodSig));
+            LineData lineInfo = (LineData) lines.get(line);
+            if (lineInfo == null) {
+              lineInfo = new LineData(line, StringsPool.getFromPool(methodSig));
+              lines.put(line, lineInfo);
+              if (line > maxLine) maxLine = line;
+            }
             classInfo.registerMethodSignature(lineInfo);
             String testName = CoverageIOUtil.readUTFFast(in);
             if (testName != null && testName.length() > 0) {
@@ -63,6 +70,7 @@ public class ProjectDataLoader {
               }
             }
           }
+          classInfo.setLines(LinesUtil.calcLineArray(maxLine, lines));
         }
       }
     }

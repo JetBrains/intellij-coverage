@@ -62,7 +62,7 @@ public class Instrumentator {
     }
 
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
-    Runtime.getRuntime().addShutdownHook(new Thread(new SaverHook(dataFile, calcUnloaded, cf)));
+    Runtime.getRuntime().addShutdownHook(new Thread(new SaveHook(dataFile, calcUnloaded, cf)));
 
     instrumentation.addTransformer(new ClassFileTransformer() {
       public byte[] transform(ClassLoader loader,
