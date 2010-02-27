@@ -1,9 +1,8 @@
 package com.intellij.rt.coverage.data;
 
 
-import com.intellij.rt.coverage.util.*;
-import gnu.trove.TIntHashSet;
-import gnu.trove.TIntIterator;
+import com.intellij.rt.coverage.util.DictionaryLookup;
+import com.intellij.rt.coverage.util.ErrorReporter;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -20,7 +19,7 @@ public class ProjectData implements CoverageData, Serializable {
   private static final MethodCaller TOUCH_JUMP_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, boolean.class});
   private static final MethodCaller TOUCH_METHOD = new MethodCaller("touch", new Class[] {int.class});
   private static final MethodCaller GET_CLASS_DATA_METHOD = new MethodCaller("getClassData", new Class[]{String.class});
-  private static MethodCaller TRACE_LINE_METHOD = new MethodCaller("traceLine", new Class[]{Object.class, int.class});
+  private static final MethodCaller TRACE_LINE_METHOD = new MethodCaller("traceLine", new Class[]{Object.class, int.class});
 
   public static ProjectData ourProjectData;
 
@@ -116,10 +115,17 @@ public class ProjectData implements CoverageData, Serializable {
        for (Iterator it = myTrace.keySet().iterator(); it.hasNext();) {
          final Object classData = it.next();
          os.writeUTF(classData.toString());
-         final TIntHashSet lines = (TIntHashSet) myTrace.get(classData);
-         os.writeInt(lines.size());
-         for (TIntIterator linesIt = lines.iterator(); linesIt.hasNext();) {
-           os.writeInt(linesIt.next());
+         final boolean[] lines = (boolean[]) myTrace.get(classData);
+         int numberOfTraces = 0;
+         for (int idx = 0; idx < lines.length; idx++) {
+           if (lines[idx]) numberOfTraces++;
+         }
+         os.writeInt(numberOfTraces);
+         for (int idx = 0; idx < lines.length; idx++) {
+           final boolean incl = lines[idx];
+           if (incl) {
+             os.writeInt(idx);
+           }
          }
        }
      }
@@ -262,12 +268,17 @@ public class ProjectData implements CoverageData, Serializable {
   public void traceLine(Object classData, int line) {
     if (myTrace != null) {
       synchronized (myTrace) {
-        TIntHashSet lines = (TIntHashSet) myTrace.get(classData);
+        boolean[] lines = (boolean[]) myTrace.get(classData);
         if (lines == null) {
-          lines = new TIntHashSet();
+          lines = new boolean[line + 20];
           myTrace.put(classData, lines);
         }
-        lines.add(line);
+        if (lines.length <= line) {
+          boolean[] longLines = new boolean[line + 20];
+          System.arraycopy(lines, 0, longLines, 0, lines.length);
+          lines = longLines;
+        }
+        lines[line] = true;
       }
     }
   }
