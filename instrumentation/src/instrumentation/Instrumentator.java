@@ -39,7 +39,7 @@ public class Instrumentator {
     final File dataFile = new File(args[0]);
     final boolean calcUnloaded = Boolean.valueOf(args[2]).booleanValue();
     ProjectData initialData = null;
-    if (Boolean.valueOf(args[3]).booleanValue()) {
+    if (Boolean.valueOf(args[3]).booleanValue() && dataFile.isFile()) {
       initialData = ProjectDataLoader.load(dataFile);
     }
     final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling);
