@@ -58,21 +58,23 @@ public class ClassData implements CoverageData {
   }
 
   public void merge(final CoverageData data) {
-    ClassData classData = (ClassData)data;
-    if (myLinesArray.length < classData.myLinesArray.length) {
-      LineData[] lines = new LineData[classData.myLinesArray.length];
+    mergeLines(((ClassData)data).myLinesArray);
+  }
+
+  private void mergeLines(LineData[] dLines) {
+    if (myLinesArray.length < dLines.length) {
+      LineData[] lines = new LineData[dLines.length];
       System.arraycopy(myLinesArray, 0, lines, 0, myLinesArray.length);
       myLinesArray = lines;
     }
-    for (int i = 0; i < classData.myLinesArray.length; i++) {
-      final LineData mergedData = classData.myLinesArray[i];
+    for (int i = 0; i < dLines.length; i++) {
+      final LineData mergedData = dLines[i];
       if (mergedData == null) continue;
-      final LineData lineData = i < myLinesArray.length ? myLinesArray[i] : null;
+      final LineData lineData = myLinesArray[i];
       if (lineData != null) {
         lineData.merge(mergedData);
       }
       else {
-        registerMethodSignature(mergedData);
         myLinesArray[i] = mergedData;
       }
     }
@@ -132,6 +134,7 @@ public class ClassData implements CoverageData {
     if (myStatus == null) myStatus = new HashMap();
   }
 
+  /** @noinspection UnusedDeclaration*/
   public Integer getStatus(String methodSignature) {
     Integer methodStatus = (Integer)myStatus.get(methodSignature);
     if (methodStatus == null) {
@@ -155,11 +158,21 @@ public class ClassData implements CoverageData {
   }
 
   public void initLineMask(int size) {
-    myLineMask = new int[size + 1];
-    Arrays.fill(myLineMask, 0);
+    if (myLineMask == null) {
+      myLineMask = new int[size + 1];
+      Arrays.fill(myLineMask, 0);
+    } else if (myLineMask.length < size) {
+      int[] lines = new int[size];
+      System.arraycopy(myLineMask, 0, lines, 0, myLineMask.length);
+      myLineMask = lines;
+    }
   }
 
   public void setLines(LineData[] lines) {
-    myLinesArray = lines;
+    if (myLinesArray == null) {
+      myLinesArray = lines;
+    } else {
+      mergeLines(lines);
+    }
   }
 }
