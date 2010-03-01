@@ -33,9 +33,14 @@ public class CoveragePremain {
     final String fullPath = resourceURL.getFile();
     final int delimiter = fullPath.indexOf("!");
     String archivePath = fullPath.substring(0, delimiter);
-    final String fileProtocol = "file:/";
-    if (archivePath.startsWith(fileProtocol)) {
-      archivePath = archivePath.substring(fileProtocol.length());
+    archivePath = removePrefix(archivePath, "file://");
+    archivePath = removePrefix(archivePath, "file:/");
+    return archivePath;
+  }
+
+  private static String removePrefix(String archivePath, String prefix) {
+    if (archivePath.startsWith(prefix)) {
+      archivePath = archivePath.substring(prefix.length());
     }
     return archivePath;
   }
