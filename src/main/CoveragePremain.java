@@ -4,6 +4,8 @@
  */
 package com.intellij.rt.coverage.main;
 
+import com.intellij.rt.coverage.util.URLsUtil;
+
 import java.io.File;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Method;
@@ -13,6 +15,7 @@ import java.net.URLClassLoader;
 import java.util.Arrays;
 
 public class CoveragePremain {
+
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
     final File lib = new File(getArchivePath()).getParentFile();
     final URL[] urls = new URL[5];
@@ -37,9 +40,6 @@ public class CoveragePremain {
     if (resourceURL == null) {
       resourceURL = ClassLoader.getSystemResource(className);
     }
-    final String fullPath = resourceURL.getPath();
-    final int delimiter = fullPath.indexOf("!");
-    String archivePath = fullPath.substring(0, delimiter);
-    return archivePath;
+    return URLsUtil.extractRoot(resourceURL, "/" + className);
   }
 }
