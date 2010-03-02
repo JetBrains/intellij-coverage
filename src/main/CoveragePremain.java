@@ -9,6 +9,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 
 public class CoveragePremain {
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
@@ -19,6 +20,7 @@ public class CoveragePremain {
     urls[2] = new File(lib, "asm-tree-3.0.jar").toURI().toURL();
     urls[3] = new File(lib, "asm.jar").toURI().toURL();
     urls[4] = new File(lib, "trove4j.jar").toURI().toURL();
+    System.out.println("Classloader URLs: " + Arrays.asList(urls));
     final Class instrumentator = Class.forName("com.intellij.rt.coverage.instrumentation.Instrumentator", true, new URLClassLoader(urls));
     final Method premainMethod = instrumentator.getDeclaredMethod("premain", new Class[]{String.class, Instrumentation.class});
     premainMethod.invoke(null, new Object[] {argsString, instrumentation});
