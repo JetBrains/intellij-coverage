@@ -157,14 +157,29 @@ public class ClassData implements CoverageData {
     return myClassName;
   }
 
-  public void initLineMask(int size) {
+  public void initLineMask(LineData[] lines) {
     if (myLineMask == null) {
-      myLineMask = new int[size + 1];
+      myLineMask = new int[lines.length];
       Arrays.fill(myLineMask, 0);
-    } else if (myLineMask.length < size) {
-      int[] lines = new int[size];
-      System.arraycopy(myLineMask, 0, lines, 0, myLineMask.length);
-      myLineMask = lines;
+      if (myLinesArray != null) {
+        for (int i = 0; i < myLinesArray.length; i++) {
+          final LineData data = myLinesArray[i];
+          if (data != null) {
+            myLineMask[i] = data.getHits();
+          }
+        }
+      }
+    } else {
+      if (myLineMask.length < lines.length) {
+        int[] lineMask = new int[lines.length];
+        System.arraycopy(myLineMask, 0, lineMask, 0, myLineMask.length);
+        myLineMask = lineMask;
+      }
+      for (int i = 0; i < lines.length; i++) {
+        if (lines[i] != null) {
+          myLineMask[i] += lines[i].getHits();
+        }
+      }
     }
   }
 

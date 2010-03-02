@@ -1,11 +1,11 @@
 package com.intellij.rt.coverage.instrumentation;
 
+import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.util.LinesUtil;
 import com.intellij.rt.coverage.data.ProjectData;
 import org.objectweb.asm.*;
 
 public class SamplingInstrumenter extends Instrumenter {
-  private int mySize;
   private static final String OBJECT_TYPE = "Ljava/lang/Object;";
 
   public SamplingInstrumenter(final ProjectData projectData, ClassVisitor classVisitor) {
@@ -41,7 +41,6 @@ public class SamplingInstrumenter extends Instrumenter {
         mv.visitVarInsn(Opcodes.ALOAD, getCurrentClassDataNumber());
         mv.visitIntInsn(Opcodes.SIPUSH, line);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchLine", "(" + OBJECT_TYPE + "I)V");
-        if (mySize < line) mySize = line;
         super.visitLineNumber(line, start);
       }
 
@@ -82,8 +81,8 @@ public class SamplingInstrumenter extends Instrumenter {
   }
 
   protected void initLineData() {
-    myClassData.initLineMask(mySize);
-    myClassData.setLines(LinesUtil.calcLineArray(myMaxLineNumber, myLines));
-    myLines = null;
+    final LineData[] lines = LinesUtil.calcLineArray(myMaxLineNumber, myLines);
+    myClassData.initLineMask(lines);
+    myClassData.setLines(lines);
   }
 }

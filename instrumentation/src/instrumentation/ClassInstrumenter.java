@@ -18,7 +18,6 @@ public class ClassInstrumenter extends Instrumenter {
 
   protected void initLineData() {
     myClassData.setLines(LinesUtil.calcLineArray(myMaxLineNumber, myLines));
-    myLines = null;
   }
 
   public LineData getLineData(int line) {

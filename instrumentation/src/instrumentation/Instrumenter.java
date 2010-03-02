@@ -59,6 +59,7 @@ public abstract class Instrumenter extends ClassAdapter {
   public void visitEnd() {
     if (myProcess) {
       initLineData();
+      myLines = null;
     }
     super.visitEnd();
   }
@@ -78,9 +79,5 @@ public abstract class Instrumenter extends ClassAdapter {
 
   public void removeLine(final int line) {
     myLines.remove(line);
-  }
-
-  public int getMaxLineNumber() {
-    return myMaxLineNumber;
   }
 }
