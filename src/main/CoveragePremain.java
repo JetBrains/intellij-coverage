@@ -37,18 +37,9 @@ public class CoveragePremain {
     if (resourceURL == null) {
       resourceURL = ClassLoader.getSystemResource(className);
     }
-    final String fullPath = resourceURL.getFile();
+    final String fullPath = resourceURL.getPath();
     final int delimiter = fullPath.indexOf("!");
     String archivePath = fullPath.substring(0, delimiter);
-    archivePath = removePrefix(archivePath, "file://");
-    archivePath = removePrefix(archivePath, "file:/");
-    return archivePath;
-  }
-
-  private static String removePrefix(String archivePath, String prefix) {
-    if (archivePath.startsWith(prefix)) {
-      archivePath = archivePath.substring(prefix.length());
-    }
     return archivePath;
   }
 }
