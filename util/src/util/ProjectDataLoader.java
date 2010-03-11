@@ -68,6 +68,7 @@ public class ProjectDataLoader {
                 lineInfo.setSwitchHits(s, keys, keysHits);
               }
             }
+            lineInfo.fillArrays();
           }
         }
         classInfo.setLines(LinesUtil.calcLineArray(maxLine, lines));

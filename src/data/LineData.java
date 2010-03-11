@@ -5,8 +5,6 @@ import com.intellij.rt.coverage.util.DictionaryLookup;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
 
 public class LineData implements CoverageData {
   private final int myLineNumber;
@@ -49,10 +47,10 @@ public class LineData implements CoverageData {
     }
 
     if (myJumpsAndSwitches != null) {
-      List jumps = getOrCreateJumpsAndSwitches().getJumps();
+      JumpData[] jumps = getOrCreateJumpsAndSwitches().getJumps();
       if (jumps != null) {
-        for (Iterator it = jumps.iterator(); it.hasNext();) {
-          final JumpData jumpData = (JumpData)it.next();
+        for (int i = 0; i < jumps.length; i++) {
+          final JumpData jumpData = jumps[i];
           if ((jumpData.getFalseHits() > 0 ? 1 : 0) + (jumpData.getTrueHits() > 0 ? 1 : 0) < 2){
             myStatus = LineCoverage.PARTIAL;
             return myStatus;
@@ -60,10 +58,10 @@ public class LineData implements CoverageData {
         }
       }
 
-      List switches = getOrCreateJumpsAndSwitches().getSwitches();
+      SwitchData[] switches = getOrCreateJumpsAndSwitches().getSwitches();
       if (switches != null) {
-        for (Iterator it = switches.iterator(); it.hasNext();) {
-          final SwitchData switchData = (SwitchData)it.next();
+        for (int s = 0; s < switches.length; s++) {
+          final SwitchData switchData = switches[s];
           if (switchData.getDefaultHits() == 0){
             myStatus = LineCoverage.PARTIAL;
             return myStatus;
@@ -178,12 +176,12 @@ public class LineData implements CoverageData {
     addSwitch(switchNumber, keys).setKeysAndHits(keys, hits);
   }
 
-  public List getJumps() {
+  public JumpData[] getJumps() {
     if (myJumpsAndSwitches == null) return null;
     return getOrCreateJumpsAndSwitches().getJumps();
   }
 
-  public List getSwitches() {
+  public SwitchData[] getSwitches() {
     if (myJumpsAndSwitches == null) return null;
     return getOrCreateJumpsAndSwitches().getSwitches();
   }
