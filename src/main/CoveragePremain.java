@@ -23,7 +23,30 @@ public class CoveragePremain {
     urls[2] = fileToURL(new File(lib, "asm-tree-3.0.jar"));
     urls[3] = fileToURL(new File(lib, "asm.jar"));
     urls[4] = fileToURL(new File(lib, "trove4j.jar"));
-    final Class instrumentator = Class.forName("com.intellij.rt.coverage.instrumentation.Instrumentator", true, new URLClassLoader(urls));
+    final Class instrumentator = Class.forName("com.intellij.rt.coverage.instrumentation.Instrumentator", true, new URLClassLoader(urls) {
+      protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
+        final Class loadedClass = findLoadedClass(name);
+        if (loadedClass != null) {
+          if (resolve) {
+            resolveClass(loadedClass);
+          }
+          return loadedClass;
+        }
+
+        try {
+          final Class aClass = findClass(name);
+          if (aClass != null) {
+            if (resolve) {
+              resolveClass(aClass);
+            }
+            return aClass;
+          }
+        } catch (ClassNotFoundException e) {
+          //find it in parent
+        }
+        return super.loadClass(name, resolve);
+      }
+    });
     final Method premainMethod = instrumentator.getDeclaredMethod("premain", new Class[]{String.class, Instrumentation.class});
     premainMethod.invoke(null, new Object[] {argsString, instrumentation});
   }
