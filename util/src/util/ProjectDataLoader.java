@@ -14,7 +14,6 @@ import java.io.*;
 public class ProjectDataLoader {
 
   public static ProjectData load(File sessionDataFile) {
-    ErrorReporter.reportError("start loading: " + sessionDataFile.length());
     final ProjectData projectInfo = new ProjectData();
     DataInputStream in = null;
     try {
@@ -75,7 +74,7 @@ public class ProjectDataLoader {
       }
     }
     catch (IOException e) {
-      ErrorReporter.reportError("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath() + " size: " + sessionDataFile.length(), e);
+      ErrorReporter.reportError("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath(), e);
       return projectInfo;
     }
     finally {

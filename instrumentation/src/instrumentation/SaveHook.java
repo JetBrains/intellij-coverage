@@ -67,7 +67,6 @@ public class SaveHook implements Runnable {
           if (os != null) {
             os.close();
           }
-          ErrorReporter.reportError("Saved file size:" + myDataFile.length());
         }
         catch (IOException e) {
           ErrorReporter.reportError("Error writing file " + myDataFile.getPath(), e);
