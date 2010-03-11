@@ -118,8 +118,8 @@ public class SaveHook implements Runnable {
           classData.setLines(LinesUtil.calcLineArray(maxLine[0], lines));
         }
       }
-      catch (IOException e) {
-        // failed to read class
+      catch (Throwable e) {
+        ErrorReporter.reportError(e.getMessage(), e);
       }
     }
   }
