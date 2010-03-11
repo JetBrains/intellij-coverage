@@ -69,8 +69,8 @@ public class ProjectDataLoader {
               }
             }
           }
-          classInfo.setLines(LinesUtil.calcLineArray(maxLine, lines));
         }
+        classInfo.setLines(LinesUtil.calcLineArray(maxLine, lines));
       }
     }
     catch (IOException e) {
