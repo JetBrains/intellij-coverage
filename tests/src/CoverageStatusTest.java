@@ -31,11 +31,11 @@ public class CoverageStatusTest extends TestCase {
   public void testSimple() throws Exception {
     doTest("Simple", "1:NONE\n" +
             "3:FULL\n" +
-            "4:FULL\n" +
+            "4:PARTIAL\n" +
             "5:FULL\n" +
             "6:FULL\n" +
             "8:NONE\n" +
-            "11:FULL\n" +
+            "11:PARTIAL\n" +
             "13:FULL\n" +
             "14:FULL\n" +
             "16:NONE\n");
@@ -43,12 +43,12 @@ public class CoverageStatusTest extends TestCase {
 
   public void testStaticFieldInInterface() throws Exception {
     doTest("staticFieldInInterface", "1:FULL\n" +
-            "4:FULL\n" +
+            "4:PARTIAL\n" +
             "5:FULL\n" +
             "6:FULL\n" +
             "7:NONE\n" +
             "8:NONE\n" +
-            "11:FULL\n" +
+            "11:PARTIAL\n" +
             "13:NONE\n" +
             "14:NONE\n" +
             "16:FULL\n" +
@@ -74,8 +74,8 @@ public class CoverageStatusTest extends TestCase {
   public void testBranches() throws Exception {
     doTest("branches", "1:NONE\n" +
             "3:FULL\n" +
-            "4:FULL\n" +
-            "5:FULL\n" +
+            "4:PARTIAL\n" +
+            "5:PARTIAL\n" +
             "6:NONE\n");
   }
 
