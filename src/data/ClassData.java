@@ -40,6 +40,7 @@ public class ClassData implements CoverageData {
 
   private Map prepareSignaturesMap(DictionaryLookup dictionaryLookup) {
     final Map sigLines = new HashMap();
+    if (myLinesArray == null) return sigLines;
     for (int i = 0; i < myLinesArray.length; i++) {
       final LineData lineData = myLinesArray[i];
       if (lineData == null) continue;
