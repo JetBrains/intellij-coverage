@@ -4,7 +4,7 @@
   <property name="instrumenter.jar" value="${dist}/instrumenter.jar"/>
   <property name="src.dst" value="${dist}/coverage-src.zip"/>
   <property name="build.rt.classes.dir" value="${basedir}/out/production"/>
-  <target name="all" depends="test">
+  <target name="all">
     <delete dir="${coverage.data.jar}"/>
     <delete dir="${instrumenter.jar}"/>
     <mkdir dir="${dist}"/>
@@ -47,7 +47,7 @@
     <copy todir="${dist}" file="${basedir}/lib/asm-commons.jar"/>
     <copy todir="${dist}" file="${basedir}/lib/trove4j.jar"/>
   </target>
-  <target name="test" description="run tests">
+  <target name="test" description="run tests" depends="all">
     <junit fork="true" dir="${basedir}" failureproperty="junit.failed">
       <classpath>
         <fileset dir="${jdk15.home}">
