@@ -58,6 +58,7 @@
         <pathelement location="${basedir}\out\test\tests"/>
         <pathelement location="${basedir}\out\production\coverage"/>
         <pathelement location="${basedir}\out\production\util"/>
+        <pathelement location="${basedir}\lib\trove4j.jar"/>
       </classpath>
       <formatter type="plain" />
       <test name="com.intellij.rt.coverage.CoverageStatusTest"/>
