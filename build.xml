@@ -4,7 +4,7 @@
   <property name="instrumenter.jar" value="${dist}/instrumenter.jar"/>
   <property name="src.dst" value="${dist}/coverage-src.zip"/>
   <property name="build.rt.classes.dir" value="${basedir}/out/production"/>
-  <target name="all">
+  <target name="all" depends="test">
     <delete dir="${coverage.data.jar}"/>
     <delete dir="${instrumenter.jar}"/>
     <mkdir dir="${dist}"/>
@@ -46,6 +46,21 @@
     <copy todir="${dist}" file="${basedir}/lib/asm-tree-3.0.jar"/>
     <copy todir="${dist}" file="${basedir}/lib/asm-commons.jar"/>
     <copy todir="${dist}" file="${basedir}/lib/trove4j.jar"/>
+  </target>
+  <target name="test" description="run tests">
+    <junit fork="true" dir="${basedir}" failureproperty="junit.failed">
+      <classpath>
+        <fileset dir="${java.home}">
+          <include name="jre/lib/*.jar"/>
+          <include name="lib/tools.jar"/>
+        </fileset>
+        <pathelement location="${basedir}\tests\lib\junit.jar"/>
+        <pathelement location="${basedir}\out\test\tests"/>
+      </classpath>
+      <formatter type="plain" />
+      <test name="com.intellij.rt.coverage.CoverageStatusTest"/>
+    </junit>
+    <fail if="junit.failed"/>
   </target>
 </project>
 
