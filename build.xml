@@ -48,11 +48,9 @@
     <copy todir="${dist}" file="${basedir}/lib/trove4j.jar"/>
   </target>
   <target name="test" description="run tests">
-    <echo message="${java.home}"/>
-    <echo message="${jdk15.home}"/>
     <junit fork="true" dir="${basedir}" failureproperty="junit.failed">
       <classpath>
-        <fileset dir="${java.home}">
+        <fileset dir="${jdk15.home}">
           <include name="jre/lib/*.jar"/>
           <include name="lib/tools.jar"/>
         </fileset>
