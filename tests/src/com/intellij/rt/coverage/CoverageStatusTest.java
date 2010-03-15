@@ -82,12 +82,13 @@ public class CoverageStatusTest extends TestCase {
   private void doTest(final String className, String expected) throws Exception {
     final String testDataPath = new File("").getAbsolutePath() + File.separator + "tests" + File.separator + "testData" + File.separator + "coverage" + File.separator + className;
 
+    myDataFile = new File(testDataPath +File.separator+ "Test.ic");
+
     Main.compile(new String[]{testDataPath + File.separator + "Test.java"});
 
-    myDataFile = new File(testDataPath +File.separator+ "Test.ic");
     myClassFile = new File(testDataPath +File.separator + "Test.class");
 
-    final String exePath = System.getenv("JDK_HOME") + File.separator + "bin" + File.separator + "java";
+    final String exePath = System.getenv("JAVA_HOME") + File.separator + "bin" + File.separator + "java";
     final String coverageAgentPath = new File("").getAbsolutePath() + File.separator + "dist" + File.separator + "coverage-agent.jar";
     final Process process = Runtime.getRuntime().exec(new String[]{
             exePath,
