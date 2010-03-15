@@ -49,6 +49,7 @@
   </target>
   <target name="test" description="run tests">
     <echo message="${java.home}"/>
+    <echo message="${JDK_15}"/>
     <junit fork="true" dir="${basedir}" failureproperty="junit.failed">
       <classpath>
         <fileset dir="${java.home}">
