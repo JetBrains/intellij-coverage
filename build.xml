@@ -56,6 +56,8 @@
         </fileset>
         <pathelement location="${basedir}\tests\lib\junit.jar"/>
         <pathelement location="${basedir}\out\test\tests"/>
+        <pathelement location="${basedir}\out\production\coverage"/>
+        <pathelement location="${basedir}\out\production\util"/>
       </classpath>
       <formatter type="plain" />
       <test name="com.intellij.rt.coverage.CoverageStatusTest"/>
