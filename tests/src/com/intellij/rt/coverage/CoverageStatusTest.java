@@ -84,11 +84,7 @@ public class CoverageStatusTest extends TestCase {
 
     myDataFile = new File(testDataPath +File.separator+ "Test.ic");
 
-    try {
-      Main.compile(new String[]{testDataPath + File.separator + "Test.java"});
-    } catch (Throwable e) {
-      e.printStackTrace();
-    }
+    Main.compile(new String[]{testDataPath + File.separator + "Test.java"});
 
     myClassFile = new File(testDataPath +File.separator + "Test.class");
 
