@@ -29,7 +29,7 @@ public class CoverageStatusTest extends TestCase {
   }
 
   public void testSimple() throws Exception {
-    doTest("Simple", "1:NONE\n" +
+    doTest("simple", "1:NONE\n" +
             "3:FULL\n" +
             "4:PARTIAL\n" +
             "5:FULL\n" +
