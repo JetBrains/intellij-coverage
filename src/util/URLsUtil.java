@@ -5,7 +5,10 @@
 package com.intellij.rt.coverage.util;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class URLsUtil {
   public static final String FILE = "file";
@@ -52,7 +55,7 @@ return s != null && s.length() != 0 && s.charAt(0) == prefix;
     if (resourcePath.endsWith(File.separator)) {
       resultPath = resultPath.substring(0, resultPath.lastIndexOf(File.separator));
     }
-
+    resultPath = unescapePercentSequences(resultPath);
    return resultPath;
  }
 
@@ -68,4 +71,56 @@ return s != null && s.length() != 0 && s.charAt(0) == prefix;
    final int suffixLength = suffix.length();
    return stringLength >= suffixLength && str.regionMatches(true, stringLength - suffixLength, suffix, 0, suffixLength);
  }
+
+  public static String unescapePercentSequences(String s) {
+    if (s.indexOf('%') == -1) {
+      return s;
+    }
+
+    StringBuilder decoded = new StringBuilder();
+    final int len = s.length();
+    int i = 0;
+    while (i < len) {
+      char c = s.charAt(i);
+      if (c == '%') {
+        List bytes = new ArrayList();
+        while (i + 2 < len && s.charAt(i) == '%') {
+          final int d1 = decode(s.charAt(i + 1));
+          final int d2 = decode(s.charAt(i + 2));
+          if (d1 != -1 && d2 != -1) {
+            bytes.add(new Integer(((d1 & 0xf) << 4 | d2 & 0xf)));
+            i += 3;
+          } else {
+            break;
+          }
+        }
+        if (!bytes.isEmpty()) {
+          final byte[] bytesArray = new byte[bytes.size()];
+          for (int j = 0; j < bytes.size(); j++) {
+            bytesArray[j] = (byte) ((Integer) bytes.get(j)).intValue();
+          }
+          try {
+            decoded.append(new String(bytesArray, "UTF-8"));
+            continue;
+          }
+          catch (UnsupportedEncodingException ignored) {
+          }
+        }
+      }
+
+      decoded.append(c);
+      i++;
+    }
+    return decoded.toString();
+  }
+
+  private static int decode(char c) {
+    if ((c >= '0') && (c <= '9'))
+      return c - '0';
+    if ((c >= 'a') && (c <= 'f'))
+      return c - 'a' + 10;
+    if ((c >= 'A') && (c <= 'F'))
+      return c - 'A' + 10;
+    return -1;
+  }
 }
