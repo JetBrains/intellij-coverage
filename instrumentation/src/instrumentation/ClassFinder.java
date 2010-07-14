@@ -49,7 +49,7 @@ public class ClassFinder {
     return classes;
   }
 
-  private Collection getClassPathEntries() {
+  protected Collection getClassPathEntries() {
     Set result = new HashSet();
 
     result.addAll(extractEntries(System.getProperty("java.class.path")));
