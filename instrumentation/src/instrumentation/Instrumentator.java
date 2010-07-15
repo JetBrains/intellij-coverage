@@ -83,10 +83,7 @@ public class Instrumentator {
           //and do not instrument packages which are used during instrumented method invocation
           //(inside methods touch, save, etc from ProjectData)
           if (className.startsWith("com.intellij.rt")
-           || className.startsWith("java.lang")
-           || className.startsWith("java.util")
-           || className.startsWith("java.io")
-           || className.startsWith("java.text")
+           || className.startsWith("java.")
            || className.startsWith("gnu.trove")
            || className.startsWith("org.objectweb.asm")
            || className.startsWith("org.apache.oro.text.regex")) {
