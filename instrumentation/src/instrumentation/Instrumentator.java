@@ -84,6 +84,7 @@ public class Instrumentator {
           //(inside methods touch, save, etc from ProjectData)
           if (className.startsWith("com.intellij.rt")
            || className.startsWith("java.")
+           || className.startsWith("sun.")
            || className.startsWith("gnu.trove")
            || className.startsWith("org.objectweb.asm")
            || className.startsWith("org.apache.oro.text.regex")) {
