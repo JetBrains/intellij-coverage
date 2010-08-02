@@ -2,6 +2,7 @@
   <property name="dist" value="${basedir}/dist"/>
   <property name="coverage.data.jar" value="${dist}/coverage-agent.jar"/>
   <property name="instrumenter.jar" value="${dist}/instrumenter.jar"/>
+  <property name="util.jar" value="${dist}/coverage-util.jar"/>
   <property name="src.dst" value="${dist}/coverage-src.zip"/>
   <property name="build.rt.classes.dir" value="${basedir}/out/production"/>
   <target name="all">
@@ -21,6 +22,9 @@
     </jar>
     <jar destfile="${instrumenter.jar}">
       <fileset dir="${build.rt.classes.dir}/instrumentation" includes="com/intellij/rt/coverage/instrumentation/**"/>
+      <fileset dir="${build.rt.classes.dir}/util" includes="com/intellij/rt/coverage/util/**"/>
+    </jar>
+    <jar destfile="${util.jar}">
       <fileset dir="${build.rt.classes.dir}/util" includes="com/intellij/rt/coverage/util/**"/>
     </jar>
 

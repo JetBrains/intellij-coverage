@@ -1,4 +1,4 @@
-package com.intellij.rt.coverage.instrumentation;
+package com.intellij.rt.coverage.util.classFinder;
 
 import com.intellij.rt.coverage.util.ClassNameUtil;
 

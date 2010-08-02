@@ -1,4 +1,4 @@
-package com.intellij.rt.coverage.instrumentation;
+package com.intellij.rt.coverage.util.classFinder;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

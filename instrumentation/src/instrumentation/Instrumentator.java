@@ -1,5 +1,6 @@
 package com.intellij.rt.coverage.instrumentation;
 
+import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.ClassNameUtil;
