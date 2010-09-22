@@ -45,7 +45,7 @@ public class Instrumentator {
     }
     final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling);
     final List includePatterns = new ArrayList();
-    System.out.println("---- IDEA coverage runner ---- ");
+    System.out.println("---- IntelliJ IDEA coverage runner ---- ");
     System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
     final String excludes = "-exclude";
     int i = 5;
