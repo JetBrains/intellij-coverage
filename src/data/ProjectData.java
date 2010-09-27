@@ -7,6 +7,7 @@ import com.intellij.rt.coverage.util.ErrorReporter;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -22,34 +23,25 @@ public class ProjectData implements CoverageData, Serializable {
   private static final MethodCaller TRACE_LINE_METHOD = new MethodCaller("traceLine", new Class[]{Object.class, int.class});
 
   public static ProjectData ourProjectData;
-
   private File myDataFile;
-  private final Map myClasses = new HashMap(1000);
 
   /** @noinspection UnusedDeclaration*/
   private String myCurrentTestName;
-
   private boolean myTraceLines;
   private boolean mySampling;
   private Map myTrace;
   private File myTracesDir;
+
+  private ClassesMap myClasses = new ClassesMap();
+
   private static Object ourProjectDataObject;
 
-  private LastClassData myLastClassData;
-
   public ClassData getClassData(final String name) {
-    final LastClassData lastClassData = myLastClassData;
-    if (lastClassData != null) {
-      final ClassData data = lastClassData.getClassData(name);
-      if (data != null) return data;
-    }
-    final ClassData data = (ClassData) myClasses.get(name);
-    myLastClassData = new LastClassData(name, data);
-    return data;
+    return myClasses.get(name);
   }
 
   public ClassData getOrCreateClassData(String name) {
-    ClassData classData = (ClassData) myClasses.get(name);
+    ClassData classData = myClasses.get(name);
     if (classData == null) {
       classData = new ClassData(name);
       myClasses.put(name, classData);
@@ -79,7 +71,7 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public void save(DataOutputStream os, DictionaryLookup dictionaryLookup) throws IOException {
-    final HashMap classes = new HashMap(myClasses);
+    final HashMap classes = myClasses.asMap();
     for (Iterator it = classes.values().iterator(); it.hasNext();) {
       ((ClassData)it.next()).save(os, dictionaryLookup);
     }
@@ -87,10 +79,10 @@ public class ProjectData implements CoverageData, Serializable {
 
   public void merge(final CoverageData data) {
     final ProjectData projectData = (ProjectData)data;
-    for (Iterator iter = projectData.myClasses.keySet().iterator(); iter.hasNext();) {
-      final Object key = iter.next();
-      final ClassData mergedData = (ClassData)projectData.myClasses.get(key);
-      final ClassData classData = (ClassData)myClasses.get(key);
+    for (Iterator iter = projectData.myClasses.names().iterator(); iter.hasNext();) {
+      final String key = (String) iter.next();
+      final ClassData mergedData = projectData.myClasses.get(key);
+      final ClassData classData = myClasses.get(key);
       if (classData != null) {
         classData.merge(mergedData);
       }
@@ -175,7 +167,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   /** @noinspection UnusedDeclaration*/
   public Map getClasses() {
-    return myClasses;
+    return myClasses.asMap();
   }
 
 
@@ -284,23 +276,6 @@ public class ProjectData implements CoverageData, Serializable {
   }
   // ----------------------------------------------------------------------------------------------- //
 
-  private static class LastClassData {
-    private String myClassName;
-    private ClassData myClassData;
-
-    private LastClassData(String className, ClassData classData) {
-      myClassName = className;
-      myClassData = classData;
-    }
-
-    public ClassData getClassData(String name) {
-      if (name == myClassName) {
-        return myClassData;
-      }
-      return null;
-    }
-  }
-
   private static class MethodCaller {
     private Method myMethod;
     private String myMethodName;
@@ -323,6 +298,60 @@ public class ProjectData implements CoverageData, Serializable {
       // speedup method invocation by calling setAccessible(true)
       m.setAccessible(true);
       return m;
+    }
+  }
+
+  /**
+   * This map provides faster read operations for the case when key is mostly the same
+   * object. In our case key is the class name which is the same string with high probability.
+   * According to CPU snapshots with usual map we spend a lot of time on equals() operation.
+   * This class was introduced to reduce number of equals().
+   */
+  private static class ClassesMap {
+    private static final int POOL_SIZE = 1000;
+    private IdentityClassData[] myIdentityArray = new IdentityClassData[POOL_SIZE];
+    private final Map myClasses = new HashMap(1000);
+
+    public ClassData get(String name) {
+      int idx = Math.abs(name.hashCode() % POOL_SIZE);
+      final IdentityClassData lastClassData = myIdentityArray[idx];
+      if (lastClassData != null) {
+        final ClassData data = lastClassData.getClassData(name);
+        if (data != null) return data;
+      }
+
+      final ClassData data = (ClassData) myClasses.get(name);
+      myIdentityArray[idx] = new IdentityClassData(name, data);
+      return data;
+    }
+
+    public void put(String name, ClassData data) {
+      myClasses.put(name, data);
+    }
+
+    public HashMap asMap() {
+      return new HashMap(myClasses);
+    }
+
+    public Collection names() {
+      return myClasses.keySet();
+    }
+  }
+
+  private static class IdentityClassData {
+    private String myClassName;
+    private ClassData myClassData;
+
+    private IdentityClassData(String className, ClassData classData) {
+      myClassName = className;
+      myClassData = classData;
+    }
+
+    public ClassData getClassData(String name) {
+      if (name == myClassName) {
+        return myClassData;
+      }
+      return null;
     }
   }
 
