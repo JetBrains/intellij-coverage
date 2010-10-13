@@ -56,6 +56,7 @@ public class Instrumentator {
       System.out.println(args[i]);
     }
     System.out.println("exclude patterns:");
+    i++;
     final List excludePatterns = new ArrayList();
     for (; i < args.length; i++) {
       excludePatterns.add(Pattern.compile(args[i]));
