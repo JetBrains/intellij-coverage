@@ -26,15 +26,19 @@ import java.util.regex.Pattern;
 public class Instrumentator {
 
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
-    String[] args = tokenize(argsString);
-    if (args.length == 1) {
+    String[] args;
+    File argsFile = new File(argsString);
+    if (argsFile.isFile()) {
       try {
-        args = readArgsFromFile(args[0]);
+        args = readArgsFromFile(argsString);
       } catch (IOException e) {
         ErrorReporter.reportError("Arguments were not passed correctly", e);
         return;
       }
+    } else {
+      args = tokenize(argsString);
     }
+
     final boolean traceLines = Boolean.valueOf(args[1]).booleanValue();
     final boolean sampling = Boolean.valueOf(args[4]).booleanValue();
     final File dataFile = new File(args[0]);
