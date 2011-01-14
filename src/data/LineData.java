@@ -39,7 +39,7 @@ public class LineData implements CoverageData {
     return myJumpsAndSwitches;
   }
 
-  public byte getStatus() {
+  public int getStatus() {
     if (myStatus != -1) return myStatus;
     if (myHits == 0) {
       myStatus = LineCoverage.NONE;
@@ -104,7 +104,7 @@ public class LineData implements CoverageData {
       myMethodSignature = lineData.myMethodSignature;
     }
     if (myStatus != -1) {
-      byte status = lineData.getStatus();
+      byte status = (byte) lineData.getStatus();
       if (status > myStatus) {
         myStatus = status;
       }
