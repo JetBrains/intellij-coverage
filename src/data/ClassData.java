@@ -60,24 +60,30 @@ public class ClassData implements CoverageData {
 
   public void merge(final CoverageData data) {
     mergeLines(((ClassData)data).myLinesArray);
+    final Iterator iterator = getMethodSigs().iterator();
+    while (iterator.hasNext()) {
+      myStatus.put(iterator.next(), null);
+    }
   }
 
   private void mergeLines(LineData[] dLines) {
-    if (myLinesArray.length < dLines.length) {
+    if (myLinesArray == null || myLinesArray.length < dLines.length) {
       LineData[] lines = new LineData[dLines.length];
-      System.arraycopy(myLinesArray, 0, lines, 0, myLinesArray.length);
+      if (myLinesArray != null) {
+        System.arraycopy(myLinesArray, 0, lines, 0, myLinesArray.length);
+      }
       myLinesArray = lines;
     }
     for (int i = 0; i < dLines.length; i++) {
       final LineData mergedData = dLines[i];
       if (mergedData == null) continue;
-      final LineData lineData = myLinesArray[i];
-      if (lineData != null) {
-        lineData.merge(mergedData);
+      LineData lineData = myLinesArray[i];
+      if (lineData == null) {
+        lineData = new LineData(mergedData.getLineNumber(), mergedData.getMethodSignature());
+        registerMethodSignature(lineData);
+        myLinesArray[i] = lineData;
       }
-      else {
-        myLinesArray[i] = mergedData;
-      }
+      lineData.merge(mergedData);
     }
   }
 

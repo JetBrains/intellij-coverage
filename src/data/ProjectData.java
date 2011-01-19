@@ -82,13 +82,12 @@ public class ProjectData implements CoverageData, Serializable {
     for (Iterator iter = projectData.myClasses.names().iterator(); iter.hasNext();) {
       final String key = (String) iter.next();
       final ClassData mergedData = projectData.myClasses.get(key);
-      final ClassData classData = myClasses.get(key);
-      if (classData != null) {
-        classData.merge(mergedData);
+      ClassData classData = myClasses.get(key);
+      if (classData == null) {
+        classData = new ClassData(mergedData.getName());
+        myClasses.put(key, classData);
       }
-      else {
-        myClasses.put(key, mergedData);
-      }
+      classData.merge(mergedData);
     }
   }
 

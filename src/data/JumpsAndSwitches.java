@@ -108,7 +108,7 @@ public class JumpsAndSwitches implements CoverageData {
           System.arraycopy(myJumpsArray, 0, extJumpsArray, 0, myJumpsArray.length);
           myJumpsArray = extJumpsArray;
         }
-        mergeArrays(myJumpsArray, jumpsData.myJumpsArray);
+        mergeJumps(myJumpsArray, jumpsData.myJumpsArray);
       }
     }
     if (jumpsData.mySwitchesArray != null) {
@@ -121,18 +121,30 @@ public class JumpsAndSwitches implements CoverageData {
           System.arraycopy(mySwitchesArray, 0, extJumpsArray, 0, mySwitchesArray.length);
           mySwitchesArray = extJumpsArray;
         }
-        mergeArrays(mySwitchesArray, jumpsData.mySwitchesArray);
+        mergeSwitches(mySwitchesArray, jumpsData.mySwitchesArray);
       }
     }
   }
 
-  private static void mergeArrays(CoverageData[] myArray, CoverageData[] array) {
+  private static void mergeSwitches(SwitchData[] myArray, SwitchData[] array) {
     for (int i = 0; i < array.length; i++) {
-      if (myArray[i] == null) {
-        myArray[i] = array[i];
-      } else {
-        myArray[i].merge(array[i]);
+      SwitchData switchData = myArray[i];
+      if (switchData == null) {
+        if (array[i] == null) continue;
+        switchData = new SwitchData(array[i].getKeys());
       }
+      switchData.merge(array[i]);
+    }
+  }
+
+  private static void mergeJumps(JumpData[] myArray, JumpData[] array) {
+    for (int i = 0; i < array.length; i++) {
+      JumpData switchData = myArray[i];
+      if (switchData == null) {
+        if (array[i] == null) continue;
+        switchData = new JumpData();
+      }
+      switchData.merge(array[i]);
     }
   }
 }
