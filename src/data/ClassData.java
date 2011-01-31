@@ -147,7 +147,7 @@ public class ClassData implements CoverageData {
     if (methodStatus == null) {
       for (int i = 0; i < myLinesArray.length; i++) {
         final LineData lineData = myLinesArray[i];
-        if (lineData != null && lineData.getMethodSignature().equals(methodSignature)) {
+        if (lineData != null && methodSignature.equals(lineData.getMethodSignature())) {
           if (lineData.getStatus() != LineCoverage.NONE) {
             methodStatus = new Integer(LineCoverage.PARTIAL);
             break;
