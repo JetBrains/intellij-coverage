@@ -70,6 +70,43 @@ public class CoverageMergeTest extends TestCase {
                 "7:FULL\n");
     }
 
+    public void testJumps() throws Exception {
+        doTest("jumps",
+                //Test1
+                "1:NONE\n" +
+                "3:FULL\n" +
+                "4:FULL\n" +
+                 //Common
+                "1:FULL\n" +
+                "3:PARTIAL\n" +
+                "4:NONE\n" +
+                "6:FULL\n",
+
+                //Test2
+                "1:NONE\n" +
+                "3:FULL\n" +
+                "4:FULL\n" +
+                //Common
+                "1:FULL\n" +
+                "3:PARTIAL\n" +
+                "4:FULL\n" +
+                "6:NONE\n",
+
+                //Test1
+                "1:NONE\n" +
+                "3:FULL\n" +
+                "4:FULL\n" +
+                 //Test2
+                "1:NONE\n" +
+                "3:FULL\n" +
+                "4:FULL\n" +
+                 //Common
+                "1:FULL\n" +
+                "3:FULL\n" +
+                "4:FULL\n" +
+                "6:FULL\n");
+    }
+
     private ProjectData prepareData(String number, String testName) throws Exception {
         final String testDataPath = getTestDataPath(testName);
         String className = "Test" + number;

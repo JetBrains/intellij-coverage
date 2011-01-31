@@ -100,7 +100,7 @@ public class JumpsAndSwitches implements CoverageData {
     JumpsAndSwitches jumpsData = (JumpsAndSwitches)data;
     if (jumpsData.myJumpsArray != null) {
       if (myJumpsArray == null) {
-        myJumpsArray = jumpsData.myJumpsArray;
+        myJumpsArray = new JumpData[jumpsData.myJumpsArray.length];
       }
       else if (jumpsData.myJumpsArray != null) {
         if (myJumpsArray.length < jumpsData.myJumpsArray.length) {
@@ -108,12 +108,12 @@ public class JumpsAndSwitches implements CoverageData {
           System.arraycopy(myJumpsArray, 0, extJumpsArray, 0, myJumpsArray.length);
           myJumpsArray = extJumpsArray;
         }
-        mergeJumps(myJumpsArray, jumpsData.myJumpsArray);
       }
+      mergeJumps(myJumpsArray, jumpsData.myJumpsArray);
     }
     if (jumpsData.mySwitchesArray != null) {
       if (mySwitchesArray == null) {
-        mySwitchesArray = jumpsData.mySwitchesArray;
+        mySwitchesArray = new SwitchData[jumpsData.mySwitchesArray.length];
       }
       else if (jumpsData.mySwitchesArray != null) {
         if (mySwitchesArray.length < jumpsData.mySwitchesArray.length) {
@@ -121,8 +121,8 @@ public class JumpsAndSwitches implements CoverageData {
           System.arraycopy(mySwitchesArray, 0, extJumpsArray, 0, mySwitchesArray.length);
           mySwitchesArray = extJumpsArray;
         }
-        mergeSwitches(mySwitchesArray, jumpsData.mySwitchesArray);
       }
+      mergeSwitches(mySwitchesArray, jumpsData.mySwitchesArray);
     }
   }
 
@@ -132,6 +132,7 @@ public class JumpsAndSwitches implements CoverageData {
       if (switchData == null) {
         if (array[i] == null) continue;
         switchData = new SwitchData(array[i].getKeys());
+        myArray[i] = switchData;
       }
       switchData.merge(array[i]);
     }
@@ -143,6 +144,7 @@ public class JumpsAndSwitches implements CoverageData {
       if (switchData == null) {
         if (array[i] == null) continue;
         switchData = new JumpData();
+        myArray[i] = switchData;
       }
       switchData.merge(array[i]);
     }
