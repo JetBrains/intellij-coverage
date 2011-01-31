@@ -91,7 +91,13 @@ public class ProjectDataLoader {
   private static String expand(DataInputStream in, final TIntObjectHashMap dict) throws IOException {
     return CoverageIOUtil.processWithDictionary(CoverageIOUtil.readUTFFast(in), new CoverageIOUtil.Consumer() {
       protected String consume(String type) {
-        return ((ClassData) dict.get(Integer.parseInt(type))).getName();
+          final int typeIdx;
+          try {
+            typeIdx = Integer.parseInt(type);
+          } catch (NumberFormatException e) {
+            return type;
+          }
+          return ((ClassData) dict.get(typeIdx)).getName();
       }
     });
   }

@@ -156,7 +156,8 @@ public class CoverageIOUtil {
   public static String collapse(String methodSignature, final DictionaryLookup dictionaryLookup) {
     return processWithDictionary(methodSignature, new Consumer() {
       protected String consume(String type) {
-        return String.valueOf(dictionaryLookup.getDictionaryIndex(type));
+          final int dictionaryIndex = dictionaryLookup.getDictionaryIndex(type);
+          return dictionaryIndex >= 0 ? String.valueOf(dictionaryIndex) : type;
       }
     });
   }

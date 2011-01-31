@@ -56,7 +56,7 @@ public class SaveHook implements Runnable {
                 saveDictionary(os, dict, classes);
                 projectData.save(os, new DictionaryLookup() {
                     public int getDictionaryIndex(String className) {
-                        return dict.get(className);
+                        return dict.containsKey(className) ? dict.get(className) : -1;
                     }
                 });
             } catch (IOException e) {
