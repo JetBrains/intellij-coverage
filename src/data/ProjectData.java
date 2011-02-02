@@ -268,6 +268,7 @@ public class ProjectData implements CoverageData, Serializable {
           boolean[] longLines = new boolean[line + 20];
           System.arraycopy(lines, 0, longLines, 0, lines.length);
           lines = longLines;
+          myTrace.put(classData, lines);
         }
         lines[line] = true;
       }
