@@ -59,8 +59,6 @@ public class SwitchData implements CoverageData {
       myHits = new int[switchData.myHits.length];
       System.arraycopy(old, 0, myHits, 0, old.length);
       System.arraycopy(switchData.myHits, old.length, myHits, old.length, myHits.length - old.length);
-    }
-    if ((myKeys.length == 0) && (switchData.myKeys.length > 0)) {
       myKeys = switchData.myKeys;
     }
   }
