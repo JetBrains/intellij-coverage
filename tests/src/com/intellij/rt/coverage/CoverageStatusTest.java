@@ -92,6 +92,7 @@ public class CoverageStatusTest extends TestCase {
 
     final String exePath = System.getenv("JAVA_HOME") + File.separator + "bin" + File.separator + "java";
     final String coverageAgentPath = new File("").getAbsolutePath() + File.separator + "dist" + File.separator + "coverage-agent.jar";
+    System.out.println(coverageAgentPath);
     final Process process = Runtime.getRuntime().exec(new String[]{
             exePath,
             "-javaagent:" + coverageAgentPath + "=\"" + myDataFile.getPath() + "\" false false false false Test(\\$.*)*",
