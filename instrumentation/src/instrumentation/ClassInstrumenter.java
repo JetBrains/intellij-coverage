@@ -7,8 +7,8 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
 public class ClassInstrumenter extends Instrumenter {
-  public ClassInstrumenter(final ProjectData projectData, ClassVisitor classVisitor) {
-    super(projectData, classVisitor);
+  public ClassInstrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className) {
+    super(projectData, classVisitor, className);
   }
 
   protected MethodVisitor createMethodLineEnumerator(MethodVisitor mv, String name, String desc, int access, String signature,
@@ -24,7 +24,4 @@ public class ClassInstrumenter extends Instrumenter {
     return (LineData) myLines.get(line);
   }
 
-  public String getClassName() {
-    return myClassData.getName();
-  }
 }

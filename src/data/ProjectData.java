@@ -33,6 +33,7 @@ public class ProjectData implements CoverageData, Serializable {
   private File myTracesDir;
 
   private ClassesMap myClasses = new ClassesMap();
+  private Map myLinesMap;
 
   private static Object ourProjectDataObject;
 
@@ -89,6 +90,40 @@ public class ProjectData implements CoverageData, Serializable {
       }
       classData.merge(mergedData);
     }
+  }
+
+  public void checkLineMappings() {
+    if (myLinesMap != null) {
+      for (Iterator iterator = myLinesMap.keySet().iterator(); iterator.hasNext(); ) {
+        final String className = (String) iterator.next();
+        final ClassData classData = getClassData(className);
+        final FileMapData[] fileData = (FileMapData[]) myLinesMap.get(className);
+        //postpone process main file because its lines would be reset and next files won't be processed correctly
+        FileMapData mainData = null;
+        for (int i = 0; i < fileData.length; i++) {
+          final String fileName = fileData[i].getClassName();
+          if (fileName.equals(className)) {
+            mainData = fileData[i];
+            continue;
+          }
+          final ClassData classInfo = getOrCreateClassData(fileName);
+          classInfo.checkLineMappings(fileData[i].getLines(), classData);
+        }
+
+        if (mainData != null) {
+          classData.checkLineMappings(mainData.getLines(), classData);
+        } else {
+          ErrorReporter.reportError("Class data was not extracted: " + className, new Throwable());
+        }
+      }
+    }
+  }
+
+  public void addLineMaps(String className, FileMapData[] fileDatas) {
+    if (myLinesMap == null) {
+      myLinesMap = new HashMap();
+    }
+    myLinesMap.put(className, fileDatas);
   }
 
  // --------------- used from listeners --------------------- //

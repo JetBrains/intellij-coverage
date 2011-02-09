@@ -18,6 +18,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="module" module-name="instrumentation" />
   </component>
 </module>
 

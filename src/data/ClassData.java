@@ -67,6 +67,7 @@ public class ClassData implements CoverageData {
   }
 
   private void mergeLines(LineData[] dLines) {
+    if (dLines == null) return;
     if (myLinesArray == null || myLinesArray.length < dLines.length) {
       LineData[] lines = new LineData[dLines.length];
       if (myLinesArray != null) {
@@ -197,4 +198,38 @@ public class ClassData implements CoverageData {
       mergeLines(lines);
     }
   }
+
+  public void checkLineMappings(LineMapData[] linesMap, ClassData classData) {
+    if (linesMap != null) {
+      LineData[] result = new LineData[linesMap.length];
+      for (int i = 0, linesMapLength = linesMap.length; i < linesMapLength; i++) {
+        final LineMapData mapData = linesMap[i];
+        if (mapData != null) {
+          result[mapData.getSourceLineNumber()] = classData.createSourceLineData(mapData);
+        }
+      }
+      myLinesArray = result;
+      myLineMask = null;
+    }
+  }
+
+  private LineData createSourceLineData(LineMapData lineMapData) {
+    for (int i = lineMapData.getTargetMinLine(); i <= lineMapData.getTargetMaxLine(); i++) {
+      final LineData targetLineData = getLineData(i);
+      if (targetLineData != null) { //todo ??? show info according to one target line
+
+        final LineData lineData = new LineData(lineMapData.getSourceLineNumber(), targetLineData.getMethodSignature());
+
+        lineData.merge(targetLineData);
+        if (myLineMask != null) {
+          lineData.setHits(myLineMask[i]);
+        }
+
+        return lineData;
+
+      }
+    }
+    return null;
+  }
+
 }

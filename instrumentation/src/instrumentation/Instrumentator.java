@@ -105,11 +105,11 @@ public class Instrumentator {
 
           cf.addClassLoader(loader);
           if (includePatterns.isEmpty() && loader != null) {
-            return instrument(classfileBuffer, data);
+            return instrument(classfileBuffer, data, className);
           }
           for (Iterator it = includePatterns.iterator(); it.hasNext();) {
             if (((Pattern)it.next()).matcher(className).matches()) {
-              return instrument(classfileBuffer, data);
+              return instrument(classfileBuffer, data, className);
             }
           }
         }
@@ -135,10 +135,10 @@ public class Instrumentator {
     return (String[]) result.toArray(new String[result.size()]);
   }
 
-  private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data) {
+  private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data, String className) {
     final ClassReader cr = new ClassReader(classfileBuffer);
     final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-    final ClassAdapter cv = data.isSampling() ? (ClassAdapter)new SamplingInstrumenter(data, cw) : new ClassInstrumenter(data, cw);
+    final ClassAdapter cv = data.isSampling() ? (ClassAdapter)new SamplingInstrumenter(data, cw, className) : new ClassInstrumenter(data, cw, className);
     cr.accept(cv, 0);
     return cw.toByteArray();
   }

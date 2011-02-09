@@ -8,8 +8,8 @@ import org.objectweb.asm.*;
 public class SamplingInstrumenter extends Instrumenter {
   private static final String OBJECT_TYPE = "Ljava/lang/Object;";
 
-  public SamplingInstrumenter(final ProjectData projectData, ClassVisitor classVisitor) {
-    super(projectData, classVisitor);
+  public SamplingInstrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className) {
+    super(projectData, classVisitor, className);
   }
 
   protected MethodVisitor createMethodLineEnumerator(final MethodVisitor mv,
@@ -45,7 +45,7 @@ public class SamplingInstrumenter extends Instrumenter {
       }
 
       public void visitCode() {
-        mv.visitLdcInsn(myClassData.getName());
+        mv.visitLdcInsn(getClassName());
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)" + OBJECT_TYPE);
         mv.visitVarInsn(Opcodes.ASTORE, getCurrentClassDataNumber());
         super.visitCode();

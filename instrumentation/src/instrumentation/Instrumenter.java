@@ -4,6 +4,7 @@ import com.intellij.rt.coverage.util.StringsPool;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import gnu.trove.THashSet;
 import gnu.trove.TIntObjectHashMap;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
@@ -13,6 +14,7 @@ import org.objectweb.asm.Opcodes;
 public abstract class Instrumenter extends ClassAdapter {
   protected final ProjectData myProjectData;
   protected final ClassVisitor myClassVisitor;
+  private final String myClassName;
 
   protected TIntObjectHashMap myLines = new TIntObjectHashMap(4, 0.99f);
   protected int myMaxLineNumber;
@@ -21,18 +23,18 @@ public abstract class Instrumenter extends ClassAdapter {
   protected boolean myProcess;
   private boolean myEnum;
 
-  public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor) {
+  public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className) {
     super(classVisitor);
     myProjectData = projectData;
     myClassVisitor = classVisitor;
+    myClassName = className;
   }
 
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-    final String className = name.replace('/', '.');
     if ((access & Opcodes.ACC_INTERFACE) == 0) {
       myProcess = true;
       myEnum = (access & Opcodes.ACC_ENUM) != 0;
-      myClassData = myProjectData.getOrCreateClassData(StringsPool.getFromPool(className));
+      myClassData = myProjectData.getOrCreateClassData(StringsPool.getFromPool(myClassName));
     }
     super.visit(version, access, name, signature, superName, interfaces);
   }
@@ -46,9 +48,8 @@ public abstract class Instrumenter extends ClassAdapter {
     final MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
     if (!myProcess || mv == null) return mv;
     if (myEnum) {
-      final String className = myClassData.getName().replace('.', '/');
-      if (name.equals("values") && desc.equals("()[L" + className + ";")) return mv;
-      if (name.equals("valueOf") && desc.equals("(Ljava/lang/String;)L" + className + ";")) return mv;
+      if (name.equals("values") && desc.equals("()[L" + myClassName + ";")) return mv;
+      if (name.equals("valueOf") && desc.equals("(Ljava/lang/String;)L" + myClassName + ";")) return mv;
       if (name.equals("<init>") && signature != null && signature.equals("()V")) return mv;
     }
     return createMethodLineEnumerator(mv, name, desc, access, signature, exceptions);
@@ -79,5 +80,16 @@ public abstract class Instrumenter extends ClassAdapter {
 
   public void removeLine(final int line) {
     myLines.remove(line);
+  }
+
+  public void visitSource(String source, String debug) {
+    super.visitSource(source, debug);
+    if (debug != null) {
+      myProjectData.addLineMaps(myClassName, JSR45Util.extractLineMapping(debug, myClassName));
+    }
+  }
+
+  public String getClassName() {
+    return myClassName;
   }
 }
