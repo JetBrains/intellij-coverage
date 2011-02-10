@@ -55,4 +55,16 @@ public class SMAPParsingTest extends TestCase {
     }
   }
 
+  public void testRelativePath() {
+    final String fileName1 = "view/../greeting.jsp";
+    Assert.assertEquals("greeting.jsp", JSR45Util.processRelative(fileName1));
+
+    final String fileName2 = "view/greeting.jsp";
+    Assert.assertEquals("view/greeting.jsp", JSR45Util.processRelative(fileName2));
+
+    final String fileName3 = "greeting.jsp";
+    Assert.assertEquals("greeting.jsp", JSR45Util.processRelative(fileName3));
+
+  }
+
 }

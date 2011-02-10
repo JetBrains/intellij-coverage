@@ -96,10 +96,33 @@ public class JSR45Util {
     for (int i = 0; i < fileNameIdx.length; i++) {
       String fileName = fileNameIdx[i];
       if (fileName.startsWith("+")) continue;
-      final int lastDot = fileName.lastIndexOf(".");
-      result[i / 2] = getClassPackageName(className) + (fileName.substring(0, lastDot) + "_" + fileName.substring(lastDot + 1)).replace('/', '.');
+      if (i / 2 == 0) {
+        result[0] = className;
+      } else {
+        fileName = processRelative(fileName);
+        final int lastDot = fileName.lastIndexOf(".");
+        result[i / 2] = getClassPackageName(className) + (fileName.substring(0, lastDot) + "_" + fileName.substring(lastDot + 1)).replace('/', '.');
+      }
     }
     return result;
+  }
+
+  public static String processRelative(String fileName) {
+    int idx;
+    while ((idx = fileName.indexOf("..")) > -1) {
+      final String rest = fileName.substring(idx + "..".length());
+      String start = fileName.substring(0, idx);
+      if (!start.endsWith("/")) return fileName;
+      start = start.substring(0, start.length() - 1);
+      final int endIndex = start.lastIndexOf('/');
+      if (endIndex > -1) {
+        fileName = start.substring(0, endIndex) + rest;
+      }
+      else {
+        fileName = rest.startsWith("/") ? rest.substring(1) : rest;
+      }
+    }
+    return fileName;
   }
 
   private static String getClassPackageName(String className) {
