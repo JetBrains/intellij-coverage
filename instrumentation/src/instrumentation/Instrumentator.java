@@ -98,9 +98,9 @@ public class Instrumentator {
           }
 
           // apply include and exclude patterns to parent class name only
-          className = ClassNameUtil.getOuterClassName(className);
+          String outerClassName = ClassNameUtil.getOuterClassName(className);
           for (Iterator it = excludePatterns.iterator(); it.hasNext();) {
-            if (((Pattern)it.next()).matcher((className)).matches()) return null;
+            if (((Pattern)it.next()).matcher((outerClassName)).matches()) return null;
           }
 
           cf.addClassLoader(loader);
