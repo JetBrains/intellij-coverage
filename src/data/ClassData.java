@@ -33,7 +33,7 @@ public class ClassData implements CoverageData {
       final List lines = (List)sigLines.get(sig);
       CoverageIOUtil.writeINT(os, lines.size());
       for (int i = 0; i < lines.size(); i++) {
-        ((LineData)lines.get(i)).save(os, dictionaryLookup);
+        ((LineData)lines.get(i)).save(os);
       }
     }
   }

@@ -72,8 +72,7 @@ public class ProjectDataLoader {
         }
         classInfo.setLines(LinesUtil.calcLineArray(maxLine, lines));
       }
-    }
-    catch (IOException e) {
+    } catch (Exception e) {
       ErrorReporter.reportError("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath(), e);
       return projectInfo;
     }

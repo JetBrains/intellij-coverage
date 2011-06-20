@@ -1,7 +1,6 @@
 package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.util.CoverageIOUtil;
-import com.intellij.rt.coverage.util.DictionaryLookup;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -26,7 +25,7 @@ public class JumpData implements CoverageData {
     return myFalseHits;
   }
 
-  public void save(final DataOutputStream os, DictionaryLookup dictionaryLookup) throws IOException {
+  public void save(final DataOutputStream os) throws IOException {
     CoverageIOUtil.writeINT(os, myTrueHits);
     CoverageIOUtil.writeINT(os, myFalseHits);
   }

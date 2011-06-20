@@ -1,7 +1,6 @@
 package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.util.CoverageIOUtil;
-import com.intellij.rt.coverage.util.DictionaryLookup;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -58,17 +57,17 @@ public class JumpsAndSwitches implements CoverageData {
     return mySwitchesArray == null ? null : mySwitchesArray[switchNumber];
   }
 
-  public void save(final DataOutputStream os, DictionaryLookup dictionaryLookup) throws IOException {
+  public void save(final DataOutputStream os) throws IOException {
     CoverageIOUtil.writeINT(os, myJumpsArray != null ? myJumpsArray.length : 0);
     if (myJumpsArray != null) {
       for (int j = 0; j < myJumpsArray.length; j++) {
-        myJumpsArray[j].save(os, dictionaryLookup);
+        myJumpsArray[j].save(os);
       }
     }
     CoverageIOUtil.writeINT(os, mySwitchesArray != null ? mySwitchesArray.length : 0);
     if (mySwitchesArray != null) {
       for (int s = 0; s < mySwitchesArray.length; s++) {
-        mySwitchesArray[s].save(os, dictionaryLookup);
+        mySwitchesArray[s].save(os);
       }
     }
   }

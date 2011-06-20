@@ -1,7 +1,6 @@
 package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.util.CoverageIOUtil;
-import com.intellij.rt.coverage.util.DictionaryLookup;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -81,15 +80,15 @@ public class LineData implements CoverageData {
     return myStatus;
   }
 
-  public void save(final DataOutputStream os, DictionaryLookup dictionaryLookup) throws IOException {
+  public void save(final DataOutputStream os) throws IOException {
     CoverageIOUtil.writeINT(os, myLineNumber);
     CoverageIOUtil.writeUTF(os, myUniqueTestName != null ? myUniqueTestName : "");
     CoverageIOUtil.writeINT(os, myHits);
     if (myHits > 0) {
       if (myJumpsAndSwitches != null) {
-        getOrCreateJumpsAndSwitches().save(os, dictionaryLookup);
+        getOrCreateJumpsAndSwitches().save(os);
       } else {
-        new JumpsAndSwitches().save(os, dictionaryLookup);
+        new JumpsAndSwitches().save(os);
       }
     }
   }

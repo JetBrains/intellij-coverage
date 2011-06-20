@@ -1,7 +1,6 @@
 package com.intellij.rt.coverage.data;
 
 
-import com.intellij.rt.coverage.util.DictionaryLookup;
 import com.intellij.rt.coverage.util.ErrorReporter;
 
 import java.io.*;
@@ -69,13 +68,6 @@ public class ProjectData implements CoverageData, Serializable {
     ourProjectData.myTraceLines = traceLines;
     ourProjectData.myDataFile = dataFile;
     return ourProjectData;
-  }
-
-  public void save(DataOutputStream os, DictionaryLookup dictionaryLookup) throws IOException {
-    final HashMap classes = myClasses.asMap();
-    for (Iterator it = classes.values().iterator(); it.hasNext();) {
-      ((ClassData)it.next()).save(os, dictionaryLookup);
-    }
   }
 
   public void merge(final CoverageData data) {

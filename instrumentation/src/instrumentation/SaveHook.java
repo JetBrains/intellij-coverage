@@ -55,11 +55,7 @@ public class SaveHook implements Runnable {
                 final Map classes = new HashMap(projectData.getClasses());
                 CoverageIOUtil.writeINT(os, classes.size());
                 saveDictionary(os, dict, classes);
-                projectData.save(os, new DictionaryLookup() {
-                    public int getDictionaryIndex(String className) {
-                        return dict.containsKey(className) ? dict.get(className) : -1;
-                    }
-                });
+                saveData(os, dict, classes);
             } catch (IOException e) {
                 ErrorReporter.reportError("Error writing file " + myDataFile.getPath(), e);
             } finally {
@@ -72,9 +68,19 @@ public class SaveHook implements Runnable {
                 }
             }
         } catch (OutOfMemoryError e) {
-            ErrorReporter.reportError("Out of memory error occured, try to increase memory available for the JVM, or make include / exclude patterns more specific", e);
+            ErrorReporter.reportError("Out of memory error occurred, try to increase memory available for the JVM, or make include / exclude patterns more specific", e);
         } catch (Throwable e) {
             ErrorReporter.reportError("Unexpected error", e);
+        }
+    }
+
+    private static void saveData(DataOutputStream os, final TObjectIntHashMap dict, Map classes) throws IOException {
+        for (Iterator it = classes.values().iterator(); it.hasNext();) {
+          ((ClassData)it.next()).save(os, new DictionaryLookup() {
+              public int getDictionaryIndex(String className) {
+                  return dict.containsKey(className) ? dict.get(className) : -1;
+              }
+          });
         }
     }
 
