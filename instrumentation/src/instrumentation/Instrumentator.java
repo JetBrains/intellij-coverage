@@ -137,7 +137,7 @@ public class Instrumentator {
 
   private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data, String className) {
     final ClassReader cr = new ClassReader(classfileBuffer);
-    final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+    final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES|ClassWriter.COMPUTE_MAXS);
     final ClassAdapter cv = data.isSampling() ? (ClassAdapter)new SamplingInstrumenter(data, cw, className) : new ClassInstrumenter(data, cw, className);
     cr.accept(cv, 0);
     return cw.toByteArray();
