@@ -71,6 +71,7 @@ public class Instrumentator {
     Runtime.getRuntime().addShutdownHook(new Thread(new SaveHook(dataFile, calcUnloaded, cf)));
 
     instrumentation.addTransformer(new ClassFileTransformer() {
+      private boolean computeFrames = computeFrames();
       public byte[] transform(ClassLoader loader,
                               String className,
                               Class classBeingRedefined,
@@ -105,11 +106,11 @@ public class Instrumentator {
 
           cf.addClassLoader(loader);
           if (includePatterns.isEmpty() && loader != null) {
-            return instrument(classfileBuffer, data, className);
+            return instrument(classfileBuffer, data, className, computeFrames);
           }
           for (Iterator it = includePatterns.iterator(); it.hasNext();) {
             if (((Pattern)it.next()).matcher(className).matches()) {
-              return instrument(classfileBuffer, data, className);
+              return instrument(classfileBuffer, data, className, computeFrames);
             }
           }
         }
@@ -117,6 +118,11 @@ public class Instrumentator {
           ErrorReporter.reportError("Error during class instrumentation: " + className, e);
         }
         return null;
+      }
+
+      private boolean computeFrames() {
+        final String property = System.getProperty("java.specification.version");
+        return (property.indexOf("1.7") >= 0 || property.indexOf("7.0") >= 0) && System.getProperty("idea.coverage.no.frames") == null;
       }
     });
   }
@@ -135,9 +141,9 @@ public class Instrumentator {
     return (String[]) result.toArray(new String[result.size()]);
   }
 
-  private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data, String className) {
+  private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data, String className, boolean computeFrames) {
     final ClassReader cr = new ClassReader(classfileBuffer);
-    final ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES|ClassWriter.COMPUTE_MAXS);
+    final ClassWriter cw = new ClassWriter(computeFrames ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS);
     final ClassAdapter cv = data.isSampling() ? (ClassAdapter)new SamplingInstrumenter(data, cw, className) : new ClassInstrumenter(data, cw, className);
     cr.accept(cv, 0);
     return cw.toByteArray();
