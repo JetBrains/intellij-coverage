@@ -8,6 +8,8 @@ import com.intellij.rt.coverage.util.ErrorReporter;
 import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.commons.EmptyVisitor;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -143,10 +145,26 @@ public class Instrumentator {
 
   private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data, String className, boolean computeFrames) {
     final ClassReader cr = new ClassReader(classfileBuffer);
-    final ClassWriter cw = new ClassWriter(computeFrames ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS);
-    final ClassAdapter cv = data.isSampling() ? (ClassAdapter)new SamplingInstrumenter(data, cw, className) : new ClassInstrumenter(data, cw, className);
+    final ClassWriter cw;
+    if (computeFrames) {
+      final int version = getClassFileVersion(cr);
+      cw = new ClassWriter(version >= Opcodes.V1_6 && version != Opcodes.V1_1 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS);
+    } else {
+      cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+    }
+    final ClassAdapter cv = data.isSampling() ? (ClassAdapter) new SamplingInstrumenter(data, cw, className) : new ClassInstrumenter(data, cw, className);
     cr.accept(cv, 0);
     return cw.toByteArray();
+  }
+
+  public static int getClassFileVersion(ClassReader reader) {
+    final int[] classFileVersion = new int[1];
+    reader.accept(new EmptyVisitor() {
+      public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        classFileVersion[0] = version;
+      }
+    }, 0);
+    return classFileVersion[0];
   }
 
   private static String[] tokenize(String argumentString) {
