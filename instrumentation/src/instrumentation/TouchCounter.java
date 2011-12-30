@@ -2,11 +2,11 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
 import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodAdapter;
+import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-public class TouchCounter extends MethodAdapter implements Opcodes {
+public class TouchCounter extends MethodVisitor implements Opcodes {
   private final int myVariablesCount;
 
   private final LineEnumerator myEnumerator;
@@ -27,7 +27,7 @@ public class TouchCounter extends MethodAdapter implements Opcodes {
   private byte myState;
 
   public TouchCounter(final LineEnumerator enumerator, int access, String desc) {
-    super(enumerator.getWV());
+    super(Opcodes.ASM4, enumerator.getWV());
     myEnumerator = enumerator;
     int variablesCount = ((Opcodes.ACC_STATIC & access) != 0) ? 0 : 1;
     final Type[] args = Type.getArgumentTypes(desc);

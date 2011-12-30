@@ -11,7 +11,7 @@ import org.objectweb.asm.*;
 import java.util.HashSet;
 import java.util.Set;
 
-public class SourceLineCounter extends ClassAdapter {
+public class SourceLineCounter extends ClassVisitor {
   private final boolean myExcludeLines;
   private final ClassData myClassData;
 
@@ -21,8 +21,8 @@ public class SourceLineCounter extends ClassAdapter {
   private boolean myInterface;
   private boolean myEnum;
 
-  public SourceLineCounter(final ClassVisitor cv, final ClassData classData, final boolean excludeLines) {
-    super(cv);
+  public SourceLineCounter(final ClassData classData, final boolean excludeLines) {
+    super(Opcodes.ASM4, new ClassVisitor(Opcodes.ASM4) {});
     myClassData = classData;
     myExcludeLines = excludeLines;
   }
@@ -45,7 +45,7 @@ public class SourceLineCounter extends ClassAdapter {
       if (name.equals("valueOf") && desc.startsWith("(Ljava/lang/String;)L")) return v;
       if (name.equals("<init>") && signature != null && signature.equals("()V")) return v;
     }
-    return new MethodAdapter(v) {
+    return new MethodVisitor(Opcodes.ASM4, v) {
       private boolean myHasInstructions;
 
 

@@ -5,11 +5,10 @@ import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
-import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.commons.EmptyVisitor;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -152,14 +151,14 @@ public class Instrumentator {
     } else {
       cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
     }
-    final ClassAdapter cv = data.isSampling() ? (ClassAdapter) new SamplingInstrumenter(data, cw, className) : new ClassInstrumenter(data, cw, className);
+    final ClassVisitor cv =  data.isSampling() ? ((ClassVisitor)new SamplingInstrumenter(data, cw, className)) : new ClassInstrumenter(data, cw, className);
     cr.accept(cv, 0);
     return cw.toByteArray();
   }
 
   public static int getClassFileVersion(ClassReader reader) {
     final int[] classFileVersion = new int[1];
-    reader.accept(new EmptyVisitor() {
+    reader.accept(new ClassVisitor(Opcodes.ASM4) {
       public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         classFileVersion[0] = version;
       }

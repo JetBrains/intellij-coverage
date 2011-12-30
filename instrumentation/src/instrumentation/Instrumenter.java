@@ -1,17 +1,15 @@
 package com.intellij.rt.coverage.instrumentation;
 
-import com.intellij.rt.coverage.util.StringsPool;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import gnu.trove.THashSet;
+import com.intellij.rt.coverage.util.StringsPool;
 import gnu.trove.TIntObjectHashMap;
-import org.objectweb.asm.ClassAdapter;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-public abstract class Instrumenter extends ClassAdapter {
+public abstract class Instrumenter extends ClassVisitor {
   protected final ProjectData myProjectData;
   protected final ClassVisitor myClassVisitor;
   private final String myClassName;
@@ -24,7 +22,7 @@ public abstract class Instrumenter extends ClassAdapter {
   private boolean myEnum;
 
   public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className) {
-    super(classVisitor);
+    super(Opcodes.ASM4, classVisitor);
     myProjectData = projectData;
     myClassVisitor = classVisitor;
     myClassName = className;

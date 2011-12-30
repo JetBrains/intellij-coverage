@@ -2,8 +2,8 @@
   <library name="asm">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/asm-commons.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/asm-tree-3.0.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/asm.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/asm-tree-4.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

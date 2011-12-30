@@ -4,18 +4,17 @@
  */
 package com.intellij.rt.coverage.instrumentation;
 
-import com.intellij.rt.coverage.util.*;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineCoverage;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.*;
 import com.intellij.rt.coverage.util.classFinder.ClassEntry;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntObjectProcedure;
 import gnu.trove.TObjectIntHashMap;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.commons.EmptyVisitor;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -103,7 +102,7 @@ public class SaveHook implements Runnable {
             if (cd != null) continue;
             try {
                 ClassReader reader = new ClassReader(classEntry.getClassInputStream());
-                SourceLineCounter slc = new SourceLineCounter(new EmptyVisitor(), cd, !projectData.isSampling());
+                SourceLineCounter slc = new SourceLineCounter(cd, !projectData.isSampling());
                 reader.accept(slc, 0);
                 if (slc.getNSourceLines() > 0) { // ignore classes without executable code
                     final TIntObjectHashMap lines = new TIntObjectHashMap(4, 0.99f);

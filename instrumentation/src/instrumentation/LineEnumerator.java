@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class LineEnumerator extends MethodAdapter implements Opcodes {
+public class LineEnumerator extends MethodVisitor implements Opcodes {
   private final ClassInstrumenter myClassInstrumenter;
   private final int myAccess;
   private final String myMethodName;
@@ -48,7 +48,7 @@ public class LineEnumerator extends MethodAdapter implements Opcodes {
                         final String desc,
                         final String signature,
                         final String[] exceptions) {
-    super(new MethodNode(access, name, desc, signature, exceptions));
+    super(Opcodes.ASM4, new MethodNode(access, name, desc, signature, exceptions));
     myClassInstrumenter = classInstrumenter;
     myWriterMethodVisitor = mv;
     myAccess = access;
