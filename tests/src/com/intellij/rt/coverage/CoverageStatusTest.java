@@ -89,14 +89,17 @@ public class CoverageStatusTest extends TestCase {
     myClassFile = new File(testDataPath +File.separator + "Test.class");
 
     final String exePath = System.getenv("JAVA_HOME") + File.separator + "bin" + File.separator + "java";
-    final String coverageAgentPath = new File("").getAbsolutePath() + File.separator + "dist" + File.separator + "coverage-agent.jar";
+    final String path = new File("").getAbsolutePath() + File.separator + "dist" + File.separator;
+    final String coverageAgentPath = path + "coverage-agent.jar";
     System.out.println(coverageAgentPath);
+    String classpath = testDataPath + File.pathSeparator + path + "asm.jar";
+    classpath += File.pathSeparator + path + "asm-commons.jar";
+    classpath += File.pathSeparator + path + "asm-tree-4.0.jar";
+
     final Process process = Runtime.getRuntime().exec(new String[]{
             exePath,
             "-javaagent:" + coverageAgentPath + "=\"" + myDataFile.getPath() + "\" false false false false Test(\\$.*)*",
-            "-classpath", testDataPath,
-            "Test"
-    });
+            "-classpath", classpath, "Test"});
     process.waitFor();
     process.destroy();
 
