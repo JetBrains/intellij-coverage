@@ -47,7 +47,7 @@
     <delete dir="${dist}/src"/>
 
     <copy todir="${dist}" file="${basedir}/lib/asm.jar"/>
-    <copy todir="${dist}" file="/lib/asm-tree-4.0.jar"/>
+    <copy todir="${dist}" file="${basedir}/lib/asm-tree-4.0.jar"/>
     <copy todir="${dist}" file="${basedir}/lib/asm-commons.jar"/>
     <copy todir="${dist}" file="${basedir}/lib/trove4j.jar"/>
   </target>
