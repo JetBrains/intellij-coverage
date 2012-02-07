@@ -17,12 +17,10 @@ public class CoveragePremain {
 
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
     final File lib = new File(getArchivePath()).getParentFile();
-    final URL[] urls = new URL[5];
+    final URL[] urls = new URL[3];
     urls[0] = fileToURL(new File(lib, "instrumenter.jar"));
-    urls[1] = fileToURL(new File(lib, "asm-commons.jar"));
-    urls[2] = fileToURL(new File(lib, "asm-tree-4.0.jar"));
-    urls[3] = fileToURL(new File(lib, "asm.jar"));
-    urls[4] = fileToURL(new File(lib, "trove4j.jar"));
+    urls[1] = fileToURL(new File(lib, "asm-all.jar"));
+    urls[2] = fileToURL(new File(lib, "trove4j.jar"));
     final Class instrumentator = Class.forName("com.intellij.rt.coverage.instrumentation.Instrumentator", true, new URLClassLoader(urls) {
       protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
         synchronized (this) {

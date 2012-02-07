@@ -46,9 +46,7 @@
     </zip>
     <delete dir="${dist}/src"/>
 
-    <copy todir="${dist}" file="${basedir}/lib/asm.jar"/>
-    <copy todir="${dist}" file="${basedir}/lib/asm-tree-4.0.jar"/>
-    <copy todir="${dist}" file="${basedir}/lib/asm-commons.jar"/>
+    <copy todir="${dist}" file="${basedir}/lib/asm-all.jar"/>
     <copy todir="${dist}" file="${basedir}/lib/trove4j.jar"/>
   </target>
   <target name="test" description="run tests" depends="all">
@@ -70,5 +68,15 @@
     </junit>
     <fail if="junit.failed"/>
   </target>
+    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="${basedir}/lib/jarjar-1.0.jar"/>
+    <target name="prepare libs">
+        <delete file="${basedir}/lib/asm-all.jar"/>
+        <jarjar jarfile="${basedir}/lib/asm-all.jar">
+            <zipfileset src="${basedir}/lib/asm.jar"/>
+            <zipfileset src="${basedir}/lib/asm-commons.jar"/>
+            <zipfileset src="${basedir}/lib/asm-tree-4.0.jar"/>
+            <rule pattern="org.objectweb.**" result="org.jetbrains.coverage.@1"/>
+        </jarjar>
+    </target>
 </project>
 

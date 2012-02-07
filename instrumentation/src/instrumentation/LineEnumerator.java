@@ -1,8 +1,8 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
-import org.objectweb.asm.*;
-import org.objectweb.asm.tree.MethodNode;
+import org.jetbrains.coverage.asm.*;
+import org.jetbrains.coverage.asm.tree.MethodNode;
 
 import java.util.HashMap;
 import java.util.HashSet;
