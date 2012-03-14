@@ -5,10 +5,10 @@ import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
-import org.jetbrains.coverage.asm.ClassReader;
-import org.jetbrains.coverage.asm.ClassVisitor;
-import org.jetbrains.coverage.asm.ClassWriter;
-import org.jetbrains.coverage.asm.Opcodes;
+import org.jetbrains.asm4.ClassReader;
+import org.jetbrains.asm4.ClassVisitor;
+import org.jetbrains.asm4.ClassWriter;
+import org.jetbrains.asm4.Opcodes;
 
 import java.io.BufferedReader;
 import java.io.File;

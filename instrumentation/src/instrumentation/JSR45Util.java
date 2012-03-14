@@ -3,7 +3,6 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineMapData;
 import gnu.trove.THashSet;
-import gnu.trove.TIntHashSet;
 import gnu.trove.TIntObjectHashMap;
 
 import java.util.Iterator;

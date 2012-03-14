@@ -6,7 +6,7 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ClassData;
 import gnu.trove.TIntObjectHashMap;
-import org.jetbrains.coverage.asm.*;
+import org.jetbrains.asm4.*;
 
 import java.util.HashSet;
 import java.util.Set;
