@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Constructor;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -147,13 +150,51 @@ public class Instrumentator {
     final ClassWriter cw;
     if (computeFrames) {
       final int version = getClassFileVersion(cr);
-      cw = new ClassWriter(version >= Opcodes.V1_6 && version != Opcodes.V1_1 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS);
+      cw = getClassWriter(version >= Opcodes.V1_6 && version != Opcodes.V1_1 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS);
     } else {
-      cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+      cw = getClassWriter(ClassWriter.COMPUTE_MAXS);
     }
     final ClassVisitor cv =  data.isSampling() ? ((ClassVisitor)new SamplingInstrumenter(data, cw, className)) : new ClassInstrumenter(data, cw, className);
     cr.accept(cv, 0);
     return cw.toByteArray();
+  }
+
+  private static ClassWriter getClassWriter(int flags) {
+    if (flags == ClassWriter.COMPUTE_FRAMES && System.getProperty("idea.asm.default.compute.frames") == null) {
+
+      final Class classFinder;
+      try {
+        classFinder = Class.forName("com.intellij.compiler.instrumentation.InstrumentationClassFinder");
+      } catch (ClassNotFoundException e) {
+        //do not log error when finder is not supported
+        return new ClassWriter(flags);
+      }
+
+      try {
+        Constructor constructor = classFinder.getDeclaredConstructor(new Class[]{new URL[0].getClass(), new URL[0].getClass()});
+        if (constructor != null) {
+          constructor.setAccessible(true);
+          final ClassLoader classLoader = Instrumentator.class.getClassLoader();
+          if (classLoader instanceof URLClassLoader) {
+            final URL[] urls = ((URLClassLoader) classLoader).getURLs();
+            final ClassLoader parentLoader = classLoader.getParent();
+            if (parentLoader instanceof URLClassLoader) {
+              final URL[] platform = ((URLClassLoader) parentLoader).getURLs();
+              final Object finder = constructor.newInstance(new Object[]{platform, urls});
+              final Class classWriter = Class.forName("com.intellij.compiler.instrumentation.InstrumenterClassWriter");
+              final Constructor classWriterDeclaredConstructor = classWriter.getDeclaredConstructor(new Class[]{int.class, classFinder});
+              if (classWriterDeclaredConstructor != null) {
+                classWriterDeclaredConstructor.setAccessible(true);
+                return (ClassWriter) classWriterDeclaredConstructor.newInstance(new Object[]{Integer.valueOf(flags), finder});
+              }
+            }
+          }
+        }
+      } catch (Exception e) {
+        ErrorReporter.logError(e.getMessage());
+      }
+    }
+    return new ClassWriter(flags);
   }
 
   public static int getClassFileVersion(ClassReader reader) {

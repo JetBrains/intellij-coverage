@@ -51,6 +51,21 @@ public class ErrorReporter {
     }
   }
 
+  public static synchronized void logError(final String message) {
+    PrintStream os = null;
+    try {
+      os = getErrorLogStream();
+      StringBuffer buf = prepareMessage(message);
+      os.println(buf.toString());
+    } catch (IOException e) {
+      System.err.println("Failed to write to error log file: " + e.toString());
+    } finally {
+      if (os != null) {
+        os.close();
+      }
+    }
+  }
+
   private static PrintStream getErrorLogStream() throws FileNotFoundException {
     return new PrintStream(new FileOutputStream(ERROR_FILE, true));
   }
