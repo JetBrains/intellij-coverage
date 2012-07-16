@@ -41,6 +41,7 @@ public class SaveHook implements Runnable {
     }
 
     public void save(ProjectData projectData) {
+        projectData.stop();
         try {
             if (myAppendUnloaded) {
                 appendUnloaded(projectData);

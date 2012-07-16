@@ -81,6 +81,7 @@ public class Instrumentator {
                               Class classBeingRedefined,
                               ProtectionDomain protectionDomain,
                               byte[] classfileBuffer) throws IllegalClassFormatException {
+        if (data.isStopped()) return null;
         try {
           if (className == null) {
             return null;
