@@ -21,6 +21,8 @@ public class ProjectData implements CoverageData, Serializable {
   private static final MethodCaller GET_CLASS_DATA_METHOD = new MethodCaller("getClassData", new Class[]{String.class});
   private static final MethodCaller TRACE_LINE_METHOD = new MethodCaller("traceLine", new Class[]{Object.class, int.class});
 
+  private static boolean ourStopped = false;
+
   public static ProjectData ourProjectData;
   private File myDataFile;
 
@@ -51,6 +53,14 @@ public class ProjectData implements CoverageData, Serializable {
 
   public static ProjectData getProjectData() {
     return ourProjectData;
+  }
+
+  public void stop() {
+    ourStopped = true;
+  }
+
+  public boolean isStopped() {
+    return ourStopped;
   }
 
   public boolean isSampling() {
