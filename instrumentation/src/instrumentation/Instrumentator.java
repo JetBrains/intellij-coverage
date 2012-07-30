@@ -126,8 +126,7 @@ public class Instrumentator {
       }
 
       private boolean computeFrames() {
-        final String property = System.getProperty("java.specification.version");
-        return (property == null || property.indexOf("1.7") >= 0 || property.indexOf("7.0") >= 0) && System.getProperty("idea.coverage.no.frames") == null;
+        return System.getProperty("idea.coverage.no.frames") == null;
       }
     });
   }
