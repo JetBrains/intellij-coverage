@@ -40,6 +40,7 @@ public class SourceLineCounter extends ClassVisitor {
                                    final String[] exceptions) {
     final MethodVisitor v = cv.visitMethod(access, name, desc, signature, exceptions);
     if (myInterface) return v;
+    if ((access & Opcodes.ACC_BRIDGE) != 0) return v;
     if (myEnum) {
       if (name.equals("values") && desc.startsWith("()[L")) return v;
       if (name.equals("valueOf") && desc.startsWith("(Ljava/lang/String;)L")) return v;

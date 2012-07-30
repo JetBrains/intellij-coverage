@@ -45,6 +45,7 @@ public abstract class Instrumenter extends ClassVisitor {
                                    final String[] exceptions) {
     final MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
     if (!myProcess || mv == null) return mv;
+    if ((access & Opcodes.ACC_BRIDGE) != 0) return mv; //try to skip bridge methods
     if (myEnum) {
       if (name.equals("values") && desc.equals("()[L" + myClassName + ";")) return mv;
       if (name.equals("valueOf") && desc.equals("(Ljava/lang/String;)L" + myClassName + ";")) return mv;
