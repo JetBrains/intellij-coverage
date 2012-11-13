@@ -111,11 +111,11 @@ public class Instrumentator {
 
           cf.addClassLoader(loader);
           if (includePatterns.isEmpty() && loader != null) {
-            return instrument(classfileBuffer, data, className, computeFrames);
+            return instrument(classfileBuffer, data, className, classBeingRedefined, computeFrames);
           }
           for (Iterator it = includePatterns.iterator(); it.hasNext();) {
             if (((Pattern)it.next()).matcher(className).matches()) {
-              return instrument(classfileBuffer, data, className, computeFrames);
+              return instrument(classfileBuffer, data, className, classBeingRedefined, computeFrames);
             }
           }
         }
@@ -145,21 +145,21 @@ public class Instrumentator {
     return (String[]) result.toArray(new String[result.size()]);
   }
 
-  private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data, String className, boolean computeFrames) {
+  private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data, String className, Class classBeingRedefined, boolean computeFrames) {
     final ClassReader cr = new ClassReader(classfileBuffer);
     final ClassWriter cw;
     if (computeFrames) {
       final int version = getClassFileVersion(cr);
-      cw = getClassWriter(version >= Opcodes.V1_6 && version != Opcodes.V1_1 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS);
+      cw = getClassWriter(version >= Opcodes.V1_6 && version != Opcodes.V1_1 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS, classBeingRedefined);
     } else {
-      cw = getClassWriter(ClassWriter.COMPUTE_MAXS);
+      cw = getClassWriter(ClassWriter.COMPUTE_MAXS, classBeingRedefined);
     }
     final ClassVisitor cv =  data.isSampling() ? ((ClassVisitor)new SamplingInstrumenter(data, cw, className)) : new ClassInstrumenter(data, cw, className);
     cr.accept(cv, 0);
     return cw.toByteArray();
   }
 
-  private static ClassWriter getClassWriter(int flags) {
+  private static ClassWriter getClassWriter(int flags, Class classBeingRedefined) {
     if (flags == ClassWriter.COMPUTE_FRAMES && System.getProperty("idea.asm.default.compute.frames") == null) {
 
       final Class classFinder;
@@ -174,7 +174,7 @@ public class Instrumentator {
         Constructor constructor = classFinder.getDeclaredConstructor(new Class[]{new URL[0].getClass(), new URL[0].getClass()});
         if (constructor != null) {
           constructor.setAccessible(true);
-          final ClassLoader classLoader = Instrumentator.class.getClassLoader();
+          final ClassLoader classLoader = classBeingRedefined.getClassLoader();
           if (classLoader instanceof URLClassLoader) {
             final URL[] urls = ((URLClassLoader) classLoader).getURLs();
             final ClassLoader parentLoader = classLoader.getParent();
