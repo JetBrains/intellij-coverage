@@ -198,6 +198,15 @@ public class Instrumentator {
         ErrorReporter.logError(e.getMessage());
       }
     }
+    try {
+      final Class classWriter = Class.forName("org.jetbrains.asm4.ClassWriter.ClassWriter", false, classLoader);
+      final Constructor constructor = classWriter.getDeclaredConstructor(new Class[]{int.class});
+      if (constructor != null) {
+        constructor.setAccessible(true);
+        return (ClassWriter) constructor.newInstance(new Object[]{Integer.valueOf(flags)});
+      }
+    } catch (Exception ignore) {
+    }
     return new ClassWriter(flags);
   }
 
