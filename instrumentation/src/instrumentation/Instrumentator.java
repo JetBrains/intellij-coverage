@@ -177,8 +177,13 @@ public class Instrumentator {
           if (classLoader instanceof URLClassLoader) {
             final URL[] urls = ((URLClassLoader) classLoader).getURLs();
             final ClassLoader parentLoader = classLoader.getParent();
-            if (parentLoader instanceof URLClassLoader) {
-              final URL[] platform = ((URLClassLoader) parentLoader).getURLs();
+            URL[] platform = null;
+            if (parentLoader == null) {
+              platform = new URL[0];
+            } else if (parentLoader instanceof URLClassLoader) {
+              platform = ((URLClassLoader) parentLoader).getURLs();
+            }
+            if (platform != null) {
               final Object finder = constructor.newInstance(new Object[]{platform, urls});
               final Class classWriter = Class.forName("com.intellij.compiler.instrumentation.InstrumenterClassWriter");
               final Constructor classWriterDeclaredConstructor = classWriter.getDeclaredConstructor(new Class[]{int.class, classFinder});
