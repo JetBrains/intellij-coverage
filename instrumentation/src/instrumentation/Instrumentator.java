@@ -159,7 +159,7 @@ public class Instrumentator {
     return cw.toByteArray();
   }
 
-  private static ClassWriter getClassWriter(int flags, ClassLoader classLoader) {
+  private static ClassWriter getClassWriter(int flags, final ClassLoader classLoader) {
     if (flags == ClassWriter.COMPUTE_FRAMES && System.getProperty("idea.asm.default.compute.frames") == null) {
 
       final Class classFinder;
@@ -167,7 +167,7 @@ public class Instrumentator {
         classFinder = Class.forName("com.intellij.compiler.instrumentation.InstrumentationClassFinder");
       } catch (ClassNotFoundException e) {
         //do not log error when finder is not supported
-        return new ClassWriter(flags);
+        return new MyClassWriter(flags, classLoader);
       }
 
       try {
@@ -198,16 +198,8 @@ public class Instrumentator {
         ErrorReporter.logError(e.getMessage());
       }
     }
-    try {
-      final Class classWriter = Class.forName("org.jetbrains.asm4.ClassWriter.ClassWriter", false, classLoader);
-      final Constructor constructor = classWriter.getDeclaredConstructor(new Class[]{int.class});
-      if (constructor != null) {
-        constructor.setAccessible(true);
-        return (ClassWriter) constructor.newInstance(new Object[]{Integer.valueOf(flags)});
-      }
-    } catch (Exception ignore) {
-    }
-    return new ClassWriter(flags);
+
+    return new MyClassWriter(flags, classLoader);
   }
 
   public static int getClassFileVersion(ClassReader reader) {
@@ -252,5 +244,38 @@ public class Instrumentator {
       tokenizedArgs.add(arg);
     }
     return (String[])tokenizedArgs.toArray(new String[tokenizedArgs.size()]);
+  }
+
+  private static class MyClassWriter extends ClassWriter {
+    private final ClassLoader classLoader;
+
+    public MyClassWriter(int flags, ClassLoader classLoader) {
+      super(flags);
+      this.classLoader = classLoader;
+    }
+
+    protected String getCommonSuperClass(String type1, String type2) {
+      Class c, d;
+      try {
+        c = Class.forName(type1.replace('/', '.'), false, classLoader);
+        d = Class.forName(type2.replace('/', '.'), false, classLoader);
+      } catch (Exception e) {
+        throw new RuntimeException(e.toString());
+      }
+      if (c.isAssignableFrom(d)) {
+        return type1;
+      }
+      if (d.isAssignableFrom(c)) {
+        return type2;
+      }
+      if (c.isInterface() || d.isInterface()) {
+        return "java/lang/Object";
+      } else {
+        do {
+          c = c.getSuperclass();
+        } while (!c.isAssignableFrom(d));
+        return c.getName().replace('.', '/');
+      }
+    }
   }
 }
