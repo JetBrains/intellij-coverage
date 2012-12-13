@@ -17,16 +17,11 @@ public class CoveragePremain {
 
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
     final File lib = new File(getArchivePath()).getParentFile();
-    final File finder = new File(lib, "finder.jar");
-    boolean hasFinder = finder.exists();
-    final URL[] urls = new URL[hasFinder ? 4 : 3];
+    final URL[] urls = new URL[3];
     urls[0] = fileToURL(new File(lib, "instrumenter.jar"));
     urls[1] = fileToURL(new File(lib, "asm-all.jar"));
     urls[2] = fileToURL(new File(lib, "trove4j.jar"));
 
-    if (hasFinder) {
-      urls[3] = fileToURL(finder);
-    }
     final Class instrumentator = Class.forName("com.intellij.rt.coverage.instrumentation.Instrumentator", true, new URLClassLoader(urls) {
       protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
         synchronized (this) {

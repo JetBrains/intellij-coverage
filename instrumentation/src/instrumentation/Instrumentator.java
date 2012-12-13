@@ -10,16 +10,10 @@ import org.jetbrains.asm4.ClassVisitor;
 import org.jetbrains.asm4.ClassWriter;
 import org.jetbrains.asm4.Opcodes;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Constructor;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -76,6 +70,7 @@ public class Instrumentator {
 
     instrumentation.addTransformer(new ClassFileTransformer() {
       private boolean computeFrames = computeFrames();
+
       public byte[] transform(ClassLoader loader,
                               String className,
                               Class classBeingRedefined,
@@ -95,31 +90,30 @@ public class Instrumentator {
           //and do not instrument packages which are used during instrumented method invocation
           //(inside methods touch, save, etc from ProjectData)
           if (className.startsWith("com.intellij.rt.")
-           || className.startsWith("java.")
-           || className.startsWith("sun.")
-           || className.startsWith("gnu.trove.")
-           || className.startsWith("org.jetbrains.asm4.")
-           || className.startsWith("org.apache.oro.text.regex.")) {
+            || className.startsWith("java.")
+            || className.startsWith("sun.")
+            || className.startsWith("gnu.trove.")
+            || className.startsWith("org.jetbrains.asm4.")
+            || className.startsWith("org.apache.oro.text.regex.")) {
             return null;
           }
 
           // apply include and exclude patterns to parent class name only
           String outerClassName = ClassNameUtil.getOuterClassName(className);
-          for (Iterator it = excludePatterns.iterator(); it.hasNext();) {
-            if (((Pattern)it.next()).matcher((outerClassName)).matches()) return null;
+          for (Iterator it = excludePatterns.iterator(); it.hasNext(); ) {
+            if (((Pattern) it.next()).matcher((outerClassName)).matches()) return null;
           }
 
           cf.addClassLoader(loader);
           if (includePatterns.isEmpty() && loader != null) {
             return instrument(classfileBuffer, data, className, loader, computeFrames);
           }
-          for (Iterator it = includePatterns.iterator(); it.hasNext();) {
-            if (((Pattern)it.next()).matcher(className).matches()) {
+          for (Iterator it = includePatterns.iterator(); it.hasNext(); ) {
+            if (((Pattern) it.next()).matcher(className).matches()) {
               return instrument(classfileBuffer, data, className, loader, computeFrames);
             }
           }
-        }
-        catch (Throwable e) {
+        } catch (Throwable e) {
           ErrorReporter.reportError("Error during class instrumentation: " + className, e);
         }
         return null;
@@ -136,7 +130,7 @@ public class Instrumentator {
     final File file = new File(arg);
     final BufferedReader reader = new BufferedReader(new FileReader(file));
     try {
-      while(reader.ready()) {
+      while (reader.ready()) {
         result.add(reader.readLine());
       }
     } finally {
@@ -154,13 +148,13 @@ public class Instrumentator {
     } else {
       cw = getClassWriter(ClassWriter.COMPUTE_MAXS, loader);
     }
-    final ClassVisitor cv =  data.isSampling() ? ((ClassVisitor)new SamplingInstrumenter(data, cw, className)) : new ClassInstrumenter(data, cw, className);
+    final ClassVisitor cv = data.isSampling() ? ((ClassVisitor) new SamplingInstrumenter(data, cw, className)) : new ClassInstrumenter(data, cw, className);
     cr.accept(cv, 0);
     return cw.toByteArray();
   }
 
   private static ClassWriter getClassWriter(int flags, final ClassLoader classLoader) {
-    if (flags == ClassWriter.COMPUTE_FRAMES && System.getProperty("idea.asm.default.compute.frames") == null) {
+    /*if (flags == ClassWriter.COMPUTE_FRAMES && System.getProperty("idea.asm.default.compute.frames") == null) {
 
       final Class classFinder;
       try {
@@ -198,7 +192,7 @@ public class Instrumentator {
         ErrorReporter.logError(e.getMessage());
       }
     }
-
+*/
     return new MyClassWriter(flags, classLoader);
   }
 
@@ -247,6 +241,7 @@ public class Instrumentator {
   }
 
   private static class MyClassWriter extends ClassWriter {
+    public static final String JAVA_LANG_OBJECT = "java/lang/Object";
     private final ClassLoader classLoader;
 
     public MyClassWriter(int flags, ClassLoader classLoader) {
@@ -255,26 +250,87 @@ public class Instrumentator {
     }
 
     protected String getCommonSuperClass(String type1, String type2) {
-      Class c, d;
       try {
-        c = Class.forName(type1.replace('/', '.'), false, classLoader);
-        d = Class.forName(type2.replace('/', '.'), false, classLoader);
-      } catch (Exception e) {
+        ClassReader info1 = typeInfo(type1);
+        ClassReader info2 = typeInfo(type2);
+        String 
+        superType = checkImplementInterface(type1, type2, info1, info2);
+        if (superType != null) return superType;
+        superType = checkImplementInterface(type2, type1, info2, info1);
+        if (superType != null) return superType;
+
+        StringBuilder b1 = typeAncestors(type1, info1);
+        StringBuilder b2 = typeAncestors(type2, info2);
+        String result = JAVA_LANG_OBJECT;
+        int end1 = b1.length();
+        int end2 = b2.length();
+        while (true) {
+          int start1 = b1.lastIndexOf(";", end1 - 1);
+          int start2 = b2.lastIndexOf(";", end2 - 1);
+          if (start1 != -1 && start2 != -1 && end1 - start1 == end2 - start2) {
+            String p1 = b1.substring(start1 + 1, end1);
+            String p2 = b2.substring(start2 + 1, end2);
+            if (p1.equals(p2)) {
+              result = p1;
+              end1 = start1;
+              end2 = start2;
+            } else {
+              return result;
+            }
+          } else {
+            return result;
+          }
+        }
+      } catch (IOException e) {
         throw new RuntimeException(e.toString());
       }
-      if (c.isAssignableFrom(d)) {
-        return type1;
+    }
+
+    private String checkImplementInterface(String type1, String type2, ClassReader info1, ClassReader info2) throws IOException {
+      if ((info1.getAccess() & Opcodes.ACC_INTERFACE) != 0) {
+        if (typeImplements(type2, info2, type1)) {
+          return type1;
+        }
+        return JAVA_LANG_OBJECT;
       }
-      if (d.isAssignableFrom(c)) {
-        return type2;
+      return null;
+    }
+
+    private StringBuilder typeAncestors(String type, ClassReader info) throws IOException {
+      StringBuilder b = new StringBuilder();
+      while (!JAVA_LANG_OBJECT.equals(type)) {
+        b.append(';').append(type);
+        type = info.getSuperName();
+        info = typeInfo(type);
       }
-      if (c.isInterface() || d.isInterface()) {
-        return "java/lang/Object";
-      } else {
-        do {
-          c = c.getSuperclass();
-        } while (!c.isAssignableFrom(d));
-        return c.getName().replace('.', '/');
+      return b;
+    }
+
+    private boolean typeImplements(String type, ClassReader classReader, String interfaceName) throws IOException {
+      while (!JAVA_LANG_OBJECT.equals(type)) {
+        String[] itfs = classReader.getInterfaces();
+        for (int i = 0; i < itfs.length; ++i) {
+          if (itfs[i].equals(interfaceName)) {
+            return true;
+          }
+        }
+        for (int i = 0; i < itfs.length; ++i) {
+          if (typeImplements(itfs[i], typeInfo(itfs[i]), interfaceName)) {
+            return true;
+          }
+        }
+        type = classReader.getSuperName();
+        classReader = typeInfo(type);
+      }
+      return false;
+    }
+
+    private ClassReader typeInfo(final String type) throws IOException {
+      InputStream is = classLoader.getResourceAsStream(type + ".class");
+      try {
+        return new ClassReader(is);
+      } finally {
+        is.close();
       }
     }
   }
