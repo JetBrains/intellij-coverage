@@ -13,6 +13,7 @@ public class ClassData implements CoverageData {
   private LineData[] myLinesArray;
   private Map myStatus;
   private int[] myLineMask;
+  private String mySource;
 
   public ClassData(final String name) {
     myClassName = name;
@@ -232,4 +233,11 @@ public class ClassData implements CoverageData {
     return null;
   }
 
+  public void setSource(String source) {
+    this.mySource = source;
+  }
+
+  public String getSource() {
+    return mySource;
+  }
 }

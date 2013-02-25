@@ -8,8 +8,8 @@ import org.jetbrains.asm4.*;
 public class SamplingInstrumenter extends Instrumenter {
   private static final String OBJECT_TYPE = "Ljava/lang/Object;";
 
-  public SamplingInstrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className) {
-    super(projectData, classVisitor, className);
+  public SamplingInstrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
+    super(projectData, classVisitor, className, shouldCalculateSource);
   }
 
   protected MethodVisitor createMethodLineEnumerator(final MethodVisitor mv,

@@ -5,6 +5,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ClassData;
+import com.intellij.rt.coverage.data.ProjectData;
 import gnu.trove.TIntObjectHashMap;
 import org.jetbrains.asm4.*;
 
@@ -14,6 +15,7 @@ import java.util.Set;
 public class SourceLineCounter extends ClassVisitor {
   private final boolean myExcludeLines;
   private final ClassData myClassData;
+  private final ProjectData myProjectData;
 
   private final TIntObjectHashMap myNSourceLines = new TIntObjectHashMap();
   private final Set myMethodsWithSourceCode = new HashSet();
@@ -21,8 +23,9 @@ public class SourceLineCounter extends ClassVisitor {
   private boolean myInterface;
   private boolean myEnum;
 
-  public SourceLineCounter(final ClassData classData, final boolean excludeLines) {
+  public SourceLineCounter(final ClassData classData, final boolean excludeLines, final ProjectData projectData) {
     super(Opcodes.ASM4, new ClassVisitor(Opcodes.ASM4) {});
+    myProjectData = projectData;
     myClassData = classData;
     myExcludeLines = excludeLines;
   }
@@ -31,6 +34,20 @@ public class SourceLineCounter extends ClassVisitor {
     myInterface = (access & Opcodes.ACC_INTERFACE) != 0;
     myEnum = (access & Opcodes.ACC_ENUM) != 0;
     super.visit(version, access, name, signature, superName, interfaces);
+  }
+
+  public void visitSource(String sourceFileName, String debug) {
+    if (myProjectData != null) {
+      myClassData.setSource(sourceFileName);
+    }
+    super.visitSource(sourceFileName, debug);
+  }
+
+  public void visitOuterClass(String outerClassName, String methodName, String methodSig) {
+    if (myProjectData != null) {
+      myProjectData.getOrCreateClassData(outerClassName).setSource(myClassData.getSource());
+    }
+    super.visitOuterClass(outerClassName, methodName, methodSig);
   }
 
   public MethodVisitor visitMethod(final int access,

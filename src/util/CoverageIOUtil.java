@@ -4,10 +4,7 @@
  */
 package com.intellij.rt.coverage.util;
 
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.IOException;
-import java.io.UTFDataFormatException;
+import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -177,5 +174,17 @@ public class CoverageIOUtil {
       }
     }
     return methodSignature;
+  }
+
+  public static DataOutputStream openFile(File file) throws FileNotFoundException {
+    return new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+  }
+
+  public static void close(DataOutputStream out) {
+    if (out != null) {
+      try {
+        out.close();
+      } catch (IOException ignored) {}
+    }
   }
 }

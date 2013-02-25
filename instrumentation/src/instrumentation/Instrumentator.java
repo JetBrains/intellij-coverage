@@ -45,6 +45,12 @@ public class Instrumentator {
     if (Boolean.valueOf(args[3]).booleanValue() && dataFile.isFile()) {
       initialData = ProjectDataLoader.load(dataFile);
     }
+    final File sourceMapFile;
+    if (args.length > 5 && Boolean.valueOf(args[5]).booleanValue()) {
+      sourceMapFile = new File(args[6]);
+    } else {
+      sourceMapFile = null;
+    }
     final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling);
     final List includePatterns = new ArrayList();
     System.out.println("---- IntelliJ IDEA coverage runner ---- ");
@@ -66,7 +72,9 @@ public class Instrumentator {
     }
 
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
-    Runtime.getRuntime().addShutdownHook(new Thread(new SaveHook(dataFile, calcUnloaded, cf)));
+    final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf);
+    hook.setSourceMapFile(sourceMapFile);
+    Runtime.getRuntime().addShutdownHook(new Thread(hook));
 
     instrumentation.addTransformer(new ClassFileTransformer() {
       private boolean computeFrames = computeFrames();
@@ -106,11 +114,11 @@ public class Instrumentator {
 
           cf.addClassLoader(loader);
           if (includePatterns.isEmpty() && loader != null) {
-            return instrument(classfileBuffer, data, className, loader, computeFrames);
+            return instrument(classfileBuffer, data, className, loader, computeFrames, sourceMapFile != null);
           }
           for (Iterator it = includePatterns.iterator(); it.hasNext(); ) {
             if (((Pattern) it.next()).matcher(className).matches()) {
-              return instrument(classfileBuffer, data, className, loader, computeFrames);
+              return instrument(classfileBuffer, data, className, loader, computeFrames, sourceMapFile != null);
             }
           }
         } catch (Throwable e) {
@@ -139,7 +147,7 @@ public class Instrumentator {
     return (String[]) result.toArray(new String[result.size()]);
   }
 
-  private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data, String className, ClassLoader loader, boolean computeFrames) {
+  private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data, String className, ClassLoader loader, boolean computeFrames, boolean shouldCalculateSource) {
     final ClassReader cr = new ClassReader(classfileBuffer);
     final ClassWriter cw;
     if (computeFrames) {
@@ -148,7 +156,7 @@ public class Instrumentator {
     } else {
       cw = getClassWriter(ClassWriter.COMPUTE_MAXS, loader);
     }
-    final ClassVisitor cv = data.isSampling() ? ((ClassVisitor) new SamplingInstrumenter(data, cw, className)) : new ClassInstrumenter(data, cw, className);
+    final ClassVisitor cv =  data.isSampling() ? ((ClassVisitor) new SamplingInstrumenter(data, cw, className, shouldCalculateSource)) : new ClassInstrumenter(data, cw, className, shouldCalculateSource);
     cr.accept(cv, 0);
     return cw.toByteArray();
   }

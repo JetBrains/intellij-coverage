@@ -18,7 +18,6 @@ import org.jetbrains.asm4.ClassReader;
 
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,6 +26,7 @@ import java.util.Map;
 
 public class SaveHook implements Runnable {
     private final File myDataFile;
+    private File mySourceMapFile;
     private final boolean myAppendUnloaded;
     private final ClassFinder myClassFinder;
 
@@ -49,13 +49,25 @@ public class SaveHook implements Runnable {
 
             DataOutputStream os = null;
             try {
-                os = new DataOutputStream(new FileOutputStream(myDataFile));
+                os = CoverageIOUtil.openFile(myDataFile);
                 projectData.checkLineMappings();
                 final TObjectIntHashMap dict = new TObjectIntHashMap();
                 final Map classes = new HashMap(projectData.getClasses());
                 CoverageIOUtil.writeINT(os, classes.size());
                 saveDictionary(os, dict, classes);
                 saveData(os, dict, classes);
+
+                if (mySourceMapFile != null) {
+                    DataOutputStream mapOs = null;
+                    try {
+                        mapOs = CoverageIOUtil.openFile(mySourceMapFile);
+                        saveSourceMap(mapOs, classes);
+                    } catch (IOException e) {
+                        ErrorReporter.reportError("Error writing source map " + mySourceMapFile.getPath(), e);
+                    } finally {
+                        CoverageIOUtil.close(mapOs);
+                    }
+                }
             } catch (IOException e) {
                 ErrorReporter.reportError("Error writing file " + myDataFile.getPath(), e);
             } finally {
@@ -93,6 +105,15 @@ public class SaveHook implements Runnable {
         }
     }
 
+    private static void saveSourceMap(DataOutputStream out, Map classes) throws IOException {
+      CoverageIOUtil.writeINT(out, classes.size());
+      for (Iterator it = classes.values().iterator(); it.hasNext(); ) {
+        ClassData classData = ((ClassData)it.next());
+        CoverageIOUtil.writeUTF(out, classData.getName());
+        CoverageIOUtil.writeUTF(out, classData.getSource() != null ? classData.getSource() : "");
+      }
+    }
+
     private void appendUnloaded(final ProjectData projectData) {
 
         Collection matchedClasses = myClassFinder.findMatchedClasses();
@@ -103,7 +124,10 @@ public class SaveHook implements Runnable {
             if (cd != null) continue;
             try {
                 ClassReader reader = new ClassReader(classEntry.getClassInputStream());
-                SourceLineCounter slc = new SourceLineCounter(cd, !projectData.isSampling());
+                if (mySourceMapFile != null && cd == null) {
+                    cd  = projectData.getOrCreateClassData(classEntry.getClassName());
+                }
+                SourceLineCounter slc = new SourceLineCounter(cd, !projectData.isSampling(), mySourceMapFile != null ? projectData : null);
                 reader.accept(slc, 0);
                 if (slc.getNSourceLines() > 0) { // ignore classes without executable code
                     final TIntObjectHashMap lines = new TIntObjectHashMap(4, 0.99f);
@@ -122,8 +146,13 @@ public class SaveHook implements Runnable {
                     classData.setLines(LinesUtil.calcLineArray(maxLine[0], lines));
                 }
             } catch (Throwable e) {
+              e.printStackTrace();
                 ErrorReporter.reportError("Failed to process class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
             }
         }
+    }
+
+    public void setSourceMapFile(File sourceMapFile) {
+        mySourceMapFile = sourceMapFile;
     }
 }

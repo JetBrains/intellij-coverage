@@ -13,6 +13,7 @@ public abstract class Instrumenter extends ClassVisitor {
   protected final ProjectData myProjectData;
   protected final ClassVisitor myClassVisitor;
   private final String myClassName;
+  private final boolean myShouldCalculateSource;
 
   protected TIntObjectHashMap myLines = new TIntObjectHashMap(4, 0.99f);
   protected int myMaxLineNumber;
@@ -21,11 +22,12 @@ public abstract class Instrumenter extends ClassVisitor {
   protected boolean myProcess;
   private boolean myEnum;
 
-  public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className) {
+  public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
     super(Opcodes.ASM4, classVisitor);
     myProjectData = projectData;
     myClassVisitor = classVisitor;
     myClassName = className;
+    myShouldCalculateSource = shouldCalculateSource;
   }
 
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
@@ -83,6 +85,9 @@ public abstract class Instrumenter extends ClassVisitor {
 
   public void visitSource(String source, String debug) {
     super.visitSource(source, debug);
+    if (myShouldCalculateSource) {
+      myProjectData.getOrCreateClassData(myClassName).setSource(source);
+    }
     if (debug != null) {
       myProjectData.addLineMaps(myClassName, JSR45Util.extractLineMapping(debug, myClassName));
     }
@@ -90,5 +95,12 @@ public abstract class Instrumenter extends ClassVisitor {
 
   public String getClassName() {
     return myClassName;
+  }
+
+  public void visitOuterClass(String outerClassName, String methodName, String methodSig) {
+    if (myShouldCalculateSource) {
+      myProjectData.getOrCreateClassData(outerClassName).setSource(myClassData.getSource());
+    }
+    super.visitOuterClass(outerClassName, methodName, methodSig);
   }
 }

@@ -7,8 +7,8 @@ import org.jetbrains.asm4.ClassVisitor;
 import org.jetbrains.asm4.MethodVisitor;
 
 public class ClassInstrumenter extends Instrumenter {
-  public ClassInstrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className) {
-    super(projectData, classVisitor, className);
+  public ClassInstrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
+    super(projectData, classVisitor, className, shouldCalculateSource);
   }
 
   protected MethodVisitor createMethodLineEnumerator(MethodVisitor mv, String name, String desc, int access, String signature,
