@@ -45,18 +45,21 @@ public class Instrumentator {
     if (Boolean.valueOf(args[3]).booleanValue() && dataFile.isFile()) {
       initialData = ProjectDataLoader.load(dataFile);
     }
+    int i = 5;
+
     final File sourceMapFile;
     if (args.length > 5 && Boolean.valueOf(args[5]).booleanValue()) {
       sourceMapFile = new File(args[6]);
+      i = 7;
     } else {
       sourceMapFile = null;
     }
+
     final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling);
     final List includePatterns = new ArrayList();
     System.out.println("---- IntelliJ IDEA coverage runner ---- ");
     System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
     final String excludes = "-exclude";
-    int i = 5;
     System.out.println("include patterns:");
     for (; i < args.length; i++) {
       if (excludes.equals(args[i])) break;
