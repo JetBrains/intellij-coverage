@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ProjectData implements CoverageData, Serializable {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/ProjectData";
@@ -173,7 +174,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   public void testStarted(final String name) {
     myCurrentTestName = name;
-    if (myTraceLines) myTrace = new HashMap();
+    if (myTraceLines) myTrace = new ConcurrentHashMap();
   }
   //---------------------------------------------------------- //
 
