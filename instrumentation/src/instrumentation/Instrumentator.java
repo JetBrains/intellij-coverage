@@ -70,8 +70,9 @@ public class Instrumentator {
     i++;
     final List excludePatterns = new ArrayList();
     for (; i < args.length; i++) {
-      excludePatterns.add(Pattern.compile(args[i]));
-      System.out.println(args[i]);
+      final Pattern pattern = ClassNameUtil.makePattern(args[i]);
+      excludePatterns.add(pattern);
+      System.out.println(pattern.pattern());
     }
 
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
@@ -109,18 +110,15 @@ public class Instrumentator {
             return null;
           }
 
-          // apply include and exclude patterns to parent class name only
-          String outerClassName = ClassNameUtil.getOuterClassName(className);
-          for (Iterator it = excludePatterns.iterator(); it.hasNext(); ) {
-            if (((Pattern) it.next()).matcher((outerClassName)).matches()) return null;
-          }
+          // matching outer or inner class name depending on pattern
+          if (ClassNameUtil.shouldExclude(className, excludePatterns)) return null;
 
           cf.addClassLoader(loader);
           if (includePatterns.isEmpty() && loader != null) {
             return instrument(classfileBuffer, data, className, loader, computeFrames, sourceMapFile != null);
           }
           for (Iterator it = includePatterns.iterator(); it.hasNext(); ) {
-            if (((Pattern) it.next()).matcher(className).matches()) {
+            if (((Pattern) it.next()).matcher(className).matches()) { // matching inner class name
               return instrument(classfileBuffer, data, className, loader, computeFrames, sourceMapFile != null);
             }
           }

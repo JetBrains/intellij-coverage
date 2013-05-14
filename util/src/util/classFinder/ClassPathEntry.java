@@ -74,11 +74,10 @@ public class ClassPathEntry {
     }
 
     protected boolean shouldInclude(final String className) {
+      // matching outer or inner class name depending on pattern
+      if (ClassNameUtil.shouldExclude(className, myExcludePatterns)) return false;
+
       String outerClassName = ClassNameUtil.getOuterClassName(className);
-      for (Iterator it = myExcludePatterns.iterator(); it.hasNext();) {
-        Pattern e = (Pattern)it.next();
-        if (e.matcher(outerClassName).matches()) return false;
-      }
       for (Iterator it = myIncludePatterns.iterator(); it.hasNext();) {
         Pattern e = (Pattern)it.next();
         if (e.matcher(outerClassName).matches()) return true;

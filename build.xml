@@ -65,6 +65,7 @@
       <formatter type="plain" />
       <test name="com.intellij.rt.coverage.CoverageStatusTest"/>
       <test name="com.intellij.rt.coverage.CoverageMergeTest"/>
+      <test name="com.intellij.rt.coverage.FilteringTest"/>
     </junit>
     <fail if="junit.failed"/>
   </target>
