@@ -70,7 +70,7 @@ public class Instrumentator {
     i++;
     final List excludePatterns = new ArrayList();
     for (; i < args.length; i++) {
-      final Pattern pattern = ClassNameUtil.makePattern(args[i]);
+      final Pattern pattern = Pattern.compile(args[i]);
       excludePatterns.add(pattern);
       System.out.println(pattern.pattern());
     }

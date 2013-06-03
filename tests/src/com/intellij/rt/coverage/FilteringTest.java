@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * User: Andrei Titov
@@ -20,16 +21,21 @@ public class FilteringTest extends TestCase {
     doTestExcludeFilter("com.product.AAA$QQQ", toPatterns(new String[]{".*AAA"}), true);
     doTestExcludeFilter("com.product.AAA$QQQ$1", toPatterns(new String[]{".*AAA"}), true);
 
-    // This case is not so obvious. But without this we will not be able to exclude "AAA$1" class with ".*AAA" pattern
-    doTestExcludeFilter("com.product.QQQ$AAA", toPatterns(new String[]{".*AAA"}), false);
+    // allowing to exclude inner class without explicit $ sign
+    doTestExcludeFilter("com.product.QQQ$AAA", toPatterns(new String[]{".*AAA"}), true);
+    doTestExcludeFilter("com.product.QQQ$$$AAA$AAA", toPatterns(new String[]{".*AAA"}), true);
+    doTestExcludeFilter("com.product.QQQ$AAB", toPatterns(new String[]{".*AAA"}), false);
+    doTestExcludeFilter("com.product.QQQ$$$AAB$AAA", toPatterns(new String[]{".*AAA"}), true);
+    doTestExcludeFilter("com.product.QQQ$$$AAA$AAB", toPatterns(new String[]{".*AAA"}), true);
+    doTestExcludeFilter("com.product.QQQ", toPatterns(new String[]{".*AAA"}), false);
 
-    doTestExcludeFilter("com.product.AAA", toPatterns(new String[]{".*AAA$1"}), false);
-    doTestExcludeFilter("com.product.AAA$1", toPatterns(new String[]{".*AAA$1"}), true);
-    doTestExcludeFilter("com.product.AAA", toPatterns(new String[]{".*$.*"}), false);
-    doTestExcludeFilter("com.product.AAA$1", toPatterns(new String[]{".*$.*"}), true);
-    doTestExcludeFilter("com.product.AAA$AAA", toPatterns(new String[]{".*$.*"}), true);
-    doTestExcludeFilter("com.product.AAA$QQQ", toPatterns(new String[]{".*$.*"}), true);
-    doTestExcludeFilter("com.product.AAA$QQQ$1", toPatterns(new String[]{".*$.*"}), true);
+    doTestExcludeFilter("com.product.AAA", toPatterns(new String[]{".*AAA\\$1"}), false);
+    doTestExcludeFilter("com.product.AAA$1", toPatterns(new String[]{".*AAA\\$1"}), true);
+    doTestExcludeFilter("com.product.AAA", toPatterns(new String[]{".*\\$.*"}), false);
+    doTestExcludeFilter("com.product.AAA$1", toPatterns(new String[]{".*\\$.*"}), true);
+    doTestExcludeFilter("com.product.AAA$AAA", toPatterns(new String[]{".*\\$.*"}), true);
+    doTestExcludeFilter("com.product.AAA$QQQ", toPatterns(new String[]{".*\\$.*"}), true);
+    doTestExcludeFilter("com.product.AAA$QQQ$1", toPatterns(new String[]{".*\\$.*"}), true);
   }
 
   private void doTestExcludeFilter(String className, List excludePatterns, boolean expected) throws Exception {
@@ -39,7 +45,7 @@ public class FilteringTest extends TestCase {
   private List toPatterns(String regexs[]) {
     List res = new ArrayList(regexs.length);
     for (int i = 0; i < regexs.length; ++i) {
-      res.add(ClassNameUtil.makePattern(regexs[i]));
+      res.add(Pattern.compile(regexs[i] + "(\\$.*)?"));
     }
     return res;
   }
