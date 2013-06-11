@@ -5,6 +5,7 @@
   <property name="util.jar" value="${dist}/coverage-util.jar"/>
   <property name="src.dst" value="${dist}/coverage-src.zip"/>
   <property name="build.rt.classes.dir" value="${basedir}/out/production"/>
+  <property environment="env"/>
   <target name="all">
     <delete dir="${coverage.data.jar}"/>
     <delete dir="${instrumenter.jar}"/>
@@ -50,11 +51,22 @@
     <copy todir="${dist}" file="${basedir}/lib/trove4j.jar"/>
   </target>
   <target name="test" description="run tests" depends="all">
+    <condition property="jdk_with_tools_jar"><not><available file="${java.home}/lib/tools.jar"/></not></condition>
+    <condition property="jre_with_tools_jar"><not><available file="${java.home}/../lib/tools.jar"/></not></condition>
+    <!--<available file="${java.home}/../lib/tools.jar" property="jre_with_tools_jar"/>-->
+    <condition property="tools_jar_found">
+        <or><isfalse value="${jdk_with_tools_jar}"/><isfalse value="${jre_with_tools_jar}"/></or>
+    </condition>
+    <fail unless="${tools_jar_found}" message="tools.jar wasn't found neither in ${java.home}/lib/tools.jar nor ${java.home}/../lib/tools.jar"/>
     <junit fork="true" dir="${basedir}" failureproperty="junit.failed">
       <classpath>
-        <fileset dir="${jdk15.home}">
-          <include name="jre/lib/*.jar"/>
-          <include name="lib/tools.jar"/>
+        <fileset dir="${java.home}">
+          <include name="jre/lib/*.jar" unless="${jdk_with_tools_jar}"/>
+          <include name="lib/tools.jar" unless="${jdk_with_tools_jar}"/>
+        </fileset>
+        <fileset dir="${java.home}/..">
+          <include name="jre/lib/*.jar" unless="${jre_with_tools_jar}"/>
+          <include name="lib/tools.jar" unless="${jre_with_tools_jar}"/>
         </fileset>
         <pathelement location="${basedir}\tests\lib\junit.jar"/>
         <pathelement location="${basedir}\out\test\tests"/>
