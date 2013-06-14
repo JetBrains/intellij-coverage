@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 
 public class Instrumentator {
@@ -63,16 +64,31 @@ public class Instrumentator {
     System.out.println("include patterns:");
     for (; i < args.length; i++) {
       if (excludes.equals(args[i])) break;
-      includePatterns.add(Pattern.compile(args[i]));
-      System.out.println(args[i]);
+      try {
+        includePatterns.add(Pattern.compile(args[i]));
+        System.out.println(args[i]);
+      } catch (PatternSyntaxException ex) {
+        System.err.println("Problem occurred with include pattern " + args[i]);
+        System.err.println(ex.getDescription());
+        System.err.println("This may cause no tests run and no coverage collected");
+        System.exit(1);
+      }
     }
     System.out.println("exclude patterns:");
     i++;
     final List excludePatterns = new ArrayList();
     for (; i < args.length; i++) {
-      final Pattern pattern = Pattern.compile(args[i]);
-      excludePatterns.add(pattern);
-      System.out.println(pattern.pattern());
+      try {
+        final Pattern pattern = Pattern.compile(args[i]);
+        excludePatterns.add(pattern);
+        System.out.println(pattern.pattern());
+      } catch (PatternSyntaxException ex) {
+        System.err.println("Problem occurred with exclude pattern " + args[i]);
+        System.err.println(ex.getDescription());
+        System.err.println("This may cause no tests run and no coverage collected");
+        System.exit(1);
+      }
+
     }
 
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
