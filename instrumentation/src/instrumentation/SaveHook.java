@@ -16,9 +16,7 @@ import gnu.trove.TIntObjectProcedure;
 import gnu.trove.TObjectIntHashMap;
 import org.jetbrains.asm4.ClassReader;
 
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -60,6 +58,13 @@ public class SaveHook implements Runnable {
                 if (mySourceMapFile != null) {
                     DataOutputStream mapOs = null;
                     try {
+                        try {
+                            if (mySourceMapFile.exists()) {
+                                loadSourceMapFromFile(classes, mySourceMapFile);
+                            }
+                        } catch (IOException e) {
+                            ErrorReporter.reportError("Error loading source map from " + mySourceMapFile.getPath(), e);
+                        }
                         mapOs = CoverageIOUtil.openFile(mySourceMapFile);
                         saveSourceMap(mapOs, classes);
                     } catch (IOException e) {
@@ -86,7 +91,25 @@ public class SaveHook implements Runnable {
         }
     }
 
-    private static void saveData(DataOutputStream os, final TObjectIntHashMap dict, Map classes) throws IOException {
+    private void loadSourceMapFromFile(Map classes, File mySourceMapFile) throws IOException {
+        DataInputStream in = null;
+        try {
+            in = new DataInputStream(new FileInputStream(mySourceMapFile));
+            final int classNumber = CoverageIOUtil.readINT(in);
+            for (int i = 0; i < classNumber; ++i) {
+                final String className = CoverageIOUtil.readUTFFast(in);
+                final String classSource = CoverageIOUtil.readUTFFast(in);
+                ClassData data = (ClassData) classes.get(className);
+                if (data == null) {
+                    classes.put(className, classSource);
+                } else if (data.getSource() == null || !data.getSource().equals(classSource)) {
+                    classes.put(className, classSource);
+                }
+            }
+        } finally { if (in != null) in.close(); }
+    }
+
+  private static void saveData(DataOutputStream os, final TObjectIntHashMap dict, Map classes) throws IOException {
         for (Iterator it = classes.values().iterator(); it.hasNext();) {
           ((ClassData)it.next()).save(os, new DictionaryLookup() {
               public int getDictionaryIndex(String className) {
