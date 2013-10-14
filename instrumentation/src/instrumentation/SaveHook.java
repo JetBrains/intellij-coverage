@@ -17,10 +17,7 @@ import gnu.trove.TObjectIntHashMap;
 import org.jetbrains.asm4.ClassReader;
 
 import java.io.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class SaveHook implements Runnable {
     private final File myDataFile;
@@ -55,24 +52,7 @@ public class SaveHook implements Runnable {
                 saveDictionary(os, dict, classes);
                 saveData(os, dict, classes);
 
-                if (mySourceMapFile != null) {
-                    DataOutputStream mapOs = null;
-                    try {
-                        try {
-                            if (mySourceMapFile.exists()) {
-                                loadSourceMapFromFile(classes, mySourceMapFile);
-                            }
-                        } catch (IOException e) {
-                            ErrorReporter.reportError("Error loading source map from " + mySourceMapFile.getPath(), e);
-                        }
-                        mapOs = CoverageIOUtil.openFile(mySourceMapFile);
-                        saveSourceMap(mapOs, classes);
-                    } catch (IOException e) {
-                        ErrorReporter.reportError("Error writing source map " + mySourceMapFile.getPath(), e);
-                    } finally {
-                        CoverageIOUtil.close(mapOs);
-                    }
-                }
+                saveSourceMap(classes, mySourceMapFile);
             } catch (IOException e) {
                 ErrorReporter.reportError("Error writing file " + myDataFile.getPath(), e);
             } finally {
@@ -91,25 +71,49 @@ public class SaveHook implements Runnable {
         }
     }
 
-    private void loadSourceMapFromFile(Map classes, File mySourceMapFile) throws IOException {
+    public static void saveSourceMap(Map str_clData_classes, File sourceMapFile) {
+        if (sourceMapFile != null) {
+            Map readNames = Collections.emptyMap();
+            try {
+                if (sourceMapFile.exists()) {
+                    readNames = loadSourceMapFromFile(str_clData_classes, sourceMapFile);
+                }
+            } catch (IOException e) {
+                ErrorReporter.reportError("Error loading source map from " + sourceMapFile.getPath(), e);
+            }
+
+            try {
+                doSaveSourceMap(readNames, sourceMapFile, str_clData_classes);
+            } catch (IOException e) {
+                ErrorReporter.reportError("Error writing source map " + sourceMapFile.getPath(), e);
+            }
+        }
+    }
+
+    public static Map loadSourceMapFromFile(Map classes, File mySourceMapFile) throws IOException {
         DataInputStream in = null;
         try {
             in = new DataInputStream(new FileInputStream(mySourceMapFile));
             final int classNumber = CoverageIOUtil.readINT(in);
+            final HashMap readNames = new HashMap(classNumber);
             for (int i = 0; i < classNumber; ++i) {
                 final String className = CoverageIOUtil.readUTFFast(in);
                 final String classSource = CoverageIOUtil.readUTFFast(in);
+                if ("".equals(classSource)) {
+                    continue;
+                }
                 ClassData data = (ClassData) classes.get(className);
                 if (data == null) {
-                    classes.put(className, classSource);
+                    readNames.put(className, classSource);
                 } else if (data.getSource() == null || !data.getSource().equals(classSource)) {
-                    classes.put(className, classSource);
+                    readNames.put(className, classSource);
                 }
             }
+            return readNames;
         } finally { if (in != null) in.close(); }
     }
 
-  private static void saveData(DataOutputStream os, final TObjectIntHashMap dict, Map classes) throws IOException {
+    private static void saveData(DataOutputStream os, final TObjectIntHashMap dict, Map classes) throws IOException {
         for (Iterator it = classes.values().iterator(); it.hasNext();) {
           ((ClassData)it.next()).save(os, new DictionaryLookup() {
               public int getDictionaryIndex(String className) {
@@ -128,13 +132,28 @@ public class SaveHook implements Runnable {
         }
     }
 
-    private static void saveSourceMap(DataOutputStream out, Map classes) throws IOException {
-      CoverageIOUtil.writeINT(out, classes.size());
-      for (Iterator it = classes.values().iterator(); it.hasNext(); ) {
-        ClassData classData = ((ClassData)it.next());
-        CoverageIOUtil.writeUTF(out, classData.getName());
-        CoverageIOUtil.writeUTF(out, classData.getSource() != null ? classData.getSource() : "");
-      }
+    public static void doSaveSourceMap(Map str_str_readNames, File sourceMapFile, Map str_clData_classes) throws IOException {
+        HashMap str_str_merged_map = new HashMap(str_str_readNames);
+        for (Iterator clData_it = str_clData_classes.values().iterator(); clData_it.hasNext(); ) {
+            ClassData classData = ((ClassData)clData_it.next());
+            if (!str_str_merged_map.containsKey(classData.getName())) {
+                str_str_merged_map.put(classData.getName(), classData.getSource());
+            }
+        }
+
+        DataOutputStream out = null;
+        try {
+            out = CoverageIOUtil.openFile(sourceMapFile);
+            CoverageIOUtil.writeINT(out, str_str_merged_map.size());
+            for (Iterator entry_it = str_str_merged_map.entrySet().iterator(); entry_it.hasNext(); ) {
+                Map.Entry str_str_entry = (Map.Entry) entry_it.next();
+                CoverageIOUtil.writeUTF(out, (String)str_str_entry.getKey());
+                final String value = (String) str_str_entry.getValue();
+                CoverageIOUtil.writeUTF(out, value != null ? value : "");
+            }
+        } finally {
+            if (out != null) CoverageIOUtil.close(out);
+        }
     }
 
     private void appendUnloaded(final ProjectData projectData) {
