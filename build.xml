@@ -88,10 +88,8 @@
     <target name="prepare libs">
         <delete file="${basedir}/lib/asm-all.jar"/>
         <jarjar jarfile="${basedir}/lib/asm-all.jar">
-            <zipfileset src="${basedir}/lib/asm.jar"/>
-            <zipfileset src="${basedir}/lib/asm-commons.jar"/>
-            <zipfileset src="${basedir}/lib/asm-tree-4.0.jar"/>
-            <rule pattern="org.objectweb.asm.**" result="org.jetbrains.asm4.@1"/>
+            <zipfileset src="${basedir}/lib/asm-all-5.0.jar"/>
+            <rule pattern="org.objectweb.asm.**" result="org.jetbrains.org.objectweb.asm.@1"/>
         </jarjar>
     </target>
 </project>
