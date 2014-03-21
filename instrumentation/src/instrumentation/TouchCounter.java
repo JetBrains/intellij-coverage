@@ -1,10 +1,10 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
-import org.jetbrains.asm4.Label;
-import org.jetbrains.asm4.MethodVisitor;
-import org.jetbrains.asm4.Opcodes;
-import org.jetbrains.asm4.Type;
+import org.jetbrains.org.objectweb.asm.Label;
+import org.jetbrains.org.objectweb.asm.MethodVisitor;
+import org.jetbrains.org.objectweb.asm.Opcodes;
+import org.jetbrains.org.objectweb.asm.Type;
 
 public class TouchCounter extends MethodVisitor implements Opcodes {
   private final int myVariablesCount;

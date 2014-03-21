@@ -5,9 +5,9 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.StringsPool;
 import gnu.trove.TIntObjectHashMap;
-import org.jetbrains.asm4.ClassVisitor;
-import org.jetbrains.asm4.MethodVisitor;
-import org.jetbrains.asm4.Opcodes;
+import org.jetbrains.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.org.objectweb.asm.MethodVisitor;
+import org.jetbrains.org.objectweb.asm.Opcodes;
 
 public abstract class Instrumenter extends ClassVisitor {
   protected final ProjectData myProjectData;
