@@ -121,7 +121,7 @@ public class Instrumentator {
             || className.startsWith("java.")
             || className.startsWith("sun.")
             || className.startsWith("gnu.trove.")
-            || className.startsWith("org.jetbrains.asm4.")
+            || className.startsWith("org.jetbrains.org.objectweb.asm.")
             || className.startsWith("org.apache.oro.text.regex.")) {
             return null;
           }
