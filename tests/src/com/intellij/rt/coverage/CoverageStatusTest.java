@@ -101,7 +101,7 @@ public class CoverageStatusTest extends TestCase {
 
     final Process process = Runtime.getRuntime().exec(new String[]{
             exePath,
-            "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
+            //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
             "-javaagent:" + coverageAgentPath + "=\"" + myDataFile.getPath() + "\" false false false false Test(\\$.*)*",
             "-classpath", classpath, "Test"});
     process.waitFor();
