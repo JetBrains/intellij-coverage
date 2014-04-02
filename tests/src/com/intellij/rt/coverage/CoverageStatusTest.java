@@ -55,9 +55,7 @@ public class CoverageStatusTest extends TestCase {
             "18:FULL\n" +
             "19:FULL\n" +
             "23:FULL\n" +
-            "24:FULL\n" +
             "28:FULL\n" +
-            "29:FULL\n" +
             "30:FULL\n" +
             "34:FULL\n");
   }
