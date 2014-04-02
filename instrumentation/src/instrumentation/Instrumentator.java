@@ -223,7 +223,7 @@ public class Instrumentator {
 
   public static int getClassFileVersion(ClassReader reader) {
     final int[] classFileVersion = new int[1];
-    reader.accept(new ClassVisitor(Opcodes.ASM4) {
+    reader.accept(new ClassVisitor(Opcodes.ASM5) {
       public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         classFileVersion[0] = version;
       }

@@ -24,7 +24,7 @@ public class SamplingInstrumenter extends Instrumenter {
       variablesCount += args[i].getSize();
     }
     final int varCount = variablesCount;
-    return new MethodVisitor(Opcodes.ASM4, mv) {
+    return new MethodVisitor(Opcodes.ASM5, mv) {
       private Label myStartLabel;
       private Label myEndLabel;
 

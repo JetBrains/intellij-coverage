@@ -4,10 +4,7 @@ import com.intellij.rt.coverage.data.LineData;
 import org.jetbrains.org.objectweb.asm.*;
 import org.jetbrains.org.objectweb.asm.tree.MethodNode;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class LineEnumerator extends MethodVisitor implements Opcodes {
   private final ClassInstrumenter myClassInstrumenter;
@@ -48,7 +45,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
                         final String desc,
                         final String signature,
                         final String[] exceptions) {
-    super(Opcodes.ASM4, new MethodNode(access, name, desc, signature, exceptions));
+    super(Opcodes.ASM5, new MethodNode(access, name, desc, signature, exceptions));
     myClassInstrumenter = classInstrumenter;
     myWriterMethodVisitor = mv;
     myAccess = access;

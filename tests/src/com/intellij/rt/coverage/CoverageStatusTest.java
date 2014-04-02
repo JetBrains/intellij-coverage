@@ -54,7 +54,9 @@ public class CoverageStatusTest extends TestCase {
             "16:FULL\n" +
             "18:FULL\n" +
             "19:FULL\n" +
+            "23:FULL\n" +
             "24:FULL\n" +
+            "28:FULL\n" +
             "29:FULL\n" +
             "30:FULL\n" +
             "34:FULL\n");
@@ -99,6 +101,7 @@ public class CoverageStatusTest extends TestCase {
 
     final Process process = Runtime.getRuntime().exec(new String[]{
             exePath,
+            "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
             "-javaagent:" + coverageAgentPath + "=\"" + myDataFile.getPath() + "\" false false false false Test(\\$.*)*",
             "-classpath", classpath, "Test"});
     process.waitFor();

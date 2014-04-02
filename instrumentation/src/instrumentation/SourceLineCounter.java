@@ -24,7 +24,7 @@ public class SourceLineCounter extends ClassVisitor {
   private boolean myEnum;
 
   public SourceLineCounter(final ClassData classData, final boolean excludeLines, final ProjectData projectData) {
-    super(Opcodes.ASM4, new ClassVisitor(Opcodes.ASM4) {});
+    super(Opcodes.ASM5, new ClassVisitor(Opcodes.ASM5) {});
     myProjectData = projectData;
     myClassData = classData;
     myExcludeLines = excludeLines;
@@ -63,7 +63,7 @@ public class SourceLineCounter extends ClassVisitor {
       if (name.equals("valueOf") && desc.startsWith("(Ljava/lang/String;)L")) return v;
       if (name.equals("<init>") && signature != null && signature.equals("()V")) return v;
     }
-    return new MethodVisitor(Opcodes.ASM4, v) {
+    return new MethodVisitor(Opcodes.ASM5, v) {
       private boolean myHasInstructions;
 
 
