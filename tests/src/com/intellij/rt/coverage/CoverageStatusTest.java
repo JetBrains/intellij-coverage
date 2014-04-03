@@ -54,8 +54,8 @@ public class CoverageStatusTest extends TestCase {
             "16:FULL\n" +
             "18:FULL\n" +
             "19:FULL\n" +
-            "23:FULL\n" +
-            "28:FULL\n" +
+            "24:FULL\n" +
+            "29:FULL\n" +
             "30:FULL\n" +
             "34:FULL\n");
   }
@@ -64,10 +64,10 @@ public class CoverageStatusTest extends TestCase {
     doTest("notExpressions", "1:FULL\n" +
             "3:FULL\n" +
             "7:FULL\n" +
-            "8:PARTIAL\n" +
+            "8:FULL\n" +
             "9:FULL\n" +
             "10:FULL\n" +
-            "11:PARTIAL\n" +
+            "11:FULL\n" +
             "12:FULL\n");
   }
 
