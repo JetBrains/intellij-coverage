@@ -102,7 +102,7 @@ public class CoverageMergeTest extends TestCase {
                 "4:FULL\n" +
                  //Common
                 "1:FULL\n" +
-                "3:PARTIAL\n" +
+                "3:FULL\n" +
                 "4:FULL\n" +
                 "6:FULL\n");
     }
