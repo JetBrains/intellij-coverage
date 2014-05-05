@@ -21,6 +21,7 @@ public abstract class Instrumenter extends ClassVisitor {
   protected ClassData myClassData;
   protected boolean myProcess;
   private boolean myEnum;
+  private boolean myInterface;
 
   public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
     super(Opcodes.ASM5, classVisitor);
@@ -31,11 +32,10 @@ public abstract class Instrumenter extends ClassVisitor {
   }
 
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-    if ((access & Opcodes.ACC_INTERFACE) == 0) {
-      myProcess = true;
-      myEnum = (access & Opcodes.ACC_ENUM) != 0;
-      myClassData = myProjectData.getOrCreateClassData(StringsPool.getFromPool(myClassName));
-    }
+    myEnum = (access & Opcodes.ACC_ENUM) != 0;
+    myInterface = (access & Opcodes.ACC_INTERFACE) != 0;
+    myProcess = !myInterface;
+    myClassData = myProjectData.getOrCreateClassData(StringsPool.getFromPool(myClassName));
     super.visit(version, access, name, signature, superName, interfaces);
   }
 
@@ -46,14 +46,32 @@ public abstract class Instrumenter extends ClassVisitor {
                                    final String signature,
                                    final String[] exceptions) {
     final MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
-    if (!myProcess || mv == null) return mv;
-    if ((access & Opcodes.ACC_BRIDGE) != 0) return mv; //try to skip bridge methods
-    if (myEnum) {
-      if (name.equals("values") && desc.equals("()[L" + myClassName + ";")) return mv;
-      if (name.equals("valueOf") && desc.equals("(Ljava/lang/String;)L" + myClassName + ";")) return mv;
-      if (name.equals("<init>") && signature != null && signature.equals("()V")) return mv;
+    if (!shouldInstrumentMethod(mv, access, name, desc, signature)) {
+      return mv;
+    } else {
+      myProcess = true;
+      return createMethodLineEnumerator(mv, name, desc, access, signature, exceptions);
     }
-    return createMethodLineEnumerator(mv, name, desc, access, signature, exceptions);
+  }
+
+  private boolean shouldInstrumentMethod(final MethodVisitor mv,
+                                         final int access,
+                                         final String name,
+                                         final String desc,
+                                         final String signature) {
+    return (mv != null &&
+        (access & Opcodes.ACC_BRIDGE) == 0 && // try to skip bridge methods
+        (!myEnum || !isDefaultEnumMethod(name, desc, signature, myClassName)) && // skipping default enum methods like values()
+        (!myInterface || (access & Opcodes.ACC_ABSTRACT) == 0) // should instrument an interface method only if it is a Java8 default method
+      );
+  }
+
+  private static boolean isDefaultEnumMethod(String name, String desc, String signature, String className) {
+    return (
+      name.equals("values") && desc.equals("()[L" + className + ";") ||
+      name.equals("valueOf") && desc.equals("(Ljava/lang/String;)L" + className + ";") ||
+      name.equals("<init>") && signature != null && signature.equals("()V")
+    );
   }
 
   protected abstract MethodVisitor createMethodLineEnumerator(MethodVisitor mv, String name, String desc, int access, String signature, String[] exceptions);
@@ -86,7 +104,7 @@ public abstract class Instrumenter extends ClassVisitor {
   public void visitSource(String source, String debug) {
     super.visitSource(source, debug);
     if (myShouldCalculateSource) {
-      myProjectData.getOrCreateClassData(myClassName).setSource(source);
+      myClassData.setSource(source);
     }
     if (debug != null) {
       myProjectData.addLineMaps(myClassName, JSR45Util.extractLineMapping(debug, myClassName));
