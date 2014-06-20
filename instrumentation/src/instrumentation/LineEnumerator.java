@@ -235,8 +235,8 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     myHasInstructions = true;
   }
 
-  public void visitMethodInsn(final int opcode, final String owner, final String name, final String desc) {
-    super.visitMethodInsn(opcode, owner, name, desc);
+  public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+    super.visitMethodInsn(opcode, owner, name, desc, itf);
     if (!myHasExecutableLines) return;
     myState = SEEN_NOTHING;
     myHasInstructions = true;
