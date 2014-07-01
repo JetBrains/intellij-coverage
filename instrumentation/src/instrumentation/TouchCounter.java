@@ -217,9 +217,9 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
     super.visitTypeInsn(opcode, desc);
   }
 
-  public void visitMethodInsn(final int opcode, final String owner, final String name, final String desc) {
+  public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
     touchLastJump();
-    super.visitMethodInsn(opcode, owner, name, desc);
+    super.visitMethodInsn(opcode, owner, name, desc, itf);
   }
 
 
