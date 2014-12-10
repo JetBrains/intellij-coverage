@@ -1,7 +1,19 @@
 /*
- * User: anna
- * Date: 22-May-2008
+ * Copyright 2000-2014 JetBrains s.r.o.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
 package com.intellij.rt.coverage;
 
 import com.intellij.rt.coverage.data.ClassData;
@@ -13,10 +25,15 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+/**
+ * @author anna
+ * @since 22-May-2008
+ */
 public class CoverageStatusTest extends TestCase {
   private File myDataFile;
   private File myClassFile;
@@ -84,32 +101,13 @@ public class CoverageStatusTest extends TestCase {
 
     myDataFile = new File(testDataPath +File.separator+ "Test.ic");
 
-    Main.compile(new String[]{testDataPath + File.separator + "Test.java"});
+    if (Main.compile(new String[]{testDataPath + File.separator + "Test.java"}) != 0) {
+      throw new RuntimeException("Compilation failed");
+    }
 
     myClassFile = new File(testDataPath +File.separator + "Test.class");
 
-    final String exePath = System.getenv("JAVA_HOME") + File.separator + "bin" + File.separator + "java";
-    final String path = new File("").getAbsolutePath() + File.separator + "dist" + File.separator;
-    final String coverageAgentPath = path + "coverage-agent.jar";
-    System.out.println(coverageAgentPath);
-    String classpath = testDataPath;
-   /*classpath += File.pathSeparator + path + "asm.jar";
-    classpath += File.pathSeparator + path + "asm-commons.jar";
-    classpath += File.pathSeparator + path + "asm-tree-4.0.jar";*/
-
-    final Process process = Runtime.getRuntime().exec(new String[]{
-            exePath,
-            //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
-            "-javaagent:" + coverageAgentPath + "=\"" + myDataFile.getPath() + "\" false false false false Test(\\$.*)*",
-            "-classpath", classpath, "Test"});
-    process.waitFor();
-    process.destroy();
-
-    while (!myDataFile.exists()) {
-      Thread.sleep(1000);
-    }
-    final ProjectData projectInfo = ProjectDataLoader.load(myDataFile);
-    assert projectInfo != null;
+    final ProjectData projectInfo = runCoverage(testDataPath, myDataFile, "Test(\\$.*)*", "Test");
 
     final StringBuffer buf = new StringBuffer();
 
@@ -136,4 +134,44 @@ public class CoverageStatusTest extends TestCase {
     Assert.assertEquals(expected, buf.toString());
   }
 
+  public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns, String classToRun)
+      throws IOException, InterruptedException {
+    String javaHome = System.getenv("JAVA_HOME");
+    if (javaHome == null) {
+      throw new RuntimeException("JAVA_HOME environment variable needs to be set");
+    }
+    final String exePath = javaHome + File.separator + "bin" + File.separator + "java";
+    final String path = new File("").getAbsolutePath() + File.separator + "dist" + File.separator;
+    final String coverageAgentPath = path + "coverage-agent.jar";
+    if (!new File(coverageAgentPath).exists()) {
+      throw new RuntimeException("Coverage agent does not exist. Please rebuild all artifacts to build it.");
+    }
+
+    String[] commandLine = {
+        exePath,
+        //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
+        "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" false false false false " + patterns,
+        "-classpath", testDataPath, classToRun};
+    StringBuffer cmd = new StringBuffer();
+    for (String s : commandLine) {
+      cmd.append(s).append(" ");
+    }
+    System.out.println(cmd);
+
+    final Process process = Runtime.getRuntime().exec(commandLine);
+    process.waitFor();
+    process.destroy();
+
+    int retries = 0;
+    while (!coverageDataFile.exists()) {
+      Thread.sleep(1000);
+      retries++;
+      if (retries > 10) {
+        throw new RuntimeException("Timeout waiting for coverage data file to be created");
+      }
+    }
+    final ProjectData projectInfo = ProjectDataLoader.load(coverageDataFile);
+    assert projectInfo != null;
+    return projectInfo;
+  }
 }

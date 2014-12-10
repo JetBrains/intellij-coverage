@@ -7,8 +7,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="coverage" />
-    <orderEntry type="library" name="trov4j" level="project" />
+    <orderEntry type="module" module-name="intellij-coverage" />
+    <orderEntry type="library" name="trove4j" level="project" />
   </component>
 </module>
-
