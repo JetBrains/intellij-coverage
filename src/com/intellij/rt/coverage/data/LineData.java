@@ -134,7 +134,7 @@ public class LineData implements CoverageData {
     return getOrCreateJumpsAndSwitches().getJumpData(jump);
   }
 
-  public void touchBrunch(final int jump, final boolean hit) {
+  public void touchBranch(final int jump, final boolean hit) {
     final JumpData jumpData = getJumpData(jump);
     if (jumpData != null) {
       if (hit) {
@@ -162,7 +162,7 @@ public class LineData implements CoverageData {
     return addSwitch(switchNumber, keys);
   }
 
-  public void touchBrunch(final int switchNumber, final int key) {
+  public void touchBranch(final int switchNumber, final int key) {
     final SwitchData switchData = getSwitchData(switchNumber);
     if (switchData != null) {
       switchData.touch(key);

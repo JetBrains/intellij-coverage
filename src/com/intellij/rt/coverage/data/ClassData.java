@@ -76,10 +76,14 @@ public class ClassData implements CoverageData {
   }
 
   public void merge(final CoverageData data) {
-    mergeLines(((ClassData)data).myLinesArray);
+    ClassData classData = (ClassData) data;
+    mergeLines(classData.myLinesArray);
     final Iterator iterator = getMethodSigs().iterator();
     while (iterator.hasNext()) {
       myStatus.put(iterator.next(), null);
+    }
+    if (mySource == null && classData.mySource != null) {
+      mySource = classData.mySource;
     }
   }
 
@@ -119,14 +123,14 @@ public class ClassData implements CoverageData {
   public void touch(int line, int jump, boolean hit) {
     final LineData lineData = getLineData(line);
     if (lineData != null) {
-      lineData.touchBrunch(jump, hit);
+      lineData.touchBranch(jump, hit);
     }
   }
 
   public void touch(int line, int switchNumber, int key) {
     final LineData lineData = getLineData(line);
     if (lineData != null) {
-      lineData.touchBrunch(switchNumber, key);
+      lineData.touchBranch(switchNumber, key);
     }
   }
 
