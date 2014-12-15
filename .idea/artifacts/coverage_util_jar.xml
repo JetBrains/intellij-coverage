@@ -2,7 +2,7 @@
   <artifact build-on-make="true" name="coverage-util:jar">
     <output-path>$PROJECT_DIR$/dist</output-path>
     <root id="root">
-      <element id="archive" name="util.jar">
+      <element id="archive" name="coverage-util.jar">
         <element id="directory" name="META-INF" />
         <element id="module-output" name="util" />
       </element>
