@@ -96,7 +96,29 @@ public class CoverageStatusTest extends TestCase {
             "6:NONE\n");
   }
 
+  public void testLongClass() throws Exception {
+    StringBuilder expectedBuilder = new StringBuilder("1:NONE\n" +
+        "3:FULL\n");
+    for (int line = 32004; line <= 34004; line++) {
+      expectedBuilder.append(line).append(":FULL\n");
+    }
+    doTest("longClass", expectedBuilder.toString(), true);
+  }
+
+  public void testLongClassTracing() throws Exception {
+    StringBuilder expectedBuilder = new StringBuilder("1:NONE\n" +
+        "3:FULL\n");
+    for (int line = 32004; line < 34004; line++) {
+      expectedBuilder.append(line).append(":FULL\n");
+    }
+    doTest("longClass", expectedBuilder.toString());
+  }
+
   private void doTest(final String className, String expected) throws Exception {
+    doTest(className, expected, false);
+  }
+
+  private void doTest(final String className, String expected, boolean sampling) throws Exception {
     final String testDataPath = new File("").getAbsolutePath() + File.separator + "tests" + File.separator + "testData" + File.separator + "coverage" + File.separator + className;
 
     myDataFile = new File(testDataPath +File.separator+ "Test.ic");
@@ -107,7 +129,7 @@ public class CoverageStatusTest extends TestCase {
 
     myClassFile = new File(testDataPath +File.separator + "Test.class");
 
-    final ProjectData projectInfo = runCoverage(testDataPath, myDataFile, "Test(\\$.*)*", "Test");
+    final ProjectData projectInfo = runCoverage(testDataPath, myDataFile, "Test(\\$.*)*", "Test", sampling);
 
     final StringBuffer buf = new StringBuffer();
 
@@ -134,7 +156,8 @@ public class CoverageStatusTest extends TestCase {
     Assert.assertEquals(expected, buf.toString());
   }
 
-  public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns, String classToRun)
+  public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
+                                        String classToRun, final boolean sampling)
       throws IOException, InterruptedException {
     String javaHome = System.getenv("JAVA_HOME");
     if (javaHome == null) {
@@ -150,7 +173,8 @@ public class CoverageStatusTest extends TestCase {
     String[] commandLine = {
         exePath,
         //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
-        "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" false false false false " + patterns,
+        "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" false false false "
+            + sampling + " " + patterns,
         "-classpath", testDataPath, classToRun};
     StringBuffer cmd = new StringBuffer();
     for (String s : commandLine) {

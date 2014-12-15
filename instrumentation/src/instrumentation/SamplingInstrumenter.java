@@ -55,7 +55,12 @@ public class SamplingInstrumenter extends Instrumenter {
       public void visitLineNumber(final int line, final Label start) {
         getOrCreateLineData(line, name, desc);
         mv.visitVarInsn(Opcodes.ALOAD, getCurrentClassDataNumber());
-        mv.visitIntInsn(Opcodes.SIPUSH, line);
+        if (line <= Short.MAX_VALUE) {
+          mv.visitIntInsn(Opcodes.SIPUSH, line);
+        }
+        else {
+          mv.visitLdcInsn(new Integer(line));
+        }
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchLine", "(" + OBJECT_TYPE + "I)V");
         super.visitLineNumber(line, start);
       }

@@ -134,7 +134,7 @@ public class CoverageMergeTest extends TestCase {
     myFiles2Delete.add(new File(testDataPath + File.separator + className + ".class"));
     myFiles2Delete.add(new File(testDataPath + File.separator + COMMON + ".class"));
 
-    return CoverageStatusTest.runCoverage(testDataPath, dataFile, ".*", className);
+    return CoverageStatusTest.runCoverage(testDataPath, dataFile, ".*", className, false);
   }
 
   private void doTest(String testName, String expected1, String expected2, String expectedMerged) throws Exception {

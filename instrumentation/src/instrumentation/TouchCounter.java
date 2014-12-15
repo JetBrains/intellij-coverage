@@ -60,7 +60,7 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
     myCurrentSwitchIdx = 0;
 
     mv.visitVarInsn(Opcodes.ALOAD, getCurrentClassDataNumber());
-    mv.visitIntInsn(Opcodes.SIPUSH, line);
+    pushLineNumber(line);
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/Object;I)V");
     super.visitLineNumber(line, start);
   }
@@ -79,7 +79,7 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
       Label l = new Label();
 
       mv.visitVarInsn(Opcodes.ILOAD, getLineVariableNumber());
-      mv.visitIntInsn(Opcodes.SIPUSH, myLastLineJump);
+      pushLineNumber(myLastLineJump);
       mv.visitJumpInsn(Opcodes.IF_ICMPNE, l);
 
       mv.visitVarInsn(Opcodes.ILOAD, getJumpVariableNumber());
@@ -146,7 +146,7 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
     if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR && !myEnumerator.getMethodName().equals("<clinit>") && myEnumerator.isJump(label) && !(state == GETSTATIC_SEEN && opcode == Opcodes.IFNE)) {
       myLastJump = myCurrentJumpIdx;
       myLastLineJump = myCurrentLine;
-      mv.visitIntInsn(Opcodes.SIPUSH, myCurrentLine);
+      pushLineNumber(myCurrentLine);
       mv.visitVarInsn(Opcodes.ISTORE, getLineVariableNumber());
       mv.visitIntInsn(Opcodes.SIPUSH, myCurrentJumpIdx++);
       mv.visitVarInsn(Opcodes.ISTORE, getJumpVariableNumber());
@@ -185,11 +185,20 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
   }
 
   private void storeSwitchDescriptor() {
-    mv.visitIntInsn(Opcodes.SIPUSH, myCurrentLine);
+    pushLineNumber(myCurrentLine);
     mv.visitVarInsn(Opcodes.ISTORE, getLineVariableNumber());
 
     mv.visitIntInsn(Opcodes.SIPUSH, myCurrentSwitchIdx++);
     mv.visitVarInsn(Opcodes.ISTORE, getSwitchVariableNumber());
+  }
+
+  private void pushLineNumber(int line) {
+    if (line <= Short.MAX_VALUE) {
+      mv.visitIntInsn(Opcodes.SIPUSH, line);
+    }
+    else {
+      mv.visitLdcInsn(new Integer(line));
+    }
   }
 
 
