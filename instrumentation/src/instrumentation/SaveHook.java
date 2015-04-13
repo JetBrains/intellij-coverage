@@ -53,7 +53,9 @@ public class SaveHook implements Runnable {
 
     public void save(ProjectData projectData) {
         projectData.stop();
+        CoverageIOUtil.FileLock lock = null;
         try {
+            lock = CoverageIOUtil.FileLock.lock(myDataFile);
             if (myAppendUnloaded) {
                 appendUnloaded(projectData);
             }
@@ -84,24 +86,34 @@ public class SaveHook implements Runnable {
             ErrorReporter.reportError("Out of memory error occurred, try to increase memory available for the JVM, or make include / exclude patterns more specific", e);
         } catch (Throwable e) {
             ErrorReporter.reportError("Unexpected error", e);
+        } finally {
+            CoverageIOUtil.FileLock.unlock(lock);
         }
     }
 
     public static void saveSourceMap(Map str_clData_classes, File sourceMapFile) {
-        if (sourceMapFile != null) {
-            Map readNames = Collections.emptyMap();
-            try {
-                if (sourceMapFile.exists()) {
-                    readNames = loadSourceMapFromFile(str_clData_classes, sourceMapFile);
+        CoverageIOUtil.FileLock lock = null;
+        try {
+            lock = CoverageIOUtil.FileLock.lock(sourceMapFile);
+            if (sourceMapFile != null) {
+                Map readNames = Collections.emptyMap();
+                try {
+                    if (sourceMapFile.exists()) {
+                        readNames = loadSourceMapFromFile(str_clData_classes, sourceMapFile);
+                    }
+                } catch (IOException e) {
+                    ErrorReporter.reportError("Error loading source map from " + sourceMapFile.getPath(), e);
                 }
-            } catch (IOException e) {
-                ErrorReporter.reportError("Error loading source map from " + sourceMapFile.getPath(), e);
-            }
 
-            try {
-                doSaveSourceMap(readNames, sourceMapFile, str_clData_classes);
-            } catch (IOException e) {
-                ErrorReporter.reportError("Error writing source map " + sourceMapFile.getPath(), e);
+                try {
+                    doSaveSourceMap(readNames, sourceMapFile, str_clData_classes);
+                } catch (IOException e) {
+                    ErrorReporter.reportError("Error writing source map " + sourceMapFile.getPath(), e);
+                }
+            }
+        } finally {
+            if (lock != null) {
+                CoverageIOUtil.FileLock.unlock(lock);
             }
         }
     }

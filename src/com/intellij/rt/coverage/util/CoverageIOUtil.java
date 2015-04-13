@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.util;
 
 import java.io.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -34,6 +35,83 @@ public class CoverageIOUtil {
   private CoverageIOUtil() {
   }
 
+  public final static class FileLock {
+    final File lock;
+    final File target;
+    boolean isLocked = false;
+
+    protected FileLock(final File target) {
+      this.target = target;
+      lock = new File(target.getParentFile(), target.getName() + ".lck");
+      if (lock.getParentFile() != null) {
+        lock.getParentFile().mkdirs();
+      }
+    }
+
+    synchronized boolean tryLock() {
+      try {
+        return isLocked = lock.createNewFile();
+      } catch (IOException e) {
+        return false;
+      }
+    }
+
+    private boolean brokenLock() {
+      return (isLocked = lock.renameTo(new File(lock.getParentFile(), lock.getName() + ".broken")));
+    }
+
+    synchronized boolean tryUnlock() {
+      return isLocked = lock.delete();
+    }
+
+    synchronized boolean tryUnlockForced() {
+      return tryUnlock() || brokenLock();
+    }
+
+    public synchronized static FileLock lock(final File targetFile) {
+        return lock(targetFile, 2, TimeUnit.MINUTES, 100);
+    }
+
+    /**
+     * @param targetFile    File to lock
+     * @return Lock object
+     */
+    public synchronized static FileLock lock(final File targetFile, final long totalTimeout, final TimeUnit unit, final long waitTimeMS) {
+      final FileLock lock = new FileLock(targetFile);
+      for (int i = 0; i < unit.toMillis(totalTimeout); ++i) {
+        if (lock.tryLock()) {
+          return lock;
+        }
+        try {
+          Thread.sleep(waitTimeMS);
+        } catch (InterruptedException e) {
+          return null;
+        }
+      }
+      return null;
+    }
+
+    public synchronized static boolean unlock(final FileLock lock) {
+      return unlock(lock, 2, TimeUnit.MINUTES, 100);
+    }
+
+    public synchronized static boolean unlock(final FileLock lock, final long totalTimeout, final TimeUnit unit, final long waitTimeMS) {
+      if (lock == null) {
+        return true;
+      }
+      for (long i = 0; i < unit.toMillis(totalTimeout); i += waitTimeMS) {
+        if (lock.tryUnlock()) {
+          return true;
+        }
+        try {
+          Thread.sleep(waitTimeMS);
+        } catch (InterruptedException ignore) {
+          return false;
+        }
+      }
+      return lock.tryUnlockForced();
+    }
+  }
 
   public static String readString(DataInput stream) throws IOException {
     int length = stream.readInt();
