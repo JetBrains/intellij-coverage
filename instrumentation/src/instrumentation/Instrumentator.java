@@ -19,7 +19,6 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
-import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.org.objectweb.asm.ClassReader;
 import org.jetbrains.org.objectweb.asm.ClassVisitor;
@@ -59,9 +58,7 @@ public class Instrumentator {
     final File dataFile = new File(args[0]);
     final boolean calcUnloaded = Boolean.valueOf(args[2]).booleanValue();
     ProjectData initialData = null;
-    if (Boolean.valueOf(args[3]).booleanValue() && dataFile.isFile()) {
-      initialData = ProjectDataLoader.load(dataFile);
-    }
+    final boolean mergeData = Boolean.valueOf(args[3]).booleanValue();
     int i = 5;
 
     final File sourceMapFile;
@@ -108,7 +105,7 @@ public class Instrumentator {
     }
 
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
-    final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf);
+    final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf, mergeData);
     hook.setSourceMapFile(sourceMapFile);
     Runtime.getRuntime().addShutdownHook(new Thread(hook));
 

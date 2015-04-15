@@ -40,11 +40,13 @@ public class SaveHook implements Runnable {
     private File mySourceMapFile;
     private final boolean myAppendUnloaded;
     private final ClassFinder myClassFinder;
+    private final boolean myMergeFile;
 
-    public SaveHook(File dataFile, boolean appendUnloaded, ClassFinder classFinder) {
+    public SaveHook(File dataFile, boolean appendUnloaded, ClassFinder classFinder, boolean mergeFile) {
         myDataFile = dataFile;
         myAppendUnloaded = appendUnloaded;
         myClassFinder = classFinder;
+        myMergeFile = mergeFile;
     }
 
     public void run() {
@@ -58,6 +60,11 @@ public class SaveHook implements Runnable {
             lock = CoverageIOUtil.FileLock.lock(myDataFile);
             if (myAppendUnloaded) {
                 appendUnloaded(projectData);
+            }
+
+            if (myMergeFile) {
+                final ProjectData load = ProjectDataLoader.load(myDataFile);
+                projectData.merge(load);
             }
 
             DataOutputStream os = null;

@@ -29,12 +29,20 @@ import java.io.*;
  */
 public class ProjectDataLoader {
 
-  public static ProjectData load(File sessionDataFile) throws InterruptedException {
-    final ProjectData projectInfo = new ProjectData();
-    DataInputStream in = null;
+  public static ProjectData loadLocked(final File sessionDataFile) {
     CoverageIOUtil.FileLock lock = null;
     try {
       lock = CoverageIOUtil.FileLock.lock(sessionDataFile);
+      return load(sessionDataFile);
+    } finally {
+      CoverageIOUtil.FileLock.unlock(lock);
+    }
+  }
+
+  public static ProjectData load(File sessionDataFile) {
+    final ProjectData projectInfo = new ProjectData();
+    DataInputStream in = null;
+    try {
       if (sessionDataFile.length() == 0) {
         return projectInfo;
       }
@@ -97,7 +105,6 @@ public class ProjectDataLoader {
       ErrorReporter.reportError("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath(), e);
       return projectInfo;
     } finally {
-      CoverageIOUtil.FileLock.unlock(lock);
       if (in != null) {
         try {
           in.close();
