@@ -78,7 +78,7 @@ public class CoverageIOUtil {
      */
     public synchronized static FileLock lock(final File targetFile, final long totalTimeout, final TimeUnit unit, final long waitTimeMS) {
       final FileLock lock = new FileLock(targetFile);
-      for (int i = 0; i < unit.toMillis(totalTimeout); ++i) {
+      for (long timePassed = 0; timePassed < unit.toMillis(totalTimeout); ++timePassed) {
         if (lock.tryLock()) {
           return lock;
         }
@@ -99,7 +99,7 @@ public class CoverageIOUtil {
       if (lock == null) {
         return true;
       }
-      for (long i = 0; i < unit.toMillis(totalTimeout); i += waitTimeMS) {
+      for (long timePassed = 0; timePassed < unit.toMillis(totalTimeout); timePassed += waitTimeMS) {
         if (lock.tryUnlock()) {
           return true;
         }
