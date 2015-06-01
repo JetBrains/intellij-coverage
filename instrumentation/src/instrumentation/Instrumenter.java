@@ -63,7 +63,6 @@ public abstract class Instrumenter extends ClassVisitor {
     if (mv == null) return mv;
     if ((access & Opcodes.ACC_BRIDGE) != 0) return mv; //try to skip bridge methods
     if ((access & Opcodes.ACC_ABSTRACT) != 0) return mv; //skip abstracts; do not include interfaces without non-abstract methods in result
-    if ((access & Opcodes.ACC_SYNTHETIC) != 0) return mv; //skip synthetic methods
     if (myEnum && isDefaultEnumMethod(name, desc, signature, myClassName)) {
       return mv;
     }

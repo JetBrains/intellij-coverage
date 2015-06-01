@@ -96,6 +96,14 @@ public class CoverageStatusTest extends TestCase {
             "6:NONE\n");
   }
 
+  public void _testLambda() throws Exception {
+    doTest("lambda", "1:NONE\n" +
+            "3:FULL\n" +
+            "4:FULL\n" +
+            "5:FULL\n" +
+            "10:FULL\n");
+  }
+
   public void testLongClass() throws Exception {
     StringBuilder expectedBuilder = new StringBuilder("1:NONE\n" +
         "3:FULL\n");
