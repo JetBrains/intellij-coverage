@@ -116,7 +116,14 @@ public class JSR45Util {
       } else {
         fileName = processRelative(fileName);
         final int lastDot = fileName.lastIndexOf(".");
-        result[i / 2] = getClassPackageName(className) + (fileName.substring(0, lastDot) + "_" + fileName.substring(lastDot + 1)).replace('/', '.');
+          final String fileNameWithDots;
+          if (lastDot < 0) {
+            fileNameWithDots = fileName;
+          }
+          else {
+            fileNameWithDots = fileName.substring(0, lastDot) + "_" + fileName.substring(lastDot + 1);
+          }
+          result[i / 2] = getClassPackageName(className) + fileNameWithDots.replace('/', '.');
       }
     }
     return result;
