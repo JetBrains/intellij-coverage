@@ -52,9 +52,9 @@
         <attribute name="Boot-Class-Path" value="coverage-agent.jar"/>
       </manifest>
 
-      <fileset dir="${build.rt.classes.dir}/coverage" includes="com/intellij/rt/coverage/data/**"/>
-      <fileset dir="${build.rt.classes.dir}/coverage" includes="com/intellij/rt/coverage/main/**"/>
-      <fileset dir="${build.rt.classes.dir}/coverage" includes="com/intellij/rt/coverage/util/**"/>
+      <fileset dir="${build.rt.classes.dir}/intellij-coverage" includes="com/intellij/rt/coverage/data/**"/>
+      <fileset dir="${build.rt.classes.dir}/intellij-coverage" includes="com/intellij/rt/coverage/main/**"/>
+      <fileset dir="${build.rt.classes.dir}/intellij-coverage" includes="com/intellij/rt/coverage/util/**"/>
     </jar>
     <jar destfile="${instrumenter.jar}">
       <fileset dir="${build.rt.classes.dir}/instrumentation" includes="com/intellij/rt/coverage/instrumentation/**"/>
