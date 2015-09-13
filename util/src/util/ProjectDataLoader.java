@@ -29,10 +29,23 @@ import java.io.*;
  */
 public class ProjectDataLoader {
 
+  public static ProjectData loadLocked(final File sessionDataFile) {
+    CoverageIOUtil.FileLock lock = null;
+    try {
+      lock = CoverageIOUtil.FileLock.lock(sessionDataFile);
+      return load(sessionDataFile);
+    } finally {
+      CoverageIOUtil.FileLock.unlock(lock);
+    }
+  }
+
   public static ProjectData load(File sessionDataFile) {
     final ProjectData projectInfo = new ProjectData();
     DataInputStream in = null;
     try {
+      if (sessionDataFile.length() == 0) {
+        return projectInfo;
+      }
       in = new DataInputStream(new BufferedInputStream(new FileInputStream(sessionDataFile)));
       final TIntObjectHashMap dict = new TIntObjectHashMap(1000, 0.99f);
       final int classCount = CoverageIOUtil.readINT(in);
@@ -91,13 +104,13 @@ public class ProjectDataLoader {
     } catch (Exception e) {
       ErrorReporter.reportError("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath(), e);
       return projectInfo;
-    }
-    finally {
-      try {
-        in.close();
-      }
-      catch (IOException e) {
-        ErrorReporter.reportError("Failed to close file: " + sessionDataFile.getAbsolutePath(), e);
+    } finally {
+      if (in != null) {
+        try {
+          in.close();
+        } catch (IOException e) {
+          ErrorReporter.reportError("Failed to close file: " + sessionDataFile.getAbsolutePath(), e);
+        }
       }
     }
     return projectInfo;
