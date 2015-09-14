@@ -17,7 +17,7 @@
 <project name="IDEA Coverage Agent" default="all">
   <property name="dist" value="${basedir}/dist"/>
   <property name="coverage.data.jar" value="${dist}/coverage-agent.jar"/>
-  <property name="instrumenter.jar" value="${dist}/instrumenter.jar"/>
+  <property name="instrumenter.jar" value="${dist}/coverage-instrumenter.jar"/>
   <property name="util.jar" value="${dist}/coverage-util.jar"/>
   <property name="src.dst" value="${dist}/coverage-src.zip"/>
   <property name="build.rt.classes.dir" value="${basedir}/out/production"/>
