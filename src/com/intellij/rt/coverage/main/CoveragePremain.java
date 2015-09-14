@@ -34,7 +34,7 @@ public class CoveragePremain {
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
     final File lib = new File(getArchivePath()).getParentFile();
     final URL[] urls = new URL[3];
-    urls[0] = fileToURL(new File(lib, "instrumenter.jar"));
+    urls[0] = fileToURL(new File(lib, "coverage-instrumenter.jar"));
     urls[1] = fileToURL(new File(lib, "asm-all.jar"));
     urls[2] = fileToURL(new File(lib, "trove4j.jar"));
 
