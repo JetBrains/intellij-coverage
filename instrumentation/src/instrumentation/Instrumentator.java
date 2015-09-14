@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.testDiscovery.TestDiscoveryInstrumenter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
@@ -32,6 +33,7 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -42,24 +44,29 @@ public class Instrumentator {
 
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
     String[] args;
-    File argsFile = new File(argsString);
-    if (argsFile.isFile()) {
-      try {
-        args = readArgsFromFile(argsString);
-      } catch (IOException e) {
-        ErrorReporter.reportError("Arguments were not passed correctly", e);
-        return;
+    if (argsString != null) {
+      File argsFile = new File(argsString);
+      if (argsFile.isFile()) {
+        try {
+          args = readArgsFromFile(argsString);
+        } catch (IOException e) {
+          ErrorReporter.reportError("Arguments were not passed correctly", e);
+          return;
+        }
+      } else {
+        args = tokenize(argsString);
       }
-    } else {
-      args = tokenize(argsString);
+    }
+    else {
+      args = new String[0];
     }
 
-    final boolean traceLines = Boolean.valueOf(args[1]).booleanValue();
-    final boolean sampling = Boolean.valueOf(args[4]).booleanValue();
-    final File dataFile = new File(args[0]);
-    final boolean calcUnloaded = Boolean.valueOf(args[2]).booleanValue();
+    final boolean traceLines = args.length > 0 && Boolean.valueOf(args[1]).booleanValue();
+    final boolean sampling = args.length == 0 || Boolean.valueOf(args[4]).booleanValue();
+    final File dataFile = args.length > 0 ? new File(args[0]) : null;
+    final boolean calcUnloaded = args.length > 0 && Boolean.valueOf(args[2]).booleanValue();
     ProjectData initialData = null;
-    if (Boolean.valueOf(args[3]).booleanValue() && dataFile.isFile()) {
+    if (args.length > 0 && Boolean.valueOf(args[3]).booleanValue() && dataFile.isFile()) {
       initialData = ProjectDataLoader.load(dataFile);
     }
     int i = 5;
@@ -72,45 +79,57 @@ public class Instrumentator {
       sourceMapFile = null;
     }
 
-    final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling);
-    final List includePatterns = new ArrayList();
-    System.out.println("---- IntelliJ IDEA coverage runner ---- ");
-    System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
-    final String excludes = "-exclude";
-    System.out.println("include patterns:");
-    for (; i < args.length; i++) {
-      if (excludes.equals(args[i])) break;
-      try {
-        includePatterns.add(Pattern.compile(args[i]));
-        System.out.println(args[i]);
-      } catch (PatternSyntaxException ex) {
-        System.err.println("Problem occurred with include pattern " + args[i]);
-        System.err.println(ex.getDescription());
-        System.err.println("This may cause no tests run and no coverage collected");
-        System.exit(1);
+    final ProjectData data = args.length == 0 
+            ? ProjectData.createProjectData() 
+            : ProjectData.createProjectData(dataFile, initialData, traceLines, sampling);
+    final List includePatterns;
+    final List excludePatterns;
+    if (!data.isTestDiscovery()) {
+      includePatterns = new ArrayList();
+      System.out.println("---- IntelliJ IDEA coverage runner ---- ");
+      System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
+      final String excludes = "-exclude";
+      System.out.println("include patterns:");
+      for (; i < args.length; i++) {
+        if (excludes.equals(args[i])) break;
+        try {
+          includePatterns.add(Pattern.compile(args[i]));
+          System.out.println(args[i]);
+        } catch (PatternSyntaxException ex) {
+          System.err.println("Problem occurred with include pattern " + args[i]);
+          System.err.println(ex.getDescription());
+          System.err.println("This may cause no tests run and no coverage collected");
+          System.exit(1);
+        }
+      }
+      System.out.println("exclude patterns:");
+      i++;
+      excludePatterns = new ArrayList();
+      for (; i < args.length; i++) {
+        try {
+          final Pattern pattern = Pattern.compile(args[i]);
+          excludePatterns.add(pattern);
+          System.out.println(pattern.pattern());
+        } catch (PatternSyntaxException ex) {
+          System.err.println("Problem occurred with exclude pattern " + args[i]);
+          System.err.println(ex.getDescription());
+          System.err.println("This may cause no tests run and no coverage collected");
+          System.exit(1);
+        }
+  
       }
     }
-    System.out.println("exclude patterns:");
-    i++;
-    final List excludePatterns = new ArrayList();
-    for (; i < args.length; i++) {
-      try {
-        final Pattern pattern = Pattern.compile(args[i]);
-        excludePatterns.add(pattern);
-        System.out.println(pattern.pattern());
-      } catch (PatternSyntaxException ex) {
-        System.err.println("Problem occurred with exclude pattern " + args[i]);
-        System.err.println(ex.getDescription());
-        System.err.println("This may cause no tests run and no coverage collected");
-        System.exit(1);
-      }
-
+    else {
+      includePatterns = Collections.emptyList();
+      excludePatterns = Collections.emptyList();
     }
 
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
-    final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf);
-    hook.setSourceMapFile(sourceMapFile);
-    Runtime.getRuntime().addShutdownHook(new Thread(hook));
+    if (dataFile != null) {
+      final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf);
+      hook.setSourceMapFile(sourceMapFile);
+      Runtime.getRuntime().addShutdownHook(new Thread(hook));
+    }
 
     instrumentation.addTransformer(new ClassFileTransformer() {
       private boolean computeFrames = computeFrames();
@@ -192,7 +211,10 @@ public class Instrumentator {
     
     final ClassVisitor cv;
     if (data.isSampling()) {
-      if (System.getProperty("idea.new.sampling.coverage") != null) {
+      if (System.getProperty(ProjectData.TRACE_DIR) != null) {
+        cv = new TestDiscoveryInstrumenter(cw, cr, className);
+      }
+      else if (System.getProperty("idea.new.sampling.coverage") != null) {
         //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode  
         cv = new NewSamplingInstrumenter(data, cw, cr, className, shouldCalculateSource); 
       }
