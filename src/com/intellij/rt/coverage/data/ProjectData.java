@@ -32,6 +32,7 @@ public class ProjectData implements CoverageData, Serializable {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/ProjectData";
 
   private static final MethodCaller TOUCH_LINE_METHOD = new MethodCaller("touchLine", new Class[] {int.class});
+  private static final MethodCaller TOUCH_LINES_METHOD = new MethodCaller("touchLines", new Class[] {int[].class});
   private static final MethodCaller TOUCH_SWITCH_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, int.class});
   private static final MethodCaller TOUCH_JUMP_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, boolean.class});
   private static final MethodCaller TOUCH_METHOD = new MethodCaller("touch", new Class[] {int.class});
@@ -281,14 +282,29 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
 
-  private static void touch(final MethodCaller methodCaller, Object classData, final Object[] paramValues) {
+  private static Object touch(final MethodCaller methodCaller, Object classData, final Object[] paramValues) {
     try {
-      methodCaller.invoke(classData, paramValues);
+      return methodCaller.invoke(classData, paramValues);
     } catch (Exception e) {
       ErrorReporter.reportError("Error in project data collection: " + methodCaller.myMethodName, e);
+      return null;
     }
   }
 
+  public static int[] touchClassLines(String className, int[] lines) {
+      if (ourProjectData != null) {
+          return ourProjectData.getClassData(className).touchLines(lines);
+      }
+      try {
+          final Object projectDataObject = getProjectDataObject();
+          Object classData = GET_CLASS_DATA_METHOD.invoke(projectDataObject, new Object[]{className});
+          return (int[]) touch(TOUCH_LINES_METHOD, classData, new Object[] {lines});
+      } catch (Exception e) {
+          ErrorReporter.reportError("Error in class data loading: " + className, e);
+          return lines;
+      }
+  }  
+    
   public static Object loadClassData(String className) {
     if (ourProjectData != null) {
       return ourProjectData.getClassData(className);

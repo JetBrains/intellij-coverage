@@ -189,51 +189,25 @@ public class Instrumentator {
     } else {
       cw = getClassWriter(ClassWriter.COMPUTE_MAXS, loader);
     }
-    final ClassVisitor cv =  data.isSampling() ? ((ClassVisitor) new SamplingInstrumenter(data, cw, className, shouldCalculateSource)) : new ClassInstrumenter(data, cw, className, shouldCalculateSource);
+    
+    final ClassVisitor cv;
+    if (data.isSampling()) {
+      if (System.getProperty("idea.new.sampling.coverage") != null) {
+        //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode  
+        cv = new NewSamplingInstrumenter(data, cw, cr, className, shouldCalculateSource); 
+      }
+      else {
+        cv = ((ClassVisitor) new SamplingInstrumenter(data, cw, className, shouldCalculateSource));
+      }
+    }
+    else {
+      cv = new ClassInstrumenter(data, cw, className, shouldCalculateSource);
+    }
     cr.accept(cv, 0);
     return cw.toByteArray();
   }
 
   private static ClassWriter getClassWriter(int flags, final ClassLoader classLoader) {
-    /*if (flags == ClassWriter.COMPUTE_FRAMES && System.getProperty("idea.asm.default.compute.frames") == null) {
-
-      final Class classFinder;
-      try {
-        classFinder = Class.forName("com.intellij.compiler.instrumentation.InstrumentationClassFinder");
-      } catch (ClassNotFoundException e) {
-        //do not log error when finder is not supported
-        return new MyClassWriter(flags, classLoader);
-      }
-
-      try {
-        Constructor constructor = classFinder.getDeclaredConstructor(new Class[]{new URL[0].getClass(), new URL[0].getClass()});
-        if (constructor != null) {
-          constructor.setAccessible(true);
-          if (classLoader instanceof URLClassLoader) {
-            final URL[] urls = ((URLClassLoader) classLoader).getURLs();
-            final ClassLoader parentLoader = classLoader.getParent();
-            URL[] platform = null;
-            if (parentLoader == null) {
-              platform = new URL[0];
-            } else if (parentLoader instanceof URLClassLoader) {
-              platform = ((URLClassLoader) parentLoader).getURLs();
-            }
-            if (platform != null) {
-              final Object finder = constructor.newInstance(new Object[]{platform, urls});
-              final Class classWriter = Class.forName("com.intellij.compiler.instrumentation.InstrumenterClassWriter");
-              final Constructor classWriterDeclaredConstructor = classWriter.getDeclaredConstructor(new Class[]{int.class, classFinder});
-              if (classWriterDeclaredConstructor != null) {
-                classWriterDeclaredConstructor.setAccessible(true);
-                return (ClassWriter) classWriterDeclaredConstructor.newInstance(new Object[]{Integer.valueOf(flags), finder});
-              }
-            }
-          }
-        }
-      } catch (Exception e) {
-        ErrorReporter.logError(e.getMessage());
-      }
-    }
-*/
     return new MyClassWriter(flags, classLoader);
   }
 

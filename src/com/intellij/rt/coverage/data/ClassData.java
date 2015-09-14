@@ -260,4 +260,9 @@ public class ClassData implements CoverageData {
   public String getSource() {
     return mySource;
   }
+    
+  public int[] touchLines(int[] lines) { //todo
+      myLineMask = lines;
+      return lines;
+  }
 }
