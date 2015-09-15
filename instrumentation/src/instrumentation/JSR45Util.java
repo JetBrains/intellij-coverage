@@ -21,7 +21,7 @@ import com.intellij.rt.coverage.data.LineMapData;
 import gnu.trove.THashSet;
 import gnu.trove.TIntObjectHashMap;
 
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * @author anna
@@ -88,13 +88,14 @@ public class JSR45Util {
         }
       }
 
-      final FileMapData[] result = new FileMapData[linesMap.size()];
+      final List result = new ArrayList();
       final int[] keys = linesMap.keys();
+      Arrays.sort(keys);
       for (int i = 0; i < keys.length; i++) {
         final int key = keys[i];
-        result[key] = new FileMapData(fileNames[key], getLinesMapping((THashSet) linesMap.get(key)));
+        result.add(new FileMapData(fileNames[key], getLinesMapping((THashSet) linesMap.get(key))));
       }
-      return result;
+      return (FileMapData[]) result.toArray(new FileMapData[result.size()]);
     }
     return null;
   }
