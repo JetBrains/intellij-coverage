@@ -132,7 +132,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
 
     protected void getOrCreateLineData(int line, String name, String desc) {
         if (myLines == null) {
-            myLines = new LineData[myMaxLineNumber];
+            myLines = new LineData[myMaxLineNumber + 1];
         }
 
         if (myLines[line] == null) {
