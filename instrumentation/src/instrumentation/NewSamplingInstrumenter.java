@@ -96,18 +96,14 @@ public class NewSamplingInstrumenter extends ClassVisitor {
                                      final String[] exceptions) {
         final MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
 
-        if (mv == null || !shouldProcessMethod(access, name, desc, signature, myEnum)) {  
+        if (mv == null || !shouldProcessMethod(access, name, desc, signature, myEnum) || name.equals("<init>")) {  
             return mv;
         }
         myProcess = true;
-        if ("<clinit>".equals(name)) {
-            myVisitedStaticBlock = true;
-            return new StaticBlockMethodVisitor(mv);
-        }
-        return new MethodVisitor(Opcodes.ASM5, mv) {
+        final MethodVisitor visitor = new MethodVisitor(Opcodes.ASM5, mv) {
             public void visitLineNumber(final int line, final Label start) {
                 getOrCreateLineData(line, name, desc);
-                
+
                 //prepare for store: load array and index
                 visitFieldInsn(Opcodes.GETSTATIC, myClassNameType, LINE_HITS_FIELD_NAME, "[I");
                 pushInstruction(mv, line);
@@ -118,16 +114,21 @@ public class NewSamplingInstrumenter extends ClassVisitor {
                 pushInstruction(mv, line);
                 //load array[index]
                 visitInsn(Opcodes.IALOAD);
-                
+
                 //increment
                 visitInsn(Opcodes.ICONST_1);
                 visitInsn(Opcodes.IADD);
-                
+
                 //stack: array, index, incremented value: store value in array[index]
                 visitInsn(Opcodes.IASTORE);
                 super.visitLineNumber(line, start);
             }
         };
+        if ("<clinit>".equals(name)) {
+            myVisitedStaticBlock = true;
+            return new StaticBlockMethodVisitor(visitor);
+        }
+        return visitor;
     }
 
     protected void getOrCreateLineData(int line, String name, String desc) {
