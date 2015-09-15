@@ -29,7 +29,7 @@
     <mkdir dir="${temp.src}"/>
     <copy todir="${temp.src}" includeemptydirs="true">
       <!-- coverage module src -->
-      <fileset dir="${basedir}/src" includes="com/**"/>
+      <fileset dir="${basedir}/src/com/intellij/rt/coverage" includes="**"/>
       <!-- instrumentation module src -->
       <fileset dir="${basedir}/instrumentation/src" includes="instrumentation/**"/>
       <!-- util module src -->
