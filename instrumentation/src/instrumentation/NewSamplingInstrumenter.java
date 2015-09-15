@@ -47,8 +47,8 @@ public class NewSamplingInstrumenter extends ClassVisitor {
                                    final boolean shouldCalculateSource) {
         super(Opcodes.ASM5, classVisitor);
         myProjectData = projectData;
-        myClassName = className;
-        myClassNameType = myClassName.replace(".", "/");
+        myClassName = className.replace('$', '.');
+        myClassNameType = className.replace(".", "/");
         myShouldCalculateSource = shouldCalculateSource;
         myMaxLineNumber = calcMaxLineNumber(cr);
         myLines = new LineData[myMaxLineNumber + 1];
