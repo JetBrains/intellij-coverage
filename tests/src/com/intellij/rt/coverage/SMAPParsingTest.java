@@ -35,15 +35,15 @@ public class SMAPParsingTest extends TestCase {
             "JSP\n" +
             "*S JSP\n" +
             "*F\n" +
-            "+ 0 Hello.jsp\n" +
+            "+ 1 Hello.jsp\n" +
             "Hello.jsp\n" +
-            "+ 1 greeting.jsp\n" +
+            "+ 2 greeting.jsp\n" +
             "greeting.jsp\n" +
             "*L\n" +
             "1,5:59\n" +
-            "1#1,2:64\n" +
+            "1#2,2:64\n" +
             "3:66,4\n" +
-            "6#0,3:70\n" +
+            "6#1,3:70\n" +
             "*E";
     final FileMapData[] expected = new FileMapData[]{new FileMapData("org.apache.jsp.Hello_jsp",
         new LineMapData[] {
@@ -69,6 +69,27 @@ public class SMAPParsingTest extends TestCase {
       final FileMapData expectedData = expected[i];
       Assert.assertEquals(data.toString(), expectedData.toString(), data.toString());
     }
+  }
+
+  public void testKotlinSMAP() throws Exception {
+    String test = "SMAP\n" +
+                  "StoreAwareProjectManager.kt\n" +
+                  "Kotlin\n" +
+                  "*S Kotlin\n" +
+                  "*F\n" +
+                  "+ 1 StoreAwareProjectManager.kt\n" +
+                  "com/intellij/configurationStore/StoreAwareProjectManager\n" +
+                  "+ 2 Standard.kt\n" +
+                  "kotlin/KotlinPackage\n" +
+                  "+ 3 JLangJVM.kt\n" +
+                  "kotlin/KotlinPackage\n" +
+                  "*L\n" +
+                  "1#1,296:1\n" +
+                  "24#2:297\n" +
+                  "45#3,6:298\n" +
+                  "*E";
+    final FileMapData[] datas = JSR45Util.extractLineMapping(test, "StoreAwareProjectManager");
+
   }
 
   public void testRelativePath() {

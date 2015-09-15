@@ -41,7 +41,7 @@ public class JSR45Util {
       final String[] fileNames = parseFileNames(debug.substring(fileSectionIdx + FILE_SECTION.length(), lineInfoIdx), className);
       final String lineInfo = debug.substring(lineInfoIdx + LINE_SECTION.length(), debug.indexOf(END_SECTION));
       final String[] lines = lineInfo.split("\n");
-      int fileId = 0;
+      int fileId = 1;
       for (int i = 0; i < lines.length; i++) {
         //InputStartLine # LineFileID , RepeatCount : OutputStartLine , OutputLineIncrement
         int startSrcLine;
@@ -93,7 +93,7 @@ public class JSR45Util {
       Arrays.sort(keys);
       for (int i = 0; i < keys.length; i++) {
         final int key = keys[i];
-        result.add(new FileMapData(fileNames[key], getLinesMapping((THashSet) linesMap.get(key))));
+        result.add(new FileMapData(fileNames[key - 1], getLinesMapping((THashSet) linesMap.get(key))));
       }
       return (FileMapData[]) result.toArray(new FileMapData[result.size()]);
     }
