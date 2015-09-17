@@ -158,7 +158,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
 
     public void visitEnd() {
         if (myProcess) {
-            visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_STATIC, LINE_HITS_FIELD_NAME, "[I", null, null);
+            visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_STATIC | Opcodes.ACC_TRANSIENT, LINE_HITS_FIELD_NAME, "[I", null, null);
 
             if (!myVisitedStaticBlock) {
                 MethodVisitor mv = super.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
