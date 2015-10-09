@@ -188,7 +188,7 @@ public class Instrumentator {
   private static String[] readArgsFromFile(String arg) throws IOException {
     final List result = new ArrayList();
     final File file = new File(arg);
-    final BufferedReader reader = new BufferedReader(new FileReader(file));
+    final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
     try {
       while (reader.ready()) {
         result.add(reader.readLine());
