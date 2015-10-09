@@ -363,11 +363,15 @@ public class Instrumentator {
     }
 
     private ClassReader typeInfo(final String type) throws IOException {
-      InputStream is = classLoader.getResourceAsStream(type + ".class");
+      InputStream is = null;
       try {
+        is = classLoader.getResourceAsStream(type + ".class");
         return new ClassReader(is);
-      } finally {
-        is.close();
+      }
+      finally {
+        if (is != null) {
+          is.close();
+        }
       }
     }
   }
