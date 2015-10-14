@@ -64,6 +64,9 @@ public class Instrumentator {
     final boolean traceLines = args.length > 0 && Boolean.valueOf(args[1]).booleanValue();
     final boolean sampling = args.length == 0 || Boolean.valueOf(args[4]).booleanValue();
     final File dataFile = args.length > 0 ? new File(args[0]) : null;
+    if (dataFile != null) {
+      ErrorReporter.setBasePath(dataFile.getParent());
+    }
     final boolean calcUnloaded = args.length > 0 && Boolean.valueOf(args[2]).booleanValue();
     ProjectData initialData = null;
     if (args.length > 0 && Boolean.valueOf(args[3]).booleanValue() && dataFile.isFile()) {
