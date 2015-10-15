@@ -110,7 +110,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   }
 
   public void visitEnd() {
-    visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_STATIC | Opcodes.ACC_TRANSIENT, METHODS_VISITED,
+    visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_STATIC, METHODS_VISITED,
             METHODS_VISITED_CLASS, null, null);
 
     if (!myVisitedStaticBlock) {
