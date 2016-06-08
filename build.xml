@@ -58,6 +58,7 @@
     </jar>
     <jar destfile="${instrumenter.jar}">
       <fileset dir="${build.rt.classes.dir}/instrumentation" includes="com/intellij/rt/coverage/instrumentation/**"/>
+      <fileset dir="${build.rt.classes.dir}/instrumentation" includes="com/intellij/rt/coverage/testDiscovery/**"/>
       <fileset dir="${build.rt.classes.dir}/util" includes="com/intellij/rt/coverage/util/**"/>
     </jar>
     <jar destfile="${util.jar}">
