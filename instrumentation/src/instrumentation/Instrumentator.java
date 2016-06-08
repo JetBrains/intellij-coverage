@@ -215,7 +215,7 @@ public class Instrumentator {
     final ClassVisitor cv;
     if (data.isSampling()) {
       if (System.getProperty(ProjectData.TRACE_DIR) != null) {
-        cv = new TestDiscoveryInstrumenter(cw, cr, className);
+        cv = new TestDiscoveryInstrumenter(cw, cr, className, loader);
       }
       else if (System.getProperty("idea.new.sampling.coverage") != null) {
         //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode  
