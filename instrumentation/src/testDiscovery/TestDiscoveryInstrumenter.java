@@ -43,7 +43,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   private static final boolean INLINE_COUNTERS = System.getProperty("idea.inline.counter.fields") != null;
 
   public TestDiscoveryInstrumenter(ClassVisitor classVisitor, ClassReader cr, String className, ClassLoader loader) {
-    super(Opcodes.ASM5, classVisitor);
+    super(Opcodes.ASM6, classVisitor);
     myClassVisitor = classVisitor;
     myMethodFilter = new InstrumentedMethodsFilter(className);
     myClassName = className.replace('$', '.'); // for inner classes
@@ -56,7 +56,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   private String[] collectMethodNames(ClassReader cr, final String className) {
     final List instrumentedMethods = new ArrayList();
 
-    final ClassVisitor instrumentedMethodCounter =  new ClassVisitor(Opcodes.ASM5) {
+    final ClassVisitor instrumentedMethodCounter =  new ClassVisitor(Opcodes.ASM6) {
       final InstrumentedMethodsFilter methodsFilter = new InstrumentedMethodsFilter(className);
       public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         methodsFilter.visit(version, access, name, signature, superName, interfaces);
@@ -163,7 +163,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
     if (!myMethodFilter.shouldVisitMethod(access, name, desc, signature, exceptions)) return mv;
 
-    return new MethodVisitor(Opcodes.ASM5, mv) {
+    return new MethodVisitor(Opcodes.ASM6, mv) {
       final int myMethodId = myCurrentMethodCount++;
 
       public void visitCode() {
@@ -202,7 +202,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
   private class StaticBlockMethodVisitor extends MethodVisitor {
     public StaticBlockMethodVisitor(MethodVisitor mv) {
-      super(Opcodes.ASM5, mv);
+      super(Opcodes.ASM6, mv);
     }
 
     public void visitCode() {

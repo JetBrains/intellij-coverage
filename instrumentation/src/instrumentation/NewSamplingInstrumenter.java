@@ -45,7 +45,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
                                    final ClassReader cr,
                                    final String className,
                                    final boolean shouldCalculateSource) {
-        super(Opcodes.ASM5, classVisitor);
+        super(Opcodes.ASM6, classVisitor);
         myProjectData = projectData;
         myClassName = className.replace('$', '.');
         myClassNameType = className.replace(".", "/");
@@ -56,7 +56,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
 
     private int calcMaxLineNumber(ClassReader cr) {
         final int[] maxLine = new int[] {0};
-        final ClassVisitor instrumentedMethodCounter =  new ClassVisitor(Opcodes.ASM5) {
+        final ClassVisitor instrumentedMethodCounter =  new ClassVisitor(Opcodes.ASM6) {
             private boolean myEnum;
             public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
                 myEnum = (access & Opcodes.ACC_ENUM) != 0;
@@ -67,7 +67,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
                 if (!shouldProcessMethod(access, name, desc, signature, myEnum)) {
                     return null;
                 }
-                return new MethodVisitor(Opcodes.ASM5) {
+                return new MethodVisitor(Opcodes.ASM6) {
                     public void visitLineNumber(int line, Label start) {
                         if (maxLine[0] < line) {
                             maxLine[0] = line;
@@ -100,7 +100,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
             return mv;
         }
         myProcess = true;
-        final MethodVisitor visitor = new MethodVisitor(Opcodes.ASM5, mv) {
+        final MethodVisitor visitor = new MethodVisitor(Opcodes.ASM6, mv) {
             public void visitLineNumber(final int line, final Label start) {
                 getOrCreateLineData(line, name, desc);
 
@@ -194,7 +194,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
 
     private class StaticBlockMethodVisitor extends MethodVisitor {
         public StaticBlockMethodVisitor(MethodVisitor mv) {
-            super(Opcodes.ASM5, mv);
+            super(Opcodes.ASM6, mv);
         }
 
         public void visitCode() {

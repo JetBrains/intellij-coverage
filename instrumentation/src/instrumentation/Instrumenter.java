@@ -39,7 +39,7 @@ public abstract class Instrumenter extends ClassVisitor {
   private boolean myEnum;
 
   public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
-    super(Opcodes.ASM5, classVisitor);
+    super(Opcodes.ASM6, classVisitor);
     myProjectData = projectData;
     myClassVisitor = classVisitor;
     myClassName = className;
