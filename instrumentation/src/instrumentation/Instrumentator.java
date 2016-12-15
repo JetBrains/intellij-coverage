@@ -144,7 +144,7 @@ public class Instrumentator {
                               byte[] classfileBuffer) throws IllegalClassFormatException {
         if (data.isStopped()) return null;
         try {
-          if (className == null) {
+          if (className == null || className.equals("module-info")) {
             return null;
           }
           if (className.endsWith(".class")) {
