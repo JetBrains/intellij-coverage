@@ -61,13 +61,13 @@ public class SamplingInstrumenter extends Instrumenter {
         else {
           mv.visitLdcInsn(new Integer(line));
         }
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchLine", "(" + OBJECT_TYPE + "I)V");
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchLine", "(" + OBJECT_TYPE + "I)V", false);
         super.visitLineNumber(line, start);
       }
 
       public void visitCode() {
         mv.visitLdcInsn(getClassName());
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)" + OBJECT_TYPE);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)" + OBJECT_TYPE, false);
         mv.visitVarInsn(Opcodes.ASTORE, getCurrentClassDataNumber());
         super.visitCode();
       }

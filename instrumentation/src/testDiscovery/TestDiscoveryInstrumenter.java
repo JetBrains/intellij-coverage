@@ -113,7 +113,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
       mv.visitMethodInsn(Opcodes.INVOKESPECIAL,
               "java/lang/Object",
               "<init>",
-              "()V");
+              "()V", false);
       mv.visitInsn(Opcodes.RETURN);
       mv.visitMaxs(1, 1);
       mv.visitEnd();

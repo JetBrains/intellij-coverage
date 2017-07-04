@@ -61,7 +61,7 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
 
     mv.visitVarInsn(Opcodes.ALOAD, getCurrentClassDataNumber());
     pushLineNumber(line);
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/Object;I)V");
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/Object;I)V", false);
     super.visitLineNumber(line, start);
   }
 
@@ -116,7 +116,7 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
       mv.visitVarInsn(Opcodes.ILOAD, getLineVariableNumber());
       mv.visitVarInsn(Opcodes.ILOAD, getSwitchVariableNumber());
       mv.visitIntInsn(Opcodes.SIPUSH, key.intValue());
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchSwitch", "(Ljava/lang/Object;III)V");
+      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchSwitch", "(Ljava/lang/Object;III)V", false);
     }
   }
 
@@ -125,7 +125,7 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
     mv.visitVarInsn(Opcodes.ILOAD, getLineVariableNumber());
     mv.visitVarInsn(Opcodes.ILOAD, getJumpVariableNumber());
     mv.visitInsn(trueHit ? Opcodes.ICONST_0 : Opcodes.ICONST_1);
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchJump", "(Ljava/lang/Object;IIZ)V");
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchJump", "(Ljava/lang/Object;IIZ)V", false);
 
     mv.visitIntInsn(Opcodes.SIPUSH, -1);
     mv.visitVarInsn(Opcodes.ISTORE, getJumpVariableNumber());
@@ -166,7 +166,7 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
     mv.visitVarInsn(Opcodes.ISTORE, getSwitchVariableNumber());
 
     mv.visitLdcInsn(myEnumerator.getClassName());
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)Ljava/lang/Object;");
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)Ljava/lang/Object;", false);
     mv.visitVarInsn(Opcodes.ASTORE, getCurrentClassDataNumber());
 
     super.visitCode();
