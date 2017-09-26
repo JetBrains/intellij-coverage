@@ -1,4 +1,4 @@
-# IntelliJ IDEA Code Coverage Agent
+# IntelliJ IDEA Code Coverage Agent [![official JetBrains project](http://jb.gg/badges/official-plastic.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
 Apache 2 licensed code coverage engine for JVM. Supports branch coverage and
 per-test coverage tracking. Used in IntelliJ IDEA and in JetBrains TeamCity.
