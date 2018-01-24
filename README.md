@@ -12,4 +12,4 @@ Rebuild Project. The agent binary is created as "coverage-agent.jar" in the
 ## Contributions
 
 Pull requests are welcome. Please post bug reports and feature requests
-to [YouTrack](http://www.youtrack.jetbrains.com), project "IntelliJ IDEA".
+to [YouTrack](https://youtrack.jetbrains.com/issues/IDEA), project "IntelliJ IDEA".
