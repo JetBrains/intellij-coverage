@@ -17,7 +17,6 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.testDiscovery.TestDiscoveryInstrumenter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
@@ -43,6 +42,10 @@ import java.util.regex.PatternSyntaxException;
 public class Instrumentator {
 
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
+    new Instrumentator().performPremain(argsString, instrumentation);
+  }
+
+  public void performPremain(String argsString, Instrumentation instrumentation) throws Exception {
     String[] args;
     if (argsString != null) {
       File argsFile = new File(argsString);
@@ -188,7 +191,7 @@ public class Instrumentator {
     });
   }
 
-  private static String[] readArgsFromFile(String arg) throws IOException {
+  private String[] readArgsFromFile(String arg) throws IOException {
     final List result = new ArrayList();
     final File file = new File(arg);
     final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
@@ -202,7 +205,7 @@ public class Instrumentator {
     return (String[]) result.toArray(new String[result.size()]);
   }
 
-  private static byte[] instrument(final byte[] classfileBuffer, final ProjectData data, String className, ClassLoader loader, boolean computeFrames, boolean shouldCalculateSource) {
+  private byte[] instrument(final byte[] classfileBuffer, final ProjectData data, String className, ClassLoader loader, boolean computeFrames, boolean shouldCalculateSource) {
     final ClassReader cr = new ClassReader(classfileBuffer);
     final ClassWriter cw;
     if (computeFrames) {
@@ -211,25 +214,25 @@ public class Instrumentator {
     } else {
       cw = getClassWriter(ClassWriter.COMPUTE_MAXS, loader);
     }
-    
-    final ClassVisitor cv;
+
+    final ClassVisitor cv = createClassVisitor(data, className, loader, shouldCalculateSource, cr, cw);
+    cr.accept(cv, 0);
+    return cw.toByteArray();
+  }
+
+  protected ClassVisitor createClassVisitor(ProjectData data, String className, ClassLoader loader, boolean shouldCalculateSource, ClassReader cr, ClassWriter cw) {
     if (data.isSampling()) {
-      if (System.getProperty(ProjectData.TRACE_DIR) != null) {
-        cv = new TestDiscoveryInstrumenter(cw, cr, className, loader);
-      }
-      else if (System.getProperty("idea.new.sampling.coverage") != null) {
+      if (System.getProperty("idea.new.sampling.coverage") != null) {
         //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode  
-        cv = new NewSamplingInstrumenter(data, cw, cr, className, shouldCalculateSource); 
+        return new NewSamplingInstrumenter(data, cw, cr, className, shouldCalculateSource); 
       }
       else {
-        cv = ((ClassVisitor) new SamplingInstrumenter(data, cw, className, shouldCalculateSource));
+        return new SamplingInstrumenter(data, cw, className, shouldCalculateSource);
       }
     }
     else {
-      cv = new ClassInstrumenter(data, cw, className, shouldCalculateSource);
+      return new ClassInstrumenter(data, cw, className, shouldCalculateSource);
     }
-    cr.accept(cv, 0);
-    return cw.toByteArray();
   }
 
   private static ClassWriter getClassWriter(int flags, final ClassLoader classLoader) {

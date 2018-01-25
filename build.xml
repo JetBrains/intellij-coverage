@@ -18,6 +18,8 @@
   <property name="dist" value="${basedir}/dist"/>
   <property name="coverage.data.jar" value="${dist}/coverage-agent.jar"/>
   <property name="instrumenter.jar" value="${dist}/coverage-instrumenter.jar"/>
+  <property name="test-discovery.data.jar" value="${dist}/test-discovery-agent.jar"/>
+  <property name="test-discovery.instrumenter.jar" value="${dist}/test-discovery-instrumenter.jar"/>
   <property name="util.jar" value="${dist}/coverage-util.jar"/>
   <property name="src.dst" value="${dist}/coverage-src.zip"/>
   <property name="build.rt.classes.dir" value="${basedir}/out/production"/>
@@ -58,8 +60,23 @@
     </jar>
     <jar destfile="${instrumenter.jar}">
       <fileset dir="${build.rt.classes.dir}/instrumentation" includes="com/intellij/rt/coverage/instrumentation/**"/>
-      <fileset dir="${build.rt.classes.dir}/instrumentation" includes="com/intellij/rt/coverage/testDiscovery/**"/>
       <fileset dir="${build.rt.classes.dir}/util" includes="com/intellij/rt/coverage/util/**"/>
+    </jar>
+    <jar destfile="${test-discovery.data.jar}">
+      <manifest>
+        <attribute name="Premain-Class" value="com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain"/>
+        <attribute name="Boot-Class-Path" value="test-discovery-agent.jar"/>
+      </manifest>
+
+      <fileset dir="${build.rt.classes.dir}/intellij-coverage" includes="com/intellij/rt/coverage/data/**"/>
+      <fileset dir="${build.rt.classes.dir}/intellij-coverage" includes="com/intellij/rt/coverage/main/**"/>
+      <fileset dir="${build.rt.classes.dir}/intellij-coverage" includes="com/intellij/rt/coverage/util/**"/>
+      <fileset dir="${build.rt.classes.dir}/testDiscovery" includes="com/intellij/rt/coverage/testDiscovery/main/**"/>
+    </jar>
+    <jar destfile="${test-discovery.instrumenter.jar}">
+      <fileset dir="${build.rt.classes.dir}/instrumentation" includes="com/intellij/rt/coverage/instrumentation/**"/>
+      <fileset dir="${build.rt.classes.dir}/util" includes="com/intellij/rt/coverage/util/**"/>
+      <fileset dir="${build.rt.classes.dir}/testDiscovery" includes="com/intellij/rt/coverage/testDiscovery/instrumentation/**"/>
     </jar>
     <jar destfile="${util.jar}">
       <fileset dir="${build.rt.classes.dir}/util" includes="com/intellij/rt/coverage/util/**"/>

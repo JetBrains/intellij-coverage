@@ -32,13 +32,22 @@ import java.net.URLClassLoader;
 public class CoveragePremain {
 
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
-    final File lib = new File(getArchivePath()).getParentFile();
-    final URL[] urls = new URL[3];
-    urls[0] = fileToURL(new File(lib, "coverage-instrumenter.jar"));
-    urls[1] = fileToURL(new File(lib, "asm-all.jar"));
-    urls[2] = fileToURL(new File(lib, "trove4j.jar"));
+    premain(argsString, instrumentation, 
+            "com.intellij.rt.coverage.instrumentation.Instrumentator", 
+            "coverage-instrumenter.jar");
+  }
 
-    final Class instrumentator = Class.forName("com.intellij.rt.coverage.instrumentation.Instrumentator", true, new URLClassLoader(urls) {
+  public static void premain(String argsString, Instrumentation instrumentation, String instrumenterName, String... jars) throws Exception {
+    final File lib = new File(getArchivePath()).getParentFile();
+    final URL[] urls = new URL[jars.length + 2];
+
+    for (int idx = 0; idx < jars.length; idx ++) {
+      urls[idx] = fileToURL(new File(lib, jars[idx]));
+    }
+    urls[jars.length] = fileToURL(new File(lib, "asm-all.jar"));
+    urls[jars.length + 1] = fileToURL(new File(lib, "trove4j.jar"));
+
+    final Class instrumentator = Class.forName(instrumenterName, true, new URLClassLoader(urls) {
       protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException {
         synchronized (this) {
           Class result = findLoadedClass(name);
