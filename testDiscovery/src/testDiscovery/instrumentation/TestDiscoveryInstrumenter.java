@@ -46,7 +46,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     myMethodFilter = new InstrumentedMethodsFilter(className);
     myClassName = className.replace('$', '.'); // for inner classes
     myInternalClassName = className.replace('.', '/');
-    myInternalCounterClassJVMName = myInternalClassName+"$" + myInternalCounterClassName;
+    myInternalCounterClassJVMName = myInternalClassName + "$" + myInternalCounterClassName;
     myClassLoader = loader;
     myMethodNames = collectMethodNames(cr, className);
   }
@@ -54,8 +54,9 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   private String[] collectMethodNames(ClassReader cr, final String className) {
     final List<String> instrumentedMethods = new ArrayList<String>();
 
-    final ClassVisitor instrumentedMethodCounter =  new ClassVisitor(Opcodes.ASM6) {
+    final ClassVisitor instrumentedMethodCounter = new ClassVisitor(Opcodes.ASM6) {
       final InstrumentedMethodsFilter methodsFilter = new InstrumentedMethodsFilter(className);
+
       public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         methodsFilter.visit(version, access, name, signature, superName, interfaces);
         myClassVersion = version;
@@ -85,17 +86,17 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     MethodVisitor mv;
 
     cw.visit(myClassVersion,
-            Opcodes.ACC_STATIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER + Opcodes.ACC_SYNTHETIC,
-            myInternalCounterClassJVMName, // ?
-            null,
-            "java/lang/Object",
-            null);
+        Opcodes.ACC_STATIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER + Opcodes.ACC_SYNTHETIC,
+        myInternalCounterClassJVMName, // ?
+        null,
+        "java/lang/Object",
+        null);
 
     {
       cw.visitOuterClass(myInternalClassName, myInternalCounterClassJVMName, null);
 
       cw.visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_STATIC, METHODS_VISITED,
-              METHODS_VISITED_CLASS, null, null);
+          METHODS_VISITED_CLASS, null, null);
 
       MethodVisitor staticBlockVisitor = cw.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
       staticBlockVisitor = new StaticBlockMethodVisitor(staticBlockVisitor);
@@ -109,9 +110,9 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
       mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
       mv.visitVarInsn(Opcodes.ALOAD, 0);
       mv.visitMethodInsn(Opcodes.INVOKESPECIAL,
-              "java/lang/Object",
-              "<init>",
-              "()V", false);
+          "java/lang/Object",
+          "<init>",
+          "()V", false);
       mv.visitInsn(Opcodes.RETURN);
       mv.visitMaxs(1, 1);
       mv.visitEnd();
@@ -179,7 +180,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   public void visitEnd() {
     if (INLINE_COUNTERS) {
       visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_STATIC, METHODS_VISITED,
-              METHODS_VISITED_CLASS, null, null);
+          METHODS_VISITED_CLASS, null, null);
 
       if (!myVisitedStaticBlock) {
         MethodVisitor mv = super.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
@@ -213,7 +214,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
       pushInstruction(this, myMethodNames.length);
       visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/String");
 
-      for(int i = 0; i < myMethodNames.length; ++i) {
+      for (int i = 0; i < myMethodNames.length; ++i) {
         visitInsn(Opcodes.DUP);
         pushInstruction(this, i);
         visitLdcInsn(myMethodNames[i]);
