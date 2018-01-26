@@ -22,10 +22,6 @@ import com.intellij.rt.coverage.instrumentation.JSR45Util;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-/**
- * @author anna
- * @since 2/9/11
- */
 public class SMAPParsingTest extends TestCase {
 
   public void test1() {
@@ -63,6 +59,7 @@ public class SMAPParsingTest extends TestCase {
             new LineMapData(3, 66, 69)})};
 
     final FileMapData[] datas = JSR45Util.extractLineMapping(test, "org.apache.jsp.Hello_jsp");
+    Assert.assertNotNull(datas);
     Assert.assertEquals(expected.length, datas.length);
     for (int i = 0; i < datas.length; i++) {
       final FileMapData data = datas[i];
@@ -71,7 +68,29 @@ public class SMAPParsingTest extends TestCase {
     }
   }
 
-  public void testKotlinSMAP() throws Exception {
+  public void testJspSMAP() {
+    String test = "SMAP\n" +
+            "index_jsp.java\n" +
+            "JSP\n" +
+            "*S JSP\n" +
+            "*F\n" +
+            "+ 0 index.jsp\n" +
+            "index.jsp\n" +
+            "+ 1 greeting.jsp\n" +
+            "subDir/greeting.jsp\n" +
+            "*L\n" +
+            "7,9:68\n" +
+            "1#1,9:76\n" +
+            "10:85,3\n" +
+            "11,4:88\n" +
+            "15#0,5:91\n" +
+            "*E";
+    doTestClassNames(test, 
+            "org.apache.jsp.index_jsp org.apache.jsp.subDir.greeting_jsp", 
+            "org.apache.jsp.Hello_jsp");
+  }
+
+  public void testKotlinSMAP() {
     String test = "SMAP\n" +
                   "StoreAwareProjectManager.kt\n" +
                   "Kotlin\n" +
@@ -88,8 +107,45 @@ public class SMAPParsingTest extends TestCase {
                   "24#2:297\n" +
                   "45#3,6:298\n" +
                   "*E";
-    final FileMapData[] datas = JSR45Util.extractLineMapping(test, "StoreAwareProjectManager");
+    doTestClassNames(test, "com.intellij.configurationStore.StoreAwareProjectManager kotlin.KotlinPackage kotlin.KotlinPackage", 
+            "StoreAwareProjectManager");
+  }
 
+  public void testKotlinSMAP1() {
+    String test ="SMAP\n" + 
+            "test.kt\n" +
+            "Kotlin\n" +
+            "*S Kotlin\n" +
+            "*F\n" +
+            "+ 1 test.kt\n" +
+            "one/TestKt\n" +
+            "+ 2 inline.kt\n" +
+            "one/coverageinline/InlineKt\n" +
+            "*L\n" +
+            "1#1,10:1\n" +
+            "8#2,6:11\n" +
+            "8#2,6:17\n" +
+            "*E\n" +
+            "*S KotlinDebug\n" +
+            "*F\n" +
+            "+ 1 test.kt\n" +
+            "one/TestKt\n" +
+            "*L\n" +
+            "8#1,6:11\n" +
+            "9#1,6:17\n" +
+            "*E";
+    doTestClassNames(test, "one.TestKt one.coverageinline.InlineKt", 
+            "one.Test");
+  }
+
+  private void doTestClassNames(String test, String expectedMergedString, String mainClassname) {
+    FileMapData[] fileMapData = JSR45Util.extractLineMapping(test, mainClassname);
+    assertNotNull(fileMapData);
+    StringBuilder classNames = new StringBuilder();
+    for (FileMapData fileData : fileMapData) {
+      classNames.append(" ").append(fileData.getClassName());
+    }
+    Assert.assertEquals(expectedMergedString, classNames.toString().trim());
   }
 
   public void testRelativePath() {

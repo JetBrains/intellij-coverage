@@ -20,7 +20,8 @@ package com.intellij.rt.coverage.data;
  * @author anna
  * @since 2/9/11
  */
-public class FileMapData {
+public class FileMapData { 
+  public static final FileMapData[] EMPTY_FILE_MAP = new FileMapData[0];
   private String myClassName;
   private LineMapData[] myLines;
 
@@ -38,10 +39,10 @@ public class FileMapData {
   }
 
   public String toString() {
-    String toString = "";
+    StringBuilder toString = new StringBuilder();
     for (LineMapData line : myLines) {
       if (line != null) {
-        toString += "\n" + line.toString();
+        toString.append("\n").append(line.toString());
       }
     }
     return "class name: " + myClassName + "\nlines:" + toString;

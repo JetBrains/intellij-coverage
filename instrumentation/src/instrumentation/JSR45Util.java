@@ -18,8 +18,7 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineMapData;
-import gnu.trove.THashSet;
-import gnu.trove.TIntObjectHashMap;
+import gnu.trove.*;
 
 import java.util.*;
 
@@ -34,11 +33,11 @@ public class JSR45Util {
 
   public static FileMapData[] extractLineMapping(String debug, String className) {
     if (debug.startsWith("SMAP")) {
-      final TIntObjectHashMap linesMap = new TIntObjectHashMap();
+      final TIntObjectHashMap<THashSet<LineMapData>> linesMap = new TIntObjectHashMap<THashSet<LineMapData>>();
       debug = debug.substring(4);
       final int fileSectionIdx = debug.indexOf(FILE_SECTION);
       final int lineInfoIdx = debug.indexOf(LINE_SECTION);
-      final String[] fileNames = parseFileNames(debug.substring(fileSectionIdx + FILE_SECTION.length(), lineInfoIdx), className);
+      final TIntObjectHashMap<String> fileNames = parseFileNames(debug.substring(fileSectionIdx + FILE_SECTION.length(), lineInfoIdx), className);
       final String lineInfo = debug.substring(lineInfoIdx + LINE_SECTION.length(), debug.indexOf(END_SECTION));
       final String[] lines = lineInfo.split("\n");
       int fileId = 1;
@@ -78,9 +77,9 @@ public class JSR45Util {
           startOutLine = Integer.parseInt(outLine);
         }
 
-        THashSet currentFile = (THashSet) linesMap.get(fileId);
+        THashSet<LineMapData> currentFile = linesMap.get(fileId);
         if (currentFile == null) {
-          currentFile = new THashSet();
+          currentFile = new THashSet<LineMapData>();
           linesMap.put(fileId, currentFile);
         }
         for (int r = 0; r < repeat; r++) {
@@ -88,43 +87,60 @@ public class JSR45Util {
         }
       }
 
-      final List result = new ArrayList();
+      final List<FileMapData> result = new ArrayList<FileMapData>();
       final int[] keys = linesMap.keys();
       Arrays.sort(keys);
       for (final int key : keys) {
-        result.add(new FileMapData(fileNames[key - 1], getLinesMapping((THashSet) linesMap.get(key))));
+        result.add(new FileMapData(fileNames.get(key), getLinesMapping(linesMap.get(key))));
       }
-      return (FileMapData[]) result.toArray(new FileMapData[result.size()]);
+      return result.toArray(FileMapData.EMPTY_FILE_MAP);
     }
     return null;
   }
 
-  public static String[] parseFileNames(String fileSection, String className) {
-
+  private static TIntObjectHashMap<String>  parseFileNames(String fileSection, String className) {
     fileSection = fileSection.trim();
     if (fileSection.endsWith("\n")) {
       fileSection = fileSection.substring(0, fileSection.length() - 1);
     }
 
+    final String defaultPrefix = getClassPackageName(className);
     final String[] fileNameIdx = fileSection.split("\n");
-    final String[] result = new String[fileNameIdx.length / 2];
+    final TIntObjectHashMap<String> result = new TIntObjectHashMap<String>();
+    boolean generatedPrefix = true;
     for (int i = 0; i < fileNameIdx.length; i++) {
       String fileName = fileNameIdx[i];
-      if (fileName.startsWith("+")) continue;
-      if (i / 2 == 0) {
-        result[0] = className;
-      } else {
-        fileName = processRelative(fileName);
-        final int lastDot = fileName.lastIndexOf(".");
-          final String fileNameWithDots;
-          if (lastDot < 0) {
-            fileNameWithDots = fileName;
-          }
-          else {
-            fileNameWithDots = fileName.substring(0, lastDot) + "_" + fileName.substring(lastDot + 1);
-          }
-          result[i / 2] = getClassPackageName(className) + fileNameWithDots.replace('/', '.');
+      String idAndName = fileName;
+      String path = null;
+      if (fileName.startsWith("+ ")) {
+        idAndName = fileName.substring(2);
+        path = fileNameIdx[++i];
       }
+      int idx = idAndName.indexOf(" ");
+      int key = Integer.parseInt(idAndName.substring(0, idx));
+      String currentClassName = idAndName.substring(idx + 1);
+
+      path = path == null ? currentClassName : processRelative(path);
+      final int lastDot = path.lastIndexOf(".");
+      String fileNameWithDots;
+      if (lastDot < 0) {
+        fileNameWithDots = path;
+      } else {
+        fileNameWithDots = path.substring(0, lastDot) + "_" + path.substring(lastDot + 1);
+      }
+      fileNameWithDots = fileNameWithDots.replace('/', '.');
+      
+      generatedPrefix &= !fileNameWithDots.startsWith(defaultPrefix);
+      currentClassName = fileNameWithDots;
+      result.put(key, currentClassName);
+    }
+    
+    if (generatedPrefix) {
+      result.transformValues(new TObjectFunction<String, String>() {
+        public String execute(String selfValue) {
+          return defaultPrefix + selfValue;
+        }
+      });
     }
     return result;
   }
@@ -156,7 +172,7 @@ public class JSR45Util {
     return generatePrefix;
   }
 
-  static LineMapData[] getLinesMapping(THashSet linesMap) {
+  private static LineMapData[] getLinesMapping(THashSet<LineMapData> linesMap) {
 
     int max = 0;
     for (Object aLinesMap1 : linesMap) {
