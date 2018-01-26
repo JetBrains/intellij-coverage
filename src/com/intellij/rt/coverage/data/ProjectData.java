@@ -16,7 +16,6 @@
 
 package com.intellij.rt.coverage.data;
 
-
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 
@@ -100,8 +99,8 @@ public class ProjectData implements CoverageData, Serializable {
 
 
   public static ProjectData createProjectData(final File dataFile,
-                                              final ProjectData initialData, 
-                                              boolean traceLines, 
+                                              final ProjectData initialData,
+                                              boolean traceLines,
                                               boolean isSampling) throws IOException {
     ourProjectData = initialData == null ? new ProjectData() : initialData;
     if (dataFile != null && !dataFile.exists()) {
@@ -117,8 +116,8 @@ public class ProjectData implements CoverageData, Serializable {
 
   public void merge(final CoverageData data) {
     final ProjectData projectData = (ProjectData)data;
-    for (Iterator iter = projectData.myClasses.names().iterator(); iter.hasNext();) {
-      final String key = (String) iter.next();
+    for (Object o : projectData.myClasses.names()) {
+      final String key = (String) o;
       final ClassData mergedData = projectData.myClasses.get(key);
       ClassData classData = myClasses.get(key);
       if (classData == null) {
@@ -131,20 +130,20 @@ public class ProjectData implements CoverageData, Serializable {
 
   public void checkLineMappings() {
     if (myLinesMap != null) {
-      for (Iterator iterator = myLinesMap.keySet().iterator(); iterator.hasNext(); ) {
-        final String className = (String) iterator.next();
+      for (Object o : myLinesMap.keySet()) {
+        final String className = (String) o;
         final ClassData classData = getClassData(className);
         final FileMapData[] fileData = (FileMapData[]) myLinesMap.get(className);
         //postpone process main file because its lines would be reset and next files won't be processed correctly
         FileMapData mainData = null;
-        for (int i = 0; i < fileData.length; i++) {
-          final String fileName = fileData[i].getClassName();
+        for (FileMapData aFileData : fileData) {
+          final String fileName = aFileData.getClassName();
           if (fileName.equals(className)) {
-            mainData = fileData[i];
+            mainData = aFileData;
             continue;
           }
           final ClassData classInfo = getOrCreateClassData(fileName);
-          classInfo.checkLineMappings(fileData[i].getLines(), classData);
+          classInfo.checkLineMappings(aFileData.getLines(), classData);
         }
 
         if (mainData != null) {
@@ -175,13 +174,12 @@ public class ProjectData implements CoverageData, Serializable {
      try {
        os = new DataOutputStream(new FileOutputStream(traceFile));
        os.writeInt(myTrace.size());
-       for (Iterator it = myTrace.keySet().iterator(); it.hasNext();) {
-         final Object classData = it.next();
+       for (final Object classData : myTrace.keySet()) {
          os.writeUTF(classData.toString());
          final boolean[] lines = (boolean[]) myTrace.get(classData);
          int numberOfTraces = 0;
-         for (int idx = 0; idx < lines.length; idx++) {
-           if (lines[idx]) numberOfTraces++;
+         for (boolean line : lines) {
+           if (line) numberOfTraces++;
          }
          os.writeInt(numberOfTraces);
          for (int idx = 0; idx < lines.length; idx++) {
@@ -320,8 +318,8 @@ public class ProjectData implements CoverageData, Serializable {
           ErrorReporter.reportError("Error in class data loading: " + className, e);
           return lines;
       }
-  }  
-    
+  }
+
   public static Object loadClassData(String className) {
     if (ourProjectData != null) {
       return ourProjectData.getClassData(className);
@@ -441,112 +439,106 @@ public class ProjectData implements CoverageData, Serializable {
       return null;
     }
   }
-    
+
   //----------test discovery
-    public static final String TRACE_DIR = "org.jetbrains.instrumentation.trace.dir";
+  public static final String TRACE_DIR = "org.jetbrains.instrumentation.trace.dir";
 
+  private String myTraceDir = System.getProperty(TRACE_DIR, "");
 
-    private String myTraceDir = System.getProperty(TRACE_DIR, "");
+  public void setTraceDir(String traceDir) {
+    myTraceDir = traceDir;
+  }
 
-    public void setTraceDir(String traceDir) {
-        myTraceDir = traceDir;
+  private final ConcurrentMap myTrace2 = new ConcurrentHashMap();
+  private final ConcurrentMap myTrace3 = new ConcurrentHashMap();
+
+  // called from instrumented code during class's static init
+  public static boolean[] trace(String className, boolean[] methodFlags, String[] methodNames) {
+    return ourProjectData.traceLines(className, methodFlags, methodNames);
+  }
+
+  private synchronized boolean[] traceLines(String className, boolean[] methodFlags, String[] methodNames) {
+    //System.out.println("Registering " + className);
+    //assert methodFlags.length == methodNames.length;
+    final boolean[] previousMethodFlags = (boolean[]) myTrace2.putIfAbsent(className, methodFlags);
+
+    if (previousMethodFlags != null) {
+      //  assert previousMethodFlags.length == methodFlags.length;
+      final String[] previousMethodNames = (String[]) myTrace3.get(className);
+      //assert previousMethodNames != null && previousMethodNames.length == methodNames.length;
+    } else {
+      myTrace3.put(className, methodNames);
     }
+    return previousMethodFlags != null ? previousMethodFlags : methodFlags;
+  }
 
-    private final ConcurrentMap myTrace2 = new ConcurrentHashMap();
-    private final ConcurrentMap myTrace3 = new ConcurrentHashMap();
+  public synchronized void testDiscoveryEnded(final String name) {
+    new File(myTraceDir).mkdirs();
+    final File traceFile = new File(myTraceDir, name + ".tr");
+    try {
+      if (!traceFile.exists()) {
+        traceFile.createNewFile();
+      }
+      DataOutputStream os = null;
+      try {
+        os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(traceFile), 64 * 1024));
 
-    // called from instrumented code during class's static init
-    public static boolean[] trace(String className, boolean[] methodFlags, String[] methodNames) {
-        return ourProjectData.traceLines(className, methodFlags, methodNames);
-    }
+        //saveOldTrace(os);
 
-    private synchronized boolean[] traceLines(String className, boolean[] methodFlags, String[] methodNames) {
-        //System.out.println("Registering " + className);
-        //assert methodFlags.length == methodNames.length;
-        final boolean[] previousMethodFlags = (boolean[]) myTrace2.putIfAbsent(className, methodFlags);
+        Map classToUsedMethods = new HashMap();
+        for (Object o : myTrace2.entrySet()) {
+          Map.Entry e = (Map.Entry) o;
+          boolean[] used = (boolean[]) e.getValue();
+          int usedMethodsCount = 0;
 
-        if (previousMethodFlags != null) {
-            //  assert previousMethodFlags.length == methodFlags.length;
-            final String[] previousMethodNames = (String[]) myTrace3.get(className);
-            //assert previousMethodNames != null && previousMethodNames.length == methodNames.length;
-        } else {
-            myTrace3.put(className, methodNames);
+          for (boolean anUsed : used) {
+            if (anUsed) ++usedMethodsCount;
+          }
+
+          if (usedMethodsCount > 0) {
+            classToUsedMethods.put(e.getKey(), new Integer(usedMethodsCount));
+          }
         }
-        return previousMethodFlags != null ? previousMethodFlags : methodFlags;
-    }
 
-    public synchronized void testDiscoveryEnded(final String name) {
-        new File(myTraceDir).mkdirs();
-        final File traceFile = new File(myTraceDir, name + ".tr");
-        try {
-            if (!traceFile.exists()) {
-                traceFile.createNewFile();
+        CoverageIOUtil.writeINT(os, classToUsedMethods.size());
+        for (Object o : myTrace2.entrySet()) {
+          Map.Entry e = (Map.Entry) o;
+          final boolean[] used = (boolean[]) e.getValue();
+          final String className = (String) e.getKey();
+
+          Integer integer = (Integer) classToUsedMethods.get(className);
+          if (integer == null) continue;
+
+          int usedMethodsCount = integer.intValue();
+
+          CoverageIOUtil.writeUTF(os, className);
+          CoverageIOUtil.writeINT(os, usedMethodsCount);
+
+          String[] methodNames = (String[]) myTrace3.get(className);
+          for (int i = 0, len = used.length; i < len; ++i) {
+            // we check usedMethodCount here since used can still be updated by other threads
+            if (used[i] && usedMethodsCount-- > 0) {
+              CoverageIOUtil.writeUTF(os, methodNames[i]);
             }
-            DataOutputStream os = null;
-            try {
-                os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(traceFile), 64 * 1024));
-
-                //saveOldTrace(os);
-
-                Map classToUsedMethods = new HashMap();
-                for (Iterator iterator = myTrace2.entrySet().iterator(); iterator.hasNext(); ) {
-                    Map.Entry e = (Map.Entry) iterator.next();
-                    boolean[] used = (boolean[]) e.getValue();
-                    int usedMethodsCount = 0;
-
-                    for (int i = 0; i < used.length; i++) {
-                        boolean anUsed = used[i];
-                        if (anUsed) ++usedMethodsCount;
-                    }
-
-                    if (usedMethodsCount > 0) {
-                        classToUsedMethods.put(e.getKey(), new Integer(usedMethodsCount));
-                    }
-                }
-
-                CoverageIOUtil.writeINT(os, classToUsedMethods.size());
-                for (Iterator iterator = myTrace2.entrySet().iterator(); iterator.hasNext(); ) {
-                    Map.Entry e = (Map.Entry) iterator.next();
-                    final boolean[] used = (boolean[]) e.getValue();
-                    final String className = (String) e.getKey();
-
-                    Integer integer = (Integer) classToUsedMethods.get(className);
-                    if (integer == null) continue;
-
-                    int usedMethodsCount = integer.intValue();
-
-                    CoverageIOUtil.writeUTF(os, className);
-                    CoverageIOUtil.writeINT(os, usedMethodsCount);
-
-                    String[] methodNames = (String[]) myTrace3.get(className);
-                    for (int i = 0, len = used.length; i < len; ++i) {
-                        // we check usedMethodCount here since used can still be updated by other threads
-                        if (used[i] && usedMethodsCount-- > 0) {
-                            CoverageIOUtil.writeUTF(os, methodNames[i]);
-                        }
-                    }
-                }
-            }
-            finally {
-                if (os != null) {
-                    os.close();
-                }
-            }
+          }
         }
-        catch (IOException e) {
-            e.printStackTrace();
+      } finally {
+        if (os != null) {
+          os.close();
         }
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
     }
+  }
 
-    public synchronized void testDiscoveryStarted(final String name) {
-        //clearOldTrace();
-        for (Iterator iterator = myTrace2.entrySet().iterator(); iterator.hasNext(); ) {
-            Object e = iterator.next();
-            boolean[] used = (boolean[]) ((Map.Entry) e).getValue();
-            for (int i = 0, len = used.length; i < len; ++i) {
-                if (used[i]) used[i] = false;
-            }
-        }
+  public synchronized void testDiscoveryStarted(final String name) {
+    //clearOldTrace();
+    for (Object e : myTrace2.entrySet()) {
+      boolean[] used = (boolean[]) ((Map.Entry) e).getValue();
+      for (int i = 0, len = used.length; i < len; ++i) {
+        if (used[i]) used[i] = false;
+      }
     }
-
+  }
 }
