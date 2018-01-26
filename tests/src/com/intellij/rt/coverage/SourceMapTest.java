@@ -155,8 +155,8 @@ public class SourceMapTest extends TestCase {
   }
 
   private void checkMapContainsAll(Map str_str_resultMap, Map init_str_clData_map) {
-    for (Iterator entry_it = init_str_clData_map.entrySet().iterator(); entry_it.hasNext(); ) {
-      Map.Entry str_clData_entry = (Map.Entry) entry_it.next();
+    for (Object o : init_str_clData_map.entrySet()) {
+      Map.Entry str_clData_entry = (Map.Entry) o;
       final String clName = (String) str_str_resultMap.get(str_clData_entry.getKey());
       assertNotNull("Class " + str_clData_entry.getKey() + " wasn't found", clName);
       final String initSourceFilename = ((ClassData) str_clData_entry.getValue()).getSource();

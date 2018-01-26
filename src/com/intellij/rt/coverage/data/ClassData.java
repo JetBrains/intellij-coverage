@@ -45,13 +45,13 @@ public class ClassData implements CoverageData {
     final Map sigLines = prepareSignaturesMap(dictionaryLookup);
     final Set sigs = sigLines.keySet();
     CoverageIOUtil.writeINT(os, sigs.size());
-    for (Iterator it = sigs.iterator(); it.hasNext();) {
-      final String sig = (String)it.next();
+    for (Object sig1 : sigs) {
+      final String sig = (String) sig1;
       CoverageIOUtil.writeUTF(os, sig);
-      final List lines = (List)sigLines.get(sig);
+      final List lines = (List) sigLines.get(sig);
       CoverageIOUtil.writeINT(os, lines.size());
-      for (int i = 0; i < lines.size(); i++) {
-        ((LineData)lines.get(i)).save(os);
+      for (Object line : lines) {
+        ((LineData) line).save(os);
       }
     }
   }
@@ -59,14 +59,13 @@ public class ClassData implements CoverageData {
   private Map prepareSignaturesMap(DictionaryLookup dictionaryLookup) {
     final Map sigLines = new HashMap();
     if (myLinesArray == null) return sigLines;
-    for (int i = 0; i < myLinesArray.length; i++) {
-      final LineData lineData = myLinesArray[i];
+    for (final LineData lineData : myLinesArray) {
       if (lineData == null) continue;
       if (myLineMask != null) {
         lineData.setHits(myLineMask[lineData.getLineNumber()]);
       }
       final String sig = CoverageIOUtil.collapse(lineData.getMethodSignature(), dictionaryLookup);
-      List lines = (List)sigLines.get(sig);
+      List lines = (List) sigLines.get(sig);
       if (lines == null) {
         lines = new ArrayList();
         sigLines.put(sig, lines);
@@ -79,9 +78,8 @@ public class ClassData implements CoverageData {
   public void merge(final CoverageData data) {
     ClassData classData = (ClassData) data;
     mergeLines(classData.myLinesArray);
-    final Iterator iterator = getMethodSigs().iterator();
-    while (iterator.hasNext()) {
-      myStatus.put(iterator.next(), null);
+    for (Object o : getMethodSigs()) {
+      myStatus.put(o, null);
     }
     if (mySource == null && classData.mySource != null) {
       mySource = classData.mySource;
@@ -168,8 +166,7 @@ public class ClassData implements CoverageData {
   public Integer getStatus(String methodSignature) {
     Integer methodStatus = (Integer)myStatus.get(methodSignature);
     if (methodStatus == null) {
-      for (int i = 0; i < myLinesArray.length; i++) {
-        final LineData lineData = myLinesArray[i];
+      for (final LineData lineData : myLinesArray) {
         if (lineData != null && methodSignature.equals(lineData.getMethodSignature())) {
           if (lineData.getStatus() != LineCoverage.NONE) {
             methodStatus = new Integer(LineCoverage.PARTIAL);
@@ -226,8 +223,7 @@ public class ClassData implements CoverageData {
       LineData[] result;
       try {
         result = new LineData[linesMap.length];
-        for (int i = 0, linesMapLength = linesMap.length; i < linesMapLength; i++) {
-          final LineMapData mapData = linesMap[i];
+        for (final LineMapData mapData : linesMap) {
           if (mapData != null) {
             result[mapData.getSourceLineNumber()] = classData.createSourceLineData(mapData);
           }

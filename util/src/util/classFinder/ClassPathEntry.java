@@ -80,8 +80,8 @@ public class ClassPathEntry {
 
     public Collection findClasses(final String classPathEntry) throws IOException {
       Set includedClasses = new HashSet();
-      for (Iterator iterator = extractClassNames(classPathEntry).iterator(); iterator.hasNext();) {
-        final String className = (String) iterator.next();
+      for (Object o : extractClassNames(classPathEntry)) {
+        final String className = (String) o;
         if (shouldInclude(className)) {
           includedClasses.add(new ClassEntry(className, myClassLoader));
         }
@@ -94,8 +94,8 @@ public class ClassPathEntry {
       if (ClassNameUtil.shouldExclude(className, myExcludePatterns)) return false;
 
       String outerClassName = ClassNameUtil.getOuterClassName(className);
-      for (Iterator it = myIncludePatterns.iterator(); it.hasNext();) {
-        Pattern e = (Pattern)it.next();
+      for (Object myIncludePattern : myIncludePatterns) {
+        Pattern e = (Pattern) myIncludePattern;
         if (e.matcher(outerClassName).matches()) return true;
       }
       return myIncludePatterns.isEmpty();
@@ -125,13 +125,11 @@ public class ClassPathEntry {
       File[] files = parent.listFiles();
       if (files != null) {
         String prefix = curPath.length() == 0 ? "" : curPath + ".";
-        for (int i = 0; i < files.length; i++) {
-          File f = files[i];
+        for (File f : files) {
           final String name = f.getName();
           if (name.endsWith(CLASS_FILE_SUFFIX)) {
             result.add(prefix + removeClassSuffix(name));
-          }
-          else if (f.isDirectory()) {
+          } else if (f.isDirectory()) {
             collectClasses(prefix + name, f, result);
           }
         }

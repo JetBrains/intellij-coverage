@@ -47,8 +47,8 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
     myEnumerator = enumerator;
     int variablesCount = ((Opcodes.ACC_STATIC & access) != 0) ? 0 : 1;
     final Type[] args = Type.getArgumentTypes(desc);
-    for (int i = 0; i < args.length; i++) {
-      variablesCount += args[i].getSize();
+    for (Type arg : args) {
+      variablesCount += arg.getSize();
     }
     myVariablesCount = variablesCount;
   }

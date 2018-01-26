@@ -39,8 +39,7 @@ public class FileMapData {
 
   public String toString() {
     String toString = "";
-    for (int i = 0, myLinesLength = myLines.length; i < myLinesLength; i++) {
-      LineMapData line = myLines[i];
+    for (LineMapData line : myLines) {
       if (line != null) {
         toString += "\n" + line.toString();
       }

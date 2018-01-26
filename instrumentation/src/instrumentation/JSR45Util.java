@@ -42,16 +42,16 @@ public class JSR45Util {
       final String lineInfo = debug.substring(lineInfoIdx + LINE_SECTION.length(), debug.indexOf(END_SECTION));
       final String[] lines = lineInfo.split("\n");
       int fileId = 1;
-      for (int i = 0; i < lines.length; i++) {
+      for (String line : lines) {
         //InputStartLine # LineFileID , RepeatCount : OutputStartLine , OutputLineIncrement
         int startSrcLine;
         int repeat = 1;
         int startOutLine;
         int outLineInc = 1;
 
-        final int idx = lines[i].indexOf(":");
-        final String srcLine = lines[i].substring(0, idx);
-        final String outLine = lines[i].substring(idx + 1);
+        final int idx = line.indexOf(":");
+        final String srcLine = line.substring(0, idx);
+        final String outLine = line.substring(idx + 1);
 
         final int srcCommaIdx = srcLine.indexOf(',');
         final int sharpIdx = srcLine.indexOf("#");
@@ -91,8 +91,7 @@ public class JSR45Util {
       final List result = new ArrayList();
       final int[] keys = linesMap.keys();
       Arrays.sort(keys);
-      for (int i = 0; i < keys.length; i++) {
-        final int key = keys[i];
+      for (final int key : keys) {
         result.add(new FileMapData(fileNames[key - 1], getLinesMapping((THashSet) linesMap.get(key))));
       }
       return (FileMapData[]) result.toArray(new FileMapData[result.size()]);
@@ -160,16 +159,16 @@ public class JSR45Util {
   static LineMapData[] getLinesMapping(THashSet linesMap) {
 
     int max = 0;
-    for (Iterator iterator = linesMap.iterator(); iterator.hasNext(); ) {
-      LineMapData lmd = (LineMapData) iterator.next();
+    for (Object aLinesMap1 : linesMap) {
+      LineMapData lmd = (LineMapData) aLinesMap1;
       if (max < lmd.getSourceLineNumber()) {
         max = lmd.getSourceLineNumber();
       }
     }
 
     final LineMapData[] result = new LineMapData[max + 1];
-    for (Iterator iterator = linesMap.iterator(); iterator.hasNext(); ) {
-      LineMapData lmd = (LineMapData) iterator.next();
+    for (Object aLinesMap : linesMap) {
+      LineMapData lmd = (LineMapData) aLinesMap;
       result[lmd.getSourceLineNumber()] = lmd;
     }
     return result;

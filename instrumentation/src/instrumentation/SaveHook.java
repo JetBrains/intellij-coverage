@@ -130,43 +130,43 @@ public class SaveHook implements Runnable {
     }
 
     private static void saveData(DataOutputStream os, final TObjectIntHashMap dict, Map classes) throws IOException {
-        for (Iterator it = classes.values().iterator(); it.hasNext();) {
-          ((ClassData)it.next()).save(os, new DictionaryLookup() {
-              public int getDictionaryIndex(String className) {
-                  return dict.containsKey(className) ? dict.get(className) : -1;
-              }
-          });
-        }
+      for (Object o : classes.values()) {
+        ((ClassData) o).save(os, new DictionaryLookup() {
+          public int getDictionaryIndex(String className) {
+            return dict.containsKey(className) ? dict.get(className) : -1;
+          }
+        });
+      }
     }
 
     private static void saveDictionary(DataOutputStream os, TObjectIntHashMap dict, Map classes) throws IOException {
         int i = 0;
-        for (Iterator it = classes.keySet().iterator(); it.hasNext();) {
-            String className = (String) it.next();
-            dict.put(className, i++);
-            CoverageIOUtil.writeUTF(os, className);
-        }
+      for (Object o : classes.keySet()) {
+        String className = (String) o;
+        dict.put(className, i++);
+        CoverageIOUtil.writeUTF(os, className);
+      }
     }
 
     public static void doSaveSourceMap(Map str_str_readNames, File sourceMapFile, Map str_clData_classes) throws IOException {
         HashMap str_str_merged_map = new HashMap(str_str_readNames);
-        for (Iterator clData_it = str_clData_classes.values().iterator(); clData_it.hasNext(); ) {
-            ClassData classData = ((ClassData)clData_it.next());
-            if (!str_str_merged_map.containsKey(classData.getName())) {
-                str_str_merged_map.put(classData.getName(), classData.getSource());
-            }
+      for (Object o1 : str_clData_classes.values()) {
+        ClassData classData = ((ClassData) o1);
+        if (!str_str_merged_map.containsKey(classData.getName())) {
+          str_str_merged_map.put(classData.getName(), classData.getSource());
         }
+      }
 
         DataOutputStream out = null;
         try {
             out = CoverageIOUtil.openFile(sourceMapFile);
             CoverageIOUtil.writeINT(out, str_str_merged_map.size());
-            for (Iterator entry_it = str_str_merged_map.entrySet().iterator(); entry_it.hasNext(); ) {
-                Map.Entry str_str_entry = (Map.Entry) entry_it.next();
-                CoverageIOUtil.writeUTF(out, (String)str_str_entry.getKey());
-                final String value = (String) str_str_entry.getValue();
-                CoverageIOUtil.writeUTF(out, value != null ? value : "");
-            }
+          for (Object o : str_str_merged_map.entrySet()) {
+            Map.Entry str_str_entry = (Map.Entry) o;
+            CoverageIOUtil.writeUTF(out, (String) str_str_entry.getKey());
+            final String value = (String) str_str_entry.getValue();
+            CoverageIOUtil.writeUTF(out, value != null ? value : "");
+          }
         } finally {
             if (out != null) CoverageIOUtil.close(out);
         }
@@ -176,38 +176,38 @@ public class SaveHook implements Runnable {
 
         Collection matchedClasses = myClassFinder.findMatchedClasses();
 
-        for (Iterator matchedClassIterator = matchedClasses.iterator(); matchedClassIterator.hasNext();) {
-            ClassEntry classEntry = (ClassEntry) matchedClassIterator.next();
-            ClassData cd = projectData.getClassData(classEntry.getClassName());
-            if (cd != null) continue;
-            try {
-                ClassReader reader = new ClassReader(classEntry.getClassInputStream());
-                if (mySourceMapFile != null && cd == null) {
-                    cd  = projectData.getOrCreateClassData(classEntry.getClassName());
-                }
-                SourceLineCounter slc = new SourceLineCounter(cd, !projectData.isSampling(), mySourceMapFile != null ? projectData : null);
-                reader.accept(slc, 0);
-                if (slc.getNSourceLines() > 0) { // ignore classes without executable code
-                    final TIntObjectHashMap lines = new TIntObjectHashMap(4, 0.99f);
-                    final int[] maxLine = new int[]{1};
-                    final ClassData classData = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
-                    slc.getSourceLines().forEachEntry(new TIntObjectProcedure() {
-                        public boolean execute(int line, Object methodSig) {
-                            final LineData ld = new LineData(line, StringsPool.getFromPool((String) methodSig));
-                            lines.put(line, ld);
-                            if (line > maxLine[0]) maxLine[0] = line;
-                            classData.registerMethodSignature(ld);
-                            ld.setStatus(LineCoverage.NONE);
-                            return true;
-                        }
-                    });
-                    classData.setLines(LinesUtil.calcLineArray(maxLine[0], lines));
-                }
-            } catch (Throwable e) {
-              e.printStackTrace();
-                ErrorReporter.reportError("Failed to process class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
-            }
+      for (Object matchedClass : matchedClasses) {
+        ClassEntry classEntry = (ClassEntry) matchedClass;
+        ClassData cd = projectData.getClassData(classEntry.getClassName());
+        if (cd != null) continue;
+        try {
+          ClassReader reader = new ClassReader(classEntry.getClassInputStream());
+          if (mySourceMapFile != null && cd == null) {
+            cd = projectData.getOrCreateClassData(classEntry.getClassName());
+          }
+          SourceLineCounter slc = new SourceLineCounter(cd, !projectData.isSampling(), mySourceMapFile != null ? projectData : null);
+          reader.accept(slc, 0);
+          if (slc.getNSourceLines() > 0) { // ignore classes without executable code
+            final TIntObjectHashMap lines = new TIntObjectHashMap(4, 0.99f);
+            final int[] maxLine = new int[]{1};
+            final ClassData classData = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
+            slc.getSourceLines().forEachEntry(new TIntObjectProcedure() {
+              public boolean execute(int line, Object methodSig) {
+                final LineData ld = new LineData(line, StringsPool.getFromPool((String) methodSig));
+                lines.put(line, ld);
+                if (line > maxLine[0]) maxLine[0] = line;
+                classData.registerMethodSignature(ld);
+                ld.setStatus(LineCoverage.NONE);
+                return true;
+              }
+            });
+            classData.setLines(LinesUtil.calcLineArray(maxLine[0], lines));
+          }
+        } catch (Throwable e) {
+          e.printStackTrace();
+          ErrorReporter.reportError("Failed to process class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
         }
+      }
     }
 
     public void setSourceMapFile(File sourceMapFile) {

@@ -36,8 +36,8 @@ public class SamplingInstrumenter extends Instrumenter {
                                                      final String[] exceptions) {
     int variablesCount = ((Opcodes.ACC_STATIC & access) != 0) ? 0 : 1;
     final Type[] args = Type.getArgumentTypes(desc);
-    for (int i = 0; i < args.length; i++) {
-      variablesCount += args[i].getSize();
+    for (Type arg : args) {
+      variablesCount += arg.getSize();
     }
     final int varCount = variablesCount;
     return new MethodVisitor(Opcodes.ASM6, mv) {

@@ -60,8 +60,8 @@ public class FilteringTest extends TestCase {
 
   private List toPatterns(String regexs[]) {
     List res = new ArrayList(regexs.length);
-    for (int i = 0; i < regexs.length; ++i) {
-      res.add(Pattern.compile(regexs[i] + "(\\$.*)?"));
+    for (String regex : regexs) {
+      res.add(Pattern.compile(regex + "(\\$.*)?"));
     }
     return res;
   }

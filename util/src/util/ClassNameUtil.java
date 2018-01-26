@@ -31,8 +31,8 @@ public class ClassNameUtil {
   }
 
   public static boolean shouldExclude(String className, List excludePatterns) {
-    for (Iterator it = excludePatterns.iterator(); it.hasNext(); ) {
-      final Pattern excludePattern = (Pattern) it.next();
+    for (Object excludePattern1 : excludePatterns) {
+      final Pattern excludePattern = (Pattern) excludePattern1;
       if (excludePattern.matcher(className).matches()) return true;
     }
     return false;

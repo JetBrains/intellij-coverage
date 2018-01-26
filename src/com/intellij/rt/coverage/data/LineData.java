@@ -64,9 +64,8 @@ public class LineData implements CoverageData {
     if (myJumpsAndSwitches != null) {
       JumpData[] jumps = getOrCreateJumpsAndSwitches().getJumps();
       if (jumps != null) {
-        for (int i = 0; i < jumps.length; i++) {
-          final JumpData jumpData = jumps[i];
-          if ((jumpData.getFalseHits() > 0 ? 1 : 0) + (jumpData.getTrueHits() > 0 ? 1 : 0) < 2){
+        for (final JumpData jumpData : jumps) {
+          if ((jumpData.getFalseHits() > 0 ? 1 : 0) + (jumpData.getTrueHits() > 0 ? 1 : 0) < 2) {
             myStatus = LineCoverage.PARTIAL;
             return myStatus;
           }
@@ -75,15 +74,14 @@ public class LineData implements CoverageData {
 
       SwitchData[] switches = getOrCreateJumpsAndSwitches().getSwitches();
       if (switches != null) {
-        for (int s = 0; s < switches.length; s++) {
-          final SwitchData switchData = switches[s];
-          if (switchData.getDefaultHits() == 0){
+        for (final SwitchData switchData : switches) {
+          if (switchData.getDefaultHits() == 0) {
             myStatus = LineCoverage.PARTIAL;
             return myStatus;
           }
           for (int i = 0; i < switchData.getHits().length; i++) {
             int hit = switchData.getHits()[i];
-            if (hit == 0){
+            if (hit == 0) {
               myStatus = LineCoverage.PARTIAL;
               return myStatus;
             }

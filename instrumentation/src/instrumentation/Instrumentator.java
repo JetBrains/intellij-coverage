@@ -174,8 +174,8 @@ public class Instrumentator {
           if (includePatterns.isEmpty() && loader != null) {
             return instrument(classfileBuffer, data, className, loader, computeFrames, sourceMapFile != null);
           }
-          for (Iterator it = includePatterns.iterator(); it.hasNext(); ) {
-            if (((Pattern) it.next()).matcher(className).matches()) { // matching inner class name
+          for (Object includePattern : includePatterns) {
+            if (((Pattern) includePattern).matcher(className).matches()) { // matching inner class name
               return instrument(classfileBuffer, data, className, loader, computeFrames, sourceMapFile != null);
             }
           }
@@ -352,13 +352,13 @@ public class Instrumentator {
     private boolean typeImplements(String type, ClassReader classReader, String interfaceName) throws IOException {
       while (!JAVA_LANG_OBJECT.equals(type)) {
         String[] itfs = classReader.getInterfaces();
-        for (int i = 0; i < itfs.length; ++i) {
-          if (itfs[i].equals(interfaceName)) {
+        for (String itf1 : itfs) {
+          if (itf1.equals(interfaceName)) {
             return true;
           }
         }
-        for (int i = 0; i < itfs.length; ++i) {
-          if (typeImplements(itfs[i], typeInfo(itfs[i]), interfaceName)) {
+        for (String itf : itfs) {
+          if (typeImplements(itf, typeInfo(itf), interfaceName)) {
             return true;
           }
         }

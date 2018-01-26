@@ -75,14 +75,13 @@ public class ClassFinder {
   }
 
   private void collectClassloaderEntries(final Set result) {
-    for (Iterator iterator = myClassloaders.iterator(); iterator.hasNext();) {
-      URLClassLoader cl = (URLClassLoader) iterator.next();
+    for (Object myClassloader : myClassloaders) {
+      URLClassLoader cl = (URLClassLoader) myClassloader;
       // assert cl != null; // see addClassLoader(ClassLoader)
       URL[] urls;
       try {
         urls = cl.getURLs();
-        for (int i = 0; i < urls.length; i++) {
-          URL url = urls[i];
+        for (URL url : urls) {
           if (!"file".equals(url.getProtocol())) continue;
 
           String path = fixPath(url.getPath());
@@ -92,8 +91,8 @@ public class ClassFinder {
         }
       } catch (Exception e) {
         System.out.println("Exception occurred on trying collect ClassPath URLs. One of possible reasons is shutting down " +
-          "Tomcat before finishing tests. Coverage won't be affected but some of uncovered classes could be missing from " +
-          "the report.");
+            "Tomcat before finishing tests. Coverage won't be affected but some of uncovered classes could be missing from " +
+            "the report.");
         e.printStackTrace();
         continue;
       }
@@ -120,8 +119,8 @@ public class ClassFinder {
     if (classPath == null) return Collections.emptyList();
     String[] entries = classPath.split(System.getProperty("path.separator"));
     Set result = new HashSet();
-    for (int i = 0; i < entries.length; i++) {
-      result.add(new ClassPathEntry(entries[i], null));
+    for (String entry : entries) {
+      result.add(new ClassPathEntry(entry, null));
     }
     return result;
   }
