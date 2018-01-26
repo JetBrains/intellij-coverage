@@ -25,12 +25,12 @@ import org.jetbrains.org.objectweb.asm.ClassWriter;
 import java.lang.instrument.Instrumentation;
 
 public class TestDiscoveryInstrumentator extends Instrumentator {
-    public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
-        new TestDiscoveryInstrumentator().performPremain(argsString, instrumentation);
-    }
+  public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
+    new TestDiscoveryInstrumentator().performPremain(argsString, instrumentation);
+  }
 
-    @Override
-    protected ClassVisitor createClassVisitor(ProjectData data, String className, ClassLoader loader, boolean shouldCalculateSource, ClassReader cr, ClassWriter cw) {
-        return new TestDiscoveryInstrumenter(cw, cr, className, loader);
-    }
+  @Override
+  protected ClassVisitor createClassVisitor(ProjectData data, String className, ClassLoader loader, boolean shouldCalculateSource, ClassReader cr, ClassWriter cw) {
+    return new TestDiscoveryInstrumenter(cw, cr, className, loader);
+  }
 }

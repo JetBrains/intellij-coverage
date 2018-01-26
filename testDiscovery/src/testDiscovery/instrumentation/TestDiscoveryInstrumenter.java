@@ -25,7 +25,6 @@ import java.util.List;
 
 public class TestDiscoveryInstrumenter extends ClassVisitor {
   private static final int ADDED_CODE_STACK_SIZE = 6;
-  protected final ClassVisitor myClassVisitor;
   private final String myClassName;
   private final String myInternalClassName;
   private final ClassLoader myClassLoader;
@@ -42,9 +41,8 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   private static final String METHODS_VISITED_CLASS = "[Z";
   private static final boolean INLINE_COUNTERS = System.getProperty("idea.inline.counter.fields") != null;
 
-  public TestDiscoveryInstrumenter(ClassVisitor classVisitor, ClassReader cr, String className, ClassLoader loader) {
+  TestDiscoveryInstrumenter(ClassVisitor classVisitor, ClassReader cr, String className, ClassLoader loader) {
     super(Opcodes.ASM6, classVisitor);
-    myClassVisitor = classVisitor;
     myMethodFilter = new InstrumentedMethodsFilter(className);
     myClassName = className.replace('$', '.'); // for inner classes
     myInternalClassName = className.replace('.', '/');
@@ -54,7 +52,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   }
 
   private String[] collectMethodNames(ClassReader cr, final String className) {
-    final List instrumentedMethods = new ArrayList();
+    final List<String> instrumentedMethods = new ArrayList<String>();
 
     final ClassVisitor instrumentedMethodCounter =  new ClassVisitor(Opcodes.ASM6) {
       final InstrumentedMethodsFilter methodsFilter = new InstrumentedMethodsFilter(className);
@@ -79,7 +77,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
     cr.accept(instrumentedMethodCounter, 0);
 
-    return (String[]) instrumentedMethods.toArray(new String[instrumentedMethods.size()]);
+    return instrumentedMethods.toArray(new String[0]);
   }
 
   private void generateInnerClassWithCounter() {
@@ -127,14 +125,14 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
       Method defineClassMethodRef = myDefineClassMethodRef;
       if (defineClassMethodRef == null) {
-        defineClassMethodRef = ClassLoader.class.getDeclaredMethod("defineClass", new Class[]{byte[].class, Integer.TYPE, Integer.TYPE});
+        defineClassMethodRef = ClassLoader.class.getDeclaredMethod("defineClass", byte[].class, Integer.TYPE, Integer.TYPE);
         if (defineClassMethodRef != null) {
           defineClassMethodRef.setAccessible(true);
           myDefineClassMethodRef = defineClassMethodRef;
         }
       }
 
-      defineClassMethodRef.invoke(myClassLoader, new Object[]{bytes, new Integer(0), new Integer(bytes.length)});
+      defineClassMethodRef.invoke(myClassLoader, bytes, 0, bytes.length);
     } catch (Throwable t) {
       t.printStackTrace();
     }
@@ -151,7 +149,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
                                    final String signature,
                                    final String[] exceptions) {
     final MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
-    if (mv == null) return mv;
+    if (mv == null) return null;
     if ("<clinit>".equals(name)) {
       if (INLINE_COUNTERS) {
         myVisitedStaticBlock = true;
@@ -201,7 +199,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   }
 
   private class StaticBlockMethodVisitor extends MethodVisitor {
-    public StaticBlockMethodVisitor(MethodVisitor mv) {
+    StaticBlockMethodVisitor(MethodVisitor mv) {
       super(Opcodes.ASM6, mv);
     }
 
@@ -229,9 +227,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     }
 
     public void visitMaxs(int maxStack, int maxLocals) {
-      final int ourMaxStack = ADDED_CODE_STACK_SIZE;
-
-      super.visitMaxs(Math.max(ourMaxStack, maxStack), maxLocals);
+      super.visitMaxs(Math.max(ADDED_CODE_STACK_SIZE, maxStack), maxLocals);
     }
   }
 
