@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact name="test-discovery-agent:jar">
+  <artifact name="test-discovery-agent.jar">
     <output-path>$PROJECT_DIR$/dist</output-path>
     <root id="root">
       <element id="library" level="project" name="asm-all" />

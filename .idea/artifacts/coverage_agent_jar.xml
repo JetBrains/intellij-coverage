@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact build-on-make="true" name="coverage-agent:jar">
+  <artifact build-on-make="true" name="coverage-agent.jar">
     <output-path>$PROJECT_DIR$/dist</output-path>
     <root id="root">
       <element id="archive" name="coverage-agent.jar">
