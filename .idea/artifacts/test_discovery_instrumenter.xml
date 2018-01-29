@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="test-discovery-instrumenter">
+    <output-path>$PROJECT_DIR$/dist</output-path>
+    <root id="archive" name="test-discovery-instrumenter.jar">
+      <element id="module-output" name="testDiscovery" />
+      <element id="module-output" name="instrumentation" />
+      <element id="module-output" name="util" />
+    </root>
+  </artifact>
+</component>
