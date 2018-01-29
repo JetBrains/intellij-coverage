@@ -449,8 +449,8 @@ public class ProjectData implements CoverageData, Serializable {
     myTraceDir = traceDir;
   }
 
-  private final ConcurrentMap myTrace2 = new ConcurrentHashMap();
-  private final ConcurrentMap myTrace3 = new ConcurrentHashMap();
+  private final ConcurrentMap<String, boolean[]> myTrace2 = new ConcurrentHashMap<String, boolean[]>();
+  private final ConcurrentMap<String, String[]> myTrace3 = new ConcurrentHashMap<String, String[]>();
 
   // called from instrumented code during class's static init
   public static boolean[] trace(String className, boolean[] methodFlags, String[] methodNames) {
@@ -460,11 +460,11 @@ public class ProjectData implements CoverageData, Serializable {
   private synchronized boolean[] traceLines(String className, boolean[] methodFlags, String[] methodNames) {
     //System.out.println("Registering " + className);
     //assert methodFlags.length == methodNames.length;
-    final boolean[] previousMethodFlags = (boolean[]) myTrace2.putIfAbsent(className, methodFlags);
+    final boolean[] previousMethodFlags = myTrace2.putIfAbsent(className, methodFlags);
 
     if (previousMethodFlags != null) {
       //  assert previousMethodFlags.length == methodFlags.length;
-      final String[] previousMethodNames = (String[]) myTrace3.get(className);
+      final String[] previousMethodNames = myTrace3.get(className);
       //assert previousMethodNames != null && previousMethodNames.length == methodNames.length;
     } else {
       myTrace3.put(className, methodNames);
@@ -485,10 +485,9 @@ public class ProjectData implements CoverageData, Serializable {
 
         //saveOldTrace(os);
 
-        Map classToUsedMethods = new HashMap();
-        for (Object o : myTrace2.entrySet()) {
-          Map.Entry e = (Map.Entry) o;
-          boolean[] used = (boolean[]) e.getValue();
+        Map<String, Integer> classToUsedMethods = new HashMap<String, Integer>();
+        for (Map.Entry<String, boolean[]> o : myTrace2.entrySet()) {
+          boolean[] used = o.getValue();
           int usedMethodsCount = 0;
 
           for (boolean anUsed : used) {
@@ -496,25 +495,22 @@ public class ProjectData implements CoverageData, Serializable {
           }
 
           if (usedMethodsCount > 0) {
-            classToUsedMethods.put(e.getKey(), new Integer(usedMethodsCount));
+            classToUsedMethods.put(o.getKey(), usedMethodsCount);
           }
         }
 
         CoverageIOUtil.writeINT(os, classToUsedMethods.size());
-        for (Object o : myTrace2.entrySet()) {
-          Map.Entry e = (Map.Entry) o;
-          final boolean[] used = (boolean[]) e.getValue();
-          final String className = (String) e.getKey();
+        for (Map.Entry<String, boolean[]> o : myTrace2.entrySet()) {
+          final boolean[] used = o.getValue();
+          final String className = o.getKey();
 
-          Integer integer = (Integer) classToUsedMethods.get(className);
-          if (integer == null) continue;
-
-          int usedMethodsCount = integer.intValue();
+          Integer usedMethodsCount = classToUsedMethods.get(className);
+          if (usedMethodsCount == null) continue;
 
           CoverageIOUtil.writeUTF(os, className);
           CoverageIOUtil.writeINT(os, usedMethodsCount);
 
-          String[] methodNames = (String[]) myTrace3.get(className);
+          String[] methodNames = myTrace3.get(className);
           for (int i = 0, len = used.length; i < len; ++i) {
             // we check usedMethodCount here since used can still be updated by other threads
             if (used[i] && usedMethodsCount-- > 0) {
