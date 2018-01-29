@@ -24,7 +24,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -449,8 +448,8 @@ public class ProjectData implements CoverageData, Serializable {
     myTraceDir = traceDir;
   }
 
-  private final ConcurrentMap<String, boolean[]> myTrace2 = new ConcurrentHashMap<String, boolean[]>();
-  private final ConcurrentMap<String, String[]> myTrace3 = new ConcurrentHashMap<String, String[]>();
+  private final ConcurrentMap<String, boolean[]> myClassToVisitedMethods = new ConcurrentHashMap<String, boolean[]>();
+  private final ConcurrentMap<String, String[]> myClassToMethodNames = new ConcurrentHashMap<String, String[]>();
 
   // called from instrumented code during class's static init
   public static boolean[] trace(String className, boolean[] methodFlags, String[] methodNames) {
@@ -460,14 +459,14 @@ public class ProjectData implements CoverageData, Serializable {
   private synchronized boolean[] traceLines(String className, boolean[] methodFlags, String[] methodNames) {
     //System.out.println("Registering " + className);
     //assert methodFlags.length == methodNames.length;
-    final boolean[] previousMethodFlags = myTrace2.putIfAbsent(className, methodFlags);
+    final boolean[] previousMethodFlags = myClassToVisitedMethods.putIfAbsent(className, methodFlags);
 
     if (previousMethodFlags != null) {
       //  assert previousMethodFlags.length == methodFlags.length;
-      final String[] previousMethodNames = myTrace3.get(className);
+      final String[] previousMethodNames = myClassToMethodNames.get(className);
       //assert previousMethodNames != null && previousMethodNames.length == methodNames.length;
     } else {
-      myTrace3.put(className, methodNames);
+      myClassToMethodNames.put(className, methodNames);
     }
     return previousMethodFlags != null ? previousMethodFlags : methodFlags;
   }
@@ -486,7 +485,7 @@ public class ProjectData implements CoverageData, Serializable {
         //saveOldTrace(os);
 
         Map<String, Integer> classToUsedMethods = new HashMap<String, Integer>();
-        for (Map.Entry<String, boolean[]> o : myTrace2.entrySet()) {
+        for (Map.Entry<String, boolean[]> o : myClassToVisitedMethods.entrySet()) {
           boolean[] used = o.getValue();
           int usedMethodsCount = 0;
 
@@ -500,7 +499,7 @@ public class ProjectData implements CoverageData, Serializable {
         }
 
         CoverageIOUtil.writeINT(os, classToUsedMethods.size());
-        for (Map.Entry<String, boolean[]> o : myTrace2.entrySet()) {
+        for (Map.Entry<String, boolean[]> o : myClassToVisitedMethods.entrySet()) {
           final boolean[] used = o.getValue();
           final String className = o.getKey();
 
@@ -510,7 +509,7 @@ public class ProjectData implements CoverageData, Serializable {
           CoverageIOUtil.writeUTF(os, className);
           CoverageIOUtil.writeINT(os, usedMethodsCount);
 
-          String[] methodNames = myTrace3.get(className);
+          String[] methodNames = myClassToMethodNames.get(className);
           for (int i = 0, len = used.length; i < len; ++i) {
             // we check usedMethodCount here since used can still be updated by other threads
             if (used[i] && usedMethodsCount-- > 0) {
@@ -530,7 +529,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   public synchronized void testDiscoveryStarted(final String name) {
     //clearOldTrace();
-    for (Object e : myTrace2.entrySet()) {
+    for (Object e : myClassToVisitedMethods.entrySet()) {
       boolean[] used = (boolean[]) ((Map.Entry) e).getValue();
       for (int i = 0, len = used.length; i < len; ++i) {
         if (used[i]) used[i] = false;
