@@ -16,13 +16,18 @@
 
 package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
-import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import org.jetbrains.org.objectweb.asm.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This ClassVisitor adds byte array with 'visited' flag for all methods in given class to either
+ * new field or inner class, depending on {@link #INLINE_COUNTERS}
+ * Also modifies class static initializer to invoke {@link TestDiscoveryProjectData#trace(String, boolean[], String[])}
+ */
 public class TestDiscoveryInstrumenter extends ClassVisitor {
   private static final int ADDED_CODE_STACK_SIZE = 6;
   private final String myClassName;
@@ -221,7 +226,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
         visitInsn(Opcodes.AASTORE);
       }
 
-      visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/String;[Z[Ljava/lang/String;)[Z", false);
+      visitMethodInsn(Opcodes.INVOKESTATIC, TestDiscoveryProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/String;[Z[Ljava/lang/String;)[Z", false);
       visitFieldInsn(Opcodes.PUTSTATIC, INLINE_COUNTERS ? myInternalClassName : myInternalCounterClassJVMName, METHODS_VISITED, METHODS_VISITED_CLASS);
 
       // no return here
