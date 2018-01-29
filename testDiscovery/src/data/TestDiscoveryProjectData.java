@@ -30,11 +30,7 @@ public class TestDiscoveryProjectData {
   public static final String TRACE_DIR = "org.jetbrains.instrumentation.trace.dir";
   protected static TestDiscoveryProjectData ourProjectData = new TestDiscoveryProjectData();
 
-  private String myTraceDir = System.getProperty(TRACE_DIR, "");
-
-  public void setTraceDir(String traceDir) {
-    myTraceDir = traceDir;
-  }
+  private final String myTraceDir = System.getProperty(TRACE_DIR, "");
 
   public static TestDiscoveryProjectData getProjectData() {
     return ourProjectData;
