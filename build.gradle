@@ -21,13 +21,10 @@ allprojects {
     dependencies {
         runtime files(Jvm.current().toolsJar)
     }
-}
 
-sourceSets {
-    main.java.srcDirs = [file('src')]
-    test.java.srcDirs = []
-    main.resources.srcDirs = []
-    test.resources.srcDirs = []
+    sourceSets {
+        main { java.srcDirs 'src' }
+    }
 }
 
 apply from: 'artifacts.gradle'

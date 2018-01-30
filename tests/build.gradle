@@ -1,8 +1,6 @@
 sourceSets {
     main.java.srcDirs = []
     test.java.srcDirs = [file('src')]
-    main.resources.srcDirs = []
-    test.resources.srcDirs = []
 }
 
 dependencies {
