@@ -7,7 +7,9 @@ sourceSets {
 
 dependencies {
   compile rootProject
-  // library trove4j
   compile library_project_trove4j
 }
 
+jar {
+  from
+}
