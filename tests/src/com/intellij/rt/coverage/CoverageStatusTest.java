@@ -127,7 +127,7 @@ public class CoverageStatusTest extends TestCase {
   }
 
   private void doTest(final String className, String expected, boolean sampling) throws Exception {
-    final String testDataPath = new File("").getAbsolutePath() + File.separator + "tests" + File.separator + "testData" + File.separator + "coverage" + File.separator + className;
+    final String testDataPath = new File("").getAbsolutePath() + File.separator + "testData" + File.separator + "coverage" + File.separator + className;
 
     myDataFile = new File(testDataPath +File.separator+ "Test.ic");
 

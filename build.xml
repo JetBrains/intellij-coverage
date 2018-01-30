@@ -64,7 +64,7 @@
     </jar>
     <jar destfile="${test-discovery.data.jar}">
       <manifest>
-        <attribute name="Premain-Class" value="com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain"/>
+        <attribute name="Premain-Class" value="TestDiscoveryPremain"/>
         <attribute name="Boot-Class-Path" value="test-discovery-agent.jar"/>
       </manifest>
 

@@ -1,0 +1,113 @@
+///////////////////////////////////////////
+/// THIS IS AUTO GENERATED FILE
+/// YOU MAY EDIT IT ON YOUR OWN RISK
+/// idea2gradle VERSION=SNAPSHOT
+/// generated on Jan 30, 2018 3:32:27 PM
+///////////////////////////////////////////
+
+
+task buildInstrumenter_jar(type: Jar, dependsOn: [project(':util').tasks['assemble'], project(':instrumentation').tasks['assemble']]) {
+    baseName = 'coverage-instrumenter'
+    destinationDir = file("$buildDir/artifacts/instrumenter_jar")
+    from(project(':instrumentation').sourceSets.main.output)
+    from(project(':util').sourceSets.main.output)
+}
+
+task buildCoverage_agent_zip(type: Zip, dependsOn: []) {
+    destinationDir = file("$buildDir/tmp")
+    archiveName = 'coverage-agent.jar'
+    from(rootProject.sourceSets.main.output)
+    from(file("$rootDir/src/META-INF/MANIFEST.MF")) {
+        into '/META-INF'
+    }
+}
+task buildCoverage_agent_jar(dependsOn: [buildCoverage_agent_zip, rootProject.tasks['assemble']]) {
+    outputs.dir("$buildDir/artifacts/coverage_agent_jar")
+    doLast {
+        copy {
+            from files("$buildDir/tmp/coverage-agent.jar")
+            into "$buildDir/artifacts/coverage_agent_jar"
+            fileMode 0755
+            dirMode 0755
+        }
+        copy {
+            from library_project_asm_all
+            into "$buildDir/artifacts/coverage_agent_jar"
+            fileMode 0755
+            dirMode 0755
+        }
+        copy {
+            from library_project_trove4j
+            into "$buildDir/artifacts/coverage_agent_jar"
+            fileMode 0755
+            dirMode 0755
+        }
+    }
+}
+
+task buildTest_discovery_agent_zip(type: Zip, dependsOn: []) {
+    destinationDir = file("$buildDir/tmp")
+    archiveName = 'test-discovery-agent.jar'
+    from(file("$rootDir/testDiscovery/src/META-INF/MANIFEST.MF")) {
+        into '/META-INF'
+    }
+    from(project(':testDiscovery').sourceSets.main.output)
+    from(rootProject.sourceSets.main.output)
+}
+task buildTest_discovery_agent_jar(dependsOn: [buildTest_discovery_agent_zip, project(':testDiscovery').tasks['assemble'], rootProject.tasks['assemble']]) {
+    outputs.dir("$buildDir/artifacts/test_discovery_agent_jar")
+    doLast {
+        copy {
+            from library_project_asm_all
+            into "$buildDir/artifacts/test_discovery_agent_jar"
+            fileMode 0755
+            dirMode 0755
+        }
+        copy {
+            from library_project_trove4j
+            into "$buildDir/artifacts/test_discovery_agent_jar"
+            fileMode 0755
+            dirMode 0755
+        }
+        copy {
+            from files("$buildDir/tmp/test-discovery-agent.jar")
+            into "$buildDir/artifacts/test_discovery_agent_jar"
+            fileMode 0755
+            dirMode 0755
+        }
+    }
+}
+
+task buildTest_discovery_instrumenter_jar(type: Jar, dependsOn: [project(':testDiscovery').tasks['assemble'], project(':util').tasks['assemble'], project(':instrumentation').tasks['assemble']]) {
+    baseName = 'test-discovery-instrumenter'
+    destinationDir = file("$buildDir/artifacts/test_discovery_instrumenter_jar")
+    from(project(':testDiscovery').sourceSets.main.output)
+    from(project(':instrumentation').sourceSets.main.output)
+    from(project(':util').sourceSets.main.output)
+}
+
+task buildCoverage_util_zip(type: Zip, dependsOn: []) {
+    destinationDir = file("$buildDir/tmp")
+    archiveName = 'coverage-util.jar'
+    from(project(':util').sourceSets.main.output)
+}
+task buildCoverage_util_jar(dependsOn: [buildCoverage_util_zip, project(':util').tasks['assemble']]) {
+    outputs.dir("$buildDir/artifacts/coverage_util_jar")
+    doLast {
+        copy {
+            from files("$buildDir/tmp/coverage-util.jar")
+            into "$buildDir/artifacts/coverage_util_jar"
+            fileMode 0755
+            dirMode 0755
+        }
+        copy {
+            from library_project_trove4j
+            into "$buildDir/artifacts/coverage_util_jar"
+            fileMode 0755
+            dirMode 0755
+        }
+    }
+}
+
+task artifacts(dependsOn: [buildInstrumenter_jar, buildCoverage_agent_jar, buildTest_discovery_agent_jar, buildTest_discovery_instrumenter_jar, buildCoverage_util_jar]) {
+}

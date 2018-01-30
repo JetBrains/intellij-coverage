@@ -1,0 +1,15 @@
+sourceSets {
+    main.java.srcDirs = []
+    test.java.srcDirs = [file('src')]
+    main.resources.srcDirs = []
+    test.resources.srcDirs = []
+}
+
+dependencies {
+    compile project(':util')
+    compile project(':instrumentation')
+    compile project(':testDiscovery')
+
+    testCompile 'junit:junit:4.12'
+    testCompile rootProject
+}

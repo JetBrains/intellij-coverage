@@ -190,7 +190,7 @@ public class CoverageMergeTest extends TestCase {
   }
 
   private static String getTestDataPath(String className) {
-    return new File("").getAbsolutePath() + File.separator + "tests" + File.separator + "testData" + File.separator + "coverage" + File.separator + "merge" + File.separator + className;
+    return new File("").getAbsolutePath() + File.separator + "testData" + File.separator + "coverage" + File.separator + "merge" + File.separator + className;
   }
 
 }

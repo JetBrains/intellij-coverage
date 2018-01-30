@@ -1,0 +1,26 @@
+///////////////////////////////////////////
+/// THIS IS AUTO GENERATED FILE
+/// YOU MAY EDIT IT ON YOUR OWN RISK
+/// idea2gradle VERSION=SNAPSHOT
+/// generated on Jan 30, 2018 3:32:27 PM
+///////////////////////////////////////////
+
+
+sourceSets {
+  main.java.srcDirs = [ file('src') ]
+  test.java.srcDirs = [  ]
+  main.resources.srcDirs = [  ]
+  test.resources.srcDirs = [  ]
+}
+
+dependencies {
+  compile project(':util')
+  compile rootProject
+  // library trove4j
+  compile library_project_trove4j
+
+  // library asm-all
+  compile library_project_asm_all
+
+}
+

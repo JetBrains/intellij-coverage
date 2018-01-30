@@ -1,0 +1,13 @@
+sourceSets {
+  main.java.srcDirs = [ file('src') ]
+  test.java.srcDirs = [  ]
+  main.resources.srcDirs = [  ]
+  test.resources.srcDirs = [  ]
+}
+
+dependencies {
+  compile rootProject
+  // library trove4j
+  compile library_project_trove4j
+}
+
