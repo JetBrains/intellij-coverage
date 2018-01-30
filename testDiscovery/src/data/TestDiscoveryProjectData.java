@@ -16,21 +16,38 @@
 
 package com.intellij.rt.coverage.data;
 
-import com.intellij.rt.coverage.util.CoverageIOUtil;
-
-import java.io.*;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class TestDiscoveryProjectData {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/TestDiscoveryProjectData";
+  public static final String TEST_DISCOVERY_DATA_LISTENER_PROP = "test.discovery.data.listener";
 
-  public static final String TRACE_DIR = "org.jetbrains.instrumentation.trace.dir";
   protected static TestDiscoveryProjectData ourProjectData = new TestDiscoveryProjectData();
 
-  private final String myTraceDir = System.getProperty(TRACE_DIR, "");
+  public TestDiscoveryProjectData() {
+    try {
+      myDataListener = (TestDiscoveryDataListener) Class.forName(System.getProperty(TEST_DISCOVERY_DATA_LISTENER_PROP, TrFileDiscoveryDataListener.class.getName())).newInstance();
+    } catch (InstantiationException e) {
+      throw new RuntimeException(e);
+    } catch (IllegalAccessException e) {
+      throw new RuntimeException(e);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException(e);
+    }
+
+    //TODO do via event
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      public void run() {
+        try {
+          myDataListener.testsFinished();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }));
+  }
 
   public static TestDiscoveryProjectData getProjectData() {
     return ourProjectData;
@@ -38,6 +55,7 @@ public class TestDiscoveryProjectData {
 
   private final ConcurrentMap<String, boolean[]> myClassToVisitedMethods = new ConcurrentHashMap<String, boolean[]>();
   private final ConcurrentMap<String, String[]> myClassToMethodNames = new ConcurrentHashMap<String, String[]>();
+  private final TestDiscoveryDataListener myDataListener;
 
   // called from instrumented code during class's static init
   public static boolean[] trace(String className, boolean[] methodFlags, String[] methodNames) {
@@ -60,57 +78,9 @@ public class TestDiscoveryProjectData {
   }
 
   public synchronized void testDiscoveryEnded(final String name) {
-    new File(myTraceDir).mkdirs();
-    final File traceFile = new File(myTraceDir, name + ".tr");
     try {
-      if (!traceFile.exists()) {
-        traceFile.createNewFile();
-      }
-      DataOutputStream os = null;
-      try {
-        os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(traceFile), 64 * 1024));
-
-        //saveOldTrace(os);
-
-        Map<String, Integer> classToUsedMethods = new HashMap<String, Integer>();
-        for (Map.Entry<String, boolean[]> o : myClassToVisitedMethods.entrySet()) {
-          boolean[] used = o.getValue();
-          int usedMethodsCount = 0;
-
-          for (boolean anUsed : used) {
-            if (anUsed) ++usedMethodsCount;
-          }
-
-          if (usedMethodsCount > 0) {
-            classToUsedMethods.put(o.getKey(), usedMethodsCount);
-          }
-        }
-
-        CoverageIOUtil.writeINT(os, classToUsedMethods.size());
-        for (Map.Entry<String, boolean[]> o : myClassToVisitedMethods.entrySet()) {
-          final boolean[] used = o.getValue();
-          final String className = o.getKey();
-
-          Integer usedMethodsCount = classToUsedMethods.get(className);
-          if (usedMethodsCount == null) continue;
-
-          CoverageIOUtil.writeUTF(os, className);
-          CoverageIOUtil.writeINT(os, usedMethodsCount);
-
-          String[] methodNames = myClassToMethodNames.get(className);
-          for (int i = 0, len = used.length; i < len; ++i) {
-            // we check usedMethodCount here since used can still be updated by other threads
-            if (used[i] && usedMethodsCount-- > 0) {
-              CoverageIOUtil.writeUTF(os, methodNames[i]);
-            }
-          }
-        }
-      } finally {
-        if (os != null) {
-          os.close();
-        }
-      }
-    } catch (IOException e) {
+      myDataListener.testFinished(name, myClassToVisitedMethods, myClassToMethodNames);
+    } catch (Exception e) {
       e.printStackTrace();
     }
   }
