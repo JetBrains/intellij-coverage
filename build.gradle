@@ -1,3 +1,5 @@
+import org.gradle.internal.jvm.Jvm
+
 apply from: 'project-libraries.gradle'
 
 allprojects {
@@ -14,7 +16,7 @@ allprojects {
     }
 
     dependencies {
-        runtime files(org.gradle.internal.jvm.Jvm.current().toolsJar)
+        runtime files(Jvm.current().toolsJar)
     }
 }
 
