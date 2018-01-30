@@ -3,19 +3,34 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation.iml" filepath="$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation.iml" group="instrumentation" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation.iml" filepath="$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation.iml" group="instrumentation" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation_main.iml" filepath="$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation_main.iml" group="instrumentation" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation_main.iml" filepath="$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation_main.iml" group="instrumentation" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation_test.iml" filepath="$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation_test.iml" group="instrumentation" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation_test.iml" filepath="$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation_test.iml" group="instrumentation" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage_main.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage_main.iml" group="intellij-coverage" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage_main.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage_main.iml" group="intellij-coverage" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage_test.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage_test.iml" group="intellij-coverage" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage_test.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage_test.iml" group="intellij-coverage" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/src-intellij-coverage.iml" filepath="$PROJECT_DIR$/.idea/modules/src-intellij-coverage.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/testDiscovery/testDiscovery.iml" filepath="$PROJECT_DIR$/.idea/modules/testDiscovery/testDiscovery.iml" group="testDiscovery" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/testDiscovery/testDiscovery.iml" filepath="$PROJECT_DIR$/.idea/modules/testDiscovery/testDiscovery.iml" group="testDiscovery" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/testDiscovery/testDiscovery_main.iml" filepath="$PROJECT_DIR$/.idea/modules/testDiscovery/testDiscovery_main.iml" group="testDiscovery" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/testDiscovery/testDiscovery_main.iml" filepath="$PROJECT_DIR$/.idea/modules/testDiscovery/testDiscovery_main.iml" group="testDiscovery" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/testDiscovery/testDiscovery_test.iml" filepath="$PROJECT_DIR$/.idea/modules/testDiscovery/testDiscovery_test.iml" group="testDiscovery" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/testDiscovery/testDiscovery_test.iml" filepath="$PROJECT_DIR$/.idea/modules/testDiscovery/testDiscovery_test.iml" group="testDiscovery" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tests/tests.iml" filepath="$PROJECT_DIR$/.idea/modules/tests/tests.iml" group="tests" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/tests/tests.iml" filepath="$PROJECT_DIR$/.idea/modules/tests/tests.iml" group="tests" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/tests/tests_main.iml" filepath="$PROJECT_DIR$/.idea/modules/tests/tests_main.iml" group="tests" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tests/tests_main.iml" filepath="$PROJECT_DIR$/.idea/modules/tests/tests_main.iml" group="tests" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/tests/tests_test.iml" filepath="$PROJECT_DIR$/.idea/modules/tests/tests_test.iml" group="tests" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/tests/tests_test.iml" filepath="$PROJECT_DIR$/.idea/modules/tests/tests_test.iml" group="tests" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/util/util.iml" filepath="$PROJECT_DIR$/.idea/modules/util/util.iml" group="util" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/util/util.iml" filepath="$PROJECT_DIR$/.idea/modules/util/util.iml" group="util" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/util/util_main.iml" filepath="$PROJECT_DIR$/.idea/modules/util/util_main.iml" group="util" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/util/util_main.iml" filepath="$PROJECT_DIR$/.idea/modules/util/util_main.iml" group="util" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/util/util_test.iml" filepath="$PROJECT_DIR$/.idea/modules/util/util_test.iml" group="util" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/util/util_test.iml" filepath="$PROJECT_DIR$/.idea/modules/util/util_test.iml" group="util" />
     </modules>
   </component>
