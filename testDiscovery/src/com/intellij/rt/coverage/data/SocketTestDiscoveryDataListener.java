@@ -23,13 +23,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListener {
   public static final String HOST_PROP = "test.discovery.data.host";
@@ -40,12 +38,16 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
   private static final byte TEST_FINISHED_MSG = 2;
   private final SocketChannel mySocket;
   private final ExecutorService myExecutor;
+  private final Selector mySelector;
+  private volatile boolean myClosed;
+  private final BlockingQueue<ByteBuffer> myData = new ArrayBlockingQueue<ByteBuffer>(10);
 
   public SocketTestDiscoveryDataListener() throws IOException {
     String host = System.getProperty(HOST_PROP, "127.0.0.1");
     int port = Integer.parseInt(System.getProperty(PORT_PROP));
     mySocket = SocketChannel.open(new InetSocketAddress(host, port));
     mySocket.configureBlocking(false);
+    mySelector = Selector.open();
     myExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
       public Thread newThread(Runnable r) {
         Thread thread = new Thread(r);
@@ -53,11 +55,92 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
         return thread;
       }
     });
-    write(new WriteOp() {
-      public void write() throws IOException {
-        mySocket.write(ByteBuffer.wrap(new byte[]{START_MSG}));
+    myExecutor.submit(new Runnable() {
+      public void run() {
+        try {
+          connect();
+        } catch (IOException e) {
+          e.printStackTrace();
+          return;
+        }
+
+        while (!myClosed || !myData.isEmpty()) {
+          ByteBuffer data = myData.peek();
+          if (data == null) {
+            try {
+              Thread.sleep(100);
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
+            continue;
+          }
+
+          try {
+            sendDataPart(data);
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+
+          if (!data.hasRemaining()) {
+            myData.poll();
+          }
+        }
+      }
+
+      private void connect() throws IOException {
+        mySocket.register(mySelector, SelectionKey.OP_CONNECT);
+        while (true) {
+          int selected = mySelector.select(100);
+          if (selected != 0) {
+            Iterator<SelectionKey> keyIt = mySelector.selectedKeys().iterator();
+            while (keyIt.hasNext()) {
+              SelectionKey key = keyIt.next();
+              SocketChannel channel = (SocketChannel) key.channel();
+              keyIt.remove();
+              if (key.isValid() && key.isConnectable()) {
+                boolean connected = channel.finishConnect();//also can throw NoRouteToHostException and some others
+                if (!connected) {
+                  throw new RuntimeException("Connection is not established");
+                }
+                channel.register(mySelector, SelectionKey.OP_WRITE, key.attachment());
+                keyIt.remove();
+                return;
+              } else {
+                keyIt.remove();
+              }
+            }
+          }
+        }
+      }
+
+      private void sendDataPart(ByteBuffer data) throws IOException {
+        while (true) {
+          int selected = mySelector.select(100);
+          if (selected != 0) {
+            Iterator<SelectionKey> keyIt = mySelector.selectedKeys().iterator();
+            while (keyIt.hasNext()) {
+              SelectionKey key = keyIt.next();
+              SocketChannel channel = (SocketChannel) key.channel();
+              keyIt.remove();
+              if (key.isValid() && key.isWritable()) {
+                try {
+                  if (channel.write(data) == -1) {
+                    throw new IOException("Connection is closed");
+                  }
+                } catch (IOException e) {
+                  key.cancel();
+                  throw e;
+                }
+                return;
+              }
+            }
+
+          }
+        }
       }
     });
+
+    write(ByteBuffer.wrap(new byte[]{START_MSG}));
   }
 
   public void testFinished(final String testName, Map<String, boolean[]> classToVisitedMethods, Map<String, String[]> classToMethodNames) {
@@ -79,33 +162,29 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
       }
     }
 
-    write(new WriteOp() {
-      public void write() throws IOException {
-        final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
-        baos.write(TEST_FINISHED_MSG);
-        DataOutputStream dos = new DataOutputStream(baos);
-        CoverageIOUtil.writeUTF(dos, testName);
+    try {
+      final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
+      baos.write(TEST_FINISHED_MSG);
+      DataOutputStream dos = new DataOutputStream(baos);
+      CoverageIOUtil.writeUTF(dos, testName);
 
-        CoverageIOUtil.writeINT(dos, visitedMethods.size());
-        for (VisitedMethods ns : visitedMethods) {
-          CoverageIOUtil.writeUTF(dos, ns.className);
-          CoverageIOUtil.writeINT(dos, ns.methodNames.size());
-          for (String name : ns.methodNames) {
-            CoverageIOUtil.writeUTF(dos, name);
-          }
+      CoverageIOUtil.writeINT(dos, visitedMethods.size());
+      for (VisitedMethods ns : visitedMethods) {
+        CoverageIOUtil.writeUTF(dos, ns.className);
+        CoverageIOUtil.writeINT(dos, ns.methodNames.size());
+        for (String name : ns.methodNames) {
+          CoverageIOUtil.writeUTF(dos, name);
         }
-
-        mySocket.write(baos.asByteBuffer());
       }
-    });
+
+      write(baos.asByteBuffer());
+    } catch (IOException ignored) {
+    }
   }
 
   public void testsFinished() {
-    write(new WriteOp() {
-      public void write() throws IOException {
-        mySocket.write(ByteBuffer.wrap(new byte[]{FINISHED_MSG}));
-      }
-    });
+    write(ByteBuffer.wrap(new byte[]{FINISHED_MSG}));
+    myClosed = true;
     myExecutor.shutdown();
     try {
       mySocket.close();
@@ -114,20 +193,12 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
     }
   }
 
-  private void write(final WriteOp op) {
-    myExecutor.submit(new Runnable() {
-      public void run() {
-        try {
-          op.write();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    });
-  }
-
-  private interface WriteOp {
-    void write() throws IOException;
+  private void write(final ByteBuffer data) {
+    try {
+      myData.put(data);
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private static class MyByteArrayOutputStream extends ByteArrayOutputStream {
