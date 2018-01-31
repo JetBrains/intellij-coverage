@@ -2,3 +2,8 @@ dependencies {
   compile rootProject
   compile library_project_trove4j
 }
+
+jar {
+  destinationDir = file("../dist")
+  archiveName = "coverage-util.jar"
+}

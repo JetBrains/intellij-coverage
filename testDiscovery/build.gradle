@@ -1,6 +1,14 @@
 dependencies {
-    compile library_project_asm_all
-    compile project(':instrumentation')
-    compile rootProject
+  compile library_project_asm_all
+  compile project(':instrumentation')
+  compile rootProject
 }
 
+jar {
+  manifest.attributes(
+      "Premain-Class": "com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain",
+      "Boot-Class-Path": "test-discovery-agent.jar",
+  )
+  archiveName = "test-discovery-agent.jar"
+  destinationDir = file("../dist")
+}

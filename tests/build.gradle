@@ -1,13 +1,13 @@
 sourceSets {
-    main.java.srcDirs = []
-    test.java.srcDirs = [file('src')]
+  main.java.srcDirs = []
+  test.java.srcDirs = [file('src')]
 }
 
 dependencies {
-    compile project(':util')
-    compile project(':instrumentation')
-    compile project(':testDiscovery')
+  compile project(':util')
+  compile project(':instrumentation')
+  compile project(':testDiscovery')
 
-    testCompile 'junit:junit:4.12'
-    testCompile rootProject
+  testCompile 'junit:junit:4.12'
+  testCompile rootProject
 }

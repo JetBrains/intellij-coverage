@@ -5,3 +5,7 @@ dependencies {
   compile library_project_asm_all
 }
 
+jar {
+  destinationDir = file("../dist")
+  archiveName = "coverage-instrumenter.jar"
+}
