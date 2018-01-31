@@ -1,3 +1,0 @@
-Manifest-Version: 1.0.0
-Premain-Class: com.intellij.rt.coverage.main.CoveragePremain
-Boot-Class-Path: coverage-agent.jar
