@@ -9,7 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/instrumentation" />
-            <option value="$PROJECT_DIR$/testDiscovery" />
+            <option value="$PROJECT_DIR$/test-discovery" />
             <option value="$PROJECT_DIR$/tests" />
             <option value="$PROJECT_DIR$/util" />
           </set>

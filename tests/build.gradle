@@ -6,7 +6,7 @@ sourceSets {
 dependencies {
   compile project(':util')
   compile project(':instrumentation')
-  compile project(':testDiscovery')
+  compile project(':test-discovery')
 
   testCompile 'junit:junit:4.12'
   testCompile rootProject

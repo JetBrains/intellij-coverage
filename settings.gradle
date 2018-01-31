@@ -1,6 +1,6 @@
 rootProject.name = 'intellij-coverage'
 
 include ':instrumentation'
-include ':testDiscovery'
+include ':test-discovery'
 include ':tests'
 include ':util'

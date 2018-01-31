@@ -71,13 +71,13 @@
       <fileset dir="${build.rt.classes.dir}/intellij-coverage" includes="com/intellij/rt/coverage/data/**"/>
       <fileset dir="${build.rt.classes.dir}/intellij-coverage" includes="com/intellij/rt/coverage/main/**"/>
       <fileset dir="${build.rt.classes.dir}/intellij-coverage" includes="com/intellij/rt/coverage/util/**"/>
-      <fileset dir="${build.rt.classes.dir}/testDiscovery" includes="com/intellij/rt/coverage/data/**"/>
-      <fileset dir="${build.rt.classes.dir}/testDiscovery" includes="com/intellij/rt/coverage/testDiscovery/main/**"/>
+      <fileset dir="${build.rt.classes.dir}/test-discovery" includes="com/intellij/rt/coverage/data/**"/>
+      <fileset dir="${build.rt.classes.dir}/test-discovery" includes="com/intellij/rt/coverage/testDiscovery/main/**"/>
     </jar>
     <jar destfile="${test-discovery.instrumenter.jar}">
       <fileset dir="${build.rt.classes.dir}/instrumentation" includes="com/intellij/rt/coverage/instrumentation/**"/>
       <fileset dir="${build.rt.classes.dir}/util" includes="com/intellij/rt/coverage/util/**"/>
-      <fileset dir="${build.rt.classes.dir}/testDiscovery" includes="com/intellij/rt/coverage/testDiscovery/instrumentation/**"/>
+      <fileset dir="${build.rt.classes.dir}/test-discovery" includes="com/intellij/rt/coverage/testDiscovery/instrumentation/**"/>
     </jar>
     <jar destfile="${util.jar}">
       <fileset dir="${build.rt.classes.dir}/util" includes="com/intellij/rt/coverage/util/**"/>

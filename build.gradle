@@ -111,7 +111,7 @@ publishing {
       groupId 'org.jetbrains.intellij.deps'
       artifactId 'intellij-test-discovery'
       version version
-      artifact project(":testDiscovery").discoveryAgentJar
+      artifact project(":test-discovery").discoveryAgentJar
     }
   }
 }
