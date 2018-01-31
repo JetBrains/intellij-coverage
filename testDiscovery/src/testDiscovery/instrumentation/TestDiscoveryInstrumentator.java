@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import com.intellij.rt.coverage.instrumentation.Instrumentator;
 import org.jetbrains.org.objectweb.asm.ClassReader;
 import org.jetbrains.org.objectweb.asm.ClassVisitor;
@@ -27,6 +28,14 @@ import java.lang.instrument.Instrumentation;
 public class TestDiscoveryInstrumentator extends Instrumentator {
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
     new TestDiscoveryInstrumentator().performPremain(argsString, instrumentation);
+  }
+
+  @Override
+  public void performPremain(String argsString, Instrumentation instrumentation) throws Exception {
+    // initialize TestDiscoveryProjectData before instrumentation
+    @SuppressWarnings("unused")
+    TestDiscoveryProjectData projectData = TestDiscoveryProjectData.getProjectData();
+    super.performPremain(argsString, instrumentation);
   }
 
   @Override
