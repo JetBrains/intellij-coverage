@@ -32,7 +32,7 @@ task wrapper(type: Wrapper) {
   gradleVersion = '4.5'
 }
 
-task coveraAgentJar(type: Jar) {
+task coverAgentJar(type: Jar) {
   baseName = "coverage-agent"
   destinationDir = file("dist")
   manifest.attributes(
@@ -42,29 +42,29 @@ task coveraAgentJar(type: Jar) {
   from(sourceSets.main.output)
   from(["util", "instrumentation"].collect({ project(":$it").sourceSets.main.output }))
   from { zipTree('lib/trove.jar') } {
-    include '**/THash.class'
-    include '**/Equality.class'
-    include '**/THashSet.class'
-    include '**/TIntHash.class'
-    include '**/TLongHash.class'
-    include '**/PrimeFinder.class'
-    include '**/TIntHashSet.class'
-    include '**/TObjectHash.class'
-    include '**/HashFunctions.class'
-    include '**/TPrimitiveHash.class'
-    include '**/TObjectFunction.class'
-    include '**/TIntObjectHashMap.class'
-    include '**/TObjectIntHashMap.class'
-    include '**/TLongObjectHashMap.class'
-    include '**/TIntHashingStrategy.class'
-    include '**/TIntObjectProcedure.class'
-    include '**/TLongObjectProcedure.class'
-    include '**/TLongHashingStrategy.class'
-    include '**/TObjectHashingStrategy.class'
+    include ('**/THash.class'
+           , '**/Equality.class'
+           , '**/THashSet.class'
+           , '**/TIntHash.class'
+           , '**/TLongHash.class'
+           , '**/PrimeFinder.class'
+           , '**/TIntHashSet.class'
+           , '**/TObjectHash.class'
+           , '**/HashFunctions.class'
+           , '**/TPrimitiveHash.class'
+           , '**/TObjectFunction.class'
+           , '**/TIntObjectHashMap.class'
+           , '**/TObjectIntHashMap.class'
+           , '**/TLongObjectHashMap.class'
+           , '**/TIntHashingStrategy.class'
+           , '**/TIntObjectProcedure.class'
+           , '**/TLongObjectProcedure.class'
+           , '**/TLongHashingStrategy.class'
+           , '**/TObjectHashingStrategy.class')
   }
   from { zipTree('lib/asm-all.jar') } {
     include '**/*.class'
   }
 }
 
-build.dependsOn(coveraAgentJar)
+build.dependsOn(coverAgentJar)
