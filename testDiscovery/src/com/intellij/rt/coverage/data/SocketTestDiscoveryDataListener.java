@@ -45,9 +45,9 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
   public SocketTestDiscoveryDataListener() throws IOException {
     String host = System.getProperty(HOST_PROP, "127.0.0.1");
     int port = Integer.parseInt(System.getProperty(PORT_PROP));
+    mySelector = Selector.open();
     mySocket = SocketChannel.open(new InetSocketAddress(host, port));
     mySocket.configureBlocking(false);
-    mySelector = Selector.open();
     myExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
       public Thread newThread(Runnable r) {
         Thread thread = new Thread(r);
@@ -55,15 +55,9 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
         return thread;
       }
     });
+    mySocket.register(mySelector, SelectionKey.OP_WRITE);
     myExecutor.submit(new Runnable() {
       public void run() {
-        try {
-          connect();
-        } catch (IOException e) {
-          e.printStackTrace();
-          return;
-        }
-
         while (!myClosed || !myData.isEmpty()) {
           ByteBuffer data = myData.peek();
           if (data == null) {
@@ -83,32 +77,6 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
 
           if (!data.hasRemaining()) {
             myData.poll();
-          }
-        }
-      }
-
-      private void connect() throws IOException {
-        mySocket.register(mySelector, SelectionKey.OP_CONNECT);
-        while (true) {
-          int selected = mySelector.select(100);
-          if (selected != 0) {
-            Iterator<SelectionKey> keyIt = mySelector.selectedKeys().iterator();
-            while (keyIt.hasNext()) {
-              SelectionKey key = keyIt.next();
-              SocketChannel channel = (SocketChannel) key.channel();
-              keyIt.remove();
-              if (key.isValid() && key.isConnectable()) {
-                boolean connected = channel.finishConnect();//also can throw NoRouteToHostException and some others
-                if (!connected) {
-                  throw new RuntimeException("Connection is not established");
-                }
-                channel.register(mySelector, SelectionKey.OP_WRITE, key.attachment());
-                keyIt.remove();
-                return;
-              } else {
-                keyIt.remove();
-              }
-            }
           }
         }
       }
@@ -186,10 +154,29 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
     write(ByteBuffer.wrap(new byte[]{FINISHED_MSG}));
     myClosed = true;
     myExecutor.shutdown();
+
+    try {
+      if (!myExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+        shutdownNow();
+        if (!myExecutor.awaitTermination(60, TimeUnit.SECONDS))
+          System.err.println("Socket worker didn't finished properlt");
+
+      }
+    } catch (InterruptedException ie) {
+      shutdownNow();
+      Thread.currentThread().interrupt();
+    }
+
     try {
       mySocket.close();
     } catch (IOException e) {
       e.printStackTrace();
+    }
+  }
+
+  private void shutdownNow() {
+    for (Runnable task : myExecutor.shutdownNow()) {
+      task.run();
     }
   }
 
