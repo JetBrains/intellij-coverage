@@ -24,8 +24,8 @@ allprojects {
   }
 
   apply plugin: 'java'
-  sourceCompatibility = 1.6
-  targetCompatibility = 1.6
+  sourceCompatibility = 1.5
+  targetCompatibility = 1.5
 
   configurations {
     testArtifacts.extendsFrom testRuntime
