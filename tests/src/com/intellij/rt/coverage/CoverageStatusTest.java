@@ -21,7 +21,6 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.sun.tools.javac.Main;
-import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import java.io.*;
@@ -158,7 +157,7 @@ public class CoverageStatusTest extends TestCase {
 
     final ProjectData projectInfo = runCoverage(testDataPath, myDataFile, "Test(\\$.*)*", "Test", sampling);
 
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
 
     final ClassData classInfo = projectInfo.getClassData("Test");
 
@@ -180,12 +179,11 @@ public class CoverageStatusTest extends TestCase {
       buf.append(info.getLineNumber()).append(":").append(info.getStatus() == 0 ? "NONE" : info.getStatus() == 1 ? "PARTIAL" : "FULL").append("\n");
     }
 
-    Assert.assertEquals(expected, buf.toString());
+    assertEquals(expected, buf.toString());
   }
 
-  public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
-                                        String classToRun, final boolean sampling)
-      throws IOException, InterruptedException {
+  static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
+                                 String classToRun, final boolean sampling) throws IOException, InterruptedException {
     String javaHome = System.getenv("JAVA_HOME");
     if (javaHome == null) {
       throw new RuntimeException("JAVA_HOME environment variable needs to be set");
