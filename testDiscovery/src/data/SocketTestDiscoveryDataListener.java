@@ -154,10 +154,29 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
     write(ByteBuffer.wrap(new byte[]{FINISHED_MSG}));
     myClosed = true;
     myExecutor.shutdown();
+
+    try {
+      if (!myExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+        shutdownNow();
+        if (!myExecutor.awaitTermination(60, TimeUnit.SECONDS))
+          System.err.println("Socket worker didn't finished properlt");
+
+      }
+    } catch (InterruptedException ie) {
+      shutdownNow();
+      Thread.currentThread().interrupt();
+    }
+
     try {
       mySocket.close();
     } catch (IOException e) {
       e.printStackTrace();
+    }
+  }
+
+  private void shutdownNow() {
+    for (Runnable task : myExecutor.shutdownNow()) {
+      task.run();
     }
   }
 
