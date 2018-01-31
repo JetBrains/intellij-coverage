@@ -100,42 +100,4 @@ clean.doFirst {
   delete "dist"
 }
 
-artifacts {
-  archives coverageAgentJar
-}
-
-publishing {
-  publications {
-    CoveragePublication(MavenPublication) {
-      groupId 'org.jetbrains.intellij.deps'
-      artifactId 'intellij-coverage'
-      version version
-      artifact coverageAgentJar
-    }
-    TestDiscoveryPublication(MavenPublication) {
-      groupId 'org.jetbrains.intellij.deps'
-      artifactId 'intellij-test-discovery'
-      version version
-      artifact project(":test-discovery").discoveryAgentJar
-    }
-  }
-}
-
-bintray {
-  user = System.getenv('BINTRAY_USER')
-  key = System.getenv('BINTRAY_KEY')
-
-  publish = true
-
-  pkg {
-    repo = 'intellij-third-party-dependencies'
-    name = 'intellij-coverage'
-    userOrg = 'jetbrains'
-
-    version {
-      name = version
-    }
-  }
-
-  publications = ['CoveragePublication', 'TestDiscoveryPublication']
-}
+apply from: 'artifacts.gradle'
