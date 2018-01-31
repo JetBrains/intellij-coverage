@@ -23,7 +23,7 @@ import java.lang.instrument.Instrumentation;
 public class TestDiscoveryPremain {
     public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
         CoveragePremain.premain(argsString, instrumentation, "TestDiscoveryInstrumentator",
-                "test-discovery-instrumenter.jar");
+                "test-discovery-instrumenter.jar", "coverage-util.jar");
     }
 
 }
