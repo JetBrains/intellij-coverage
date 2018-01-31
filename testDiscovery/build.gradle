@@ -4,11 +4,21 @@ dependencies {
   compile rootProject
 }
 
-jar {
-  manifest.attributes(
-      "Premain-Class": "com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain",
-      "Boot-Class-Path": "test-discovery-agent.jar",
-  )
+task discoveryAgentJar(type: Jar) {
   baseName = "test-discovery-agent"
   destinationDir = file("../dist")
+  manifest.attributes(
+      "Premain-Class": "com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain",
+      "Boot-Class-Path": "$archiveName"
+  )
+  from(sourceSets.main.output)
+  from(["util", "instrumentation"].collect({ project(":$it").sourceSets.main.output }))
+  from { zipTree('../lib/trove.jar') } {
+    include(troveClasses())
+  }
+  from { zipTree('../lib/asm-all.jar') } {
+    include '**/*.class'
+  }
 }
+
+build.dependsOn(discoveryAgentJar)

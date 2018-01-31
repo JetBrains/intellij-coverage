@@ -32,7 +32,7 @@ task wrapper(type: Wrapper) {
   gradleVersion = '4.5'
 }
 
-task coverAgentJar(type: Jar) {
+task coverageAgentJar(type: Jar) {
   baseName = "coverage-agent"
   destinationDir = file("dist")
   manifest.attributes(
@@ -42,29 +42,33 @@ task coverAgentJar(type: Jar) {
   from(sourceSets.main.output)
   from(["util", "instrumentation"].collect({ project(":$it").sourceSets.main.output }))
   from { zipTree('lib/trove.jar') } {
-    include ('**/THash.class'
-           , '**/Equality.class'
-           , '**/THashSet.class'
-           , '**/TIntHash.class'
-           , '**/TLongHash.class'
-           , '**/PrimeFinder.class'
-           , '**/TIntHashSet.class'
-           , '**/TObjectHash.class'
-           , '**/HashFunctions.class'
-           , '**/TPrimitiveHash.class'
-           , '**/TObjectFunction.class'
-           , '**/TIntObjectHashMap.class'
-           , '**/TObjectIntHashMap.class'
-           , '**/TLongObjectHashMap.class'
-           , '**/TIntHashingStrategy.class'
-           , '**/TIntObjectProcedure.class'
-           , '**/TLongObjectProcedure.class'
-           , '**/TLongHashingStrategy.class'
-           , '**/TObjectHashingStrategy.class')
+    include(troveClasses())
   }
   from { zipTree('lib/asm-all.jar') } {
     include '**/*.class'
   }
 }
 
-build.dependsOn(coverAgentJar)
+private static troveClasses() {
+  ['THash.class'
+   , 'Equality.class'
+   , 'THashSet.class'
+   , 'TIntHash.class'
+   , 'TLongHash.class'
+   , 'PrimeFinder.class'
+   , 'TIntHashSet.class'
+   , 'TObjectHash.class'
+   , 'HashFunctions.class'
+   , 'TPrimitiveHash.class'
+   , 'TObjectFunction.class'
+   , 'TIntObjectHashMap.class'
+   , 'TObjectIntHashMap.class'
+   , 'TLongObjectHashMap.class'
+   , 'TIntHashingStrategy.class'
+   , 'TIntObjectProcedure.class'
+   , 'TLongObjectProcedure.class'
+   , 'TLongHashingStrategy.class'
+   , 'TObjectHashingStrategy.class'].collect { "**/$it" }
+}
+
+build.dependsOn(coverageAgentJar)
