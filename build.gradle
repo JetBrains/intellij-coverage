@@ -36,8 +36,6 @@ jar {
   destinationDir = file("dist")
 }
 
-apply from: 'artifacts.gradle'
-
 //noinspection GrUnresolvedAccess
 task wrapper(type: Wrapper) {
   gradleVersion = '4.5'
