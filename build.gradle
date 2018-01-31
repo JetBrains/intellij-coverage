@@ -3,7 +3,8 @@ import org.gradle.internal.jvm.Jvm
 //noinspection GroovyAssignabilityCheck
 version "$version"
 
-apply from: 'project-libraries.gradle'
+ext.library_project_trove4j = files(rootProject.file('lib/trove.jar'))
+ext.library_project_asm_all = files(rootProject.file('lib/asm-all.jar'))
 
 allprojects {
   repositories {
