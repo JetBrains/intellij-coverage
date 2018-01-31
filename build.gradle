@@ -37,34 +37,36 @@ task copyAsm(type: Copy) {
   into file("dist")
 }
 
-task copyTrove(type: Copy) {
-  from library_project_trove4j
-  into file("dist")
-}
-
-//subprojects.each { subproject -> evaluationDependsOn( subproject.path ) }
-//jar.dependsOn subprojects.tasks['classes']
-//jar {
-//  baseName = 'MyApp'
-//  manifest {
-//    attributes 'Main-Class': 'org.abc.App'
-//  }
-//  ["util"].collect({project(":$it")}).each { subproject ->
-//    from subproject.sourceSets.main.output.classesDir
-//    from subproject.sourceSets.main.output.resourcesDir
-//  }
-//}
-
 task coveraAgentJar(type: Jar) {
-//  baseName = "coverage-agent"
-  archiveName = "coverage-agent.jar"
+  baseName = "coverage-agent"
   destinationDir = file("dist")
   manifest.attributes(
       "Premain-Class": "com.intellij.rt.coverage.main.CoveragePremain",
-      "Boot-Class-Path": "coverage-agent.jar asm-all.jar trove4j.jar"
+      "Boot-Class-Path": "$archiveName asm-all.jar"
   )
   from(sourceSets.main.output)
   from(["util", "instrumentation"].collect({ project(":$it").sourceSets.main.output }))
+  from { zipTree(library_project_trove4j.first().path) } {
+    include '**/THash.class'
+    include '**/Equality.class'
+    include '**/THashSet.class'
+    include '**/TIntHash.class'
+    include '**/TLongHash.class'
+    include '**/PrimeFinder.class'
+    include '**/TIntHashSet.class'
+    include '**/TObjectHash.class'
+    include '**/HashFunctions.class'
+    include '**/TPrimitiveHash.class'
+    include '**/TObjectFunction.class'
+    include '**/TIntObjectHashMap.class'
+    include '**/TObjectIntHashMap.class'
+    include '**/TLongObjectHashMap.class'
+    include '**/TIntHashingStrategy.class'
+    include '**/TIntObjectProcedure.class'
+    include '**/TLongObjectProcedure.class'
+    include '**/TLongHashingStrategy.class'
+    include '**/TObjectHashingStrategy.class'
+  }
 }
 
-build.dependsOn(copyAsm, copyTrove, coveraAgentJar)
+build.dependsOn(copyAsm, coveraAgentJar)
