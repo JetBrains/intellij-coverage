@@ -24,8 +24,7 @@ import com.sun.tools.javac.Main;
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -172,12 +171,19 @@ public class CoverageStatusTest extends TestCase {
       throw new RuntimeException("JAVA_HOME environment variable needs to be set");
     }
     final String exePath = javaHome + File.separator + "bin" + File.separator + "java";
-    final String path = new File("").getAbsolutePath() + File.separator + "dist" + File.separator;
-    final String coverageAgentPath = path + "coverage-agent.jar";
-    if (!new File(coverageAgentPath).exists()) {
+    File dist = new File("../dist");
+    File[] jars = dist.listFiles(new FilenameFilter() {
+      @Override
+      public boolean accept(File dir, String name) {
+        return name.startsWith("coverage-agent");
+      }
+    });
+
+    if (jars == null || jars.length != 1) {
       throw new RuntimeException("Coverage agent does not exist. Please rebuild all artifacts to build it.");
     }
 
+    String coverageAgentPath = jars[0].getCanonicalPath();
     String[] commandLine = {
         exePath,
         //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
@@ -192,6 +198,13 @@ public class CoverageStatusTest extends TestCase {
 
     final Process process = Runtime.getRuntime().exec(commandLine);
     process.waitFor();
+
+    if (process.exitValue() != 0) {
+      printStdout(process);
+      process.destroy();
+      throw new RuntimeException("Exit code != 0");
+    }
+
     process.destroy();
 
     int retries = 0;
@@ -205,5 +218,19 @@ public class CoverageStatusTest extends TestCase {
     final ProjectData projectInfo = ProjectDataLoader.load(coverageDataFile);
     assert projectInfo != null;
     return projectInfo;
+  }
+
+  private static void printStdout(Process process) throws IOException {
+    BufferedReader output = new BufferedReader(new InputStreamReader(process.getInputStream()));
+    BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+    String str;
+
+    while ((str = output.readLine()) != null) {
+      System.out.println(str);
+    }
+
+    while ((str = error.readLine()) != null) {
+      System.out.println(str);
+    }
   }
 }
