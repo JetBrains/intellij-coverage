@@ -4,6 +4,5 @@ dependencies {
 }
 
 jar {
-  destinationDir = file("../dist")
-  archiveName = "coverage-util.jar"
+  baseName = "coverage-util"
 }

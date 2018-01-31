@@ -6,6 +6,5 @@ dependencies {
 }
 
 jar {
-  destinationDir = file("../dist")
-  archiveName = "coverage-instrumenter.jar"
+  baseName = "coverage-instrumenter"
 }

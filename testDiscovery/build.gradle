@@ -9,6 +9,6 @@ jar {
       "Premain-Class": "com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain",
       "Boot-Class-Path": "test-discovery-agent.jar",
   )
-  archiveName = "test-discovery-agent.jar"
+  baseName = "test-discovery-agent"
   destinationDir = file("../dist")
 }

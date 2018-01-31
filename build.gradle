@@ -27,15 +27,6 @@ allprojects {
   }
 }
 
-jar {
-  manifest.attributes(
-      "Premain-Class": "com.intellij.rt.coverage.main.CoveragePremain",
-      "Boot-Class-Path": "coverage-agent.jar"
-  )
-  archiveName = "coverage-agent.jar"
-  destinationDir = file("dist")
-}
-
 //noinspection GrUnresolvedAccess
 task wrapper(type: Wrapper) {
   gradleVersion = '4.5'
@@ -51,4 +42,29 @@ task copyTrove(type: Copy) {
   into file("dist")
 }
 
-build.dependsOn(copyAsm, copyTrove)
+//subprojects.each { subproject -> evaluationDependsOn( subproject.path ) }
+//jar.dependsOn subprojects.tasks['classes']
+//jar {
+//  baseName = 'MyApp'
+//  manifest {
+//    attributes 'Main-Class': 'org.abc.App'
+//  }
+//  ["util"].collect({project(":$it")}).each { subproject ->
+//    from subproject.sourceSets.main.output.classesDir
+//    from subproject.sourceSets.main.output.resourcesDir
+//  }
+//}
+
+task coveraAgentJar(type: Jar) {
+//  baseName = "coverage-agent"
+  archiveName = "coverage-agent.jar"
+  destinationDir = file("dist")
+  manifest.attributes(
+      "Premain-Class": "com.intellij.rt.coverage.main.CoveragePremain",
+      "Boot-Class-Path": "coverage-agent.jar asm-all.jar trove4j.jar"
+  )
+  from(sourceSets.main.output)
+  from(["util", "instrumentation"].collect({ project(":$it").sourceSets.main.output }))
+}
+
+build.dependsOn(copyAsm, copyTrove, coveraAgentJar)

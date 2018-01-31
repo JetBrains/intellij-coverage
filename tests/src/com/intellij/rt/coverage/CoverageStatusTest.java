@@ -186,7 +186,7 @@ public class CoverageStatusTest extends TestCase {
     String coverageAgentPath = jars[0].getCanonicalPath();
     String[] commandLine = {
         exePath,
-        //"-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
+//        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
         "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" false false false "
             + sampling + " " + patterns,
         "-classpath", testDataPath, classToRun};

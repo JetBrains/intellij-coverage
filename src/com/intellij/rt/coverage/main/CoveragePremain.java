@@ -33,8 +33,7 @@ public class CoveragePremain {
 
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
     premain(argsString, instrumentation, 
-            "com.intellij.rt.coverage.instrumentation.Instrumentator", 
-            "coverage-instrumenter.jar", "coverage-util.jar");
+            "com.intellij.rt.coverage.instrumentation.Instrumentator");
   }
 
   public static void premain(String argsString, Instrumentation instrumentation, String instrumenterName, String... jars) throws Exception {
