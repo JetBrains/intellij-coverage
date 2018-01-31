@@ -129,5 +129,13 @@
             <rule pattern="org.objectweb.asm.**" result="org.jetbrains.org.objectweb.asm.@1"/>
         </jarjar>
     </target>
+    <taskdef name="jarjar" classname="com.tonicsystems.jarjar.JarJarTask" classpath="${basedir}/lib/jarjar-1.0.jar"/>
+    <target name="repack_trove">
+        <delete file="${basedir}/lib/trove.jar"/>
+        <jarjar jarfile="${basedir}/lib/trove.jar">
+            <zipfileset src="${basedir}/lib/trove4j.jar"/>
+            <rule pattern="gnu.trove.**" result="org.jetbrains.coverage.gnu.trove.@1"/>
+        </jarjar>
+    </target>
 </project>
 

@@ -18,7 +18,9 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineMapData;
-import gnu.trove.*;
+import org.jetbrains.coverage.gnu.trove.THashSet;
+import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
+import org.jetbrains.coverage.gnu.trove.TObjectFunction;
 
 import java.util.*;
 

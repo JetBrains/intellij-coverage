@@ -19,7 +19,7 @@ package com.intellij.rt.coverage.util;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import gnu.trove.TIntObjectHashMap;
+import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 
 import java.io.*;
 

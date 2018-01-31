@@ -17,7 +17,7 @@
 package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.LineData;
-import gnu.trove.TIntObjectHashMap;
+import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 
 /*
  * @author anna

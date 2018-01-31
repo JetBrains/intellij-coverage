@@ -16,7 +16,8 @@
 
 package com.intellij.rt.coverage.util;
 
-import gnu.trove.TLongObjectHashMap;
+
+import org.jetbrains.coverage.gnu.trove.TLongObjectHashMap;
 
 /**
  * @author Pavel.Sher
