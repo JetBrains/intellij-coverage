@@ -32,17 +32,12 @@ task wrapper(type: Wrapper) {
   gradleVersion = '4.5'
 }
 
-task copyAsm(type: Copy) {
-  from library_project_asm_all
-  into file("dist")
-}
-
 task coveraAgentJar(type: Jar) {
   baseName = "coverage-agent"
   destinationDir = file("dist")
   manifest.attributes(
       "Premain-Class": "com.intellij.rt.coverage.main.CoveragePremain",
-      "Boot-Class-Path": "$archiveName asm-all.jar"
+      "Boot-Class-Path": "$archiveName"
   )
   from(sourceSets.main.output)
   from(["util", "instrumentation"].collect({ project(":$it").sourceSets.main.output }))
@@ -67,6 +62,9 @@ task coveraAgentJar(type: Jar) {
     include '**/TLongHashingStrategy.class'
     include '**/TObjectHashingStrategy.class'
   }
+  from { zipTree('lib/asm-all.jar') } {
+    include '**/*.class'
+  }
 }
 
-build.dependsOn(copyAsm, coveraAgentJar)
+build.dependsOn(coveraAgentJar)
