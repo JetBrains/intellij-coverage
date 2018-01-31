@@ -1,9 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="instrumenter.jar">
-    <output-path>$PROJECT_DIR$/dist</output-path>
-    <root id="archive" name="coverage-instrumenter.jar">
-      <element id="module-output" name="instrumentation" />
-      <element id="module-output" name="util" />
-    </root>
-  </artifact>
-</component>
