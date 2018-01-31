@@ -46,7 +46,7 @@ task coveraAgentJar(type: Jar) {
   )
   from(sourceSets.main.output)
   from(["util", "instrumentation"].collect({ project(":$it").sourceSets.main.output }))
-  from { zipTree(library_project_trove4j.first().path) } {
+  from { zipTree('lib/trove.jar') } {
     include '**/THash.class'
     include '**/Equality.class'
     include '**/THashSet.class'
