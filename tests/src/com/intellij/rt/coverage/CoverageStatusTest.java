@@ -39,8 +39,8 @@ public class CoverageStatusTest extends TestCase {
 
   @Override
   protected void tearDown() throws Exception {
-    myDataFile.delete();
-    myClassFile.delete();
+    if (myDataFile != null) myDataFile.delete();
+    if (myClassFile != null) myClassFile.delete();
     super.tearDown();
   }
 
@@ -58,7 +58,8 @@ public class CoverageStatusTest extends TestCase {
   }
 
   public void testStaticFieldInInterface() throws Exception {
-    doTest("staticFieldInInterface", "1:FULL\n" +
+    String expected = Double.parseDouble(System.getProperty("java.specification.version")) < 1.8 ?
+        "1:FULL\n" +
             "4:PARTIAL\n" +
             "5:FULL\n" +
             "6:FULL\n" +
@@ -73,7 +74,26 @@ public class CoverageStatusTest extends TestCase {
             "24:FULL\n" +
             "29:FULL\n" +
             "30:FULL\n" +
-            "34:FULL\n");
+            "34:FULL\n" :
+        "1:FULL\n" +
+            "4:PARTIAL\n" +
+            "5:FULL\n" +
+            "6:FULL\n" +
+            "7:NONE\n" +
+            "8:NONE\n" +
+            "11:PARTIAL\n" +
+            "13:NONE\n" +
+            "14:NONE\n" +
+            "16:FULL\n" +
+            "18:FULL\n" +
+            "19:FULL\n" +
+            "23:FULL\n" +
+            "24:FULL\n" +
+            "28:FULL\n" +
+            "29:FULL\n" +
+            "30:FULL\n" +
+            "34:FULL\n";
+    doTest("staticFieldInInterface", expected);
   }
 
   public void testNotExpressions() throws Exception {
