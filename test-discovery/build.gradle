@@ -13,12 +13,7 @@ task discoveryAgentJar(type: Jar) {
   )
   from(sourceSets.main.output)
   from(["util", "instrumentation"].collect({ project(":$it").sourceSets.main.output }))
-  from { zipTree('../lib/trove.jar') } {
-    include(troveClasses())
-  }
-  from { zipTree('../lib/asm-all.jar') } {
-    include '**/*.class'
-  }
+  with repackLibs
 }
 
 build.dependsOn(discoveryAgentJar)

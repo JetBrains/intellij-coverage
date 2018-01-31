@@ -4,16 +4,17 @@ plugins {
   id "com.jfrog.bintray" version "1.7.3"
 }
 
-//noinspection GroovyAssignabilityCheck
-
 private calcVersion() {
   hasProperty("teamcity") ? "1.0.${teamcity["build.number"]}" : ""
 }
 
 apply plugin: 'maven-publish'
 
-ext.library_project_trove4j = files(rootProject.file('lib/trove.jar'))
-ext.library_project_asm_all = files(rootProject.file('lib/asm-all.jar'))
+def trove = rootProject.file('lib/trove.jar')
+def asm = rootProject.file('lib/asm-all.jar')
+
+ext.library_project_trove4j = files(trove)
+ext.library_project_asm_all = files(asm)
 
 allprojects {
   version calcVersion()
@@ -48,6 +49,15 @@ task wrapper(type: Wrapper) {
   gradleVersion = '4.5'
 }
 
+ext.repackLibs = copySpec {
+  from { zipTree(trove.path) } {
+    include(troveClasses())
+  }
+  from { zipTree(asm.path) } {
+    include '**/*.class'
+  }
+}
+
 task coverageAgentJar(type: Jar) {
   baseName = "coverage-agent"
   destinationDir = file("dist")
@@ -57,12 +67,7 @@ task coverageAgentJar(type: Jar) {
   )
   from(sourceSets.main.output)
   from(["util", "instrumentation"].collect({ project(":$it").sourceSets.main.output }))
-  from { zipTree('lib/trove.jar') } {
-    include(troveClasses())
-  }
-  from { zipTree('lib/asm-all.jar') } {
-    include '**/*.class'
-  }
+  with repackLibs
 }
 
 // @formatter:off
