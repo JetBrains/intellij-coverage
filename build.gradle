@@ -90,35 +90,41 @@ clean.doFirst {
 }
 
 artifacts {
-    archives coverageAgentJar
+  archives coverageAgentJar
 }
 
 publishing {
-    publications {
-        MyPublication(MavenPublication) {
-            groupId 'org.jetbrains.intellij.deps'
-            artifactId 'intellij-coverage'
-            version version
-            artifact coverageAgentJar
-        }
+  publications {
+    CoveragePublication(MavenPublication) {
+      groupId 'org.jetbrains.intellij.deps'
+      artifactId 'intellij-coverage'
+      version version
+      artifact coverageAgentJar
     }
+    TestDiscoveryPublication(MavenPublication) {
+      groupId 'org.jetbrains.intellij.deps'
+      artifactId 'intellij-test-discovery'
+      version version
+      artifact project(":testDiscovery").discoveryAgentJar
+    }
+  }
 }
 
 bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
+  user = System.getenv('BINTRAY_USER')
+  key = System.getenv('BINTRAY_KEY')
 
-    publish = true
+  publish = true
 
-    pkg {
-        repo = 'intellij-third-party-dependencies'
-        name = 'intellij-coverage'
-        userOrg = 'jetbrains'
+  pkg {
+    repo = 'intellij-third-party-dependencies'
+    name = 'intellij-coverage'
+    userOrg = 'jetbrains'
 
-        version {
-            name = version
-        }
+    version {
+      name = version
     }
+  }
 
-    publications = ['MyPublication']
+  publications = ['CoveragePublication', 'TestDiscoveryPublication']
 }
