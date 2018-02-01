@@ -159,7 +159,7 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
       if (!myExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
         shutdownNow();
         if (!myExecutor.awaitTermination(60, TimeUnit.SECONDS))
-          System.err.println("Socket worker didn't finished properlt");
+          System.err.println("Socket worker didn't finished properly");
 
       }
     } catch (InterruptedException ie) {
