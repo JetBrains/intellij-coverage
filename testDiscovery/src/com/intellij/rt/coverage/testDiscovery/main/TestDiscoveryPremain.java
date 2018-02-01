@@ -16,13 +16,12 @@
 
 package com.intellij.rt.coverage.testDiscovery.main;
 
-import com.intellij.rt.coverage.main.CoveragePremain;
+import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInstrumentator;
 
 import java.lang.instrument.Instrumentation;
 
 public class TestDiscoveryPremain {
-    public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
-        CoveragePremain.premain(argsString, instrumentation, "TestDiscoveryInstrumentator");
-    }
-
+  public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
+    new TestDiscoveryInstrumentator().performPremain(argsString, instrumentation);
+  }
 }
