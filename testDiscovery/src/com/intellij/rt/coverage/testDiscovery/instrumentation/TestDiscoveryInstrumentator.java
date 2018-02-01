@@ -16,30 +16,49 @@
 
 package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
-import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
-import com.intellij.rt.coverage.instrumentation.Instrumentator;
+import com.intellij.rt.coverage.instrumentation.AbstractIntellijClassfileTransformer;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 
 import java.lang.instrument.Instrumentation;
 
-public class TestDiscoveryInstrumentator extends Instrumentator {
-  public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
-    new TestDiscoveryInstrumentator().performPremain(argsString, instrumentation);
+public class TestDiscoveryInstrumentator {
+  public static void premain(String argsString, Instrumentation instrumentation) {
+    new TestDiscoveryInstrumentator().performPremain(instrumentation);
   }
 
-  @Override
-  public void performPremain(String argsString, Instrumentation instrumentation) throws Exception {
+  public void performPremain(Instrumentation instrumentation) {
     // initialize TestDiscoveryProjectData before instrumentation
     @SuppressWarnings("unused")
     TestDiscoveryProjectData projectData = TestDiscoveryProjectData.getProjectData();
-    super.performPremain(argsString, instrumentation);
-  }
 
-  @Override
-  protected ClassVisitor createClassVisitor(ProjectData data, String className, ClassLoader loader, boolean shouldCalculateSource, ClassReader cr, ClassWriter cw) {
-    return new TestDiscoveryInstrumenter(cw, cr, className, loader);
+    instrumentation.addTransformer(new AbstractIntellijClassfileTransformer() {
+      @Override
+      protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
+        return new TestDiscoveryInstrumenter(cw, cr, className, loader);
+      }
+
+      @Override
+      protected boolean shouldExclude(String className) {
+        return false;
+      }
+
+      @Override
+      protected boolean shouldIncludeBootstrapClass(String className) {
+        return false;
+      }
+
+      @Override
+      protected void visitClassLoader(ClassLoader classLoader) {
+
+      }
+
+      @Override
+      protected boolean isStopped() {
+        return false;
+      }
+    });
   }
 }

@@ -1,0 +1,217 @@
+/*
+ * Copyright 2000-2018 JetBrains s.r.o.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.intellij.rt.coverage.instrumentation;
+
+import com.intellij.rt.coverage.util.ErrorReporter;
+import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
+import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
+import java.security.ProtectionDomain;
+
+public abstract class AbstractIntellijClassfileTransformer implements ClassFileTransformer {
+  private final boolean computeFrames = computeFrames();
+
+  @Override
+  public final byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
+    if (isStopped()) {
+      return null;
+    }
+
+    try {
+      if (className == null) {
+        return null;
+      }
+      if (className.endsWith(".class")) {
+        className = className.substring(0, className.length() - 6);
+      }
+      className = className.replace('\\', '.').replace('/', '.');
+
+      //do not instrument itself
+      //and do not instrument packages which are used during instrumented method invocation
+      //(inside methods touch, save, etc from ProjectData)
+      if (className.startsWith("com.intellij.rt.")
+          || className.startsWith("java.")
+          || className.startsWith("sun.")
+          || className.startsWith("org.jetbrains.coverage.gnu.trove.")
+          || className.startsWith("org.jetbrains.coverage.org.objectweb.asm.")
+          || className.startsWith("org.apache.oro.text.regex.")) {
+        return null;
+      }
+
+      if (shouldExclude(className)) return null;
+
+      visitClassLoader(loader);
+
+      if (loader != null || shouldIncludeBootstrapClass(className)) {
+        return instrument(classFileBuffer, className, loader, computeFrames);
+      }
+    } catch (Throwable e) {
+      ErrorReporter.reportError("Error during class instrumentation: " + className, e);
+    }
+    return null;
+  }
+
+  private byte[] instrument(final byte[] classfileBuffer, String className, ClassLoader loader, boolean computeFrames) {
+    final ClassReader cr = new ClassReader(classfileBuffer);
+    final ClassWriter cw;
+    if (computeFrames) {
+      final int version = getClassFileVersion(cr);
+      cw = getClassWriter(version >= Opcodes.V1_6 && version != Opcodes.V1_1 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS, loader);
+    } else {
+      cw = getClassWriter(ClassWriter.COMPUTE_MAXS, loader);
+    }
+
+    final ClassVisitor cv = createClassVisitor(className, loader, cr, cw);
+    cr.accept(cv, 0);
+    return cw.toByteArray();
+  }
+
+  protected abstract ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw);
+
+  protected abstract boolean shouldExclude(String className);
+
+  protected abstract boolean shouldIncludeBootstrapClass(String className);
+
+  protected abstract void visitClassLoader(ClassLoader classLoader);
+
+  protected abstract boolean isStopped();
+
+  private boolean computeFrames() {
+    return System.getProperty("idea.coverage.no.frames") == null;
+  }
+
+  private static ClassWriter getClassWriter(int flags, final ClassLoader classLoader) {
+    return new MyClassWriter(flags, classLoader);
+  }
+
+  private static int getClassFileVersion(ClassReader reader) {
+    final int[] classFileVersion = new int[1];
+    reader.accept(new ClassVisitor(Opcodes.ASM6) {
+      public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        classFileVersion[0] = version;
+      }
+    }, 0);
+    return classFileVersion[0];
+  }
+
+  private static class MyClassWriter extends ClassWriter {
+    private static final String JAVA_LANG_OBJECT = "java/lang/Object";
+    private final ClassLoader classLoader;
+
+    MyClassWriter(int flags, ClassLoader classLoader) {
+      super(flags);
+      this.classLoader = classLoader;
+    }
+
+    protected String getCommonSuperClass(String type1, String type2) {
+      try {
+        ClassReader info1 = typeInfo(type1);
+        ClassReader info2 = typeInfo(type2);
+        String
+            superType = checkImplementInterface(type1, type2, info1, info2);
+        if (superType != null) return superType;
+        superType = checkImplementInterface(type2, type1, info2, info1);
+        if (superType != null) return superType;
+
+        StringBuilder b1 = typeAncestors(type1, info1);
+        StringBuilder b2 = typeAncestors(type2, info2);
+        String result = JAVA_LANG_OBJECT;
+        int end1 = b1.length();
+        int end2 = b2.length();
+        while (true) {
+          int start1 = b1.lastIndexOf(";", end1 - 1);
+          int start2 = b2.lastIndexOf(";", end2 - 1);
+          if (start1 != -1 && start2 != -1 && end1 - start1 == end2 - start2) {
+            String p1 = b1.substring(start1 + 1, end1);
+            String p2 = b2.substring(start2 + 1, end2);
+            if (p1.equals(p2)) {
+              result = p1;
+              end1 = start1;
+              end2 = start2;
+            } else {
+              return result;
+            }
+          } else {
+            return result;
+          }
+        }
+      } catch (IOException e) {
+        throw new RuntimeException(e.toString());
+      }
+    }
+
+    private String checkImplementInterface(String type1, String type2, ClassReader info1, ClassReader info2) throws IOException {
+      if ((info1.getAccess() & Opcodes.ACC_INTERFACE) != 0) {
+        if (typeImplements(type2, info2, type1)) {
+          return type1;
+        }
+        return JAVA_LANG_OBJECT;
+      }
+      return null;
+    }
+
+    private StringBuilder typeAncestors(String type, ClassReader info) throws IOException {
+      StringBuilder b = new StringBuilder();
+      while (!JAVA_LANG_OBJECT.equals(type)) {
+        b.append(';').append(type);
+        type = info.getSuperName();
+        info = typeInfo(type);
+      }
+      return b;
+    }
+
+
+
+    private boolean typeImplements(String type, ClassReader classReader, String interfaceName) throws IOException {
+      while (!JAVA_LANG_OBJECT.equals(type)) {
+        String[] interfaces = classReader.getInterfaces();
+        for (String itf1 : interfaces) {
+          if (itf1.equals(interfaceName)) {
+            return true;
+          }
+        }
+        for (String itf : interfaces) {
+          if (typeImplements(itf, typeInfo(itf), interfaceName)) {
+            return true;
+          }
+        }
+        type = classReader.getSuperName();
+        classReader = typeInfo(type);
+      }
+      return false;
+    }
+
+    private ClassReader typeInfo(final String type) throws IOException {
+      InputStream is = null;
+      try {
+        is = classLoader.getResourceAsStream(type + ".class");
+        return new ClassReader(is);
+      }
+      finally {
+        if (is != null) {
+          is.close();
+        }
+      }
+    }
+  }
+}

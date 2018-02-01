@@ -21,7 +21,7 @@ import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInstr
 import java.lang.instrument.Instrumentation;
 
 public class TestDiscoveryPremain {
-  public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
-    new TestDiscoveryInstrumentator().performPremain(argsString, instrumentation);
+  public static void premain(String argsString, Instrumentation instrumentation) {
+    new TestDiscoveryInstrumentator().performPremain(instrumentation);
   }
 }
