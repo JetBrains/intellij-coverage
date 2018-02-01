@@ -160,7 +160,7 @@ public class Instrumentator {
           if (className.startsWith("com.intellij.rt.")
             || className.startsWith("java.")
             || className.startsWith("sun.")
-            || className.startsWith("gnu.trove.")
+            || className.startsWith("org.jetbrains.coverage.gnu.trove.")
             || className.startsWith("org.jetbrains.coverage.org.objectweb.asm.")
             || className.startsWith("org.apache.oro.text.regex.")) {
             return null;
