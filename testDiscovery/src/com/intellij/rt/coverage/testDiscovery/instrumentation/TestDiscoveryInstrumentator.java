@@ -19,9 +19,9 @@ package com.intellij.rt.coverage.testDiscovery.instrumentation;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import com.intellij.rt.coverage.instrumentation.Instrumentator;
-import org.jetbrains.org.objectweb.asm.ClassReader;
-import org.jetbrains.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.org.objectweb.asm.ClassWriter;
+import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
+import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 
 import java.lang.instrument.Instrumentation;
 

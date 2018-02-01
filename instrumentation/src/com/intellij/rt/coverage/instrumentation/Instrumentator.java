@@ -21,10 +21,10 @@ import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
-import org.jetbrains.org.objectweb.asm.ClassReader;
-import org.jetbrains.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.org.objectweb.asm.ClassWriter;
-import org.jetbrains.org.objectweb.asm.Opcodes;
+import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
+import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.io.*;
 import java.lang.instrument.ClassFileTransformer;
@@ -161,7 +161,7 @@ public class Instrumentator {
             || className.startsWith("java.")
             || className.startsWith("sun.")
             || className.startsWith("gnu.trove.")
-            || className.startsWith("org.jetbrains.org.objectweb.asm.")
+            || className.startsWith("org.jetbrains.coverage.org.objectweb.asm.")
             || className.startsWith("org.apache.oro.text.regex.")) {
             return null;
           }

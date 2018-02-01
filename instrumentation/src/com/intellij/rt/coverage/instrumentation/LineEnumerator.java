@@ -17,8 +17,8 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
-import org.jetbrains.org.objectweb.asm.*;
-import org.jetbrains.org.objectweb.asm.tree.MethodNode;
+import org.jetbrains.coverage.org.objectweb.asm.*;
+import org.jetbrains.coverage.org.objectweb.asm.tree.MethodNode;
 
 import java.util.*;
 

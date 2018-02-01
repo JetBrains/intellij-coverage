@@ -26,7 +26,7 @@ import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.gnu.trove.TIntObjectProcedure;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
-import org.jetbrains.org.objectweb.asm.ClassReader;
+import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
 import java.io.*;
 import java.util.*;

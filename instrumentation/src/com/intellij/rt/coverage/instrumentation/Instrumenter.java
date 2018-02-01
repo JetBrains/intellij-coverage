@@ -21,9 +21,9 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
-import org.jetbrains.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.org.objectweb.asm.MethodVisitor;
-import org.jetbrains.org.objectweb.asm.Opcodes;
+import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public abstract class Instrumenter extends ClassVisitor {
   protected final ProjectData myProjectData;

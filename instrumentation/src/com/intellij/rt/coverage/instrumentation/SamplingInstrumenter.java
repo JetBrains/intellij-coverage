@@ -19,7 +19,7 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.util.LinesUtil;
 import com.intellij.rt.coverage.data.ProjectData;
-import org.jetbrains.org.objectweb.asm.*;
+import org.jetbrains.coverage.org.objectweb.asm.*;
 
 public class SamplingInstrumenter extends Instrumenter {
   private static final String OBJECT_TYPE = "Ljava/lang/Object;";

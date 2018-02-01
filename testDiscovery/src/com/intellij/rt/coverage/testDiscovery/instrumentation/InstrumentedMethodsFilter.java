@@ -16,7 +16,7 @@
 
 package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
-import org.jetbrains.org.objectweb.asm.Opcodes;
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class InstrumentedMethodsFilter {
   private final String myClassName;

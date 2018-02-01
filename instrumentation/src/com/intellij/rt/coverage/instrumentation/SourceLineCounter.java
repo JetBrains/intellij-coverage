@@ -19,7 +19,7 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
-import org.jetbrains.org.objectweb.asm.*;
+import org.jetbrains.coverage.org.objectweb.asm.*;
 
 import java.util.HashSet;
 import java.util.Set;

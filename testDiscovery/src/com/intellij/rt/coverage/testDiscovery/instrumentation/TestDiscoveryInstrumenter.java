@@ -17,7 +17,7 @@
 package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
-import org.jetbrains.org.objectweb.asm.*;
+import org.jetbrains.coverage.org.objectweb.asm.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

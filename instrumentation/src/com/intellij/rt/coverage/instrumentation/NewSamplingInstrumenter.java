@@ -20,7 +20,7 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.StringsPool;
-import org.jetbrains.org.objectweb.asm.*;
+import org.jetbrains.coverage.org.objectweb.asm.*;
 
 public class NewSamplingInstrumenter extends ClassVisitor {
     private static final String LINE_HITS_FIELD_NAME = "__$lineHits$__";
