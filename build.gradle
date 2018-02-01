@@ -74,3 +74,7 @@ private static troveClasses() {
 // @formatter:on
 
 build.dependsOn(coverageAgentJar)
+
+clean.doFirst {
+  delete "dist"
+}
