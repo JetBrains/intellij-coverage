@@ -1,11 +1,17 @@
 import org.gradle.internal.jvm.Jvm
 
+plugins {
+  id "com.jfrog.bintray" version "1.7.3"
+}
+
 //noinspection GroovyAssignabilityCheck
 version calcVersion()
 
 private calcVersion() {
   hasProperty("teamcity") ? "1.0.${teamcity["build.number"]}" : ""
 }
+
+apply plugin: 'maven-publish'
 
 apply from: 'project-libraries.gradle'
 
@@ -81,4 +87,38 @@ build.dependsOn(coverageAgentJar)
 
 clean.doFirst {
   delete "dist"
+}
+
+artifacts {
+    archives coverageAgentJar
+}
+
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            groupId 'org.jetbrains.intellij.deps'
+            artifactId 'intellij-coverage'
+            version version
+            artifact coverageAgentJar
+        }
+    }
+}
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+
+    publish = true
+
+    pkg {
+        repo = 'intellij-third-party-dependencies'
+        name = 'intellij-coverage'
+        userOrg = 'jetbrains'
+
+        version {
+            name = version
+        }
+    }
+
+    publications = ['MyPublication']
 }
