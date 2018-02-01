@@ -5,7 +5,7 @@ dependencies {
 }
 
 task discoveryAgentJar(type: Jar) {
-  archiveName = "test-discovery-agent.jar"
+  baseName = "test-discovery-agent"
   destinationDir = file("../dist")
   manifest.attributes(
       "Premain-Class": "com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain",

@@ -33,7 +33,7 @@ task wrapper(type: Wrapper) {
 }
 
 task coverageAgentJar(type: Jar) {
-  archiveName = "coverage-agent.jar"
+  baseName = "coverage-agent"
   destinationDir = file("dist")
   manifest.attributes(
       "Premain-Class": "com.intellij.rt.coverage.main.CoveragePremain",
