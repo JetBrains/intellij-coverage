@@ -38,6 +38,10 @@ allprojects {
   }
 }
 
+dependencies {
+  compile project(':util')
+}
+
 //noinspection GrUnresolvedAccess
 task wrapper(type: Wrapper) {
   gradleVersion = '4.5'

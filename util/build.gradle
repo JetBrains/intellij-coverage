@@ -1,5 +1,4 @@
 dependencies {
-  compile rootProject
   compile library_project_trove4j
 }
 
