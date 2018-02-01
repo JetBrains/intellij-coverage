@@ -1,7 +1,12 @@
 import org.gradle.internal.jvm.Jvm
 
 //noinspection GroovyAssignabilityCheck
-version ""
+version calcVersion()
+
+private calcVersion() {
+  def number = System.getProperty("build.number")
+  number == null ? "" : "$version$number"
+}
 
 apply from: 'project-libraries.gradle'
 

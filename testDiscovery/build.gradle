@@ -1,4 +1,4 @@
-version ""
+version = calcVersion()
 
 dependencies {
   compile library_project_asm_all
