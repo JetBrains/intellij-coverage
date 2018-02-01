@@ -69,7 +69,7 @@ private static troveClasses() {
    , 'TIntObjectProcedure'
    , 'TLongObjectProcedure'
    , 'TLongHashingStrategy'
-   , 'TObjectHashingStrategy'].collect { "**/${it}.class" }
+   , 'TObjectHashingStrategy'].collect { "org/jetbrains/coverage/**/${it}.class" }
 }
 // @formatter:on
 
