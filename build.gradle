@@ -49,26 +49,28 @@ task coverageAgentJar(type: Jar) {
   }
 }
 
+// @formatter:off
 private static troveClasses() {
-  ['THash.class'
-   , 'Equality.class'
-   , 'THashSet.class'
-   , 'TIntHash.class'
-   , 'TLongHash.class'
-   , 'PrimeFinder.class'
-   , 'TIntHashSet.class'
-   , 'TObjectHash.class'
-   , 'HashFunctions.class'
-   , 'TPrimitiveHash.class'
-   , 'TObjectFunction.class'
-   , 'TIntObjectHashMap.class'
-   , 'TObjectIntHashMap.class'
-   , 'TLongObjectHashMap.class'
-   , 'TIntHashingStrategy.class'
-   , 'TIntObjectProcedure.class'
-   , 'TLongObjectProcedure.class'
-   , 'TLongHashingStrategy.class'
-   , 'TObjectHashingStrategy.class'].collect { "**/$it" }
+  [  'THash'
+   , 'Equality'
+   , 'THashSet'
+   , 'TIntHash'
+   , 'TLongHash'
+   , 'PrimeFinder'
+   , 'TIntHashSet'
+   , 'TObjectHash'
+   , 'HashFunctions'
+   , 'TPrimitiveHash'
+   , 'TObjectFunction'
+   , 'TIntObjectHashMap'
+   , 'TObjectIntHashMap'
+   , 'TLongObjectHashMap'
+   , 'TIntHashingStrategy'
+   , 'TIntObjectProcedure'
+   , 'TLongObjectProcedure'
+   , 'TLongHashingStrategy'
+   , 'TObjectHashingStrategy'].collect { "**/${it}.class" }
 }
+// @formatter:on
 
 build.dependsOn(coverageAgentJar)
