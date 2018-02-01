@@ -1,3 +1,5 @@
+version ""
+
 dependencies {
   compile library_project_asm_all
   compile project(':instrumentation')

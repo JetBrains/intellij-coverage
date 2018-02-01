@@ -1,7 +1,7 @@
 import org.gradle.internal.jvm.Jvm
 
 //noinspection GroovyAssignabilityCheck
-version "$version"
+version ""
 
 apply from: 'project-libraries.gradle'
 
