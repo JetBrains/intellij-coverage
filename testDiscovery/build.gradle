@@ -1,5 +1,3 @@
-version = calcVersion()
-
 dependencies {
   compile library_project_asm_all
   compile project(':instrumentation')
