@@ -4,8 +4,7 @@ import org.gradle.internal.jvm.Jvm
 version calcVersion()
 
 private calcVersion() {
-  def number = System.getProperty("build.number")
-  number == null ? "" : "$version$number"
+  hasProperty("teamcity") ? "$version${teamcity["build.number"]}" : ""
 }
 
 apply from: 'project-libraries.gradle'
