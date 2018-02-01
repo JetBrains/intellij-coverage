@@ -28,7 +28,6 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.io.*;
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
@@ -63,21 +62,21 @@ public class Instrumentator {
       args = new String[0];
     }
 
-    final boolean traceLines = args.length > 0 && Boolean.valueOf(args[1]).booleanValue();
-    final boolean sampling = args.length == 0 || Boolean.valueOf(args[4]).booleanValue();
+    final boolean traceLines = args.length > 0 && Boolean.valueOf(args[1]);
+    final boolean sampling = args.length == 0 || Boolean.valueOf(args[4]);
     final File dataFile = args.length > 0 ? new File(args[0]) : null;
     if (dataFile != null) {
       ErrorReporter.setBasePath(dataFile.getParent());
     }
-    final boolean calcUnloaded = args.length > 0 && Boolean.valueOf(args[2]).booleanValue();
+    final boolean calcUnloaded = args.length > 0 && Boolean.valueOf(args[2]);
     ProjectData initialData = null;
-    if (args.length > 0 && Boolean.valueOf(args[3]).booleanValue() && dataFile.isFile()) {
+    if (args.length > 0 && Boolean.valueOf(args[3]) && dataFile.isFile()) {
       initialData = ProjectDataLoader.load(dataFile);
     }
     int i = 5;
 
     final File sourceMapFile;
-    if (args.length > 5 && Boolean.valueOf(args[5]).booleanValue()) {
+    if (args.length > 5 && Boolean.valueOf(args[5])) {
       sourceMapFile = new File(args[6]);
       i = 7;
     } else {
@@ -87,10 +86,10 @@ public class Instrumentator {
     final ProjectData data = args.length == 0 
             ? ProjectData.createProjectData() 
             : ProjectData.createProjectData(dataFile, initialData, traceLines, sampling);
-    final List includePatterns;
-    final List excludePatterns;
+    final List<Pattern> includePatterns;
+    final List<Pattern> excludePatterns;
     if (!data.isTestDiscovery()) {
-      includePatterns = new ArrayList();
+      includePatterns = new ArrayList<Pattern>();
       System.out.println("---- IntelliJ IDEA coverage runner ---- ");
       System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
       final String excludes = "-exclude";
@@ -109,7 +108,7 @@ public class Instrumentator {
       }
       System.out.println("exclude patterns:");
       i++;
-      excludePatterns = new ArrayList();
+      excludePatterns = new ArrayList<Pattern>();
       for (; i < args.length; i++) {
         try {
           final Pattern pattern = Pattern.compile(args[i]);
@@ -143,7 +142,7 @@ public class Instrumentator {
                               String className,
                               Class classBeingRedefined,
                               ProtectionDomain protectionDomain,
-                              byte[] classfileBuffer) throws IllegalClassFormatException {
+                              byte[] classFileBuffer) {
         if (data.isStopped()) return null;
         try {
           if (className == null) {
@@ -171,11 +170,11 @@ public class Instrumentator {
 
           cf.addClassLoader(loader);
           if (includePatterns.isEmpty() && loader != null) {
-            return instrument(classfileBuffer, data, className, loader, computeFrames, sourceMapFile != null);
+            return instrument(classFileBuffer, data, className, loader, computeFrames, sourceMapFile != null);
           }
           for (Object includePattern : includePatterns) {
             if (((Pattern) includePattern).matcher(className).matches()) { // matching inner class name
-              return instrument(classfileBuffer, data, className, loader, computeFrames, sourceMapFile != null);
+              return instrument(classFileBuffer, data, className, loader, computeFrames, sourceMapFile != null);
             }
           }
         } catch (Throwable e) {
@@ -191,7 +190,7 @@ public class Instrumentator {
   }
 
   private String[] readArgsFromFile(String arg) throws IOException {
-    final List result = new ArrayList();
+    final List<String> result = new ArrayList<String>();
     final File file = new File(arg);
     final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
     try {
@@ -201,7 +200,7 @@ public class Instrumentator {
     } finally {
       reader.close();
     }
-    return (String[]) result.toArray(new String[result.size()]);
+    return result.toArray(new String[0]);
   }
 
   private byte[] instrument(final byte[] classfileBuffer, final ProjectData data, String className, ClassLoader loader, boolean computeFrames, boolean shouldCalculateSource) {
@@ -238,7 +237,7 @@ public class Instrumentator {
     return new MyClassWriter(flags, classLoader);
   }
 
-  public static int getClassFileVersion(ClassReader reader) {
+  private static int getClassFileVersion(ClassReader reader) {
     final int[] classFileVersion = new int[1];
     reader.accept(new ClassVisitor(Opcodes.ASM6) {
       public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
@@ -249,7 +248,7 @@ public class Instrumentator {
   }
 
   private static String[] tokenize(String argumentString) {
-    List tokenizedArgs = new ArrayList();
+    List<String> tokenizedArgs = new ArrayList<String>();
     StringBuffer currentArg = new StringBuffer();
     for (int i = 0; i < argumentString.length(); i++) {
       char c = argumentString.charAt(i);
@@ -279,14 +278,14 @@ public class Instrumentator {
     if (arg.length() > 0) {
       tokenizedArgs.add(arg);
     }
-    return (String[])tokenizedArgs.toArray(new String[tokenizedArgs.size()]);
+    return tokenizedArgs.toArray(new String[0]);
   }
 
   private static class MyClassWriter extends ClassWriter {
-    public static final String JAVA_LANG_OBJECT = "java/lang/Object";
+    private static final String JAVA_LANG_OBJECT = "java/lang/Object";
     private final ClassLoader classLoader;
 
-    public MyClassWriter(int flags, ClassLoader classLoader) {
+    MyClassWriter(int flags, ClassLoader classLoader) {
       super(flags);
       this.classLoader = classLoader;
     }
@@ -350,13 +349,13 @@ public class Instrumentator {
 
     private boolean typeImplements(String type, ClassReader classReader, String interfaceName) throws IOException {
       while (!JAVA_LANG_OBJECT.equals(type)) {
-        String[] itfs = classReader.getInterfaces();
-        for (String itf1 : itfs) {
+        String[] interfaces = classReader.getInterfaces();
+        for (String itf1 : interfaces) {
           if (itf1.equals(interfaceName)) {
             return true;
           }
         }
-        for (String itf : itfs) {
+        for (String itf : interfaces) {
           if (typeImplements(itf, typeInfo(itf), interfaceName)) {
             return true;
           }
