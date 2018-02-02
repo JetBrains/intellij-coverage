@@ -1,4 +1,5 @@
 dependencies {
+  compile library_project_asm_all
   compile library_project_trove4j
 }
 

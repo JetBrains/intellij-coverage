@@ -1,7 +1,6 @@
 dependencies {
   compile library_project_asm_all
-  compile project(':instrumentation')
-  compile rootProject
+  compile project(':util')
 }
 
 task discoveryAgentJar(type: Jar) {
@@ -12,7 +11,7 @@ task discoveryAgentJar(type: Jar) {
       "Boot-Class-Path": "$archiveName"
   )
   from(sourceSets.main.output)
-  from(["util", "instrumentation"].collect({ project(":$it").sourceSets.main.output }))
+  from(["util"].collect({ project(":$it").sourceSets.main.output }))
   with repackLibs
 }
 
