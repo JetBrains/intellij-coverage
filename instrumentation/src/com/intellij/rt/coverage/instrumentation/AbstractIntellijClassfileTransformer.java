@@ -53,8 +53,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
           || className.startsWith("java.")
           || className.startsWith("sun.")
           || className.startsWith("org.jetbrains.coverage.gnu.trove.")
-          || className.startsWith("org.jetbrains.coverage.org.objectweb.asm.")
-          || className.startsWith("org.apache.oro.text.regex.")) {
+          || className.startsWith("org.jetbrains.coverage.org.objectweb.")) {
         return null;
       }
 
