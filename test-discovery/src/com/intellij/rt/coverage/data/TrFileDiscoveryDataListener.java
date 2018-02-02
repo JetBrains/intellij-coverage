@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TrFileDiscoveryDataListener implements TestDiscoveryDataListener {
+  @SuppressWarnings("WeakerAccess")
   public static final String TRACE_DIR = "org.jetbrains.instrumentation.trace.dir";
 
   private final String myTraceDir;

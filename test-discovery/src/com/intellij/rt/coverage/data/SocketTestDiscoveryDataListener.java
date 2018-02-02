@@ -29,8 +29,11 @@ import java.nio.channels.SocketChannel;
 import java.util.*;
 import java.util.concurrent.*;
 
+@SuppressWarnings("unused")
 public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListener {
+  @SuppressWarnings("WeakerAccess")
   public static final String HOST_PROP = "test.discovery.data.host";
+  @SuppressWarnings("WeakerAccess")
   public static final String PORT_PROP = "test.discovery.data.port";
 
   private static final byte START_MSG = 0;
