@@ -46,7 +46,6 @@ public class ProjectData implements CoverageData, Serializable {
   private String myCurrentTestName;
   private boolean myTraceLines;
   private boolean mySampling;
-  private boolean myDiscovery;
   private Map myTrace;
   private File myTracesDir;
 
@@ -83,17 +82,6 @@ public class ProjectData implements CoverageData, Serializable {
   public boolean isSampling() {
     return mySampling;
   }
-
-  public boolean isTestDiscovery() {
-    return myDiscovery;
-  }
-
-  public static ProjectData createProjectData() throws IOException {
-    final ProjectData projectData = createProjectData(null, null, false, true);
-    projectData.myDiscovery = true;
-    return projectData;
-  }
-
 
   public static ProjectData createProjectData(final File dataFile,
                                               final ProjectData initialData,

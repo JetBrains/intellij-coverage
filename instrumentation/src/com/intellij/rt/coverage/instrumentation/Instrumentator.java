@@ -28,7 +28,6 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 import java.io.*;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -56,7 +55,8 @@ public class Instrumentator {
       }
     }
     else {
-      args = new String[0];
+      ErrorReporter.reportError("Argument string should be passed");
+      return;
     }
 
     final boolean traceLines = args.length > 0 && Boolean.valueOf(args[1]);
@@ -80,49 +80,40 @@ public class Instrumentator {
       sourceMapFile = null;
     }
 
-    final ProjectData data = args.length == 0 
-            ? ProjectData.createProjectData() 
-            : ProjectData.createProjectData(dataFile, initialData, traceLines, sampling);
+    final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling);
     final List<Pattern> includePatterns;
     final List<Pattern> excludePatterns;
-    if (!data.isTestDiscovery()) {
-      includePatterns = new ArrayList<Pattern>();
-      System.out.println("---- IntelliJ IDEA coverage runner ---- ");
-      System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
-      final String excludes = "-exclude";
-      System.out.println("include patterns:");
-      for (; i < args.length; i++) {
-        if (excludes.equals(args[i])) break;
-        try {
-          includePatterns.add(Pattern.compile(args[i]));
-          System.out.println(args[i]);
-        } catch (PatternSyntaxException ex) {
-          System.err.println("Problem occurred with include pattern " + args[i]);
-          System.err.println(ex.getDescription());
-          System.err.println("This may cause no tests run and no coverage collected");
-          System.exit(1);
-        }
-      }
-      System.out.println("exclude patterns:");
-      i++;
-      excludePatterns = new ArrayList<Pattern>();
-      for (; i < args.length; i++) {
-        try {
-          final Pattern pattern = Pattern.compile(args[i]);
-          excludePatterns.add(pattern);
-          System.out.println(pattern.pattern());
-        } catch (PatternSyntaxException ex) {
-          System.err.println("Problem occurred with exclude pattern " + args[i]);
-          System.err.println(ex.getDescription());
-          System.err.println("This may cause no tests run and no coverage collected");
-          System.exit(1);
-        }
-  
+    includePatterns = new ArrayList<Pattern>();
+    System.out.println("---- IntelliJ IDEA coverage runner ---- ");
+    System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
+    final String excludes = "-exclude";
+    System.out.println("include patterns:");
+    for (; i < args.length; i++) {
+      if (excludes.equals(args[i])) break;
+      try {
+        includePatterns.add(Pattern.compile(args[i]));
+        System.out.println(args[i]);
+      } catch (PatternSyntaxException ex) {
+        System.err.println("Problem occurred with include pattern " + args[i]);
+        System.err.println(ex.getDescription());
+        System.err.println("This may cause no tests run and no coverage collected");
+        System.exit(1);
       }
     }
-    else {
-      includePatterns = Collections.emptyList();
-      excludePatterns = Collections.emptyList();
+    System.out.println("exclude patterns:");
+    i++;
+    excludePatterns = new ArrayList<Pattern>();
+    for (; i < args.length; i++) {
+      try {
+        final Pattern pattern = Pattern.compile(args[i]);
+        excludePatterns.add(pattern);
+        System.out.println(pattern.pattern());
+      } catch (PatternSyntaxException ex) {
+        System.err.println("Problem occurred with exclude pattern " + args[i]);
+        System.err.println(ex.getDescription());
+        System.err.println("This may cause no tests run and no coverage collected");
+        System.exit(1);
+      }
     }
 
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
