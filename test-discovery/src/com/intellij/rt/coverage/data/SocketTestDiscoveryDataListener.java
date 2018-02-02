@@ -64,11 +64,6 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
         while (!myClosed || !myData.isEmpty()) {
           ByteBuffer data = myData.peek();
           if (data == null) {
-            try {
-              Thread.sleep(100);
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-            }
             continue;
           }
 
@@ -86,7 +81,7 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
 
       private void sendDataPart(ByteBuffer data) throws IOException {
         while (true) {
-          int selected = mySelector.select(100);
+          int selected = mySelector.select();
           if (selected != 0) {
             Iterator<SelectionKey> keyIt = mySelector.selectedKeys().iterator();
             while (keyIt.hasNext()) {
@@ -161,9 +156,9 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
     try {
       if (!myExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
         shutdownNow();
-        if (!myExecutor.awaitTermination(60, TimeUnit.SECONDS))
+        if (!myExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
           System.err.println("Socket worker didn't finished properly");
-
+        }
       }
     } catch (InterruptedException ie) {
       shutdownNow();
