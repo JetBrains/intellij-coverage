@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.data;
 
 import org.jetbrains.coverage.gnu.trove.THashMap;
+import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -26,23 +27,22 @@ import java.util.Map;
 public class IncrementalNameEnumerator {
   private static final boolean USE_DIRECT_BYTE_BUFFER = Boolean.valueOf(System.getProperty("incremental.name.enumerator.direct.byte.buffer", Boolean.TRUE.toString()));
 
-  private final Map<String, ByteBuffer> myNames = new THashMap<String, ByteBuffer>();
+  private final TObjectIntHashMap<String> myNames = new TObjectIntHashMap<String>();
   private List<NameAndId> myDataIncrement = new ArrayList<NameAndId>();
-  private int myNextNameId;
+  private int myNextNameId = 1; // because of 0
 
   private final Object myNameLock = "NameLock";
   private final Object myDataIncrementLock = "DataIncrementLock";
 
-  public ByteBuffer enumerate(String name) {
+  public int enumerate(String name) {
     synchronized (myNameLock) {
-      ByteBuffer enumerated = myNames.get(name);
-      if (enumerated != null) return enumerated;
+      int enumerated = myNames.get(name);
+      if (enumerated != 0) return enumerated;
 
       int newId = myNextNameId++;
-      ByteBuffer idAsByteBuffer = toByteBuffer(newId);
-      updateDataIncrement(name, idAsByteBuffer);
-      myNames.put(name, idAsByteBuffer);
-      return idAsByteBuffer;
+      updateDataIncrement(name, newId);
+      myNames.put(name, newId);
+      return newId;
     }
   }
 
