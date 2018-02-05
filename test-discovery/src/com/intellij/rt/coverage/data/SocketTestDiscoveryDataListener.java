@@ -31,6 +31,7 @@ import java.util.concurrent.*;
 
 @SuppressWarnings("unused")
 public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListener {
+  private static final int SOCKET_BUFFER_SIZE = 16 * 1024;
   @SuppressWarnings("WeakerAccess")
   public static final String HOST_PROP = "test.discovery.data.host";
   @SuppressWarnings("WeakerAccess")
@@ -58,6 +59,7 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
         return thread;
       }
     });
+    mySocket.socket().setSendBufferSize(SOCKET_BUFFER_SIZE); // mySocket.setOption(StandardSocketOptions.SO_SNDBUF, SOCKET_BUFFER_SIZE);
     mySocket.register(mySelector, SelectionKey.OP_WRITE);
     myExecutor.submit(new Runnable() {
       public void run() {
