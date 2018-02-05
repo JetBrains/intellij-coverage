@@ -19,7 +19,7 @@ package com.intellij.rt.coverage;
 import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineMapData;
 import com.intellij.rt.coverage.instrumentation.JSR45Util;
-import junit.framework.Assert;
+import org.junit.Assert;
 import junit.framework.TestCase;
 
 public class SMAPParsingTest extends TestCase {
