@@ -123,7 +123,7 @@ public class TestDiscoveryProjectData {
     try {
       cleanup();
     } finally {
-      ourTraceTime += System.nanoTime() - s;
+      ourCleanupTime += System.nanoTime() - s;
     }
   }
 
