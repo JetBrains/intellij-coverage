@@ -109,7 +109,7 @@ public class ResourceUtil {
     if (pattern.length() == 0 || text.length() < pattern.length()) {
       return text;
     }
-    final StringBuffer buf = new StringBuffer(text.length());
+    final StringBuilder buf = new StringBuilder(text.length());
     int currentTextIndex = 0;
     while (currentTextIndex < text.length()) {
       final int startOfPattern = text.indexOf(pattern, currentTextIndex);

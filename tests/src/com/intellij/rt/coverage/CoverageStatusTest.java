@@ -19,7 +19,6 @@ package com.intellij.rt.coverage;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.testDiscovery.SingleFileTestDiscoveryIntegrationTest;
 import com.intellij.rt.coverage.util.FileUtil;
 import com.intellij.rt.coverage.util.ProcessUtil;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
@@ -27,12 +26,11 @@ import com.intellij.rt.coverage.util.ResourceUtil;
 import com.sun.tools.javac.Main;
 import junit.framework.TestCase;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author anna
