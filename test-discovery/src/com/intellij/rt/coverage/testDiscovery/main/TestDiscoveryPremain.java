@@ -54,9 +54,10 @@ public class TestDiscoveryPremain {
           if (e.matcher(className).matches()) return true;
         }
         for (Pattern e : include) {
-          if (!e.matcher(className).matches()) return true;
+          if (e.matcher(className).matches()) return false;
         }
-        return false;
+        // if we have any include pattern we should say exclude class here
+        return !include.isEmpty();
       }
     });
   }
@@ -64,6 +65,7 @@ public class TestDiscoveryPremain {
   private static List<Pattern> patterns(String key) {
     String property = System.getProperty(key);
     if (property == null) return Collections.emptyList();
+    System.out.println("Patterns from " + key);
     List<Pattern> patterns = new ArrayList<Pattern>(1);
     for (String s : property.split(";")) {
       try {
