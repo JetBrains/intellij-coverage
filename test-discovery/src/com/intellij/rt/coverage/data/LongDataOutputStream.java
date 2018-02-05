@@ -100,6 +100,11 @@ public class LongDataOutputStream extends OutputStream implements DataOutput {
     origin.writeUTF(str);
   }
 
+  @Override
+  public void close() throws IOException {
+    origin.close();
+  }
+
   public long total() {
     return total;
   }
