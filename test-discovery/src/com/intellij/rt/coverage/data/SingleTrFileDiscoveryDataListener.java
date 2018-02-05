@@ -16,40 +16,50 @@
 
 package com.intellij.rt.coverage.data;
 
+import com.intellij.rt.coverage.data.IncrementalNameEnumerator.NameAndId;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
+
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
-import static com.intellij.rt.coverage.data.TrFileDiscoveryDataListener.writeVisitedMethod;
-
-public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListener  {
+public class SingleTrFileDiscoveryDataListener extends TrFileDiscoveryDataListener {
   @SuppressWarnings("WeakerAccess")
   public static final String TRACE_FILE = "org.jetbrains.instrumentation.trace.file";
   @SuppressWarnings("WeakerAccess")
   public static final String BUFFER_SIZE = "org.jetbrains.instrumentation.trace.file.buffer.size";
 
-  private final BufferedOutputStream bw;
+  private final DataOutputStream stream;
+  private final IncrementalNameEnumerator nameEnumerator = new IncrementalNameEnumerator();
 
   public SingleTrFileDiscoveryDataListener() throws Exception {
     String myTraceFile = System.getProperty(TRACE_FILE, "td.tr");
-    bw = new BufferedOutputStream(new FileOutputStream(myTraceFile), Integer.parseInt(System.getProperty(BUFFER_SIZE, "32768")));
+    int bufferSize = Integer.parseInt(System.getProperty(BUFFER_SIZE, "32768"));
+    stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(myTraceFile), bufferSize));
   }
 
   public void testFinished(String testName, Map<String, boolean[]> classToVisitedMethods, Map<String, String[]> classToMethodNames) throws IOException {
-    writeVisitedMethod(classToVisitedMethods, classToMethodNames, new DataOutputStream(bw) {
-      @Override
-      public void close() {
-      }
-    });
+    writeVisitedMethod(classToVisitedMethods, classToMethodNames, stream);
   }
 
   public void testsFinished() {
     try {
-      bw.close();
+      List<NameAndId> pair = nameEnumerator.getAndClearDataIncrement();
+      CoverageIOUtil.writeINT(stream, pair.size());
+      for (NameAndId nameAndId : pair) {
+        CoverageIOUtil.writeINT(stream, nameAndId.getMyId());
+        CoverageIOUtil.writeUTF(stream, nameAndId.getMyName());
+      }
+      stream.close();
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  protected void writeString(DataOutputStream os, String className) throws IOException {
+    CoverageIOUtil.writeINT(os, nameEnumerator.enumerate(className));
   }
 }

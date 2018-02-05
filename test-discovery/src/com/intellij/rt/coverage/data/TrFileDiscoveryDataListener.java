@@ -25,15 +25,7 @@ import java.util.Map;
 public class TrFileDiscoveryDataListener implements TestDiscoveryDataListener {
   @SuppressWarnings("WeakerAccess")
   public static final String TRACE_DIR = "org.jetbrains.instrumentation.trace.dir";
-
-  private final String myTraceDir;
-
-  public TrFileDiscoveryDataListener() {
-    myTraceDir = System.getProperty(TRACE_DIR);
-    if (myTraceDir == null) {
-      throw new NullPointerException("\'" + TRACE_DIR + "\' property should be specified to store test discovery .tr-files");
-    }
-  }
+  private final String myTraceDir = System.getProperty(TRACE_DIR, "test-discovery");
 
   public void testFinished(String testName, Map<String, boolean[]> classToVisitedMethods, Map<String, String[]> classToMethodNames) throws IOException {
     new File(myTraceDir).mkdirs();
@@ -46,10 +38,9 @@ public class TrFileDiscoveryDataListener implements TestDiscoveryDataListener {
   }
 
   public void testsFinished() {
-
   }
 
-  private static void writeVisitedMethods(Map<String, boolean[]> classToVisitedMethods,
+  private void writeVisitedMethods(Map<String, boolean[]> classToVisitedMethods,
                                           Map<String, String[]> classToMethodNames,
                                           OutputStream stream) throws IOException {
     DataOutputStream os = null;
@@ -63,9 +54,9 @@ public class TrFileDiscoveryDataListener implements TestDiscoveryDataListener {
     }
   }
 
-  protected static void writeVisitedMethod(Map<String, boolean[]> classToVisitedMethods,
-                                           Map<String, String[]> classToMethodNames,
-                                           DataOutputStream os) throws IOException {
+  protected void writeVisitedMethod(Map<String, boolean[]> classToVisitedMethods,
+                                    Map<String, String[]> classToMethodNames,
+                                    DataOutputStream os) throws IOException {
     Map<String, Integer> classToUsedMethods = new HashMap<String, Integer>();
     for (Map.Entry<String, boolean[]> o : classToVisitedMethods.entrySet()) {
       boolean[] used = o.getValue();
@@ -88,16 +79,20 @@ public class TrFileDiscoveryDataListener implements TestDiscoveryDataListener {
       Integer usedMethodsCount = classToUsedMethods.get(className);
       if (usedMethodsCount == null) continue;
 
-      CoverageIOUtil.writeUTF(os, className);
+      writeString(os, className);
       CoverageIOUtil.writeINT(os, usedMethodsCount);
 
       String[] methodNames = classToMethodNames.get(className);
       for (int i = 0, len = used.length; i < len; ++i) {
         // we check usedMethodCount here since used can still be updated by other threads
         if (used[i] && usedMethodsCount-- > 0) {
-          CoverageIOUtil.writeUTF(os, methodNames[i]);
+          writeString(os, methodNames[i]);
         }
       }
     }
+  }
+
+  protected void writeString(DataOutputStream os, String s) throws IOException {
+    CoverageIOUtil.writeUTF(os, s);
   }
 }

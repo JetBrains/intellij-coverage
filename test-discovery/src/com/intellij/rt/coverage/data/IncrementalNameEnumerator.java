@@ -16,37 +16,32 @@
 
 package com.intellij.rt.coverage.data;
 
-import org.jetbrains.coverage.gnu.trove.THashMap;
+import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-public class IncrementalNameEnumerator {
-  private static final boolean USE_DIRECT_BYTE_BUFFER = Boolean.valueOf(System.getProperty("incremental.name.enumerator.direct.byte.buffer", Boolean.TRUE.toString()));
-
-  private final Map<String, ByteBuffer> myNames = new THashMap<String, ByteBuffer>();
+class IncrementalNameEnumerator {
+  private final TObjectIntHashMap<String> myNames = new TObjectIntHashMap<String>();
   private List<NameAndId> myDataIncrement = new ArrayList<NameAndId>();
-  private int myNextNameId;
+  private int myNextNameId = 1; // because TObjectIntHashMap uses 0 as null
 
   private final Object myNameLock = "NameLock";
   private final Object myDataIncrementLock = "DataIncrementLock";
 
-  public ByteBuffer enumerate(String name) {
+  int enumerate(String name) {
     synchronized (myNameLock) {
-      ByteBuffer enumerated = myNames.get(name);
-      if (enumerated != null) return enumerated;
+      int enumerated = myNames.get(name);
+      if (enumerated != 0) return enumerated;
 
       int newId = myNextNameId++;
-      ByteBuffer idAsByteBuffer = toByteBuffer(newId);
-      updateDataIncrement(name, idAsByteBuffer);
-      myNames.put(name, idAsByteBuffer);
-      return idAsByteBuffer;
+      updateDataIncrement(name, newId);
+      myNames.put(name, newId);
+      return newId;
     }
   }
 
-  public List<NameAndId> getAndClearDataIncrement() {
+  List<NameAndId> getAndClearDataIncrement() {
     synchronized (myDataIncrementLock) {
       List<NameAndId> dataIncrement = myDataIncrement;
       myDataIncrement = new ArrayList<NameAndId>();
@@ -54,36 +49,26 @@ public class IncrementalNameEnumerator {
     }
   }
 
-  private void updateDataIncrement(String name, ByteBuffer idx) {
+  private void updateDataIncrement(String name, int idx) {
     synchronized (myDataIncrementLock) {
       myDataIncrement.add(new NameAndId(name, idx));
     }
   }
 
-  private static ByteBuffer toByteBuffer(int num) {
-    ByteBuffer byteBuffer = USE_DIRECT_BYTE_BUFFER ? ByteBuffer.allocateDirect(4) : ByteBuffer.allocate(4);
-    byteBuffer.putInt(num);
-    return byteBuffer;
-  }
-
-  private static List<NameAndId> createEmptyDataIncrement() {
-    return new ArrayList<NameAndId>(10);
-  }
-
-  public static final class NameAndId {
+  static final class NameAndId {
     private final String myName;
-    private final ByteBuffer myId;
+    private final int myId;
 
-    NameAndId(String myName, ByteBuffer myId) {
+    NameAndId(String myName, int myId) {
       this.myName = myName;
       this.myId = myId;
     }
 
-    public String getMyName() {
+    String getMyName() {
       return myName;
     }
 
-    public ByteBuffer getMyId() {
+    int getMyId() {
       return myId;
     }
   }
