@@ -51,7 +51,7 @@ public class ExplicitTestDiscoveryInstrumentationTest {
   private byte[] doTransform(final String name) throws IOException {
     AbstractIntellijClassfileTransformer testDiscoveryInstrumenter = new AbstractIntellijClassfileTransformer() {
       protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
-        return new TestDiscoveryInstrumenter(cw, cr, className, loader);
+        return new TestDiscoveryInstrumenter(cw, cr, className);
       }
 
       protected boolean shouldExclude(String className) {

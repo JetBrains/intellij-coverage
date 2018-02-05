@@ -41,7 +41,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   private final boolean myInterface;
   private boolean myCreatedMethod = false;
 
-  public TestDiscoveryInstrumenter(ClassWriter classWriter, ClassReader cr, String className, ClassLoader loader) {
+  public TestDiscoveryInstrumenter(ClassWriter classWriter, ClassReader cr, String className) {
     super(Opcodes.ASM6, classWriter);
     myMethodFilter = new InstrumentedMethodsFilter(className);
     myClassName = className;

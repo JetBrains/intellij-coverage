@@ -66,7 +66,7 @@ public class TestDiscoveryPremain {
       protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
         return COUNTERS_IN_INNER_CLASS 
             ? new TestDiscoveryInnerClassInstrumenter(cw, cr, className, loader) 
-            : new TestDiscoveryInstrumenter(cw, cr, className, loader);
+            : new TestDiscoveryInstrumenter(cw, cr, className);
       }
 
       @Override

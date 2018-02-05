@@ -31,7 +31,7 @@ public class TestDiscoveryInnerClassInstrumenter extends TestDiscoveryInstrument
   private final ClassLoader myClassLoader;
 
   public TestDiscoveryInnerClassInstrumenter(ClassWriter classWriter, ClassReader cr, String className, ClassLoader loader) {
-    super(classWriter, cr, className, loader);
+    super(classWriter, cr, className);
     myInternalCounterClassJVMName = myInternalClassName + "$" + myInternalCounterClassName;
     myClassLoader = loader;
   }
