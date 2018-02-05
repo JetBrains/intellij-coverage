@@ -82,14 +82,15 @@ public class SingleTrFileReader {
   }
 
   private void readDictionary() throws IOException {
+    int size = 8;
     RandomAccessFile r = null;
     try {
       r = new RandomAccessFile(file, "r");
-      if (r.length() < 5) {
+      if (r.length() < size + 1) {
         throw new IOException("Dictionary not found: file is too small");
       }
-      r.seek(r.length() - 4);
-      int dictOffset = r.readInt();
+      r.seek(r.length() - size);
+      long dictOffset = r.readLong();
       if (dictOffset > r.length() || dictOffset < 0) {
         throw new IOException("Dictionary not found: offset specified in the end of file is outside of file range");
       }

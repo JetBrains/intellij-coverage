@@ -43,7 +43,7 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
   static final int NAMES_DICTIONARY_MARKER = 0x3;
   static final int NAMES_DICTIONARY_PART_MARKER = 0x4;
 
-  private final DataOutputStream stream;
+  private final LongDataOutputStream stream;
   private final NameEnumerator nameEnumerator;
   private final byte version;
 
@@ -52,18 +52,18 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
     int bufferSize = Integer.parseInt(System.getProperty(BUFFER_SIZE, "32768"));
     myTraceFile.getParentFile().mkdirs();
     version = Byte.parseByte(System.getProperty(FILE_VERSION, String.valueOf(VERSION)));
-    stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(myTraceFile), bufferSize));
+    stream = new LongDataOutputStream(new BufferedOutputStream(new FileOutputStream(myTraceFile), bufferSize));
     nameEnumerator = (version == 2) ? new NameEnumerator.Incremental() : new NameEnumerator();
     start();
   }
 
   // For tests
-  public SingleTrFileDiscoveryDataListener(DataOutputStream stream) throws Exception {
+  SingleTrFileDiscoveryDataListener(LongDataOutputStream stream) throws Exception {
     this(stream, (byte) VERSION);
   }
 
   // For tests
-  public SingleTrFileDiscoveryDataListener(DataOutputStream stream, byte version) throws Exception {
+  SingleTrFileDiscoveryDataListener(LongDataOutputStream stream, byte version) throws Exception {
     this.version = version;
     this.stream = stream;
     nameEnumerator = new NameEnumerator.Incremental();
@@ -101,7 +101,7 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
     }
     try {
       stream.writeByte(NAMES_DICTIONARY_MARKER);
-      int dictStartOffset = stream.size();
+      long dictStartOffset = stream.total();
       TObjectIntHashMap<String> namesMap = nameEnumerator.getNamesMap();
       CoverageIOUtil.writeINT(stream, namesMap.size());
       namesMap.forEachEntry(new TObjectIntProcedure<String>() {
@@ -115,7 +115,7 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
           return true;
         }
       });
-      stream.writeInt(dictStartOffset);
+      stream.writeLong(dictStartOffset);
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
@@ -129,7 +129,7 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
 
   private void writeVisitedMethod(Map<Integer, boolean[]> classToVisitedMethods,
                                   Map<Integer, int[]> classToMethodNames,
-                                  DataOutputStream os) throws IOException {
+                                  DataOutput os) throws IOException {
     TIntIntHashMap classToUsedMethods = new TIntIntHashMap();
     for (Map.Entry<Integer, boolean[]> o : classToVisitedMethods.entrySet()) {
       boolean[] used = o.getValue();
