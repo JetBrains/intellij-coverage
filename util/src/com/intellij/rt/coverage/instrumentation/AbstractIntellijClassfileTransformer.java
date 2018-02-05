@@ -51,6 +51,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
       if (className.startsWith("com.intellij.rt.")
           || className.startsWith("java.")
           || className.startsWith("sun.")
+          || className.startsWith("jdk.")
           || className.startsWith("org.jetbrains.coverage.gnu.trove.")
           || className.startsWith("org.jetbrains.coverage.org.objectweb.")) {
         return null;
