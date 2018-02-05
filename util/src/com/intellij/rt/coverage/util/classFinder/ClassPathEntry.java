@@ -32,12 +32,12 @@ public class ClassPathEntry {
   private ClassLoader myClassLoader;
   private String myClassPathEntry;
 
-  public ClassPathEntry(final String classPathEntry, final ClassLoader classLoader) {
+  ClassPathEntry(final String classPathEntry, final ClassLoader classLoader) {
     myClassPathEntry = classPathEntry;
     myClassLoader = classLoader;
   }
 
-  public Collection getClassesIterator(List includePatterns, List excludePatterns) throws IOException {
+  Collection<ClassEntry> getClassesIterator(List<Pattern> includePatterns, List<Pattern> excludePatterns) throws IOException {
     ClassPathEntryProcessor processor = createEntryProcessor(myClassPathEntry);
     if (processor == null) {
 //      System.err.println("Do not know how to process class path entry: " + myClassPathEntry);
@@ -63,11 +63,11 @@ public class ClassPathEntry {
   private final static ZipEntryProcessor myZipProcessor = new ZipEntryProcessor();
 
   private static abstract class AbstractClassPathEntryProcessor implements ClassPathEntryProcessor {
-    private List myIncludePatterns;
-    private List myExcludePatterns;
+    private List<Pattern> myIncludePatterns;
+    private List<Pattern> myExcludePatterns;
     private ClassLoader myClassLoader;
 
-    public void setFilter(final List includePatterns, final List excludePatterns) {
+    public void setFilter(final List<Pattern> includePatterns, final List<Pattern> excludePatterns) {
       myIncludePatterns = includePatterns;
       myExcludePatterns = excludePatterns;
     }
@@ -76,10 +76,10 @@ public class ClassPathEntry {
       myClassLoader = classLoader;
     }
 
-    protected abstract Collection extractClassNames(String classPathEntry) throws IOException;
+    protected abstract Collection<String> extractClassNames(String classPathEntry) throws IOException;
 
-    public Collection findClasses(final String classPathEntry) throws IOException {
-      Set includedClasses = new HashSet();
+    public Collection<ClassEntry> findClasses(final String classPathEntry) throws IOException {
+      Set<ClassEntry> includedClasses = new HashSet<ClassEntry>();
       for (Object o : extractClassNames(classPathEntry)) {
         final String className = (String) o;
         if (shouldInclude(className)) {
@@ -89,7 +89,7 @@ public class ClassPathEntry {
       return includedClasses;
     }
 
-    protected boolean shouldInclude(final String className) {
+    private boolean shouldInclude(final String className) {
       // matching outer or inner class name depending on pattern
       if (ClassNameUtil.shouldExclude(className, myExcludePatterns)) return false;
 
@@ -103,25 +103,25 @@ public class ClassPathEntry {
   }
 
   private interface ClassPathEntryProcessor {
-    void setFilter(final List includePatterns, final List excludePatterns);
-    void setClassLoader(final ClassLoader classLoader);
+    void setFilter(List<Pattern> includePatterns, List<Pattern> excludePatterns);
+    void setClassLoader(ClassLoader classLoader);
 
-    Collection findClasses(final String classPathEntry) throws IOException;
+    Collection<ClassEntry> findClasses(final String classPathEntry) throws IOException;
   }
 
   private static final String CLASS_FILE_SUFFIX = ".class";
 
   private static class DirectoryEntryProcessor extends AbstractClassPathEntryProcessor {
 
-    protected Collection extractClassNames(final String classPathEntry) {
+    protected Collection<String> extractClassNames(final String classPathEntry) {
       File dir = new File(classPathEntry);
-      List result = new ArrayList(100);
+      List<String> result = new ArrayList<String>(100);
       String curPath = "";
       collectClasses(curPath, dir, result);
       return result;
     }
 
-    private static void collectClasses(final String curPath, final File parent, final List result) {
+    private static void collectClasses(final String curPath, final File parent, final List<String> result) {
       File[] files = parent.listFiles();
       if (files != null) {
         String prefix = curPath.length() == 0 ? "" : curPath + ".";
@@ -142,13 +142,13 @@ public class ClassPathEntry {
   }
 
   private static class ZipEntryProcessor extends AbstractClassPathEntryProcessor {
-    public Collection extractClassNames(final String classPathEntry) throws IOException {
-      List result = new ArrayList(100);
+    public Collection<String> extractClassNames(final String classPathEntry) throws IOException {
+      List<String> result = new ArrayList<String>(100);
       ZipFile zipFile = new ZipFile(new File(classPathEntry));
       try {
-        Enumeration zenum = zipFile.entries();
+        Enumeration<? extends ZipEntry> zenum = zipFile.entries();
         while (zenum.hasMoreElements()) {
-          ZipEntry ze = (ZipEntry)zenum.nextElement();
+          ZipEntry ze = zenum.nextElement();
           if (!ze.isDirectory() && ze.getName().endsWith(CLASS_FILE_SUFFIX)) {
             result.add(removeClassSuffix(ze.getName()).replace('/', '.').replace('\\', '.'));
           }

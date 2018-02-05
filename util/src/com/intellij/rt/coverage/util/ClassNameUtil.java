@@ -29,9 +29,8 @@ public class ClassNameUtil {
     return className.substring(0, idx);
   }
 
-  public static boolean shouldExclude(String className, List excludePatterns) {
-    for (Object excludePattern1 : excludePatterns) {
-      final Pattern excludePattern = (Pattern) excludePattern1;
+  public static boolean shouldExclude(String className, List<Pattern> excludePatterns) {
+    for (Pattern excludePattern : excludePatterns) {
       if (excludePattern.matcher(className).matches()) return true;
     }
     return false;

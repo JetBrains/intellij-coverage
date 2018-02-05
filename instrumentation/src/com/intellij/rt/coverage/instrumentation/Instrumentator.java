@@ -32,9 +32,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-
 public class Instrumentator {
-
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
     new Instrumentator().performPremain(argsString, instrumentation);
   }
@@ -53,8 +51,7 @@ public class Instrumentator {
       } else {
         args = tokenize(argsString);
       }
-    }
-    else {
+    } else {
       ErrorReporter.reportError("Argument string should be passed");
       return;
     }
@@ -81,9 +78,7 @@ public class Instrumentator {
     }
 
     final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling);
-    final List<Pattern> includePatterns;
-    final List<Pattern> excludePatterns;
-    includePatterns = new ArrayList<Pattern>();
+    final List<Pattern> includePatterns = new ArrayList<Pattern>();
     System.out.println("---- IntelliJ IDEA coverage runner ---- ");
     System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
     final String excludes = "-exclude";
@@ -102,7 +97,7 @@ public class Instrumentator {
     }
     System.out.println("exclude patterns:");
     i++;
-    excludePatterns = new ArrayList<Pattern>();
+    final List<Pattern> excludePatterns = new ArrayList<Pattern>();
     for (; i < args.length; i++) {
       try {
         final Pattern pattern = Pattern.compile(args[i]);
@@ -131,15 +126,14 @@ public class Instrumentator {
           if (System.getProperty("idea.new.sampling.coverage") != null) {
             //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
             return new NewSamplingInstrumenter(data, cw, cr, className, shouldCalculateSource);
-          }
-          else {
+          } else {
             return new SamplingInstrumenter(data, cw, className, shouldCalculateSource);
           }
-        }
-        else {
+        } else {
           return new ClassInstrumenter(data, cw, className, shouldCalculateSource);
         }
       }
+
       @Override
       protected boolean shouldExclude(String className) {
         return ClassNameUtil.shouldExclude(className, excludePatterns);
@@ -147,8 +141,8 @@ public class Instrumentator {
 
       @Override
       protected boolean shouldIncludeBootstrapClass(String className) {
-        for (Object includePattern : includePatterns) {
-          if (((Pattern) includePattern).matcher(className).matches()) { // matching inner class name
+        for (Pattern includePattern : includePatterns) {
+          if (includePattern.matcher(className).matches()) { // matching inner class name
             return true;
           }
         }

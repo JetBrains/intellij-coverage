@@ -22,19 +22,20 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * @author pavel.sher
  */
 public class ClassFinder {
-  private List myIncludePatterns;
-  private List myExcludePatterns;
-  private Set myClassloaders;
+  private List<Pattern> myIncludePatterns;
+  private List<Pattern> myExcludePatterns;
+  private Set<ClassLoader> myClassloaders;
 
-  public ClassFinder(final List includePatterns, final List excludePatterns) {
+  public ClassFinder(List<Pattern> includePatterns, List<Pattern> excludePatterns) {
     myIncludePatterns = includePatterns;
     myExcludePatterns = excludePatterns;
-    myClassloaders = new HashSet();
+    myClassloaders = new HashSet<ClassLoader>();
   }
 
   public void addClassLoader(ClassLoader cl) {
@@ -51,11 +52,9 @@ public class ClassFinder {
     }
   }
 
-  public Collection findMatchedClasses() {
-    Set classes = new HashSet();
-    final Iterator classPathEntryIt = getClassPathEntries().iterator();
-    while (classPathEntryIt.hasNext()) {
-      final ClassPathEntry entry = (ClassPathEntry) classPathEntryIt.next();
+  public Collection<ClassEntry> findMatchedClasses() {
+    Set<ClassEntry> classes = new HashSet<ClassEntry>();
+    for (ClassPathEntry entry : getClassPathEntries()) {
       try {
         classes.addAll(entry.getClassesIterator(myIncludePatterns, myExcludePatterns));
       } catch (IOException e) {
@@ -65,16 +64,15 @@ public class ClassFinder {
     return classes;
   }
 
-  protected Collection getClassPathEntries() {
-    Set result = new HashSet();
-
+  private Collection<ClassPathEntry> getClassPathEntries() {
+    Set<ClassPathEntry> result = new HashSet<ClassPathEntry>();
     result.addAll(extractEntries(System.getProperty("java.class.path")));
     result.addAll(extractEntries(System.getProperty("sun.boot.class.path")));
     collectClassloaderEntries(result);
     return result;
   }
 
-  private void collectClassloaderEntries(final Set result) {
+  private void collectClassloaderEntries(final Set<ClassPathEntry> result) {
     for (Object myClassloader : myClassloaders) {
       URLClassLoader cl = (URLClassLoader) myClassloader;
       // assert cl != null; // see addClassLoader(ClassLoader)
@@ -94,7 +92,6 @@ public class ClassFinder {
             "Tomcat before finishing tests. Coverage won't be affected but some of uncovered classes could be missing from " +
             "the report.");
         e.printStackTrace();
-        continue;
       }
     }
   }
@@ -115,10 +112,10 @@ public class ClassFinder {
     return result;
   }
 
-  private static Collection extractEntries(final String classPath) {
+  private static Collection<ClassPathEntry> extractEntries(final String classPath) {
     if (classPath == null) return Collections.emptyList();
     String[] entries = classPath.split(System.getProperty("path.separator"));
-    Set result = new HashSet();
+    Set<ClassPathEntry> result = new HashSet<ClassPathEntry>();
     for (String entry : entries) {
       result.add(new ClassPathEntry(entry, null));
     }
