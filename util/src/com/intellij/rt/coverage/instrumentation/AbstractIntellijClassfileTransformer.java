@@ -39,7 +39,37 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
   private final boolean computeFrames = computeFrames();
   private final WeakHashMap<ClassLoader, Map<String, ClassReader>> classReaders = new WeakHashMap<ClassLoader, Map<String, ClassReader>>();
 
+  private long ourTime;
+  private int ourClassCount;
+
+  protected AbstractIntellijClassfileTransformer() {
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      public void run() {
+        try {
+          double allTime = ourTime / (1000 * 1000 * 1000.0);
+          System.out.println(
+              "Class transformation time: " + allTime + "s for " +
+                  ourClassCount + " classes or " + allTime / ourClassCount + "s per class"
+
+          );
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }));
+  }
+
   public final byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
+    long s = System.nanoTime();
+    try {
+      return transformInner(loader, className, classFileBuffer);
+    } finally {
+      ourClassCount++;
+      ourTime += System.nanoTime() - s;
+    }
+  }
+
+  private byte[] transformInner(ClassLoader loader, String className, byte[] classFileBuffer) {
     if (isStopped()) {
       return null;
     }
