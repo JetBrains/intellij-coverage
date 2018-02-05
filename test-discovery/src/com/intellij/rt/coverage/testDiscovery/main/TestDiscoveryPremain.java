@@ -58,21 +58,6 @@ public class TestDiscoveryPremain {
         }
         return false;
       }
-
-      @Override
-      protected boolean shouldIncludeBootstrapClass(String className) {
-        return false;
-      }
-
-      @Override
-      protected void visitClassLoader(ClassLoader classLoader) {
-
-      }
-
-      @Override
-      protected boolean isStopped() {
-        return false;
-      }
     });
   }
 

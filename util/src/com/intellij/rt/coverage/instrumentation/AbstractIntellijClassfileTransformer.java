@@ -90,11 +90,17 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
 
   protected abstract boolean shouldExclude(String className);
 
-  protected abstract boolean shouldIncludeBootstrapClass(String className);
+  protected boolean shouldIncludeBootstrapClass(String className) {
+    return false;
+  }
 
-  protected abstract void visitClassLoader(ClassLoader classLoader);
+  protected void visitClassLoader(ClassLoader classLoader) {
 
-  protected abstract boolean isStopped();
+  }
+
+  protected boolean isStopped() {
+    return false;
+  }
 
   private boolean computeFrames() {
     return System.getProperty("idea.coverage.no.frames") == null;
@@ -181,7 +187,6 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     }
 
 
-
     private boolean typeImplements(String type, ClassReader classReader, String interfaceName) throws IOException {
       while (!JAVA_LANG_OBJECT.equals(type)) {
         String[] interfaces = classReader.getInterfaces();
@@ -206,8 +211,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
       try {
         is = classLoader.getResourceAsStream(type + ".class");
         return new ClassReader(is);
-      }
-      finally {
+      } finally {
         if (is != null) {
           is.close();
         }
