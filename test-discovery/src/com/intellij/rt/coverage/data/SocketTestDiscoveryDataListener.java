@@ -26,7 +26,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 @SuppressWarnings("unused")
@@ -40,6 +43,7 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
   private static final byte START_MSG = 0;
   private static final byte FINISHED_MSG = 1;
   private static final byte TEST_FINISHED_MSG = 2;
+  private static final byte VERSION = 1;
   private final SocketChannel mySocket;
   private final ExecutorService myExecutor;
   private final Selector mySelector;
@@ -108,7 +112,7 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
       }
     });
 
-    write(ByteBuffer.wrap(new byte[]{START_MSG}));
+    write(ByteBuffer.wrap(new byte[]{START_MSG, VERSION}));
   }
 
   public void testFinished(final String testName, Map<String, boolean[]> classToVisitedMethods, Map<String, String[]> classToMethodNames) {
