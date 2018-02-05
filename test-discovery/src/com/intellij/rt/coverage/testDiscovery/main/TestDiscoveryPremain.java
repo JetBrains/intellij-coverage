@@ -24,12 +24,23 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 
 import java.lang.instrument.Instrumentation;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class TestDiscoveryPremain {
   private void performPremain(Instrumentation instrumentation) {
     // initialize TestDiscoveryProjectData before instrumentation
     @SuppressWarnings("unused")
     TestDiscoveryProjectData projectData = TestDiscoveryProjectData.getProjectData();
+
+    System.out.println("---- IntelliJ IDEA Test Discovery ---- ");
+
+    // separated by ;
+    final List<Pattern> include = patterns("test.discovery.include.class.patterns");
+    final List<Pattern> exclude = patterns("test.discovery.exclude.class.patterns");
 
     instrumentation.addTransformer(new AbstractIntellijClassfileTransformer() {
       @Override
@@ -39,6 +50,12 @@ public class TestDiscoveryPremain {
 
       @Override
       protected boolean shouldExclude(String className) {
+        for (Pattern e : exclude) {
+          if (e.matcher(className).matches()) return true;
+        }
+        for (Pattern e : include) {
+          if (!e.matcher(className).matches()) return true;
+        }
         return false;
       }
 
@@ -57,6 +74,23 @@ public class TestDiscoveryPremain {
         return false;
       }
     });
+  }
+
+  private static List<Pattern> patterns(String key) {
+    String property = System.getProperty(key);
+    if (property == null) return Collections.emptyList();
+    List<Pattern> patterns = new ArrayList<Pattern>(1);
+    for (String s : property.split(";")) {
+      try {
+        patterns.add(Pattern.compile(s));
+        System.out.println(s);
+      } catch (PatternSyntaxException ex) {
+        System.err.println("Problem occurred with pattern " + s);
+        System.err.println(ex.getDescription());
+        System.exit(1);
+      }
+    }
+    return patterns;
   }
 
   public static void premain(String argsString, Instrumentation instrumentation) {
