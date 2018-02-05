@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.intellij.rt.coverage.util.CoverageIOUtil.GIGA;
+
 public class TestDiscoveryProjectData {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/TestDiscoveryProjectData";
   public static final String TEST_DISCOVERY_DATA_LISTENER_PROP = "test.discovery.data.listener";
@@ -48,11 +50,9 @@ public class TestDiscoveryProjectData {
     //TODO do via event
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
-        try {
-          testDiscoveryFinished();
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        testDiscoveryFinished();
+        System.out.println("Trace time: " + 1. * ourTraceTime / GIGA);
+        System.out.println("Cleanup time: " + 1. * ourCleanupTime / GIGA);
       }
     }));
   }
@@ -68,8 +68,16 @@ public class TestDiscoveryProjectData {
 
   // called from instrumented code during class's static init
   public static boolean[] trace(String className, boolean[] methodFlags, String[] methodNames) {
-    return ourProjectData.traceLines(className, methodFlags, methodNames);
+    long s = System.nanoTime();
+    try {
+      return ourProjectData.traceLines(className, methodFlags, methodNames);
+    } finally {
+      ourTraceTime += System.nanoTime() - s;
+    }
   }
+
+  private static Long ourTraceTime = 0L;
+  private static Long ourCleanupTime = 0L;
 
   private synchronized boolean[] traceLines(String className, boolean[] methodFlags, String[] methodNames) {
     //System.out.println("Registering " + className);
@@ -111,6 +119,15 @@ public class TestDiscoveryProjectData {
   }
 
   public synchronized void testDiscoveryStarted(final String className, final String methodName) {
+    long s = System.nanoTime();
+    try {
+      cleanup();
+    } finally {
+      ourCleanupTime += System.nanoTime() - s;
+    }
+  }
+
+  private void cleanup() {
     for (Object e : myClassToVisitedMethods.entrySet()) {
       boolean[] used = (boolean[]) ((Map.Entry) e).getValue();
       for (int i = 0, len = used.length; i < len; ++i) {
