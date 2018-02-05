@@ -105,6 +105,11 @@ public class LongDataOutputStream extends OutputStream implements DataOutput {
     origin.close();
   }
 
+  @Override
+  public void write(byte[] b) throws IOException {
+    write(b, 0, b.length);
+  }
+
   public long total() {
     return total;
   }
