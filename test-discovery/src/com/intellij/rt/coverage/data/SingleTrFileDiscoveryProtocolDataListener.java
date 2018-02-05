@@ -47,6 +47,17 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
     myStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(myTraceFile), bufferSize));
     myNameEnumerator = new NameEnumerator.Incremental();
     start(this.myStream);
+
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      public void run() {
+        try {
+          double allTime = ourSendTime / (1000 * 1000 * 1000.0);
+          System.out.println("Send time: " + allTime);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }));
   }
 
   // For tests
@@ -57,15 +68,25 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
     start(myStream);
   }
 
+  private static Long ourSendTime = 0L;
+
   public synchronized void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException {
-    writeTestFinished(myStream, className, methodName, classToVisitedMethods, classToMethodNames);
+    long s = System.nanoTime();
+    try {
+      writeTestFinished(myStream, className, methodName, classToVisitedMethods, classToMethodNames);
+    } finally {
+      Long diff = ourSendTime += System.nanoTime() - s;
+    }
   }
 
   public synchronized void testsFinished() throws IOException {
+    long s = System.nanoTime();
+
     try {
       writeDictionaryIncrementIfNeeded(myStream);
       finish(myStream);
     } finally {
+      ourSendTime += System.nanoTime() - s;
       myStream.close();
     }
   }

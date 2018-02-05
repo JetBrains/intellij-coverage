@@ -50,6 +50,9 @@ public class TestDiscoveryProjectData {
       public void run() {
         try {
           testDiscoveryFinished();
+          double allTraceTime = ourTraceTime / (1000 * 1000 * 1000.0);
+          double allCleanupTime = ourCleanupTime / (1000 * 1000 * 1000.0);
+          System.out.println("Trace time: " + allTraceTime + ", cleanup: " + allCleanupTime);
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -68,8 +71,16 @@ public class TestDiscoveryProjectData {
 
   // called from instrumented code during class's static init
   public static boolean[] trace(String className, boolean[] methodFlags, String[] methodNames) {
-    return ourProjectData.traceLines(className, methodFlags, methodNames);
+    long s = System.nanoTime();
+    try {
+      return ourProjectData.traceLines(className, methodFlags, methodNames);
+    } finally {
+      ourTraceTime += System.nanoTime() - s;
+    }
   }
+
+  private static Long ourTraceTime = 0L;
+  private static Long ourCleanupTime = 0L;
 
   private synchronized boolean[] traceLines(String className, boolean[] methodFlags, String[] methodNames) {
     //System.out.println("Registering " + className);
@@ -111,6 +122,15 @@ public class TestDiscoveryProjectData {
   }
 
   public synchronized void testDiscoveryStarted(final String className, final String methodName) {
+    long s = System.nanoTime();
+    try {
+      cleanup();
+    } finally {
+      ourTraceTime += System.nanoTime() - s;
+    }
+  }
+
+  private void cleanup() {
     for (Object e : myClassToVisitedMethods.entrySet()) {
       boolean[] used = (boolean[]) ((Map.Entry) e).getValue();
       for (int i = 0, len = used.length; i < len; ++i) {
