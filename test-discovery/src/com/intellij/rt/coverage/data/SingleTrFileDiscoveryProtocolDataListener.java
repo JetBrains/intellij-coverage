@@ -16,6 +16,8 @@
 
 package com.intellij.rt.coverage.data;
 
+import com.intellij.rt.coverage.util.CoverageIOUtil;
+
 import java.io.*;
 import java.util.List;
 import java.util.Map;
@@ -50,12 +52,7 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
 
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
-        try {
-          double allTime = ourSendTime / (1000 * 1000 * 1000.0);
-          System.out.println("Send time: " + allTime);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        System.out.println("Send time: " + 1. * ourSendTime / CoverageIOUtil.GIGA);
       }
     }));
   }

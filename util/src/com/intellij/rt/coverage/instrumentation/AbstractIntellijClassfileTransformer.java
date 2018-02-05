@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import org.jetbrains.coverage.gnu.trove.THashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
@@ -45,16 +46,10 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
   protected AbstractIntellijClassfileTransformer() {
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
-        try {
-          double allTime = ourTime / (1000 * 1000 * 1000.0);
-          System.out.println(
-              "Class transformation time: " + allTime + "s for " +
-                  ourClassCount + " classes or " + allTime / ourClassCount + "s per class"
-
-          );
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        double allTime = 1. * ourTime / CoverageIOUtil.GIGA;
+        System.out.println("Class transformation time: " + allTime + "s for " +
+            ourClassCount + " classes or " + allTime / ourClassCount + "s per class"
+        );
       }
     }));
   }

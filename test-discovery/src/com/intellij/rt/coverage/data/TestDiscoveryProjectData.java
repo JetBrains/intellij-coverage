@@ -22,6 +22,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.intellij.rt.coverage.util.CoverageIOUtil.GIGA;
+
 public class TestDiscoveryProjectData {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/TestDiscoveryProjectData";
   public static final String TEST_DISCOVERY_DATA_LISTENER_PROP = "test.discovery.data.listener";
@@ -48,14 +50,9 @@ public class TestDiscoveryProjectData {
     //TODO do via event
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
-        try {
-          testDiscoveryFinished();
-          double allTraceTime = ourTraceTime / (1000 * 1000 * 1000.0);
-          double allCleanupTime = ourCleanupTime / (1000 * 1000 * 1000.0);
-          System.out.println("Trace time: " + allTraceTime + ", cleanup: " + allCleanupTime);
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
+        testDiscoveryFinished();
+        System.out.println("Trace time: " + 1. * ourTraceTime / GIGA);
+        System.out.println("Cleanup time: " + 1. * ourCleanupTime / GIGA);
       }
     }));
   }
