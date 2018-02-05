@@ -33,7 +33,7 @@ import java.util.Map;
 public class SourceMapTest extends TestCase {
   public void test_write_read_data() throws IOException {
     final File tempFile = File.createTempFile("write_data", "ideacovtest");
-    Map init_str_clData_map = createMap(new String[]{"someclass", "filename.java", "class5", "filename2.java", "class2", "filename0.java"});
+    Map<String, ClassData> init_str_clData_map = createMap(new String[]{"someclass", "filename.java", "class5", "filename2.java", "class2", "filename0.java"});
     SaveHook.doSaveSourceMap(Collections.emptyMap(), tempFile, init_str_clData_map);
 
     final Map map = SaveHook.loadSourceMapFromFile(Collections.emptyMap(), tempFile);
@@ -43,7 +43,7 @@ public class SourceMapTest extends TestCase {
 
   public void test_write_read_data_many() throws IOException {
     final File tempFile = File.createTempFile("write_data", "ideacovtest");
-    Map init_str_clData_map = createRandomMap();
+    Map<String, ClassData> init_str_clData_map = createRandomMap();
     SaveHook.doSaveSourceMap(Collections.emptyMap(), tempFile, init_str_clData_map);
 
     final Map map = SaveHook.loadSourceMapFromFile(Collections.emptyMap(), tempFile);
@@ -52,10 +52,10 @@ public class SourceMapTest extends TestCase {
 
   public void test_write_with_old_file() throws IOException {
     final File tempFile = File.createTempFile("write_data", "ideacovtest");
-    Map init_str_clData_map = createMap(new String[]{"someclass", "filename.java", "class5", "filename2.java", "class2", "filename0.java"});
+    Map<String, ClassData> init_str_clData_map = createMap(new String[]{"someclass", "filename.java", "class5", "filename2.java", "class2", "filename0.java"});
     SaveHook.doSaveSourceMap(Collections.emptyMap(), tempFile, init_str_clData_map);
 
-    Map second_str_clData_map = createMap(new String[]{"someclass1", "filename.java1", "class51", "filename2.java1", "class21", "filename0.java1"});
+    Map<String, ClassData> second_str_clData_map = createMap(new String[]{"someclass1", "filename.java1", "class51", "filename2.java1", "class21", "filename0.java1"});
 
     SaveHook.saveSourceMap(second_str_clData_map, tempFile);
 
@@ -66,10 +66,10 @@ public class SourceMapTest extends TestCase {
 
   public void test_duplicate_class_in_old_file() throws IOException {
     final File tempFile = File.createTempFile("write_data", "ideacovtest");
-    Map init_str_clData_map = createMap(new String[]{"someclass", "filename.java", "class5", "filename2.java", "class2", "filename0.java"});
+    Map<String, ClassData> init_str_clData_map = createMap(new String[]{"someclass", "filename.java", "class5", "filename2.java", "class2", "filename0.java"});
     SaveHook.doSaveSourceMap(Collections.emptyMap(), tempFile, init_str_clData_map);
 
-    Map second_str_clData_map = createMap(new String[]{"someclass", "filename.java", "class51", "filename2.java1", "class21", "filename0.java1"});
+    Map<String, ClassData> second_str_clData_map = createMap(new String[]{"someclass", "filename.java", "class51", "filename2.java1", "class21", "filename0.java1"});
 
     SaveHook.saveSourceMap(second_str_clData_map, tempFile);
 
@@ -81,10 +81,10 @@ public class SourceMapTest extends TestCase {
 
   public void test_duplicate_class_with_other_source_in_old_file() throws IOException {
     final File tempFile = File.createTempFile("write_data", "ideacovtest");
-    Map init_str_clData_map = createMap(new String[]{"someclass", "filename.java"});
+    Map<String, ClassData> init_str_clData_map = createMap(new String[]{"someclass", "filename.java"});
     SaveHook.doSaveSourceMap(Collections.emptyMap(), tempFile, init_str_clData_map);
 
-    Map second_str_clData_map = createMap(new String[]{"someclass", "filename.java1"});
+    Map<String, ClassData> second_str_clData_map = createMap(new String[]{"someclass", "filename.java1"});
 
     SaveHook.saveSourceMap(second_str_clData_map, tempFile);
 
@@ -95,10 +95,10 @@ public class SourceMapTest extends TestCase {
 
   public void test_duplicate_class_with_null_source_in_old_file() throws IOException {
     final File tempFile = File.createTempFile("write_data", "ideacovtest");
-    Map init_str_clData_map = createMap(new String[]{"someclass", null});
+    Map<String, ClassData> init_str_clData_map = createMap(new String[]{"someclass", null});
     SaveHook.doSaveSourceMap(Collections.emptyMap(), tempFile, init_str_clData_map);
 
-    Map second_str_clData_map = createMap(new String[]{"someclass", "filename.java1"});
+    Map<String, ClassData> second_str_clData_map = createMap(new String[]{"someclass", "filename.java1"});
 
     SaveHook.saveSourceMap(second_str_clData_map, tempFile);
 
@@ -109,10 +109,10 @@ public class SourceMapTest extends TestCase {
 
   public void test_duplicate_class_with_both_null_source() throws IOException {
     final File tempFile = File.createTempFile("write_data", "ideacovtest");
-    Map init_str_clData_map = createMap(new String[]{"someclass", null});
+    Map<String, ClassData> init_str_clData_map = createMap(new String[]{"someclass", null});
     SaveHook.doSaveSourceMap(Collections.emptyMap(), tempFile, init_str_clData_map);
 
-    Map second_str_clData_map = createMap(new String[]{"someclass", null});
+    Map<String, ClassData> second_str_clData_map = createMap(new String[]{"someclass", null});
 
     SaveHook.saveSourceMap(second_str_clData_map, tempFile);
 
@@ -122,10 +122,10 @@ public class SourceMapTest extends TestCase {
 
   public void test_duplicate_class_with_null_source_in_new_file() throws IOException {
     final File tempFile = File.createTempFile("write_data", "ideacovtest");
-    Map init_str_clData_map = createMap(new String[]{"someclass", "filename.java1"});
+    Map<String, ClassData> init_str_clData_map = createMap(new String[]{"someclass", "filename.java1"});
     SaveHook.doSaveSourceMap(Collections.emptyMap(), tempFile, init_str_clData_map);
 
-    Map second_str_clData_map = createMap(new String[]{"someclass", null});
+    Map<String, ClassData> second_str_clData_map = createMap(new String[]{"someclass", null});
 
     SaveHook.saveSourceMap(second_str_clData_map, tempFile);
 
@@ -134,8 +134,8 @@ public class SourceMapTest extends TestCase {
     assertEquals("filename.java1", map.get("someclass"));
   }
 
-  private Map createMap(final String[] strings) {
-    HashMap map = new HashMap(strings.length / 2);
+  private Map<String, ClassData> createMap(final String[] strings) {
+    HashMap<String, ClassData> map = new HashMap<String, ClassData>(strings.length / 2);
     for (int i = 0; i < strings.length; i += 2) {
       final ClassData clData = new ClassData(strings[i]);
       clData.setSource(strings[i + 1]);
@@ -144,7 +144,7 @@ public class SourceMapTest extends TestCase {
     return map;
   }
 
-  private Map createRandomMap() {
+  private Map<String, ClassData> createRandomMap() {
     int limit = 20000;
     String[] strings = new String[limit];
     for (int i = 0; i < limit; ++i) {
@@ -153,7 +153,7 @@ public class SourceMapTest extends TestCase {
     return createMap(strings);
   }
 
-  private void checkMapContainsAll(Map str_str_resultMap, Map init_str_clData_map) {
+  private void checkMapContainsAll(Map str_str_resultMap, Map<String, ClassData> init_str_clData_map) {
     for (Object o : init_str_clData_map.entrySet()) {
       Map.Entry str_clData_entry = (Map.Entry) o;
       final String clName = (String) str_str_resultMap.get(str_clData_entry.getKey());

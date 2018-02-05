@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  * @since 5/14/13
  */
 public class FilteringTest extends TestCase {
-  public void test_excludes() throws Exception {
+  public void test_excludes() {
     doTestExcludeFilter("com.product.AAA", toPatterns(new String[]{"AAA"}), false);
     doTestExcludeFilter("com.product.AAA$1", toPatterns(new String[]{"AAA"}), false);
     doTestExcludeFilter("com.product.AAA", toPatterns(new String[]{"com.product.AAA"}), true);
@@ -54,12 +54,12 @@ public class FilteringTest extends TestCase {
     doTestExcludeFilter("com.product.AAA$QQQ$1", toPatterns(new String[]{".*\\$.*"}), true);
   }
 
-  private void doTestExcludeFilter(String className, List excludePatterns, boolean expected) throws Exception {
+  private void doTestExcludeFilter(String className, List<Pattern> excludePatterns, boolean expected) {
     assertEquals(expected, ClassNameUtil.shouldExclude(className, excludePatterns));
   }
 
-  private List toPatterns(String regexs[]) {
-    List res = new ArrayList(regexs.length);
+  private List<Pattern> toPatterns(String regexs[]) {
+    List<Pattern> res = new ArrayList<Pattern>(regexs.length);
     for (String regex : regexs) {
       res.add(Pattern.compile(regex + "(\\$.*)?"));
     }

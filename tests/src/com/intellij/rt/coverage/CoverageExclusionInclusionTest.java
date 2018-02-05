@@ -72,7 +72,7 @@ public class CoverageExclusionInclusionTest extends TestCase {
     });
 
     final ProjectData projectInfo = CoverageStatusTest.runCoverage(testDataPath.getAbsolutePath(), myDataFile, inclusionFilter, "Test", true);
-    assertEquals(new HashSet(Arrays.asList(expectedClasses)), projectInfo.getClasses().keySet());
+    assertEquals(new HashSet<String>(Arrays.asList(expectedClasses)), projectInfo.getClasses().keySet());
   }
 
   @NotNull
