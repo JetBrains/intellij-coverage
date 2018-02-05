@@ -33,6 +33,12 @@ public class SingleTrFileDiscoveryDataListener extends TrFileDiscoveryDataListen
   @SuppressWarnings("WeakerAccess")
   public static final String BUFFER_SIZE = "org.jetbrains.instrumentation.trace.file.buffer.size";
 
+  private static final int VERSION = 0x1;
+
+  private static final int START_MARKER = 0x1;
+  private static final int TEST_FINISHED_MARKER = 0x2;
+  private static final int NAMES_DICTIONARY_MARKER = 0x3;
+
   private final DataOutputStream stream;
   private final IncrementalNameEnumerator nameEnumerator = new IncrementalNameEnumerator();
 
@@ -40,14 +46,18 @@ public class SingleTrFileDiscoveryDataListener extends TrFileDiscoveryDataListen
     String myTraceFile = System.getProperty(TRACE_FILE, "td.tr");
     int bufferSize = Integer.parseInt(System.getProperty(BUFFER_SIZE, "32768"));
     stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(myTraceFile), bufferSize));
+    stream.writeByte(START_MARKER);
+    stream.writeByte(VERSION);
   }
 
   public void testFinished(String testName, Map<String, boolean[]> classToVisitedMethods, Map<String, String[]> classToMethodNames) throws IOException {
+    stream.writeByte(TEST_FINISHED_MARKER);
     writeVisitedMethod(classToVisitedMethods, classToMethodNames, stream);
   }
 
   public void testsFinished() throws IOException {
     try {
+      stream.writeByte(NAMES_DICTIONARY_MARKER);
       TObjectIntHashMap<String> namesMap = nameEnumerator.getNamesMap();
       CoverageIOUtil.writeINT(stream, namesMap.size());
       namesMap.forEachEntry(new TObjectIntProcedure<String>() {
