@@ -31,7 +31,6 @@ import java.security.ProtectionDomain;
 public abstract class AbstractIntellijClassfileTransformer implements ClassFileTransformer {
   private final boolean computeFrames = computeFrames();
 
-  @Override
   public final byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
     if (isStopped()) {
       return null;

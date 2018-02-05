@@ -191,7 +191,6 @@ public class CoverageStatusTest extends TestCase {
     final String exePath = javaHome + File.separator + "bin" + File.separator + "java";
     File dist = new File("../dist");
     File[] jars = dist.listFiles(new FilenameFilter() {
-      @Override
       public boolean accept(File dir, String name) {
         return name.startsWith("coverage-agent");
       }
