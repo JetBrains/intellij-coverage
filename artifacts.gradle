@@ -43,7 +43,7 @@ bintray {
     userOrg = 'jetbrains'
 
     version {
-      name = version
+      name = project.version
     }
   }
 
