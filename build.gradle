@@ -88,6 +88,7 @@ private static troveClasses() {
    , 'TLongObjectHashMap'
    , 'TIntHashingStrategy'
    , 'TIntObjectProcedure'
+   , 'TObjectIntProcedure'
    , 'TLongObjectProcedure'
    , 'TLongHashingStrategy'
    , 'TObjectHashingStrategy'].collect { "org/jetbrains/coverage/**/${it}.class" }

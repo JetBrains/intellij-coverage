@@ -16,16 +16,17 @@
 
 package com.intellij.rt.coverage.data;
 
-import com.intellij.rt.coverage.data.IncrementalNameEnumerator.NameAndId;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
+import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
+import org.jetbrains.coverage.gnu.trove.TObjectIntProcedure;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class SingleTrFileDiscoveryDataListener extends TrFileDiscoveryDataListener {
   @SuppressWarnings("WeakerAccess")
   public static final String TRACE_FILE = "org.jetbrains.instrumentation.trace.file";
@@ -45,17 +46,26 @@ public class SingleTrFileDiscoveryDataListener extends TrFileDiscoveryDataListen
     writeVisitedMethod(classToVisitedMethods, classToMethodNames, stream);
   }
 
-  public void testsFinished() {
+  public void testsFinished() throws IOException {
     try {
-      List<NameAndId> pair = nameEnumerator.getAndClearDataIncrement();
-      CoverageIOUtil.writeINT(stream, pair.size());
-      for (NameAndId nameAndId : pair) {
-        CoverageIOUtil.writeINT(stream, nameAndId.getMyId());
-        CoverageIOUtil.writeUTF(stream, nameAndId.getMyName());
-      }
-      stream.close();
+      TObjectIntHashMap<String> namesMap = nameEnumerator.getNamesMap();
+      CoverageIOUtil.writeINT(stream, namesMap.size());
+      namesMap.forEachEntry(new TObjectIntProcedure<String>() {
+        public boolean execute(String s, int i) {
+          try {
+            CoverageIOUtil.writeINT(stream, i);
+            CoverageIOUtil.writeUTF(stream, s);
+          } catch (IOException e) {
+            e.printStackTrace();
+          }
+          return true;
+        }
+      });
     } catch (IOException e) {
       e.printStackTrace();
+    }
+    finally {
+      stream.close();
     }
   }
 

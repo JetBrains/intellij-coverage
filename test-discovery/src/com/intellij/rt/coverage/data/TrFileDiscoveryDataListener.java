@@ -37,7 +37,7 @@ public class TrFileDiscoveryDataListener implements TestDiscoveryDataListener {
     writeVisitedMethods(classToVisitedMethods, classToMethodNames, fileStream);
   }
 
-  public void testsFinished() {
+  public void testsFinished() throws IOException {
   }
 
   private void writeVisitedMethods(Map<String, boolean[]> classToVisitedMethods,

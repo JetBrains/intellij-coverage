@@ -23,11 +23,8 @@ import java.util.List;
 
 class IncrementalNameEnumerator {
   private final TObjectIntHashMap<String> myNames = new TObjectIntHashMap<String>();
-  private List<NameAndId> myDataIncrement = new ArrayList<NameAndId>();
   private int myNextNameId = 1; // because TObjectIntHashMap uses 0 as null
-
   private final Object myNameLock = "NameLock";
-  private final Object myDataIncrementLock = "DataIncrementLock";
 
   int enumerate(String name) {
     synchronized (myNameLock) {
@@ -41,35 +38,47 @@ class IncrementalNameEnumerator {
     }
   }
 
-  List<NameAndId> getAndClearDataIncrement() {
-    synchronized (myDataIncrementLock) {
-      List<NameAndId> dataIncrement = myDataIncrement;
-      myDataIncrement = new ArrayList<NameAndId>();
-      return dataIncrement;
-    }
+  public TObjectIntHashMap<String> getNamesMap() {
+    return myNames;
   }
 
-  private void updateDataIncrement(String name, int idx) {
-    synchronized (myDataIncrementLock) {
-      myDataIncrement.add(new NameAndId(name, idx));
-    }
+  protected void updateDataIncrement(String name, int idx) {
   }
 
-  static final class NameAndId {
-    private final String myName;
-    private final int myId;
+  static class OftenFlush extends IncrementalNameEnumerator {
+    private List<NameAndId> myDataIncrement = new ArrayList<NameAndId>();
+    private final Object myDataIncrementLock = "DataIncrementLock";
 
-    NameAndId(String myName, int myId) {
-      this.myName = myName;
-      this.myId = myId;
+    protected void updateDataIncrement(String name, int idx) {
+      synchronized (myDataIncrementLock) {
+        myDataIncrement.add(new NameAndId(name, idx));
+      }
     }
 
-    String getMyName() {
-      return myName;
+    List<NameAndId> getAndClearDataIncrement() {
+      synchronized (myDataIncrementLock) {
+        List<NameAndId> dataIncrement = myDataIncrement;
+        myDataIncrement = new ArrayList<NameAndId>();
+        return dataIncrement;
+      }
     }
 
-    int getMyId() {
-      return myId;
+    static final class NameAndId {
+      private final String myName;
+      private final int myId;
+
+      NameAndId(String myName, int myId) {
+        this.myName = myName;
+        this.myId = myId;
+      }
+
+      String getName() {
+        return myName;
+      }
+
+      int getId() {
+        return myId;
+      }
     }
   }
 }
