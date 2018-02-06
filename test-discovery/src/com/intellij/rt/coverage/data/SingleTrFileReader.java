@@ -54,15 +54,13 @@ public class SingleTrFileReader {
 
   private void readData(DataInputStream input) throws IOException {
     String testName = readString(input);
-    debug(testName);
     int classCount = CoverageIOUtil.readINT(input);
     while (classCount-- > 0) {
       String className = readString(input);
-      debug(className);
       int methodCount = CoverageIOUtil.readINT(input);
       while (methodCount-- > 0) {
         String methodName = readString(input);
-        debug(methodName);
+        processData(testName, className, methodName);
       }
     }
   }
@@ -89,6 +87,10 @@ public class SingleTrFileReader {
         r.close();
       }
     }
+  }
+
+  protected void processData(String testName, String className, String methodName) {
+
   }
 
   protected void debug(String s) {
