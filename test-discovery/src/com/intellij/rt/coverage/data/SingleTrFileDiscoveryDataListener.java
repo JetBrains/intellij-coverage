@@ -17,14 +17,17 @@
 package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.util.CoverageIOUtil;
+import org.jetbrains.coverage.gnu.trove.TIntIntHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntProcedure;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 @SuppressWarnings("unused")
-public class SingleTrFileDiscoveryDataListener extends TrFileDiscoveryDataListener {
+public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListener {
   @SuppressWarnings("WeakerAccess")
   public static final String TRACE_FILE = "org.jetbrains.instrumentation.trace.file";
   @SuppressWarnings("WeakerAccess")
@@ -37,7 +40,7 @@ public class SingleTrFileDiscoveryDataListener extends TrFileDiscoveryDataListen
   static final int NAMES_DICTIONARY_MARKER = 0x3;
 
   private final DataOutputStream stream;
-  private final IncrementalNameEnumerator nameEnumerator = new IncrementalNameEnumerator();
+  private final NameEnumerator nameEnumerator = new NameEnumerator();
 
   public SingleTrFileDiscoveryDataListener() throws Exception {
     String myTraceFile = System.getProperty(TRACE_FILE, "td.tr");
@@ -47,7 +50,7 @@ public class SingleTrFileDiscoveryDataListener extends TrFileDiscoveryDataListen
     stream.writeByte(VERSION);
   }
 
-  public void testFinished(String testName, Map<String, boolean[]> classToVisitedMethods, Map<String, String[]> classToMethodNames) throws IOException {
+  public void testFinished(String testName, ConcurrentMap<Integer, boolean[]> classToVisitedMethods, ConcurrentMap<Integer, int[]> classToMethodNames) throws Exception {
     stream.writeByte(TEST_FINISHED_MARKER);
     writeVisitedMethod(classToVisitedMethods, classToMethodNames, stream);
   }
@@ -77,7 +80,44 @@ public class SingleTrFileDiscoveryDataListener extends TrFileDiscoveryDataListen
     }
   }
 
-  protected void writeString(DataOutputStream os, String className) throws IOException {
-    CoverageIOUtil.writeINT(os, nameEnumerator.enumerate(className));
+  public NameEnumerator getIncrementalNameEnumerator() {
+    return nameEnumerator;
+  }
+
+  private void writeVisitedMethod(Map<Integer, boolean[]> classToVisitedMethods,
+                                  Map<Integer, int[]> classToMethodNames,
+                                  DataOutputStream os) throws IOException {
+    TIntIntHashMap classToUsedMethods = new TIntIntHashMap();
+    for (Map.Entry<Integer, boolean[]> o : classToVisitedMethods.entrySet()) {
+      boolean[] used = o.getValue();
+      int usedMethodsCount = 0;
+
+      for (boolean anUsed : used) {
+        if (anUsed) ++usedMethodsCount;
+      }
+
+      if (usedMethodsCount > 0) {
+        classToUsedMethods.put(o.getKey(), usedMethodsCount);
+      }
+    }
+
+    CoverageIOUtil.writeINT(os, classToUsedMethods.size());
+    for (Map.Entry<Integer, boolean[]> o : classToVisitedMethods.entrySet()) {
+      final boolean[] used = o.getValue();
+      final int className = o.getKey();
+
+      int usedMethodsCount = classToUsedMethods.get(className);
+
+      CoverageIOUtil.writeINT(os, className);
+      CoverageIOUtil.writeINT(os, usedMethodsCount);
+
+      int[] methodNames = classToMethodNames.get(className);
+      for (int i = 0, len = used.length; i < len; ++i) {
+        // we check usedMethodCount here since used can still be updated by other threads
+        if (used[i] && usedMethodsCount-- > 0) {
+          CoverageIOUtil.writeINT(os, methodNames[i]);
+        }
+      }
+    }
   }
 }

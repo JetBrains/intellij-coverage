@@ -21,7 +21,7 @@ import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import java.util.ArrayList;
 import java.util.List;
 
-class IncrementalNameEnumerator {
+class NameEnumerator {
   private final TObjectIntHashMap<String> myNames = new TObjectIntHashMap<String>();
   private int myNextNameId = 1; // because TObjectIntHashMap uses 0 as null
   private final Object myNameLock = "NameLock";
@@ -45,7 +45,7 @@ class IncrementalNameEnumerator {
   protected void updateDataIncrement(String name, int id) {
   }
 
-  static class OftenFlush extends IncrementalNameEnumerator {
+  static class Incremental extends NameEnumerator {
     private List<NameAndId> myDataIncrement = new ArrayList<NameAndId>();
     private final Object myDataIncrementLock = "DataIncrementLock";
 
@@ -80,5 +80,14 @@ class IncrementalNameEnumerator {
         return myId;
       }
     }
+  }
+
+  static int[] enumerate(String[] names, NameEnumerator enumerator) {
+    int[] ids = new int[names.length];
+    for (int i = 0; i < names.length; i++) {
+      String name = names[i];
+      ids[i] = enumerator.enumerate(name);
+    }
+    return ids;
   }
 }

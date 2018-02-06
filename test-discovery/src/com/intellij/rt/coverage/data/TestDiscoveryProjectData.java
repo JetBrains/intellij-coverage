@@ -25,10 +25,16 @@ public class TestDiscoveryProjectData {
   public static final String TEST_DISCOVERY_DATA_LISTENER_PROP = "test.discovery.data.listener";
 
   protected static TestDiscoveryProjectData ourProjectData = new TestDiscoveryProjectData();
+  private final NameEnumerator myNameEnumerator;
 
   public TestDiscoveryProjectData() {
     try {
-      myDataListener = (TestDiscoveryDataListener) Class.forName(System.getProperty(TEST_DISCOVERY_DATA_LISTENER_PROP, TrFileDiscoveryDataListener.class.getName())).newInstance();
+      String testDiscoveryDataListener = System.getProperty(TEST_DISCOVERY_DATA_LISTENER_PROP);
+      if (testDiscoveryDataListener == null) {
+        throw new RuntimeException("Property \"" + TEST_DISCOVERY_DATA_LISTENER_PROP + "\" should be specified");
+      }
+      myDataListener = (TestDiscoveryDataListener) Class.forName(testDiscoveryDataListener).newInstance();
+      myNameEnumerator = myDataListener.getIncrementalNameEnumerator();
     } catch (InstantiationException e) {
       throw new RuntimeException(e);
     } catch (IllegalAccessException e) {
@@ -53,8 +59,8 @@ public class TestDiscoveryProjectData {
     return ourProjectData;
   }
 
-  private final ConcurrentMap<String, boolean[]> myClassToVisitedMethods = new ConcurrentHashMap<String, boolean[]>();
-  private final ConcurrentMap<String, String[]> myClassToMethodNames = new ConcurrentHashMap<String, String[]>();
+  private final ConcurrentMap<Integer, boolean[]> myClassToVisitedMethods = new ConcurrentHashMap<Integer, boolean[]>();
+  private final ConcurrentMap<Integer, int[]> myClassToMethodNames = new ConcurrentHashMap<Integer, int[]>();
   private final TestDiscoveryDataListener myDataListener;
 
   // called from instrumented code during class's static init
@@ -65,14 +71,16 @@ public class TestDiscoveryProjectData {
   private synchronized boolean[] traceLines(String className, boolean[] methodFlags, String[] methodNames) {
     //System.out.println("Registering " + className);
     //assert methodFlags.length == methodNames.length;
-    final boolean[] previousMethodFlags = myClassToVisitedMethods.putIfAbsent(className, methodFlags);
+    int classId = myNameEnumerator.enumerate(className);
+
+    final boolean[] previousMethodFlags = myClassToVisitedMethods.putIfAbsent(classId, methodFlags);
 
     if (previousMethodFlags != null) {
       //  assert previousMethodFlags.length == methodFlags.length;
-      final String[] previousMethodNames = myClassToMethodNames.get(className);
+      final int[] previousMethodNames = myClassToMethodNames.get(classId);
       //assert previousMethodNames != null && previousMethodNames.length == methodNames.length;
     } else {
-      myClassToMethodNames.put(className, methodNames);
+      myClassToMethodNames.put(classId, NameEnumerator.enumerate(methodNames, myNameEnumerator));
     }
     return previousMethodFlags != null ? previousMethodFlags : methodFlags;
   }
@@ -93,5 +101,4 @@ public class TestDiscoveryProjectData {
       }
     }
   }
-
 }

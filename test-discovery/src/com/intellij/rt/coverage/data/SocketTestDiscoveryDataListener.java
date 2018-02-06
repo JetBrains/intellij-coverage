@@ -17,6 +17,8 @@
 package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.util.CoverageIOUtil;
+import org.jetbrains.coverage.gnu.trove.TIntArrayList;
+import org.jetbrains.coverage.gnu.trove.TIntProcedure;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -49,6 +51,7 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
   private final Selector mySelector;
   private volatile boolean myClosed;
   private final BlockingQueue<ByteBuffer> myData = new ArrayBlockingQueue<ByteBuffer>(10);
+  private final NameEnumerator.Incremental incrementalNameEnumerator = new NameEnumerator.Incremental();
 
   public SocketTestDiscoveryDataListener() throws IOException {
     String host = System.getProperty(HOST_PROP, "127.0.0.1");
@@ -115,10 +118,10 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
     write(ByteBuffer.wrap(new byte[]{START_MSG, VERSION}));
   }
 
-  public void testFinished(final String testName, Map<String, boolean[]> classToVisitedMethods, Map<String, String[]> classToMethodNames) {
+  public void testFinished(final String testName, ConcurrentMap<Integer, boolean[]> classToVisitedMethods, ConcurrentMap<Integer, int[]> classToMethodNames) {
     final List<VisitedMethods> visitedMethods = new ArrayList<VisitedMethods>();
-    String[] methodNames = null;
-    for (Map.Entry<String, boolean[]> e : classToVisitedMethods.entrySet()) {
+    int[] methodNames = null;
+    for (Map.Entry<Integer, boolean[]> e : classToVisitedMethods.entrySet()) {
       VisitedMethods currentMethods = null;
       boolean[] markers = e.getValue();
       for (int i = 0; i < markers.length; i++) {
@@ -129,7 +132,7 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
             methodNames = classToMethodNames.get(e.getKey());
             visitedMethods.add(currentMethods);
           }
-          currentMethods.methodNames.add(methodNames[i]);
+          currentMethods.methodIds.add(methodNames[i]);
         }
       }
     }
@@ -137,20 +140,45 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
     try {
       final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
       baos.write(TEST_FINISHED_MSG);
-      DataOutputStream dos = new DataOutputStream(baos);
-      CoverageIOUtil.writeUTF(dos, testName);
-
-      CoverageIOUtil.writeINT(dos, visitedMethods.size());
-      for (VisitedMethods ns : visitedMethods) {
-        CoverageIOUtil.writeUTF(dos, ns.className);
-        CoverageIOUtil.writeINT(dos, ns.methodNames.size());
-        for (String name : ns.methodNames) {
-          CoverageIOUtil.writeUTF(dos, name);
-        }
-      }
+      final DataOutputStream dos = new DataOutputStream(baos);
+      writeEnumeratorIncrement(dos);
+      writeTestData(testName, visitedMethods, dos);
 
       write(baos.asByteBuffer());
     } catch (IOException ignored) {
+    }
+  }
+
+  private void writeEnumeratorIncrement(DataOutputStream dos) throws IOException {
+    List<NameEnumerator.Incremental.NameAndId> increment = incrementalNameEnumerator.getAndClearDataIncrement();
+    CoverageIOUtil.writeINT(dos, increment.size());
+    for (NameEnumerator.Incremental.NameAndId nameAndId : increment) {
+      CoverageIOUtil.writeUTF(dos, nameAndId.getName());
+      CoverageIOUtil.writeINT(dos, nameAndId.getId());
+    }
+  }
+
+  private void writeTestData(String testName, List<VisitedMethods> visitedMethods, final DataOutputStream dos) throws IOException {
+    CoverageIOUtil.writeUTF(dos, testName);
+
+    CoverageIOUtil.writeINT(dos, visitedMethods.size());
+    for (VisitedMethods ns : visitedMethods) {
+      CoverageIOUtil.writeINT(dos, ns.classId);
+      CoverageIOUtil.writeINT(dos, ns.methodIds.size());
+
+      final IOException[] exception = new IOException[] {null};
+      ns.methodIds.forEach(new TIntProcedure() {
+        public boolean execute(int methodId) {
+          try {
+            CoverageIOUtil.writeINT(dos, methodId);
+          } catch (IOException e) {
+            exception[0] = e;
+            return false;
+          }
+          return true;
+        }
+      });
+      if (exception[0] != null) throw exception[0];
     }
   }
 
@@ -178,6 +206,10 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
     }
   }
 
+  public NameEnumerator getIncrementalNameEnumerator() {
+    return incrementalNameEnumerator;
+  }
+
   private void shutdownNow() {
     for (Runnable task : myExecutor.shutdownNow()) {
       task.run();
@@ -199,11 +231,11 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
   }
 
   private static class VisitedMethods {
-    private final String className;
-    private final List<String> methodNames = new ArrayList<String>(1);
+    private final int classId;
+    private final TIntArrayList methodIds = new TIntArrayList(1);
 
-    private VisitedMethods(String className) {
-      this.className = className;
+    private VisitedMethods(int classId) {
+      this.classId = classId;
     }
   }
 }
