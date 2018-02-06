@@ -20,10 +20,7 @@ import com.intellij.rt.coverage.util.CoverageIOUtil;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntProcedure;
 
-import java.io.BufferedOutputStream;
-import java.io.DataOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.Map;
 
 @SuppressWarnings("unused")
@@ -35,9 +32,9 @@ public class SingleTrFileDiscoveryDataListener extends TrFileDiscoveryDataListen
 
   private static final int VERSION = 0x1;
 
-  private static final int START_MARKER = 0x1;
-  private static final int TEST_FINISHED_MARKER = 0x2;
-  private static final int NAMES_DICTIONARY_MARKER = 0x3;
+  static final int START_MARKER = 0x1;
+  static final int TEST_FINISHED_MARKER = 0x2;
+  static final int NAMES_DICTIONARY_MARKER = 0x3;
 
   private final DataOutputStream stream;
   private final IncrementalNameEnumerator nameEnumerator = new IncrementalNameEnumerator();
@@ -58,6 +55,7 @@ public class SingleTrFileDiscoveryDataListener extends TrFileDiscoveryDataListen
   public void testsFinished() throws IOException {
     try {
       stream.writeByte(NAMES_DICTIONARY_MARKER);
+      int dictStartOffset = stream.size();
       TObjectIntHashMap<String> namesMap = nameEnumerator.getNamesMap();
       CoverageIOUtil.writeINT(stream, namesMap.size());
       namesMap.forEachEntry(new TObjectIntProcedure<String>() {
@@ -71,10 +69,10 @@ public class SingleTrFileDiscoveryDataListener extends TrFileDiscoveryDataListen
           return true;
         }
       });
+      stream.writeInt(dictStartOffset);
     } catch (IOException e) {
       e.printStackTrace();
-    }
-    finally {
+    } finally {
       stream.close();
     }
   }
