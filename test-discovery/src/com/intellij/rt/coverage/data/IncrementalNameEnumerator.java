@@ -38,20 +38,20 @@ class IncrementalNameEnumerator {
     }
   }
 
-  public TObjectIntHashMap<String> getNamesMap() {
+  TObjectIntHashMap<String> getNamesMap() {
     return myNames;
   }
 
-  protected void updateDataIncrement(String name, int idx) {
+  protected void updateDataIncrement(String name, int id) {
   }
 
   static class OftenFlush extends IncrementalNameEnumerator {
     private List<NameAndId> myDataIncrement = new ArrayList<NameAndId>();
     private final Object myDataIncrementLock = "DataIncrementLock";
 
-    protected void updateDataIncrement(String name, int idx) {
+    protected void updateDataIncrement(String name, int id) {
       synchronized (myDataIncrementLock) {
-        myDataIncrement.add(new NameAndId(name, idx));
+        myDataIncrement.add(new NameAndId(name, id));
       }
     }
 

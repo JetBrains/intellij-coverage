@@ -54,9 +54,9 @@ public class TrFileDiscoveryDataListener implements TestDiscoveryDataListener {
     }
   }
 
-  protected void writeVisitedMethod(Map<String, boolean[]> classToVisitedMethods,
-                                    Map<String, String[]> classToMethodNames,
-                                    DataOutputStream os) throws IOException {
+  void writeVisitedMethod(Map<String, boolean[]> classToVisitedMethods,
+                          Map<String, String[]> classToMethodNames,
+                          DataOutputStream os) throws IOException {
     Map<String, Integer> classToUsedMethods = new HashMap<String, Integer>();
     for (Map.Entry<String, boolean[]> o : classToVisitedMethods.entrySet()) {
       boolean[] used = o.getValue();
