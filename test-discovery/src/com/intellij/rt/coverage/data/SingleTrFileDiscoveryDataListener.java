@@ -22,7 +22,6 @@ import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntProcedure;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
@@ -43,8 +42,9 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
   private final NameEnumerator nameEnumerator = new NameEnumerator();
 
   public SingleTrFileDiscoveryDataListener() throws Exception {
-    String myTraceFile = System.getProperty(TRACE_FILE, "td.tr");
+    final File myTraceFile = getCanonicalFile(new File(System.getProperty(TRACE_FILE, "td.tr")));
     int bufferSize = Integer.parseInt(System.getProperty(BUFFER_SIZE, "32768"));
+    myTraceFile.getParentFile().mkdirs();
     stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(myTraceFile), bufferSize));
     stream.writeByte(START_MARKER);
     stream.writeByte(VERSION);
@@ -118,6 +118,14 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
           CoverageIOUtil.writeINT(os, methodNames[i]);
         }
       }
+    }
+  }
+
+  private static File getCanonicalFile(File file) {
+    try {
+      return file.getCanonicalFile();
+    } catch (IOException e) {
+      return file.getAbsoluteFile();
     }
   }
 }
