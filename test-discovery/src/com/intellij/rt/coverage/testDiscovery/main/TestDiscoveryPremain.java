@@ -16,12 +16,50 @@
 
 package com.intellij.rt.coverage.testDiscovery.main;
 
-import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInstrumentator;
+import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
+import com.intellij.rt.coverage.instrumentation.AbstractIntellijClassfileTransformer;
+import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInstrumenter;
+import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
+import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 
 import java.lang.instrument.Instrumentation;
 
 public class TestDiscoveryPremain {
+  private void performPremain(Instrumentation instrumentation) {
+    // initialize TestDiscoveryProjectData before instrumentation
+    @SuppressWarnings("unused")
+    TestDiscoveryProjectData projectData = TestDiscoveryProjectData.getProjectData();
+
+    instrumentation.addTransformer(new AbstractIntellijClassfileTransformer() {
+      @Override
+      protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
+        return new TestDiscoveryInstrumenter(cw, cr, className, loader);
+      }
+
+      @Override
+      protected boolean shouldExclude(String className) {
+        return false;
+      }
+
+      @Override
+      protected boolean shouldIncludeBootstrapClass(String className) {
+        return false;
+      }
+
+      @Override
+      protected void visitClassLoader(ClassLoader classLoader) {
+
+      }
+
+      @Override
+      protected boolean isStopped() {
+        return false;
+      }
+    });
+  }
+
   public static void premain(String argsString, Instrumentation instrumentation) {
-    new TestDiscoveryInstrumentator().performPremain(instrumentation);
+    new TestDiscoveryPremain().performPremain(instrumentation);
   }
 }
