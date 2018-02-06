@@ -81,6 +81,7 @@ private static troveClasses() {
    , 'TIntHashSet'
    , 'TObjectHash'
    , 'HashFunctions'
+   , 'TIntIntHashMap'
    , 'TPrimitiveHash'
    , 'TObjectFunction'
    , 'TIntObjectHashMap'
