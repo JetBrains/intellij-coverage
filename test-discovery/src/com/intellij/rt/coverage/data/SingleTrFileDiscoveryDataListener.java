@@ -23,6 +23,7 @@ import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntProcedure;
 
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
@@ -32,38 +33,72 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
   public static final String TRACE_FILE = "org.jetbrains.instrumentation.trace.file";
   @SuppressWarnings("WeakerAccess")
   public static final String BUFFER_SIZE = "org.jetbrains.instrumentation.trace.file.buffer.size";
+  @SuppressWarnings("WeakerAccess")
+  public static final String FILE_VERSION = "org.jetbrains.instrumentation.trace.file.version";
 
   private static final int VERSION = 0x1;
 
   static final int START_MARKER = 0x1;
   static final int TEST_FINISHED_MARKER = 0x2;
   static final int NAMES_DICTIONARY_MARKER = 0x3;
+  static final int NAMES_DICTIONARY_PART_MARKER = 0x4;
 
   private final DataOutputStream stream;
-  private final NameEnumerator nameEnumerator = new NameEnumerator();
+  private final NameEnumerator nameEnumerator;
+  private final byte version;
 
   public SingleTrFileDiscoveryDataListener() throws Exception {
     final File myTraceFile = getCanonicalFile(new File(System.getProperty(TRACE_FILE, "td.tr")));
     int bufferSize = Integer.parseInt(System.getProperty(BUFFER_SIZE, "32768"));
     myTraceFile.getParentFile().mkdirs();
+    version = Byte.parseByte(System.getProperty(FILE_VERSION, String.valueOf(VERSION)));
     stream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(myTraceFile), bufferSize));
-    stream.writeByte(START_MARKER);
-    stream.writeByte(VERSION);
+    nameEnumerator = (version == 2) ? new NameEnumerator.Incremental() : new NameEnumerator();
+    start();
   }
 
+  // For tests
   public SingleTrFileDiscoveryDataListener(DataOutputStream stream) throws Exception {
+    this(stream, (byte) VERSION);
+  }
+
+  // For tests
+  public SingleTrFileDiscoveryDataListener(DataOutputStream stream, byte version) throws Exception {
+    this.version = version;
     this.stream = stream;
+    nameEnumerator = new NameEnumerator.Incremental();
+    start();
+  }
+
+  private void start() throws IOException {
     this.stream.writeByte(START_MARKER);
-    this.stream.writeByte(VERSION);
+    this.stream.writeByte(this.version);
   }
 
   public void testFinished(String testName, ConcurrentMap<Integer, boolean[]> classToVisitedMethods, ConcurrentMap<Integer, int[]> classToMethodNames) throws Exception {
+    writeDictionaryIncrementIfSupported();
     stream.writeByte(TEST_FINISHED_MARKER);
     CoverageIOUtil.writeINT(stream, nameEnumerator.enumerate(testName));
     writeVisitedMethod(classToVisitedMethods, classToMethodNames, stream);
   }
 
+  private boolean writeDictionaryIncrementIfSupported() throws IOException {
+    if (version != 2) return false;
+    final List<NameEnumerator.Incremental.NameAndId> increment = ((NameEnumerator.Incremental) nameEnumerator).getAndClearDataIncrement();
+    if (increment.isEmpty()) return true;
+    stream.writeByte(NAMES_DICTIONARY_PART_MARKER);
+    CoverageIOUtil.writeINT(stream, increment.size());
+    for (NameEnumerator.Incremental.NameAndId nameAndId : increment) {
+      CoverageIOUtil.writeINT(stream, nameAndId.getId());
+      CoverageIOUtil.writeUTF(stream, nameAndId.getName());
+    }
+    return true;
+  }
+
   public void testsFinished() throws IOException {
+    if (writeDictionaryIncrementIfSupported()) {
+      return;
+    }
     try {
       stream.writeByte(NAMES_DICTIONARY_MARKER);
       int dictStartOffset = stream.size();

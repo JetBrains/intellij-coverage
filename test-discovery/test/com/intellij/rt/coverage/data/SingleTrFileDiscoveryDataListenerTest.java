@@ -62,6 +62,33 @@ public class SingleTrFileDiscoveryDataListenerTest {
       // Link to start of dictionary:
       0x00, 0x00, 0x00, 0x09};
 
+
+  public static final byte[] V2_EMPTY = {0x1, 0x2,
+  };
+  public static final byte[] V2_NO_TESTS_ONE_NAME = {0x1, 0x2,
+      0x4, // Partial directory
+      0x1, // count
+      0x1, // 1 - A
+      0x3, 0x41, 0x42, 0x43 // "ABC"
+  };
+  public static final byte[] V2_SINGLE_TEST_SINGLE_METHOD = {0x1, 0x2,
+      0x4, // Partial directory
+      0x2, // count
+      0x1, // 1 - A
+      0x1, 0x41, // "A"
+      0x2, // 2 - B
+      0x1, 0x42, // "B"
+      0x2, // TestMarker
+      0x1, // name_id
+      0x1, // 1 class
+      0x1, // Class A
+      0x1, // 1 method
+      0x2, // method B
+  };
+
+  private static final byte V1 = 0x1;
+  private static final byte V2 = 0x2;
+
   @Test
   public void testNoCoverage() throws Exception {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -117,5 +144,48 @@ public class SingleTrFileDiscoveryDataListenerTest {
     listener.testFinished(name1, classes, methods);
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(SINGLE_TEST_SINGLE_METHOD);
+  }
+
+
+  @Test
+  public void testV2NoCoverage() throws Exception {
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    final DataOutputStream dos = new DataOutputStream(baos);
+    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos, V2);
+    listener.testsFinished();
+    assertThat(baos.toByteArray()).isEqualTo(V2_EMPTY);
+  }
+
+
+  @Test
+  public void testV2OnlyEnumerator() throws Exception {
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    final DataOutputStream dos = new DataOutputStream(baos);
+    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos, V2);
+    listener.getIncrementalNameEnumerator().enumerate("ABC");
+    listener.testsFinished();
+    assertThat(baos.toByteArray()).isEqualTo(V2_NO_TESTS_ONE_NAME);
+  }
+
+  @Test
+  public void testV2SingleTestOnlyOneClassVisited() throws Exception {
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    final DataOutputStream dos = new DataOutputStream(baos);
+    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos, V2);
+
+    final String name1 = "A";
+    final String name2 = "B";
+    listener.getIncrementalNameEnumerator().enumerate(name1);
+    listener.getIncrementalNameEnumerator().enumerate(name2);
+
+    final ConcurrentHashMap<Integer, boolean[]> classes = new ConcurrentHashMap<Integer, boolean[]>();
+    final ConcurrentHashMap<Integer, int[]> methods = new ConcurrentHashMap<Integer, int[]>();
+    classes.put(1, new boolean[]{true});
+    classes.put(2, new boolean[]{false});
+    methods.put(1, new int[]{2});
+    methods.put(2, new int[]{1});
+    listener.testFinished(name1, classes, methods);
+    listener.testsFinished();
+    assertThat(baos.toByteArray()).isEqualTo(V2_SINGLE_TEST_SINGLE_METHOD);
   }
 }

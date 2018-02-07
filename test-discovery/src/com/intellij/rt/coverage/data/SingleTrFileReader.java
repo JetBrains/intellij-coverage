@@ -55,6 +55,11 @@ public class SingleTrFileReader {
         case SingleTrFileDiscoveryDataListener.TEST_FINISHED_MARKER:
           debug("test data received");
           readData(input);
+          break;
+        case SingleTrFileDiscoveryDataListener.NAMES_DICTIONARY_PART_MARKER:
+          debug("partial dictionary received");
+          readDictionary(input);
+          break;
       }
     }
   }
@@ -92,17 +97,21 @@ public class SingleTrFileReader {
       if (r.readByte() != SingleTrFileDiscoveryDataListener.NAMES_DICTIONARY_MARKER) {
         throw new IOException("Dictionary not found: offset specified in the end of file is incorrect");
       }
+      readDictionary(r);
+    } finally {
+      if (r != null) {
+        r.close();
+      }
+    }
+  }
+
+  private void readDictionary(DataInput r) throws IOException {
       int count = CoverageIOUtil.readINT(r);
       while (count-- > 0) {
         int id = CoverageIOUtil.readINT(r);
         String name = CoverageIOUtil.readUTFFast(r);
         processDictionaryRecord(id, name);
       }
-    } finally {
-      if (r != null) {
-        r.close();
-      }
-    }
   }
 
   protected void processData(String testName, String className, String methodName) {

@@ -61,6 +61,17 @@ public class SingleTrFileReaderTest {
     final MySingleTrFileReader reader = getReader(SingleTrFileDiscoveryDataListenerTest.SINGLE_TEST_SINGLE_METHOD);
     reader.read();
     assertThat(reader.myData).isNotEmpty();
+    final String[] data = reader.myData.iterator().next();
+    assertThat(data).doesNotContainNull().containsExactly("A", "A", "B");
+  }
+
+  @Test
+  public void testV2TestWithOneMethod() throws IOException {
+    final MySingleTrFileReader reader = getReader(SingleTrFileDiscoveryDataListenerTest.V2_SINGLE_TEST_SINGLE_METHOD);
+    reader.read();
+    assertThat(reader.myData).isNotEmpty();
+    final String[] data = reader.myData.iterator().next();
+    assertThat(data).doesNotContainNull().containsExactly("A", "A", "B");
   }
 
   private MySingleTrFileReader getReader(byte[] content) throws IOException {
