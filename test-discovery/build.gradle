@@ -1,6 +1,9 @@
 dependencies {
   compile library_project_asm_all
   compile project(':util')
+
+  testCompile 'junit:junit:4.12'
+  testCompile 'org.assertj:assertj-core:2.9.0'
 }
 
 task discoveryAgentJar(type: Jar) {

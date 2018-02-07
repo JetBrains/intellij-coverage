@@ -50,8 +50,15 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
     stream.writeByte(VERSION);
   }
 
+  public SingleTrFileDiscoveryDataListener(DataOutputStream stream) throws Exception {
+    this.stream = stream;
+    this.stream.writeByte(START_MARKER);
+    this.stream.writeByte(VERSION);
+  }
+
   public void testFinished(String testName, ConcurrentMap<Integer, boolean[]> classToVisitedMethods, ConcurrentMap<Integer, int[]> classToMethodNames) throws Exception {
     stream.writeByte(TEST_FINISHED_MARKER);
+    CoverageIOUtil.writeINT(stream, nameEnumerator.enumerate(testName));
     writeVisitedMethod(classToVisitedMethods, classToMethodNames, stream);
   }
 
@@ -101,11 +108,14 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
       }
     }
 
-    CoverageIOUtil.writeINT(os, classToUsedMethods.size());
+    final int size = classToUsedMethods.size();
+    CoverageIOUtil.writeINT(os, size);
+    if (size == 0) return;
     for (Map.Entry<Integer, boolean[]> o : classToVisitedMethods.entrySet()) {
       final boolean[] used = o.getValue();
       final int className = o.getKey();
 
+      if (!classToUsedMethods.containsKey(className)) continue;
       int usedMethodsCount = classToUsedMethods.get(className);
 
       CoverageIOUtil.writeINT(os, className);
