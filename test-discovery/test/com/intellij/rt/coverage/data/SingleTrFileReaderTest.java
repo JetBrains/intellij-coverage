@@ -29,7 +29,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SingleTrFileReaderTest {
 
   @Test
-  public void testEmpty() throws IOException {
+  public void testCompletelyEmpty() throws IOException {
+    final MySingleTrFileReader reader = getReader(new byte[0]);
+    reader.read();
+    assertThat(reader.myData).isEmpty();
+  }
+
+  @Test
+  public void testNoMeaningfulData() throws IOException {
     final MySingleTrFileReader reader = getReader(SingleTrFileDiscoveryDataListenerTest.EMPTY);
     reader.read();
     assertThat(reader.myData).isEmpty();
@@ -57,7 +64,7 @@ public class SingleTrFileReaderTest {
   }
 
   private MySingleTrFileReader getReader(byte[] content) throws IOException {
-    return new MySingleTrFileReader(content);
+    return new MySingleTrFileReader(SingleTrFileReaderTest.createFileWithContent(content));
   }
 
   private static File createFileWithContent(byte[] content) throws IOException {
@@ -71,8 +78,8 @@ public class SingleTrFileReaderTest {
   private static class MySingleTrFileReader extends SingleTrFileReader {
     List<String[]> myData;
 
-    MySingleTrFileReader(byte[] content) throws IOException {
-      super(SingleTrFileReaderTest.createFileWithContent(content));
+    MySingleTrFileReader(File file) {
+      super(file);
       myData = new ArrayList<String[]>(0);
     }
 

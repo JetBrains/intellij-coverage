@@ -30,16 +30,23 @@ public class SingleTrFileReader {
   }
 
   public final void read() throws IOException {
-    readDictionary();
-
     int bufferSize = Integer.parseInt(System.getProperty(SingleTrFileDiscoveryDataListener.BUFFER_SIZE, "32768"));
     DataInputStream input = new DataInputStream(new BufferedInputStream(new FileInputStream(file), bufferSize));
     while (true) {
-      byte msgType = input.readByte();
+      final int read = input.read();
+      if (read == -1) {
+        debug("stream ended while in zero state");
+        input.close();
+        return;
+      }
+      byte msgType = (byte) read;
       switch (msgType) {
         case SingleTrFileDiscoveryDataListener.START_MARKER:
           byte version = input.readByte();
           debug("version: " + version);
+          if (version == 1) {
+            readDictionary();
+          }
           break;
         case SingleTrFileDiscoveryDataListener.NAMES_DICTIONARY_MARKER:
           debug("test data ended");
@@ -73,9 +80,18 @@ public class SingleTrFileReader {
     RandomAccessFile r = null;
     try {
       r = new RandomAccessFile(file, "r");
+      if (r.length() < 5) {
+        throw new IOException("Dictionary not found: file is too small");
+      }
       r.seek(r.length() - 4);
       int dictOffset = r.readInt();
-      r.seek(dictOffset);
+      if (dictOffset > r.length() || dictOffset < 0) {
+        throw new IOException("Dictionary not found: offset specified in the end of file is outside of file range");
+      }
+      r.seek(dictOffset - 1);
+      if (r.readByte() != SingleTrFileDiscoveryDataListener.NAMES_DICTIONARY_MARKER) {
+        throw new IOException("Dictionary not found: offset specified in the end of file is incorrect");
+      }
       int count = CoverageIOUtil.readINT(r);
       while (count-- > 0) {
         int id = CoverageIOUtil.readINT(r);
