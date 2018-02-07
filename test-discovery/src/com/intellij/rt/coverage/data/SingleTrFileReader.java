@@ -35,10 +35,10 @@ public class SingleTrFileReader {
     int bufferSize = Integer.parseInt(System.getProperty(SingleTrFileDiscoveryDataListener.BUFFER_SIZE, "32768"));
     DataInputStream input = new DataInputStream(new BufferedInputStream(new FileInputStream(file), bufferSize));
     while (true) {
-      byte msgType = (byte) input.read();
+      byte msgType = input.readByte();
       switch (msgType) {
         case SingleTrFileDiscoveryDataListener.START_MARKER:
-          byte version = (byte) input.read();
+          byte version = input.readByte();
           debug("version: " + version);
           break;
         case SingleTrFileDiscoveryDataListener.NAMES_DICTIONARY_MARKER:
