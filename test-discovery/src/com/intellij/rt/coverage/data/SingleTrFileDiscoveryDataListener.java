@@ -18,6 +18,7 @@ package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import org.jetbrains.coverage.gnu.trove.TIntIntHashMap;
+import org.jetbrains.coverage.gnu.trove.TIntIntIterator;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntProcedure;
 
@@ -111,17 +112,18 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
     final int size = classToUsedMethods.size();
     CoverageIOUtil.writeINT(os, size);
     if (size == 0) return;
-    for (Map.Entry<Integer, boolean[]> o : classToVisitedMethods.entrySet()) {
-      final boolean[] used = o.getValue();
-      final int className = o.getKey();
-
-      if (!classToUsedMethods.containsKey(className)) continue;
-      int usedMethodsCount = classToUsedMethods.get(className);
+    final TIntIntIterator iterator = classToUsedMethods.iterator();
+    while (iterator.hasNext()) {
+      iterator.advance();
+      final int className = iterator.key();
+      int usedMethodsCount = iterator.value();
 
       CoverageIOUtil.writeINT(os, className);
       CoverageIOUtil.writeINT(os, usedMethodsCount);
 
-      int[] methodNames = classToMethodNames.get(className);
+      final int[] methodNames = classToMethodNames.get(className);
+      final boolean[] used = classToVisitedMethods.get(className);
+
       for (int i = 0, len = used.length; i < len; ++i) {
         // we check usedMethodCount here since used can still be updated by other threads
         if (used[i] && usedMethodsCount-- > 0) {
