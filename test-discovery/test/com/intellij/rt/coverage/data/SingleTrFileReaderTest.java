@@ -29,16 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SingleTrFileReaderTest {
 
   @Test
-  public void testReal() throws IOException {
-    final MySingleTrFileReader reader = new MySingleTrFileReader(new File("/home/vlad/Downloads/td.v2.tr"));
-    reader.read();
-    assertThat(reader.myData).isNotEmpty();
-    for (String[] datum : reader.myData) {
-      assertThat(datum).doesNotContainNull();
-    }
-  }
-
-  @Test
   public void testCompletelyEmpty() throws IOException {
     final MySingleTrFileReader reader = getReader(new byte[0]);
     reader.read();
