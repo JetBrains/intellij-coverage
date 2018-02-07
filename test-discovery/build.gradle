@@ -6,6 +6,10 @@ dependencies {
   testCompile 'org.assertj:assertj-core:2.9.0'
 }
 
+sourceSets {
+  test.java.srcDirs = [file('test')]
+}
+
 task discoveryAgentJar(type: Jar) {
   baseName = "test-discovery-agent"
   destinationDir = file("../dist")
