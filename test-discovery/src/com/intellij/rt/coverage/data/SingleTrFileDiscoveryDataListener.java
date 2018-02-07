@@ -76,9 +76,10 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
   }
 
   public void testFinished(String testName, ConcurrentMap<Integer, boolean[]> classToVisitedMethods, ConcurrentMap<Integer, int[]> classToMethodNames) throws Exception {
+    final int testNameId = nameEnumerator.enumerate(testName);
     writeDictionaryIncrementIfSupported();
     stream.writeByte(TEST_FINISHED_MARKER);
-    CoverageIOUtil.writeINT(stream, nameEnumerator.enumerate(testName));
+    CoverageIOUtil.writeINT(stream, testNameId);
     writeVisitedMethod(classToVisitedMethods, classToMethodNames, stream);
   }
 
@@ -96,31 +97,34 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
   }
 
   public void testsFinished() throws IOException {
-    if (writeDictionaryIncrementIfSupported()) {
-      return;
-    }
     try {
-      stream.writeByte(NAMES_DICTIONARY_MARKER);
-      long dictStartOffset = stream.total();
-      TObjectIntHashMap<String> namesMap = nameEnumerator.getNamesMap();
-      CoverageIOUtil.writeINT(stream, namesMap.size());
-      namesMap.forEachEntry(new TObjectIntProcedure<String>() {
-        public boolean execute(String s, int i) {
-          try {
-            CoverageIOUtil.writeINT(stream, i);
-            CoverageIOUtil.writeUTF(stream, s);
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
-          return true;
-        }
-      });
-      stream.writeLong(dictStartOffset);
+      if (!writeDictionaryIncrementIfSupported()) {
+        writeFullDictionary();
+      }
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
       stream.close();
     }
+  }
+
+  private void writeFullDictionary() throws IOException {
+    stream.writeByte(NAMES_DICTIONARY_MARKER);
+    long dictStartOffset = stream.total();
+    TObjectIntHashMap<String> namesMap = nameEnumerator.getNamesMap();
+    CoverageIOUtil.writeINT(stream, namesMap.size());
+    namesMap.forEachEntry(new TObjectIntProcedure<String>() {
+      public boolean execute(String s, int i) {
+        try {
+          CoverageIOUtil.writeINT(stream, i);
+          CoverageIOUtil.writeUTF(stream, s);
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+        return true;
+      }
+    });
+    stream.writeLong(dictStartOffset);
   }
 
   public NameEnumerator getIncrementalNameEnumerator() {

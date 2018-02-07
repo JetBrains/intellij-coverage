@@ -49,11 +49,13 @@ public class SingleTrFileDiscoveryDataListenerTest {
       0x2, // TestMarker
       0x1, // name_id
       0x1, // 1 class
-      0x1, // Class A
+      0x2, // Class A
       0x1, // 1 method
-      0x2, // method B
+      0x3, // method C
       0x3, // DictionaryMarker
-      0x2, // count
+      0x3, // count
+      0x3, // 3 - C
+      0x1, 0x43, // "C"
       0x2, // 2 - B
       0x1, 0x42, // "B"
       0x1, // 1 - A
@@ -83,6 +85,28 @@ public class SingleTrFileDiscoveryDataListenerTest {
       0x1, // Class A
       0x1, // 1 method
       0x2, // method B
+  };
+  public static final byte[] V2_TWO_TESTS_INCREMENTAL_DICT = {0x1, 0x2,
+      0x4, // Partial directory
+      0x1, // count
+      0x1, // 1 - A
+      0x1, 0x41, // "A"
+      0x2, // TestMarker
+      0x1, // test A
+      0x1, // 1 class
+      0x1, // Class A
+      0x1, // 1 method
+      0x1, // method A
+      0x4, // Partial directory
+      0x1, // count
+      0x2, // 1 - B
+      0x1, 0x42, // "B"
+      0x2, // TestMarker
+      0x2, // test B
+      0x1, // 1 class
+      0x1, // Class A
+      0x1, // 1 method
+      0x1, // method A
   };
 
   private static final byte V1 = 0x1;
@@ -129,18 +153,17 @@ public class SingleTrFileDiscoveryDataListenerTest {
     final LongDataOutputStream dos = new LongDataOutputStream(baos);
     final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos);
 
-    final String name1 = "A";
-    final String name2 = "B";
-    listener.getIncrementalNameEnumerator().enumerate(name1);
-    listener.getIncrementalNameEnumerator().enumerate(name2);
+    listener.getIncrementalNameEnumerator().enumerate("A");
+    listener.getIncrementalNameEnumerator().enumerate("B");
+    listener.getIncrementalNameEnumerator().enumerate("C");
 
     final ConcurrentHashMap<Integer, boolean[]> classes = new ConcurrentHashMap<Integer, boolean[]>();
     final ConcurrentHashMap<Integer, int[]> methods = new ConcurrentHashMap<Integer, int[]>();
-    classes.put(1, new boolean[]{true});
-    classes.put(2, new boolean[]{false});
-    methods.put(1, new int[]{2});
-    methods.put(2, new int[]{1});
-    listener.testFinished(name1, classes, methods);
+    classes.put(2, new boolean[]{true});
+    classes.put(3, new boolean[]{false});
+    methods.put(2, new int[]{3});
+    methods.put(3, new int[]{2});
+    listener.testFinished("A", classes, methods);
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(SINGLE_TEST_SINGLE_METHOD);
   }
@@ -186,5 +209,25 @@ public class SingleTrFileDiscoveryDataListenerTest {
     listener.testFinished(name1, classes, methods);
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(V2_SINGLE_TEST_SINGLE_METHOD);
+  }
+  @Test
+  public void testV2TwoTestsIncrementalDict() throws Exception {
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    final LongDataOutputStream dos = new LongDataOutputStream(baos);
+    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos, V2);
+
+    listener.getIncrementalNameEnumerator().enumerate("A");
+
+    final ConcurrentHashMap<Integer, boolean[]> classes = new ConcurrentHashMap<Integer, boolean[]>();
+    final ConcurrentHashMap<Integer, int[]> methods = new ConcurrentHashMap<Integer, int[]>();
+    classes.put(1, new boolean[]{true});
+    methods.put(1, new int[]{1});
+
+    listener.testFinished("A", classes, methods);
+    listener.testFinished("B", classes, methods);
+
+
+    listener.testsFinished();
+    assertThat(baos.toByteArray()).isEqualTo(V2_TWO_TESTS_INCREMENTAL_DICT);
   }
 }
