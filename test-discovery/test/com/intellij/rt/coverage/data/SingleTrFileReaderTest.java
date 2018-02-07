@@ -29,6 +29,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SingleTrFileReaderTest {
 
   @Test
+  public void testReal() throws IOException {
+    final MySingleTrFileReader reader = new MySingleTrFileReader(new File("/home/vlad/Downloads/td.v2.tr"));
+    reader.read();
+    assertThat(reader.myData).isNotEmpty();
+    for (String[] datum : reader.myData) {
+      assertThat(datum).doesNotContainNull();
+    }
+  }
+
+  @Test
   public void testCompletelyEmpty() throws IOException {
     final MySingleTrFileReader reader = getReader(new byte[0]);
     reader.read();
@@ -62,7 +72,7 @@ public class SingleTrFileReaderTest {
     reader.read();
     assertThat(reader.myData).isNotEmpty();
     final String[] data = reader.myData.iterator().next();
-    assertThat(data).doesNotContainNull().containsExactly("A", "A", "B");
+    assertThat(data).doesNotContainNull().containsExactly("A", "B", "C");
   }
 
   @Test
@@ -97,6 +107,7 @@ public class SingleTrFileReaderTest {
     @Override
     protected void processData(String testName, String className, String methodName) {
       myData.add(new String[]{testName, className, methodName});
+      super.processData(testName, className, methodName);
     }
   }
 }
