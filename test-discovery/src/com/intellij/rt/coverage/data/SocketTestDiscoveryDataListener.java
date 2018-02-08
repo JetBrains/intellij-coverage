@@ -146,12 +146,17 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
       final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
       baos.write(TEST_FINISHED_MSG);
       final DataOutputStream dos = new DataOutputStream(baos);
+      writeTestName(testName, dos);
       writeEnumeratorIncrement(dos);
       writeTestData(testName, visitedMethods, dos);
 
       write(baos.asByteBuffer());
     } catch (IOException ignored) {
     }
+  }
+
+  private void writeTestName(String testName, DataOutputStream dos) throws IOException {
+    CoverageIOUtil.writeUTF(dos, testName);
   }
 
   private void writeEnumeratorIncrement(DataOutputStream dos) throws IOException {
@@ -164,7 +169,6 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
   }
 
   private void writeTestData(String testName, List<VisitedMethods> visitedMethods, final DataOutputStream dos) throws IOException {
-    CoverageIOUtil.writeUTF(dos, testName);
 
     CoverageIOUtil.writeINT(dos, visitedMethods.size());
     for (VisitedMethods ns : visitedMethods) {
