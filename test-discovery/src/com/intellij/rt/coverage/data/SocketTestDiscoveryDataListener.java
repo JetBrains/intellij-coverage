@@ -163,8 +163,8 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
     List<NameEnumerator.Incremental.NameAndId> increment = incrementalNameEnumerator.getAndClearDataIncrement();
     CoverageIOUtil.writeINT(dos, increment.size());
     for (NameEnumerator.Incremental.NameAndId nameAndId : increment) {
-      CoverageIOUtil.writeUTF(dos, nameAndId.getName());
       CoverageIOUtil.writeINT(dos, nameAndId.getId());
+      CoverageIOUtil.writeUTF(dos, nameAndId.getName());
     }
   }
 

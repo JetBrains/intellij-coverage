@@ -107,12 +107,11 @@ public class SingleTrFileReader {
   }
 
   private void readDictionary(DataInput r) throws IOException {
-      int count = CoverageIOUtil.readINT(r);
-      while (count-- > 0) {
-        int id = CoverageIOUtil.readINT(r);
-        String name = CoverageIOUtil.readUTFFast(r);
+    TestDiscoveryIOUtil.readDictionary(r, new TestDiscoveryIOUtil.DictionaryProcessor() {
+      public void process(int id, String name) {
         processDictionaryRecord(id, name);
       }
+    });
   }
 
   protected void processData(String testName, String className, String methodName) {
