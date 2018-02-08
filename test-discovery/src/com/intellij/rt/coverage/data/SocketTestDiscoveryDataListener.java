@@ -42,10 +42,15 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
   @SuppressWarnings("WeakerAccess")
   public static final String PORT_PROP = "test.discovery.data.port";
 
-  private static final byte START_MSG = 0;
-  private static final byte FINISHED_MSG = 1;
-  private static final byte TEST_FINISHED_MSG = 2;
-  private static final byte VERSION = 1;
+  @SuppressWarnings("WeakerAccess")
+  public static final byte START_MSG = 0;
+  @SuppressWarnings("WeakerAccess")
+  public static final byte FINISHED_MSG = 1;
+  @SuppressWarnings("WeakerAccess")
+  public static final byte TEST_FINISHED_MSG = 2;
+  @SuppressWarnings("WeakerAccess")
+  public static final byte VERSION = 1;
+
   private final SocketChannel mySocket;
   private final ExecutorService myExecutor;
   private final Selector mySelector;
