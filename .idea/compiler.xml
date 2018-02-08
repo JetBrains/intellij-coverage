@@ -16,6 +16,10 @@
       <module name="instrumentation_test" target="1.5" />
       <module name="intellij-coverage_main" target="1.5" />
       <module name="intellij-coverage_test" target="1.5" />
+      <module name="junit-test-discovery-launcher_main" target="1.5" />
+      <module name="junit-test-discovery-launcher_test" target="1.5" />
+      <module name="junit4-test-discovery-launcher_main" target="1.5" />
+      <module name="junit4-test-discovery-launcher_test" target="1.5" />
       <module name="test-discovery_main" target="1.5" />
       <module name="test-discovery_test" target="1.5" />
       <module name="testDiscovery_main" target="1.6" />

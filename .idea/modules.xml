@@ -8,11 +8,11 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage_main.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage_main.iml" group="intellij-coverage" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage_test.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage_test.iml" group="intellij-coverage" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/test-discovery/test-discovery.iml" filepath="$PROJECT_DIR$/.idea/modules/test-discovery/test-discovery.iml" group="test-discovery" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/junit4-test-discovery-launcher/junit4-test-discovery-launcher.iml" filepath="$PROJECT_DIR$/.idea/modules/junit4-test-discovery-launcher/junit4-test-discovery-launcher.iml" group="junit4-test-discovery-launcher" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/junit4-test-discovery-launcher/junit4-test-discovery-launcher_main.iml" filepath="$PROJECT_DIR$/.idea/modules/junit4-test-discovery-launcher/junit4-test-discovery-launcher_main.iml" group="junit4-test-discovery-launcher" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/junit4-test-discovery-launcher/junit4-test-discovery-launcher_test.iml" filepath="$PROJECT_DIR$/.idea/modules/junit4-test-discovery-launcher/junit4-test-discovery-launcher_test.iml" group="junit4-test-discovery-launcher" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/test-discovery/test-discovery.iml" filepath="$PROJECT_DIR$/.idea/modules/test-discovery/test-discovery.iml" group="test-discovery" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/test-discovery/test-discovery_main.iml" filepath="$PROJECT_DIR$/.idea/modules/test-discovery/test-discovery_main.iml" group="test-discovery" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/test-discovery/test-discovery_main.iml" filepath="$PROJECT_DIR$/.idea/modules/test-discovery/test-discovery_main.iml" group="test-discovery" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/test-discovery/test-discovery_test.iml" filepath="$PROJECT_DIR$/.idea/modules/test-discovery/test-discovery_test.iml" group="test-discovery" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/test-discovery/test-discovery_test.iml" filepath="$PROJECT_DIR$/.idea/modules/test-discovery/test-discovery_test.iml" group="test-discovery" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/tests/tests.iml" filepath="$PROJECT_DIR$/.idea/modules/tests/tests.iml" group="tests" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/tests/tests_main.iml" filepath="$PROJECT_DIR$/.idea/modules/tests/tests_main.iml" group="tests" />

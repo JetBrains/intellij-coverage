@@ -23,3 +23,8 @@ task discoveryAgentJar(type: Jar) {
 }
 
 build.dependsOn(discoveryAgentJar)
+
+jar.enabled = false
+artifacts {
+  archives discoveryAgentJar
+}

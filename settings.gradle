@@ -2,5 +2,6 @@ rootProject.name = 'intellij-coverage'
 
 include ':instrumentation'
 include ':test-discovery'
+include ':junit4-test-discovery-launcher'
 include ':tests'
 include ':util'
