@@ -66,15 +66,19 @@ public class SingleTrFileReader {
 
   private void readData(DataInputStream input) throws IOException {
     String testName = readString(input);
+    testProcessingStarted(testName);
     int classCount = CoverageIOUtil.readINT(input);
     while (classCount-- > 0) {
       String className = readString(input);
+      classProcessingStarted(className);
       int methodCount = CoverageIOUtil.readINT(input);
       while (methodCount-- > 0) {
         String methodName = readString(input);
-        processData(testName, className, methodName);
+        processMethodName(methodName);
       }
+      classProcessingFinished(className);
     }
+    testProcessingFinished(testName);
   }
 
   private String readString(DataInputStream input) throws IOException {
@@ -114,7 +118,23 @@ public class SingleTrFileReader {
     });
   }
 
-  protected void processData(String testName, String className, String methodName) {
+  protected void testProcessingFinished(String testName) {
+
+  }
+
+  protected void classProcessingFinished(String className) {
+
+  }
+
+  protected void processMethodName(String methodName) {
+
+  }
+
+  protected void classProcessingStarted(String className) {
+
+  }
+
+  protected void testProcessingStarted(String testName) {
 
   }
 
@@ -123,5 +143,41 @@ public class SingleTrFileReader {
 
   protected void processDictionaryRecord(int id, String name) {
     dict.put(id, name);
+  }
+
+  public abstract class Sequential extends SingleTrFileReader {
+    private String currentClassName;
+    private String currentTestName;
+
+    public Sequential(File file) {
+      super(file);
+    }
+
+    protected abstract void processData(String testName, String className, String methodName);
+
+    @Override
+    protected void testProcessingFinished(String testName) {
+      currentTestName = null;
+    }
+
+    @Override
+    protected void classProcessingFinished(String className) {
+      currentClassName = null;
+    }
+
+    @Override
+    protected void processMethodName(String methodName) {
+      processData(currentTestName, currentClassName, methodName);
+    }
+
+    @Override
+    protected void classProcessingStarted(String className) {
+      currentClassName = className;
+    }
+
+    @Override
+    protected void testProcessingStarted(String testName) {
+      currentTestName = testName;
+    }
   }
 }
