@@ -45,12 +45,42 @@ public class SingleFileTestDiscoveryIntegrationTest extends TestCase {
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
     assertThat(data).contains(
+        new String[]{"Test.test1", "Test", "test1"},
         new String[]{"Test.test1", "ClassA", "method1"},
         new String[]{"Test.test1", "ClassA", "method2"},
 
+        new String[]{"Test.test2", "Test", "test2"},
         new String[]{"Test.test2", "ClassB", "method1"},
         new String[]{"Test.test2", "ClassB", "method2"},
 
+        new String[]{"Test.test3", "Test", "test3"},
+        new String[]{"Test.test3", "ClassA", "methodR"},
+        new String[]{"Test.test3", "ClassA", "method1"},
+        new String[]{"Test.test3", "ClassA", "method2"},
+        new String[]{"Test.test3", "ClassB", "methodR"},
+        new String[]{"Test.test3", "ClassB", "method1"},
+        new String[]{"Test.test3", "ClassB", "method2"}
+    );
+  }
+
+  public void testSimpleExcludeLibs() throws Exception {
+    final File result = doTest("simple",
+        "-Dtest.discovery.include.class.patterns=Test.*;Class.*",
+        "-Dtest.discovery.exclude.class.patterns=junit.*;org.*");
+    final MySingleTrFileReader reader = new MySingleTrFileReader(result);
+    reader.read();
+    final List<String[]> data = reader.data;
+    assertThat(data).isNotEmpty();
+    assertThat(data).containsOnly(
+        new String[]{"Test.test1", "Test", "test1"},
+        new String[]{"Test.test1", "ClassA", "method1"},
+        new String[]{"Test.test1", "ClassA", "method2"},
+
+        new String[]{"Test.test2", "Test", "test2"},
+        new String[]{"Test.test2", "ClassB", "method1"},
+        new String[]{"Test.test2", "ClassB", "method2"},
+
+        new String[]{"Test.test3", "Test", "test3"},
         new String[]{"Test.test3", "ClassA", "methodR"},
         new String[]{"Test.test3", "ClassA", "method1"},
         new String[]{"Test.test3", "ClassA", "method2"},
