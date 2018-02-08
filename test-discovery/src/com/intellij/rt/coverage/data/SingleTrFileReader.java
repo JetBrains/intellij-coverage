@@ -145,7 +145,7 @@ public class SingleTrFileReader {
     dict.put(id, name);
   }
 
-  public abstract class Sequential extends SingleTrFileReader {
+  public static abstract class Sequential extends SingleTrFileReader {
     private String currentClassName;
     private String currentTestName;
 

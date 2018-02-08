@@ -86,7 +86,7 @@ public class SingleTrFileReaderTest {
     return file;
   }
 
-  private static class MySingleTrFileReader extends SingleTrFileReader {
+  private static class MySingleTrFileReader extends SingleTrFileReader.Sequential {
     List<String[]> myData;
 
     MySingleTrFileReader(File file) {
@@ -97,7 +97,6 @@ public class SingleTrFileReaderTest {
     @Override
     protected void processData(String testName, String className, String methodName) {
       myData.add(new String[]{testName, className, methodName});
-      super.processData(testName, className, methodName);
     }
   }
 }
