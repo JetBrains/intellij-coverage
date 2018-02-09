@@ -123,7 +123,7 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
     write(ByteBuffer.wrap(new byte[]{START_MSG, VERSION}));
   }
 
-  public void testFinished(final String testName, ConcurrentMap<Integer, boolean[]> classToVisitedMethods, ConcurrentMap<Integer, int[]> classToMethodNames) {
+  public void testFinished(final String testName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) {
     final List<VisitedMethods> visitedMethods = new ArrayList<VisitedMethods>();
     int[] methodNames = null;
     for (Map.Entry<Integer, boolean[]> e : classToVisitedMethods.entrySet()) {

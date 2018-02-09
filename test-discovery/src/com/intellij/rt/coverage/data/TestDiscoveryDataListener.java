@@ -16,11 +16,11 @@
 
 package com.intellij.rt.coverage.data;
 
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
 
 public interface TestDiscoveryDataListener {
 
-  void testFinished(String testName, ConcurrentMap<Integer, boolean[]> classToVisitedMethods, ConcurrentMap<Integer, int[]> classToMethodNames) throws Exception;
+  void testFinished(String testName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws Exception;
 
   void testsFinished() throws Exception;
 

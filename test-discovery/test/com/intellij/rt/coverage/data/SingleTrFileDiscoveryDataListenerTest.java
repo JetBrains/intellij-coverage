@@ -19,7 +19,8 @@ package com.intellij.rt.coverage.data;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -138,8 +139,8 @@ public class SingleTrFileDiscoveryDataListenerTest {
     final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos);
     final String name = "ABC";
     listener.getIncrementalNameEnumerator().enumerate(name);
-    final ConcurrentHashMap<Integer, boolean[]> classes = new ConcurrentHashMap<Integer, boolean[]>();
-    final ConcurrentHashMap<Integer, int[]> methods = new ConcurrentHashMap<Integer, int[]>();
+    final Map<Integer, boolean[]> classes = new HashMap<Integer, boolean[]>();
+    final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();
     classes.put(1, new boolean[]{false});
     methods.put(1, new int[]{1});
     listener.testFinished(name, classes, methods);
@@ -157,8 +158,8 @@ public class SingleTrFileDiscoveryDataListenerTest {
     listener.getIncrementalNameEnumerator().enumerate("B");
     listener.getIncrementalNameEnumerator().enumerate("C");
 
-    final ConcurrentHashMap<Integer, boolean[]> classes = new ConcurrentHashMap<Integer, boolean[]>();
-    final ConcurrentHashMap<Integer, int[]> methods = new ConcurrentHashMap<Integer, int[]>();
+    final Map<Integer, boolean[]> classes = new HashMap<Integer, boolean[]>();
+    final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();
     classes.put(2, new boolean[]{true});
     classes.put(3, new boolean[]{false});
     methods.put(2, new int[]{3});
@@ -200,8 +201,8 @@ public class SingleTrFileDiscoveryDataListenerTest {
     listener.getIncrementalNameEnumerator().enumerate(name1);
     listener.getIncrementalNameEnumerator().enumerate(name2);
 
-    final ConcurrentHashMap<Integer, boolean[]> classes = new ConcurrentHashMap<Integer, boolean[]>();
-    final ConcurrentHashMap<Integer, int[]> methods = new ConcurrentHashMap<Integer, int[]>();
+    final Map<Integer, boolean[]> classes = new HashMap<Integer, boolean[]>();
+    final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();
     classes.put(1, new boolean[]{true});
     classes.put(2, new boolean[]{false});
     methods.put(1, new int[]{2});
@@ -218,8 +219,8 @@ public class SingleTrFileDiscoveryDataListenerTest {
 
     listener.getIncrementalNameEnumerator().enumerate("A");
 
-    final ConcurrentHashMap<Integer, boolean[]> classes = new ConcurrentHashMap<Integer, boolean[]>();
-    final ConcurrentHashMap<Integer, int[]> methods = new ConcurrentHashMap<Integer, int[]>();
+    final Map<Integer, boolean[]> classes = new HashMap<Integer, boolean[]>();
+    final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();
     classes.put(1, new boolean[]{true});
     methods.put(1, new int[]{1});
 

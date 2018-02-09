@@ -25,7 +25,6 @@ import org.jetbrains.coverage.gnu.trove.TObjectIntProcedure;
 import java.io.*;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
 
 @SuppressWarnings("unused")
 public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListener {
@@ -75,7 +74,7 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
     this.stream.writeByte(this.version);
   }
 
-  public void testFinished(String testName, ConcurrentMap<Integer, boolean[]> classToVisitedMethods, ConcurrentMap<Integer, int[]> classToMethodNames) throws Exception {
+  public void testFinished(String testName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws Exception {
     final int testNameId = nameEnumerator.enumerate(testName);
     writeDictionaryIncrementIfSupported();
     stream.writeByte(TEST_FINISHED_MARKER);
