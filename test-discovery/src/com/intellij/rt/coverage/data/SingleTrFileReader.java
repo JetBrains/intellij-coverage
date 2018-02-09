@@ -65,8 +65,9 @@ public class SingleTrFileReader {
   }
 
   private void readData(DataInputStream input) throws IOException {
-    String testName = readString(input);
-    testProcessingStarted(testName);
+    String testClassName = readString(input);
+    String testMethodName = readString(input);
+    testProcessingStarted(testClassName, testMethodName);
     int classCount = CoverageIOUtil.readINT(input);
     while (classCount-- > 0) {
       String className = readString(input);
@@ -78,7 +79,7 @@ public class SingleTrFileReader {
       }
       classProcessingFinished(className);
     }
-    testProcessingFinished(testName);
+    testProcessingFinished(testClassName, testMethodName);
   }
 
   private String readString(DataInputStream input) throws IOException {
@@ -116,6 +117,20 @@ public class SingleTrFileReader {
         processDictionaryRecord(id, name);
       }
     });
+  }
+
+  private String getName(String testClassName, String testMethodName) {
+    if (testClassName == null) return testMethodName;
+    else if (testMethodName == null) return testClassName;
+    else return testClassName + "." + testMethodName;
+  }
+
+  protected void testProcessingStarted(String testClassName, String testMethodName) {
+    testProcessingStarted(getName(testClassName, testMethodName));
+  }
+
+  protected void testProcessingFinished(String testClassName, String testMethodName) {
+    testProcessingFinished(getName(testClassName, testMethodName));
   }
 
   protected void testProcessingFinished(String testName) {

@@ -62,7 +62,7 @@ public class SingleTrFileReaderTest {
     reader.read();
     assertThat(reader.myData).isNotEmpty();
     final String[] data = reader.myData.iterator().next();
-    assertThat(data).doesNotContainNull().containsExactly("A", "B", "C");
+    assertThat(data).doesNotContainNull().containsExactly("A.B", "B", "C");
   }
 
   @Test
@@ -71,7 +71,7 @@ public class SingleTrFileReaderTest {
     reader.read();
     assertThat(reader.myData).isNotEmpty();
     final String[] data = reader.myData.iterator().next();
-    assertThat(data).doesNotContainNull().containsExactly("A", "A", "B");
+    assertThat(data).doesNotContainNull().containsExactly("A.B", "A", "B");
   }
 
   private MySingleTrFileReader getReader(byte[] content) throws IOException {

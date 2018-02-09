@@ -123,7 +123,7 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
     write(ByteBuffer.wrap(new byte[]{START_MSG, VERSION}));
   }
 
-  public void testFinished(final String testName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) {
+  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws Exception {
     final List<VisitedMethods> visitedMethods = new ArrayList<VisitedMethods>();
     int[] methodNames = null;
     for (Map.Entry<Integer, boolean[]> e : classToVisitedMethods.entrySet()) {
@@ -146,17 +146,21 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
       final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
       baos.write(TEST_FINISHED_MSG);
       final DataOutputStream dos = new DataOutputStream(baos);
-      writeTestName(testName, dos);
+
+      final int testClassNameId = incrementalNameEnumerator.enumerate(className);
+      final int testMethodNameId = incrementalNameEnumerator.enumerate(methodName);
+
+      // Enumerator may send className and methodName if it's first test in class or this test caused classloading
+      // Otherwise className and methodName was already sent with one of previous calls
       writeEnumeratorIncrement(dos);
-      writeTestData(testName, visitedMethods, dos);
+
+      CoverageIOUtil.writeINT(dos, testClassNameId);
+      CoverageIOUtil.writeINT(dos, testMethodNameId);
+      writeTestData(visitedMethods, dos);
 
       write(baos.asByteBuffer());
     } catch (IOException ignored) {
     }
-  }
-
-  private void writeTestName(String testName, DataOutputStream dos) throws IOException {
-    CoverageIOUtil.writeUTF(dos, testName);
   }
 
   private void writeEnumeratorIncrement(DataOutputStream dos) throws IOException {
@@ -168,7 +172,7 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
     }
   }
 
-  private void writeTestData(String testName, List<VisitedMethods> visitedMethods, final DataOutputStream dos) throws IOException {
+  private void writeTestData(List<VisitedMethods> visitedMethods, final DataOutputStream dos) throws IOException {
 
     CoverageIOUtil.writeINT(dos, visitedMethods.size());
     for (VisitedMethods ns : visitedMethods) {

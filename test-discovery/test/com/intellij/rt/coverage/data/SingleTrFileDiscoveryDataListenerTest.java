@@ -38,17 +38,17 @@ public class SingleTrFileDiscoveryDataListenerTest {
       , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03};
   public static final byte[] SINGLE_TEST_NO_METHODS = {0x1, 0x1,
       0x2, // TestMarker
-      0x1, // name_id
+      0x1, 0x1, // test ABC.ABC
       0x0, //no classes
       0x3, // DictionaryMarker
       0x1, // count
       0x1, // 1 - ABC
       0x3, 0x41, 0x42, 0x43 // "ABC"
       // Link to start of dictionary:
-      , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06};
+      , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07};
   public static final byte[] SINGLE_TEST_SINGLE_METHOD = {0x1, 0x1,
       0x2, // TestMarker
-      0x1, // name_id
+      0x1, 0x2, // test A.B
       0x1, // 1 class
       0x2, // Class A
       0x1, // 1 method
@@ -62,7 +62,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
       0x1, // 1 - A
       0x1, 0x41 // "A"
       // Link to start of dictionary:
-      , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09};
+      , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A};
 
 
   public static final byte[] V2_EMPTY = {0x1, 0x2,
@@ -81,7 +81,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
       0x2, // 2 - B
       0x1, 0x42, // "B"
       0x2, // TestMarker
-      0x1, // name_id
+      0x1, 0x2, // test A.B
       0x1, // 1 class
       0x1, // Class A
       0x1, // 1 method
@@ -89,21 +89,19 @@ public class SingleTrFileDiscoveryDataListenerTest {
   };
   public static final byte[] V2_TWO_TESTS_INCREMENTAL_DICT = {0x1, 0x2,
       0x4, // Partial directory
-      0x1, // count
+      0x2, // count
       0x1, // 1 - A
       0x1, 0x41, // "A"
+      0x2, // 1 - B
+      0x1, 0x42, // "B"
       0x2, // TestMarker
-      0x1, // test A
+      0x1, 0x2, // test A.B
       0x1, // 1 class
       0x1, // Class A
       0x1, // 1 method
       0x1, // method A
-      0x4, // Partial directory
-      0x1, // count
-      0x2, // 1 - B
-      0x1, 0x42, // "B"
       0x2, // TestMarker
-      0x2, // test B
+      0x2, 0x1, // test B.A
       0x1, // 1 class
       0x1, // Class A
       0x1, // 1 method
@@ -143,7 +141,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
     final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();
     classes.put(1, new boolean[]{false});
     methods.put(1, new int[]{1});
-    listener.testFinished(name, classes, methods);
+    listener.testFinished(name, name, classes, methods);
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(SINGLE_TEST_NO_METHODS);
   }
@@ -164,7 +162,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
     classes.put(3, new boolean[]{false});
     methods.put(2, new int[]{3});
     methods.put(3, new int[]{2});
-    listener.testFinished("A", classes, methods);
+    listener.testFinished("A", "B", classes, methods);
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(SINGLE_TEST_SINGLE_METHOD);
   }
@@ -207,10 +205,11 @@ public class SingleTrFileDiscoveryDataListenerTest {
     classes.put(2, new boolean[]{false});
     methods.put(1, new int[]{2});
     methods.put(2, new int[]{1});
-    listener.testFinished(name1, classes, methods);
+    listener.testFinished(name1, name2, classes, methods);
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(V2_SINGLE_TEST_SINGLE_METHOD);
   }
+
   @Test
   public void testV2TwoTestsIncrementalDict() throws Exception {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -224,8 +223,8 @@ public class SingleTrFileDiscoveryDataListenerTest {
     classes.put(1, new boolean[]{true});
     methods.put(1, new int[]{1});
 
-    listener.testFinished("A", classes, methods);
-    listener.testFinished("B", classes, methods);
+    listener.testFinished("A", "B", classes, methods);
+    listener.testFinished("B", "A", classes, methods);
 
 
     listener.testsFinished();

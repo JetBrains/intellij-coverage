@@ -47,7 +47,7 @@ public class TestDiscoveryProjectData {
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
         try {
-          myDataListener.testsFinished();
+          testDiscoveryFinished();
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -85,20 +85,32 @@ public class TestDiscoveryProjectData {
     return previousMethodFlags != null ? previousMethodFlags : methodFlags;
   }
 
-  public synchronized void testDiscoveryEnded(final String name) {
+  public synchronized void testDiscoveryEnded(final String className, final String methodName) {
     try {
-      myDataListener.testFinished(name, myClassToVisitedMethods, myClassToMethodNames);
+      myDataListener.testFinished(className, methodName, myClassToVisitedMethods, myClassToMethodNames);
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  public synchronized void testDiscoveryStarted(final String name) {
+  public synchronized void testDiscoveryStarted(final String className, final String methodName) {
     for (Object e : myClassToVisitedMethods.entrySet()) {
       boolean[] used = (boolean[]) ((Map.Entry) e).getValue();
       for (int i = 0, len = used.length; i < len; ++i) {
         if (used[i]) used[i] = false;
       }
+    }
+  }
+
+  private volatile boolean myFinished;
+
+  public synchronized void testDiscoveryFinished() {
+    if (myFinished) return;
+    myFinished = true;
+    try {
+      myDataListener.testsFinished();
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 }

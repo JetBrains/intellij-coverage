@@ -74,11 +74,17 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
     this.stream.writeByte(this.version);
   }
 
-  public void testFinished(String testName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws Exception {
-    final int testNameId = nameEnumerator.enumerate(testName);
+  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws Exception {
+    final int testClassNameId = nameEnumerator.enumerate(className);
+    final int testMethodNameId = nameEnumerator.enumerate(methodName);
+
+    // Enumerator may send className and methodName if it's first test in class or this test caused classloading
+    // Otherwise className and methodName was already sent with one of previous calls
     writeDictionaryIncrementIfSupported();
+
     stream.writeByte(TEST_FINISHED_MARKER);
-    CoverageIOUtil.writeINT(stream, testNameId);
+    CoverageIOUtil.writeINT(stream, testClassNameId);
+    CoverageIOUtil.writeINT(stream, testMethodNameId);
     writeVisitedMethod(classToVisitedMethods, classToMethodNames, stream);
   }
 
