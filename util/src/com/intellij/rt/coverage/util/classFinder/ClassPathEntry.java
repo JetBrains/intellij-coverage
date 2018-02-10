@@ -32,7 +32,9 @@ public class ClassPathEntry {
   private ClassLoader myClassLoader;
   private String myClassPathEntry;
 
-  ClassPathEntry(final String classPathEntry, final ClassLoader classLoader) {
+  // Used in IntelliJ
+  @SuppressWarnings("WeakerAccess")
+  public ClassPathEntry(final String classPathEntry, final ClassLoader classLoader) {
     myClassPathEntry = classPathEntry;
     myClassLoader = classLoader;
   }

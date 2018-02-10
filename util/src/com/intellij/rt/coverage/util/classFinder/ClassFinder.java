@@ -64,7 +64,9 @@ public class ClassFinder {
     return classes;
   }
 
-  private Collection<ClassPathEntry> getClassPathEntries() {
+  // Overriden in IntelliJ
+  @SuppressWarnings("WeakerAccess")
+  protected Collection<ClassPathEntry> getClassPathEntries() {
     Set<ClassPathEntry> result = new HashSet<ClassPathEntry>();
     result.addAll(extractEntries(System.getProperty("java.class.path")));
     result.addAll(extractEntries(System.getProperty("sun.boot.class.path")));
