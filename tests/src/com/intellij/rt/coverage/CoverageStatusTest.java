@@ -194,7 +194,7 @@ public class CoverageStatusTest extends TestCase {
     final String exePath = javaHome + File.separator + "bin" + File.separator + "java";
 
     final String coverageAgentPath = ResourceUtil.getResourceRoot(ProjectData.class);
-    assertThat(coverageAgentPath).isNotNull().endsWith("coverage-agent.jar");
+    assertThat(coverageAgentPath).isNotNull().matches(".*/coverage-agent(-[0-9.]+)?\\.jar");
 
     String[] commandLine = {
         exePath,
