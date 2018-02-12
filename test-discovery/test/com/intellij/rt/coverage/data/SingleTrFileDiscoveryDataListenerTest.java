@@ -26,87 +26,66 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SingleTrFileDiscoveryDataListenerTest {
 
-  public static final byte[] EMPTY = {0x1, 0x1, 0x3,
-      0x00 //count
-      // Start of dictionary:
-      , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03};
-  public static final byte[] NO_TESTS_ONE_NAME = {0x1, 0x1, 0x3,
-      0x1, // count
-      0x1, // 1 - ABC
-      0x3, 0x41, 0x42, 0x43 // "ABC"
-      // Start of dictionary:
-      , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03};
-  public static final byte[] SINGLE_TEST_NO_METHODS = {0x1, 0x1,
-      0x2, // TestMarker
-      0x1, 0x1, // test ABC.ABC
-      0x0, //no classes
-      0x3, // DictionaryMarker
-      0x1, // count
-      0x1, // 1 - ABC
-      0x3, 0x41, 0x42, 0x43 // "ABC"
-      // Link to start of dictionary:
-      , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07};
-  public static final byte[] SINGLE_TEST_SINGLE_METHOD = {0x1, 0x1,
-      0x2, // TestMarker
-      0x1, 0x2, // test A.B
-      0x1, // 1 class
-      0x2, // Class A
-      0x1, // 1 method
-      0x3, // method C
-      0x3, // DictionaryMarker
-      0x3, // count
-      0x3, // 3 - C
-      0x1, 0x43, // "C"
-      0x2, // 2 - B
-      0x1, 0x42, // "B"
-      0x1, // 1 - A
-      0x1, 0x41 // "A"
-      // Link to start of dictionary:
-      , 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A};
+  public static final byte[] EMPTY =
+      new BinaryResponseBuilder().withHeader().withStart(1)
+          .withDictionaryStart(0).withDictionaryEnd().build();
+
+  public static final byte[] NO_TESTS_ONE_NAME =
+      new BinaryResponseBuilder().withHeader().withStart(1)
+          .withDictionaryStart(1)
+          .withDictionaryElement(1, 0x41, 0x42, 0x43) // 1 - ABC
+          .withDictionaryEnd().build();
+
+  public static final byte[] SINGLE_TEST_NO_METHODS =
+      new BinaryResponseBuilder().withHeader().withStart(1)
+          .withTestResultStart(1, 1, 0) // Test ABC.ABC, 0 coverage
+          .withDictionaryStart(1)
+          .withDictionaryElement(1, 0x41, 0x42, 0x43) // 1 - ABC
+          .withDictionaryEnd().build();
+
+  public static final byte[] SINGLE_TEST_SINGLE_METHOD =
+      new BinaryResponseBuilder().withHeader().withStart(1)
+          .withTestResultStart(1, 2, 1) // test A.B, 1 class
+          .withTestResultClass(2, 1) // Class B, 1 method
+          .withTestResultMethod(3) // Method C
+          .withDictionaryStart(3)
+          .withDictionaryElement(3, 0x43) // 3-C
+          .withDictionaryElement(2, 0x42) // 2-B
+          .withDictionaryElement(1, 0x41) // 1-A
+          .withDictionaryEnd().build();
 
 
-  public static final byte[] V2_EMPTY = {0x1, 0x2,
-  };
-  public static final byte[] V2_NO_TESTS_ONE_NAME = {0x1, 0x2,
-      0x4, // Partial directory
-      0x1, // count
-      0x1, // 1 - A
-      0x3, 0x41, 0x42, 0x43 // "ABC"
-  };
-  public static final byte[] V2_SINGLE_TEST_SINGLE_METHOD = {0x1, 0x2,
-      0x4, // Partial directory
-      0x2, // count
-      0x1, // 1 - A
-      0x1, 0x41, // "A"
-      0x2, // 2 - B
-      0x1, 0x42, // "B"
-      0x2, // TestMarker
-      0x1, 0x2, // test A.B
-      0x1, // 1 class
-      0x1, // Class A
-      0x1, // 1 method
-      0x2, // method B
-  };
-  public static final byte[] V2_TWO_TESTS_INCREMENTAL_DICT = {0x1, 0x2,
-      0x4, // Partial directory
-      0x2, // count
-      0x1, // 1 - A
-      0x1, 0x41, // "A"
-      0x2, // 1 - B
-      0x1, 0x42, // "B"
-      0x2, // TestMarker
-      0x1, 0x2, // test A.B
-      0x1, // 1 class
-      0x1, // Class A
-      0x1, // 1 method
-      0x1, // method A
-      0x2, // TestMarker
-      0x2, 0x1, // test B.A
-      0x1, // 1 class
-      0x1, // Class A
-      0x1, // 1 method
-      0x1, // method A
-  };
+  public static final byte[] V2_EMPTY =
+      new BinaryResponseBuilder().withHeader().withStart(2).build();
+
+  public static final byte[] V2_NO_TESTS_ONE_NAME =
+      new BinaryResponseBuilder().withHeader().withStart(2)
+          .withIncrementalDictionaryStart(1)
+          .withDictionaryElement(1, 0x41, 0x42, 0x43) // 1-ABC
+          .build();
+
+  public static final byte[] V2_SINGLE_TEST_SINGLE_METHOD =
+      new BinaryResponseBuilder().withHeader().withStart(2)
+          .withIncrementalDictionaryStart(2)
+          .withDictionaryElement(1, 0x41) // 1-A
+          .withDictionaryElement(2, 0x42) // 2-B
+          .withTestResultStart(1, 2, 1) // Test A.B, 1 class
+          .withTestResultClass(1, 1) // Class A, 1 method
+          .withTestResultMethod(2) // Method B
+          .build();
+
+  public static final byte[] V2_TWO_TESTS_INCREMENTAL_DICT =
+      new BinaryResponseBuilder().withHeader().withStart(2)
+          .withIncrementalDictionaryStart(2)
+          .withDictionaryElement(1, 0x41) // 1-A
+          .withDictionaryElement(2, 0x42) // 2-B
+          .withTestResultStart(1, 2, 1) // Test A.B, 1 class
+          .withTestResultClass(1, 1) // Class A, 1 method
+          .withTestResultMethod(1) // Method A
+          .withTestResultStart(2, 1, 1) // Test B.A, 1 class
+          .withTestResultClass(1, 1) // Class A, 1 method
+          .withTestResultMethod(1) // Method A
+          .build();
 
   private static final byte V1 = 0x1;
   private static final byte V2 = 0x2;

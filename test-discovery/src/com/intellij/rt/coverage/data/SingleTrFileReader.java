@@ -20,7 +20,9 @@ import com.intellij.rt.coverage.util.CoverageIOUtil;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 
 import java.io.*;
+import java.util.Arrays;
 
+@SuppressWarnings("WeakerAccess")
 public class SingleTrFileReader {
   private File file;
   private final TIntObjectHashMap<String> dict = new TIntObjectHashMap<String>();
@@ -32,6 +34,8 @@ public class SingleTrFileReader {
   public final void read() throws IOException {
     int bufferSize = Integer.parseInt(System.getProperty(SingleTrFileDiscoveryDataListener.BUFFER_SIZE, "32768"));
     DataInputStream input = new DataInputStream(new BufferedInputStream(new FileInputStream(file), bufferSize));
+    // TODO Count read bytes and report in case of exceptions
+    boolean start = true;
     while (true) {
       final int read = input.read();
       if (read == -1) {
@@ -60,6 +64,16 @@ public class SingleTrFileReader {
           debug("partial dictionary received");
           readDictionary(input);
           break;
+        case 0x49: // I of IJTC
+          final byte[] jtc = new byte[3];
+          assert start;
+          assert input.read(jtc) == 3;
+          assert Arrays.equals(jtc, new byte[]{(byte) 0x4a, (byte) 0x54, (byte) 0x43,});
+          start = false;
+          debug("start marker");
+          break;
+        default:
+          throw new IllegalStateException(String.format("Unknown input: %2X", msgType));
       }
     }
   }

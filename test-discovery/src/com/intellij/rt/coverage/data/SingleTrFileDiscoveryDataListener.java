@@ -37,6 +37,8 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
 
   private static final int VERSION = 0x1;
 
+  static final byte[] HEADER = new byte[]{0x49, 0x4a, 0x54, 0x43}; // "IJTC"
+
   static final int START_MARKER = 0x1;
   static final int TEST_FINISHED_MARKER = 0x2;
   static final int NAMES_DICTIONARY_MARKER = 0x3;
@@ -70,6 +72,7 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
   }
 
   private void start() throws IOException {
+    this.stream.write(HEADER);
     this.stream.writeByte(START_MARKER);
     this.stream.writeByte(this.version);
   }
