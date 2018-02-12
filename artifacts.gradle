@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-artifacts {
-  archives coverageAgentJar
-}
-
 publishing {
   publications {
     CoveragePublication(MavenPublication) {
       groupId 'org.jetbrains.intellij.deps'
       artifactId 'intellij-coverage'
       version version
-      artifact coverageAgentJar
+      artifact project(":instrumentation").coverageAgentJar
     }
     TestDiscoveryPublication(MavenPublication) {
       groupId 'org.jetbrains.intellij.deps'

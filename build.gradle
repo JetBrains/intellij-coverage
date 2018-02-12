@@ -58,18 +58,6 @@ ext.repackLibs = copySpec {
   }
 }
 
-task coverageAgentJar(type: Jar) {
-  baseName = "coverage-agent"
-  destinationDir = file("dist")
-  manifest.attributes(
-      "Premain-Class": "com.intellij.rt.coverage.main.CoveragePremain",
-      "Boot-Class-Path": "$archiveName"
-  )
-  from(sourceSets.main.output)
-  from(["util", "instrumentation"].collect({ project(":$it").sourceSets.main.output }))
-  with repackLibs
-}
-
 // @formatter:off
 private static troveClasses() {
   return '**/*.class' // todo: use proguard
@@ -96,8 +84,6 @@ private static troveClasses() {
    , 'TObjectHashingStrategy'].collect { "org/jetbrains/coverage/**/${it}.class" }
 }
 // @formatter:on
-
-build.dependsOn(coverageAgentJar)
 
 clean.doFirst {
   delete "dist"

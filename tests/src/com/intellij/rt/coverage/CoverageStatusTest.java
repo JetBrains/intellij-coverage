@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
+import com.intellij.rt.coverage.util.ResourceUtil;
 import com.sun.tools.javac.Main;
 import junit.framework.TestCase;
 
@@ -27,6 +28,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author anna
@@ -189,18 +192,10 @@ public class CoverageStatusTest extends TestCase {
       throw new RuntimeException("JAVA_HOME environment variable needs to be set");
     }
     final String exePath = javaHome + File.separator + "bin" + File.separator + "java";
-    File dist = new File("../dist");
-    File[] jars = dist.listFiles(new FilenameFilter() {
-      public boolean accept(File dir, String name) {
-        return name.startsWith("coverage-agent");
-      }
-    });
 
-    if (jars == null || jars.length != 1) {
-      throw new RuntimeException("Coverage agent does not exist. Please rebuild all artifacts to build it.");
-    }
+    final String coverageAgentPath = ResourceUtil.getResourceRoot(ProjectData.class);
+    assertThat(coverageAgentPath).isNotNull().endsWith("coverage-agent.jar");
 
-    String coverageAgentPath = jars[0].getCanonicalPath();
     String[] commandLine = {
         exePath,
 //        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",

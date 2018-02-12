@@ -5,6 +5,25 @@ dependencies {
   compile library_project_asm_all
 }
 
+task coverageAgentJar(type: Jar) {
+  baseName = "coverage-agent"
+  destinationDir = file("../dist")
+  manifest.attributes(
+      "Premain-Class": "com.intellij.rt.coverage.main.CoveragePremain",
+      "Boot-Class-Path": "$archiveName"
+  )
+  from(sourceSets.main.output)
+  from(["util", ""].collect({ project(":$it").sourceSets.main.output }))
+  with repackLibs
+}
+
+build.dependsOn(coverageAgentJar)
+
+jar.enabled = false
+artifacts {
+  archives coverageAgentJar
+}
+
 jar {
   baseName = "coverage-instrumenter"
 }

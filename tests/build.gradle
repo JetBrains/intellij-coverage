@@ -5,11 +5,12 @@ sourceSets {
 
 dependencies {
   testCompile project(':util')
-  testCompile project(':instrumentation')
+  testCompile project(path: ':instrumentation', configuration: 'archives')
+
   testCompile project(path: ':test-discovery', configuration: 'archives')
 
   testCompile 'junit:junit:4.12'
-  testCompile rootProject
+  testCompile project(path: ':', configuration: 'archives')
 
   testCompile 'org.jetbrains:annotations:15.0'
   testCompile 'org.assertj:assertj-core:2.9.0'
