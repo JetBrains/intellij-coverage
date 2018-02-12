@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.util.CoverageIOUtil;
+import org.apache.commons.io.input.CountingInputStream;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 
 import java.io.*;
@@ -32,50 +33,59 @@ public class SingleTrFileReader {
   }
 
   public final void read() throws IOException {
-    int bufferSize = Integer.parseInt(System.getProperty(SingleTrFileDiscoveryDataListener.BUFFER_SIZE, "32768"));
-    DataInputStream input = new DataInputStream(new BufferedInputStream(new FileInputStream(file), bufferSize));
-    // TODO Count read bytes and report in case of exceptions
+    final int bufferSize = Integer.parseInt(System.getProperty(SingleTrFileDiscoveryDataListener.BUFFER_SIZE, "32768"));
+    final CountingInputStream countingStream = new CountingInputStream(new BufferedInputStream(new FileInputStream(file), bufferSize));
+    final DataInputStream input = new DataInputStream(countingStream);
     boolean start = true;
-    while (true) {
-      final int read = input.read();
-      if (read == -1) {
-        debug("stream ended while in zero state");
-        input.close();
-        return;
-      }
-      byte msgType = (byte) read;
-      switch (msgType) {
-        case SingleTrFileDiscoveryDataListener.START_MARKER:
-          byte version = input.readByte();
-          debug("version: " + version);
-          if (version == 1) {
-            readDictionary();
-          }
-          break;
-        case SingleTrFileDiscoveryDataListener.NAMES_DICTIONARY_MARKER:
-          debug("test data ended");
+    try {
+      while (true) {
+        final int read = input.read();
+        if (read == -1) {
+          debug("stream ended while in zero state");
           input.close();
           return;
-        case SingleTrFileDiscoveryDataListener.TEST_FINISHED_MARKER:
-          debug("test data received");
-          readData(input);
-          break;
-        case SingleTrFileDiscoveryDataListener.NAMES_DICTIONARY_PART_MARKER:
-          debug("partial dictionary received");
-          readDictionary(input);
-          break;
-        case 0x49: // I of IJTC
-          final byte[] jtc = new byte[3];
-          assert start;
-          assert input.read(jtc) == 3;
-          assert Arrays.equals(jtc, new byte[]{(byte) 0x4a, (byte) 0x54, (byte) 0x43,});
-          start = false;
-          debug("start marker");
-          break;
-        default:
-          throw new IllegalStateException(String.format("Unknown input: %2X", msgType));
+        }
+        byte msgType = (byte) read;
+        switch (msgType) {
+          case SingleTrFileDiscoveryDataListener.START_MARKER:
+            byte version = input.readByte();
+            debug("version: " + version);
+            if (version == 1) {
+              readDictionary();
+            }
+            break;
+          case SingleTrFileDiscoveryDataListener.NAMES_DICTIONARY_MARKER:
+            debug("test data ended");
+            input.close();
+            return;
+          case SingleTrFileDiscoveryDataListener.TEST_FINISHED_MARKER:
+            debug("test data received");
+            readData(input);
+            break;
+          case SingleTrFileDiscoveryDataListener.NAMES_DICTIONARY_PART_MARKER:
+            debug("partial dictionary received");
+            readDictionary(input);
+            break;
+          case 0x49: // I of IJTC
+            final byte[] jtc = new byte[3];
+            assert start;
+            assert input.read(jtc) == 3;
+            assert Arrays.equals(jtc, new byte[]{(byte) 0x4a, (byte) 0x54, (byte) 0x43,});
+            start = false;
+            debug("start marker");
+            break;
+          default:
+            throw new IllegalStateException(String.format("Unknown input: %2X", msgType));
+        }
       }
+    } catch (IOException e) {
+      final IOException ex = new IOException("Exception occurred during file parsing, last read position: " + countingStream.getByteCount());
+      ex.initCause(e);
+      throw ex;
+    } catch (RuntimeException e) {
+      throw new RuntimeException("Exception occurred during file parsing, last read position: " + countingStream.getByteCount(), e);
     }
+    // TODO: We'd better to throw our own exceptions in case of errors, like malformed file
   }
 
   private void readData(DataInputStream input) throws IOException {
