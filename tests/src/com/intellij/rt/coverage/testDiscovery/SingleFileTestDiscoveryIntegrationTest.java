@@ -172,7 +172,7 @@ public class SingleFileTestDiscoveryIntegrationTest extends TestCase {
     final String exePath = javaHome + File.separator + "bin" + File.separator + "java";
 
     final String agentJar = ResourceUtil.getResourceRoot(TestDiscoveryProjectData.class);
-    assertThat(agentJar).isNotNull().endsWith(".*/test-discovery-agent(-[0-9.]+)?\\.jar");
+    assertThat(agentJar).isNotNull().matches(".*/test-discovery-agent(-[0-9.]+)?\\.jar");
 
     final ArrayList<String> args = new ArrayList<String>();
     args.add(exePath);
