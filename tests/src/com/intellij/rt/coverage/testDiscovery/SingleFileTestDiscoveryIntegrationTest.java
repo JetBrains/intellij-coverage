@@ -126,7 +126,7 @@ public class SingleFileTestDiscoveryIntegrationTest extends TestCase {
     final File generated = createTempDir();
     myToRemove.add(generated);
 
-    File dataFile = new File(generated, "td.tr");
+    File dataFile = new File(generated, "td.ijtc");
     assertThat(dataFile).doesNotExist();
 
     final File[] sources = testData.listFiles(new FilenameFilter() {

@@ -79,7 +79,7 @@ public class SingleTrFileReaderTest {
   }
 
   private static File createFileWithContent(byte[] content) throws IOException {
-    final File file = File.createTempFile("temporarily-td", ".tr");
+    final File file = File.createTempFile("temporarily-td", ".ijtc");
     final FileOutputStream fos = new FileOutputStream(file);
     fos.write(content);
     fos.close();

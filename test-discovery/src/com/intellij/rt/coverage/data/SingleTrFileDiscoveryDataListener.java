@@ -47,7 +47,7 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
   private final byte version;
 
   public SingleTrFileDiscoveryDataListener() throws Exception {
-    final File myTraceFile = getCanonicalFile(new File(System.getProperty(TRACE_FILE, "td.tr")));
+    final File myTraceFile = getCanonicalFile(new File(System.getProperty(TRACE_FILE, "td.ijtc")));
     int bufferSize = Integer.parseInt(System.getProperty(BUFFER_SIZE, "32768"));
     myTraceFile.getParentFile().mkdirs();
     version = Byte.parseByte(System.getProperty(FILE_VERSION, String.valueOf(VERSION)));
