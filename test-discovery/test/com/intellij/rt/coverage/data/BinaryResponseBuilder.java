@@ -74,6 +74,13 @@ class BinaryResponseBuilder {
     return this;
   }
 
+  public BinaryResponseBuilder withBytes(int... bytes) {
+    for (int b : bytes) {
+      myBytes.add((byte) b);
+    }
+    return this;
+  }
+
   public byte[] build() {
     myBytes.add((byte) 0x00); // finish marker
 

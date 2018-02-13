@@ -161,6 +161,17 @@ public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtoc
     return incrementalNameEnumerator;
   }
 
+  public void addMetadata(Map<String, String> metadata) throws Exception {
+    try {
+      final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
+      final DataOutputStream dos = new DataOutputStream(baos);
+      writeFileMetadata(dos, metadata);
+
+      write(baos.asByteBuffer());
+    } catch (IOException ignored) {
+    }
+  }
+
   private void shutdownNow() {
     for (Runnable task : myExecutor.shutdownNow()) {
       task.run();

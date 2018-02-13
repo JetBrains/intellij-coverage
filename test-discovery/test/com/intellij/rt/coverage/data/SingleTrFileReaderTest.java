@@ -23,8 +23,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 public class SingleTrFileReaderTest {
 
@@ -40,6 +42,14 @@ public class SingleTrFileReaderTest {
     final MySingleTrFileReader reader = getReader(SingleTrFileDiscoveryDataListenerTest.EMPTY);
     reader.read();
     assertThat(reader.myData).isEmpty();
+  }
+
+  @Test
+  public void testOnlyMetadata() throws IOException {
+    final MySingleTrFileReader reader = getReader(SingleTrFileDiscoveryDataListenerTest.METADATA);
+    reader.read();
+    assertThat(reader.myData).isEmpty();
+    assertThat(reader.myMetadata).isNotNull().containsOnly(entry("A", "B"));
   }
 
   @Test
@@ -79,6 +89,7 @@ public class SingleTrFileReaderTest {
 
   private static class MySingleTrFileReader extends SingleTrFileReader.Sequential {
     List<String[]> myData;
+    Map<String, String> myMetadata;
 
     MySingleTrFileReader(File file) {
       super(file);
@@ -88,6 +99,11 @@ public class SingleTrFileReaderTest {
     @Override
     protected void processData(String testName, String className, String methodName) {
       myData.add(new String[]{testName, className, methodName});
+    }
+
+    @Override
+    protected void processMetadata(Map<String, String> metadata) {
+      myMetadata = metadata;
     }
   }
 }

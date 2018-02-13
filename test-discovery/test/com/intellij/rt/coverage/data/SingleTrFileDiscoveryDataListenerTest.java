@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.data;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +29,11 @@ public class SingleTrFileDiscoveryDataListenerTest {
 
   public static final byte[] EMPTY =
       new BinaryResponseBuilder().withHeader().withStart(1).build();
+
+  public static final byte[] METADATA =
+      new BinaryResponseBuilder().withHeader().withStart(1)
+          .withBytes(0x5, 0x1, 0x1, 0x41, 0x1, 0x42)
+          .build();
 
   public static final byte[] NO_TESTS_ONE_NAME =
       new BinaryResponseBuilder().withHeader().withStart(1)
@@ -89,6 +95,16 @@ public class SingleTrFileDiscoveryDataListenerTest {
     final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos);
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(EMPTY);
+  }
+
+  @Test
+  public void testMetadata() throws Exception {
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    final LongDataOutputStream dos = new LongDataOutputStream(baos);
+    final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos);
+    listener.addMetadata(Collections.singletonMap("A", "B"));
+    listener.testsFinished();
+    assertThat(baos.toByteArray()).isEqualTo(METADATA);
   }
 
 

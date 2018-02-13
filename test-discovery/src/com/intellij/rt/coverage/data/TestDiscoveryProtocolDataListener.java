@@ -22,6 +22,7 @@ import org.jetbrains.coverage.gnu.trove.TIntIntIterator;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +35,7 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
   public static final int NAMES_DICTIONARY_PART_MARKER = 0x02;
   public static final int TEST_FINISHED_MARKER = 0x03;
 
+  public static final int METADATA_MARKER = 0x05;
 
   protected final byte myVersion;
 
@@ -122,6 +124,31 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
           CoverageIOUtil.writeINT(os, methodNames[i]);
         }
       }
+    }
+  }
+
+  /**
+   * Writes file metadata map as list of key-value pairs.
+   * Format:
+   * <ul>
+   * <li>Marker - byte</li>
+   * <li>N - number</li>
+   * <li>Key1 - string</li>
+   * <li>Value1 - string</li>
+   * <li>...</li>
+   * <li>KeyN - string</li>
+   * <li>ValueN - string</li>
+   * </ul>
+   * <p>
+   * Note that enumerator is not used since metadata is usually small
+   */
+  protected void writeFileMetadata(DataOutput os, Map<String, String> metadata) throws IOException {
+    final LinkedHashMap<String, String> map = new LinkedHashMap<String, String>(metadata);
+    os.writeByte(METADATA_MARKER);
+    CoverageIOUtil.writeINT(os, map.size());
+    for (Map.Entry<String, String> entry : map.entrySet()) {
+      CoverageIOUtil.writeUTF(os, entry.getKey());
+      CoverageIOUtil.writeUTF(os, entry.getValue());
     }
   }
 }

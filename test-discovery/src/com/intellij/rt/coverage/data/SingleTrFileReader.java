@@ -21,6 +21,8 @@ import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
 public class SingleTrFileReader {
@@ -60,6 +62,10 @@ public class SingleTrFileReader {
         case SingleTrFileDiscoveryProtocolDataListener.NAMES_DICTIONARY_PART_MARKER:
           debug("partial dictionary received");
           readDictionary(input);
+          break;
+        case SingleTrFileDiscoveryProtocolDataListener.METADATA_MARKER:
+          debug("metadata received");
+          readMetadata(input);
           break;
         case SingleTrFileDiscoveryProtocolDataListener.HEADER_START:
           final byte[] jtc = new byte[3];
@@ -106,6 +112,18 @@ public class SingleTrFileReader {
     });
   }
 
+  private void readMetadata(DataInput r) throws IOException {
+    int count = CoverageIOUtil.readINT(r);
+    if (count == 0) return;
+    final Map<String, String> result = new LinkedHashMap<String, String>();
+    while (count-- > 0) {
+      String key = CoverageIOUtil.readUTFFast(r);
+      String value = CoverageIOUtil.readUTFFast(r);
+      result.put(key, value);
+    }
+    processMetadata(result);
+  }
+
   private String getName(String testClassName, String testMethodName) {
     if (testClassName == null) return testMethodName;
     else if (testMethodName == null) return testClassName;
@@ -138,6 +156,9 @@ public class SingleTrFileReader {
 
   protected void testProcessingStarted(String testName) {
 
+  }
+
+  protected void processMetadata(Map<String, String> metadata) {
   }
 
   protected void debug(String s) {

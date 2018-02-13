@@ -80,6 +80,10 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
     return myNameEnumerator;
   }
 
+  public void addMetadata(Map<String, String> metadata) throws IOException {
+    writeFileMetadata(myStream, metadata);
+  }
+
   protected void start(DataOutput output) throws IOException {
     output.writeByte(HEADER_START);
     output.write(HEADER_TAIL);
