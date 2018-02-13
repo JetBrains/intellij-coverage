@@ -20,7 +20,7 @@ import java.io.*;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public class SingleTrFileDiscoveryDataListener extends TrProtocolTestDiscoveryDataListener {
+public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProtocolDataListener {
   @SuppressWarnings("WeakerAccess")
   public static final String TRACE_FILE = "org.jetbrains.instrumentation.trace.file";
   @SuppressWarnings("WeakerAccess")
@@ -37,7 +37,7 @@ public class SingleTrFileDiscoveryDataListener extends TrProtocolTestDiscoveryDa
   private final NameEnumerator.Incremental myNameEnumerator;
 
 
-  public SingleTrFileDiscoveryDataListener() throws Exception {
+  public SingleTrFileDiscoveryProtocolDataListener() throws Exception {
     super(Byte.parseByte(System.getProperty(FILE_VERSION, String.valueOf(DEFAULT_VERSION))));
     final File myTraceFile = getCanonicalFile(new File(System.getProperty(TRACE_FILE, "td.ijtc")));
     int bufferSize = Integer.parseInt(System.getProperty(BUFFER_SIZE, "32768"));
@@ -49,12 +49,12 @@ public class SingleTrFileDiscoveryDataListener extends TrProtocolTestDiscoveryDa
   }
 
   // For tests
-  SingleTrFileDiscoveryDataListener(LongDataOutputStream stream) throws Exception {
+  SingleTrFileDiscoveryProtocolDataListener(LongDataOutputStream stream) throws Exception {
     this(stream, (byte) DEFAULT_VERSION);
   }
 
   // For tests
-  SingleTrFileDiscoveryDataListener(LongDataOutputStream stream, byte version) throws Exception {
+  SingleTrFileDiscoveryProtocolDataListener(LongDataOutputStream stream, byte version) throws Exception {
     super(version);
     myStream = stream;
     myNameEnumerator = new NameEnumerator.Incremental();

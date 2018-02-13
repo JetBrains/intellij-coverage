@@ -17,8 +17,8 @@
 package com.intellij.rt.coverage.testDiscovery;
 
 import com.intellij.rt.coverage.data.SocketTestDataReader;
-import com.intellij.rt.coverage.data.SocketTestDiscoveryDataListener;
-import com.intellij.rt.coverage.data.TrProtocolTestDiscoveryDataListener;
+import com.intellij.rt.coverage.data.SocketTestDiscoveryProtocolDataListener;
+import com.intellij.rt.coverage.data.TestDiscoveryProtocolDataListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.junit.Assert;
@@ -73,9 +73,9 @@ public class SocketWriterTestDiscoveryIntegrationTest {
     MyTestDiscoverySocketListener socketListener = new MyTestDiscoverySocketListener();
 
     List<String> ops = new ArrayList<String>();
-    ops.add("-Dtest.discovery.data.listener=" + SocketTestDiscoveryDataListener.class.getName());
-    ops.add("-D" + SocketTestDiscoveryDataListener.HOST_PROP + "=127.0.0.1");
-    ops.add("-D" + SocketTestDiscoveryDataListener.PORT_PROP + "=" + socketListener.getPort());
+    ops.add("-Dtest.discovery.data.listener=" + SocketTestDiscoveryProtocolDataListener.class.getName());
+    ops.add("-D" + SocketTestDiscoveryProtocolDataListener.HOST_PROP + "=127.0.0.1");
+    ops.add("-D" + SocketTestDiscoveryProtocolDataListener.PORT_PROP + "=" + socketListener.getPort());
 //     ops.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007");
 
     TestDiscoveryTestUtil.runTestDiscovery(outputDir.getAbsolutePath(), "Test", ops);
@@ -110,18 +110,18 @@ public class SocketWriterTestDiscoveryIntegrationTest {
               int code = inputStream.read();
               if (code == -1) return;
               switch (code) {
-                case TrProtocolTestDiscoveryDataListener.START_MARKER:
+                case TestDiscoveryProtocolDataListener.START_MARKER:
                   // do nothing
-                  Assert.assertEquals(SocketTestDiscoveryDataListener.VERSION, inputStream.read());
+                  Assert.assertEquals(SocketTestDiscoveryProtocolDataListener.VERSION, inputStream.read());
                   break;
-                case TrProtocolTestDiscoveryDataListener.FINISH_MARKER:
+                case TestDiscoveryProtocolDataListener.FINISH_MARKER:
                   socket.close();
                   finished = true;
                   return;
-                case TrProtocolTestDiscoveryDataListener.NAMES_DICTIONARY_PART_MARKER:
+                case TestDiscoveryProtocolDataListener.NAMES_DICTIONARY_PART_MARKER:
                   SocketTestDataReader.readDictionary(new DataInputStream(inputStream), listener);
                   break;
-                case TrProtocolTestDiscoveryDataListener.TEST_FINISHED_MARKER:
+                case TestDiscoveryProtocolDataListener.TEST_FINISHED_MARKER:
                   SocketTestDataReader.readTestData(new DataInputStream(inputStream), listener);
                   break;
               }

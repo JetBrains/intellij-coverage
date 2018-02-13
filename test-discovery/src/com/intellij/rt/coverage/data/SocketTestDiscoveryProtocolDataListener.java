@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 @SuppressWarnings("unused")
-public class SocketTestDiscoveryDataListener extends TrProtocolTestDiscoveryDataListener {
+public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtocolDataListener {
   private static final int SOCKET_BUFFER_SIZE = 16 * 1024;
   @SuppressWarnings("WeakerAccess")
   public static final String HOST_PROP = "test.discovery.data.host";
@@ -46,7 +46,7 @@ public class SocketTestDiscoveryDataListener extends TrProtocolTestDiscoveryData
   private final BlockingQueue<ByteBuffer> myData = new ArrayBlockingQueue<ByteBuffer>(10);
   private final NameEnumerator.Incremental incrementalNameEnumerator = new NameEnumerator.Incremental();
 
-  public SocketTestDiscoveryDataListener() throws IOException {
+  public SocketTestDiscoveryProtocolDataListener() throws IOException {
     super(VERSION);
     String host = System.getProperty(HOST_PROP, "127.0.0.1");
     int port = Integer.parseInt(System.getProperty(PORT_PROP));

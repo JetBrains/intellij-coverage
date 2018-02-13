@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("WeakerAccess")
-public abstract class TrProtocolTestDiscoveryDataListener implements TestDiscoveryDataListener {
+public abstract class TestDiscoveryProtocolDataListener implements TestDiscoveryDataListener {
 
   public static final int START_MARKER = 0x01;
   public static final int FINISH_MARKER = 0x00;
@@ -37,7 +37,7 @@ public abstract class TrProtocolTestDiscoveryDataListener implements TestDiscove
 
   protected final byte myVersion;
 
-  public TrProtocolTestDiscoveryDataListener(byte version) {
+  public TestDiscoveryProtocolDataListener(byte version) {
     this.myVersion = version;
   }
 

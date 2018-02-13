@@ -32,7 +32,7 @@ public class SingleTrFileReader {
   }
 
   public final void read() throws IOException {
-    int bufferSize = Integer.parseInt(System.getProperty(SingleTrFileDiscoveryDataListener.BUFFER_SIZE, "32768"));
+    int bufferSize = Integer.parseInt(System.getProperty(SingleTrFileDiscoveryProtocolDataListener.BUFFER_SIZE, "32768"));
     DataInputStream input = new DataInputStream(new BufferedInputStream(new FileInputStream(file), bufferSize));
     // TODO Count read bytes and report in case of exceptions
     boolean start = true;
@@ -45,27 +45,27 @@ public class SingleTrFileReader {
       }
       byte msgType = (byte) read;
       switch (msgType) {
-        case SingleTrFileDiscoveryDataListener.START_MARKER:
+        case SingleTrFileDiscoveryProtocolDataListener.START_MARKER:
           byte version = input.readByte();
           debug("start marker, format version: " + version);
           break;
-        case SingleTrFileDiscoveryDataListener.FINISH_MARKER:
+        case SingleTrFileDiscoveryProtocolDataListener.FINISH_MARKER:
           debug("finish marker");
           input.close();
           return;
-        case SingleTrFileDiscoveryDataListener.TEST_FINISHED_MARKER:
+        case SingleTrFileDiscoveryProtocolDataListener.TEST_FINISHED_MARKER:
           debug("test data received");
           readData(input);
           break;
-        case SingleTrFileDiscoveryDataListener.NAMES_DICTIONARY_PART_MARKER:
+        case SingleTrFileDiscoveryProtocolDataListener.NAMES_DICTIONARY_PART_MARKER:
           debug("partial dictionary received");
           readDictionary(input);
           break;
-        case SingleTrFileDiscoveryDataListener.HEADER_START:
+        case SingleTrFileDiscoveryProtocolDataListener.HEADER_START:
           final byte[] jtc = new byte[3];
           if (!start) throw new IllegalStateException("File header is not expected here");
           if (input.read(jtc) != 3) throw new IOException("Failed to read header fully");
-          if (!Arrays.equals(jtc, SingleTrFileDiscoveryDataListener.HEADER_TAIL))
+          if (!Arrays.equals(jtc, SingleTrFileDiscoveryProtocolDataListener.HEADER_TAIL))
             throw new IOException("File header mismatch: I" + new String(jtc, "ASCII"));
           debug("file header");
           break;
