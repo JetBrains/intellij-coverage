@@ -193,8 +193,18 @@ public class CoverageStatusTest extends TestCase {
     }
     final String exePath = javaHome + File.separator + "bin" + File.separator + "java";
 
-    final String coverageAgentPath = ResourceUtil.getResourceRoot(ProjectData.class);
-    assertThat(coverageAgentPath).isNotNull().matches(".*/coverage-agent(-[0-9.]+)?\\.jar");
+    File dist = new File("../dist");
+    File[] jars = dist.listFiles(new FilenameFilter() {
+      public boolean accept(File dir, String name) {
+        return name.startsWith("coverage-agent");
+      }
+    });
+
+    if (jars == null || jars.length != 1) {
+      throw new RuntimeException("Coverage agent does not exist. Please rebuild all artifacts to build it.");
+    }
+
+    String coverageAgentPath = jars[0].getCanonicalPath();
 
     String[] commandLine = {
         exePath,

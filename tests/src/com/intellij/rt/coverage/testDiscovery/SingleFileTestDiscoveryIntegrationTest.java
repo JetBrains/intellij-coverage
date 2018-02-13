@@ -18,13 +18,16 @@ package com.intellij.rt.coverage.testDiscovery;
 
 import com.intellij.rt.coverage.data.SingleTrFileReader;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
-import com.intellij.rt.coverage.util.FileUtil;
 import com.intellij.rt.coverage.util.ResourceUtil;
 import com.intellij.rt.coverage.util.StringUtil;
 import com.sun.tools.javac.Main;
 import junit.framework.TestCase;
 import org.hamcrest.Matcher;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.JUnitLauncher;
 
 import java.io.*;
@@ -34,9 +37,11 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SingleFileTestDiscoveryIntegrationTest extends TestCase {
-  private List<File> myToRemove = new ArrayList<File>();
+public class SingleFileTestDiscoveryIntegrationTest {
+  @Rule
+  public TemporaryFolder tmpDir  = new TemporaryFolder();
 
+  @Test
   public void testSimple() throws Exception {
 //    final File result = doTest("simple", "-Dorg.jetbrains.instrumentation.trace.file.version=2");
     final File result = doTest("simple");
@@ -63,6 +68,7 @@ public class SingleFileTestDiscoveryIntegrationTest extends TestCase {
     );
   }
 
+  @Test
   public void testSimpleExcludeLibs() throws Exception {
     final File result = doTest("simple",
         "-Dtest.discovery.include.class.patterns=Test.*;Class.*",
@@ -105,15 +111,6 @@ public class SingleFileTestDiscoveryIntegrationTest extends TestCase {
     }
   }
 
-  @Override
-  protected void tearDown() throws Exception {
-    for (File file : myToRemove) {
-      FileUtil.delete(file);
-    }
-    myToRemove.clear();
-    super.tearDown();
-  }
-
   @NotNull
   private static File getTestData(@NotNull String directory) {
     final File file = new File(new File("").getAbsoluteFile(), "testData/testDiscovery/" + directory);
@@ -123,8 +120,7 @@ public class SingleFileTestDiscoveryIntegrationTest extends TestCase {
 
   private File doTest(final String directory, String... additionalJavaOptions) throws Exception {
     final File testData = getTestData(directory);
-    final File generated = createTempDir();
-    myToRemove.add(generated);
+    final File generated = tmpDir.newFolder();
 
     File dataFile = new File(generated, "td.ijtc");
     assertThat(dataFile).doesNotExist();
@@ -146,7 +142,7 @@ public class SingleFileTestDiscoveryIntegrationTest extends TestCase {
     }
 
     if (Main.compile(args.toArray(new String[0])) != 0) {
-      fail("Compilation failed");
+      Assert.fail("Compilation failed");
     }
 
 
@@ -155,24 +151,24 @@ public class SingleFileTestDiscoveryIntegrationTest extends TestCase {
     return dataFile;
   }
 
-  @NotNull
-  private File createTempDir() throws IOException {
-    final File file = File.createTempFile("test-discovery-", "-dir");
-    assertTrue(file.delete());
-    assertTrue(file.mkdirs());
-    file.deleteOnExit();
-    return file;
-  }
-
   static void runTestDiscovery(String testDataPath, File traceFile, String testClass, List<String> additionalJavaOptions) throws IOException, InterruptedException {
     String javaHome = System.getenv("JAVA_HOME");
     if (javaHome == null) {
-      fail("JAVA_HOME environment variable needs to be set");
+      Assert.fail("JAVA_HOME environment variable needs to be set");
     }
     final String exePath = javaHome + File.separator + "bin" + File.separator + "java";
 
-    final String agentJar = ResourceUtil.getResourceRoot(TestDiscoveryProjectData.class);
-    assertThat(agentJar).isNotNull().matches(".*/test-discovery-agent(-[0-9.]+)?\\.jar");
+    File dist = new File("../dist");
+    File[] jars = dist.listFiles(new FilenameFilter() {
+      public boolean accept(File dir, String name) {
+        return name.startsWith("test-discovery-agent");
+      }
+    });
+
+    if (jars == null || jars.length != 1) {
+      throw new RuntimeException("Test discovery agent does not exist. Please rebuild all artifacts to build it.");
+    }
+    String agentJar = jars[0].getCanonicalPath();
 
     final ArrayList<String> args = new ArrayList<String>();
     args.add(exePath);
@@ -198,7 +194,7 @@ public class SingleFileTestDiscoveryIntegrationTest extends TestCase {
     printStdout(process);
     if (process.exitValue() != 0) {
       process.destroy();
-      fail("Exit code != 0");
+      Assert.fail("Exit code != 0");
     }
     process.destroy();
 
