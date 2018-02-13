@@ -16,22 +16,17 @@
 
 package com.intellij.rt.coverage.util;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.io.File;
 
 public class FileUtil {
-  public static void delete(@Nullable File file) {
-    if (file == null) return;
-    if (!file.exists()) return;
-
-    if (file.isDirectory()) {
-      final File[] files = file.listFiles();
-      if (files != null) for (File f : files) {
-        delete(f);
+  public static void waitUntilFileCreated(File traceFile) throws InterruptedException {
+    int retries = 0;
+    while (!traceFile.exists()) {
+      Thread.sleep(1000);
+      retries++;
+      if (retries > 10) {
+        throw new RuntimeException("Timeout waiting for coverage data file to be created");
       }
-    } else {
-      file.delete();
     }
   }
 }

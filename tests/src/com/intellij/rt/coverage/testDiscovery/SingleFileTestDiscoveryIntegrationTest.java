@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.testDiscovery;
 
 import com.intellij.rt.coverage.data.SingleTrFileReader;
+import com.intellij.rt.coverage.util.FileUtil;
 import com.intellij.rt.coverage.util.ProcessUtil;
 import com.intellij.rt.coverage.util.ResourceUtil;
 import com.intellij.rt.coverage.util.StringUtil;
@@ -170,13 +171,6 @@ public class SingleFileTestDiscoveryIntegrationTest {
 
     ProcessUtil.execJavaProcess(args.toArray(new String[0]));
 
-    int retries = 0;
-    while (!traceFile.exists()) {
-      Thread.sleep(1000);
-      retries++;
-      if (retries > 10) {
-        throw new RuntimeException("Timeout waiting for coverage data file to be created");
-      }
-    }
+    FileUtil.waitUntilFileCreated(traceFile);
   }
 }

@@ -19,6 +19,8 @@ package com.intellij.rt.coverage;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.testDiscovery.SingleFileTestDiscoveryIntegrationTest;
+import com.intellij.rt.coverage.util.FileUtil;
 import com.intellij.rt.coverage.util.ProcessUtil;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.ResourceUtil;
@@ -198,14 +200,7 @@ public class CoverageStatusTest extends TestCase {
 
     ProcessUtil.execJavaProcess(commandLine);
 
-    int retries = 0;
-    while (!coverageDataFile.exists()) {
-      Thread.sleep(1000);
-      retries++;
-      if (retries > 10) {
-        throw new RuntimeException("Timeout waiting for coverage data file to be created");
-      }
-    }
+    FileUtil.waitUntilFileCreated(coverageDataFile);
     final ProjectData projectInfo = ProjectDataLoader.load(coverageDataFile);
     assert projectInfo != null;
     return projectInfo;
