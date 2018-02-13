@@ -35,7 +35,7 @@ public class CoverageIOUtil {
   }
 
 
-  public static String readString(DataInput stream) throws IOException {
+  private static String readString(DataInput stream) throws IOException {
     int length = stream.readInt();
     if (length == -1) return null;
 
@@ -50,7 +50,7 @@ public class CoverageIOUtil {
     return new String(chars);
   }
 
-  public static void writeString(String s, DataOutput stream) throws IOException {
+  private static void writeString(DataOutput stream, String s) throws IOException {
     if (s == null) {
       stream.writeInt(-1);
       return;
@@ -91,7 +91,7 @@ public class CoverageIOUtil {
       }
       catch (UTFDataFormatException e) {
         storage.writeUTF(LONGER_THAN_64K_MARKER);
-        writeString(value, storage);
+        writeString(storage, value);
       }
     }
   }
