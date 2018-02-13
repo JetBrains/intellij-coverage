@@ -17,6 +17,8 @@
 package com.intellij.rt.coverage.util;
 
 import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.net.URL;
 
 public class ResourceUtil {
@@ -108,5 +110,20 @@ public class ResourceUtil {
 
   public static String getResourceRoot(final Class aClass) {
     return getResourceRoot(aClass, "/" + aClass.getName().replace('.', '/') + ".class");
+  }
+
+  public static String getAgentPath(final String agentName) throws IOException {
+    File dist = new File("../dist");
+    File[] jars = dist.listFiles(new FilenameFilter() {
+      public boolean accept(File dir, String name) {
+        return name.startsWith(agentName);
+      }
+    });
+
+    if (jars == null || jars.length != 1) {
+      throw new RuntimeException("\"" + agentName + "\" agent does not exist. Please rebuild all artifacts to build it.");
+    }
+
+    return jars[0].getCanonicalPath();
   }
 }

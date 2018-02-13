@@ -158,18 +158,7 @@ public class SingleFileTestDiscoveryIntegrationTest {
       Assert.fail("JAVA_HOME environment variable needs to be set");
     }
     final String exePath = javaHome + File.separator + "bin" + File.separator + "java";
-
-    File dist = new File("../dist");
-    File[] jars = dist.listFiles(new FilenameFilter() {
-      public boolean accept(File dir, String name) {
-        return name.startsWith("test-discovery-agent");
-      }
-    });
-
-    if (jars == null || jars.length != 1) {
-      throw new RuntimeException("Test discovery agent does not exist. Please rebuild all artifacts to build it.");
-    }
-    String agentJar = jars[0].getCanonicalPath();
+    String agentJar = ResourceUtil.getAgentPath("test-discovery-agent");
 
     final ArrayList<String> args = new ArrayList<String>();
     args.add(exePath);
