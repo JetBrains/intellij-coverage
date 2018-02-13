@@ -19,6 +19,7 @@ package com.intellij.rt.coverage;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.ProcessUtil;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.ResourceUtil;
 import com.sun.tools.javac.Main;
@@ -212,22 +213,8 @@ public class CoverageStatusTest extends TestCase {
         "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" false false false "
             + sampling + " " + patterns,
         "-classpath", testDataPath, classToRun};
-    StringBuffer cmd = new StringBuffer();
-    for (String s : commandLine) {
-      cmd.append(s).append(" ");
-    }
-    System.out.println(cmd);
 
-    final Process process = Runtime.getRuntime().exec(commandLine);
-    process.waitFor();
-
-    if (process.exitValue() != 0) {
-      printStdout(process);
-      process.destroy();
-      throw new RuntimeException("Exit code != 0");
-    }
-
-    process.destroy();
+    ProcessUtil.execProcess(commandLine);
 
     int retries = 0;
     while (!coverageDataFile.exists()) {
@@ -240,19 +227,5 @@ public class CoverageStatusTest extends TestCase {
     final ProjectData projectInfo = ProjectDataLoader.load(coverageDataFile);
     assert projectInfo != null;
     return projectInfo;
-  }
-
-  private static void printStdout(Process process) throws IOException {
-    BufferedReader output = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-    String str;
-
-    while ((str = output.readLine()) != null) {
-      System.out.println(str);
-    }
-
-    while ((str = error.readLine()) != null) {
-      System.out.println(str);
-    }
   }
 }

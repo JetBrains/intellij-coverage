@@ -18,6 +18,7 @@ package com.intellij.rt.coverage.testDiscovery;
 
 import com.intellij.rt.coverage.data.SingleTrFileReader;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
+import com.intellij.rt.coverage.util.ProcessUtil;
 import com.intellij.rt.coverage.util.ResourceUtil;
 import com.intellij.rt.coverage.util.StringUtil;
 import com.sun.tools.javac.Main;
@@ -185,18 +186,7 @@ public class SingleFileTestDiscoveryIntegrationTest {
     args.add("org.junit.runner.JUnitLauncher");
     args.add(testClass);
 
-    final String[] argsArray = args.toArray(new String[0]);
-    System.out.println(StringUtil.join(" ", argsArray));
-
-    final Process process = Runtime.getRuntime().exec(argsArray);
-    process.waitFor();
-
-    printStdout(process);
-    if (process.exitValue() != 0) {
-      process.destroy();
-      Assert.fail("Exit code != 0");
-    }
-    process.destroy();
+    ProcessUtil.execProcess(args.toArray(new String[0]));
 
     int retries = 0;
     while (!traceFile.exists()) {
@@ -207,19 +197,4 @@ public class SingleFileTestDiscoveryIntegrationTest {
       }
     }
   }
-
-  private static void printStdout(Process process) throws IOException {
-    BufferedReader output = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-    String str;
-
-    while ((str = output.readLine()) != null) {
-      System.out.println(str);
-    }
-
-    while ((str = error.readLine()) != null) {
-      System.out.println(str);
-    }
-  }
-
 }
