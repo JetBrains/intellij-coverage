@@ -22,21 +22,25 @@ import java.io.DataInput;
 import java.io.IOException;
 
 public abstract class SocketTestDataReader {
-  protected void processTestName(String name) {}
+  protected void processTestName(int testClassId, int testMethodId) {}
 
   protected void processUsedMethod(int classId, int methodId) {}
 
   protected void processEnumeratedName(int id, String name) {}
 
   public static void read(DataInput in, final SocketTestDataReader reader) throws IOException {
-    // read test name
-    reader.processTestName(CoverageIOUtil.readUTFFast(in));
     // read enumerator increment
     TestDiscoveryIOUtil.readDictionary(in, new TestDiscoveryIOUtil.DictionaryProcessor() {
       public void process(int id, String name) {
         reader.processEnumeratedName(id, name);
       }
     });
+
+    // read test name
+    int testClassName = CoverageIOUtil.readINT(in);
+    int testMethodName = CoverageIOUtil.readINT(in);
+    reader.processTestName(testClassName, testMethodName);
+
     // read used methods
     int classCount = CoverageIOUtil.readINT(in);
     while (classCount-- > 0) {

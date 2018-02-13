@@ -132,6 +132,7 @@ public class SingleFileTestDiscoveryIntegrationTest {
 
     List<String> fullJavaOptions = new ArrayList<String>();
     Collections.addAll(fullJavaOptions, javaOptions);
+    // args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007");
     fullJavaOptions.add("-Dtest.discovery.data.listener=com.intellij.rt.coverage.data.SingleTrFileDiscoveryDataListener");
     fullJavaOptions.add("-Dorg.jetbrains.instrumentation.trace.file=" + traceDataFile.getAbsolutePath());
 
