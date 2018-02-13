@@ -33,7 +33,7 @@ import org.junit.runner.JUnitLauncher;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -120,57 +120,24 @@ public class SingleFileTestDiscoveryIntegrationTest {
   }
 
   private File doTest(final String directory, String... additionalJavaOptions) throws Exception {
-    final File testData = getTestData(directory);
-    final File generated = tmpDir.newFolder();
-
-    File dataFile = new File(generated, "td.ijtc");
-    assertThat(dataFile).doesNotExist();
-
-    final File[] sources = testData.listFiles(new FilenameFilter() {
-      public boolean accept(File dir, String name) {
-        return name.endsWith(".java");
-      }
-    });
-    assertThat(sources).isNotNull().isNotEmpty();
-
-    final ArrayList<String> args = new ArrayList<String>();
-    args.add("-d");
-    args.add(generated.getAbsolutePath());
-    args.add("-cp");
-    args.add(ResourceUtil.getResourceRoot(TestCase.class)); // junit
-    for (File source : sources) {
-      args.add(source.getAbsolutePath());
-    }
-
-    if (Main.compile(args.toArray(new String[0])) != 0) {
-      Assert.fail("Compilation failed");
-    }
-
-
-    runTestDiscovery(generated.getAbsolutePath(), dataFile, "Test", Arrays.asList(additionalJavaOptions));
-
-    return dataFile;
+    return runTestDiscoveryWithTraceFileOutput(directory, additionalJavaOptions);
   }
 
-  private static void runTestDiscovery(String testDataPath, File traceFile, String testClass, List<String> additionalJavaOptions) throws IOException, InterruptedException {
-    String agentJar = ResourceUtil.getAgentPath("test-discovery-agent");
+  private File runTestDiscoveryWithTraceFileOutput(String directory, String... javaOptions) throws IOException, InterruptedException {
+    final File testData = getTestData(directory);
+    final File outputDir = tmpDir.newFolder();
 
-    final ArrayList<String> args = new ArrayList<String>();
-    // args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007");
-    args.add("-javaagent:" + agentJar);
-    args.add("-classpath");
-    args.add(StringUtil.join(":", testDataPath,
-        ResourceUtil.getResourceRoot(JUnitLauncher.class),
-        ResourceUtil.getResourceRoot(TestCase.class),
-        ResourceUtil.getResourceRoot(Matcher.class)));
-    args.add("-Dtest.discovery.data.listener=com.intellij.rt.coverage.data.SingleTrFileDiscoveryDataListener");
-    args.add("-Dorg.jetbrains.instrumentation.trace.file=" + traceFile.getAbsolutePath());
-    args.addAll(additionalJavaOptions);
-    args.add("org.junit.runner.JUnitLauncher");
-    args.add(testClass);
+    File traceDataFile = tmpDir.newFile("td.ijtc");
+    TestDiscoveryTestUtil.compileTestData(testData, outputDir);
 
-    ProcessUtil.execJavaProcess(args.toArray(new String[0]));
+    List<String> fullJavaOptions = new ArrayList<String>();
+    Collections.addAll(fullJavaOptions, javaOptions);
+    fullJavaOptions.add("-Dtest.discovery.data.listener=com.intellij.rt.coverage.data.SingleTrFileDiscoveryDataListener");
+    fullJavaOptions.add("-Dorg.jetbrains.instrumentation.trace.file=" + traceDataFile.getAbsolutePath());
 
-    FileUtil.waitUntilFileCreated(traceFile);
+    TestDiscoveryTestUtil.runTestDiscovery(outputDir.getAbsolutePath(), "Test", fullJavaOptions);
+
+    FileUtil.waitUntilFileCreated(traceDataFile);
+    return traceDataFile;
   }
 }
