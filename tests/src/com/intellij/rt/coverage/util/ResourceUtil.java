@@ -27,10 +27,29 @@ public class ResourceUtil {
   private static final String JAR_DELIMITER = "!";
   private static final String PROTOCOL_DELIMITER = ":";
 
+  public static String getResourceRoot(final Class aClass) {
+    return getResourceRoot(aClass, "/" + aClass.getName().replace('.', '/') + ".class");
+  }
+
+  public static String getAgentPath(final String agentName) throws IOException {
+    File dist = new File("../dist");
+    File[] jars = dist.listFiles(new FilenameFilter() {
+      public boolean accept(File dir, String name) {
+        return name.startsWith(agentName);
+      }
+    });
+
+    if (jars == null || jars.length != 1) {
+      throw new RuntimeException("\"" + agentName + "\" agent does not exist. Please rebuild all artifacts to build it.");
+    }
+
+    return jars[0].getCanonicalPath();
+  }
+
   /**
    * Attempts to detect classpath entry which contains given resource
    */
-  public static String getResourceRoot(Class context, String path) {
+  private static String getResourceRoot(Class context, String path) {
     URL url = context.getResource(path);
     if (url == null) {
       url = ClassLoader.getSystemResource(path.substring(1));
@@ -106,24 +125,5 @@ public class ResourceUtil {
       currentTextIndex = startOfPattern + pattern.length();
     }
     return buf.toString();
-  }
-
-  public static String getResourceRoot(final Class aClass) {
-    return getResourceRoot(aClass, "/" + aClass.getName().replace('.', '/') + ".class");
-  }
-
-  public static String getAgentPath(final String agentName) throws IOException {
-    File dist = new File("../dist");
-    File[] jars = dist.listFiles(new FilenameFilter() {
-      public boolean accept(File dir, String name) {
-        return name.startsWith(agentName);
-      }
-    });
-
-    if (jars == null || jars.length != 1) {
-      throw new RuntimeException("\"" + agentName + "\" agent does not exist. Please rebuild all artifacts to build it.");
-    }
-
-    return jars[0].getCanonicalPath();
   }
 }

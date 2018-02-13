@@ -151,7 +151,7 @@ public class SingleFileTestDiscoveryIntegrationTest {
     return dataFile;
   }
 
-  static void runTestDiscovery(String testDataPath, File traceFile, String testClass, List<String> additionalJavaOptions) throws IOException, InterruptedException {
+  private static void runTestDiscovery(String testDataPath, File traceFile, String testClass, List<String> additionalJavaOptions) throws IOException, InterruptedException {
     String agentJar = ResourceUtil.getAgentPath("test-discovery-agent");
 
     final ArrayList<String> args = new ArrayList<String>();
