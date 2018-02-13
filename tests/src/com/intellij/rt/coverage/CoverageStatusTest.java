@@ -188,22 +188,15 @@ public class CoverageStatusTest extends TestCase {
 
   static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
                                  String classToRun, final boolean sampling) throws IOException, InterruptedException {
-    String javaHome = System.getenv("JAVA_HOME");
-    if (javaHome == null) {
-      throw new RuntimeException("JAVA_HOME environment variable needs to be set");
-    }
-    final String exePath = javaHome + File.separator + "bin" + File.separator + "java";
-
     String coverageAgentPath = ResourceUtil.getAgentPath("coverage-agent");
 
     String[] commandLine = {
-        exePath,
 //        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
         "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" false false false "
             + sampling + " " + patterns,
         "-classpath", testDataPath, classToRun};
 
-    ProcessUtil.execProcess(commandLine);
+    ProcessUtil.execJavaProcess(commandLine);
 
     int retries = 0;
     while (!coverageDataFile.exists()) {

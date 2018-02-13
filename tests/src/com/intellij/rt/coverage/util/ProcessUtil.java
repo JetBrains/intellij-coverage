@@ -16,13 +16,25 @@
 
 package com.intellij.rt.coverage.util;
 
+import org.junit.Assert;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class ProcessUtil {
-  public static void execProcess(String[] cmd) throws InterruptedException, IOException {
-    final Process process = Runtime.getRuntime().exec(cmd);
+  public static void execJavaProcess(String[] cmd) throws InterruptedException, IOException {
+    String javaHome = System.getenv("JAVA_HOME");
+    if (javaHome == null) {
+      Assert.fail("JAVA_HOME environment variable needs to be set");
+    }
+    final String exePath = javaHome + File.separator + "bin" + File.separator + "java";
+
+    String[] fullCmd = new String[cmd.length + 1];
+    fullCmd[0] = exePath;
+    System.arraycopy(cmd, 0, fullCmd, 1, cmd.length);
+    final Process process = Runtime.getRuntime().exec(fullCmd);
     process.waitFor();
 
     if (process.exitValue() != 0) {
