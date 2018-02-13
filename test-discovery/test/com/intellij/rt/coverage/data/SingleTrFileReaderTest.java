@@ -65,15 +65,6 @@ public class SingleTrFileReaderTest {
     assertThat(data).doesNotContainNull().containsExactly("A.B", "B", "C");
   }
 
-  @Test
-  public void testV2TestWithOneMethod() throws IOException {
-    final MySingleTrFileReader reader = getReader(SingleTrFileDiscoveryDataListenerTest.V2_SINGLE_TEST_SINGLE_METHOD);
-    reader.read();
-    assertThat(reader.myData).isNotEmpty();
-    final String[] data = reader.myData.iterator().next();
-    assertThat(data).doesNotContainNull().containsExactly("A.B", "A", "B");
-  }
-
   private MySingleTrFileReader getReader(byte[] content) throws IOException {
     return new MySingleTrFileReader(SingleTrFileReaderTest.createFileWithContent(content));
   }

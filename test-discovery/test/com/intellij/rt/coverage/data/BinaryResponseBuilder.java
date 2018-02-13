@@ -41,7 +41,7 @@ class BinaryResponseBuilder {
   }
 
   public BinaryResponseBuilder withTestResultStart(int classId, int methodId, int count) {
-    myBytes.add((byte) 0x2);
+    myBytes.add((byte) 0x3);
     myBytes.add((byte) classId);
     myBytes.add((byte) methodId);
     myBytes.add((byte) count);
@@ -59,28 +59,8 @@ class BinaryResponseBuilder {
     return this;
   }
 
-
-  public BinaryResponseBuilder withDictionaryStart(int count) {
-    myBytes.add((byte) 0x3);
-    myDictionaryOffset = (byte) myBytes.size();
-    myBytes.add((byte) count);
-    return this;
-  }
-
-  public BinaryResponseBuilder withDictionaryEnd() {
-    myBytes.add((byte) 0);
-    myBytes.add((byte) 0);
-    myBytes.add((byte) 0);
-    myBytes.add((byte) 0);
-    myBytes.add((byte) 0);
-    myBytes.add((byte) 0);
-    myBytes.add((byte) 0);
-    myBytes.add(myDictionaryOffset);
-    return this;
-  }
-
   public BinaryResponseBuilder withIncrementalDictionaryStart(int count) {
-    myBytes.add((byte) 0x4);
+    myBytes.add((byte) 0x2);
     myBytes.add((byte) count);
     return this;
   }
@@ -95,6 +75,8 @@ class BinaryResponseBuilder {
   }
 
   public byte[] build() {
+    myBytes.add((byte) 0x00); // finish marker
+
     final byte[] result = new byte[myBytes.size()];
     final Iterator<Byte> iterator = myBytes.iterator();
     for (int i = 0; i < result.length; i++) {

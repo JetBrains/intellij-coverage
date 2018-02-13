@@ -16,18 +16,11 @@
 
 package com.intellij.rt.coverage.data;
 
-import com.intellij.rt.coverage.util.CoverageIOUtil;
-import org.jetbrains.coverage.gnu.trove.TIntIntHashMap;
-import org.jetbrains.coverage.gnu.trove.TIntIntIterator;
-import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
-import org.jetbrains.coverage.gnu.trove.TObjectIntProcedure;
-
 import java.io.*;
-import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListener {
+public class SingleTrFileDiscoveryDataListener extends TrProtocolTestDiscoveryDataListener {
   @SuppressWarnings("WeakerAccess")
   public static final String TRACE_FILE = "org.jetbrains.instrumentation.trace.file";
   @SuppressWarnings("WeakerAccess")
@@ -35,150 +28,64 @@ public class SingleTrFileDiscoveryDataListener implements TestDiscoveryDataListe
   @SuppressWarnings("WeakerAccess")
   public static final String FILE_VERSION = "org.jetbrains.instrumentation.trace.file.version";
 
-  private static final int VERSION = 0x1;
+  public static final byte HEADER_START = 0x49; // "I"
+  public static final byte[] HEADER_TAIL = new byte[]{0x4a, 0x54, 0x43}; // "JTC"
 
-  static final byte[] HEADER = new byte[]{0x49, 0x4a, 0x54, 0x43}; // "IJTC"
+  private static final int DEFAULT_VERSION = 0x1;
 
-  static final int START_MARKER = 0x1;
-  static final int TEST_FINISHED_MARKER = 0x2;
-  static final int NAMES_DICTIONARY_MARKER = 0x3;
-  static final int NAMES_DICTIONARY_PART_MARKER = 0x4;
+  private final LongDataOutputStream myStream;
+  private final NameEnumerator.Incremental myNameEnumerator;
 
-  private final LongDataOutputStream stream;
-  private final NameEnumerator nameEnumerator;
-  private final byte version;
 
   public SingleTrFileDiscoveryDataListener() throws Exception {
+    super(Byte.parseByte(System.getProperty(FILE_VERSION, String.valueOf(DEFAULT_VERSION))));
     final File myTraceFile = getCanonicalFile(new File(System.getProperty(TRACE_FILE, "td.ijtc")));
     int bufferSize = Integer.parseInt(System.getProperty(BUFFER_SIZE, "32768"));
+    //noinspection ResultOfMethodCallIgnored
     myTraceFile.getParentFile().mkdirs();
-    version = Byte.parseByte(System.getProperty(FILE_VERSION, String.valueOf(VERSION)));
-    stream = new LongDataOutputStream(new BufferedOutputStream(new FileOutputStream(myTraceFile), bufferSize));
-    nameEnumerator = (version == 2) ? new NameEnumerator.Incremental() : new NameEnumerator();
-    start();
+    myStream = new LongDataOutputStream(new BufferedOutputStream(new FileOutputStream(myTraceFile), bufferSize));
+    myNameEnumerator = new NameEnumerator.Incremental();
+    start(myStream);
   }
 
   // For tests
   SingleTrFileDiscoveryDataListener(LongDataOutputStream stream) throws Exception {
-    this(stream, (byte) VERSION);
+    this(stream, (byte) DEFAULT_VERSION);
   }
 
   // For tests
   SingleTrFileDiscoveryDataListener(LongDataOutputStream stream, byte version) throws Exception {
-    this.version = version;
-    this.stream = stream;
-    nameEnumerator = new NameEnumerator.Incremental();
-    start();
-  }
-
-  private void start() throws IOException {
-    this.stream.write(HEADER);
-    this.stream.writeByte(START_MARKER);
-    this.stream.writeByte(this.version);
+    super(version);
+    myStream = stream;
+    myNameEnumerator = new NameEnumerator.Incremental();
+    start(myStream);
   }
 
   public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws Exception {
-    final int testClassNameId = nameEnumerator.enumerate(className);
-    final int testMethodNameId = nameEnumerator.enumerate(methodName);
-
-    // Enumerator may send className and methodName if it's first test in class or this test caused classloading
-    // Otherwise className and methodName was already sent with one of previous calls
-    writeDictionaryIncrementIfSupported();
-
-    stream.writeByte(TEST_FINISHED_MARKER);
-    CoverageIOUtil.writeINT(stream, testClassNameId);
-    CoverageIOUtil.writeINT(stream, testMethodNameId);
-    writeVisitedMethod(classToVisitedMethods, classToMethodNames, stream);
-  }
-
-  private boolean writeDictionaryIncrementIfSupported() throws IOException {
-    if (version != 2) return false;
-    final List<NameEnumerator.Incremental.NameAndId> increment = ((NameEnumerator.Incremental) nameEnumerator).getAndClearDataIncrement();
-    if (increment.isEmpty()) return true;
-    stream.writeByte(NAMES_DICTIONARY_PART_MARKER);
-    CoverageIOUtil.writeINT(stream, increment.size());
-    for (NameEnumerator.Incremental.NameAndId nameAndId : increment) {
-      CoverageIOUtil.writeINT(stream, nameAndId.getId());
-      CoverageIOUtil.writeUTF(stream, nameAndId.getName());
-    }
-    return true;
+    writeTestFinished(myStream, className, methodName, classToVisitedMethods, classToMethodNames);
   }
 
   public void testsFinished() throws IOException {
     try {
-      if (!writeDictionaryIncrementIfSupported()) {
-        writeFullDictionary();
-      }
+      writeDictionaryIncrementIfSupported(myStream);
+      finish(myStream);
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
-      stream.close();
+      myStream.close();
     }
   }
 
-  private void writeFullDictionary() throws IOException {
-    stream.writeByte(NAMES_DICTIONARY_MARKER);
-    long dictStartOffset = stream.total();
-    TObjectIntHashMap<String> namesMap = nameEnumerator.getNamesMap();
-    CoverageIOUtil.writeINT(stream, namesMap.size());
-    namesMap.forEachEntry(new TObjectIntProcedure<String>() {
-      public boolean execute(String s, int i) {
-        try {
-          CoverageIOUtil.writeINT(stream, i);
-          CoverageIOUtil.writeUTF(stream, s);
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-        return true;
-      }
-    });
-    stream.writeLong(dictStartOffset);
+  public NameEnumerator.Incremental getIncrementalNameEnumerator() {
+    return myNameEnumerator;
   }
 
-  public NameEnumerator getIncrementalNameEnumerator() {
-    return nameEnumerator;
+  protected void start(DataOutput output) throws IOException {
+    output.writeByte(HEADER_START);
+    output.write(HEADER_TAIL);
+    super.start(output);
   }
 
-  private void writeVisitedMethod(Map<Integer, boolean[]> classToVisitedMethods,
-                                  Map<Integer, int[]> classToMethodNames,
-                                  DataOutput os) throws IOException {
-    TIntIntHashMap classToUsedMethods = new TIntIntHashMap();
-    for (Map.Entry<Integer, boolean[]> o : classToVisitedMethods.entrySet()) {
-      boolean[] used = o.getValue();
-      int usedMethodsCount = 0;
-
-      for (boolean anUsed : used) {
-        if (anUsed) ++usedMethodsCount;
-      }
-
-      if (usedMethodsCount > 0) {
-        classToUsedMethods.put(o.getKey(), usedMethodsCount);
-      }
-    }
-
-    final int size = classToUsedMethods.size();
-    CoverageIOUtil.writeINT(os, size);
-    if (size == 0) return;
-    final TIntIntIterator iterator = classToUsedMethods.iterator();
-    while (iterator.hasNext()) {
-      iterator.advance();
-      final int className = iterator.key();
-      int usedMethodsCount = iterator.value();
-
-      CoverageIOUtil.writeINT(os, className);
-      CoverageIOUtil.writeINT(os, usedMethodsCount);
-
-      final int[] methodNames = classToMethodNames.get(className);
-      final boolean[] used = classToVisitedMethods.get(className);
-
-      for (int i = 0, len = used.length; i < len; ++i) {
-        // we check usedMethodCount here since used can still be updated by other threads
-        if (used[i] && usedMethodsCount-- > 0) {
-          CoverageIOUtil.writeINT(os, methodNames[i]);
-        }
-      }
-    }
-  }
 
   private static File getCanonicalFile(File file) {
     try {

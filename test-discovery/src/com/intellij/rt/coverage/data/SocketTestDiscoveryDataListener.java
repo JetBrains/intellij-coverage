@@ -16,9 +16,7 @@
 
 package com.intellij.rt.coverage.data;
 
-import com.intellij.rt.coverage.util.CoverageIOUtil;
 import org.jetbrains.coverage.gnu.trove.TIntArrayList;
-import org.jetbrains.coverage.gnu.trove.TIntProcedure;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -28,27 +26,17 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
 @SuppressWarnings("unused")
-public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListener {
+public class SocketTestDiscoveryDataListener extends TrProtocolTestDiscoveryDataListener {
   private static final int SOCKET_BUFFER_SIZE = 16 * 1024;
   @SuppressWarnings("WeakerAccess")
   public static final String HOST_PROP = "test.discovery.data.host";
   @SuppressWarnings("WeakerAccess")
   public static final String PORT_PROP = "test.discovery.data.port";
-
-  @SuppressWarnings("WeakerAccess")
-  public static final byte START_MSG = 0;
-  @SuppressWarnings("WeakerAccess")
-  public static final byte FINISHED_MSG = 1;
-  @SuppressWarnings("WeakerAccess")
-  public static final byte TEST_FINISHED_MSG = 2;
-  @SuppressWarnings("WeakerAccess")
   public static final byte VERSION = 1;
 
   private final SocketChannel mySocket;
@@ -59,6 +47,7 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
   private final NameEnumerator.Incremental incrementalNameEnumerator = new NameEnumerator.Incremental();
 
   public SocketTestDiscoveryDataListener() throws IOException {
+    super(VERSION);
     String host = System.getProperty(HOST_PROP, "127.0.0.1");
     int port = Integer.parseInt(System.getProperty(PORT_PROP));
     mySelector = Selector.open();
@@ -120,83 +109,32 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
       }
     });
 
-    write(ByteBuffer.wrap(new byte[]{START_MSG, VERSION}));
+    final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
+    start(new DataOutputStream(baos));
+    write(baos.asByteBuffer());
   }
 
   public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws Exception {
-    final List<VisitedMethods> visitedMethods = new ArrayList<VisitedMethods>();
-    int[] methodNames = null;
-    for (Map.Entry<Integer, boolean[]> e : classToVisitedMethods.entrySet()) {
-      VisitedMethods currentMethods = null;
-      boolean[] markers = e.getValue();
-      for (int i = 0; i < markers.length; i++) {
-        boolean marker = markers[i];
-        if (marker) {
-          if (currentMethods == null) {
-            currentMethods = new VisitedMethods(e.getKey());
-            methodNames = classToMethodNames.get(e.getKey());
-            visitedMethods.add(currentMethods);
-          }
-          currentMethods.methodIds.add(methodNames[i]);
-        }
-      }
-    }
-
     try {
       final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
-      baos.write(TEST_FINISHED_MSG);
       final DataOutputStream dos = new DataOutputStream(baos);
-
-      final int testClassNameId = incrementalNameEnumerator.enumerate(className);
-      final int testMethodNameId = incrementalNameEnumerator.enumerate(methodName);
-
-      // Enumerator may send className and methodName if it's first test in class or this test caused classloading
-      // Otherwise className and methodName was already sent with one of previous calls
-      writeEnumeratorIncrement(dos);
-
-      CoverageIOUtil.writeINT(dos, testClassNameId);
-      CoverageIOUtil.writeINT(dos, testMethodNameId);
-      writeTestData(visitedMethods, dos);
+      writeTestFinished(dos, className, methodName, classToVisitedMethods, classToMethodNames);
 
       write(baos.asByteBuffer());
     } catch (IOException ignored) {
     }
   }
 
-  private void writeEnumeratorIncrement(DataOutputStream dos) throws IOException {
-    List<NameEnumerator.Incremental.NameAndId> increment = incrementalNameEnumerator.getAndClearDataIncrement();
-    CoverageIOUtil.writeINT(dos, increment.size());
-    for (NameEnumerator.Incremental.NameAndId nameAndId : increment) {
-      CoverageIOUtil.writeINT(dos, nameAndId.getId());
-      CoverageIOUtil.writeUTF(dos, nameAndId.getName());
-    }
-  }
-
-  private void writeTestData(List<VisitedMethods> visitedMethods, final DataOutputStream dos) throws IOException {
-
-    CoverageIOUtil.writeINT(dos, visitedMethods.size());
-    for (VisitedMethods ns : visitedMethods) {
-      CoverageIOUtil.writeINT(dos, ns.classId);
-      CoverageIOUtil.writeINT(dos, ns.methodIds.size());
-
-      final IOException[] exception = new IOException[] {null};
-      ns.methodIds.forEach(new TIntProcedure() {
-        public boolean execute(int methodId) {
-          try {
-            CoverageIOUtil.writeINT(dos, methodId);
-          } catch (IOException e) {
-            exception[0] = e;
-            return false;
-          }
-          return true;
-        }
-      });
-      if (exception[0] != null) throw exception[0];
-    }
-  }
-
   public void testsFinished() {
-    write(ByteBuffer.wrap(new byte[]{FINISHED_MSG}));
+    try {
+      final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
+      final DataOutputStream dos = new DataOutputStream(baos);
+      finish(dos);
+      write(baos.asByteBuffer());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
     myClosed = true;
     myExecutor.shutdown();
 
@@ -219,7 +157,7 @@ public class SocketTestDiscoveryDataListener implements TestDiscoveryDataListene
     }
   }
 
-  public NameEnumerator getIncrementalNameEnumerator() {
+  public NameEnumerator.Incremental getIncrementalNameEnumerator() {
     return incrementalNameEnumerator;
   }
 

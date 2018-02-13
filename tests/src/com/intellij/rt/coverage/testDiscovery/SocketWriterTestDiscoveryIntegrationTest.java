@@ -18,6 +18,7 @@ package com.intellij.rt.coverage.testDiscovery;
 
 import com.intellij.rt.coverage.data.SocketTestDataReader;
 import com.intellij.rt.coverage.data.SocketTestDiscoveryDataListener;
+import com.intellij.rt.coverage.data.TrProtocolTestDiscoveryDataListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.junit.Assert;
@@ -103,22 +104,26 @@ public class SocketWriterTestDiscoveryIntegrationTest {
           try {
             Socket socket = MyTestDiscoverySocketListener.this.socket.accept();
             InputStream inputStream = socket.getInputStream();
+            MyTestDataListener listener = new MyTestDataListener();
 
             while (socket.isConnected()) {
               int code = inputStream.read();
               if (code == -1) return;
               switch (code) {
-                case SocketTestDiscoveryDataListener.START_MSG:
+                case TrProtocolTestDiscoveryDataListener.START_MARKER:
                   // do nothing
                   Assert.assertEquals(SocketTestDiscoveryDataListener.VERSION, inputStream.read());
                   break;
-                case SocketTestDiscoveryDataListener.FINISHED_MSG:
+                case TrProtocolTestDiscoveryDataListener.FINISH_MARKER:
                   socket.close();
                   finished = true;
                   return;
-                case SocketTestDiscoveryDataListener.TEST_FINISHED_MSG:
-                  MyTestDataListener listener = new MyTestDataListener();
-                  SocketTestDataReader.read(new DataInputStream(inputStream), listener);
+                case TrProtocolTestDiscoveryDataListener.NAMES_DICTIONARY_PART_MARKER:
+                  SocketTestDataReader.readDictionary(new DataInputStream(inputStream), listener);
+                  break;
+                case TrProtocolTestDiscoveryDataListener.TEST_FINISHED_MARKER:
+                  SocketTestDataReader.readTestData(new DataInputStream(inputStream), listener);
+                  break;
               }
             }
             socket.close();

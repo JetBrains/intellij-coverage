@@ -28,14 +28,16 @@ public abstract class SocketTestDataReader {
 
   protected void processEnumeratedName(int id, String name) {}
 
-  public static void read(DataInput in, final SocketTestDataReader reader) throws IOException {
+  public static void readDictionary(DataInput in, final SocketTestDataReader reader) throws IOException {
     // read enumerator increment
     TestDiscoveryIOUtil.readDictionary(in, new TestDiscoveryIOUtil.DictionaryProcessor() {
       public void process(int id, String name) {
         reader.processEnumeratedName(id, name);
       }
     });
+  }
 
+  public static void readTestData(DataInput in, final SocketTestDataReader reader) throws IOException {
     // read test name
     int testClassName = CoverageIOUtil.readINT(in);
     int testMethodName = CoverageIOUtil.readINT(in);

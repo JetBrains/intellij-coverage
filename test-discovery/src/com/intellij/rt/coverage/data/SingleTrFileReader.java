@@ -39,7 +39,7 @@ public class SingleTrFileReader {
     while (true) {
       final int read = input.read();
       if (read == -1) {
-        debug("stream ended while in zero state");
+        debug("stream ended before finish marker received");
         input.close();
         return;
       }
@@ -47,13 +47,10 @@ public class SingleTrFileReader {
       switch (msgType) {
         case SingleTrFileDiscoveryDataListener.START_MARKER:
           byte version = input.readByte();
-          debug("version: " + version);
-          if (version == 1) {
-            readDictionary();
-          }
+          debug("start marker, format version: " + version);
           break;
-        case SingleTrFileDiscoveryDataListener.NAMES_DICTIONARY_MARKER:
-          debug("test data ended");
+        case SingleTrFileDiscoveryDataListener.FINISH_MARKER:
+          debug("finish marker");
           input.close();
           return;
         case SingleTrFileDiscoveryDataListener.TEST_FINISHED_MARKER:
@@ -64,17 +61,18 @@ public class SingleTrFileReader {
           debug("partial dictionary received");
           readDictionary(input);
           break;
-        case 0x49: // I of IJTC
+        case SingleTrFileDiscoveryDataListener.HEADER_START:
           final byte[] jtc = new byte[3];
-          assert start;
-          assert input.read(jtc) == 3;
-          assert Arrays.equals(jtc, new byte[]{(byte) 0x4a, (byte) 0x54, (byte) 0x43,});
-          start = false;
-          debug("start marker");
+          if (!start) throw new IllegalStateException("File header is not expected here");
+          if (input.read(jtc) != 3) throw new IOException("Failed to read header fully");
+          if (!Arrays.equals(jtc, SingleTrFileDiscoveryDataListener.HEADER_TAIL))
+            throw new IOException("File header mismatch: I" + new String(jtc, "ASCII"));
+          debug("file header");
           break;
         default:
           throw new IllegalStateException(String.format("Unknown input: %2X", msgType));
       }
+      start = false;
     }
   }
 
@@ -98,31 +96,6 @@ public class SingleTrFileReader {
 
   private String readString(DataInputStream input) throws IOException {
     return dict.get(CoverageIOUtil.readINT(input));
-  }
-
-  private void readDictionary() throws IOException {
-    int size = 8;
-    RandomAccessFile r = null;
-    try {
-      r = new RandomAccessFile(file, "r");
-      if (r.length() < size + 1) {
-        throw new IOException("Dictionary not found: file is too small");
-      }
-      r.seek(r.length() - size);
-      long dictOffset = r.readLong();
-      if (dictOffset > r.length() || dictOffset < 0) {
-        throw new IOException("Dictionary not found: offset specified in the end of file is outside of file range");
-      }
-      r.seek(dictOffset - 1);
-      if (r.readByte() != SingleTrFileDiscoveryDataListener.NAMES_DICTIONARY_MARKER) {
-        throw new IOException("Dictionary not found: offset specified in the end of file is incorrect");
-      }
-      readDictionary(r);
-    } finally {
-      if (r != null) {
-        r.close();
-      }
-    }
   }
 
   private void readDictionary(DataInput r) throws IOException {

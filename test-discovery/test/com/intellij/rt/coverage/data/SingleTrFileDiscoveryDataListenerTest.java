@@ -27,55 +27,34 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SingleTrFileDiscoveryDataListenerTest {
 
   public static final byte[] EMPTY =
-      new BinaryResponseBuilder().withHeader().withStart(1)
-          .withDictionaryStart(0).withDictionaryEnd().build();
+      new BinaryResponseBuilder().withHeader().withStart(1).build();
 
   public static final byte[] NO_TESTS_ONE_NAME =
       new BinaryResponseBuilder().withHeader().withStart(1)
-          .withDictionaryStart(1)
-          .withDictionaryElement(1, 0x41, 0x42, 0x43) // 1 - ABC
-          .withDictionaryEnd().build();
-
-  public static final byte[] SINGLE_TEST_NO_METHODS =
-      new BinaryResponseBuilder().withHeader().withStart(1)
-          .withTestResultStart(1, 1, 0) // Test ABC.ABC, 0 coverage
-          .withDictionaryStart(1)
-          .withDictionaryElement(1, 0x41, 0x42, 0x43) // 1 - ABC
-          .withDictionaryEnd().build();
-
-  public static final byte[] SINGLE_TEST_SINGLE_METHOD =
-      new BinaryResponseBuilder().withHeader().withStart(1)
-          .withTestResultStart(1, 2, 1) // test A.B, 1 class
-          .withTestResultClass(2, 1) // Class B, 1 method
-          .withTestResultMethod(3) // Method C
-          .withDictionaryStart(3)
-          .withDictionaryElement(3, 0x43) // 3-C
-          .withDictionaryElement(2, 0x42) // 2-B
-          .withDictionaryElement(1, 0x41) // 1-A
-          .withDictionaryEnd().build();
-
-
-  public static final byte[] V2_EMPTY =
-      new BinaryResponseBuilder().withHeader().withStart(2).build();
-
-  public static final byte[] V2_NO_TESTS_ONE_NAME =
-      new BinaryResponseBuilder().withHeader().withStart(2)
           .withIncrementalDictionaryStart(1)
           .withDictionaryElement(1, 0x41, 0x42, 0x43) // 1-ABC
           .build();
 
-  public static final byte[] V2_SINGLE_TEST_SINGLE_METHOD =
-      new BinaryResponseBuilder().withHeader().withStart(2)
-          .withIncrementalDictionaryStart(2)
-          .withDictionaryElement(1, 0x41) // 1-A
-          .withDictionaryElement(2, 0x42) // 2-B
-          .withTestResultStart(1, 2, 1) // Test A.B, 1 class
-          .withTestResultClass(1, 1) // Class A, 1 method
-          .withTestResultMethod(2) // Method B
+  public static final byte[] SINGLE_TEST_NO_METHODS =
+      new BinaryResponseBuilder().withHeader().withStart(1)
+          .withIncrementalDictionaryStart(1)
+          .withDictionaryElement(1, 0x41, 0x42, 0x43) // 1-ABC
+          .withTestResultStart(1, 1, 0) // Test ABC.ABC, 0 coverage
           .build();
 
-  public static final byte[] V2_TWO_TESTS_INCREMENTAL_DICT =
-      new BinaryResponseBuilder().withHeader().withStart(2)
+  public static final byte[] SINGLE_TEST_SINGLE_METHOD =
+      new BinaryResponseBuilder().withHeader().withStart(1)
+          .withIncrementalDictionaryStart(3)
+          .withDictionaryElement(1, 0x41) // 1-A
+          .withDictionaryElement(2, 0x42) // 2-B
+          .withDictionaryElement(3, 0x43) // 3-C
+          .withTestResultStart(1, 2, 1) // Test A.B, 1 class
+          .withTestResultClass(2, 1) // Class B, 1 method
+          .withTestResultMethod(3) // Method C
+          .build();
+
+  public static final byte[] TWO_TESTS_INCREMENTAL_DICT =
+      new BinaryResponseBuilder().withHeader().withStart(1)
           .withIncrementalDictionaryStart(2)
           .withDictionaryElement(1, 0x41) // 1-A
           .withDictionaryElement(2, 0x42) // 2-B
@@ -86,28 +65,6 @@ public class SingleTrFileDiscoveryDataListenerTest {
           .withTestResultClass(1, 1) // Class A, 1 method
           .withTestResultMethod(1) // Method A
           .build();
-
-  private static final byte V1 = 0x1;
-  private static final byte V2 = 0x2;
-
-  @Test
-  public void testNoCoverage() throws Exception {
-    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final LongDataOutputStream dos = new LongDataOutputStream(baos);
-    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos);
-    listener.testsFinished();
-    assertThat(baos.toByteArray()).isEqualTo(EMPTY);
-  }
-
-  @Test
-  public void testOnlyEnumerator() throws Exception {
-    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final LongDataOutputStream dos = new LongDataOutputStream(baos);
-    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos);
-    listener.getIncrementalNameEnumerator().enumerate("ABC");
-    listener.testsFinished();
-    assertThat(baos.toByteArray()).isEqualTo(NO_TESTS_ONE_NAME);
-  }
 
   @Test
   public void testSingleTestNothingVisited() throws Exception {
@@ -126,34 +83,12 @@ public class SingleTrFileDiscoveryDataListenerTest {
   }
 
   @Test
-  public void testSingleTestOnlyOneClassVisited() throws Exception {
-    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final LongDataOutputStream dos = new LongDataOutputStream(baos);
-    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos);
-
-    listener.getIncrementalNameEnumerator().enumerate("A");
-    listener.getIncrementalNameEnumerator().enumerate("B");
-    listener.getIncrementalNameEnumerator().enumerate("C");
-
-    final Map<Integer, boolean[]> classes = new HashMap<Integer, boolean[]>();
-    final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();
-    classes.put(2, new boolean[]{true});
-    classes.put(3, new boolean[]{false});
-    methods.put(2, new int[]{3});
-    methods.put(3, new int[]{2});
-    listener.testFinished("A", "B", classes, methods);
-    listener.testsFinished();
-    assertThat(baos.toByteArray()).isEqualTo(SINGLE_TEST_SINGLE_METHOD);
-  }
-
-
-  @Test
   public void testV2NoCoverage() throws Exception {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     final LongDataOutputStream dos = new LongDataOutputStream(baos);
-    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos, V2);
+    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos);
     listener.testsFinished();
-    assertThat(baos.toByteArray()).isEqualTo(V2_EMPTY);
+    assertThat(baos.toByteArray()).isEqualTo(EMPTY);
   }
 
 
@@ -161,39 +96,41 @@ public class SingleTrFileDiscoveryDataListenerTest {
   public void testV2OnlyEnumerator() throws Exception {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     final LongDataOutputStream dos = new LongDataOutputStream(baos);
-    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos, V2);
+    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos);
     listener.getIncrementalNameEnumerator().enumerate("ABC");
     listener.testsFinished();
-    assertThat(baos.toByteArray()).isEqualTo(V2_NO_TESTS_ONE_NAME);
+    assertThat(baos.toByteArray()).isEqualTo(NO_TESTS_ONE_NAME);
   }
 
   @Test
   public void testV2SingleTestOnlyOneClassVisited() throws Exception {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     final LongDataOutputStream dos = new LongDataOutputStream(baos);
-    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos, V2);
+    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos);
 
     final String name1 = "A";
     final String name2 = "B";
+    final String name3 = "C";
     listener.getIncrementalNameEnumerator().enumerate(name1);
     listener.getIncrementalNameEnumerator().enumerate(name2);
+    listener.getIncrementalNameEnumerator().enumerate(name3);
 
     final Map<Integer, boolean[]> classes = new HashMap<Integer, boolean[]>();
     final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();
-    classes.put(1, new boolean[]{true});
-    classes.put(2, new boolean[]{false});
-    methods.put(1, new int[]{2});
-    methods.put(2, new int[]{1});
+    classes.put(1, new boolean[]{false});
+    classes.put(2, new boolean[]{true});
+    methods.put(1, new int[]{1});
+    methods.put(2, new int[]{3});
     listener.testFinished(name1, name2, classes, methods);
     listener.testsFinished();
-    assertThat(baos.toByteArray()).isEqualTo(V2_SINGLE_TEST_SINGLE_METHOD);
+    assertThat(baos.toByteArray()).isEqualTo(SINGLE_TEST_SINGLE_METHOD);
   }
 
   @Test
   public void testV2TwoTestsIncrementalDict() throws Exception {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     final LongDataOutputStream dos = new LongDataOutputStream(baos);
-    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos, V2);
+    final SingleTrFileDiscoveryDataListener listener = new SingleTrFileDiscoveryDataListener(dos);
 
     listener.getIncrementalNameEnumerator().enumerate("A");
 
@@ -207,6 +144,6 @@ public class SingleTrFileDiscoveryDataListenerTest {
 
 
     listener.testsFinished();
-    assertThat(baos.toByteArray()).isEqualTo(V2_TWO_TESTS_INCREMENTAL_DICT);
+    assertThat(baos.toByteArray()).isEqualTo(TWO_TESTS_INCREMENTAL_DICT);
   }
 }
