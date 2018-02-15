@@ -45,7 +45,7 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
 
   protected void writeTestFinished(DataOutput output, String className, String methodName,
                                    Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException {
-    NameEnumerator nameEnumerator = getIncrementalNameEnumerator();
+    NameEnumerator nameEnumerator = getNameEnumerator();
     final int testClassNameId = nameEnumerator.enumerate(className);
     final int testMethodNameId = nameEnumerator.enumerate(methodName);
 
@@ -69,10 +69,10 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
     // TODO: Write CRC or at least total length?
   }
 
-  public abstract NameEnumerator.Incremental getIncrementalNameEnumerator();
+  public abstract NameEnumerator.Incremental getNameEnumerator();
 
   protected void writeDictionaryIncrementIfSupported(DataOutput output) throws IOException {
-    final List<NameEnumerator.Incremental.NameAndId> increment = getIncrementalNameEnumerator().getAndClearDataIncrement();
+    final List<NameEnumerator.Incremental.NameAndId> increment = getNameEnumerator().getAndClearDataIncrement();
     if (increment.isEmpty()) return;
     output.writeByte(NAMES_DICTIONARY_PART_MARKER);
     writeEnumeratorIncrement(output, increment);

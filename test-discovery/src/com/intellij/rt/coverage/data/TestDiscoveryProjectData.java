@@ -34,7 +34,7 @@ public class TestDiscoveryProjectData {
         throw new RuntimeException("Property \"" + TEST_DISCOVERY_DATA_LISTENER_PROP + "\" should be specified");
       }
       myDataListener = (TestDiscoveryDataListener) Class.forName(testDiscoveryDataListener).newInstance();
-      myNameEnumerator = myDataListener.getIncrementalNameEnumerator();
+      myNameEnumerator = myDataListener.getNameEnumerator();
     } catch (InstantiationException e) {
       throw new RuntimeException(e);
     } catch (IllegalAccessException e) {

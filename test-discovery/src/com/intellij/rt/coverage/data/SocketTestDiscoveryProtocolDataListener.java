@@ -157,7 +157,7 @@ public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtoc
     }
   }
 
-  public NameEnumerator.Incremental getIncrementalNameEnumerator() {
+  public NameEnumerator.Incremental getNameEnumerator() {
     return incrementalNameEnumerator;
   }
 

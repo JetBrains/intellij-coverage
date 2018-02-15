@@ -26,5 +26,5 @@ public interface TestDiscoveryDataListener {
 
   void addMetadata(Map<String, String> metadata) throws Exception;
 
-  NameEnumerator getIncrementalNameEnumerator();
+  NameEnumerator getNameEnumerator();
 }

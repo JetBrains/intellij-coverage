@@ -78,7 +78,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
     final LongDataOutputStream dos = new LongDataOutputStream(baos);
     final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos);
     final String name = "ABC";
-    listener.getIncrementalNameEnumerator().enumerate(name);
+    listener.getNameEnumerator().enumerate(name);
     final Map<Integer, boolean[]> classes = new HashMap<Integer, boolean[]>();
     final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();
     classes.put(1, new boolean[]{false});
@@ -113,7 +113,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     final LongDataOutputStream dos = new LongDataOutputStream(baos);
     final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos);
-    listener.getIncrementalNameEnumerator().enumerate("ABC");
+    listener.getNameEnumerator().enumerate("ABC");
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(NO_TESTS_ONE_NAME);
   }
@@ -127,9 +127,9 @@ public class SingleTrFileDiscoveryDataListenerTest {
     final String name1 = "A";
     final String name2 = "B";
     final String name3 = "C";
-    listener.getIncrementalNameEnumerator().enumerate(name1);
-    listener.getIncrementalNameEnumerator().enumerate(name2);
-    listener.getIncrementalNameEnumerator().enumerate(name3);
+    listener.getNameEnumerator().enumerate(name1);
+    listener.getNameEnumerator().enumerate(name2);
+    listener.getNameEnumerator().enumerate(name3);
 
     final Map<Integer, boolean[]> classes = new HashMap<Integer, boolean[]>();
     final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();
@@ -148,7 +148,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
     final LongDataOutputStream dos = new LongDataOutputStream(baos);
     final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos);
 
-    listener.getIncrementalNameEnumerator().enumerate("A");
+    listener.getNameEnumerator().enumerate("A");
 
     final Map<Integer, boolean[]> classes = new HashMap<Integer, boolean[]>();
     final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();

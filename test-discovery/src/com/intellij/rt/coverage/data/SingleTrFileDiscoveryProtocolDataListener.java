@@ -76,7 +76,7 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
     }
   }
 
-  public NameEnumerator.Incremental getIncrementalNameEnumerator() {
+  public NameEnumerator.Incremental getNameEnumerator() {
     return myNameEnumerator;
   }
 
