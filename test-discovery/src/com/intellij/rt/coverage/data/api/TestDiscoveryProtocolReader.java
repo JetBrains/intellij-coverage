@@ -22,11 +22,11 @@ public interface TestDiscoveryProtocolReader {
 
   void testDiscoveryFinished();
 
-  MetadataReader getMetadataReader();
+  MetadataReader createMetadataReader();
 
-  NameEnumeratorReader getNameEnumeratorReader();
+  NameEnumeratorReader createNameEnumeratorReader();
 
-  TestDataReader getTestDataReader();
+  TestDataReader createTestDataReader(int classId, int methodId);
 
   interface MetadataReader {
     void accept(String key, String value);
@@ -37,12 +37,12 @@ public interface TestDiscoveryProtocolReader {
   }
 
   interface TestDataReader {
-    void processTestName(int testClassId, int testMethodId);
-
     void classProcessingStarted(int classId);
 
     void processUsedMethod(int methodId);
 
     void classProcessingFinished(int classId);
+
+    void testDataProcessed();
   }
 }
