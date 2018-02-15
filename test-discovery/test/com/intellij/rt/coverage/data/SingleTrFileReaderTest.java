@@ -73,7 +73,7 @@ public class SingleTrFileReaderTest {
     reader.read();
     assertThat(reader.myData).isNotEmpty();
     final String[] data = reader.myData.iterator().next();
-    assertThat(data).doesNotContainNull().containsExactly("A.B", "B", "C");
+    assertThat(data).doesNotContainNull().containsExactly("A", "B", "B", "C");
   }
 
   private MySingleTrFileReader getReader(byte[] content) throws IOException {
@@ -97,9 +97,8 @@ public class SingleTrFileReaderTest {
       myData = new ArrayList<String[]>(0);
     }
 
-    @Override
-    protected void processData(String testName, String className, String methodName) {
-      myData.add(new String[]{testName, className, methodName});
+    protected void processData(String testClassName, String testMethodName, String className, String methodName) {
+      myData.add(new String[]{testClassName, testMethodName, className, methodName});
     }
 
     @Override

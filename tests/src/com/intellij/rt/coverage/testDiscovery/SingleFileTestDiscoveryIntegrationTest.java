@@ -44,21 +44,21 @@ public class SingleFileTestDiscoveryIntegrationTest {
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
     assertThat(data).contains(
-        new String[]{"Test.test1", "Test", "test1"},
-        new String[]{"Test.test1", "ClassA", "method1"},
-        new String[]{"Test.test1", "ClassA", "method2"},
+        new String[]{"Test", "test1", "Test", "test1"},
+        new String[]{"Test", "test1", "ClassA", "method1"},
+        new String[]{"Test", "test1", "ClassA", "method2"},
 
-        new String[]{"Test.test2", "Test", "test2"},
-        new String[]{"Test.test2", "ClassB", "method1"},
-        new String[]{"Test.test2", "ClassB", "method2"},
+        new String[]{"Test", "test2", "Test", "test2"},
+        new String[]{"Test", "test2", "ClassB", "method1"},
+        new String[]{"Test", "test2", "ClassB", "method2"},
 
-        new String[]{"Test.test3", "Test", "test3"},
-        new String[]{"Test.test3", "ClassA", "methodR"},
-        new String[]{"Test.test3", "ClassA", "method1"},
-        new String[]{"Test.test3", "ClassA", "method2"},
-        new String[]{"Test.test3", "ClassB", "methodR"},
-        new String[]{"Test.test3", "ClassB", "method1"},
-        new String[]{"Test.test3", "ClassB", "method2"}
+        new String[]{"Test", "test3", "Test", "test3"},
+        new String[]{"Test", "test3", "ClassA", "methodR"},
+        new String[]{"Test", "test3", "ClassA", "method1"},
+        new String[]{"Test", "test3", "ClassA", "method2"},
+        new String[]{"Test", "test3", "ClassB", "methodR"},
+        new String[]{"Test", "test3", "ClassB", "method1"},
+        new String[]{"Test", "test3", "ClassB", "method2"}
     );
   }
 
@@ -72,21 +72,21 @@ public class SingleFileTestDiscoveryIntegrationTest {
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
     assertThat(data).containsOnly(
-        new String[]{"Test.test1", "Test", "test1"},
-        new String[]{"Test.test1", "ClassA", "method1"},
-        new String[]{"Test.test1", "ClassA", "method2"},
+        new String[]{"Test", "test1", "Test", "test1"},
+        new String[]{"Test", "test1", "ClassA", "method1"},
+        new String[]{"Test", "test1", "ClassA", "method2"},
 
-        new String[]{"Test.test2", "Test", "test2"},
-        new String[]{"Test.test2", "ClassB", "method1"},
-        new String[]{"Test.test2", "ClassB", "method2"},
+        new String[]{"Test", "test2", "Test", "test2"},
+        new String[]{"Test", "test2", "ClassB", "method1"},
+        new String[]{"Test", "test2", "ClassB", "method2"},
 
-        new String[]{"Test.test3", "Test", "test3"},
-        new String[]{"Test.test3", "ClassA", "methodR"},
-        new String[]{"Test.test3", "ClassA", "method1"},
-        new String[]{"Test.test3", "ClassA", "method2"},
-        new String[]{"Test.test3", "ClassB", "methodR"},
-        new String[]{"Test.test3", "ClassB", "method1"},
-        new String[]{"Test.test3", "ClassB", "method2"}
+        new String[]{"Test", "test3", "Test", "test3"},
+        new String[]{"Test", "test3", "ClassA", "methodR"},
+        new String[]{"Test", "test3", "ClassA", "method1"},
+        new String[]{"Test", "test3", "ClassA", "method2"},
+        new String[]{"Test", "test3", "ClassB", "methodR"},
+        new String[]{"Test", "test3", "ClassB", "method1"},
+        new String[]{"Test", "test3", "ClassB", "method2"}
     );
   }
 
@@ -99,9 +99,8 @@ public class SingleFileTestDiscoveryIntegrationTest {
       data = new ArrayList<String[]>(0);
     }
 
-    @Override
-    protected void processData(String testName, String className, String methodName) {
-      data.add(new String[]{testName, className, methodName});
+    protected void processData(String testClassName, String testMethodName, String className, String methodName) {
+      data.add(new String[]{testClassName, testMethodName, className, methodName});
     }
   }
 

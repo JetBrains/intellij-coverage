@@ -126,38 +126,19 @@ public class SingleTrFileReader {
     processMetadata(result);
   }
 
-  private String getName(String testClassName, String testMethodName) {
-    if (testClassName == null) return testMethodName;
-    else if (testMethodName == null) return testClassName;
-    else return testClassName + "." + testMethodName;
-  }
-
   protected void testProcessingStarted(String testClassName, String testMethodName) {
-    testProcessingStarted(getName(testClassName, testMethodName));
   }
 
   protected void testProcessingFinished(String testClassName, String testMethodName) {
-    testProcessingFinished(getName(testClassName, testMethodName));
-  }
-
-  protected void testProcessingFinished(String testName) {
-
   }
 
   protected void classProcessingFinished(String className) {
-
   }
 
   protected void processMethodName(String methodName) {
-
   }
 
   protected void classProcessingStarted(String className) {
-
-  }
-
-  protected void testProcessingStarted(String testName) {
-
   }
 
   protected void processMetadata(Map<String, String> metadata) {
@@ -172,27 +153,29 @@ public class SingleTrFileReader {
 
   public static abstract class Sequential extends SingleTrFileReader {
     private String currentClassName;
-    private String currentTestName;
+    private String currentTestClassName;
+    private String currentTestMethodName;
 
     public Sequential(File file) {
       super(file);
     }
 
-    protected abstract void processData(String testName, String className, String methodName);
+    protected abstract void processData(String testClassName, String testMethodName, String className, String methodName);
 
     @Override
-    protected void testProcessingFinished(String testName) {
-      currentTestName = null;
+    protected void testProcessingStarted(String testClassName, String testMethodName) {
+      currentTestClassName = testClassName;
+      currentTestMethodName = testMethodName;
     }
 
     @Override
-    protected void classProcessingFinished(String className) {
-      currentClassName = null;
+    protected void testProcessingFinished(String testClassName, String testMethodName) {
+      currentTestClassName = currentTestMethodName = null;
     }
 
     @Override
     protected void processMethodName(String methodName) {
-      processData(currentTestName, currentClassName, methodName);
+      processData(currentTestClassName, currentTestMethodName, currentClassName, methodName);
     }
 
     @Override
@@ -201,8 +184,8 @@ public class SingleTrFileReader {
     }
 
     @Override
-    protected void testProcessingStarted(String testName) {
-      currentTestName = testName;
+    protected void classProcessingFinished(String className) {
+      currentClassName = null;
     }
   }
 }
