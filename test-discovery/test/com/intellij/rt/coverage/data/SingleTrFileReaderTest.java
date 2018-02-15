@@ -16,7 +16,7 @@
 
 package com.intellij.rt.coverage.data;
 
-import com.intellij.rt.coverage.data.api.api.SingleTrFileReader;
+import com.intellij.rt.coverage.data.api.SingleTrFileReader;
 import org.junit.Test;
 
 import java.io.File;

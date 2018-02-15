@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.data.api.api;
+package com.intellij.rt.coverage.data.api;
 
 import com.intellij.rt.coverage.data.SingleTrFileDiscoveryProtocolDataListener;
 import com.intellij.rt.coverage.data.TestDiscoveryIOUtil;

@@ -16,7 +16,7 @@
 
 package com.intellij.rt.coverage.testDiscovery;
 
-import com.intellij.rt.coverage.data.api.api.SingleTrFileReader;
+import com.intellij.rt.coverage.data.api.SingleTrFileReader;
 import com.intellij.rt.coverage.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Rule;
