@@ -18,9 +18,9 @@ package com.intellij.rt.coverage.data.api;
 
 public interface TestDiscoveryProtocolReader {
 
-  void testDiscoveryStarted(int version);
+  void testDiscoveryDataProcessingStarted(int version);
 
-  void testDiscoveryFinished();
+  void testDiscoveryDataProcessingFinished();
 
   MetadataReader createMetadataReader();
 
@@ -28,8 +28,14 @@ public interface TestDiscoveryProtocolReader {
 
   TestDataReader createTestDataReader(int classId, int methodId);
 
+  void debug(String message);
+
+  void error(String message);
+
+  void error(Exception error);
+
   interface MetadataReader {
-    void accept(String key, String value);
+    void processMetadataEntry(String key, String value);
   }
 
   interface NameEnumeratorReader {

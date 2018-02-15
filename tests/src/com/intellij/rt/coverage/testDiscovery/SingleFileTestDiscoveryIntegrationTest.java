@@ -16,7 +16,8 @@
 
 package com.intellij.rt.coverage.testDiscovery;
 
-import com.intellij.rt.coverage.data.api.SingleTrFileReader;
+import com.intellij.rt.coverage.data.api.SimpleDecodingTestDiscoveryProtocolReader;
+import com.intellij.rt.coverage.data.api.TestDiscoveryProtocolUtil;
 import com.intellij.rt.coverage.util.FileUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Rule;
@@ -39,8 +40,8 @@ public class SingleFileTestDiscoveryIntegrationTest {
   public void testSimple() throws Exception {
 //    final File result = doTest("simple", "-Dorg.jetbrains.instrumentation.trace.file.version=2");
     final File result = doTest("simple");
-    final MySingleTrFileReader reader = new MySingleTrFileReader(result);
-    reader.read();
+    MySingleTrFileReader reader = new MySingleTrFileReader();
+    TestDiscoveryProtocolUtil.readFile(result, reader);
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
     assertThat(data).contains(
@@ -67,8 +68,8 @@ public class SingleFileTestDiscoveryIntegrationTest {
     final File result = doTest("simple",
         "-Dtest.discovery.include.class.patterns=Test.*;Class.*",
         "-Dtest.discovery.exclude.class.patterns=junit.*;org.*");
-    final MySingleTrFileReader reader = new MySingleTrFileReader(result);
-    reader.read();
+    MySingleTrFileReader reader = new MySingleTrFileReader();
+    TestDiscoveryProtocolUtil.readFile(result, reader);
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
     assertThat(data).containsOnly(
@@ -90,17 +91,15 @@ public class SingleFileTestDiscoveryIntegrationTest {
     );
   }
 
-
-  private static class MySingleTrFileReader extends SingleTrFileReader.Sequential {
-    List<String[]> data;
-
-    MySingleTrFileReader(File file) {
-      super(file);
-      data = new ArrayList<String[]>(0);
-    }
+  private static class MySingleTrFileReader extends SimpleDecodingTestDiscoveryProtocolReader {
+    final List<String[]> data = new ArrayList<String[]>();
 
     protected void processData(String testClassName, String testMethodName, String className, String methodName) {
       data.add(new String[]{testClassName, testMethodName, className, methodName});
+    }
+
+    public void processMetadataEntry(String key, String value) {
+
     }
   }
 

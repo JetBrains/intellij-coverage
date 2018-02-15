@@ -16,13 +16,15 @@
 
 package com.intellij.rt.coverage.data;
 
-import com.intellij.rt.coverage.data.api.SingleTrFileReader;
+import com.intellij.rt.coverage.data.api.SimpleDecodingTestDiscoveryProtocolReader;
+import com.intellij.rt.coverage.data.api.TestDiscoveryProtocolUtil;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,51 +35,47 @@ public class SingleTrFileReaderTest {
 
   @Test
   public void testCompletelyEmpty() throws IOException {
-    final MySingleTrFileReader reader = getReader(new byte[0]);
-    reader.read();
+    final MySingleTrFileReader reader = read(new byte[0]);
     assertThat(reader.myData).isEmpty();
   }
 
   @Test
   public void testNoMeaningfulData() throws IOException {
-    final MySingleTrFileReader reader = getReader(SingleTrFileDiscoveryDataListenerTest.EMPTY);
-    reader.read();
+    final MySingleTrFileReader reader = read(SingleTrFileDiscoveryDataListenerTest.EMPTY);
     assertThat(reader.myData).isEmpty();
   }
 
   @Test
   public void testOnlyMetadata() throws IOException {
-    final MySingleTrFileReader reader = getReader(SingleTrFileDiscoveryDataListenerTest.METADATA);
-    reader.read();
+    final MySingleTrFileReader reader = read(SingleTrFileDiscoveryDataListenerTest.METADATA);
     assertThat(reader.myData).isEmpty();
     assertThat(reader.myMetadata).isNotNull().containsOnly(entry("A", "B"));
   }
 
   @Test
   public void testNoTests() throws IOException {
-    final MySingleTrFileReader reader = getReader(SingleTrFileDiscoveryDataListenerTest.NO_TESTS_ONE_NAME);
-    reader.read();
+    final MySingleTrFileReader reader = read(SingleTrFileDiscoveryDataListenerTest.NO_TESTS_ONE_NAME);
     assertThat(reader.myData).isEmpty();
   }
 
   @Test
   public void testOneEmptyTest() throws IOException {
-    final MySingleTrFileReader reader = getReader(SingleTrFileDiscoveryDataListenerTest.SINGLE_TEST_NO_METHODS);
-    reader.read();
+    final MySingleTrFileReader reader = read(SingleTrFileDiscoveryDataListenerTest.SINGLE_TEST_NO_METHODS);
     assertThat(reader.myData).isEmpty();
   }
 
   @Test
   public void testTestWithOneMethod() throws IOException {
-    final MySingleTrFileReader reader = getReader(SingleTrFileDiscoveryDataListenerTest.SINGLE_TEST_SINGLE_METHOD);
-    reader.read();
+    final MySingleTrFileReader reader = read(SingleTrFileDiscoveryDataListenerTest.SINGLE_TEST_SINGLE_METHOD);
     assertThat(reader.myData).isNotEmpty();
     final String[] data = reader.myData.iterator().next();
     assertThat(data).doesNotContainNull().containsExactly("A", "B", "B", "C");
   }
 
-  private MySingleTrFileReader getReader(byte[] content) throws IOException {
-    return new MySingleTrFileReader(SingleTrFileReaderTest.createFileWithContent(content));
+  private MySingleTrFileReader read(byte[] content) throws IOException {
+    MySingleTrFileReader reader = new MySingleTrFileReader();
+    TestDiscoveryProtocolUtil.readFile(createFileWithContent(content), reader);
+    return reader;
   }
 
   private static File createFileWithContent(byte[] content) throws IOException {
@@ -88,22 +86,16 @@ public class SingleTrFileReaderTest {
     return file;
   }
 
-  private static class MySingleTrFileReader extends SingleTrFileReader.Sequential {
-    List<String[]> myData;
-    Map<String, String> myMetadata;
-
-    MySingleTrFileReader(File file) {
-      super(file);
-      myData = new ArrayList<String[]>(0);
-    }
+  private static class MySingleTrFileReader extends SimpleDecodingTestDiscoveryProtocolReader {
+    final List<String[]> myData = new ArrayList<String[]>();
+    final Map<String, String> myMetadata = new HashMap<String, String>();
 
     protected void processData(String testClassName, String testMethodName, String className, String methodName) {
       myData.add(new String[]{testClassName, testMethodName, className, methodName});
     }
 
-    @Override
-    protected void processMetadata(Map<String, String> metadata) {
-      myMetadata = metadata;
+    public void processMetadataEntry(String key, String value) {
+      myMetadata.put(key, value);
     }
   }
 }

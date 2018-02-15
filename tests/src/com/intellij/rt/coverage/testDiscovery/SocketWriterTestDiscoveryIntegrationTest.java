@@ -17,8 +17,8 @@
 package com.intellij.rt.coverage.testDiscovery;
 
 import com.intellij.rt.coverage.data.SocketTestDiscoveryProtocolDataListener;
-import com.intellij.rt.coverage.data.TestDiscoveryProtocolDataListener;
-import com.intellij.rt.coverage.data.api.SocketTestDataReader;
+import com.intellij.rt.coverage.data.api.TestDiscoveryProtocolReader;
+import com.intellij.rt.coverage.data.api.TestDiscoveryProtocolUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.junit.Assert;
@@ -26,7 +26,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -104,28 +103,7 @@ public class SocketWriterTestDiscoveryIntegrationTest {
           try {
             Socket socket = MyTestDiscoverySocketListener.this.socket.accept();
             InputStream inputStream = socket.getInputStream();
-            MyTestDataListener listener = new MyTestDataListener();
-
-            while (socket.isConnected()) {
-              int code = inputStream.read();
-              if (code == -1) return;
-              switch (code) {
-                case TestDiscoveryProtocolDataListener.START_MARKER:
-                  // do nothing
-                  Assert.assertEquals(SocketTestDiscoveryProtocolDataListener.VERSION, inputStream.read());
-                  break;
-                case TestDiscoveryProtocolDataListener.FINISH_MARKER:
-                  socket.close();
-                  finished = true;
-                  return;
-                case TestDiscoveryProtocolDataListener.NAMES_DICTIONARY_PART_MARKER:
-                  SocketTestDataReader.readDictionary(new DataInputStream(inputStream), listener);
-                  break;
-                case TestDiscoveryProtocolDataListener.TEST_FINISHED_MARKER:
-                  SocketTestDataReader.readTestData(new DataInputStream(inputStream), listener);
-                  break;
-              }
-            }
+            TestDiscoveryProtocolUtil.readSequentially(inputStream, new MyTestDataListener());
             socket.close();
           } catch (Exception e) {
             Assert.fail(e.getMessage());
@@ -151,22 +129,60 @@ public class SocketWriterTestDiscoveryIntegrationTest {
       return socket.getLocalPort();
     }
 
-    private class MyTestDataListener extends SocketTestDataReader {
-      private String testName;
+    private class MyTestDataListener implements TestDiscoveryProtocolReader {
+      public void testDiscoveryDataProcessingStarted(int version) {
 
-      @Override
-      protected void processTestName(int testClassId, int testMethodId) {
-        testName = enumerator.get(testClassId) + "." + enumerator.get(testMethodId);
       }
 
-      @Override
-      protected void processUsedMethod(int classId, int methodId) {
-        testDiscoveryData.add(new String[] {testName, enumerator.get(classId), enumerator.get(methodId)});
+      public void testDiscoveryDataProcessingFinished() {
+        finished = true;
       }
 
-      @Override
-      protected void processEnumeratedName(int id, String name) {
-        enumerator.put(id, name);
+      public MetadataReader createMetadataReader() {
+        return null;
+      }
+
+      public NameEnumeratorReader createNameEnumeratorReader() {
+        return new NameEnumeratorReader() {
+          public void enumerate(String name, int id) {
+            enumerator.put(id, name);
+          }
+        };
+      }
+
+      public TestDataReader createTestDataReader(final int testClassId, int testMethodId) {
+        final String testName = enumerator.get(testClassId) + "." + enumerator.get(testMethodId);
+        return new TestDataReader() {
+          int currentClassId;
+
+          public void classProcessingStarted(int classId) {
+            currentClassId = classId;
+          }
+
+          public void processUsedMethod(int methodId) {
+            testDiscoveryData.add(new String[] {testName, enumerator.get(currentClassId), enumerator.get(methodId)});
+          }
+
+          public void classProcessingFinished(int classId) {
+
+          }
+
+          public void testDataProcessed() {
+
+          }
+        };
+      }
+
+      public void debug(String message) {
+
+      }
+
+      public void error(String message) {
+
+      }
+
+      public void error(Exception error) {
+
       }
     }
   }

@@ -26,12 +26,4 @@ public class TestDiscoveryIOUtil {
     void process(int id, String name);
   }
 
-  public static void readDictionary(DataInput input, DictionaryProcessor processor) throws IOException {
-    int count = CoverageIOUtil.readINT(input);
-    while (count-- > 0) {
-      int id = CoverageIOUtil.readINT(input);
-      String name = CoverageIOUtil.readUTFFast(input);
-      processor.process(id, name);
-    }
-  }
 }
