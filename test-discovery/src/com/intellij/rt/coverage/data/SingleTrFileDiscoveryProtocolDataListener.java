@@ -61,7 +61,7 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
     start(myStream);
   }
 
-  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws Exception {
+  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException {
     writeTestFinished(myStream, className, methodName, classToVisitedMethods, classToMethodNames);
   }
 
@@ -69,8 +69,6 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
     try {
       writeDictionaryIncrementIfSupported(myStream);
       finish(myStream);
-    } catch (IOException e) {
-      e.printStackTrace();
     } finally {
       myStream.close();
     }

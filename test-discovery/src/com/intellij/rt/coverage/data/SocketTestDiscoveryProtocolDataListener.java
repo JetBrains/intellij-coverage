@@ -114,15 +114,12 @@ public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtoc
     write(baos.asByteBuffer());
   }
 
-  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws Exception {
-    try {
-      final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
-      final DataOutputStream dos = new DataOutputStream(baos);
-      writeTestFinished(dos, className, methodName, classToVisitedMethods, classToMethodNames);
+  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException {
+    MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
+    DataOutputStream dos = new DataOutputStream(baos);
+    writeTestFinished(dos, className, methodName, classToVisitedMethods, classToMethodNames);
 
-      write(baos.asByteBuffer());
-    } catch (IOException ignored) {
-    }
+    write(baos.asByteBuffer());
   }
 
   public void testsFinished() {
@@ -161,15 +158,12 @@ public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtoc
     return incrementalNameEnumerator;
   }
 
-  public void addMetadata(Map<String, String> metadata) throws Exception {
-    try {
-      final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
-      final DataOutputStream dos = new DataOutputStream(baos);
-      writeFileMetadata(dos, metadata);
+  public void addMetadata(Map<String, String> metadata) throws IOException {
+    final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
+    final DataOutputStream dos = new DataOutputStream(baos);
+    writeFileMetadata(dos, metadata);
 
-      write(baos.asByteBuffer());
-    } catch (IOException ignored) {
-    }
+    write(baos.asByteBuffer());
   }
 
   private void shutdownNow() {

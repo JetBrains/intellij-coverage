@@ -16,15 +16,16 @@
 
 package com.intellij.rt.coverage.data;
 
+import java.io.IOException;
 import java.util.Map;
 
 public interface TestDiscoveryDataListener {
 
-  void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws Exception;
+  void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException;
 
-  void testsFinished() throws Exception;
+  void testsFinished() throws IOException;
 
-  void addMetadata(Map<String, String> metadata) throws Exception;
+  void addMetadata(Map<String, String> metadata) throws IOException;
 
   NameEnumerator getNameEnumerator();
 }
