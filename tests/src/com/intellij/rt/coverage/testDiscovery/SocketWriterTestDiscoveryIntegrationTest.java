@@ -16,9 +16,9 @@
 
 package com.intellij.rt.coverage.testDiscovery;
 
-import com.intellij.rt.coverage.data.SocketTestDataReader;
 import com.intellij.rt.coverage.data.SocketTestDiscoveryProtocolDataListener;
 import com.intellij.rt.coverage.data.TestDiscoveryProtocolDataListener;
+import com.intellij.rt.coverage.data.api.api.SocketTestDataReader;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.junit.Assert;

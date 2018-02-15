@@ -21,12 +21,12 @@ import com.intellij.rt.coverage.util.CoverageIOUtil;
 import java.io.DataInput;
 import java.io.IOException;
 
-class TestDiscoveryIOUtil {
-  interface DictionaryProcessor {
+public class TestDiscoveryIOUtil {
+  public interface DictionaryProcessor {
     void process(int id, String name);
   }
 
-  static void readDictionary(DataInput input, DictionaryProcessor processor) throws IOException {
+  public static void readDictionary(DataInput input, DictionaryProcessor processor) throws IOException {
     int count = CoverageIOUtil.readINT(input);
     while (count-- > 0) {
       int id = CoverageIOUtil.readINT(input);

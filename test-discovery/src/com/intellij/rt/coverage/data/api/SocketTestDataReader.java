@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.data;
+package com.intellij.rt.coverage.data.api.api;
 
+import com.intellij.rt.coverage.data.TestDiscoveryIOUtil;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 
 import java.io.DataInput;

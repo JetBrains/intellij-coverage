@@ -16,22 +16,15 @@
 
 package com.intellij.rt.coverage.testDiscovery;
 
-import com.intellij.rt.coverage.data.SingleTrFileReader;
+import com.intellij.rt.coverage.data.api.api.SingleTrFileReader;
 import com.intellij.rt.coverage.util.FileUtil;
-import com.intellij.rt.coverage.util.ProcessUtil;
-import com.intellij.rt.coverage.util.ResourceUtil;
-import com.intellij.rt.coverage.util.StringUtil;
-import com.sun.tools.javac.Main;
-import junit.framework.TestCase;
-import org.hamcrest.Matcher;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.junit.runner.JUnitLauncher;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
