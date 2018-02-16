@@ -24,7 +24,7 @@ public class TestDiscoveryProjectData {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/TestDiscoveryProjectData";
   public static final String TEST_DISCOVERY_DATA_LISTENER_PROP = "test.discovery.data.listener";
 
-  protected static TestDiscoveryProjectData ourProjectData = new TestDiscoveryProjectData();
+  protected static final TestDiscoveryProjectData ourProjectData = new TestDiscoveryProjectData();
   private final NameEnumerator myNameEnumerator;
 
   public TestDiscoveryProjectData() {
