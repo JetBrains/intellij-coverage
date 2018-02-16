@@ -33,8 +33,7 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
 
   private static final int DEFAULT_VERSION = 0x1;
 
-  private final DataOutput myStream;
-  private final OutputStream myStream2;
+  private final DataOutputStream myStream;
   private final NameEnumerator.Incremental myNameEnumerator;
 
 
@@ -44,23 +43,15 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
     int bufferSize = Integer.parseInt(System.getProperty(BUFFER_SIZE, "32768"));
     //noinspection ResultOfMethodCallIgnored
     myTraceFile.getParentFile().mkdirs();
-    DataOutputStream s = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(myTraceFile), bufferSize));
-    this.myStream = s;
-    myStream2 = s;
+    myStream = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(myTraceFile), bufferSize));
     myNameEnumerator = new NameEnumerator.Incremental();
     start(this.myStream);
   }
 
   // For tests
-  SingleTrFileDiscoveryProtocolDataListener(LongDataOutputStream stream) throws Exception {
-    this(stream, (byte) DEFAULT_VERSION);
-  }
-
-  // For tests
-  SingleTrFileDiscoveryProtocolDataListener(LongDataOutputStream stream, byte version) throws Exception {
-    super(version);
+  SingleTrFileDiscoveryProtocolDataListener(DataOutputStream stream) throws Exception {
+    super((byte) DEFAULT_VERSION);
     myStream = stream;
-    myStream2 = stream;
     myNameEnumerator = new NameEnumerator.Incremental();
     start(myStream);
   }
@@ -74,7 +65,7 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
       writeDictionaryIncrementIfSupported(myStream);
       finish(myStream);
     } finally {
-      myStream2.close();
+      myStream.close();
     }
   }
 

@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.data;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,7 +76,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
   @Test
   public void testSingleTestNothingVisited() throws Exception {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final LongDataOutputStream dos = new LongDataOutputStream(baos);
+    final DataOutputStream dos = new DataOutputStream(baos);
     final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos);
     final String name = "ABC";
     listener.getNameEnumerator().enumerate(name);
@@ -91,7 +92,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
   @Test
   public void testV2NoCoverage() throws Exception {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final LongDataOutputStream dos = new LongDataOutputStream(baos);
+    final DataOutputStream dos = new DataOutputStream(baos);
     final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos);
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(EMPTY);
@@ -100,7 +101,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
   @Test
   public void testMetadata() throws Exception {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final LongDataOutputStream dos = new LongDataOutputStream(baos);
+    final DataOutputStream dos = new DataOutputStream(baos);
     final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos);
     listener.addMetadata(Collections.singletonMap("A", "B"));
     listener.testsFinished();
@@ -111,7 +112,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
   @Test
   public void testV2OnlyEnumerator() throws Exception {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final LongDataOutputStream dos = new LongDataOutputStream(baos);
+    final DataOutputStream dos = new DataOutputStream(baos);
     final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos);
     listener.getNameEnumerator().enumerate("ABC");
     listener.testsFinished();
@@ -121,7 +122,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
   @Test
   public void testV2SingleTestOnlyOneClassVisited() throws Exception {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final LongDataOutputStream dos = new LongDataOutputStream(baos);
+    final DataOutputStream dos = new DataOutputStream(baos);
     final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos);
 
     final String name1 = "A";
@@ -145,7 +146,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
   @Test
   public void testV2TwoTestsIncrementalDict() throws Exception {
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    final LongDataOutputStream dos = new LongDataOutputStream(baos);
+    final DataOutputStream dos = new DataOutputStream(baos);
     final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos);
 
     listener.getNameEnumerator().enumerate("A");
