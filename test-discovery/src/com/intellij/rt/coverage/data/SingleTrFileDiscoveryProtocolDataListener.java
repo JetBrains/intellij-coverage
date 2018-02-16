@@ -61,11 +61,11 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
     start(myStream);
   }
 
-  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException {
+  public synchronized void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException {
     writeTestFinished(myStream, className, methodName, classToVisitedMethods, classToMethodNames);
   }
 
-  public void testsFinished() throws IOException {
+  public synchronized void testsFinished() throws IOException {
     try {
       writeDictionaryIncrementIfSupported(myStream);
       finish(myStream);
@@ -78,11 +78,11 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
     return myNameEnumerator;
   }
 
-  public void addMetadata(Map<String, String> metadata) throws IOException {
+  public synchronized void addMetadata(Map<String, String> metadata) throws IOException {
     writeFileMetadata(myStream, metadata);
   }
 
-  protected void start(DataOutput output) throws IOException {
+  protected synchronized void start(DataOutput output) throws IOException {
     output.writeByte(HEADER_START);
     output.write(HEADER_TAIL);
     super.start(output);

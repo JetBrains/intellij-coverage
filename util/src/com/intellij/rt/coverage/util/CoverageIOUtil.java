@@ -68,7 +68,12 @@ public class CoverageIOUtil {
     stream.write(bytes);
   }
 
-  private final static byte[] ioBuffer = allocReadWriteUTFBuffer();
+  private final static ThreadLocalCachedValue<byte[]> ioBuffer = new ThreadLocalCachedValue<byte[]>() {
+    @Override
+    protected byte[] create() {
+      return allocReadWriteUTFBuffer();
+    }
+  };
 
   public static byte[] allocReadWriteUTFBuffer() {
     return new byte[STRING_LENGTH_THRESHOLD + STRING_HEADER_SIZE];
@@ -77,11 +82,11 @@ public class CoverageIOUtil {
   public static void writeUTF(final DataOutput storage, final String value) throws IOException {
     int len = value.length();
     if (len < STRING_LENGTH_THRESHOLD && isAscii(value)) {
-      ioBuffer[0] = (byte)len;
+      ioBuffer.getValue()[0] = (byte)len;
       for (int i = 0; i < len; i++) {
-        ioBuffer[i + STRING_HEADER_SIZE] = (byte)value.charAt(i);
+        ioBuffer.getValue()[i + STRING_HEADER_SIZE] = (byte)value.charAt(i);
       }
-      storage.write(ioBuffer, 0, len + STRING_HEADER_SIZE);
+      storage.write(ioBuffer.getValue(), 0, len + STRING_HEADER_SIZE);
     }
     else {
       storage.writeByte((byte)0xFF);
@@ -108,9 +113,9 @@ public class CoverageIOUtil {
     }
 
     final char[] chars = new char[len];
-    storage.readFully(ioBuffer, 0, len);
+    storage.readFully(ioBuffer.getValue(), 0, len);
     for (int i = 0; i < len; i++) {
-      chars[i] = (char)ioBuffer[i];
+      chars[i] = (char)ioBuffer.getValue()[i];
     }
 
     return new String(chars);
