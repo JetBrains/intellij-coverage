@@ -91,7 +91,7 @@ public class TestDiscoveryPremain {
       URL testDiscoveryProjectData = classLoader.getResource(PROJECT_DATA_CLASS_BINARY_NAME + ".class");
       if (testDiscoveryProjectData != null) {
         previousClassLoader = classLoader;
-        classLoader = classLoader.getParent();
+        classLoader = classLoader.getClass().getClassLoader();
       } else {
         try {
           Class.forName(PROJECT_DATA_CLASS_NAME, true, previousClassLoader);
