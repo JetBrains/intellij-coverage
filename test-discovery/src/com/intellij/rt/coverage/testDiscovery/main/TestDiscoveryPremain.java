@@ -16,7 +16,6 @@
 
 package com.intellij.rt.coverage.testDiscovery.main;
 
-import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import com.intellij.rt.coverage.instrumentation.AbstractIntellijClassfileTransformer;
 import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInstrumenter;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
@@ -24,6 +23,7 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 
 import java.lang.instrument.Instrumentation;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,12 +31,13 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class TestDiscoveryPremain {
-  private void performPremain(Instrumentation instrumentation) {
-    // initialize TestDiscoveryProjectData before instrumentation
-    @SuppressWarnings("unused")
-    TestDiscoveryProjectData projectData = TestDiscoveryProjectData.getProjectData();
+  // do not load TestDiscoveryProjectData while using these consts
+  public static final String PROJECT_DATA_CLASS_BINARY_NAME = "com/intellij/rt/coverage/data/TestDiscoveryProjectData";
+  private static final String PROJECT_DATA_CLASS_NAME = PROJECT_DATA_CLASS_BINARY_NAME.replace('/', '.');
 
+  private void performPremain(Instrumentation instrumentation) {
     System.out.println("---- IntelliJ IDEA Test Discovery ---- ");
+    loadTestDiscoveryDataClassInTopmostClassLoader();
 
     // separated by ;
     final List<Pattern> include = patterns("test.discovery.include.class.patterns");
@@ -78,6 +79,35 @@ public class TestDiscoveryPremain {
       }
     }
     return patterns;
+  }
+
+  /**
+   * load only one instance of project data inside app class loader
+   */
+  private void loadTestDiscoveryDataClassInTopmostClassLoader() {
+    ClassLoader classLoader = getClass().getClassLoader();
+    ClassLoader previousClassLoader = classLoader;
+    while (classLoader != null) {
+      URL testDiscoveryProjectData = classLoader.getResource(PROJECT_DATA_CLASS_BINARY_NAME + ".class");
+      if (testDiscoveryProjectData != null) {
+        previousClassLoader = classLoader;
+        classLoader = classLoader.getParent();
+      } else {
+        try {
+          Class.forName(PROJECT_DATA_CLASS_NAME, true, previousClassLoader);
+          return;
+        } catch (ClassNotFoundException e) {
+          e.printStackTrace();
+          System.exit(1);
+        }
+      }
+    }
+    try {
+      Class.forName(PROJECT_DATA_CLASS_NAME);
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
+      System.exit(1);
+    }
   }
 
   public static void premain(String argsString, Instrumentation instrumentation) {
