@@ -87,9 +87,8 @@ public class TestDiscoveryPremain {
   private void loadTestDiscoveryDataClassInTopmostClassLoader() {
     ClassLoader classLoader = getClass().getClassLoader();
     ClassLoader previousClassLoader = classLoader;
-    while (classLoader != null) {
-      URL testDiscoveryProjectData = classLoader.getResource(PROJECT_DATA_CLASS_BINARY_NAME + ".class");
-      if (testDiscoveryProjectData != null) {
+    while (previousClassLoader != null) {
+      if (classLoader != null && classLoader.getResource(PROJECT_DATA_CLASS_BINARY_NAME + ".class") != null) {
         previousClassLoader = classLoader;
         classLoader = classLoader.getClass().getClassLoader();
       } else {
