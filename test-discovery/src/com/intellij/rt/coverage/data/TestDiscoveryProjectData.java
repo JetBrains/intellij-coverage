@@ -16,14 +16,12 @@
 
 package com.intellij.rt.coverage.data;
 
-import com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 public class TestDiscoveryProjectData {
-  public static final String PROJECT_DATA_OWNER = TestDiscoveryPremain.PROJECT_DATA_CLASS_BINARY_NAME;
+  public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/TestDiscoveryProjectData";
   public static final String TEST_DISCOVERY_DATA_LISTENER_PROP = "test.discovery.data.listener";
 
   protected static final TestDiscoveryProjectData ourProjectData = new TestDiscoveryProjectData();

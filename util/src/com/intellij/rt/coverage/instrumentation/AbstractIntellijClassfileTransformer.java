@@ -31,7 +31,7 @@ import java.security.ProtectionDomain;
 public abstract class AbstractIntellijClassfileTransformer implements ClassFileTransformer {
   private final boolean computeFrames = computeFrames();
 
-  public final byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
+  public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
     if (isStopped()) {
       return null;
     }
@@ -82,7 +82,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     }
 
     final ClassVisitor cv = createClassVisitor(className, loader, cr, cw);
-    cr.accept(cv, 0);
+      cr.accept(cv, 0);
     return cw.toByteArray();
   }
 

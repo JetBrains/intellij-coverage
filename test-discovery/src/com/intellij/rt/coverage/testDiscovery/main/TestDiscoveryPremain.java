@@ -22,28 +22,39 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 
+import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
-import java.net.URL;
+import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class TestDiscoveryPremain {
-  // do not load TestDiscoveryProjectData while using these consts
-  public static final String PROJECT_DATA_CLASS_BINARY_NAME = "com/intellij/rt/coverage/data/TestDiscoveryProjectData";
-  private static final String PROJECT_DATA_CLASS_NAME = PROJECT_DATA_CLASS_BINARY_NAME.replace('/', '.');
-
   private void performPremain(Instrumentation instrumentation) {
     System.out.println("---- IntelliJ IDEA Test Discovery ---- ");
-    loadTestDiscoveryDataClassInTopmostClassLoader();
 
     // separated by ;
     final List<Pattern> include = patterns("test.discovery.include.class.patterns");
     final List<Pattern> exclude = patterns("test.discovery.exclude.class.patterns");
 
     instrumentation.addTransformer(new AbstractIntellijClassfileTransformer() {
+      private final ConcurrentMap<ClassLoader, Boolean> systemBasedClassLoaders = new ConcurrentHashMap<ClassLoader, Boolean>();
+
+      @Override
+      public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
+        Boolean isSystemBased = systemBasedClassLoaders.get(loader);
+        if (isSystemBased == null) {
+          systemBasedClassLoaders.put(loader, isSystemBased = isSystemBasedClassLoader(loader));
+        }
+        return isSystemBased
+            ? super.transform(loader, className, classBeingRedefined, protectionDomain, classFileBuffer)
+            : null;
+      }
+
       @Override
       protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
         return new TestDiscoveryInstrumenter(cw, cr, className, loader);
@@ -59,6 +70,18 @@ public class TestDiscoveryPremain {
         }
         // if we have any include pattern we should say exclude class here
         return !include.isEmpty();
+      }
+
+      private boolean isSystemBasedClassLoader(ClassLoader loader) {
+        ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
+        ClassLoader currentLoader = loader;
+        while (currentLoader != null) {
+          if (systemClassLoader == currentLoader) {
+            return true;
+          }
+          currentLoader = currentLoader.getParent();
+        }
+        return false;
       }
     });
   }
@@ -79,34 +102,6 @@ public class TestDiscoveryPremain {
       }
     }
     return patterns;
-  }
-
-  /**
-   * load only one instance of project data inside app class loader
-   */
-  private void loadTestDiscoveryDataClassInTopmostClassLoader() {
-    ClassLoader classLoader = getClass().getClassLoader();
-    ClassLoader previousClassLoader = classLoader;
-    while (previousClassLoader != null) {
-      if (classLoader != null && classLoader.getResource(PROJECT_DATA_CLASS_BINARY_NAME + ".class") != null) {
-        previousClassLoader = classLoader;
-        classLoader = classLoader.getClass().getClassLoader();
-      } else {
-        try {
-          Class.forName(PROJECT_DATA_CLASS_NAME, true, previousClassLoader);
-          return;
-        } catch (ClassNotFoundException e) {
-          e.printStackTrace();
-          System.exit(1);
-        }
-      }
-    }
-    try {
-      Class.forName(PROJECT_DATA_CLASS_NAME);
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
   }
 
   public static void premain(String argsString, Instrumentation instrumentation) {
