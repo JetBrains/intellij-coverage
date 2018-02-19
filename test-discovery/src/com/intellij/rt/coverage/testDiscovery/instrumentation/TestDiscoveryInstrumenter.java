@@ -49,7 +49,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   public TestDiscoveryInstrumenter(ClassVisitor classVisitor, ClassReader cr, String className, ClassLoader loader) {
     super(Opcodes.ASM6, classVisitor);
     myMethodFilter = new InstrumentedMethodsFilter(className);
-    myClassName = className.replace('$', '.'); // for inner classes
+    myClassName = className;
     myInternalClassName = className.replace('.', '/');
     myInternalCounterClassJVMName = myInternalClassName + "$" + myInternalCounterClassName;
     myClassLoader = loader;
