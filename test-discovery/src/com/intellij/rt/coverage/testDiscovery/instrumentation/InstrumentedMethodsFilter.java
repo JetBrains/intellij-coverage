@@ -39,7 +39,7 @@ public class InstrumentedMethodsFilter {
     if ((access & Opcodes.ACC_ABSTRACT) != 0) return false; //skip abstracts; do not include interfaces without non-abstract methods in result
     if ("<clinit>".equals(name) || //static initializer
         ((access & Opcodes.ACC_SYNTHETIC) != 0 && name.startsWith("access$")) || // synthetic access method
-        name.equals("<init>") //&& signature != null && signature.equals("()V") // todo: constructor
+        isDefaultConstructor(name, desc)
         ) {
       // todo skip only trivial default constructor
       return false;
@@ -48,7 +48,12 @@ public class InstrumentedMethodsFilter {
     if (myEnum && isDefaultEnumMethod(name, desc, signature, myClassName)) {
       return false;
     }
+
     return true;
+  }
+
+  private boolean isDefaultConstructor(String name, String desc) {
+    return name.equals("<init>") && desc != null && desc.equals("()V");
   }
 
   private static boolean isDefaultEnumMethod(String name, String desc, String signature, String className) {
