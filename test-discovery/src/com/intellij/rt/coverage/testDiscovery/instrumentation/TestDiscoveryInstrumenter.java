@@ -46,8 +46,8 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   private static final String METHODS_VISITED_CLASS = "[Z";
   private static final boolean INLINE_COUNTERS = System.getProperty("idea.inline.counter.fields") != null;
 
-  public TestDiscoveryInstrumenter(ClassVisitor classVisitor, ClassReader cr, String className, ClassLoader loader) {
-    super(Opcodes.ASM6, classVisitor);
+  public TestDiscoveryInstrumenter(ClassWriter classWriter, ClassReader cr, String className, ClassLoader loader) {
+    super(Opcodes.ASM6, classWriter);
     myMethodFilter = new InstrumentedMethodsFilter(className);
     myClassName = className;
     myInternalClassName = className.replace('.', '/');
