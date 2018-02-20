@@ -21,7 +21,7 @@ import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import java.util.ArrayList;
 import java.util.List;
 
-class NameEnumerator {
+public class NameEnumerator {
   private final TObjectIntHashMap<String> myNames = new TObjectIntHashMap<String>();
   private int myNextNameId = 1; // because TObjectIntHashMap uses 0 as null
   private final Object myNameLock = "NameLock";

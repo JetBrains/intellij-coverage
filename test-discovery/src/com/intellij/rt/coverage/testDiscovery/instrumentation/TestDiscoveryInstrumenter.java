@@ -21,7 +21,6 @@ import org.jetbrains.coverage.org.objectweb.asm.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -41,7 +40,6 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   private final boolean myInterface;
   private volatile boolean myInstrumentConstructors;
   private int myCurrentMethodCount;
-  private boolean mySeenClinit;
   private int myClassVersion;
   private volatile Method myDefineClassMethodRef;
 
@@ -174,7 +172,6 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     if (mv == null) return null;
     if ("<clinit>".equals(name)) {
       if (INLINE_COUNTERS) {
-        mySeenClinit = true;
         return new StaticBlockMethodVisitor(mv);
       } else {
         return mv;
@@ -214,14 +211,8 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
       visitField(access, METHODS_VISITED, METHODS_VISITED_CLASS, null, null);
 
-      if (!mySeenClinit) {
-        MethodVisitor mv = new StaticBlockMethodVisitor(super.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null));
-        mv.visitCode();
-        mv.visitInsn(Opcodes.RETURN);
-        mv.visitMaxs(ADDED_CODE_STACK_SIZE, 0);
-        mv.visitEnd();
-      }
-    } else {
+    }
+    else {
       if (myMethodNames.length > 0) {
         generateInnerClassWithCounter();
         visitInnerClass(myInternalCounterClassJVMName, myInternalClassName, myInternalCounterClassName, Opcodes.ACC_PRIVATE + Opcodes.ACC_FINAL + Opcodes.ACC_STATIC);

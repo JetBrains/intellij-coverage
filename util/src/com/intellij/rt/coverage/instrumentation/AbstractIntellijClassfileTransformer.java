@@ -71,7 +71,8 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     return null;
   }
 
-  private byte[] instrument(final byte[] classfileBuffer, String className, ClassLoader loader, boolean computeFrames) {
+  //public for test
+  public byte[] instrument(final byte[] classfileBuffer, String className, ClassLoader loader, boolean computeFrames) {
     final ClassReader cr = new ClassReader(classfileBuffer);
     final ClassWriter cw;
     if (computeFrames) {
