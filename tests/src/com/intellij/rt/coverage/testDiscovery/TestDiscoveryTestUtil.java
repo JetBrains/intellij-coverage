@@ -63,7 +63,7 @@ public class TestDiscoveryTestUtil {
     // args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007");
     args.add("-javaagent:" + agentJar);
     args.add("-classpath");
-    args.add(StringUtil.join(":", testDataPath,
+    args.add(StringUtil.join(File.pathSeparator, testDataPath,
         ResourceUtil.getResourceRoot(JUnitLauncher.class),
         ResourceUtil.getResourceRoot(TestCase.class),
         ResourceUtil.getResourceRoot(Matcher.class)));
