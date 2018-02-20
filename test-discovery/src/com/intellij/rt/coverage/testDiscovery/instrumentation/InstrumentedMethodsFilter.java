@@ -18,47 +18,49 @@ package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
-public class InstrumentedMethodsFilter {
+class InstrumentedMethodsFilter {
   private final String myClassName;
   private boolean myEnum;
 
-  public InstrumentedMethodsFilter(String className) {
+  InstrumentedMethodsFilter(String className) {
     myClassName = className;
   }
 
-  public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+  void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
     myEnum = (access & Opcodes.ACC_ENUM) != 0;
   }
 
-  public boolean shouldVisitMethod(final int access,
-                                   final String name,
-                                   final String desc,
-                                   final String signature,
-                                   final String[] exceptions) {
-    if ((access & Opcodes.ACC_BRIDGE) != 0) return false; //try to skip bridge methods
-    if ((access & Opcodes.ACC_ABSTRACT) != 0) return false; //skip abstracts; do not include interfaces without non-abstract methods in result
+  Decision shouldVisitMethod(final int access,
+                             final String name,
+                             final String desc,
+                             final String signature,
+                             final String[] exceptions,
+                             boolean instrumentConstructorsForce) {
+    if ((access & Opcodes.ACC_BRIDGE) != 0) return Decision.NO; //try to skip bridge methods
+    if ((access & Opcodes.ACC_ABSTRACT) != 0) return Decision.NO; //skip abstracts; do not include interfaces without non-abstract methods in result
     if ("<clinit>".equals(name) || //static initializer
-        ((access & Opcodes.ACC_SYNTHETIC) != 0 && name.startsWith("access$")) || // synthetic access method
-        isDefaultConstructor(name, desc)
-        ) {
+        ((access & Opcodes.ACC_SYNTHETIC) != 0 && (name.startsWith("access$") || "<init>".equals(name)))) {
       // todo skip only trivial default constructor
-      return false;
+      return Decision.NO;
+    }
+    if (name.equals("<init>") && desc.equals("()V")) {
+      // should check deep
+      return instrumentConstructorsForce ? Decision.YES : Decision.CHECK_IS_CONSTRUCTOR_DEFAULT;
     }
 
     if (myEnum && isDefaultEnumMethod(name, desc, signature, myClassName)) {
-      return false;
+      return Decision.NO;
     }
-
-    return true;
-  }
-
-  private boolean isDefaultConstructor(String name, String desc) {
-    return name.equals("<init>") && desc != null && desc.equals("()V");
+    return Decision.YES;
   }
 
   private static boolean isDefaultEnumMethod(String name, String desc, String signature, String className) {
     return name.equals("values") && desc.equals("()[L" + className + ";") ||
         name.equals("valueOf") && desc.equals("(Ljava/lang/String;)L" + className + ";") ||
         name.equals("<init>") && signature != null && signature.equals("()V");
+  }
+
+  enum Decision {
+      YES, NO, CHECK_IS_CONSTRUCTOR_DEFAULT
   }
 }

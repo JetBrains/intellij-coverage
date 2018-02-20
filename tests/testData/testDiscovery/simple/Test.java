@@ -15,4 +15,8 @@ public class Test extends junit.framework.TestCase  {
     ClassB.methodR();
   }
 
+  public void testConstructor() {
+    new ClassA().someMethod();
+    new ClassB().someMethod();
+  }
 }

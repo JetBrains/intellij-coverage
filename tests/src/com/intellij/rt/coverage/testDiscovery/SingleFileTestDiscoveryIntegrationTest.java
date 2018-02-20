@@ -59,8 +59,11 @@ public class SingleFileTestDiscoveryIntegrationTest {
         new String[]{"Test", "test3", "ClassA", "method2"},
         new String[]{"Test", "test3", "ClassB", "methodR"},
         new String[]{"Test", "test3", "ClassB", "method1"},
-        new String[]{"Test", "test3", "ClassB", "method2"}
+        new String[]{"Test", "test3", "ClassB", "method2"},
+
+        new String[]{"Test", "testConstructor", "ClassA", "<init>"}
     );
+    assertThat(data).doesNotContain(new String[]{"Test.testConstructor", "ClassB", "<init>"});
   }
 
   @Test
@@ -87,7 +90,12 @@ public class SingleFileTestDiscoveryIntegrationTest {
         new String[]{"Test", "test3", "ClassA", "method2"},
         new String[]{"Test", "test3", "ClassB", "methodR"},
         new String[]{"Test", "test3", "ClassB", "method1"},
-        new String[]{"Test", "test3", "ClassB", "method2"}
+        new String[]{"Test", "test3", "ClassB", "method2"},
+
+        new String[]{"Test", "testConstructor", "ClassA", "<init>"},
+        new String[]{"Test", "testConstructor", "ClassA", "someMethod"},
+        new String[]{"Test", "testConstructor", "ClassB", "someMethod"},
+        new String[]{"Test", "testConstructor", "Test", "testConstructor"}
     );
   }
 

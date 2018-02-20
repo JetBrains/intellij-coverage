@@ -1,4 +1,8 @@
 public class ClassA {
+  public ClassA() {
+    System.out.println("hell yeahh");
+  }
+
   static public void method1() {
   }
 
@@ -9,4 +13,6 @@ public class ClassA {
     method1();
     method2();
   }
+
+  public void someMethod() {}
 }

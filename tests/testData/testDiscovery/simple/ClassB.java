@@ -25,4 +25,6 @@ public class ClassB {
     method1();
     method2();
   }
+
+  public void someMethod() {}
 }

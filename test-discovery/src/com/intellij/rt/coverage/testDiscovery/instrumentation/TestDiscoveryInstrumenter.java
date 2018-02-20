@@ -21,6 +21,7 @@ import org.jetbrains.coverage.org.objectweb.asm.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -37,6 +38,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   private static final String myInternalCounterClassName = "int";
   private final InstrumentedMethodsFilter myMethodFilter;
   private final String[] myMethodNames;
+  private volatile boolean myInstrumentConstructors;
   private int myCurrentMethodCount;
   private boolean myVisitedStaticBlock;
   private int myClassVersion;
@@ -69,20 +71,32 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
       }
 
       public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        if (methodsFilter.shouldVisitMethod(access, name, desc, signature, exceptions)) {
-          if ("<init>".equals(name)) {
-            final int slashPos = className.lastIndexOf('.');
-            final int $Pos = className.lastIndexOf('$');
-            name = className.substring(Math.max(slashPos, $Pos) + 1);
-          }
+        InstrumentedMethodsFilter.Decision decision = methodsFilter.shouldVisitMethod(access, name, desc, signature, exceptions, myInstrumentConstructors);
+        if (decision == InstrumentedMethodsFilter.Decision.YES) {
           instrumentedMethods.add(name);
+          if ("<init>".equals(name) && !myInstrumentConstructors) {
+            myInstrumentConstructors = true;
+          }
+          return super.visitMethod(access, name, desc, signature, exceptions);
+        } else if (decision == InstrumentedMethodsFilter.Decision.NO) {
+          return super.visitMethod(access, name, desc, signature, exceptions);
+        } else {
+          assert decision == InstrumentedMethodsFilter.Decision.CHECK_IS_CONSTRUCTOR_DEFAULT;
+          assert "<init>".equals(name);
+          return new DefaultConstructorDetectionVisitor(api, super.visitMethod(access, name, desc, signature, exceptions)) {
+            @Override
+            void onDecisionDone(boolean isDefault) {
+              if (!isDefault) {
+                myInstrumentConstructors = true;
+                instrumentedMethods.add("<init>");
+              }
+            }
+          };
         }
-        return super.visitMethod(access, name, desc, signature, exceptions);
       }
     };
 
     cr.accept(instrumentedMethodCounter, 0);
-
     return instrumentedMethods.toArray(new String[0]);
   }
 
@@ -165,12 +179,17 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
       }
     }
 
-    if (!myMethodFilter.shouldVisitMethod(access, name, desc, signature, exceptions)) return mv;
+    InstrumentedMethodsFilter.Decision decision = myMethodFilter.shouldVisitMethod(access, name, desc, signature, exceptions, myInstrumentConstructors);
+    if (decision != InstrumentedMethodsFilter.Decision.YES) return mv;
 
     return new MethodVisitor(Opcodes.ASM6, mv) {
       final int myMethodId = myCurrentMethodCount++;
 
       public void visitCode() {
+        if (myMethodId >= myMethodNames.length) {
+          String data = myClassName + "  " + Arrays.toString(myMethodNames) + "  " + name;
+          throw new RuntimeException(data);
+        }
         // todo for constructor insert the code after calling 'super'
         visitFieldInsn(Opcodes.GETSTATIC, INLINE_COUNTERS ? myInternalClassName : myInternalCounterClassJVMName, METHODS_VISITED, METHODS_VISITED_CLASS);
         pushInstruction(this, myMethodId);
