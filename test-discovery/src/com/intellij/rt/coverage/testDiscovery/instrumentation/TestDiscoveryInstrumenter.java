@@ -38,9 +38,10 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   private static final String myInternalCounterClassName = "int";
   private final InstrumentedMethodsFilter myMethodFilter;
   private final String[] myMethodNames;
+  private final boolean myInterface;
   private volatile boolean myInstrumentConstructors;
   private int myCurrentMethodCount;
-  private boolean myVisitedStaticBlock;
+  private boolean mySeenClinit;
   private int myClassVersion;
   private volatile Method myDefineClassMethodRef;
 
@@ -56,6 +57,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     myInternalCounterClassJVMName = myInternalClassName + "$" + myInternalCounterClassName;
     myClassLoader = loader;
     myMethodNames = collectMethodNames(cr, className);
+    myInterface = (cr.getAccess() & Opcodes.ACC_INTERFACE) != 0;
   }
 
   private String[] collectMethodNames(ClassReader cr, final String className) {
@@ -172,7 +174,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     if (mv == null) return null;
     if ("<clinit>".equals(name)) {
       if (INLINE_COUNTERS) {
-        myVisitedStaticBlock = true;
+        mySeenClinit = true;
         return new StaticBlockMethodVisitor(mv);
       } else {
         return mv;
@@ -186,12 +188,10 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
       final int myMethodId = myCurrentMethodCount++;
 
       public void visitCode() {
-        if (myMethodId >= myMethodNames.length) {
-          String data = myClassName + "  " + Arrays.toString(myMethodNames) + "  " + name;
-          throw new RuntimeException(data);
+        if (INLINE_COUNTERS) {
+          initArrayIfNotInitialized(this);
         }
-        // todo for constructor insert the code after calling 'super'
-        visitFieldInsn(Opcodes.GETSTATIC, INLINE_COUNTERS ? myInternalClassName : myInternalCounterClassJVMName, METHODS_VISITED, METHODS_VISITED_CLASS);
+        mv.visitFieldInsn(Opcodes.GETSTATIC, INLINE_COUNTERS ? myInternalClassName : myInternalCounterClassJVMName, METHODS_VISITED, METHODS_VISITED_CLASS);
         pushInstruction(this, myMethodId);
         visitInsn(Opcodes.ICONST_1);
         visitInsn(Opcodes.BASTORE);
@@ -203,12 +203,19 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
   public void visitEnd() {
     if (INLINE_COUNTERS) {
-      visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_STATIC, METHODS_VISITED,
-          METHODS_VISITED_CLASS, null, null);
 
-      if (!myVisitedStaticBlock) {
-        MethodVisitor mv = super.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
-        mv = new StaticBlockMethodVisitor(mv);
+      int access;
+      if (myInterface) {
+        access = Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL | Opcodes.ACC_SYNTHETIC;
+      }
+      else {
+        access = Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_TRANSIENT | Opcodes.ACC_SYNTHETIC;
+      }
+
+      visitField(access, METHODS_VISITED, METHODS_VISITED_CLASS, null, null);
+
+      if (!mySeenClinit) {
+        MethodVisitor mv = new StaticBlockMethodVisitor(super.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null));
         mv.visitCode();
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(ADDED_CODE_STACK_SIZE, 0);
@@ -223,6 +230,35 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     super.visitEnd();
   }
 
+  private void initArrayIfNotInitialized(MethodVisitor mv) {
+    mv.visitFieldInsn(Opcodes.GETSTATIC, INLINE_COUNTERS ? myInternalClassName : myInternalCounterClassJVMName, METHODS_VISITED, METHODS_VISITED_CLASS);
+
+    final Label alreadyInitialized = new Label();
+    mv.visitJumpInsn(Opcodes.IFNONNULL, alreadyInitialized);
+
+    initArray(mv);
+    mv.visitLabel(alreadyInitialized);
+  }
+
+  private void initArray(MethodVisitor mv) {
+    mv.visitLdcInsn(myClassName);
+    pushInstruction(mv, myMethodNames.length);
+    mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_BOOLEAN);
+
+    pushInstruction(mv, myMethodNames.length);
+    mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/String");
+
+    for (int i = 0; i < myMethodNames.length; ++i) {
+      mv.visitInsn(Opcodes.DUP);
+      pushInstruction(mv, i);
+      mv.visitLdcInsn(myMethodNames[i]);
+      mv.visitInsn(Opcodes.AASTORE);
+    }
+
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, TestDiscoveryProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/String;[Z[Ljava/lang/String;)[Z", false);
+    mv.visitFieldInsn(Opcodes.PUTSTATIC, INLINE_COUNTERS ? myInternalClassName : myInternalCounterClassJVMName, METHODS_VISITED, METHODS_VISITED_CLASS);
+  }
+
   private class StaticBlockMethodVisitor extends MethodVisitor {
     StaticBlockMethodVisitor(MethodVisitor mv) {
       super(Opcodes.ASM6, mv);
@@ -230,24 +266,12 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
     public void visitCode() {
       super.visitCode();
-
-      visitLdcInsn(myClassName);
-      pushInstruction(this, myMethodNames.length);
-      visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_BOOLEAN);
-
-      pushInstruction(this, myMethodNames.length);
-      visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/String");
-
-      for (int i = 0; i < myMethodNames.length; ++i) {
-        visitInsn(Opcodes.DUP);
-        pushInstruction(this, i);
-        visitLdcInsn(myMethodNames[i]);
-        visitInsn(Opcodes.AASTORE);
+      if (INLINE_COUNTERS) {
+        initArrayIfNotInitialized(this);
       }
-
-      visitMethodInsn(Opcodes.INVOKESTATIC, TestDiscoveryProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/String;[Z[Ljava/lang/String;)[Z", false);
-      visitFieldInsn(Opcodes.PUTSTATIC, INLINE_COUNTERS ? myInternalClassName : myInternalCounterClassJVMName, METHODS_VISITED, METHODS_VISITED_CLASS);
-
+      else {
+        initArray(this);
+      }
       // no return here
     }
 

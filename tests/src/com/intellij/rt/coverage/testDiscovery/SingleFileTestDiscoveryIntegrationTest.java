@@ -67,6 +67,21 @@ public class SingleFileTestDiscoveryIntegrationTest {
   }
 
   @Test
+  public void testStaticInitializer() throws Exception {
+    final File result = doTest("withStaticInitializers"
+        //, "-Dtest.discovery.include.class.patterns=Test;InitClass;A;B", "-Dtest.discovery.exclude.class.patterns=junit.*;org.*"
+    );
+    MySingleTrFileReader reader = new MySingleTrFileReader();
+    TestDiscoveryProtocolUtil.readFile(result, reader);
+    final List<String[]> data = reader.data;
+    assertThat(data).isNotEmpty();
+    assertThat(data).contains(
+        new String[]{"Test", "test1", "Test", "test1"},
+        new String[]{"Test", "test1", "InitClass", "initInit"}
+    );
+  }
+
+  @Test
   public void testSimpleExcludeLibs() throws Exception {
     final File result = doTest("simple",
         "-Dtest.discovery.include.class.patterns=Test.*;Class.*",
