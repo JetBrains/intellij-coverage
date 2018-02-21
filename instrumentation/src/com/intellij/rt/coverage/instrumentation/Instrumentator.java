@@ -17,13 +17,9 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
-import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
-import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 
 import java.io.*;
 import java.lang.instrument.Instrumentation;
@@ -119,47 +115,7 @@ public class Instrumentator {
     }
 
     final boolean shouldCalculateSource = sourceMapFile != null;
-    instrumentation.addTransformer(new AbstractIntellijClassfileTransformer() {
-      @Override
-      protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
-        if (data.isSampling()) {
-          if (System.getProperty("idea.new.sampling.coverage") != null) {
-            //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
-            return new NewSamplingInstrumenter(data, cw, cr, className, shouldCalculateSource);
-          } else {
-            return new SamplingInstrumenter(data, cw, className, shouldCalculateSource);
-          }
-        } else {
-          return new ClassInstrumenter(data, cw, className, shouldCalculateSource);
-        }
-      }
-
-      @Override
-      protected boolean shouldExclude(String className) {
-        return ClassNameUtil.shouldExclude(className, excludePatterns);
-      }
-
-      @Override
-      protected boolean shouldIncludeBootstrapClass(String className) {
-        for (Pattern includePattern : includePatterns) {
-          if (includePattern.matcher(className).matches()) { // matching inner class name
-            return true;
-          }
-        }
-
-        return false;
-      }
-
-      @Override
-      protected void visitClassLoader(ClassLoader classLoader) {
-        cf.addClassLoader(classLoader);
-      }
-
-      @Override
-      protected boolean isStopped() {
-        return data.isStopped();
-      }
-    });
+    instrumentation.addTransformer(new CoverageClassfileTransformer(data, shouldCalculateSource, excludePatterns, includePatterns, cf));
   }
 
   private String[] readArgsFromFile(String arg) throws IOException {

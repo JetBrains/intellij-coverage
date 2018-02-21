@@ -29,6 +29,10 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 
 public abstract class AbstractIntellijClassfileTransformer implements ClassFileTransformer {
+  public interface InclusionPattern {
+    boolean accept(String className);
+  }
+
   private final boolean computeFrames = computeFrames();
 
   public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
@@ -62,7 +66,12 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
 
       visitClassLoader(loader);
 
-      if (loader != null || shouldIncludeBootstrapClass(className)) {
+      InclusionPattern inclusionPattern = getInclusionPattern();
+      if (inclusionPattern == null) {
+        if (loader != null) {
+          return instrument(classFileBuffer, className, loader, computeFrames);
+        }
+      } else if (inclusionPattern.accept(className)) {
         return instrument(classFileBuffer, className, loader, computeFrames);
       }
     } catch (Throwable e) {
@@ -83,7 +92,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     }
 
     final ClassVisitor cv = createClassVisitor(className, loader, cr, cw);
-      cr.accept(cv, 0);
+    cr.accept(cv, 0);
     return cw.toByteArray();
   }
 
@@ -91,8 +100,8 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
 
   protected abstract boolean shouldExclude(String className);
 
-  protected boolean shouldIncludeBootstrapClass(String className) {
-    return false;
+  protected InclusionPattern getInclusionPattern() {
+    return null;
   }
 
   protected void visitClassLoader(ClassLoader classLoader) {
