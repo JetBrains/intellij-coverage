@@ -21,6 +21,7 @@ import org.jetbrains.coverage.org.objectweb.asm.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -185,6 +186,10 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
       final int myMethodId = myCurrentMethodCount++;
 
       public void visitCode() {
+        if (myMethodId >= myMethodNames.length) {
+          super.visitCode();
+          return;
+        }
         if (INLINE_COUNTERS) {
           initArrayIfNotInitialized(this);
         }
