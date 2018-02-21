@@ -45,8 +45,10 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   private volatile Method myDefineClassMethodRef;
 
   private static final String METHODS_VISITED = "__$methodsVisited$__";
+  private static final String METHODS_VISITED_INIT = "__$initMethodsVisited$__";
   private static final String METHODS_VISITED_CLASS = "[Z";
   private static final boolean INLINE_COUNTERS = System.getProperty("idea.inline.counter.fields") != null;
+  private boolean myCreatedMethod = false;
 
   public TestDiscoveryInstrumenter(ClassWriter classWriter, ClassReader cr, String className, ClassLoader loader) {
     super(Opcodes.ASM6, classWriter);
@@ -191,7 +193,13 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
           return;
         }
         if (INLINE_COUNTERS) {
-          initArrayIfNotInitialized(this);
+          if (myInterface && !myCreatedMethod) { //java 1.8 + can create static method
+            myCreatedMethod = true;
+            //don't care about serialization for interfaces, class is required => allowed to create public method
+            createInitFieldMethod(Opcodes.ACC_SYNTHETIC | Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
+          }
+
+          mv.visitMethodInsn(Opcodes.INVOKESTATIC, myInternalClassName, METHODS_VISITED_INIT, "()V", false);
         }
         mv.visitFieldInsn(Opcodes.GETSTATIC, INLINE_COUNTERS ? myInternalClassName : myInternalCounterClassJVMName, METHODS_VISITED, METHODS_VISITED_CLASS);
         pushInstruction(this, myMethodId);
@@ -216,6 +224,9 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
       visitField(access, METHODS_VISITED, METHODS_VISITED_CLASS, null, null);
 
+      if (!myInterface) {
+        createInitFieldMethod(Opcodes.ACC_SYNTHETIC | Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC);
+      }
     }
     else {
       if (myMethodNames.length > 0) {
@@ -224,6 +235,15 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
       }
     }
     super.visitEnd();
+  }
+
+  private void createInitFieldMethod(final int access) {
+    MethodVisitor mv = visitMethod(access, METHODS_VISITED_INIT, "()V", null, null);
+    initArrayIfNotInitialized(mv);
+
+    mv.visitInsn(Opcodes.RETURN);
+    mv.visitMaxs(ADDED_CODE_STACK_SIZE, 0);
+    mv.visitEnd();
   }
 
   private void initArrayIfNotInitialized(MethodVisitor mv) {

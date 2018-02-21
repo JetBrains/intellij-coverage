@@ -30,6 +30,7 @@ import org.junit.Test;
 import java.io.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class ExplicitTestDiscoveryInstrumentationTest {
@@ -89,6 +90,40 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     Object restored = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray())).readObject();
     assertTrue(restored instanceof MySerializable);
     assertEquals("hello", ((MySerializable) restored).getField());
+  }
+
+  @SuppressWarnings("ALL")
+  public static class InitClass {
+    public static void initInit() {
+      B b = new B(0); //leads to: A<clinit>; A(1); B(1); B<clinit>; A(0); B(0)
+    }
+
+    public static class A {
+      static final A CONST = new B(1);
+      transient int pp;
+
+      public A(int p) {
+        pp = p;
+      }
+    }
+
+    public static class B extends A {
+      public B(int i) {
+        super(1);
+      }
+    }
+  }
+
+  @Test
+  public void testBrokenInitializer() throws Throwable {
+    String name = InitClass.B.class.getName();
+    Object transformed = 
+        new TransformedClassLoader(InitClass.B.class.getClassLoader(), name, doTransform(name))
+        .loadClass(name, true)
+        .getConstructor(int.class)
+        .newInstance(1);
+    //ensure class instrumentation doesn't fail
+    assertNotNull(transformed);
   }
 
   private class TransformedClassLoader extends ClassLoader {
