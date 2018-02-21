@@ -19,34 +19,24 @@ package com.intellij.rt.coverage.testDiscovery.instrumentation;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * This ClassVisitor adds byte array with 'visited' flag for all methods in given class to either
- * new field or inner class, depending on {@link #INLINE_COUNTERS}
- * Also modifies class static initializer to invoke {@link TestDiscoveryProjectData#trace(String, boolean[], String[])}
- */
 public class TestDiscoveryInstrumenter extends ClassVisitor {
-  private static final int ADDED_CODE_STACK_SIZE = 6;
+  static final int ADDED_CODE_STACK_SIZE = 6;
   private final String myClassName;
-  private final String myInternalClassName;
-  private final ClassLoader myClassLoader;
-  private final String myInternalCounterClassJVMName;
-  private static final String myInternalCounterClassName = "int";
+  final String myInternalClassName;
+  int myClassVersion;
   private final InstrumentedMethodsFilter myMethodFilter;
   private final String[] myMethodNames;
-  private final boolean myInterface;
   private volatile boolean myInstrumentConstructors;
   private int myCurrentMethodCount;
-  private int myClassVersion;
-  private volatile Method myDefineClassMethodRef;
 
-  private static final String METHODS_VISITED = "__$methodsVisited$__";
+  static final String METHODS_VISITED = "__$methodsVisited$__";
+  static final String METHODS_VISITED_CLASS = "[Z";
+
   private static final String METHODS_VISITED_INIT = "__$initMethodsVisited$__";
-  private static final String METHODS_VISITED_CLASS = "[Z";
-  private static final boolean INLINE_COUNTERS = System.getProperty("idea.inline.counter.fields") != null;
+  private final boolean myInterface;
   private boolean myCreatedMethod = false;
 
   public TestDiscoveryInstrumenter(ClassWriter classWriter, ClassReader cr, String className, ClassLoader loader) {
@@ -54,8 +44,6 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     myMethodFilter = new InstrumentedMethodsFilter(className);
     myClassName = className;
     myInternalClassName = className.replace('.', '/');
-    myInternalCounterClassJVMName = myInternalClassName + "$" + myInternalCounterClassName;
-    myClassLoader = loader;
     myMethodNames = collectMethodNames(cr, className);
     myInterface = (cr.getAccess() & Opcodes.ACC_INTERFACE) != 0;
   }
@@ -102,64 +90,6 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     return instrumentedMethods.toArray(new String[0]);
   }
 
-  private void generateInnerClassWithCounter() {
-    ClassWriter cw = new ClassWriter(0);
-    MethodVisitor mv;
-
-    cw.visit(myClassVersion,
-        Opcodes.ACC_STATIC + Opcodes.ACC_FINAL + Opcodes.ACC_SUPER + Opcodes.ACC_SYNTHETIC,
-        myInternalCounterClassJVMName, // ?
-        null,
-        "java/lang/Object",
-        null);
-
-    {
-      cw.visitOuterClass(myInternalClassName, myInternalCounterClassJVMName, null);
-
-      cw.visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL | Opcodes.ACC_STATIC, METHODS_VISITED,
-          METHODS_VISITED_CLASS, null, null);
-
-      MethodVisitor staticBlockVisitor = cw.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
-      staticBlockVisitor = new StaticBlockMethodVisitor(staticBlockVisitor);
-      staticBlockVisitor.visitCode();
-      staticBlockVisitor.visitInsn(Opcodes.RETURN);
-      staticBlockVisitor.visitMaxs(ADDED_CODE_STACK_SIZE, 0);
-      staticBlockVisitor.visitEnd();
-    }
-
-    {
-      mv = cw.visitMethod(Opcodes.ACC_PUBLIC, "<init>", "()V", null, null);
-      mv.visitVarInsn(Opcodes.ALOAD, 0);
-      mv.visitMethodInsn(Opcodes.INVOKESPECIAL,
-          "java/lang/Object",
-          "<init>",
-          "()V", false);
-      mv.visitInsn(Opcodes.RETURN);
-      mv.visitMaxs(1, 1);
-      mv.visitEnd();
-    }
-
-    cw.visitEnd();
-
-    try {
-      byte[] bytes = cw.toByteArray();
-      //saveBytes(bytes, myInternalCounterClassJVMName.replace('/', '.') + ".class");
-
-      Method defineClassMethodRef = myDefineClassMethodRef;
-      if (defineClassMethodRef == null) {
-        defineClassMethodRef = ClassLoader.class.getDeclaredMethod("defineClass", byte[].class, Integer.TYPE, Integer.TYPE);
-        if (defineClassMethodRef != null) {
-          defineClassMethodRef.setAccessible(true);
-          myDefineClassMethodRef = defineClassMethodRef;
-        }
-      }
-
-      defineClassMethodRef.invoke(myClassLoader, bytes, 0, bytes.length);
-    } catch (Throwable t) {
-      t.printStackTrace();
-    }
-  }
-
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
     myMethodFilter.visit(version, access, name, signature, superName, interfaces);
     super.visit(version, access, name, signature, superName, interfaces);
@@ -187,16 +117,8 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
           super.visitCode();
           return;
         }
-        if (INLINE_COUNTERS) {
-          if (myInterface && !myCreatedMethod) { //java 1.8 + can create static method
-            myCreatedMethod = true;
-            //don't care about serialization for interfaces, class is required => allowed to create public method
-            createInitFieldMethod(Opcodes.ACC_SYNTHETIC | Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
-          }
-
-          mv.visitMethodInsn(Opcodes.INVOKESTATIC, myInternalClassName, METHODS_VISITED_INIT, "()V", false);
-        }
-        mv.visitFieldInsn(Opcodes.GETSTATIC, INLINE_COUNTERS ? myInternalClassName : myInternalCounterClassJVMName, METHODS_VISITED, METHODS_VISITED_CLASS);
+        ensureArrayInitialized(mv);
+        mv.visitFieldInsn(Opcodes.GETSTATIC, getFieldClassName(), METHODS_VISITED, METHODS_VISITED_CLASS);
         pushInstruction(this, myMethodId);
         visitInsn(Opcodes.ICONST_1);
         visitInsn(Opcodes.BASTORE);
@@ -206,52 +128,87 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     };
   }
 
-  public void visitEnd() {
-    if (INLINE_COUNTERS) {
-
-      int access;
-      if (myInterface) {
-        access = Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL | Opcodes.ACC_SYNTHETIC;
-      }
-      else {
-        access = Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_TRANSIENT | Opcodes.ACC_SYNTHETIC;
-      }
-
-      visitField(access, METHODS_VISITED, METHODS_VISITED_CLASS, null, null);
-
-      if (!myInterface) {
-        createInitFieldMethod(Opcodes.ACC_SYNTHETIC | Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC);
-      }
+  /**
+   * Insert call to the __$initMethodsVisited$__
+   * 
+   * It also will create a method for interfaces which were skipped by default: for java 1.8- static methods in interfaces were not possible, 
+   * but if there is non-<clinit> code in the interface, then it must be 1.8+
+   */
+  protected void ensureArrayInitialized(MethodVisitor mv) {
+    if (myInterface && !myCreatedMethod) { //java 1.8 + can create static method
+      myCreatedMethod = true;
+      //don't care about serialization for interfaces, class is required => allowed to create public method
+      createInitFieldMethod(Opcodes.ACC_SYNTHETIC | Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
     }
-    else {
-      if (myMethodNames.length > 0) {
-        generateInnerClassWithCounter();
-        visitInnerClass(myInternalCounterClassJVMName, myInternalClassName, myInternalCounterClassName, Opcodes.ACC_PRIVATE + Opcodes.ACC_FINAL + Opcodes.ACC_STATIC);
-      }
+
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, myInternalClassName, METHODS_VISITED_INIT, "()V", false);
+  }
+      
+  protected String getFieldClassName() {
+    return myInternalClassName;
+  }
+
+  public void visitEnd() {
+    if (myMethodNames.length > 0) {
+      generateMembers();
     }
     super.visitEnd();
   }
 
+  /**
+   * Generate field with boolean array to put true if we enter a method
+   */
+  protected void generateMembers() {
+    int access;
+    if (myInterface) {
+      access = Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL | Opcodes.ACC_SYNTHETIC;
+    }
+    else {
+      access = Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_TRANSIENT | Opcodes.ACC_SYNTHETIC;
+    }
+
+    visitField(access, METHODS_VISITED, METHODS_VISITED_CLASS, null, null);
+
+    if (!myInterface) {
+      createInitFieldMethod(Opcodes.ACC_SYNTHETIC | Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC);
+    }
+  }
+
+  /**
+   * Creates method:
+   * <pre>
+   * <code>
+   *   `access` static void __$initMethodsVisited$__() {
+   *     if (__$methodsVisited$__ == null) {
+   *       __$methodsVisited$__ = new boolean[myMethodNames.size()];
+   *     }
+   *   }
+   * </code>
+   * </pre>
+   * 
+   * The same array will be stored in the {@link TestDiscoveryProjectData#ourProjectData} instance
+   */
   private void createInitFieldMethod(final int access) {
     MethodVisitor mv = visitMethod(access, METHODS_VISITED_INIT, "()V", null, null);
-    initArrayIfNotInitialized(mv);
+    mv.visitFieldInsn(Opcodes.GETSTATIC, getFieldClassName(), METHODS_VISITED, METHODS_VISITED_CLASS);
+
+    final Label alreadyInitialized = new Label();
+    mv.visitJumpInsn(Opcodes.IFNONNULL, alreadyInitialized);
+
+    initArray(mv);
+
+    mv.visitLabel(alreadyInitialized);
 
     mv.visitInsn(Opcodes.RETURN);
     mv.visitMaxs(ADDED_CODE_STACK_SIZE, 0);
     mv.visitEnd();
   }
 
-  private void initArrayIfNotInitialized(MethodVisitor mv) {
-    mv.visitFieldInsn(Opcodes.GETSTATIC, INLINE_COUNTERS ? myInternalClassName : myInternalCounterClassJVMName, METHODS_VISITED, METHODS_VISITED_CLASS);
-
-    final Label alreadyInitialized = new Label();
-    mv.visitJumpInsn(Opcodes.IFNONNULL, alreadyInitialized);
-
-    initArray(mv);
-    mv.visitLabel(alreadyInitialized);
-  }
-
-  private void initArray(MethodVisitor mv) {
+  /**
+   * Pushes class name, array of boolean and method names from stack to the {@link TestDiscoveryProjectData#trace(java.lang.String, boolean[], java.lang.String[])}
+   * and store result in the field {@link TestDiscoveryInstrumenter#METHODS_VISITED}
+   */
+  void initArray(MethodVisitor mv) {
     mv.visitLdcInsn(myClassName);
     pushInstruction(mv, myMethodNames.length);
     mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_BOOLEAN);
@@ -267,28 +224,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     }
 
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, TestDiscoveryProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/String;[Z[Ljava/lang/String;)[Z", false);
-    mv.visitFieldInsn(Opcodes.PUTSTATIC, INLINE_COUNTERS ? myInternalClassName : myInternalCounterClassJVMName, METHODS_VISITED, METHODS_VISITED_CLASS);
-  }
-
-  private class StaticBlockMethodVisitor extends MethodVisitor {
-    StaticBlockMethodVisitor(MethodVisitor mv) {
-      super(Opcodes.ASM6, mv);
-    }
-
-    public void visitCode() {
-      super.visitCode();
-      if (INLINE_COUNTERS) {
-        initArrayIfNotInitialized(this);
-      }
-      else {
-        initArray(this);
-      }
-      // no return here
-    }
-
-    public void visitMaxs(int maxStack, int maxLocals) {
-      super.visitMaxs(Math.max(ADDED_CODE_STACK_SIZE, maxStack), maxLocals);
-    }
+    mv.visitFieldInsn(Opcodes.PUTSTATIC, getFieldClassName(), METHODS_VISITED, METHODS_VISITED_CLASS);
   }
 
   private static void pushInstruction(MethodVisitor mv, int operand) {

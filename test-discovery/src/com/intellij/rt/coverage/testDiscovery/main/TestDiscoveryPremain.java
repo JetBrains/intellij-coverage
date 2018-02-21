@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.testDiscovery.main;
 
 import com.intellij.rt.coverage.instrumentation.AbstractIntellijClassfileTransformer;
+import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInnerClassInstrumenter;
 import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInstrumenter;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
@@ -34,6 +35,8 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class TestDiscoveryPremain {
+  private static final boolean COUNTERS_IN_INNER_CLASS = System.getProperty("idea.test.discovery.counters.in.inner.class") != null;
+
   private void performPremain(Instrumentation instrumentation) {
     System.out.println("---- IntelliJ IDEA Test Discovery ---- ");
 
@@ -57,7 +60,9 @@ public class TestDiscoveryPremain {
 
       @Override
       protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
-        return new TestDiscoveryInstrumenter(cw, cr, className, loader);
+        return COUNTERS_IN_INNER_CLASS 
+            ? new TestDiscoveryInnerClassInstrumenter(cw, cr, className, loader) 
+            : new TestDiscoveryInstrumenter(cw, cr, className, loader);
       }
 
       @Override
