@@ -21,7 +21,6 @@ import org.jetbrains.coverage.org.objectweb.asm.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -174,11 +173,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     final MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
     if (mv == null) return null;
     if ("<clinit>".equals(name)) {
-      if (INLINE_COUNTERS) {
-        return new StaticBlockMethodVisitor(mv);
-      } else {
-        return mv;
-      }
+      return mv;
     }
 
     InstrumentedMethodsFilter.Decision decision = myMethodFilter.shouldVisitMethod(access, name, desc, signature, exceptions, myInstrumentConstructors);
