@@ -115,7 +115,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
                                    final String[] exceptions) {
     final MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
     if (mv == null) return null;
-    if ("<clinit>".equals(name)) {
+    if ("<clinit>".equals(name) || METHODS_VISITED_INIT.equals(name)) {
       return mv;
     }
 
