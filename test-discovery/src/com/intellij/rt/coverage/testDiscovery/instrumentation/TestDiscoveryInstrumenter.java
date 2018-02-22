@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestDiscoveryInstrumenter extends ClassVisitor {
+  private static final String INIT_METHOD_NAME = "<init>";
+
   static final int ADDED_CODE_STACK_SIZE = 6;
   private final String myClassName;
   final String myInternalClassName;
@@ -65,32 +67,34 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
         InstrumentedMethodsFilter.Decision decision = methodsFilter.shouldVisitMethod(access, name, desc, signature, exceptions, myInstrumentConstructors);
         if (decision == InstrumentedMethodsFilter.Decision.YES) {
           instrumentedMethods.add(name);
-          if ("<init>".equals(name) && !myInstrumentConstructors) {
-            myInstrumentConstructors = true;
-            if (defaultConstructorIndex != -1) {
-              instrumentedMethods.add(defaultConstructorIndex, "<init>");
-            }
+          if (INIT_METHOD_NAME.equals(name) && !myInstrumentConstructors) {
+            instrumentAllConstructors();
           }
           return super.visitMethod(access, name, desc, signature, exceptions);
         } else if (decision == InstrumentedMethodsFilter.Decision.NO) {
           return super.visitMethod(access, name, desc, signature, exceptions);
         } else {
           assert decision == InstrumentedMethodsFilter.Decision.CHECK_IS_CONSTRUCTOR_DEFAULT;
-          assert "<init>".equals(name);
+          assert INIT_METHOD_NAME.equals(name);
           return new DefaultConstructorDetectionVisitor(api, super.visitMethod(access, name, desc, signature, exceptions)) {
             @Override
             void onDecisionDone(boolean isDefault) {
               if (!isDefault) {
-                myInstrumentConstructors = true;
-                if (defaultConstructorIndex != -1) {
-                  instrumentedMethods.add(defaultConstructorIndex, "<init>");
-                }
-                instrumentedMethods.add("<init>");
+                instrumentAllConstructors();
+                instrumentedMethods.add(INIT_METHOD_NAME);
               } else {
                 defaultConstructorIndex = instrumentedMethods.size();
               }
             }
           };
+        }
+      }
+
+      private void instrumentAllConstructors() {
+        myInstrumentConstructors = true;
+        if (defaultConstructorIndex != -1) {
+          instrumentedMethods.add(defaultConstructorIndex, INIT_METHOD_NAME);
+          defaultConstructorIndex = -1;
         }
       }
     };
