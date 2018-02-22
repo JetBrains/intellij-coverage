@@ -36,13 +36,17 @@ import java.util.regex.PatternSyntaxException;
 
 public class TestDiscoveryPremain {
   private static final boolean COUNTERS_IN_INNER_CLASS = System.getProperty("idea.test.discovery.counters.in.inner.class") != null;
+  @SuppressWarnings("WeakerAccess")
+  public static final String INCLUDE_PATTERNS_VM_OP = "test.discovery.include.class.patterns";
+  @SuppressWarnings("WeakerAccess")
+  public static final String EXCLUDE_PATTERNS_VM_OP = "test.discovery.exclude.class.patterns";
 
   private void performPremain(Instrumentation instrumentation) {
     System.out.println("---- IntelliJ IDEA Test Discovery ---- ");
 
     // separated by ;
-    final List<Pattern> include = patterns("test.discovery.include.class.patterns");
-    final List<Pattern> exclude = patterns("test.discovery.exclude.class.patterns");
+    final List<Pattern> include = patterns(INCLUDE_PATTERNS_VM_OP);
+    final List<Pattern> exclude = patterns(EXCLUDE_PATTERNS_VM_OP);
 
     instrumentation.addTransformer(new AbstractIntellijClassfileTransformer() {
       private final ConcurrentMap<ClassLoader, Boolean> systemBasedClassLoaders = new ConcurrentHashMap<ClassLoader, Boolean>();

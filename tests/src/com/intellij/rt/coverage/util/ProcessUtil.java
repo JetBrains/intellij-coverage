@@ -37,10 +37,11 @@ public class ProcessUtil {
     final Process process = Runtime.getRuntime().exec(fullCmd);
     process.waitFor();
 
-    if (process.exitValue() != 0) {
+    int exitCode = process.exitValue();
+    if (exitCode != 0) {
       printStdout(process);
       process.destroy();
-      throw new RuntimeException("Exit code != 0");
+      throw new RuntimeException("Exit code != 0. Actual code = " + exitCode);
     }
 
     process.destroy();

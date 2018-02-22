@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-public class Test {
-  public static void main(String[] args) {
+public class Test extends junit.framework.TestCase  {
+
+  public void test1() {
     new Foo();
-    new Bar();
   }
-}
-
-class Bar {
-
-}
-
-class Foo {
-
+  public void test2() {
+    new Foo("Ololo");
+  }
 }

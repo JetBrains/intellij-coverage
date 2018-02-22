@@ -52,6 +52,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     final List<String> instrumentedMethods = new ArrayList<String>();
 
     final ClassVisitor instrumentedMethodCounter = new ClassVisitor(Opcodes.ASM6) {
+      int defaultConstructorIndex = -1;
       final InstrumentedMethodsFilter methodsFilter = new InstrumentedMethodsFilter(className);
 
       public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
@@ -66,6 +67,9 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
           instrumentedMethods.add(name);
           if ("<init>".equals(name) && !myInstrumentConstructors) {
             myInstrumentConstructors = true;
+            if (defaultConstructorIndex != -1) {
+              instrumentedMethods.add(defaultConstructorIndex, "<init>");
+            }
           }
           return super.visitMethod(access, name, desc, signature, exceptions);
         } else if (decision == InstrumentedMethodsFilter.Decision.NO) {
@@ -78,7 +82,12 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
             void onDecisionDone(boolean isDefault) {
               if (!isDefault) {
                 myInstrumentConstructors = true;
+                if (defaultConstructorIndex != -1) {
+                  instrumentedMethods.add(defaultConstructorIndex, "<init>");
+                }
                 instrumentedMethods.add("<init>");
+              } else {
+                defaultConstructorIndex = instrumentedMethods.size();
               }
             }
           };
@@ -113,10 +122,6 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
       final int myMethodId = myCurrentMethodCount++;
 
       public void visitCode() {
-        if (myMethodId >= myMethodNames.length) {
-          super.visitCode();
-          return;
-        }
         ensureArrayInitialized(mv);
         mv.visitFieldInsn(Opcodes.GETSTATIC, getFieldClassName(), METHODS_VISITED, METHODS_VISITED_CLASS);
         pushInstruction(this, myMethodId);

@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.testDiscovery;
 import com.intellij.rt.coverage.data.SocketTestDiscoveryProtocolDataListener;
 import com.intellij.rt.coverage.data.api.TestDiscoveryProtocolReader;
 import com.intellij.rt.coverage.data.api.TestDiscoveryProtocolUtil;
+import com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.junit.Assert;
@@ -32,6 +33,7 @@ import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -66,7 +68,39 @@ public class SocketWriterTestDiscoveryIntegrationTest {
     assertThat(result).doesNotContain(new String[]{"Test.testConstructor", "ClassB", "<init>"});
   }
 
-  private List<String[]> doTest(final String directory) throws Exception {
+  @Test
+  public void testConstructors() throws Exception {
+    final List<String[]> result = doTest("constructors", "-D" + TestDiscoveryPremain.INCLUDE_PATTERNS_VM_OP + "=AssertionFailedError");
+    assertThat(result).contains(
+        new String[] {"Test.test1", "AssertionFailedError", "<init>"},
+        new String[] {"Test.test2", "AssertionFailedError", "<init>"},
+        new String[] {"Test.test2", "AssertionFailedError", "defaultString"},
+        new String[] {"Test.test3", "AssertionFailedError", "defaultString"});
+  }
+
+  @Test
+  public void testFieldInitializers() throws Exception {
+    final List<String[]> result = doTest("fieldInitializers", "-D" + TestDiscoveryPremain.INCLUDE_PATTERNS_VM_OP + "=Foo");
+    assertThat(result).contains(
+        new String[] {"Test.test1", "Foo", "<init>"});
+  }
+
+  @Test
+  public void testFieldInitializers2() throws Exception {
+    final List<String[]> result = doTest("fieldInitializers2", "-D" + TestDiscoveryPremain.INCLUDE_PATTERNS_VM_OP + "=Foo");
+    assertThat(result).contains(
+        new String[] {"Test.test1", "Foo", "<init>"});
+  }
+
+  @Test
+  public void testFieldInitializers3() throws Exception {
+    final List<String[]> result = doTest("fieldInitializers3", "-D" + TestDiscoveryPremain.INCLUDE_PATTERNS_VM_OP + "=Foo");
+    assertThat(result).contains(
+        new String[] {"Test.test1", "Foo", "<init>"},
+        new String[] {"Test.test2", "Foo", "<init>"});
+  }
+
+  private List<String[]> doTest(final String directory, String... additionalOps) throws Exception {
     final File testData = getTestData(directory);
     final File outputDir = tmpDir.newFolder();
 
@@ -74,7 +108,7 @@ public class SocketWriterTestDiscoveryIntegrationTest {
 
     MyTestDiscoverySocketListener socketListener = new MyTestDiscoverySocketListener();
 
-    List<String> ops = new ArrayList<String>();
+    List<String> ops = new ArrayList<String>(Arrays.asList(additionalOps));
     ops.add("-Dtest.discovery.data.listener=" + SocketTestDiscoveryProtocolDataListener.class.getName());
     ops.add("-D" + SocketTestDiscoveryProtocolDataListener.HOST_PROP + "=127.0.0.1");
     ops.add("-D" + SocketTestDiscoveryProtocolDataListener.PORT_PROP + "=" + socketListener.getPort());

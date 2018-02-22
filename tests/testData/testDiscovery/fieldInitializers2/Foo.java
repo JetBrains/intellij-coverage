@@ -14,17 +14,7 @@
  * limitations under the License.
  */
 
-public class Test {
-  public static void main(String[] args) {
-    new Foo();
-    new Bar();
-  }
-}
-
-class Bar {
-
-}
-
-class Foo {
+public class Foo {
+  private final java.util.List l = new java.util.ArrayList();
 
 }
