@@ -18,6 +18,9 @@ package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+/**
+ * Filter ignores synthetic methods and thus no information e.g. about lambda body would be collected
+ */
 class InstrumentedMethodsFilter {
   private final String myClassName;
   private boolean myEnum;
@@ -39,8 +42,7 @@ class InstrumentedMethodsFilter {
     if ((access & Opcodes.ACC_BRIDGE) != 0) return Decision.NO; //try to skip bridge methods
     if ((access & Opcodes.ACC_ABSTRACT) != 0) return Decision.NO; //skip abstracts; do not include interfaces without non-abstract methods in result
     if ("<clinit>".equals(name) || //static initializer
-        ((access & Opcodes.ACC_SYNTHETIC) != 0 && (name.startsWith("access$") || "<init>".equals(name)))) {
-      // todo skip only trivial default constructor
+        (access & Opcodes.ACC_SYNTHETIC) != 0) {//skip all synthetic methods
       return Decision.NO;
     }
     if (name.equals("<init>") && desc.equals("()V")) {
