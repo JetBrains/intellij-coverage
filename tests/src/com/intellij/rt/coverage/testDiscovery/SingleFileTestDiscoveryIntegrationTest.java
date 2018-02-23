@@ -82,6 +82,19 @@ public class SingleFileTestDiscoveryIntegrationTest {
   }
 
   @Test
+  public void testInterfaceWithDefaultMethods() throws Exception {
+    final File result = doTest("interfaceWithDefaultMethods");
+    MySingleTrFileReader reader = new MySingleTrFileReader();
+    TestDiscoveryProtocolUtil.readFile(result, reader);
+    final List<String[]> data = reader.data;
+    assertThat(data).isNotEmpty();
+    assertThat(data).contains(
+        new String[]{"Test", "test1", "Foo", "m"},
+        new String[]{"Test", "test1", "Foo", "doInvoke"}
+    );
+  }
+
+  @Test
   public void testSimpleExcludeLibs() throws Exception {
     final File result = doTest("simple",
         "-Dtest.discovery.include.class.patterns=Test.*;Class.*",
@@ -115,7 +128,7 @@ public class SingleFileTestDiscoveryIntegrationTest {
   }
 
   private static class MySingleTrFileReader extends SimpleDecodingTestDiscoveryProtocolReader {
-    final List<String[]> data = new ArrayList<String[]>();
+    final List<String[]> data = new ArrayList<>();
 
     protected void processData(String testClassName, String testMethodName, String className, String methodName) {
       data.add(new String[]{testClassName, testMethodName, className, methodName});
@@ -144,7 +157,7 @@ public class SingleFileTestDiscoveryIntegrationTest {
     File traceDataFile = tmpDir.newFile("td.ijtc");
     TestDiscoveryTestUtil.compileTestData(testData, outputDir);
 
-    List<String> fullJavaOptions = new ArrayList<String>();
+    List<String> fullJavaOptions = new ArrayList<>();
     Collections.addAll(fullJavaOptions, javaOptions);
     // args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007");
     fullJavaOptions.add("-Dtest.discovery.data.listener=com.intellij.rt.coverage.data.SingleTrFileDiscoveryProtocolDataListener");
