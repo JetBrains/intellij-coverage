@@ -128,7 +128,7 @@ public class SingleFileTestDiscoveryIntegrationTest {
   }
 
   private static class MySingleTrFileReader extends SimpleDecodingTestDiscoveryProtocolReader {
-    final List<String[]> data = new ArrayList<>();
+    final List<String[]> data = new ArrayList<String[]>();
 
     protected void processData(String testClassName, String testMethodName, String className, String methodName) {
       data.add(new String[]{testClassName, testMethodName, className, methodName});
@@ -157,7 +157,7 @@ public class SingleFileTestDiscoveryIntegrationTest {
     File traceDataFile = tmpDir.newFile("td.ijtc");
     TestDiscoveryTestUtil.compileTestData(testData, outputDir);
 
-    List<String> fullJavaOptions = new ArrayList<>();
+    List<String> fullJavaOptions = new ArrayList<String>();
     Collections.addAll(fullJavaOptions, javaOptions);
     // args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007");
     fullJavaOptions.add("-Dtest.discovery.data.listener=com.intellij.rt.coverage.data.SingleTrFileDiscoveryProtocolDataListener");
