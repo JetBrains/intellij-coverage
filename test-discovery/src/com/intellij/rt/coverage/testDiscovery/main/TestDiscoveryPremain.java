@@ -49,19 +49,6 @@ public class TestDiscoveryPremain {
     final List<Pattern> exclude = patterns(EXCLUDE_PATTERNS_VM_OP);
 
     instrumentation.addTransformer(new AbstractIntellijClassfileTransformer() {
-      private final ConcurrentMap<ClassLoader, Boolean> systemBasedClassLoaders = new ConcurrentHashMap<ClassLoader, Boolean>();
-
-      @Override
-      public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
-        Boolean isSystemBased = systemBasedClassLoaders.get(loader);
-        if (isSystemBased == null) {
-          systemBasedClassLoaders.put(loader, isSystemBased = isSystemBasedClassLoader(loader));
-        }
-        return isSystemBased
-            ? super.transform(loader, className, classBeingRedefined, protectionDomain, classFileBuffer)
-            : null;
-      }
-
       @Override
       protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
         return COUNTERS_IN_INNER_CLASS 

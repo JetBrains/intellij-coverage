@@ -35,7 +35,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
 
   private final boolean computeFrames = computeFrames();
 
-  public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
+  public final byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
     if (isStopped()) {
       return null;
     }
