@@ -76,13 +76,16 @@ public class TestDiscoveryProjectData {
     final boolean[] previousMethodFlags = myClassToVisitedMethods.putIfAbsent(classId, methodFlags);
 
     if (previousMethodFlags != null) {
-      //  assert previousMethodFlags.length == methodFlags.length;
-      final int[] previousMethodNames = myClassToMethodNames.get(classId);
-      //assert previousMethodNames != null && previousMethodNames.length == methodNames.length;
-    } else {
-      myClassToMethodNames.put(classId, NameEnumerator.enumerate(methodNames, myNameEnumerator));
+      if (previousMethodFlags.length == methodFlags.length) {
+        return previousMethodFlags;
+      }
+      //override previous data so different loaded classes would work with different arrays 
+      //the last loaded class wins but at least no ArrayIndexOutOfBound would be possible due to different class versions
+      myClassToVisitedMethods.put(classId, methodFlags);
     }
-    return previousMethodFlags != null ? previousMethodFlags : methodFlags;
+
+    myClassToMethodNames.put(classId, NameEnumerator.enumerate(methodNames, myNameEnumerator));
+    return methodFlags;
   }
 
   public synchronized void testDiscoveryEnded(final String className, final String methodName) {
