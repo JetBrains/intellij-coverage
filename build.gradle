@@ -16,6 +16,9 @@ def asm = rootProject.file('lib/asm-all.jar')
 ext.library_project_trove4j = files(trove)
 ext.library_project_asm_all = files(asm)
 
+ext.test_discovery_jar_name = 'intellij-test-discovery-agent'
+ext.coverage_jar_name = 'intellij-coverage-agent'
+
 allprojects {
   version calcVersion()
 

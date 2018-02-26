@@ -57,7 +57,7 @@ public class TestDiscoveryTestUtil {
   }
 
   static void runTestDiscovery(String testDataPath, String testClass, List<String> additionalJavaOptions) throws IOException, InterruptedException {
-    String agentJar = ResourceUtil.getAgentPath("test-discovery-agent");
+    String agentJar = ResourceUtil.getAgentPath("intellij-test-discovery-agent");
 
     final ArrayList<String> args = new ArrayList<String>();
     // args.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007");

@@ -6,7 +6,7 @@ dependencies {
 }
 
 task coverageAgentJar(type: Jar) {
-  baseName = "coverage-agent"
+  baseName = coverage_jar_name
   destinationDir = file("../dist")
   manifest.attributes(
       "Premain-Class": "com.intellij.rt.coverage.main.CoveragePremain",

@@ -18,13 +18,13 @@ publishing {
   publications {
     CoveragePublication(MavenPublication) {
       groupId 'org.jetbrains.intellij.deps'
-      artifactId 'intellij-coverage'
+      artifactId coverage_jar_name
       version version
       artifact project(":instrumentation").coverageAgentJar
     }
     TestDiscoveryPublication(MavenPublication) {
       groupId 'org.jetbrains.intellij.deps'
-      artifactId 'intellij-test-discovery'
+      artifactId test_discovery_jar_name
       version version
       artifact project(":test-discovery").discoveryAgentJar
     }

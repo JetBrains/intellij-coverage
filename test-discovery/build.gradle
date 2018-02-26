@@ -11,7 +11,7 @@ sourceSets {
 }
 
 task discoveryAgentJar(type: Jar) {
-  baseName = "test-discovery-agent"
+  baseName = test_discovery_jar_name
   destinationDir = file("../dist")
   manifest.attributes(
       "Premain-Class": "com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain",
