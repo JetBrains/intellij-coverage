@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.testDiscovery.main;
 
+import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import com.intellij.rt.coverage.instrumentation.AbstractIntellijClassfileTransformer;
 import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInnerClassInstrumenter;
 import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInstrumenter;
@@ -47,6 +48,10 @@ public class TestDiscoveryPremain {
     // separated by ;
     final List<Pattern> include = patterns(INCLUDE_PATTERNS_VM_OP);
     final List<Pattern> exclude = patterns(EXCLUDE_PATTERNS_VM_OP);
+
+    // initialize before instrumentation
+    @SuppressWarnings("unused")
+    TestDiscoveryProjectData projectData = TestDiscoveryProjectData.getProjectData();
 
     instrumentation.addTransformer(new AbstractIntellijClassfileTransformer() {
       @Override
