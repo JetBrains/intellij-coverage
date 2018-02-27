@@ -17,13 +17,14 @@
 package com.intellij.rt.coverage.testDiscovery;
 
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
+import com.intellij.rt.coverage.data.TestDiscoveryProjectDataTestAccessor;
 import com.intellij.rt.coverage.instrumentation.AbstractIntellijClassfileTransformer;
 import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInstrumenter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
-import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.coverage.org.objectweb.asm.*;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -49,6 +50,13 @@ public class ExplicitTestDiscoveryInstrumentationTest {
 
 
   private byte[] doTransform(final String name) throws IOException {
+    final String resource = name.replace('.', '/') + ".class";
+    ClassLoader loader = MySerializable.class.getClassLoader();
+    byte[] bytes = readBytes(loader.getResourceAsStream(resource));
+    return doTransform(name, bytes, loader);
+  }
+
+  private byte[] doTransform(String name, byte[] bytes, ClassLoader loader) {
     AbstractIntellijClassfileTransformer testDiscoveryInstrumenter = new AbstractIntellijClassfileTransformer() {
       protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
         return new TestDiscoveryInstrumenter(cw, cr, className);
@@ -58,10 +66,6 @@ public class ExplicitTestDiscoveryInstrumentationTest {
         return false;
       }
     };
-
-    final String resource = name.replace('.', '/') + ".class";
-    ClassLoader loader = MySerializable.class.getClassLoader();
-    byte[] bytes = readBytes(loader.getResourceAsStream(resource));
     return testDiscoveryInstrumenter.instrument(bytes, name, loader, true);
   }
 
@@ -78,9 +82,9 @@ public class ExplicitTestDiscoveryInstrumentationTest {
   }
 
   @Test
-  public void testSerializable() throws Throwable {
+  public void testSerializable() throws Exception {
     String name = MySerializable.class.getName();
-    Object transformed = 
+    Object transformed =
         new TransformedClassLoader(MySerializable.class.getClassLoader(), name, doTransform(name))
         .loadClass(name, true)
         .getConstructor(String.class)
@@ -90,6 +94,59 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     Object restored = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray())).readObject();
     assertTrue(restored instanceof MySerializable);
     assertEquals("hello", ((MySerializable) restored).getField());
+  }
+
+  @Test
+  public void testClassesWithSameQName() throws Exception {
+    final byte[] foo1Bytes = generateClassWithSingleStaticMethods("bar1");
+    final byte[] foo2Bytes = generateClassWithSingleStaticMethods("baz1", "baz2");
+
+    ClassLoader l1 = new ClassLoader(ClassLoader.getSystemClassLoader()) {{
+      byte[] bytes = doTransform("Foo", foo1Bytes, this);
+      defineClass("Foo", bytes, 0, bytes.length);
+    }};
+    ClassLoader l2 = new ClassLoader(ClassLoader.getSystemClassLoader()) {{
+      byte[] bytes = doTransform("Foo", foo2Bytes, this);
+      defineClass("Foo", bytes, 0, bytes.length);
+    }};
+
+    l1.loadClass("Foo").getDeclaredMethod("bar1").invoke(null);
+    String[] fooMethods = TestDiscoveryProjectDataTestAccessor.getClass2MethodNameMap().get("Foo");
+    boolean[] fooUsedMethods = TestDiscoveryProjectDataTestAccessor.getClass2UsedMethodsMap().get("Foo");
+    assertEquals(1, fooMethods.length);
+    assertEquals(1, fooUsedMethods.length);
+    assertEquals("bar1", fooMethods[0]);
+
+    l2.loadClass("Foo").getDeclaredMethod("baz1").invoke(null);
+    fooMethods = TestDiscoveryProjectDataTestAccessor.getClass2MethodNameMap().get("Foo");
+    fooUsedMethods = TestDiscoveryProjectDataTestAccessor.getClass2UsedMethodsMap().get("Foo");
+    assertEquals(2, fooMethods.length);
+    assertEquals(2, fooUsedMethods.length);
+    assertEquals("baz1", fooMethods[0]);
+    assertEquals("baz2", fooMethods[1]);
+
+    l2.loadClass("Foo").getDeclaredMethod("baz2").invoke(null);
+  }
+
+  @Nullable
+  private byte[] generateClassWithSingleStaticMethods(String... methodNames) {
+    ClassWriter cw = new ClassWriter(0);
+    cw.visit(Opcodes.V1_5,
+        Opcodes.ACC_PUBLIC,
+        "Foo",
+        null,
+        "java/lang/Object",
+        null);
+
+    for (String methodName : methodNames) {
+      MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, methodName, "()V", null, null);
+      mv.visitCode();
+      mv.visitInsn(Opcodes.RETURN);
+      mv.visitEnd();
+    }
+
+    cw.visitEnd();
+    return cw.toByteArray();
   }
 
   @SuppressWarnings("ALL")
@@ -117,7 +174,7 @@ public class ExplicitTestDiscoveryInstrumentationTest {
   @Test
   public void testBrokenInitializer() throws Throwable {
     String name = InitClass.B.class.getName();
-    Object transformed = 
+    Object transformed =
         new TransformedClassLoader(InitClass.B.class.getClassLoader(), name, doTransform(name))
         .loadClass(name, true)
         .getConstructor(int.class)
@@ -149,7 +206,7 @@ public class ExplicitTestDiscoveryInstrumentationTest {
       return super.loadClass(name, resolve);
     }
   }
-  
+
   private static byte[] readBytes(@NotNull InputStream in) throws IOException{
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     byte[] buffer = new byte[16384];
@@ -163,5 +220,5 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     }
   }
 
-  
+
 }
