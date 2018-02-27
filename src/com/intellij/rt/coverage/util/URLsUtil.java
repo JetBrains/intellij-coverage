@@ -104,7 +104,7 @@ return s != null && s.length() != 0 && s.charAt(0) == prefix;
           final int d1 = decode(s.charAt(i + 1));
           final int d2 = decode(s.charAt(i + 2));
           if (d1 != -1 && d2 != -1) {
-            bytes.add(new Integer(((d1 & 0xf) << 4 | d2 & 0xf)));
+            bytes.add(((d1 & 0xf) << 4 | d2 & 0xf));
             i += 3;
           } else {
             break;

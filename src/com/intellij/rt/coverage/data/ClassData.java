@@ -169,12 +169,12 @@ public class ClassData implements CoverageData {
       for (final LineData lineData : myLinesArray) {
         if (lineData != null && methodSignature.equals(lineData.getMethodSignature())) {
           if (lineData.getStatus() != LineCoverage.NONE) {
-            methodStatus = new Integer(LineCoverage.PARTIAL);
+            methodStatus = (int) LineCoverage.PARTIAL;
             break;
           }
         }
       }
-      if (methodStatus == null) methodStatus = new Integer(LineCoverage.NONE);
+      if (methodStatus == null) methodStatus = (int) LineCoverage.NONE;
       myStatus.put(methodSignature, methodStatus);
     }
     return methodStatus;

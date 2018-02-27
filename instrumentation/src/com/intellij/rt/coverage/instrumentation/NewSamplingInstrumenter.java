@@ -221,7 +221,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
             mv.visitIntInsn(Opcodes.SIPUSH, operand);
         }
         else {
-            mv.visitLdcInsn(new Integer(operand));
+            mv.visitLdcInsn(operand);
         }
     }
 }

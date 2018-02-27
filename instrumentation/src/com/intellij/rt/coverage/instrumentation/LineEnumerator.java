@@ -165,9 +165,9 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
 
   private void rememberSwitchLabels(final Label dflt, final Label[] labels) {
     if (mySwitches == null) mySwitches = new HashMap();
-    mySwitches.put(dflt, new Integer(-1));
+    mySwitches.put(dflt, -1);
     for (int i = labels.length - 1; i >= 0; i--) {
-      mySwitches.put(labels[i], new Integer(i));
+      mySwitches.put(labels[i], i);
     }
   }
 

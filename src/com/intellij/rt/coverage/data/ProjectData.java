@@ -241,7 +241,7 @@ public class ProjectData implements CoverageData, Serializable {
     }
     touch(TOUCH_LINE_METHOD,
           classData,
-          new Object[]{new Integer(line)});
+          new Object[]{line});
   }
 
   public static void touchSwitch(Object classData, int line, int switchNumber, int key) {
@@ -251,7 +251,7 @@ public class ProjectData implements CoverageData, Serializable {
     }
     touch(TOUCH_SWITCH_METHOD,
           classData,
-          new Object[]{new Integer(line), new Integer(switchNumber), new Integer(key)});
+          new Object[]{line, switchNumber, key});
   }
 
   public static void touchJump(Object classData, int line, int jump, boolean hit) {
@@ -261,7 +261,7 @@ public class ProjectData implements CoverageData, Serializable {
     }
     touch(TOUCH_JUMP_METHOD,
           classData,
-          new Object[]{new Integer(line), new Integer(jump), new Boolean(hit)});
+          new Object[]{line, jump, hit});
   }
 
   public static void trace(Object classData, int line) {
@@ -273,10 +273,10 @@ public class ProjectData implements CoverageData, Serializable {
 
     touch(TOUCH_METHOD,
           classData,
-          new Object[]{new Integer(line)});
+          new Object[]{line});
     try {
       final Object projectData = getProjectDataObject();
-      TRACE_LINE_METHOD.invoke(projectData, new Object[]{classData,  new Integer(line)});
+      TRACE_LINE_METHOD.invoke(projectData, new Object[]{classData, line});
     } catch (Exception e) {
       ErrorReporter.reportError("Error tracing class " + classData.toString(), e);
     }

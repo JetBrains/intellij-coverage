@@ -59,7 +59,7 @@ public class SamplingInstrumenter extends Instrumenter {
           mv.visitIntInsn(Opcodes.SIPUSH, line);
         }
         else {
-          mv.visitLdcInsn(new Integer(line));
+          mv.visitLdcInsn(line);
         }
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchLine", "(" + OBJECT_TYPE + "I)V", false);
         super.visitLineNumber(line, start);

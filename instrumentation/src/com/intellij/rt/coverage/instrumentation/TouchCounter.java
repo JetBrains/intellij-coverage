@@ -115,7 +115,7 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
       mv.visitVarInsn(Opcodes.ALOAD, getCurrentClassDataNumber());
       mv.visitVarInsn(Opcodes.ILOAD, getLineVariableNumber());
       mv.visitVarInsn(Opcodes.ILOAD, getSwitchVariableNumber());
-      mv.visitIntInsn(Opcodes.SIPUSH, key.intValue());
+      mv.visitIntInsn(Opcodes.SIPUSH, key);
       mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchSwitch", "(Ljava/lang/Object;III)V", false);
     }
   }
@@ -197,7 +197,7 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
       mv.visitIntInsn(Opcodes.SIPUSH, line);
     }
     else {
-      mv.visitLdcInsn(new Integer(line));
+      mv.visitLdcInsn(line);
     }
   }
 

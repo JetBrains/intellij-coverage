@@ -120,7 +120,7 @@ public class ResourceUtil {
         buf.append(text.substring(currentTextIndex)); // append the rest of the text
         return buf.toString();
       }
-      buf.append(text.substring(currentTextIndex, startOfPattern));
+      buf.append(text, currentTextIndex, startOfPattern);
       buf.append(replacement);
       currentTextIndex = startOfPattern + pattern.length();
     }
