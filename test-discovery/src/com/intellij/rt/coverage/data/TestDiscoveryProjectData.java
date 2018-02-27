@@ -116,4 +116,19 @@ public class TestDiscoveryProjectData {
       e.printStackTrace();
     }
   }
+
+  //TestOnly
+  NameEnumerator getMyNameEnumerator() {
+    return myNameEnumerator;
+  }
+
+  //TestOnly
+  ConcurrentMap<Integer, int[]> getClassToMethodNames() {
+    return myClassToMethodNames;
+  }
+
+  //TestOnly
+  ConcurrentMap<Integer, boolean[]> getClassToVisitedMethods() {
+    return myClassToVisitedMethods;
+  }
 }
