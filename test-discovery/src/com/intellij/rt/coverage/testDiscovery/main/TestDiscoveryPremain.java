@@ -68,18 +68,6 @@ public class TestDiscoveryPremain {
         // if we have any include pattern we should say exclude class here
         return !include.isEmpty();
       }
-
-      private boolean isSystemBasedClassLoader(ClassLoader loader) {
-        ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
-        ClassLoader currentLoader = loader;
-        while (currentLoader != null) {
-          if (systemClassLoader == currentLoader) {
-            return true;
-          }
-          currentLoader = currentLoader.getParent();
-        }
-        return false;
-      }
     });
   }
 
