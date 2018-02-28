@@ -18,172 +18,68 @@ package com.intellij.rt.coverage.data;
 
 import org.jetbrains.coverage.gnu.trove.TIntArrayList;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.io.*;
+import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.*;
 
 @SuppressWarnings("unused")
 public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtocolDataListener {
-  private static final int SOCKET_BUFFER_SIZE = 16 * 1024;
+  private static final int SOCKET_BUFFER_SIZE = 32768;
   @SuppressWarnings("WeakerAccess")
   public static final String HOST_PROP = "test.discovery.data.host";
   @SuppressWarnings("WeakerAccess")
   public static final String PORT_PROP = "test.discovery.data.port";
   public static final byte VERSION = 1;
 
-  private final SocketChannel mySocket;
-  private final ExecutorService myExecutor;
-  private final Selector mySelector;
-  private volatile boolean myClosed;
+  private final Socket mySocket;
   private final BlockingQueue<ByteBuffer> myData = new ArrayBlockingQueue<ByteBuffer>(10);
   private final NameEnumerator.Incremental incrementalNameEnumerator = new NameEnumerator.Incremental();
+  private final DataOutputStream dos;
+  private final OutputStream os;
 
   public SocketTestDiscoveryProtocolDataListener() throws IOException {
     super(VERSION);
     String host = System.getProperty(HOST_PROP, "127.0.0.1");
     int port = Integer.parseInt(System.getProperty(PORT_PROP));
-    mySelector = Selector.open();
-    mySocket = SocketChannel.open(new InetSocketAddress(host, port));
-    mySocket.configureBlocking(false);
-    myExecutor = Executors.newSingleThreadExecutor(new ThreadFactory() {
-      public Thread newThread(Runnable r) {
-        Thread thread = new Thread(r);
-        thread.setName("TestDiscoveryDataWriter");
-        return thread;
-      }
-    });
-    mySocket.socket().setSendBufferSize(SOCKET_BUFFER_SIZE); // mySocket.setOption(StandardSocketOptions.SO_SNDBUF, SOCKET_BUFFER_SIZE);
-    mySocket.register(mySelector, SelectionKey.OP_WRITE);
-    myExecutor.submit(new Runnable() {
-      public void run() {
-        while (!myClosed || !myData.isEmpty()) {
-          ByteBuffer data = myData.peek();
-          if (data == null) {
-            continue;
-          }
-
-          try {
-            sendDataPart(data);
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
-
-          if (!data.hasRemaining()) {
-            myData.poll();
-          }
-        }
-      }
-
-      private void sendDataPart(ByteBuffer data) throws IOException {
-        while (true) {
-          int selected = mySelector.select();
-          if (selected != 0) {
-            Iterator<SelectionKey> keyIt = mySelector.selectedKeys().iterator();
-            while (keyIt.hasNext()) {
-              SelectionKey key = keyIt.next();
-              SocketChannel channel = (SocketChannel) key.channel();
-              keyIt.remove();
-              if (key.isValid() && key.isWritable()) {
-                try {
-                  if (channel.write(data) == -1) {
-                    throw new IOException("Connection is closed");
-                  }
-                } catch (IOException e) {
-                  key.cancel();
-                  throw e;
-                }
-                return;
-              }
-            }
-
-          }
-        }
-      }
-    });
-
-    final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
-    start(new DataOutputStream(baos));
-    write(baos.asByteBuffer());
+    mySocket = new Socket(host, port);
+    mySocket.setSendBufferSize(SOCKET_BUFFER_SIZE);
+    os = mySocket.getOutputStream();
+    dos = new DataOutputStream(os);
+    start(dos);
   }
 
   public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException {
-    MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
-    DataOutputStream dos = new DataOutputStream(baos);
-    writeTestFinished(dos, className, methodName, classToVisitedMethods, classToMethodNames);
-
-    write(baos.asByteBuffer());
+    try {
+      writeTestFinished(dos, className, methodName, classToVisitedMethods, classToMethodNames);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   public void testsFinished() {
     try {
-      final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
-      final DataOutputStream dos = new DataOutputStream(baos);
       finish(dos);
-      write(baos.asByteBuffer());
     } catch (IOException e) {
       e.printStackTrace();
-    }
-
-    myClosed = true;
-    myExecutor.shutdown();
-
-    try {
-      if (!myExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
-        shutdownNow();
-        if (!myExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
-          System.err.println("Socket worker didn't finished properly");
-        }
+    } finally {
+      try {
+        dos.close();
+        os.close();
+        mySocket.close();
+      } catch (IOException e) {
+        e.printStackTrace();
       }
-    } catch (InterruptedException ie) {
-      shutdownNow();
-      Thread.currentThread().interrupt();
     }
+  }
 
-    try {
-      mySocket.close();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+  public void addMetadata(Map<String, String> metadata) throws IOException {
+    writeFileMetadata(dos, metadata);
   }
 
   public NameEnumerator.Incremental getNameEnumerator() {
     return incrementalNameEnumerator;
-  }
-
-  public void addMetadata(Map<String, String> metadata) throws IOException {
-    final MyByteArrayOutputStream baos = new MyByteArrayOutputStream();
-    final DataOutputStream dos = new DataOutputStream(baos);
-    writeFileMetadata(dos, metadata);
-
-    write(baos.asByteBuffer());
-  }
-
-  private void shutdownNow() {
-    for (Runnable task : myExecutor.shutdownNow()) {
-      task.run();
-    }
-  }
-
-  private void write(final ByteBuffer data) {
-    try {
-      myData.put(data);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private static class MyByteArrayOutputStream extends ByteArrayOutputStream {
-    ByteBuffer asByteBuffer() {
-      return ByteBuffer.wrap(buf, 0, count);
-    }
   }
 
   private static class VisitedMethods {
