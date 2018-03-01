@@ -26,7 +26,7 @@ import java.util.concurrent.*;
 
 @SuppressWarnings("unused")
 public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtocolDataListener {
-  private static final int SOCKET_BUFFER_SIZE = 32768;
+  private static final int SOCKET_BUFFER_SIZE = 128 * 1024;
   @SuppressWarnings("WeakerAccess")
   public static final String HOST_PROP = "test.discovery.data.host";
   @SuppressWarnings("WeakerAccess")
@@ -45,6 +45,7 @@ public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtoc
     int port = Integer.parseInt(System.getProperty(PORT_PROP));
     mySocket = new Socket(host, port);
     mySocket.setSendBufferSize(SOCKET_BUFFER_SIZE);
+    mySocket.setTcpNoDelay(true);
     os = mySocket.getOutputStream();
     dos = new DataOutputStream(os);
     start(dos);
