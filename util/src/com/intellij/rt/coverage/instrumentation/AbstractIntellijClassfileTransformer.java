@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.util.ErrorReporter;
+import org.jetbrains.coverage.gnu.trove.THashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
@@ -27,6 +28,7 @@ import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
+import java.util.Map;
 
 public abstract class AbstractIntellijClassfileTransformer implements ClassFileTransformer {
   public interface InclusionPattern {
@@ -133,6 +135,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
   private static class MyClassWriter extends ClassWriter {
     private static final String JAVA_LANG_OBJECT = "java/lang/Object";
     private final ClassLoader classLoader;
+    private Map<String, ClassReader> loadedClasses = new THashMap<String, ClassReader>();
 
     MyClassWriter(int flags, ClassLoader classLoader) {
       super(flags);
@@ -216,16 +219,20 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
       return false;
     }
 
-    private ClassReader typeInfo(final String type) throws IOException {
-      InputStream is = null;
-      try {
-        is = classLoader.getResourceAsStream(type + ".class");
-        return new ClassReader(is);
-      } finally {
-        if (is != null) {
-          is.close();
+    private synchronized ClassReader typeInfo(final String type) throws IOException {
+      ClassReader classReader = loadedClasses.get(type);
+      if (classReader == null) {
+        InputStream is = null;
+        try {
+          is = classLoader.getResourceAsStream(type + ".class");
+          loadedClasses.put(type, classReader = new ClassReader(is));
+        } finally {
+          if (is != null) {
+            is.close();
+          }
         }
       }
+      return classReader;
     }
   }
 }
