@@ -29,6 +29,7 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 public abstract class AbstractIntellijClassfileTransformer implements ClassFileTransformer {
   public interface InclusionPattern {
@@ -36,6 +37,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
   }
 
   private final boolean computeFrames = computeFrames();
+  private final WeakHashMap<ClassLoader, Map<String, ClassReader>> loadedClasses = new WeakHashMap<ClassLoader, Map<String, ClassReader>>();
 
   public final byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
     if (isStopped()) {
@@ -88,9 +90,10 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     final ClassWriter cw;
     if (computeFrames) {
       final int version = getClassFileVersion(cr);
-      cw = getClassWriter(version >= Opcodes.V1_6 && version != Opcodes.V1_1 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS, loader);
+      int flags = version >= Opcodes.V1_6 && version != Opcodes.V1_1 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS;
+      cw = new MyClassWriter(flags, loader);
     } else {
-      cw = getClassWriter(ClassWriter.COMPUTE_MAXS, loader);
+      cw = new MyClassWriter(ClassWriter.COMPUTE_MAXS, loader);
     }
 
     final ClassVisitor cv = createClassVisitor(className, loader, cr, cw);
@@ -118,8 +121,12 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     return System.getProperty("idea.coverage.no.frames") == null;
   }
 
-  private static ClassWriter getClassWriter(int flags, final ClassLoader classLoader) {
-    return new MyClassWriter(flags, classLoader);
+  private Map<String, ClassReader> getLoadedClasses(ClassLoader loader) {
+    Map<String, ClassReader> classes = loadedClasses.get(loader);
+    if (classes == null) {
+      loadedClasses.put(loader, classes = new THashMap<String, ClassReader>());
+    }
+    return classes;
   }
 
   private static int getClassFileVersion(ClassReader reader) {
@@ -132,14 +139,15 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     return classFileVersion[0];
   }
 
-  private static class MyClassWriter extends ClassWriter {
+  private class MyClassWriter extends ClassWriter {
     private static final String JAVA_LANG_OBJECT = "java/lang/Object";
     private final ClassLoader classLoader;
-    private Map<String, ClassReader> loadedClasses = new THashMap<String, ClassReader>();
+    private Map<String, ClassReader> loadedClasses;
 
     MyClassWriter(int flags, ClassLoader classLoader) {
       super(flags);
       this.classLoader = classLoader;
+      loadedClasses = getLoadedClasses(classLoader);
     }
 
     protected String getCommonSuperClass(String type1, String type2) {
