@@ -26,13 +26,13 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 import java.util.List;
 import java.util.regex.Pattern;
 
-class TestDiscoveryTransformer extends AbstractIntellijClassfileTransformer {
+public class TestDiscoveryTransformer extends AbstractIntellijClassfileTransformer {
   private static final boolean COUNTERS_IN_INNER_CLASS = System.getProperty("idea.test.discovery.counters.in.inner.class") != null;
 
   private final List<Pattern> exclude;
   private final List<Pattern> include;
 
-  TestDiscoveryTransformer(List<Pattern> exclude, List<Pattern> include) {
+  public TestDiscoveryTransformer(List<Pattern> exclude, List<Pattern> include) {
     this.exclude = exclude;
     this.include = include;
   }

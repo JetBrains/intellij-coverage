@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectDataTestAccessor;
 import com.intellij.rt.coverage.instrumentation.AbstractIntellijClassfileTransformer;
 import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInstrumenter;
+import com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryTransformer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.coverage.org.objectweb.asm.*;
@@ -28,6 +29,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
+import java.util.Collections;
+import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -56,16 +59,7 @@ public class ExplicitTestDiscoveryInstrumentationTest {
   }
 
   private byte[] doTransform(String name, byte[] bytes, ClassLoader loader) {
-    AbstractIntellijClassfileTransformer testDiscoveryInstrumenter = new AbstractIntellijClassfileTransformer() {
-      protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
-        return new TestDiscoveryInstrumenter(cw, cr, className);
-      }
-
-      protected boolean shouldExclude(String className) {
-        return false;
-      }
-    };
-    return testDiscoveryInstrumenter.instrument(bytes, name, loader, true);
+    return new TestDiscoveryTransformer(Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList()).instrument(bytes, name, loader, true);
   }
 
   public static class MySerializable implements Serializable {
