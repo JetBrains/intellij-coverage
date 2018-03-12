@@ -17,12 +17,6 @@
 package com.intellij.rt.coverage.testDiscovery.main;
 
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
-import com.intellij.rt.coverage.instrumentation.AbstractIntellijClassfileTransformer;
-import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInnerClassInstrumenter;
-import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInstrumenter;
-import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
-import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
@@ -32,7 +26,6 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class TestDiscoveryPremain {
-  private static final boolean COUNTERS_IN_INNER_CLASS = System.getProperty("idea.test.discovery.counters.in.inner.class") != null;
   @SuppressWarnings("WeakerAccess")
   public static final String INCLUDE_PATTERNS_VM_OP = "test.discovery.include.class.patterns";
   @SuppressWarnings("WeakerAccess")
@@ -49,26 +42,7 @@ public class TestDiscoveryPremain {
     @SuppressWarnings("unused")
     TestDiscoveryProjectData projectData = TestDiscoveryProjectData.getProjectData();
 
-    instrumentation.addTransformer(new AbstractIntellijClassfileTransformer() {
-      @Override
-      protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
-        return COUNTERS_IN_INNER_CLASS 
-            ? new TestDiscoveryInnerClassInstrumenter(cw, cr, className, loader) 
-            : new TestDiscoveryInstrumenter(cw, cr, className);
-      }
-
-      @Override
-      protected boolean shouldExclude(String className) {
-        for (Pattern e : exclude) {
-          if (e.matcher(className).matches()) return true;
-        }
-        for (Pattern e : include) {
-          if (e.matcher(className).matches()) return false;
-        }
-        // if we have any include pattern we should say exclude class here
-        return !include.isEmpty();
-      }
-    });
+    instrumentation.addTransformer(new TestDiscoveryTransformer(exclude, include));
   }
 
   private static List<Pattern> patterns(String key) {
@@ -92,4 +66,5 @@ public class TestDiscoveryPremain {
   public static void premain(String argsString, Instrumentation instrumentation) {
     new TestDiscoveryPremain().performPremain(instrumentation);
   }
+
 }
