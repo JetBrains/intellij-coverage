@@ -121,7 +121,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     return System.getProperty("idea.coverage.no.frames") == null;
   }
 
-  private Map<String, ClassReader> getLoadedClasses(ClassLoader loader) {
+  private synchronized Map<String, ClassReader> getLoadedClasses(ClassLoader loader) {
     Map<String, ClassReader> classes = loadedClasses.get(loader);
     if (classes == null) {
       loadedClasses.put(loader, classes = new THashMap<String, ClassReader>());
@@ -142,7 +142,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
   private class MyClassWriter extends ClassWriter {
     private static final String JAVA_LANG_OBJECT = "java/lang/Object";
     private final ClassLoader classLoader;
-    private Map<String, ClassReader> loadedClasses;
+    private final Map<String, ClassReader> loadedClasses;
 
     MyClassWriter(int flags, ClassLoader classLoader) {
       super(flags);
