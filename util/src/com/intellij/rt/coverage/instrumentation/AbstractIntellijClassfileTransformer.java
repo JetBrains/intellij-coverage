@@ -28,6 +28,7 @@ import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -37,7 +38,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
   }
 
   private final boolean computeFrames = computeFrames();
-  private final WeakHashMap<ClassLoader, Map<String, ClassReader>> loadedClasses = new WeakHashMap<ClassLoader, Map<String, ClassReader>>();
+  private final HashMap<ClassLoader, Map<String, ClassReader>> loadedClasses = new HashMap<ClassLoader, Map<String, ClassReader>>();
 
   public final byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
     if (isStopped()) {
