@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.data;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.runners.Parameterized.Parameter;
 import static org.junit.runners.Parameterized.Parameters;
@@ -39,6 +41,23 @@ public class SingleTrFileDiscoveryDataListenerTest {
 
   @Parameter
   public int version;
+
+  public static final byte[] CLASS_METADATA =
+      new BinaryResponseBuilder().withHeader().withStart(2)
+          .withIncrementalDictionaryStart(3)
+          .withDictionaryElement(1, 0x41) // 1-A
+          .withDictionaryElement(2, 0x41, 0x2e, 0x6a, 0x61, 0x76, 0x61) // 2-A.java
+          .withDictionaryElement(3, 0x43) // 3-C
+          .withBytes(0x6, 0x1, // 1 class
+              0x1, // class name
+              0x1, // 1 file
+              0x2, // file name
+              0x1, // 1 method
+              0x3, // method name
+              0x4, // method hash length
+              0xCA, 0xFE, 0xBA, 0xBE // method hash
+          )
+          .build();
 
   @Test
   public void testSingleTestNothingVisited() throws Exception {
@@ -73,6 +92,16 @@ public class SingleTrFileDiscoveryDataListenerTest {
     listener.addMetadata(Collections.singletonMap("A", "B"));
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(BinaryResponses.metadata(version));
+  }
+
+  @Test
+  public void testClassMetadata() throws Exception {
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    final DataOutputStream dos = new DataOutputStream(baos);
+    final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos, 2);
+    listener.addClassMetadata(singletonList(new ClassMetadata("A", singletonList("A.java"), Collections.singletonMap("C", new byte[]{(byte) 0xCA, (byte) 0xFE, (byte) 0xBA, (byte) 0xBE}))));
+    listener.testsFinished();
+    assertThat(baos.toByteArray()).isEqualTo(CLASS_METADATA);
   }
 
   @Test

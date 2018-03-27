@@ -24,6 +24,8 @@ public interface TestDiscoveryProtocolReader {
 
   MetadataReader createMetadataReader();
 
+  ClassMetadataReader createClassMetadataReader();
+
   NameEnumeratorReader createNameEnumeratorReader();
 
   TestDataReader createTestDataReader(int classId, int methodId);
@@ -36,6 +38,18 @@ public interface TestDiscoveryProtocolReader {
 
   interface MetadataReader {
     void processMetadataEntry(String key, String value);
+  }
+
+  interface ClassMetadataReader {
+    void classStarted(int classId);
+
+    void file(int fileId);
+
+    void method(int methodId, byte[] hash);
+
+    void classFinished(int classId);
+
+    void finished();
   }
 
   interface NameEnumeratorReader {

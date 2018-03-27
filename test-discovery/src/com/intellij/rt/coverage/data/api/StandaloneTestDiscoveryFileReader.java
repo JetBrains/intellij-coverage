@@ -16,6 +16,8 @@
 
 package com.intellij.rt.coverage.data.api;
 
+import com.intellij.rt.coverage.data.ClassMetadata;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -29,6 +31,10 @@ public class StandaloneTestDiscoveryFileReader {
 
       public void processMetadataEntry(String key, String value) {
         System.out.println("Metadata entry: " + key + " = " + value);
+      }
+
+      protected void processClassMetadataData(ClassMetadata metadata) {
+        System.out.println("Class Metadata entry: " + metadata.fqn);
       }
     });
   }

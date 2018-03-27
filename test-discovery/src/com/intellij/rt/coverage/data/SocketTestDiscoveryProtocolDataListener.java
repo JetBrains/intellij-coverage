@@ -21,6 +21,7 @@ import org.jetbrains.coverage.gnu.trove.TIntArrayList;
 import java.io.*;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -76,7 +77,11 @@ public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtoc
   }
 
   public void addMetadata(Map<String, String> metadata) throws IOException {
-    writeFileMetadata(dos, metadata);
+    writeMetadata(dos, metadata);
+  }
+
+  public void addClassMetadata(List<ClassMetadata> metadata) throws IOException {
+    writeClassMetadata(dos, metadata);
   }
 
   public NameEnumerator.Incremental getNameEnumerator() {

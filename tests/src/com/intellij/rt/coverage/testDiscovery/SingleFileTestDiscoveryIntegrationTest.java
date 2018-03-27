@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.testDiscovery;
 
+import com.intellij.rt.coverage.data.ClassMetadata;
 import com.intellij.rt.coverage.data.api.SimpleDecodingTestDiscoveryProtocolReader;
 import com.intellij.rt.coverage.data.api.TestDiscoveryProtocolUtil;
 import com.intellij.rt.coverage.util.FileUtil;
@@ -142,6 +143,9 @@ public class SingleFileTestDiscoveryIntegrationTest {
 
     public void processMetadataEntry(String key, String value) {
 
+    }
+
+    protected void processClassMetadataData(ClassMetadata metadata) {
     }
   }
 

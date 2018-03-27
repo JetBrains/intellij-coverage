@@ -100,6 +100,7 @@ public class SingleTrFileReaderTest {
   private static class MySingleTrFileReader extends SimpleDecodingTestDiscoveryProtocolReader {
     final List<String[]> myData = new ArrayList<String[]>();
     final Map<String, String> myMetadata = new HashMap<String, String>();
+    final List<ClassMetadata> myClassMetadata = new ArrayList<ClassMetadata>();
 
     protected void processData(String testClassName, String testMethodName, String className, String methodName) {
       myData.add(new String[]{testClassName, testMethodName, className, methodName});
@@ -107,6 +108,10 @@ public class SingleTrFileReaderTest {
 
     public void processMetadataEntry(String key, String value) {
       myMetadata.put(key, value);
+    }
+
+    protected void processClassMetadataData(ClassMetadata metadata) {
+      myClassMetadata.add(metadata);
     }
   }
 }

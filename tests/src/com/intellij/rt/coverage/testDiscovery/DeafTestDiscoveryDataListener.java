@@ -16,9 +16,11 @@
 
 package com.intellij.rt.coverage.testDiscovery;
 
+import com.intellij.rt.coverage.data.ClassMetadata;
 import com.intellij.rt.coverage.data.NameEnumerator;
 import com.intellij.rt.coverage.data.TestDiscoveryDataListener;
 
+import java.util.List;
 import java.util.Map;
 
 public class DeafTestDiscoveryDataListener implements TestDiscoveryDataListener {
@@ -29,6 +31,9 @@ public class DeafTestDiscoveryDataListener implements TestDiscoveryDataListener 
   }
 
   public void addMetadata(Map<String, String> metadata) {
+  }
+
+  public void addClassMetadata(List<ClassMetadata> metadata) {
   }
 
   public NameEnumerator getNameEnumerator() {

@@ -16,19 +16,19 @@
 
 package com.intellij.rt.coverage.data;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-public interface TestDiscoveryDataListener {
+public class ClassMetadata {
+  public final String fqn;
+  public final List<String> files;
+  public final Map<String, byte[]> methods;
 
-  void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException;
+  public ClassMetadata(String fqn, List<String> files, Map<String, byte[]> methods) {
+    assert fqn != null;
+    this.fqn = fqn;
+    this.files = files;
+    this.methods = methods;
+  }
 
-  void testsFinished() throws IOException;
-
-  void addMetadata(Map<String, String> metadata) throws IOException;
-
-  void addClassMetadata(List<ClassMetadata> metadata) throws IOException;
-
-  NameEnumerator getNameEnumerator();
 }

@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.data;
 
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("unused")
@@ -62,7 +63,7 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
 
   public synchronized void testsFinished() throws IOException {
     try {
-      writeDictionaryIncrementIfSupported(myStream);
+      writeDictionaryIncrementIfNeeded(myStream);
       finish(myStream);
     } finally {
       myStream.close();
@@ -74,7 +75,11 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
   }
 
   public synchronized void addMetadata(Map<String, String> metadata) throws IOException {
-    writeFileMetadata(myStream, metadata);
+    writeMetadata(myStream, metadata);
+  }
+
+  public void addClassMetadata(List<ClassMetadata> metadata) throws IOException {
+    writeClassMetadata(myStream, metadata);
   }
 
   protected synchronized void start(DataOutput output) throws IOException {

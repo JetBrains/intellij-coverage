@@ -22,6 +22,7 @@ import org.jetbrains.coverage.gnu.trove.TIntIntIterator;
 
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,7 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
   public static final int TEST_FINISHED_MARKER = 0x03;
 
   public static final int METADATA_MARKER = 0x05;
+  public static final int CLASS_METADATA_MARKER = 0x06;
 
   protected final byte myVersion;
 
@@ -51,7 +53,7 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
 
     // Enumerator may send className and methodName if it's first test in class or this test caused classloading
     // Otherwise className and methodName was already sent with one of previous calls
-    writeDictionaryIncrementIfSupported(output);
+    writeDictionaryIncrementIfNeeded(output);
 
     output.writeByte(TEST_FINISHED_MARKER);
     CoverageIOUtil.writeINT(output, testClassNameId);
@@ -71,7 +73,7 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
 
   public abstract NameEnumerator.Incremental getNameEnumerator();
 
-  protected void writeDictionaryIncrementIfSupported(DataOutput output) throws IOException {
+  protected void writeDictionaryIncrementIfNeeded(DataOutput output) throws IOException {
     final List<NameEnumerator.Incremental.NameAndId> increment = getNameEnumerator().getAndClearDataIncrement();
     if (increment.isEmpty()) return;
     output.writeByte(NAMES_DICTIONARY_PART_MARKER);
@@ -142,7 +144,8 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
    * <p>
    * Note that enumerator is not used since metadata is usually small
    */
-  protected void writeFileMetadata(DataOutput os, Map<String, String> metadata) throws IOException {
+  protected void writeMetadata(DataOutput os, Map<String, String> metadata) throws IOException {
+    if (metadata == null || metadata.isEmpty()) return;
     final LinkedHashMap<String, String> map = new LinkedHashMap<String, String>(metadata);
     os.writeByte(METADATA_MARKER);
     CoverageIOUtil.writeINT(os, map.size());
@@ -151,4 +154,83 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
       CoverageIOUtil.writeUTF(os, entry.getValue());
     }
   }
+
+  /**
+   * Writes class metadata
+   * Format:
+   * <ul>
+   * <li>Marker - byte</li>
+   * <li>Class.Count (N) - number</li>
+   * <li>Class[1] - number</li>
+   * <li>Class[1].Files.Count (M) - number</li>
+   * <li>Class[1].Files[1] - number</li>
+   * <li>...</li>
+   * <li>Class[1].Files[M] - number</li>
+   * <li>Class[1].Methods.Count (K) - number</li>
+   * <li>Class[1].Method[1].Id - number</li>
+   * <li>Class[1].Method[1].Hash.Length - number</li>
+   * <li>Class[1].Method[1].Hash - byte-array</li>
+   * <li>...</li>
+   * <li>Class[1].Method[K].Id - number</li>
+   * <li>Class[1].Method[K].Hash.Length - number</li>
+   * <li>Class[1].Method[K].Hash - byte-array</li>
+   * <li>Class[2] - number</li>
+   * <li>...</li>
+   * </ul>
+   * <p>
+   * Note that enumerator is used and enumerator diff may be sent first
+   *
+   * @since Version 2
+   */
+  protected void writeClassMetadata(DataOutput os, List<ClassMetadata> metadata) throws IOException {
+    if (metadata == null || metadata.isEmpty()) return;
+    if (myVersion < 2) return;
+
+    final NameEnumerator.Incremental enumerator = getNameEnumerator();
+
+    // Prepare data for enumerator
+    for (ClassMetadata data : metadata) {
+      enumerator.enumerate(data.fqn);
+      if (data.files != null) for (String file : data.files) {
+        enumerator.enumerate(file);
+      }
+      if (data.methods != null) for (String method : data.methods.keySet()) {
+        enumerator.enumerate(method);
+      }
+    }
+
+    writeDictionaryIncrementIfNeeded(os);
+
+    final ArrayList<ClassMetadata> list = new ArrayList<ClassMetadata>(metadata);
+
+    os.writeByte(CLASS_METADATA_MARKER);
+    CoverageIOUtil.writeINT(os, list.size());
+    for (ClassMetadata data : list) {
+      // Class ID
+      CoverageIOUtil.writeINT(os, enumerator.enumerate(data.fqn));
+      // Files array
+      final List<String> files = data.files;
+      if (files == null) {
+        CoverageIOUtil.writeINT(os, 0);
+      } else {
+        CoverageIOUtil.writeINT(os, files.size());
+        for (String file : files) {
+          CoverageIOUtil.writeINT(os, enumerator.enumerate(file));
+        }
+      }
+      // Methods array
+      final Map<String, byte[]> methods = data.methods;
+      if (methods == null) {
+        CoverageIOUtil.writeINT(os, 0);
+      } else {
+        CoverageIOUtil.writeINT(os, methods.size());
+        for (Map.Entry<String, byte[]> method : methods.entrySet()) {
+          CoverageIOUtil.writeINT(os, enumerator.enumerate(method.getKey()));
+          CoverageIOUtil.writeINT(os, method.getValue().length);
+          os.write(method.getValue());
+        }
+      }
+    }
+  }
+
 }

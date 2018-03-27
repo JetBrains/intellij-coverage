@@ -186,6 +186,10 @@ public class SocketWriterTestDiscoveryIntegrationTest {
         return null;
       }
 
+      public ClassMetadataReader createClassMetadataReader() {
+        return null;
+      }
+
       public NameEnumeratorReader createNameEnumeratorReader() {
         return new NameEnumeratorReader() {
           public void enumerate(String name, int id) {
