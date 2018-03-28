@@ -18,12 +18,12 @@ package com.intellij.rt.coverage.testDiscovery;
 
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectDataTestAccessor;
-import com.intellij.rt.coverage.instrumentation.AbstractIntellijClassfileTransformer;
-import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInstrumenter;
 import com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryTransformer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.coverage.org.objectweb.asm.*;
+import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
+import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,9 +32,7 @@ import java.io.*;
 import java.util.Collections;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class ExplicitTestDiscoveryInstrumentationTest {
 
@@ -79,9 +77,9 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     String name = MySerializable.class.getName();
     Object transformed =
         new TransformedClassLoader(MySerializable.class.getClassLoader(), name, doTransform(name))
-        .loadClass(name, true)
-        .getConstructor(String.class)
-        .newInstance("hello");
+            .loadClass(name, true)
+            .getConstructor(String.class)
+            .newInstance("hello");
     ByteArrayOutputStream buffer = new ByteArrayOutputStream();
     new ObjectOutputStream(buffer).writeObject(transformed);
     Object restored = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray())).readObject();
@@ -108,15 +106,15 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     boolean[] fooUsedMethods = TestDiscoveryProjectDataTestAccessor.getClass2UsedMethodsMap().get("Foo");
     assertEquals(1, fooMethods.length);
     assertEquals(1, fooUsedMethods.length);
-    assertEquals("bar1", fooMethods[0]);
+    assertEquals("bar1()V", fooMethods[0]);
 
     l2.loadClass("Foo").getDeclaredMethod("baz1").invoke(null);
     fooMethods = TestDiscoveryProjectDataTestAccessor.getClass2MethodNameMap().get("Foo");
     fooUsedMethods = TestDiscoveryProjectDataTestAccessor.getClass2UsedMethodsMap().get("Foo");
     assertEquals(2, fooMethods.length);
     assertEquals(2, fooUsedMethods.length);
-    assertEquals("baz1", fooMethods[0]);
-    assertEquals("baz2", fooMethods[1]);
+    assertEquals("baz1()V", fooMethods[0]);
+    assertEquals("baz2()V", fooMethods[1]);
 
     l2.loadClass("Foo").getDeclaredMethod("baz2").invoke(null);
   }
@@ -169,9 +167,9 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     String name = InitClass.B.class.getName();
     Object transformed =
         new TransformedClassLoader(InitClass.B.class.getClassLoader(), name, doTransform(name))
-        .loadClass(name, true)
-        .getConstructor(int.class)
-        .newInstance(1);
+            .loadClass(name, true)
+            .getConstructor(int.class)
+            .newInstance(1);
     //ensure class instrumentation doesn't fail
     assertNotNull(transformed);
   }
@@ -200,11 +198,11 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     }
   }
 
-  private static byte[] readBytes(@NotNull InputStream in) throws IOException{
+  private static byte[] readBytes(@NotNull InputStream in) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     byte[] buffer = new byte[16384];
     try {
-      for (int len = in.read(buffer); len > 0 ; len = in.read(buffer)) {
+      for (int len = in.read(buffer); len > 0; len = in.read(buffer)) {
         out.write(buffer, 0, len);
       }
       return out.toByteArray();

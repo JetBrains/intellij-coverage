@@ -63,10 +63,10 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
         super.visit(version, access, name, signature, superName, interfaces);
       }
 
-      public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+      public MethodVisitor visitMethod(int access, String name, final String desc, String signature, String[] exceptions) {
         InstrumentedMethodsFilter.Decision decision = methodsFilter.shouldVisitMethod(access, name, desc, signature, exceptions, myInstrumentConstructors);
         if (decision == InstrumentedMethodsFilter.Decision.YES) {
-          instrumentedMethods.add(name);
+          instrumentedMethods.add(name + desc);
           if (INIT_METHOD_NAME.equals(name) && !myInstrumentConstructors) {
             instrumentAllConstructors();
           }
@@ -81,7 +81,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
             void onDecisionDone(boolean isDefault) {
               if (!isDefault) {
                 instrumentAllConstructors();
-                instrumentedMethods.add(INIT_METHOD_NAME);
+                instrumentedMethods.add(INIT_METHOD_NAME + desc);
               } else {
                 defaultConstructorIndex = instrumentedMethods.size();
               }
@@ -93,7 +93,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
       private void instrumentAllConstructors() {
         myInstrumentConstructors = true;
         if (defaultConstructorIndex != -1) {
-          instrumentedMethods.add(defaultConstructorIndex, INIT_METHOD_NAME);
+          instrumentedMethods.add(defaultConstructorIndex, INIT_METHOD_NAME + "()V");
           defaultConstructorIndex = -1;
         }
       }
@@ -108,6 +108,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     super.visit(version, access, name, signature, superName, interfaces);
   }
 
+  @Override
   public MethodVisitor visitMethod(final int access,
                                    final String name,
                                    final String desc,
@@ -125,6 +126,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     return new MethodVisitor(Opcodes.ASM6, mv) {
       final int myMethodId = myCurrentMethodCount++;
 
+      @Override
       public void visitCode() {
         ensureArrayInitialized(mv);
         mv.visitFieldInsn(Opcodes.GETSTATIC, getFieldClassName(), METHODS_VISITED, METHODS_VISITED_CLASS);
@@ -139,8 +141,8 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
   /**
    * Insert call to the __$initMethodsVisited$__
-   * 
-   * It also will create a method for interfaces which were skipped by default: for java 1.8- static methods in interfaces were not possible, 
+   * <p>
+   * It also will create a method for interfaces which were skipped by default: for java 1.8- static methods in interfaces were not possible,
    * but if there is non-<clinit> code in the interface, then it must be 1.8+
    */
   protected void ensureArrayInitialized(MethodVisitor mv) {
@@ -152,11 +154,12 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, myInternalClassName, METHODS_VISITED_INIT, "()V", false);
   }
-      
+
   protected String getFieldClassName() {
     return myInternalClassName;
   }
 
+  @Override
   public void visitEnd() {
     if (myMethodNames.length > 0) {
       generateMembers();
@@ -171,8 +174,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     int access;
     if (myInterface) {
       access = Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL | Opcodes.ACC_SYNTHETIC;
-    }
-    else {
+    } else {
       access = Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_TRANSIENT | Opcodes.ACC_SYNTHETIC;
     }
 
@@ -194,7 +196,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
    *   }
    * </code>
    * </pre>
-   * 
+   * <p>
    * The same array will be stored in the {@link TestDiscoveryProjectData#ourProjectData} instance
    */
   private void createInitFieldMethod(final int access) {

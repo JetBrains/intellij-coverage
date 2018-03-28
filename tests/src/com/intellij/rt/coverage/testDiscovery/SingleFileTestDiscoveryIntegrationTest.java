@@ -34,7 +34,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SingleFileTestDiscoveryIntegrationTest {
   @Rule
-  public TemporaryFolder tmpDir  = new TemporaryFolder();
+  public TemporaryFolder tmpDir = new TemporaryFolder();
+
+  private String[][] addVoidSignature(String[]... expected) {
+    for (String[] inner : expected) {
+      inner[3] += "()V";
+    }
+    return expected;
+  }
 
   @Test
   public void testSimple() throws Exception {
@@ -44,7 +51,7 @@ public class SingleFileTestDiscoveryIntegrationTest {
     TestDiscoveryProtocolUtil.readFile(result, reader);
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
-    assertThat(data).contains(
+    assertThat(data).contains(addVoidSignature(
         new String[]{"Test", "test1", "Test", "test1"},
         new String[]{"Test", "test1", "ClassA", "method1"},
         new String[]{"Test", "test1", "ClassA", "method2"},
@@ -60,9 +67,8 @@ public class SingleFileTestDiscoveryIntegrationTest {
         new String[]{"Test", "test3", "ClassB", "methodR"},
         new String[]{"Test", "test3", "ClassB", "method1"},
         new String[]{"Test", "test3", "ClassB", "method2"},
-
         new String[]{"Test", "testConstructor", "ClassA", "<init>"}
-    );
+    ));
     assertThat(data).doesNotContain(new String[]{"Test.testConstructor", "ClassB", "<init>"});
   }
 
@@ -75,10 +81,10 @@ public class SingleFileTestDiscoveryIntegrationTest {
     TestDiscoveryProtocolUtil.readFile(result, reader);
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
-    assertThat(data).contains(
+    assertThat(data).contains(addVoidSignature(
         new String[]{"Test", "test1", "Test", "test1"},
         new String[]{"Test", "test1", "InitClass", "initInit"}
-    );
+    ));
   }
 
   @Test
@@ -88,10 +94,10 @@ public class SingleFileTestDiscoveryIntegrationTest {
     TestDiscoveryProtocolUtil.readFile(result, reader);
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
-    assertThat(data).contains(
+    assertThat(data).contains(addVoidSignature(
         new String[]{"Test", "test1", "Foo", "m"},
         new String[]{"Test", "test1", "Foo", "doInvoke"}
-    );
+    ));
   }
 
   @Test
@@ -103,7 +109,7 @@ public class SingleFileTestDiscoveryIntegrationTest {
     TestDiscoveryProtocolUtil.readFile(result, reader);
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
-    assertThat(data).containsOnly(
+    assertThat(data).containsOnly(addVoidSignature(
         new String[]{"Test", "test1", "Test", "test1"},
         new String[]{"Test", "test1", "ClassA", "method1"},
         new String[]{"Test", "test1", "ClassA", "method2"},
@@ -124,7 +130,7 @@ public class SingleFileTestDiscoveryIntegrationTest {
         new String[]{"Test", "testConstructor", "ClassA", "someMethod"},
         new String[]{"Test", "testConstructor", "ClassB", "someMethod"},
         new String[]{"Test", "testConstructor", "Test", "testConstructor"}
-    );
+    ));
   }
 
   private static class MySingleTrFileReader extends SimpleDecodingTestDiscoveryProtocolReader {

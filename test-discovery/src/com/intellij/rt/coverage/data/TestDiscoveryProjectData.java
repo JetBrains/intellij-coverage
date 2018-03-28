@@ -16,6 +16,8 @@
 
 package com.intellij.rt.coverage.data;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -27,7 +29,7 @@ public class TestDiscoveryProjectData {
   protected static final TestDiscoveryProjectData ourProjectData = new TestDiscoveryProjectData();
   private final NameEnumerator myNameEnumerator;
 
-  public TestDiscoveryProjectData() {
+  private TestDiscoveryProjectData() {
     try {
       String testDiscoveryDataListener = System.getProperty(TEST_DISCOVERY_DATA_LISTENER_PROP);
       if (testDiscoveryDataListener == null) {

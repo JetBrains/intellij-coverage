@@ -14,24 +14,11 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.testDiscovery;
+package com.intellij.rt.coverage.data;
 
-import com.intellij.rt.coverage.data.NameEnumerator;
-import com.intellij.rt.coverage.data.TestDiscoveryDataListener;
-
-import java.util.Map;
-
-public class DeafTestDiscoveryDataListener implements TestDiscoveryDataListener {
-  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) {
+final class TraceFileVersions {
+  private TraceFileVersions() {
   }
 
-  public void testsFinished() {
-  }
-
-  public void addMetadata(Map<String, String> metadata) {
-  }
-
-  public NameEnumerator getNameEnumerator() {
-    return new NameEnumerator();
-  }
+  static Object[] VERSIONS = new Object[]{1};
 }

@@ -19,6 +19,8 @@ package com.intellij.rt.coverage.data;
 import com.intellij.rt.coverage.data.api.SimpleDecodingTestDiscoveryProtocolReader;
 import com.intellij.rt.coverage.data.api.TestDiscoveryProtocolUtil;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,8 +32,17 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
+import static org.junit.runners.Parameterized.*;
 
+@RunWith(Parameterized.class)
 public class SingleTrFileReaderTest {
+  @Parameters
+  public static Object[] versions() {
+    return TraceFileVersions.VERSIONS;
+  }
+
+  @Parameter
+  public int version;
 
   @Test
   public void testCompletelyEmpty() throws IOException {
@@ -41,32 +52,32 @@ public class SingleTrFileReaderTest {
 
   @Test
   public void testNoMeaningfulData() throws IOException {
-    final MySingleTrFileReader reader = read(SingleTrFileDiscoveryDataListenerTest.EMPTY);
+    final MySingleTrFileReader reader = read(BinaryResponses.empty(version));
     assertThat(reader.myData).isEmpty();
   }
 
   @Test
   public void testOnlyMetadata() throws IOException {
-    final MySingleTrFileReader reader = read(SingleTrFileDiscoveryDataListenerTest.METADATA);
+    final MySingleTrFileReader reader = read(BinaryResponses.metadata(version));
     assertThat(reader.myData).isEmpty();
     assertThat(reader.myMetadata).isNotNull().containsOnly(entry("A", "B"));
   }
 
   @Test
   public void testNoTests() throws IOException {
-    final MySingleTrFileReader reader = read(SingleTrFileDiscoveryDataListenerTest.NO_TESTS_ONE_NAME);
+    final MySingleTrFileReader reader = read(BinaryResponses.noTestsOneName(version));
     assertThat(reader.myData).isEmpty();
   }
 
   @Test
   public void testOneEmptyTest() throws IOException {
-    final MySingleTrFileReader reader = read(SingleTrFileDiscoveryDataListenerTest.SINGLE_TEST_NO_METHODS);
+    final MySingleTrFileReader reader = read(BinaryResponses.singleTestNoMethods(version));
     assertThat(reader.myData).isEmpty();
   }
 
   @Test
   public void testTestWithOneMethod() throws IOException {
-    final MySingleTrFileReader reader = read(SingleTrFileDiscoveryDataListenerTest.SINGLE_TEST_SINGLE_METHOD);
+    final MySingleTrFileReader reader = read(BinaryResponses.singleTestSingleMethod(version));
     assertThat(reader.myData).isNotEmpty();
     final String[] data = reader.myData.iterator().next();
     assertThat(data).doesNotContainNull().containsExactly("A", "B", "B", "C");

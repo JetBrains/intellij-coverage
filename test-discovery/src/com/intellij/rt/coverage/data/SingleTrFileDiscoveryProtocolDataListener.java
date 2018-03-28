@@ -49,8 +49,8 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
   }
 
   // For tests
-  SingleTrFileDiscoveryProtocolDataListener(DataOutputStream stream) throws Exception {
-    super((byte) DEFAULT_VERSION);
+  SingleTrFileDiscoveryProtocolDataListener(DataOutputStream stream, int version) throws Exception {
+    super((byte) version);
     myStream = stream;
     myNameEnumerator = new NameEnumerator.Incremental();
     start(myStream);

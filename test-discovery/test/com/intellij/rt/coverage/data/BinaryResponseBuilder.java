@@ -23,9 +23,8 @@ import java.util.Iterator;
 // Does not support numbers greater than 196
 class BinaryResponseBuilder {
   private final ArrayList<Byte> myBytes;
-  private byte myDictionaryOffset;
 
-  public BinaryResponseBuilder() {
+  BinaryResponseBuilder() {
     myBytes = new ArrayList<Byte>();
   }
 
