@@ -34,7 +34,7 @@ public class StandaloneTestDiscoveryFileReader {
       }
 
       protected void processClassMetadataData(ClassMetadata metadata) {
-        System.out.println("Class Metadata entry: " + metadata.fqn);
+        System.out.println("Class Metadata entry: " + metadata.getFqn());
       }
     });
   }

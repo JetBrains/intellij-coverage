@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2018 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,31 +20,30 @@ package com.intellij.rt.coverage.data;
  * @author anna
  * @since 2/9/11
  */
-public class FileMapData { 
-  public static final FileMapData[] EMPTY_FILE_MAP = new FileMapData[0];
-  private String myClassName;
-  private LineMapData[] myLines;
+public class LineMapData {
+  private int mySourceLineNumber;
+  private int myTargetMinLine;
+  private int myTargetMaxLine;
 
-  public FileMapData(String className, LineMapData[] lines) {
-    myClassName = className;
-    myLines = lines;
+  public LineMapData(int mySourceLineNumber, int myTargetMinLine, int myTargetMaxLine) {
+    this.mySourceLineNumber = mySourceLineNumber;
+    this.myTargetMinLine = myTargetMinLine;
+    this.myTargetMaxLine = myTargetMaxLine;
   }
 
-  public String getClassName() {
-    return myClassName;
+  public int getTargetMinLine() {
+    return myTargetMinLine;
   }
 
-  public LineMapData[] getLines() {
-    return myLines;
+  public int getTargetMaxLine() {
+    return myTargetMaxLine;
+  }
+
+  public int getSourceLineNumber() {
+    return mySourceLineNumber;
   }
 
   public String toString() {
-    StringBuilder toString = new StringBuilder();
-    for (LineMapData line : myLines) {
-      if (line != null) {
-        toString.append("\n").append(line.toString());
-      }
-    }
-    return "class name: " + myClassName + "\nlines:" + toString;
+    return "src: " + mySourceLineNumber + ", min: " + myTargetMinLine + ", max: " + myTargetMaxLine;
   }
 }

@@ -190,11 +190,11 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
 
     // Prepare data for enumerator
     for (ClassMetadata data : metadata) {
-      enumerator.enumerate(data.fqn);
-      if (data.files != null) for (String file : data.files) {
+      enumerator.enumerate(data.getFqn());
+      if (data.getFiles() != null) for (String file : data.getFiles()) {
         enumerator.enumerate(file);
       }
-      if (data.methods != null) for (String method : data.methods.keySet()) {
+      if (data.getMethods() != null) for (String method : data.getMethods().keySet()) {
         enumerator.enumerate(method);
       }
     }
@@ -207,9 +207,9 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
     CoverageIOUtil.writeINT(os, list.size());
     for (ClassMetadata data : list) {
       // Class ID
-      CoverageIOUtil.writeINT(os, enumerator.enumerate(data.fqn));
+      CoverageIOUtil.writeINT(os, enumerator.enumerate(data.getFqn()));
       // Files array
-      final List<String> files = data.files;
+      final List<String> files = data.getFiles();
       if (files == null) {
         CoverageIOUtil.writeINT(os, 0);
       } else {
@@ -219,7 +219,7 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
         }
       }
       // Methods array
-      final Map<String, byte[]> methods = data.methods;
+      final Map<String, byte[]> methods = data.getMethods();
       if (methods == null) {
         CoverageIOUtil.writeINT(os, 0);
       } else {

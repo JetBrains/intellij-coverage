@@ -37,13 +37,6 @@ public class SingleFileTestDiscoveryIntegrationTest {
   @Rule
   public TemporaryFolder tmpDir = new TemporaryFolder();
 
-  private String[][] addVoidSignature(String[]... expected) {
-    for (String[] inner : expected) {
-      inner[3] += "()V";
-    }
-    return expected;
-  }
-
   @Test
   public void testSimple() throws Exception {
 //    final File result = doTest("simple", "-Dorg.jetbrains.instrumentation.trace.file.version=2");
@@ -51,25 +44,26 @@ public class SingleFileTestDiscoveryIntegrationTest {
     MySingleTrFileReader reader = new MySingleTrFileReader();
     TestDiscoveryProtocolUtil.readFile(result, reader);
     final List<String[]> data = reader.data;
+    checkClassMeta(reader);
     assertThat(data).isNotEmpty();
-    assertThat(data).contains(addVoidSignature(
-        new String[]{"Test", "test1", "Test", "test1"},
-        new String[]{"Test", "test1", "ClassA", "method1"},
-        new String[]{"Test", "test1", "ClassA", "method2"},
+    assertThat(data).contains(
+        new String[]{"Test", "test1", "Test", "test1()V"},
+        new String[]{"Test", "test1", "ClassA", "method1()V"},
+        new String[]{"Test", "test1", "ClassA", "method2()V"},
 
-        new String[]{"Test", "test2", "Test", "test2"},
-        new String[]{"Test", "test2", "ClassB", "method1"},
-        new String[]{"Test", "test2", "ClassB", "method2"},
+        new String[]{"Test", "test2", "Test", "test2()V"},
+        new String[]{"Test", "test2", "ClassB", "method1()V"},
+        new String[]{"Test", "test2", "ClassB", "method2()V"},
 
-        new String[]{"Test", "test3", "Test", "test3"},
-        new String[]{"Test", "test3", "ClassA", "methodR"},
-        new String[]{"Test", "test3", "ClassA", "method1"},
-        new String[]{"Test", "test3", "ClassA", "method2"},
-        new String[]{"Test", "test3", "ClassB", "methodR"},
-        new String[]{"Test", "test3", "ClassB", "method1"},
-        new String[]{"Test", "test3", "ClassB", "method2"},
-        new String[]{"Test", "testConstructor", "ClassA", "<init>"}
-    ));
+        new String[]{"Test", "test3", "Test", "test3()V"},
+        new String[]{"Test", "test3", "ClassA", "methodR()V"},
+        new String[]{"Test", "test3", "ClassA", "method1()V"},
+        new String[]{"Test", "test3", "ClassA", "method2()V"},
+        new String[]{"Test", "test3", "ClassB", "methodR()V"},
+        new String[]{"Test", "test3", "ClassB", "method1()V"},
+        new String[]{"Test", "test3", "ClassB", "method2()V"},
+        new String[]{"Test", "testConstructor", "ClassA", "<init>()V"}
+    );
     assertThat(data).doesNotContain(new String[]{"Test.testConstructor", "ClassB", "<init>"});
   }
 
@@ -82,10 +76,11 @@ public class SingleFileTestDiscoveryIntegrationTest {
     TestDiscoveryProtocolUtil.readFile(result, reader);
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
-    assertThat(data).contains(addVoidSignature(
-        new String[]{"Test", "test1", "Test", "test1"},
-        new String[]{"Test", "test1", "InitClass", "initInit"}
-    ));
+    assertThat(data).contains(
+        new String[]{"Test", "test1", "Test", "test1()V"},
+        new String[]{"Test", "test1", "InitClass", "initInit()V"}
+    );
+    checkClassMeta(reader);
   }
 
   @Test
@@ -95,10 +90,11 @@ public class SingleFileTestDiscoveryIntegrationTest {
     TestDiscoveryProtocolUtil.readFile(result, reader);
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
-    assertThat(data).contains(addVoidSignature(
-        new String[]{"Test", "test1", "Foo", "m"},
-        new String[]{"Test", "test1", "Foo", "doInvoke"}
-    ));
+    assertThat(data).contains(
+        new String[]{"Test", "test1", "Foo", "m()V"},
+        new String[]{"Test", "test1", "Foo", "doInvoke()V"}
+    );
+    checkClassMeta(reader);
   }
 
   @Test
@@ -110,32 +106,43 @@ public class SingleFileTestDiscoveryIntegrationTest {
     TestDiscoveryProtocolUtil.readFile(result, reader);
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
-    assertThat(data).containsOnly(addVoidSignature(
-        new String[]{"Test", "test1", "Test", "test1"},
-        new String[]{"Test", "test1", "ClassA", "method1"},
-        new String[]{"Test", "test1", "ClassA", "method2"},
+    assertThat(data).containsOnly(
+        new String[]{"Test", "test1", "Test", "test1()V"},
+        new String[]{"Test", "test1", "ClassA", "method1()V"},
+        new String[]{"Test", "test1", "ClassA", "method2()V"},
 
-        new String[]{"Test", "test2", "Test", "test2"},
-        new String[]{"Test", "test2", "ClassB", "method1"},
-        new String[]{"Test", "test2", "ClassB", "method2"},
+        new String[]{"Test", "test2", "Test", "test2()V"},
+        new String[]{"Test", "test2", "ClassB", "method1()V"},
+        new String[]{"Test", "test2", "ClassB", "method2()V"},
 
-        new String[]{"Test", "test3", "Test", "test3"},
-        new String[]{"Test", "test3", "ClassA", "methodR"},
-        new String[]{"Test", "test3", "ClassA", "method1"},
-        new String[]{"Test", "test3", "ClassA", "method2"},
-        new String[]{"Test", "test3", "ClassB", "methodR"},
-        new String[]{"Test", "test3", "ClassB", "method1"},
-        new String[]{"Test", "test3", "ClassB", "method2"},
+        new String[]{"Test", "test3", "Test", "test3()V"},
+        new String[]{"Test", "test3", "ClassA", "methodR()V"},
+        new String[]{"Test", "test3", "ClassA", "method1()V"},
+        new String[]{"Test", "test3", "ClassA", "method2()V"},
+        new String[]{"Test", "test3", "ClassB", "methodR()V"},
+        new String[]{"Test", "test3", "ClassB", "method1()V"},
+        new String[]{"Test", "test3", "ClassB", "method2()V"},
 
-        new String[]{"Test", "testConstructor", "ClassA", "<init>"},
-        new String[]{"Test", "testConstructor", "ClassA", "someMethod"},
-        new String[]{"Test", "testConstructor", "ClassB", "someMethod"},
-        new String[]{"Test", "testConstructor", "Test", "testConstructor"}
-    ));
+        new String[]{"Test", "testConstructor", "ClassA", "<init>()V"},
+        new String[]{"Test", "testConstructor", "ClassA", "someMethod()V"},
+        new String[]{"Test", "testConstructor", "ClassB", "someMethod()V"},
+        new String[]{"Test", "testConstructor", "Test", "testConstructor()V"}
+    );
+    checkClassMeta(reader);
+  }
+
+  private void checkClassMeta(MySingleTrFileReader reader) {
+    assertThat(reader.classMetaData).isNotEmpty();
+    for (ClassMetadata classMetadata : reader.classMetaData) {
+      assertThat(classMetadata.getFqn()).isNotBlank();
+      // for Java:
+      assertThat(classMetadata.getFiles()).size().isEqualTo(1);
+    }
   }
 
   private static class MySingleTrFileReader extends SimpleDecodingTestDiscoveryProtocolReader {
     final List<String[]> data = new ArrayList<String[]>();
+    final List<ClassMetadata> classMetaData = new ArrayList<ClassMetadata>();
 
     protected void processData(String testClassName, String testMethodName, String className, String methodName) {
       data.add(new String[]{testClassName, testMethodName, className, methodName});
@@ -146,6 +153,7 @@ public class SingleFileTestDiscoveryIntegrationTest {
     }
 
     protected void processClassMetadataData(ClassMetadata metadata) {
+      classMetaData.add(metadata);
     }
   }
 

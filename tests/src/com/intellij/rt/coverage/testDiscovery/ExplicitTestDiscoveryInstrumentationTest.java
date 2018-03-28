@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.testDiscovery;
 
+import com.intellij.rt.coverage.data.ClassMetadata;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectDataTestAccessor;
 import com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryTransformer;
@@ -29,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Pattern;
 
@@ -70,6 +72,27 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     public String getField() {
       return field;
     }
+  }
+
+  @Test
+  public void testClassMetaDataCollecting() throws Exception {
+    String fqn = MySerializable.class.getName();
+    doTransform(MySerializable.class.getName());
+    Collection<ClassMetadata> meta = TestDiscoveryProjectDataTestAccessor.getClassMetaData();
+    assertNotNull(meta);
+    ClassMetadata serializable = null;
+    for (ClassMetadata classMeta : meta) {
+      if (fqn.equals(classMeta.getFqn())) {
+        serializable = classMeta;
+      }
+    }
+    assertNotNull(serializable);
+    assertEquals(1, serializable.getFiles().size());
+    assertEquals(getClass().getCanonicalName().replace(".", "/") + ".java", serializable.getFiles().get(0));
+    assertEquals(3, serializable.getMethods().size());
+    assertTrue(serializable.getMethods().containsKey(MySerializable.class.getName()));
+    assertTrue(serializable.getMethods().containsKey("<init>(Ljava/lang/String;)V"));
+    assertTrue(serializable.getMethods().containsKey("getField()Ljava/lang/String;"));
   }
 
   @Test

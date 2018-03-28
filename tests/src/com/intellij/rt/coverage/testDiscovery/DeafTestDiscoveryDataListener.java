@@ -20,10 +20,13 @@ import com.intellij.rt.coverage.data.ClassMetadata;
 import com.intellij.rt.coverage.data.NameEnumerator;
 import com.intellij.rt.coverage.data.TestDiscoveryDataListener;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class DeafTestDiscoveryDataListener implements TestDiscoveryDataListener {
+  private final List<ClassMetadata> classMetadata = new ArrayList<ClassMetadata>();
+
   public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) {
   }
 
@@ -34,6 +37,11 @@ public class DeafTestDiscoveryDataListener implements TestDiscoveryDataListener 
   }
 
   public void addClassMetadata(List<ClassMetadata> metadata) {
+    this.classMetadata.addAll(metadata);
+  }
+
+  public List<ClassMetadata> getClassMetadata() {
+    return classMetadata;
   }
 
   public NameEnumerator getNameEnumerator() {

@@ -16,93 +16,55 @@
 
 package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
+import com.intellij.rt.coverage.data.ClassMetadata;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class TestDiscoveryInstrumenter extends ClassVisitor {
-  private static final String INIT_METHOD_NAME = "<init>";
-
   static final int ADDED_CODE_STACK_SIZE = 6;
   private final String myClassName;
   final String myInternalClassName;
   int myClassVersion;
   private final InstrumentedMethodsFilter myMethodFilter;
-  private final String[] myMethodNames;
-  private volatile boolean myInstrumentConstructors;
+  volatile boolean myInstrumentConstructors;
   private int myCurrentMethodCount;
-
   static final String METHODS_VISITED = "__$methodsVisited$__";
   static final String METHODS_VISITED_CLASS = "[Z";
-
   private static final String METHODS_VISITED_INIT = "__$initMethodsVisited$__";
   private final boolean myInterface;
   private boolean myCreatedMethod = false;
+  private final String[] myMethodNames;
 
   public TestDiscoveryInstrumenter(ClassWriter classWriter, ClassReader cr, String className) {
     super(Opcodes.ASM6, classWriter);
     myMethodFilter = new InstrumentedMethodsFilter(className);
     myClassName = className;
     myInternalClassName = className.replace('.', '/');
-    myMethodNames = collectMethodNames(cr, className);
     myInterface = (cr.getAccess() & Opcodes.ACC_INTERFACE) != 0;
+    myMethodNames = inspectClass(cr);
   }
 
-  private String[] collectMethodNames(ClassReader cr, final String className) {
-    final List<String> instrumentedMethods = new ArrayList<String>();
-
-    final ClassVisitor instrumentedMethodCounter = new ClassVisitor(Opcodes.ASM6) {
-      int defaultConstructorIndex = -1;
-      final InstrumentedMethodsFilter methodsFilter = new InstrumentedMethodsFilter(className);
-
-      public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        methodsFilter.visit(version, access, name, signature, superName, interfaces);
-        myClassVersion = version;
-        super.visit(version, access, name, signature, superName, interfaces);
-      }
-
-      public MethodVisitor visitMethod(int access, String name, final String desc, String signature, String[] exceptions) {
-        InstrumentedMethodsFilter.Decision decision = methodsFilter.shouldVisitMethod(access, name, desc, signature, exceptions, myInstrumentConstructors);
-        if (decision == InstrumentedMethodsFilter.Decision.YES) {
-          instrumentedMethods.add(name + desc);
-          if (INIT_METHOD_NAME.equals(name) && !myInstrumentConstructors) {
-            instrumentAllConstructors();
-          }
-          return super.visitMethod(access, name, desc, signature, exceptions);
-        } else if (decision == InstrumentedMethodsFilter.Decision.NO) {
-          return super.visitMethod(access, name, desc, signature, exceptions);
-        } else {
-          assert decision == InstrumentedMethodsFilter.Decision.CHECK_IS_CONSTRUCTOR_DEFAULT;
-          assert INIT_METHOD_NAME.equals(name);
-          return new DefaultConstructorDetectionVisitor(api, super.visitMethod(access, name, desc, signature, exceptions)) {
-            @Override
-            void onDecisionDone(boolean isDefault) {
-              if (!isDefault) {
-                instrumentAllConstructors();
-                instrumentedMethods.add(INIT_METHOD_NAME + desc);
-              } else {
-                defaultConstructorIndex = instrumentedMethods.size();
-              }
-            }
-          };
-        }
-      }
-
-      private void instrumentAllConstructors() {
-        myInstrumentConstructors = true;
-        if (defaultConstructorIndex != -1) {
-          instrumentedMethods.add(defaultConstructorIndex, INIT_METHOD_NAME + "()V");
-          defaultConstructorIndex = -1;
-        }
-      }
-    };
-
-    cr.accept(instrumentedMethodCounter, 0);
-    return instrumentedMethods.toArray(new String[0]);
+  private String[] inspectClass(ClassReader cr) {
+    // calculate checksums for class
+    CheckSumCalculator checksumCalculator = new CheckSumCalculator(api, myClassName);
+    // collect source files of class
+    SourceFilesCollector sourceFilesCollector = new SourceFilesCollector(api, checksumCalculator, myClassName);
+    // collect methods to instrument (and calculate checksums for them, see CheckSumCalculator)
+    InstrumentedMethodsCollector methodCollector = new InstrumentedMethodsCollector(api, sourceFilesCollector, this, myClassName);
+    cr.accept(methodCollector, 0);
+    TestDiscoveryProjectData.getProjectData()
+        .addClassMetadata(Collections.singletonList(
+            new ClassMetadata(myClassName,
+                sourceFilesCollector.getSources(),
+                checksumCalculator.getChecksums())));
+    return methodCollector.instrumentedMethods();
   }
 
+  @Override
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
     myMethodFilter.visit(version, access, name, signature, superName, interfaces);
     super.visit(version, access, name, signature, superName, interfaces);
@@ -141,7 +103,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
   /**
    * Insert call to the __$initMethodsVisited$__
-   * <p>
+   *
    * It also will create a method for interfaces which were skipped by default: for java 1.8- static methods in interfaces were not possible,
    * but if there is non-<clinit> code in the interface, then it must be 1.8+
    */
@@ -174,7 +136,8 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     int access;
     if (myInterface) {
       access = Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL | Opcodes.ACC_SYNTHETIC;
-    } else {
+    }
+    else {
       access = Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_TRANSIENT | Opcodes.ACC_SYNTHETIC;
     }
 
@@ -196,7 +159,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
    *   }
    * </code>
    * </pre>
-   * <p>
+   *
    * The same array will be stored in the {@link TestDiscoveryProjectData#ourProjectData} instance
    */
   private void createInitFieldMethod(final int access) {

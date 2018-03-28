@@ -42,37 +42,30 @@ public class SocketWriterTestDiscoveryIntegrationTest {
   @Rule
   public TemporaryFolder tmpDir  = new TemporaryFolder();
 
-  private String[][] addVoidSignature(String[]... expected) {
-    for (String[] inner : expected) {
-      inner[2] += "()V";
-    }
-    return expected;
-  }
-
   @Test
   public void testSimple() throws Exception {
     final List<String[]> result = doTest("simple");
     assertThat(result).isNotEmpty();
-    assertThat(result).contains(addVoidSignature(
-        new String[]{"Test.test1", "Test", "test1"},
-        new String[]{"Test.test1", "ClassA", "method1"},
-        new String[]{"Test.test1", "ClassA", "method2"},
+    assertThat(result).contains(
+        new String[]{"Test.test1", "Test", "test1()V"},
+        new String[]{"Test.test1", "ClassA", "method1()V"},
+        new String[]{"Test.test1", "ClassA", "method2()V"},
 
-        new String[]{"Test.test2", "Test", "test2"},
-        new String[]{"Test.test2", "ClassB", "method1"},
-        new String[]{"Test.test2", "ClassB", "method2"},
+        new String[]{"Test.test2", "Test", "test2()V"},
+        new String[]{"Test.test2", "ClassB", "method1()V"},
+        new String[]{"Test.test2", "ClassB", "method2()V"},
 
-        new String[]{"Test.test3", "Test", "test3"},
-        new String[]{"Test.test3", "ClassA", "methodR"},
-        new String[]{"Test.test3", "ClassA", "method1"},
-        new String[]{"Test.test3", "ClassA", "method2"},
-        new String[]{"Test.test3", "ClassB", "methodR"},
-        new String[]{"Test.test3", "ClassB", "method1"},
-        new String[]{"Test.test3", "ClassB", "method2"},
+        new String[]{"Test.test3", "Test", "test3()V"},
+        new String[]{"Test.test3", "ClassA", "methodR()V"},
+        new String[]{"Test.test3", "ClassA", "method1()V"},
+        new String[]{"Test.test3", "ClassA", "method2()V"},
+        new String[]{"Test.test3", "ClassB", "methodR()V"},
+        new String[]{"Test.test3", "ClassB", "method1()V"},
+        new String[]{"Test.test3", "ClassB", "method2()V"},
 
-        new String[]{"Test.testConstructor", "ClassA", "<init>"}
-    ));
-    assertThat(result).doesNotContain(new String[]{"Test.testConstructor", "ClassB", "<init>"});
+        new String[]{"Test.testConstructor", "ClassA", "<init>()V"}
+    );
+    assertThat(result).doesNotContain(new String[]{"Test.testConstructor", "ClassB", "<init>()V"});
   }
 
   @Test
@@ -88,15 +81,13 @@ public class SocketWriterTestDiscoveryIntegrationTest {
   @Test
   public void testFieldInitializers() throws Exception {
     final List<String[]> result = doTest("fieldInitializers", "-D" + TestDiscoveryPremain.INCLUDE_PATTERNS_VM_OP + "=Foo");
-    assertThat(result).contains(addVoidSignature(
-        new String[] {"Test.test1", "Foo", "<init>"}));
+    assertThat(result).contains(new String[] {"Test.test1", "Foo", "<init>()V"});
   }
 
   @Test
   public void testFieldInitializers2() throws Exception {
     final List<String[]> result = doTest("fieldInitializers2", "-D" + TestDiscoveryPremain.INCLUDE_PATTERNS_VM_OP + "=Foo");
-    assertThat(result).contains(addVoidSignature(
-        new String[] {"Test.test1", "Foo", "<init>"}));
+    assertThat(result).contains(new String[] {"Test.test1", "Foo", "<init>()V"});
   }
 
   @Test
