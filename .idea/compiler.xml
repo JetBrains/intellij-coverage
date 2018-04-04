@@ -12,6 +12,8 @@
       <entry name="!?*.clj" />
     </wildcardResourcePatterns>
     <bytecodeTargetLevel>
+      <module name="buildSrc_main" target="1.8" />
+      <module name="buildSrc_test" target="1.8" />
       <module name="instrumentation_main" target="1.5" />
       <module name="instrumentation_test" target="1.5" />
       <module name="intellij-coverage_main" target="1.5" />
@@ -20,6 +22,7 @@
       <module name="junit-test-discovery-launcher_test" target="1.5" />
       <module name="junit4-test-discovery-launcher_main" target="1.5" />
       <module name="junit4-test-discovery-launcher_test" target="1.5" />
+      <module name="test-discovery_jmh" target="1.5" />
       <module name="test-discovery_main" target="1.5" />
       <module name="test-discovery_test" target="1.5" />
       <module name="testDiscovery_main" target="1.6" />

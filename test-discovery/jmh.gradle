@@ -1,0 +1,130 @@
+import com.intellij.rt.coverage.testDiscovery.jmh.ReportReader
+import java.nio.file.Files
+
+/*
+ * Copyright 2000-2018 JetBrains s.r.o.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+repositories {
+  maven { url = 'https://jetbrains.bintray.com/intellij-third-party-dependencies' }
+}
+
+ext {
+  jmhVersion = '1.20'
+  baselineVersion = '1.0.424'
+}
+
+sourceSets {
+  jmh.java.srcDirs = [file('jmh')]
+}
+
+configurations {
+  baseline
+  head
+}
+
+dependencies {
+  jmhCompile "org.openjdk.jmh:jmh-core:$jmhVersion"
+  jmhCompile "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
+  jmhCompile 'org.joda:joda-convert:1.2'
+  jmhCompile 'junit:junit:4.12'
+  jmhCompile fileTree('lib')
+  baseline "org.jetbrains.intellij.deps:intellij-test-discovery-agent:$baselineVersion"
+  head project(':test-discovery')
+}
+
+// benchmark without discovery agent
+task noDiscoveryBenchmark(type: JavaExec) {
+  configureBenchmark it as JavaExec
+}
+
+// benchmark with baseline version of agent
+task baselineBenchmark(type: JavaExec) {
+  configureBenchmark it as JavaExec, configurations.baseline
+}
+
+// benchmark with current version of agent
+task headBenchmark(type: JavaExec, dependsOn: jar) {
+  configureBenchmark it as JavaExec, configurations.head
+}
+
+def configureBenchmark(JavaExec benchmark, Configuration agent = null) {
+  benchmark.with {
+    dependsOn jmhClasses
+    doFirst {
+      main = 'org.openjdk.jmh.Main'
+      classpath = sourceSets.jmh.runtimeClasspath
+      args = [
+          // benchmarks
+          'com\\.intellij\\.rt\\.coverage\\.testDiscovery\\.jmh\\.DiscoveryAgentBenchmark.*',
+          // report
+          '-rf', 'json', '-rff', benchmarkReport(benchmark),
+          // mode, see org.openjdk.jmh.annotations.Mode
+          '-bm', 'ss',
+          // number of forks, measurement iterations, warmups
+          '-f', 10, '-i', 1, '-wi', 0,
+          // fail-on-error
+          '-foe', 'true',
+          // verbosity [SILENT, NORMAL, EXTRA]
+          '-v', 'NORMAL',
+          // profilers
+          '-prof', 'org.openjdk.jmh.profile.StackProfiler:lines=10;top=5;detailLine=true;period=10',
+          '-prof', 'org.openjdk.jmh.profile.GCProfiler',
+          '-prof', 'com.intellij.rt.coverage.testDiscovery.jmh.TraceFileProfiler'
+      ]
+      if (agent != null) {
+        args += [
+            // discovery agent properties
+            '-jvmArgs', "-javaagent:${agent.first().absolutePath}",
+            '-jvmArgs', '-Dtest.discovery.data.listener=com.intellij.rt.coverage.data.SingleTrFileDiscoveryProtocolDataListener'
+        ]
+      }
+      benchmarkReport(benchmark).createNewFile()
+      Files.deleteIfExists(file('td.ijtc').toPath())
+    }
+  }
+}
+
+def benchmarkReport(Task benchmark) {
+  file("$benchmark.temporaryDir/${benchmark.name}.json")
+}
+
+task benchmark(group: 'verification', dependsOn: [noDiscoveryBenchmark, baselineBenchmark, headBenchmark]) {
+  doLast {
+    def secondaryMetrics = [
+        'trace.file.size',
+        '·gc.alloc.rate',
+        '·gc.count', '·gc.time'
+    ]
+    def baselineReport = benchmarkReport(baselineBenchmark).text
+    project.logger.quiet """Benchmark score:
+    No discovery vs $baselineVersion:
+    ${
+      ReportReader.readScore(
+          benchmarkReport(noDiscoveryBenchmark).text,
+          baselineReport,
+          secondaryMetrics
+      )
+    }
+    $baselineVersion vs $version:
+    ${
+      ReportReader.readScore(
+          baselineReport,
+          benchmarkReport(headBenchmark).text,
+          secondaryMetrics
+      )
+    }"""
+  }
+}

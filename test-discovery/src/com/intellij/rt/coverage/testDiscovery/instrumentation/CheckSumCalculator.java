@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.util.Printer;
 import org.jetbrains.coverage.org.objectweb.asm.util.Textifier;
@@ -35,8 +36,7 @@ public class CheckSumCalculator extends ClassVisitor {
   private final String className;
 
   public CheckSumCalculator(int api, String className) {
-    // TODO: do not use Textifier, use MethodWriter or something
-    super(api, new TraceClassVisitor(null, new Textifier(), null));
+    super(api, new TraceClassVisitor(null, new ChecksumPrinter(api), null));
     this.className = className;
     try {
       this.messageDigest = MessageDigest.getInstance("MD5");
@@ -85,5 +85,22 @@ public class CheckSumCalculator extends ClassVisitor {
         saveChecksum(name + desc);
       }
     };
+  }
+
+  // TODO: directly extend asm Printer instead of Textifier to avoid string building overhead
+  private static class ChecksumPrinter extends Textifier {
+    ChecksumPrinter(int api) {
+      super(api);
+    }
+
+    @Override
+    public void visitLineNumber(int line, Label start) {
+      // no-op
+    }
+
+    @Override
+    protected Textifier createTextifier() {
+      return new ChecksumPrinter(api);
+    }
   }
 }

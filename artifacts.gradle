@@ -26,7 +26,7 @@ publishing {
       groupId 'org.jetbrains.intellij.deps'
       artifactId test_discovery_jar_name
       version version
-      artifact project(":test-discovery").discoveryAgentJar
+      artifact project(":test-discovery").jar
     }
   }
 }
