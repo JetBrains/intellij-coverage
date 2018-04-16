@@ -16,7 +16,7 @@
 
 package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
-final class TestDiscoveryInstrumentationUtils {
+public final class TestDiscoveryInstrumentationUtils {
   private TestDiscoveryInstrumentationUtils() {
   }
 
@@ -25,7 +25,7 @@ final class TestDiscoveryInstrumentationUtils {
    * @param signature description of method arguments and return type
    * @return generated method id
    */
-  static String getMethodId(String name, String signature) {
+  public static String getMethodId(String name, String signature) {
     return name + "/" + signature;
   }
 }
