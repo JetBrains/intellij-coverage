@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 class SourceFilesCollector extends ClassVisitor {
-  List<String> sources = new ArrayList<String>(1);
+  private final List<String> sources = new ArrayList<String>(1);
   private final String className;
 
   SourceFilesCollector(int api, ClassVisitor cv, String className) {

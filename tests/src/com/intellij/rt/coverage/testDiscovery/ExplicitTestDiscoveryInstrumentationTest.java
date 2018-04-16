@@ -91,8 +91,8 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     assertEquals(getClass().getCanonicalName().replace(".", "/") + ".java", serializable.getFiles().get(0));
     assertEquals(3, serializable.getMethods().size());
     assertTrue(serializable.getMethods().containsKey(MySerializable.class.getName()));
-    assertTrue(serializable.getMethods().containsKey("<init>(Ljava/lang/String;)V"));
-    assertTrue(serializable.getMethods().containsKey("getField()Ljava/lang/String;"));
+    assertTrue(serializable.getMethods().containsKey("<init>/(Ljava/lang/String;)V"));
+    assertTrue(serializable.getMethods().containsKey("getField/()Ljava/lang/String;"));
   }
 
   @Test
