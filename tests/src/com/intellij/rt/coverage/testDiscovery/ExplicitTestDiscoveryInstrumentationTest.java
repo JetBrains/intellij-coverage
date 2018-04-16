@@ -129,15 +129,15 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     boolean[] fooUsedMethods = TestDiscoveryProjectDataTestAccessor.getClass2UsedMethodsMap().get("Foo");
     assertEquals(1, fooMethods.length);
     assertEquals(1, fooUsedMethods.length);
-    assertEquals("bar1()V", fooMethods[0]);
+    assertEquals("bar1/()V", fooMethods[0]);
 
     l2.loadClass("Foo").getDeclaredMethod("baz1").invoke(null);
     fooMethods = TestDiscoveryProjectDataTestAccessor.getClass2MethodNameMap().get("Foo");
     fooUsedMethods = TestDiscoveryProjectDataTestAccessor.getClass2UsedMethodsMap().get("Foo");
     assertEquals(2, fooMethods.length);
     assertEquals(2, fooUsedMethods.length);
-    assertEquals("baz1()V", fooMethods[0]);
-    assertEquals("baz2()V", fooMethods[1]);
+    assertEquals("baz1/()V", fooMethods[0]);
+    assertEquals("baz2/()V", fooMethods[1]);
 
     l2.loadClass("Foo").getDeclaredMethod("baz2").invoke(null);
   }

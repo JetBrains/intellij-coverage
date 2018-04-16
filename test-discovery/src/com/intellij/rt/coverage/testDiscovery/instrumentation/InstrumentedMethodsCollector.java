@@ -54,7 +54,7 @@ class InstrumentedMethodsCollector extends ClassVisitor {
         access, name, desc, signature, exceptions, instrumenter.myInstrumentConstructors
     );
     if (decision == InstrumentedMethodsFilter.Decision.YES) {
-      instrumentedMethods.add(name + desc);
+      instrumentedMethods.add(TestDiscoveryInstrumentationUtils.getMethodId(name, desc));
       if (INIT_METHOD_NAME.equals(name) && !instrumenter.myInstrumentConstructors) {
         instrumentAllConstructors();
       }
@@ -72,7 +72,7 @@ class InstrumentedMethodsCollector extends ClassVisitor {
         void onDecisionDone(boolean isDefault) {
           if (!isDefault) {
             instrumentAllConstructors();
-            instrumentedMethods.add(INIT_METHOD_NAME + desc);
+            instrumentedMethods.add(TestDiscoveryInstrumentationUtils.getMethodId(INIT_METHOD_NAME, desc));
           }
           else {
             defaultConstructorIndex = instrumentedMethods.size();
@@ -85,7 +85,7 @@ class InstrumentedMethodsCollector extends ClassVisitor {
   private void instrumentAllConstructors() {
     instrumenter.myInstrumentConstructors = true;
     if (defaultConstructorIndex != -1) {
-      instrumentedMethods.add(defaultConstructorIndex, INIT_METHOD_NAME + "()V");
+      instrumentedMethods.add(defaultConstructorIndex, TestDiscoveryInstrumentationUtils.getMethodId(INIT_METHOD_NAME, "()V"));
       defaultConstructorIndex = -1;
     }
   }

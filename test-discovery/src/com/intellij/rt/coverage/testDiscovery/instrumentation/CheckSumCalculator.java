@@ -82,7 +82,7 @@ public class CheckSumCalculator extends ClassVisitor {
       public void visitEnd() {
         super.visitEnd();
         // method checksum
-        saveChecksum(name + "/" + desc);
+        saveChecksum(TestDiscoveryInstrumentationUtils.getMethodId(name, desc));
       }
     };
   }

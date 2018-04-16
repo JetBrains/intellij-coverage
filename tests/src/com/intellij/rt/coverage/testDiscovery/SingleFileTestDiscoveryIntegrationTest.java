@@ -47,22 +47,22 @@ public class SingleFileTestDiscoveryIntegrationTest {
     checkClassMeta(reader);
     assertThat(data).isNotEmpty();
     assertThat(data).contains(
-        new String[]{"Test", "test1", "Test", "test1()V"},
-        new String[]{"Test", "test1", "ClassA", "method1()V"},
-        new String[]{"Test", "test1", "ClassA", "method2()V"},
+        new String[]{"Test", "test1", "Test", "test1/()V"},
+        new String[]{"Test", "test1", "ClassA", "method1/()V"},
+        new String[]{"Test", "test1", "ClassA", "method2/()V"},
 
-        new String[]{"Test", "test2", "Test", "test2()V"},
-        new String[]{"Test", "test2", "ClassB", "method1()V"},
-        new String[]{"Test", "test2", "ClassB", "method2()V"},
+        new String[]{"Test", "test2", "Test", "test2/()V"},
+        new String[]{"Test", "test2", "ClassB", "method1/()V"},
+        new String[]{"Test", "test2", "ClassB", "method2/()V"},
 
-        new String[]{"Test", "test3", "Test", "test3()V"},
-        new String[]{"Test", "test3", "ClassA", "methodR()V"},
-        new String[]{"Test", "test3", "ClassA", "method1()V"},
-        new String[]{"Test", "test3", "ClassA", "method2()V"},
-        new String[]{"Test", "test3", "ClassB", "methodR()V"},
-        new String[]{"Test", "test3", "ClassB", "method1()V"},
-        new String[]{"Test", "test3", "ClassB", "method2()V"},
-        new String[]{"Test", "testConstructor", "ClassA", "<init>()V"}
+        new String[]{"Test", "test3", "Test", "test3/()V"},
+        new String[]{"Test", "test3", "ClassA", "methodR/()V"},
+        new String[]{"Test", "test3", "ClassA", "method1/()V"},
+        new String[]{"Test", "test3", "ClassA", "method2/()V"},
+        new String[]{"Test", "test3", "ClassB", "methodR/()V"},
+        new String[]{"Test", "test3", "ClassB", "method1/()V"},
+        new String[]{"Test", "test3", "ClassB", "method2/()V"},
+        new String[]{"Test", "testConstructor", "ClassA", "<init>/()V"}
     );
     assertThat(data).doesNotContain(new String[]{"Test.testConstructor", "ClassB", "<init>"});
   }
@@ -77,8 +77,8 @@ public class SingleFileTestDiscoveryIntegrationTest {
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
     assertThat(data).contains(
-        new String[]{"Test", "test1", "Test", "test1()V"},
-        new String[]{"Test", "test1", "InitClass", "initInit()V"}
+        new String[]{"Test", "test1", "Test", "test1/()V"},
+        new String[]{"Test", "test1", "InitClass", "initInit/()V"}
     );
     checkClassMeta(reader);
   }
@@ -91,8 +91,8 @@ public class SingleFileTestDiscoveryIntegrationTest {
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
     assertThat(data).contains(
-        new String[]{"Test", "test1", "Foo", "m()V"},
-        new String[]{"Test", "test1", "Foo", "doInvoke()V"}
+        new String[]{"Test", "test1", "Foo", "m/()V"},
+        new String[]{"Test", "test1", "Foo", "doInvoke/()V"}
     );
     checkClassMeta(reader);
   }
@@ -107,26 +107,26 @@ public class SingleFileTestDiscoveryIntegrationTest {
     final List<String[]> data = reader.data;
     assertThat(data).isNotEmpty();
     assertThat(data).containsOnly(
-        new String[]{"Test", "test1", "Test", "test1()V"},
-        new String[]{"Test", "test1", "ClassA", "method1()V"},
-        new String[]{"Test", "test1", "ClassA", "method2()V"},
+        new String[]{"Test", "test1", "Test", "test1/()V"},
+        new String[]{"Test", "test1", "ClassA", "method1/()V"},
+        new String[]{"Test", "test1", "ClassA", "method2/()V"},
 
-        new String[]{"Test", "test2", "Test", "test2()V"},
-        new String[]{"Test", "test2", "ClassB", "method1()V"},
-        new String[]{"Test", "test2", "ClassB", "method2()V"},
+        new String[]{"Test", "test2", "Test", "test2/()V"},
+        new String[]{"Test", "test2", "ClassB", "method1/()V"},
+        new String[]{"Test", "test2", "ClassB", "method2/()V"},
 
-        new String[]{"Test", "test3", "Test", "test3()V"},
-        new String[]{"Test", "test3", "ClassA", "methodR()V"},
-        new String[]{"Test", "test3", "ClassA", "method1()V"},
-        new String[]{"Test", "test3", "ClassA", "method2()V"},
-        new String[]{"Test", "test3", "ClassB", "methodR()V"},
-        new String[]{"Test", "test3", "ClassB", "method1()V"},
-        new String[]{"Test", "test3", "ClassB", "method2()V"},
+        new String[]{"Test", "test3", "Test", "test3/()V"},
+        new String[]{"Test", "test3", "ClassA", "methodR/()V"},
+        new String[]{"Test", "test3", "ClassA", "method1/()V"},
+        new String[]{"Test", "test3", "ClassA", "method2/()V"},
+        new String[]{"Test", "test3", "ClassB", "methodR/()V"},
+        new String[]{"Test", "test3", "ClassB", "method1/()V"},
+        new String[]{"Test", "test3", "ClassB", "method2/()V"},
 
-        new String[]{"Test", "testConstructor", "ClassA", "<init>()V"},
-        new String[]{"Test", "testConstructor", "ClassA", "someMethod()V"},
-        new String[]{"Test", "testConstructor", "ClassB", "someMethod()V"},
-        new String[]{"Test", "testConstructor", "Test", "testConstructor()V"}
+        new String[]{"Test", "testConstructor", "ClassA", "<init>/()V"},
+        new String[]{"Test", "testConstructor", "ClassA", "someMethod/()V"},
+        new String[]{"Test", "testConstructor", "ClassB", "someMethod/()V"},
+        new String[]{"Test", "testConstructor", "Test", "testConstructor/()V"}
     );
     checkClassMeta(reader);
   }
