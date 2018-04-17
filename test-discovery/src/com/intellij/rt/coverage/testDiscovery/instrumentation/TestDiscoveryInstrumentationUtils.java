@@ -17,6 +17,8 @@
 package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
 public final class TestDiscoveryInstrumentationUtils {
+  public static final String SEPARATOR = "/";
+
   private TestDiscoveryInstrumentationUtils() {
   }
 
@@ -26,6 +28,6 @@ public final class TestDiscoveryInstrumentationUtils {
    * @return generated method id
    */
   public static String getMethodId(String name, String signature) {
-    return name + "/" + signature;
+    return name + SEPARATOR + signature;
   }
 }
