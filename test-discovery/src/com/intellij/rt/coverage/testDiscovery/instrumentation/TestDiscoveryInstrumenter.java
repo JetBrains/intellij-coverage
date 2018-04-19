@@ -21,8 +21,6 @@ import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 public class TestDiscoveryInstrumenter extends ClassVisitor {
   static final int ADDED_CODE_STACK_SIZE = 6;

@@ -31,7 +31,7 @@ class SourceFilesCollector extends ClassVisitor {
     this.className = className;
   }
 
-  public List<String> getSources() {
+  List<String> getSources() {
     return sources;
   }
 

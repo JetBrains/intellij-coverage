@@ -121,7 +121,7 @@ public class TestDiscoveryProjectData {
 
   private volatile boolean myFinished;
 
-  public synchronized void testDiscoveryFinished() {
+  private synchronized void testDiscoveryFinished() {
     if (myFinished) return;
     myFinished = true;
     try {

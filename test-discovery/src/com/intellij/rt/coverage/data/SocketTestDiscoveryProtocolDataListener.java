@@ -18,12 +18,15 @@ package com.intellij.rt.coverage.data;
 
 import org.jetbrains.coverage.gnu.trove.TIntArrayList;
 
-import java.io.*;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 @SuppressWarnings("unused")
 public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtocolDataListener {
