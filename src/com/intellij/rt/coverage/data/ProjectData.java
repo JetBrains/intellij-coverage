@@ -46,11 +46,11 @@ public class ProjectData implements CoverageData, Serializable {
   private String myCurrentTestName;
   private boolean myTraceLines;
   private boolean mySampling;
-  private Map myTrace;
+  private Map<ClassData, boolean[]> myTrace;
   private File myTracesDir;
 
   private ClassesMap myClasses = new ClassesMap();
-  private Map myLinesMap;
+  private Map<String, FileMapData[]> myLinesMap;
 
   private static Object ourProjectDataObject;
 
@@ -118,7 +118,7 @@ public class ProjectData implements CoverageData, Serializable {
       for (Object o : myLinesMap.keySet()) {
         final String className = (String) o;
         final ClassData classData = getClassData(className);
-        final FileMapData[] fileData = (FileMapData[]) myLinesMap.get(className);
+        final FileMapData[] fileData = myLinesMap.get(className);
         //postpone process main file because its lines would be reset and next files won't be processed correctly
         FileMapData mainData = null;
         for (FileMapData aFileData : fileData) {
@@ -142,7 +142,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   public void addLineMaps(String className, FileMapData[] fileDatas) {
     if (myLinesMap == null) {
-      myLinesMap = new HashMap();
+      myLinesMap = new HashMap<String, FileMapData[]>();
     }
     myLinesMap.put(className, fileDatas);
   }
@@ -159,9 +159,9 @@ public class ProjectData implements CoverageData, Serializable {
      try {
        os = new DataOutputStream(new FileOutputStream(traceFile));
        os.writeInt(myTrace.size());
-       for (final Object classData : myTrace.keySet()) {
+       for (ClassData classData : myTrace.keySet()) {
          os.writeUTF(classData.toString());
-         final boolean[] lines = (boolean[]) myTrace.get(classData);
+         final boolean[] lines = myTrace.get(classData);
          int numberOfTraces = 0;
          for (boolean line : lines) {
            if (line) numberOfTraces++;
@@ -191,7 +191,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   public void testStarted(final String name) {
     myCurrentTestName = name;
-    if (myTraceLines) myTrace = new ConcurrentHashMap();
+    if (myTraceLines) myTrace = new ConcurrentHashMap<ClassData, boolean[]>();
   }
   //---------------------------------------------------------- //
 
@@ -220,7 +220,7 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   /** @noinspection UnusedDeclaration*/
-  public Map getClasses() {
+  public Map<String, ClassData> getClasses() {
     return myClasses.asMap();
   }
 
@@ -267,7 +267,7 @@ public class ProjectData implements CoverageData, Serializable {
   public static void trace(Object classData, int line) {
     if (ourProjectData != null) {
       ((ClassData) classData).touch(line);
-      ourProjectData.traceLine(classData, line);
+      ourProjectData.traceLine((ClassData) classData, line);
       return;
     }
 
@@ -326,10 +326,10 @@ public class ProjectData implements CoverageData, Serializable {
     return ourProjectDataObject;
   }
 
-  public void traceLine(Object classData, int line) {
+  public void traceLine(ClassData classData, int line) {
     if (myTrace != null) {
       synchronized (myTrace) {
-        boolean[] lines = (boolean[]) myTrace.get(classData);
+        boolean[] lines = myTrace.get(classData);
         if (lines == null) {
           lines = new boolean[line + 20];
           myTrace.put(classData, lines);
@@ -363,7 +363,7 @@ public class ProjectData implements CoverageData, Serializable {
       return myMethod.invoke(thisObj, paramValues);
     }
 
-    private static Method findMethod(final Class clazz, String name, Class[] paramTypes) throws NoSuchMethodException {
+    private static Method findMethod(final Class<?> clazz, String name, Class[] paramTypes) throws NoSuchMethodException {
       Method m = clazz.getDeclaredMethod(name, paramTypes);
       // speedup method invocation by calling setAccessible(true)
       m.setAccessible(true);
@@ -380,7 +380,7 @@ public class ProjectData implements CoverageData, Serializable {
   private static class ClassesMap {
     private static final int POOL_SIZE = 1000;
     private IdentityClassData[] myIdentityArray = new IdentityClassData[POOL_SIZE];
-    private final Map myClasses = new HashMap(1000);
+    private final Map<String, ClassData> myClasses = new HashMap<String, ClassData>(1000);
 
     public ClassData get(String name) {
       int idx = Math.abs(name.hashCode() % POOL_SIZE);
@@ -390,7 +390,7 @@ public class ProjectData implements CoverageData, Serializable {
         if (data != null) return data;
       }
 
-      final ClassData data = (ClassData) myClasses.get(name);
+      final ClassData data = myClasses.get(name);
       myIdentityArray[idx] = new IdentityClassData(name, data);
       return data;
     }
@@ -399,11 +399,11 @@ public class ProjectData implements CoverageData, Serializable {
       myClasses.put(name, data);
     }
 
-    public HashMap asMap() {
-      return new HashMap(myClasses);
+    public HashMap<String, ClassData> asMap() {
+      return new HashMap<String, ClassData>(myClasses);
     }
 
-    public Collection names() {
+    public Collection<String> names() {
       return myClasses.keySet();
     }
   }

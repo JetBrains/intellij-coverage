@@ -37,7 +37,6 @@ public class ClassInstrumenter extends Instrumenter {
   }
 
   public LineData getLineData(int line) {
-    return (LineData) myLines.get(line);
+    return myLines.get(line);
   }
-
 }

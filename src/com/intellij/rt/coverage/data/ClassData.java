@@ -28,7 +28,7 @@ import java.util.*;
 public class ClassData implements CoverageData {
   private final String myClassName;
   private LineData[] myLinesArray;
-  private Map myStatus;
+  private Map<String, Integer> myStatus;
   private int[] myLineMask;
   private String mySource;
 
@@ -42,13 +42,13 @@ public class ClassData implements CoverageData {
 
   public void save(final DataOutputStream os, DictionaryLookup dictionaryLookup) throws IOException {
     CoverageIOUtil.writeINT(os, dictionaryLookup.getDictionaryIndex(myClassName));
-    final Map sigLines = prepareSignaturesMap(dictionaryLookup);
-    final Set sigs = sigLines.keySet();
+    final Map<String, List<LineData>> sigLines = prepareSignaturesMap(dictionaryLookup);
+    final Set<String> sigs = sigLines.keySet();
     CoverageIOUtil.writeINT(os, sigs.size());
     for (Object sig1 : sigs) {
       final String sig = (String) sig1;
       CoverageIOUtil.writeUTF(os, sig);
-      final List lines = (List) sigLines.get(sig);
+      final List<LineData> lines = sigLines.get(sig);
       CoverageIOUtil.writeINT(os, lines.size());
       for (Object line : lines) {
         ((LineData) line).save(os);
@@ -56,8 +56,8 @@ public class ClassData implements CoverageData {
     }
   }
 
-  private Map prepareSignaturesMap(DictionaryLookup dictionaryLookup) {
-    final Map sigLines = new HashMap();
+  private Map<String, List<LineData>> prepareSignaturesMap(DictionaryLookup dictionaryLookup) {
+    final Map<String, List<LineData>> sigLines = new HashMap<String, List<LineData>>();
     if (myLinesArray == null) return sigLines;
     for (final LineData lineData : myLinesArray) {
       if (lineData == null) continue;
@@ -65,9 +65,9 @@ public class ClassData implements CoverageData {
         lineData.setHits(myLineMask[lineData.getLineNumber()]);
       }
       final String sig = CoverageIOUtil.collapse(lineData.getMethodSignature(), dictionaryLookup);
-      List lines = (List) sigLines.get(sig);
+      List<LineData> lines = sigLines.get(sig);
       if (lines == null) {
-        lines = new ArrayList();
+        lines = new ArrayList<LineData>();
         sigLines.put(sig, lines);
       }
       lines.add(lineData);
@@ -78,7 +78,7 @@ public class ClassData implements CoverageData {
   public void merge(final CoverageData data) {
     ClassData classData = (ClassData) data;
     mergeLines(classData.myLinesArray);
-    for (Object o : getMethodSigs()) {
+    for (String o : getMethodSigs()) {
       myStatus.put(o, null);
     }
     if (mySource == null && classData.mySource != null) {
@@ -153,18 +153,18 @@ public class ClassData implements CoverageData {
   }
 
   /** @noinspection UnusedDeclaration*/
-  public Collection getMethodSigs() {
+  public Collection<String> getMethodSigs() {
     initStatusMap();
     return myStatus.keySet();
   }
 
   private void initStatusMap() {
-    if (myStatus == null) myStatus = new HashMap();
+    if (myStatus == null) myStatus = new HashMap<String, Integer>();
   }
 
   /** @noinspection UnusedDeclaration*/
   public Integer getStatus(String methodSignature) {
-    Integer methodStatus = (Integer)myStatus.get(methodSignature);
+    Integer methodStatus = myStatus.get(methodSignature);
     if (methodStatus == null) {
       for (final LineData lineData : myLinesArray) {
         if (lineData != null && methodSignature.equals(lineData.getMethodSignature())) {

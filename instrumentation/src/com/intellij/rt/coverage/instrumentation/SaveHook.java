@@ -29,7 +29,10 @@ import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
 import java.io.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author anna
@@ -62,8 +65,8 @@ public class SaveHook implements Runnable {
             try {
                 os = CoverageIOUtil.openFile(myDataFile);
                 projectData.checkLineMappings();
-                final TObjectIntHashMap dict = new TObjectIntHashMap();
-                final Map classes = new HashMap(projectData.getClasses());
+                final TObjectIntHashMap<String> dict = new TObjectIntHashMap<String>();
+                final Map<String, ClassData> classes = new HashMap<String, ClassData>(projectData.getClasses());
                 CoverageIOUtil.writeINT(os, classes.size());
                 saveDictionary(os, dict, classes);
                 saveData(os, dict, classes);
@@ -89,7 +92,7 @@ public class SaveHook implements Runnable {
 
     public static void saveSourceMap(Map str_clData_classes, File sourceMapFile) {
         if (sourceMapFile != null) {
-            Map readNames = Collections.emptyMap();
+            Map<Object, Object> readNames = Collections.emptyMap();
             try {
                 if (sourceMapFile.exists()) {
                     readNames = loadSourceMapFromFile(str_clData_classes, sourceMapFile);
@@ -106,12 +109,12 @@ public class SaveHook implements Runnable {
         }
     }
 
-    public static Map loadSourceMapFromFile(Map classes, File mySourceMapFile) throws IOException {
+    public static Map<Object, Object> loadSourceMapFromFile(Map classes, File mySourceMapFile) throws IOException {
         DataInputStream in = null;
         try {
             in = new DataInputStream(new FileInputStream(mySourceMapFile));
             final int classNumber = CoverageIOUtil.readINT(in);
-            final HashMap readNames = new HashMap(classNumber);
+            final HashMap<Object, Object> readNames = new HashMap<Object, Object>(classNumber);
             for (int i = 0; i < classNumber; ++i) {
                 final String className = CoverageIOUtil.readUTFFast(in);
                 final String classSource = CoverageIOUtil.readUTFFast(in);
@@ -129,7 +132,7 @@ public class SaveHook implements Runnable {
         } finally { if (in != null) in.close(); }
     }
 
-    private static void saveData(DataOutputStream os, final TObjectIntHashMap dict, Map classes) throws IOException {
+    private static void saveData(DataOutputStream os, final TObjectIntHashMap<String> dict, Map classes) throws IOException {
       for (Object o : classes.values()) {
         ((ClassData) o).save(os, new DictionaryLookup() {
           public int getDictionaryIndex(String className) {
@@ -139,7 +142,7 @@ public class SaveHook implements Runnable {
       }
     }
 
-    private static void saveDictionary(DataOutputStream os, TObjectIntHashMap dict, Map classes) throws IOException {
+    private static void saveDictionary(DataOutputStream os, TObjectIntHashMap<String> dict, Map classes) throws IOException {
         int i = 0;
       for (Object o : classes.keySet()) {
         String className = (String) o;
@@ -148,8 +151,8 @@ public class SaveHook implements Runnable {
       }
     }
 
-    public static void doSaveSourceMap(Map str_str_readNames, File sourceMapFile, Map str_clData_classes) throws IOException {
-        HashMap str_str_merged_map = new HashMap(str_str_readNames);
+    public static void doSaveSourceMap(Map<Object, Object> str_str_readNames, File sourceMapFile, Map str_clData_classes) throws IOException {
+        HashMap<Object, Object> str_str_merged_map = new HashMap<Object, Object>(str_str_readNames);
       for (Object o1 : str_clData_classes.values()) {
         ClassData classData = ((ClassData) o1);
         if (!str_str_merged_map.containsKey(classData.getName())) {
@@ -174,7 +177,7 @@ public class SaveHook implements Runnable {
 
     private void appendUnloaded(final ProjectData projectData) {
 
-        Collection matchedClasses = myClassFinder.findMatchedClasses();
+        Collection<ClassEntry> matchedClasses = myClassFinder.findMatchedClasses();
 
       for (Object matchedClass : matchedClasses) {
         ClassEntry classEntry = (ClassEntry) matchedClass;
@@ -188,12 +191,12 @@ public class SaveHook implements Runnable {
           SourceLineCounter slc = new SourceLineCounter(cd, !projectData.isSampling(), mySourceMapFile != null ? projectData : null);
           reader.accept(slc, 0);
           if (slc.getNSourceLines() > 0) { // ignore classes without executable code
-            final TIntObjectHashMap lines = new TIntObjectHashMap(4, 0.99f);
+            final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
             final int[] maxLine = new int[]{1};
             final ClassData classData = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
-            slc.getSourceLines().forEachEntry(new TIntObjectProcedure() {
-              public boolean execute(int line, Object methodSig) {
-                final LineData ld = new LineData(line, StringsPool.getFromPool((String) methodSig));
+            slc.getSourceLines().forEachEntry(new TIntObjectProcedure<String>() {
+              public boolean execute(int line, String methodSig) {
+                final LineData ld = new LineData(line, StringsPool.getFromPool(methodSig));
                 lines.put(line, ld);
                 if (line > maxLine[0]) maxLine[0] = line;
                 classData.registerMethodSignature(ld);

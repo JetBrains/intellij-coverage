@@ -99,7 +99,7 @@ return s != null && s.length() != 0 && s.charAt(0) == prefix;
     while (i < len) {
       char c = s.charAt(i);
       if (c == '%') {
-        List bytes = new ArrayList();
+        List<Integer> bytes = new ArrayList<Integer>();
         while (i + 2 < len && s.charAt(i) == '%') {
           final int d1 = decode(s.charAt(i + 1));
           final int d2 = decode(s.charAt(i + 2));
@@ -113,7 +113,7 @@ return s != null && s.length() != 0 && s.charAt(0) == prefix;
         if (!bytes.isEmpty()) {
           final byte[] bytesArray = new byte[bytes.size()];
           for (int j = 0; j < bytes.size(); j++) {
-            bytesArray[j] = (byte) ((Integer) bytes.get(j)).intValue();
+            bytesArray[j] = (byte) (bytes.get(j)).intValue();
           }
           try {
             decoded.append(new String(bytesArray, "UTF-8"));
