@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SingleFileTestDiscoveryIntegrationTest {
   @Rule
-  public TemporaryFolder tmpDir = new TemporaryFolder();
+  public final TemporaryFolder tmpDir = new TemporaryFolder();
 
   @Test
   public void testSimple() throws Exception {

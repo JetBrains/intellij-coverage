@@ -22,8 +22,8 @@ import java.io.InputStream;
  * @author Pavel.Sher
  */
 public class ClassEntry {
-  private String myClassName;
-  private ClassLoader myClassLoader;
+  private final String myClassName;
+  private final ClassLoader myClassLoader;
 
   public ClassEntry(final String className, final ClassLoader classLoader) {
     myClassName = className;

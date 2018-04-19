@@ -21,8 +21,8 @@ package com.intellij.rt.coverage.data;
  */
 public class FileMapData { 
   public static final FileMapData[] EMPTY_FILE_MAP = new FileMapData[0];
-  private String myClassName;
-  private LineMapData[] myLines;
+  private final String myClassName;
+  private final LineMapData[] myLines;
 
   public FileMapData(String className, LineMapData[] lines) {
     myClassName = className;

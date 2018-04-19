@@ -29,8 +29,8 @@ import java.util.zip.ZipFile;
  * @author Pavel.Sher
  */
 public class ClassPathEntry {
-  private ClassLoader myClassLoader;
-  private String myClassPathEntry;
+  private final ClassLoader myClassLoader;
+  private final String myClassPathEntry;
 
   // Used in IntelliJ
   @SuppressWarnings("WeakerAccess")

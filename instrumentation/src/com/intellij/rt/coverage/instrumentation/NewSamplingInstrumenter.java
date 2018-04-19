@@ -35,7 +35,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
     private final String myClassNameType;
 
     private final boolean myShouldCalculateSource;
-    private int myMaxLineNumber;
+    private final int myMaxLineNumber;
     private boolean myProcess;
 
     private boolean myEnum;

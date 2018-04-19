@@ -31,7 +31,7 @@ import java.util.*;
  */
 public class CoverageMergeTest extends TestCase {
   private static final String COMMON = "Common";
-  private Set<File> myFiles2Delete = new HashSet<File>();
+  private final Set<File> myFiles2Delete = new HashSet<File>();
   private static final String[] ALL_CLASS_NAMES = new String[]{"Test1", "Test2", COMMON};
   private static final String[] FRST_CLASS_NAMES = new String[]{"Test1", null, COMMON};
   private static final String[] SCD_CLASS_NAMES = new String[]{null, "Test2", COMMON};

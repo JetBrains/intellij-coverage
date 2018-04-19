@@ -18,7 +18,6 @@ package com.intellij.rt.coverage.testDiscovery.jmh;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 import junit.framework.TestListener;
-import junit.textui.TestRunner;
 
 import java.lang.reflect.Method;
 

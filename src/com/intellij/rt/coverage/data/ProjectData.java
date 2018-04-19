@@ -49,7 +49,7 @@ public class ProjectData implements CoverageData, Serializable {
   private Map<ClassData, boolean[]> myTrace;
   private File myTracesDir;
 
-  private ClassesMap myClasses = new ClassesMap();
+  private final ClassesMap myClasses = new ClassesMap();
   private Map<String, FileMapData[]> myLinesMap;
 
   private static Object ourProjectDataObject;
@@ -348,8 +348,8 @@ public class ProjectData implements CoverageData, Serializable {
 
   private static class MethodCaller {
     private Method myMethod;
-    private String myMethodName;
-    private Class[] myParamTypes;
+    private final String myMethodName;
+    private final Class[] myParamTypes;
 
     private MethodCaller(final String methodName, final Class[] paramTypes) {
       myMethodName = methodName;
@@ -379,7 +379,7 @@ public class ProjectData implements CoverageData, Serializable {
    */
   private static class ClassesMap {
     private static final int POOL_SIZE = 1000;
-    private IdentityClassData[] myIdentityArray = new IdentityClassData[POOL_SIZE];
+    private final IdentityClassData[] myIdentityArray = new IdentityClassData[POOL_SIZE];
     private final Map<String, ClassData> myClasses = new HashMap<String, ClassData>(1000);
 
     public ClassData get(String name) {
@@ -409,8 +409,8 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   private static class IdentityClassData {
-    private String myClassName;
-    private ClassData myClassData;
+    private final String myClassName;
+    private final ClassData myClassData;
 
     private IdentityClassData(String className, ClassData classData) {
       myClassName = className;
