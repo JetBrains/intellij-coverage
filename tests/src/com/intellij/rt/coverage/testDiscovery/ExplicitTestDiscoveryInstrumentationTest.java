@@ -62,14 +62,14 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     return new TestDiscoveryTransformer(Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList()).instrument(bytes, name, loader, true);
   }
 
-  public static class MySerializable implements Serializable {
+  private static class MySerializable implements Serializable {
     private final String field;
 
-    public MySerializable(final String field) {
+    private MySerializable(final String field) {
       this.field = field;
     }
 
-    public String getField() {
+    private String getField() {
       return field;
     }
   }

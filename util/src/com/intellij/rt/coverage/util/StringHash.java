@@ -142,13 +142,4 @@ public class StringHash {
     }
     return h;
   }
-
-  public static long calc(byte[] arg) {
-    if (arg == null) return 0;
-    long h = initialHash;
-    for (byte anArg : arg) {
-      h = (h << 1) ^ (h >>> 63) ^ mixMaster[(anArg ^ (anArg >>> 8)) & 0xff];
-    }
-    return h;
-  }
 }

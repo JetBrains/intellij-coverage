@@ -176,8 +176,7 @@ public class SaveHook implements Runnable {
     }
 
     private void appendUnloaded(final ProjectData projectData) {
-
-        Collection<ClassEntry> matchedClasses = myClassFinder.findMatchedClasses();
+      Collection<ClassEntry> matchedClasses = myClassFinder.findMatchedClasses();
 
       for (Object matchedClass : matchedClasses) {
         ClassEntry classEntry = (ClassEntry) matchedClass;
@@ -185,7 +184,7 @@ public class SaveHook implements Runnable {
         if (cd != null) continue;
         try {
           ClassReader reader = new ClassReader(classEntry.getClassInputStream());
-          if (mySourceMapFile != null && cd == null) {
+          if (mySourceMapFile != null) {
             cd = projectData.getOrCreateClassData(classEntry.getClassName());
           }
           SourceLineCounter slc = new SourceLineCounter(cd, !projectData.isSampling(), mySourceMapFile != null ? projectData : null);
