@@ -117,7 +117,7 @@ public class JumpsAndSwitches implements CoverageData {
       if (myJumpsArray == null) {
         myJumpsArray = new JumpData[jumpsData.myJumpsArray.length];
       }
-      else if (jumpsData.myJumpsArray != null) {
+      else {
         if (myJumpsArray.length < jumpsData.myJumpsArray.length) {
           JumpData[] extJumpsArray = new JumpData[jumpsData.myJumpsArray.length];
           System.arraycopy(myJumpsArray, 0, extJumpsArray, 0, myJumpsArray.length);
@@ -130,7 +130,7 @@ public class JumpsAndSwitches implements CoverageData {
       if (mySwitchesArray == null) {
         mySwitchesArray = new SwitchData[jumpsData.mySwitchesArray.length];
       }
-      else if (jumpsData.mySwitchesArray != null) {
+      else {
         if (mySwitchesArray.length < jumpsData.mySwitchesArray.length) {
           SwitchData[] extJumpsArray = new SwitchData[jumpsData.mySwitchesArray.length];
           System.arraycopy(mySwitchesArray, 0, extJumpsArray, 0, mySwitchesArray.length);
