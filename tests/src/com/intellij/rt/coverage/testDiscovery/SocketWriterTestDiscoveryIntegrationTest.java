@@ -40,64 +40,62 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SocketWriterTestDiscoveryIntegrationTest {
   @Rule
-  public TemporaryFolder tmpDir  = new TemporaryFolder();
+  public final TemporaryFolder tmpDir  = new TemporaryFolder();
 
   @Test
   public void testSimple() throws Exception {
     final List<String[]> result = doTest("simple");
     assertThat(result).isNotEmpty();
     assertThat(result).contains(
-        new String[]{"Test.test1", "Test", "test1"},
-        new String[]{"Test.test1", "ClassA", "method1"},
-        new String[]{"Test.test1", "ClassA", "method2"},
+        new String[]{"Test.test1", "Test", "test1/()V"},
+        new String[]{"Test.test1", "ClassA", "method1/()V"},
+        new String[]{"Test.test1", "ClassA", "method2/()V"},
 
-        new String[]{"Test.test2", "Test", "test2"},
-        new String[]{"Test.test2", "ClassB", "method1"},
-        new String[]{"Test.test2", "ClassB", "method2"},
+        new String[]{"Test.test2", "Test", "test2/()V"},
+        new String[]{"Test.test2", "ClassB", "method1/()V"},
+        new String[]{"Test.test2", "ClassB", "method2/()V"},
 
-        new String[]{"Test.test3", "Test", "test3"},
-        new String[]{"Test.test3", "ClassA", "methodR"},
-        new String[]{"Test.test3", "ClassA", "method1"},
-        new String[]{"Test.test3", "ClassA", "method2"},
-        new String[]{"Test.test3", "ClassB", "methodR"},
-        new String[]{"Test.test3", "ClassB", "method1"},
-        new String[]{"Test.test3", "ClassB", "method2"},
+        new String[]{"Test.test3", "Test", "test3/()V"},
+        new String[]{"Test.test3", "ClassA", "methodR/()V"},
+        new String[]{"Test.test3", "ClassA", "method1/()V"},
+        new String[]{"Test.test3", "ClassA", "method2/()V"},
+        new String[]{"Test.test3", "ClassB", "methodR/()V"},
+        new String[]{"Test.test3", "ClassB", "method1/()V"},
+        new String[]{"Test.test3", "ClassB", "method2/()V"},
 
-        new String[]{"Test.testConstructor", "ClassA", "<init>"}
+        new String[]{"Test.testConstructor", "ClassA", "<init>/()V"}
     );
-    assertThat(result).doesNotContain(new String[]{"Test.testConstructor", "ClassB", "<init>"});
+    assertThat(result).doesNotContain(new String[]{"Test.testConstructor", "ClassB", "<init>/()V"});
   }
 
   @Test
   public void testConstructors() throws Exception {
     final List<String[]> result = doTest("constructors", "-D" + TestDiscoveryPremain.INCLUDE_PATTERNS_VM_OP + "=AssertionFailedError");
     assertThat(result).contains(
-        new String[] {"Test.test1", "AssertionFailedError", "<init>"},
-        new String[] {"Test.test2", "AssertionFailedError", "<init>"},
-        new String[] {"Test.test2", "AssertionFailedError", "defaultString"},
-        new String[] {"Test.test3", "AssertionFailedError", "defaultString"});
+        new String[] {"Test.test1", "AssertionFailedError", "<init>/()V"},
+        new String[] {"Test.test2", "AssertionFailedError", "<init>/(Ljava/lang/String;)V"},
+        new String[] {"Test.test2", "AssertionFailedError", "defaultString/(Ljava/lang/String;)Ljava/lang/String;"},
+        new String[] {"Test.test3", "AssertionFailedError", "defaultString/(Ljava/lang/String;)Ljava/lang/String;"});
   }
 
   @Test
   public void testFieldInitializers() throws Exception {
     final List<String[]> result = doTest("fieldInitializers", "-D" + TestDiscoveryPremain.INCLUDE_PATTERNS_VM_OP + "=Foo");
-    assertThat(result).contains(
-        new String[] {"Test.test1", "Foo", "<init>"});
+    assertThat(result).contains(new String[] {"Test.test1", "Foo", "<init>/()V"});
   }
 
   @Test
   public void testFieldInitializers2() throws Exception {
     final List<String[]> result = doTest("fieldInitializers2", "-D" + TestDiscoveryPremain.INCLUDE_PATTERNS_VM_OP + "=Foo");
-    assertThat(result).contains(
-        new String[] {"Test.test1", "Foo", "<init>"});
+    assertThat(result).contains(new String[] {"Test.test1", "Foo", "<init>/()V"});
   }
 
   @Test
   public void testFieldInitializers3() throws Exception {
     final List<String[]> result = doTest("fieldInitializers3", "-D" + TestDiscoveryPremain.INCLUDE_PATTERNS_VM_OP + "=Foo");
     assertThat(result).contains(
-        new String[] {"Test.test1", "Foo", "<init>"},
-        new String[] {"Test.test2", "Foo", "<init>"});
+        new String[] {"Test.test1", "Foo", "<init>/()V"},
+        new String[] {"Test.test2", "Foo", "<init>/(Ljava/lang/String;)V"});
   }
 
   private List<String[]> doTest(final String directory, String... additionalOps) throws Exception {
@@ -176,6 +174,10 @@ public class SocketWriterTestDiscoveryIntegrationTest {
       }
 
       public MetadataReader createMetadataReader() {
+        return null;
+      }
+
+      public ClassMetadataReader createClassMetadataReader() {
         return null;
       }
 

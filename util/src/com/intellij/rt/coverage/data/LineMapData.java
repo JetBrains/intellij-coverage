@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2018 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,14 @@ package com.intellij.rt.coverage.data;
  * @since 2/9/11
  */
 public class LineMapData {
-  private int mySourceLineNumber;
-  private int myTargetMinLine;
-  private int myTargetMaxLine;
+  private final int mySourceLineNumber;
+  private final int myTargetMinLine;
+  private final int myTargetMaxLine;
 
-  public LineMapData(int mySourceLineNumber, int myTargetMinLine, int myTargetMaxLine) {
-    this.mySourceLineNumber = mySourceLineNumber;
-    this.myTargetMinLine = myTargetMinLine;
-    this.myTargetMaxLine = myTargetMaxLine;
+  public LineMapData(int sourceLineNumber, int targetMinLine, int targetMaxLine) {
+    mySourceLineNumber = sourceLineNumber;
+    myTargetMinLine = targetMinLine;
+    myTargetMaxLine = targetMaxLine;
   }
 
   public int getTargetMinLine() {

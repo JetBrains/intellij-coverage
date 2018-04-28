@@ -28,9 +28,9 @@ import java.util.regex.Pattern;
  * @author pavel.sher
  */
 public class ClassFinder {
-  private List<Pattern> myIncludePatterns;
-  private List<Pattern> myExcludePatterns;
-  private Set<ClassLoader> myClassloaders;
+  private final List<Pattern> myIncludePatterns;
+  private final List<Pattern> myExcludePatterns;
+  private final Set<ClassLoader> myClassloaders;
 
   public ClassFinder(List<Pattern> includePatterns, List<Pattern> excludePatterns) {
     myIncludePatterns = includePatterns;

@@ -27,10 +27,10 @@ import java.util.List;
  * @author Pavel.Sher
  */
 public class JumpsAndSwitches implements CoverageData {
-  private List myJumps;
+  private List<JumpData> myJumps;
   private JumpData[] myJumpsArray;
 
-  private List mySwitches;
+  private List<SwitchData> mySwitches;
   private SwitchData[] mySwitchesArray;
 
   public JumpData[] getJumps() {
@@ -42,13 +42,13 @@ public class JumpsAndSwitches implements CoverageData {
   }
 
   public JumpData addJump(final int jump) {
-    if (myJumps == null) myJumps = new ArrayList();
+    if (myJumps == null) myJumps = new ArrayList<JumpData>();
     if (myJumps.size() <= jump) {
       for (int i = myJumps.size(); i <= jump; i++){
         myJumps.add(new JumpData());
       }
     }
-    return (JumpData)myJumps.get(jump);
+    return myJumps.get(jump);
   }
 
   public JumpData getJumpData(int jump) {
@@ -56,7 +56,7 @@ public class JumpsAndSwitches implements CoverageData {
   }
 
   public SwitchData addSwitch(final int switchNumber, final int[] keys) {
-    if (mySwitches == null) mySwitches = new ArrayList();
+    if (mySwitches == null) mySwitches = new ArrayList<SwitchData>();
     final SwitchData switchData = new SwitchData(keys);
     if (mySwitches.size() <= switchNumber) {
       for(int i = mySwitches.size(); i < switchNumber; i++) {
@@ -66,7 +66,7 @@ public class JumpsAndSwitches implements CoverageData {
         mySwitches.add(switchData);
       }
     }
-    return (SwitchData)mySwitches.get(switchNumber);
+    return mySwitches.get(switchNumber);
   }
 
   public SwitchData getSwitchData(int switchNumber) {
@@ -98,14 +98,14 @@ public class JumpsAndSwitches implements CoverageData {
     if (myJumps != null) {
       myJumpsArray = new JumpData[myJumps.size()];
       for (int i = 0; i < myJumps.size(); i++) {
-        myJumpsArray[i] = (JumpData)myJumps.get(i);
+        myJumpsArray[i] = myJumps.get(i);
       }
       myJumps = null;
     }
     if (mySwitches != null) {
       mySwitchesArray = new SwitchData[mySwitches.size()];
       for (int i = 0; i < mySwitches.size(); i++) {
-        mySwitchesArray[i] = (SwitchData)mySwitches.get(i);
+        mySwitchesArray[i] = mySwitches.get(i);
       }
       mySwitches = null;
     }

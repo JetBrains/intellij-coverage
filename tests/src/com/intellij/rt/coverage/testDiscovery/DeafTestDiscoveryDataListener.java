@@ -16,18 +16,32 @@
 
 package com.intellij.rt.coverage.testDiscovery;
 
+import com.intellij.rt.coverage.data.ClassMetadata;
 import com.intellij.rt.coverage.data.NameEnumerator;
 import com.intellij.rt.coverage.data.TestDiscoveryDataListener;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class DeafTestDiscoveryDataListener implements TestDiscoveryDataListener {
-  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) { }
+  private final List<ClassMetadata> classMetadata = new ArrayList<ClassMetadata>();
 
-  public void testsFinished() { }
+  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) {
+  }
+
+  public void testsFinished() {
+  }
 
   public void addMetadata(Map<String, String> metadata) {
+  }
 
+  public void addClassMetadata(List<ClassMetadata> metadata) {
+    this.classMetadata.addAll(metadata);
+  }
+
+  public List<ClassMetadata> getClassMetadata() {
+    return classMetadata;
   }
 
   public NameEnumerator getNameEnumerator() {

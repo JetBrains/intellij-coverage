@@ -21,11 +21,16 @@ import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntProcedure;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 public class TestDiscoveryProjectDataTestAccessor {
+  public static Collection<ClassMetadata> getClassMetaData() {
+    return TestDiscoveryProjectData.getProjectData().classesToMetadata.values();
+  }
+
   @NotNull
   public static Map<String, String[]> getClass2MethodNameMap() {
     TestDiscoveryProjectData projectData = TestDiscoveryProjectData.getProjectData();

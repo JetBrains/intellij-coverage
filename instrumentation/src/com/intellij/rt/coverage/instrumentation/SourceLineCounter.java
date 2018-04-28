@@ -33,8 +33,8 @@ public class SourceLineCounter extends ClassVisitor {
   private final ClassData myClassData;
   private final ProjectData myProjectData;
 
-  private final TIntObjectHashMap myNSourceLines = new TIntObjectHashMap();
-  private final Set myMethodsWithSourceCode = new HashSet();
+  private final TIntObjectHashMap<String> myNSourceLines = new TIntObjectHashMap<String>();
+  private final Set<String> myMethodsWithSourceCode = new HashSet<String>();
   private int myCurrentLine;
   private boolean myInterface;
   private boolean myEnum;
@@ -177,12 +177,12 @@ public class SourceLineCounter extends ClassVisitor {
     return myNSourceLines.size();
   }
 
-  public TIntObjectHashMap getSourceLines() {
+  public TIntObjectHashMap<String> getSourceLines() {
     return myNSourceLines;
   }
 
 
-  public Set getMethodsWithSourceCode() {
+  public Set<String> getMethodsWithSourceCode() {
     return myMethodsWithSourceCode;
   }
 

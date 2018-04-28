@@ -36,8 +36,8 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   private Label myLastJump;
 
   private boolean myHasExecutableLines = false;
-  private Set myJumps;
-  private Map mySwitches;
+  private Set<Label> myJumps;
+  private Map<Label, Integer> mySwitches;
 
   private final MethodVisitor myWriterMethodVisitor;
   private final boolean myIsReferencedType;
@@ -104,7 +104,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
       return;
     }
     if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR && !myMethodName.equals("<clinit>")) {
-      if (myJumps == null) myJumps = new HashSet();
+      if (myJumps == null) myJumps = new HashSet<Label>();
       myJumps.add(label);
       myLastJump = label;
       final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
@@ -164,7 +164,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   }
 
   private void rememberSwitchLabels(final Label dflt, final Label[] labels) {
-    if (mySwitches == null) mySwitches = new HashMap();
+    if (mySwitches == null) mySwitches = new HashMap<Label, Integer>();
     mySwitches.put(dflt, -1);
     for (int i = labels.length - 1; i >= 0; i--) {
       mySwitches.put(labels[i], i);
@@ -174,7 +174,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
 
   public Integer getSwitchKey(Label label) {
     if (mySwitches == null) return null;
-    return (Integer)mySwitches.get(label);
+    return mySwitches.get(label);
   }
 
   public String getMethodName() {

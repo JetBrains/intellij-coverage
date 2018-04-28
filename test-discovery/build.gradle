@@ -10,7 +10,7 @@ sourceSets {
   test.java.srcDirs = [file('test')]
 }
 
-task discoveryAgentJar(type: Jar) {
+jar {
   baseName = test_discovery_jar_name
   destinationDir = file("../dist")
   manifest.attributes(
@@ -22,9 +22,4 @@ task discoveryAgentJar(type: Jar) {
   with repackLibs
 }
 
-build.dependsOn(discoveryAgentJar)
-
-jar.enabled = false
-artifacts {
-  archives discoveryAgentJar
-}
+apply from: 'jmh.gradle'

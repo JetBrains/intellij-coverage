@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.data;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 public interface TestDiscoveryDataListener {
@@ -26,6 +27,8 @@ public interface TestDiscoveryDataListener {
   void testsFinished() throws IOException;
 
   void addMetadata(Map<String, String> metadata) throws IOException;
+
+  void addClassMetadata(List<ClassMetadata> metadata) throws IOException;
 
   NameEnumerator getNameEnumerator();
 }

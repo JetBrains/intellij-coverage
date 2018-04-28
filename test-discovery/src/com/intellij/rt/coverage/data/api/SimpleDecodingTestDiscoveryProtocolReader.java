@@ -16,7 +16,13 @@
 
 package com.intellij.rt.coverage.data.api;
 
+import com.intellij.rt.coverage.data.ClassMetadata;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class SimpleDecodingTestDiscoveryProtocolReader implements
     TestDiscoveryProtocolReader,
@@ -25,6 +31,7 @@ public abstract class SimpleDecodingTestDiscoveryProtocolReader implements
   private final TIntObjectHashMap<String> enumerator = new TIntObjectHashMap<String>();
 
   protected abstract void processData(String testClassName, String testMethodName, String className, String methodName);
+  protected abstract void processClassMetadataData(ClassMetadata metadata);
 
   public void debug(String message) {
 
@@ -49,6 +56,43 @@ public abstract class SimpleDecodingTestDiscoveryProtocolReader implements
 
   public MetadataReader createMetadataReader() {
     return this;
+  }
+
+  public ClassMetadataReader createClassMetadataReader() {
+    return new ClassMetadataReader() {
+      private Map<String, byte[]> methods;
+      private List<String> files;
+      private String fqn;
+      {
+        reset();
+      }
+
+      public void classStarted(int classId) {
+        fqn = enumerator.get(classId);
+      }
+
+      public void file(int fileId) {
+        files.add(enumerator.get(fileId));
+      }
+
+      public void method(int methodId, byte[] hash) {
+        methods.put(enumerator.get(methodId), hash);
+      }
+
+      public void classFinished(int classId) {
+        processClassMetadataData(new ClassMetadata(fqn, files, methods));
+        reset();
+      }
+
+      private void reset() {
+        fqn = null;
+        files = new ArrayList<String>(1);
+        methods = new HashMap<String, byte[]>(16); // TODO: Calculate mean methods count
+      }
+
+      public void finished() {
+      }
+    };
   }
 
   public NameEnumeratorReader createNameEnumeratorReader() {

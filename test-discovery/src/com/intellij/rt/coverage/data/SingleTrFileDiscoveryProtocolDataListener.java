@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.data;
 
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("unused")
@@ -31,7 +32,7 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
   public static final byte HEADER_START = 0x49; // "I"
   public static final byte[] HEADER_TAIL = new byte[]{0x4a, 0x54, 0x43}; // "JTC"
 
-  private static final int DEFAULT_VERSION = 0x1;
+  private static final int DEFAULT_VERSION = 0x2;
 
   private final DataOutputStream myStream;
   private final NameEnumerator.Incremental myNameEnumerator;
@@ -49,8 +50,8 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
   }
 
   // For tests
-  SingleTrFileDiscoveryProtocolDataListener(DataOutputStream stream) throws Exception {
-    super((byte) DEFAULT_VERSION);
+  SingleTrFileDiscoveryProtocolDataListener(DataOutputStream stream, int version) throws Exception {
+    super((byte) version);
     myStream = stream;
     myNameEnumerator = new NameEnumerator.Incremental();
     start(myStream);
@@ -62,7 +63,7 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
 
   public synchronized void testsFinished() throws IOException {
     try {
-      writeDictionaryIncrementIfSupported(myStream);
+      writeDictionaryIncrementIfNeeded(myStream);
       finish(myStream);
     } finally {
       myStream.close();
@@ -74,7 +75,11 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
   }
 
   public synchronized void addMetadata(Map<String, String> metadata) throws IOException {
-    writeFileMetadata(myStream, metadata);
+    writeMetadata(myStream, metadata);
+  }
+
+  public void addClassMetadata(List<ClassMetadata> metadata) throws IOException {
+    writeClassMetadata(myStream, metadata);
   }
 
   protected synchronized void start(DataOutput output) throws IOException {

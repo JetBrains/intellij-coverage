@@ -16,6 +16,8 @@
 
 package com.intellij.rt.coverage.data;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -27,7 +29,7 @@ public class TestDiscoveryProjectData {
   protected static final TestDiscoveryProjectData ourProjectData = new TestDiscoveryProjectData();
   private final NameEnumerator myNameEnumerator;
 
-  public TestDiscoveryProjectData() {
+  private TestDiscoveryProjectData() {
     try {
       String testDiscoveryDataListener = System.getProperty(TEST_DISCOVERY_DATA_LISTENER_PROP);
       if (testDiscoveryDataListener == null) {
@@ -61,6 +63,7 @@ public class TestDiscoveryProjectData {
 
   private final ConcurrentMap<Integer, boolean[]> myClassToVisitedMethods = new ConcurrentHashMap<Integer, boolean[]>();
   private final ConcurrentMap<Integer, int[]> myClassToMethodNames = new ConcurrentHashMap<Integer, int[]>();
+  final ConcurrentMap<Integer, ClassMetadata> classesToMetadata = new ConcurrentHashMap<Integer, ClassMetadata>();
   private final TestDiscoveryDataListener myDataListener;
 
   // called from instrumented code during class's static init
@@ -91,6 +94,17 @@ public class TestDiscoveryProjectData {
   public synchronized void testDiscoveryEnded(final String className, final String methodName) {
     try {
       myDataListener.testFinished(className, methodName, myClassToVisitedMethods, myClassToMethodNames);
+      for (Map.Entry<Integer, boolean[]> e : myClassToVisitedMethods.entrySet()) {
+        for (boolean isUsed : e.getValue()) {
+          if (isUsed) {
+            ClassMetadata cm = classesToMetadata.remove(e.getKey());
+            if (cm != null) {
+              myDataListener.addClassMetadata(Collections.singletonList(cm));
+            }
+            break;
+          }
+        }
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -107,13 +121,19 @@ public class TestDiscoveryProjectData {
 
   private volatile boolean myFinished;
 
-  public synchronized void testDiscoveryFinished() {
+  private synchronized void testDiscoveryFinished() {
     if (myFinished) return;
     myFinished = true;
     try {
       myDataListener.testsFinished();
     } catch (Exception e) {
       e.printStackTrace();
+    }
+  }
+
+  public void addClassMetadata(List<ClassMetadata> classMetadata) {
+    for (ClassMetadata cm : classMetadata) {
+      classesToMetadata.put(myNameEnumerator.enumerate(cm.getFqn()), cm);
     }
   }
 

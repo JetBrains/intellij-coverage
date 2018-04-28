@@ -28,7 +28,6 @@ import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -38,7 +37,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
   }
 
   private final boolean computeFrames = computeFrames();
-  private final HashMap<ClassLoader, Map<String, ClassReader>> loadedClasses = new HashMap<ClassLoader, Map<String, ClassReader>>();
+  private final WeakHashMap<ClassLoader, Map<String, ClassReader>> classReaders = new WeakHashMap<ClassLoader, Map<String, ClassReader>>();
 
   public final byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
     if (isStopped()) {
@@ -122,14 +121,6 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     return System.getProperty("idea.coverage.no.frames") == null;
   }
 
-  private Map<String, ClassReader> getLoadedClasses(ClassLoader loader) {
-    Map<String, ClassReader> classes = loadedClasses.get(loader);
-    if (classes == null) {
-      loadedClasses.put(loader, classes = new THashMap<String, ClassReader>());
-    }
-    return classes;
-  }
-
   private static int getClassFileVersion(ClassReader reader) {
     final int[] classFileVersion = new int[1];
     reader.accept(new ClassVisitor(Opcodes.ASM6) {
@@ -143,18 +134,16 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
   private class MyClassWriter extends ClassWriter {
     private static final String JAVA_LANG_OBJECT = "java/lang/Object";
     private final ClassLoader classLoader;
-    private Map<String, ClassReader> loadedClasses;
 
     MyClassWriter(int flags, ClassLoader classLoader) {
       super(flags);
       this.classLoader = classLoader;
-      loadedClasses = getLoadedClasses(classLoader);
     }
 
     protected String getCommonSuperClass(String type1, String type2) {
       try {
-        ClassReader info1 = typeInfo(type1);
-        ClassReader info2 = typeInfo(type2);
+        ClassReader info1 = getOrLoadClassReader(type1, classLoader);
+        ClassReader info2 = getOrLoadClassReader(type2, classLoader);
         String
             superType = checkImplementInterface(type1, type2, info1, info2);
         if (superType != null) return superType;
@@ -203,7 +192,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
       while (!JAVA_LANG_OBJECT.equals(type)) {
         b.append(';').append(type);
         type = info.getSuperName();
-        info = typeInfo(type);
+        info = getOrLoadClassReader(type, classLoader);
       }
       return b;
     }
@@ -218,30 +207,34 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
           }
         }
         for (String itf : interfaces) {
-          if (typeImplements(itf, typeInfo(itf), interfaceName)) {
+          if (typeImplements(itf, getOrLoadClassReader(itf, classLoader), interfaceName)) {
             return true;
           }
         }
         type = classReader.getSuperName();
-        classReader = typeInfo(type);
+        classReader = getOrLoadClassReader(type, classLoader);
       }
       return false;
     }
+  }
 
-    private synchronized ClassReader typeInfo(final String type) throws IOException {
-      ClassReader classReader = loadedClasses.get(type);
-      if (classReader == null) {
-        InputStream is = null;
-        try {
-          is = classLoader.getResourceAsStream(type + ".class");
-          loadedClasses.put(type, classReader = new ClassReader(is));
-        } finally {
-          if (is != null) {
-            is.close();
-          }
+  private synchronized ClassReader getOrLoadClassReader(String className, ClassLoader classLoader) throws IOException {
+    Map<String, ClassReader> loaderClassReaders = classReaders.get(classLoader);
+    if (loaderClassReaders == null) {
+      classReaders.put(classLoader, loaderClassReaders = new THashMap<String, ClassReader>());
+    }
+    ClassReader classReader = loaderClassReaders.get(className);
+    if (classReader == null) {
+      InputStream is = null;
+      try {
+        is = classLoader.getResourceAsStream(className + ".class");
+        loaderClassReaders.put(className, classReader = new ClassReader(is));
+      } finally {
+        if (is != null) {
+          is.close();
         }
       }
-      return classReader;
     }
+    return classReader;
   }
 }

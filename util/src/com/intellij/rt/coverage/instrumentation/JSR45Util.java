@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2018 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,10 @@ import org.jetbrains.coverage.gnu.trove.THashSet;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectFunction;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author anna
@@ -33,13 +36,17 @@ public class JSR45Util {
   private static final String LINE_SECTION = "*L\n";
   private static final String END_SECTION = "*E";
 
+  private static String checkSMAP(String debug) {
+    return debug.startsWith("SMAP") ? debug.substring(4) : null;
+  }
+
   public static FileMapData[] extractLineMapping(String debug, String className) {
-    if (debug.startsWith("SMAP")) {
+    debug = checkSMAP(debug);
+    if (debug != null) {
       final TIntObjectHashMap<THashSet<LineMapData>> linesMap = new TIntObjectHashMap<THashSet<LineMapData>>();
-      debug = debug.substring(4);
       final int fileSectionIdx = debug.indexOf(FILE_SECTION);
       final int lineInfoIdx = debug.indexOf(LINE_SECTION);
-      final TIntObjectHashMap<String> fileNames = parseFileNames(debug.substring(fileSectionIdx + FILE_SECTION.length(), lineInfoIdx), className);
+      final TIntObjectHashMap<String> fileNames = parseFileNames(debug, fileSectionIdx, lineInfoIdx, className);
       final String lineInfo = debug.substring(lineInfoIdx + LINE_SECTION.length(), debug.indexOf(END_SECTION));
       final String[] lines = lineInfo.split("\n");
       int fileId = 1;
@@ -100,14 +107,18 @@ public class JSR45Util {
     return null;
   }
 
-  private static TIntObjectHashMap<String>  parseFileNames(String fileSection, String className) {
+  private static String[] getFileSectionLines(String debug, int fileSectionIdx, int lineInfoIdx) {
+    String fileSection = debug.substring(fileSectionIdx + FILE_SECTION.length(), lineInfoIdx);
     fileSection = fileSection.trim();
     if (fileSection.endsWith("\n")) {
       fileSection = fileSection.substring(0, fileSection.length() - 1);
     }
+    return fileSection.split("\n");
+  }
 
+  private static TIntObjectHashMap<String> parseFileNames(String debug, int fileSectionIdx, int lineInfoIdx, String className) {
     final String defaultPrefix = getClassPackageName(className);
-    final String[] fileNameIdx = fileSection.split("\n");
+    final String[] fileNameIdx = getFileSectionLines(debug, fileSectionIdx, lineInfoIdx);
     final TIntObjectHashMap<String> result = new TIntObjectHashMap<String>();
     boolean generatedPrefix = true;
     for (int i = 0; i < fileNameIdx.length; i++) {
@@ -131,12 +142,12 @@ public class JSR45Util {
         fileNameWithDots = path.substring(0, lastDot) + "_" + path.substring(lastDot + 1);
       }
       fileNameWithDots = fileNameWithDots.replace('/', '.');
-      
+
       generatedPrefix &= !fileNameWithDots.startsWith(defaultPrefix);
       currentClassName = fileNameWithDots;
       result.put(key, currentClassName);
     }
-    
+
     if (generatedPrefix) {
       result.transformValues(new TObjectFunction<String, String>() {
         public String execute(String selfValue) {
@@ -165,7 +176,7 @@ public class JSR45Util {
     return fileName;
   }
 
-  private static String getClassPackageName(String className) {
+  public static String getClassPackageName(String className) {
     String generatePrefix = "";
     final int fqnLastDotIdx = className.lastIndexOf(".");
     if (fqnLastDotIdx > -1) {
@@ -190,5 +201,41 @@ public class JSR45Util {
       result[lmd.getSourceLineNumber()] = lmd;
     }
     return result;
+  }
+
+  /**
+   * @param debug SourceDebugExtension of .class-file
+   * @return list of paths to source files .class-file was generated from, empty list if none are found
+   */
+  public static List<String> parseSourcePaths(String debug) {
+    debug = checkSMAP(debug);
+    if (debug != null) {
+      String[] fileNameIdx = getFileSectionLines(debug, debug.indexOf(FILE_SECTION), debug.indexOf(LINE_SECTION));
+      List<String> paths = new ArrayList<String>();
+      for (int i = 0; i < fileNameIdx.length; i++) {
+        String fileName = fileNameIdx[i];
+        String idAndName = fileName;
+        String path = null;
+        if (fileName.startsWith("+ ")) {
+          idAndName = fileName.substring(2);
+          path = fileNameIdx[++i];
+        }
+        int idx = idAndName.indexOf(" ");
+        String currentClassName = idAndName.substring(idx + 1);
+        if (path == null) {
+          path = currentClassName;
+        }
+        else {
+          path = processRelative(path);
+          int lastSlashIdx = path.lastIndexOf("/");
+          if (lastSlashIdx > 0) {
+            path = path.substring(0, ++lastSlashIdx) + currentClassName;
+          }
+        }
+        paths.add(path);
+      }
+      return paths;
+    }
+    return Collections.emptyList();
   }
 }

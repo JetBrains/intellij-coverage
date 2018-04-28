@@ -67,6 +67,10 @@ public class TestDiscoveryProtocolUtil {
           reader.debug("metadata received");
           readMetadata(input, reader);
           break;
+        case TestDiscoveryProtocolDataListener.CLASS_METADATA_MARKER:
+          reader.debug("class metadata received");
+          readClassMetadata(input, reader);
+          break;
         case SingleTrFileDiscoveryProtocolDataListener.HEADER_START:
           final byte[] jtc = new byte[3];
           if (!start) throw new IllegalStateException("File header is not expected here");
@@ -91,6 +95,32 @@ public class TestDiscoveryProtocolUtil {
       String value = CoverageIOUtil.readUTFFast(input);
       metadataReader.processMetadataEntry(key, value);
     }
+  }
+
+  private static void readClassMetadata(DataInputStream input, TestDiscoveryProtocolReader reader) throws IOException {
+    TestDiscoveryProtocolReader.ClassMetadataReader metadataReader = reader.createClassMetadataReader();
+    int classesCount = CoverageIOUtil.readINT(input);
+    if (classesCount == 0) return;
+    while (classesCount-- > 0) {
+      final int classId = CoverageIOUtil.readINT(input);
+      if (metadataReader != null) metadataReader.classStarted(classId);
+      int filesCount = CoverageIOUtil.readINT(input);
+      while (filesCount-- > 0) {
+        final int fileId = CoverageIOUtil.readINT(input);
+        if (metadataReader != null) metadataReader.file(fileId);
+      }
+      int methodsCount = CoverageIOUtil.readINT(input);
+      while (methodsCount-- > 0) {
+        final int methodId = CoverageIOUtil.readINT(input);
+        final int hashLength = CoverageIOUtil.readINT(input);
+        final byte[] hash = new byte[hashLength];
+        final int read = input.read(hash);
+        assert read == hashLength;
+        if (metadataReader != null) metadataReader.method(methodId, hash);
+      }
+      if (metadataReader != null) metadataReader.classFinished(classId);
+    }
+    if (metadataReader != null) metadataReader.finished();
   }
 
   private static void readDictionary(DataInputStream input, TestDiscoveryProtocolReader reader) throws IOException {
