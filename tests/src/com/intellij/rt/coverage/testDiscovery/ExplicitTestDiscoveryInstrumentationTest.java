@@ -16,11 +16,11 @@
 
 package com.intellij.rt.coverage.testDiscovery;
 
+import com.intellij.rt.coverage.TransformedClassLoader;
 import com.intellij.rt.coverage.data.ClassMetadata;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectDataTestAccessor;
 import com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryTransformer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
@@ -54,7 +54,7 @@ public class ExplicitTestDiscoveryInstrumentationTest {
   private byte[] doTransform(final String name) throws IOException {
     final String resource = name.replace('.', '/') + ".class";
     ClassLoader loader = MySerializable.class.getClassLoader();
-    byte[] bytes = readBytes(loader.getResourceAsStream(resource));
+    byte[] bytes = TransformedClassLoader.readBytes(loader.getResourceAsStream(resource));
     return doTransform(name, bytes, loader);
   }
 
@@ -195,43 +195,6 @@ public class ExplicitTestDiscoveryInstrumentationTest {
             .newInstance(1);
     //ensure class instrumentation doesn't fail
     assertNotNull(transformed);
-  }
-
-  private class TransformedClassLoader extends ClassLoader {
-    private final String name;
-    private final byte[] bytes;
-
-    TransformedClassLoader(ClassLoader parent, String name, byte[] bytes) {
-      super(parent);
-      this.name = name;
-      this.bytes = bytes;
-    }
-
-    @Override
-    protected synchronized Class<?> loadClass(String name, boolean resolve)
-        throws ClassNotFoundException {
-      if (name.equals(this.name)) {
-        Class<?> c = defineClass(name, bytes, 0, bytes.length);
-        if (resolve) {
-          resolveClass(c);
-        }
-        return c;
-      }
-      return super.loadClass(name, resolve);
-    }
-  }
-
-  private static byte[] readBytes(@NotNull InputStream in) throws IOException {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    byte[] buffer = new byte[16384];
-    try {
-      for (int len = in.read(buffer); len > 0; len = in.read(buffer)) {
-        out.write(buffer, 0, len);
-      }
-      return out.toByteArray();
-    } finally {
-      in.close();
-    }
   }
 
 
