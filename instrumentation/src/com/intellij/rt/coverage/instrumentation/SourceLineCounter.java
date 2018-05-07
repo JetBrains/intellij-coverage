@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2018 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,10 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
-import org.jetbrains.coverage.org.objectweb.asm.*;
+import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Label;
+import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -35,6 +38,7 @@ public class SourceLineCounter extends ClassVisitor {
 
   private final TIntObjectHashMap<String> myNSourceLines = new TIntObjectHashMap<String>();
   private final Set<String> myMethodsWithSourceCode = new HashSet<String>();
+  private int myTotalBranches = 0;
   private int myCurrentLine;
   private boolean myInterface;
   private boolean myEnum;
@@ -133,6 +137,7 @@ public class SourceLineCounter extends ClassVisitor {
       public void visitJumpInsn(final int opcode, final Label label) {
         super.visitJumpInsn(opcode, label);
         myHasInstructions = true;
+        myTotalBranches++;
       }
 
       public void visitLdcInsn(final Object cst) {
@@ -150,12 +155,14 @@ public class SourceLineCounter extends ClassVisitor {
       public void visitTableSwitchInsn(final int min, final int max, final Label dflt, final Label[] labels) {
         super.visitTableSwitchInsn(min, max, dflt, labels);
         myHasInstructions = true;
+        myTotalBranches++;
       }
 
      
       public void visitLookupSwitchInsn(final Label dflt, final int[] keys, final Label[] labels) {
         super.visitLookupSwitchInsn(dflt, keys, labels);
         myHasInstructions = true;
+        myTotalBranches++;
       }
 
      
@@ -192,5 +199,9 @@ public class SourceLineCounter extends ClassVisitor {
 
   public boolean isInterface() {
     return myInterface;
+  }
+
+  public int getTotalBranches() {
+    return myTotalBranches;
   }
 }
