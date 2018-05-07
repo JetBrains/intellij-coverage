@@ -186,7 +186,7 @@ public class ExplicitTestDiscoveryInstrumentationTest {
   }
 
   @Test
-  public void testBrokenInitializer() throws Throwable {
+  public void testSameClassMethodCalledBeforeStaticClassInitializer() throws Throwable {
     String name = InitClass.B.class.getName();
     Object transformed =
         new TransformedClassLoader(InitClass.B.class.getClassLoader(), name, doTransform(name))
