@@ -18,18 +18,18 @@ package com.intellij.rt.coverage.data;
 
 public class BranchData {
   private final int myTotalBranches;
-  private final int myTouchedBranches;
+  private final int myCoveredBranches;
 
   public BranchData(int totalBranches, int touchedBranches) {
     myTotalBranches = totalBranches;
-    myTouchedBranches = touchedBranches;
+    myCoveredBranches = touchedBranches;
   }
 
   public int getTotalBranches() {
     return myTotalBranches;
   }
 
-  public int getTouchedBranches() {
-    return myTouchedBranches;
+  public int getCoveredBranches() {
+    return myCoveredBranches;
   }
 }

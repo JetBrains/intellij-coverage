@@ -209,20 +209,28 @@ public class LineData implements CoverageData {
     if (myJumpsAndSwitches == null) return null;
     int total = 0;
     int covered = 0;
-    for (JumpData jump : myJumpsAndSwitches.getJumps()) {
-      total++;
-      if (jump.getFalseHits() + jump.getTrueHits() > 0) {
-        covered++;
+
+    JumpData[] jumps = myJumpsAndSwitches.getJumps();
+    if (jumps != null) {
+      for (JumpData jump : jumps) {
+        total++;
+        if (jump.getFalseHits() + jump.getTrueHits() > 0) {
+          covered++;
+        }
       }
     }
-    for (SwitchData switchData : myJumpsAndSwitches.getSwitches()) {
-      total++;
-      int hits = switchData.getDefaultHits();
-      for (int hit : switchData.getHits()) {
-        hits += hit;
-      }
-      if (hits > 0) {
-        covered++;
+
+    SwitchData[] switches = myJumpsAndSwitches.getSwitches();
+    if (switches != null) {
+      for (SwitchData switchData : switches) {
+        total++;
+        int hits = switchData.getDefaultHits();
+        for (int hit : switchData.getHits()) {
+          hits += hit;
+        }
+        if (hits > 0) {
+          covered++;
+        }
       }
     }
 
