@@ -39,11 +39,19 @@ class SourceFilesCollector extends ClassVisitor {
   public void visitSource(String source, String debug) {
     if (debug != null) {
       // SourceDebugExtension attribute
-      sources.addAll(JSR45Util.parseSourcePaths(debug));
+      List<String> sourceFiles = JSR45Util.parseSourcePaths(debug);
+      for (String sourceFile : sourceFiles) {
+        if (!sources.contains(sourceFile)) {
+          sources.add(sourceFile);
+        }
+      }
     }
     else {
       // SourceFile attribute
-      sources.add(JSR45Util.getClassPackageName(className).replace(".", "/") + source);
+      String sourceFile = JSR45Util.getClassPackageName(className).replace(".", "/") + source;
+      if (!sources.contains(sourceFile)) {
+        sources.add(sourceFile);
+      }
     }
     super.visitSource(source, debug);
   }
