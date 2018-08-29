@@ -22,7 +22,7 @@ import java.util.Map;
 
 public interface TestDiscoveryDataListener {
 
-  void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException;
+  void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames, List<int[]> openedFiles) throws IOException;
 
   void testsFinished() throws IOException;
 

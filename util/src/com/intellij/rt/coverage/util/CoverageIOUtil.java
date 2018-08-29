@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
  * @since 18-May-2009
  */
 public class CoverageIOUtil {
+  public static final int GIGA = 1000 * 1000 * 1000;
   private static final int STRING_HEADER_SIZE = 1;
   private static final int STRING_LENGTH_THRESHOLD = 255;
 

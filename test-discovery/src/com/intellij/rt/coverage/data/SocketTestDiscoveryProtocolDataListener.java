@@ -29,13 +29,13 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 @SuppressWarnings("unused")
-public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtocolDataListener {
+public class  SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtocolDataListener {
   private static final int SOCKET_BUFFER_SIZE = 128 * 1024;
   @SuppressWarnings("WeakerAccess")
   public static final String HOST_PROP = "test.discovery.data.host";
   @SuppressWarnings("WeakerAccess")
   public static final String PORT_PROP = "test.discovery.data.port";
-  public static final byte VERSION = 1;
+  public static final byte VERSION = 2;
 
   private final Socket mySocket;
   private final BlockingQueue<ByteBuffer> myData = new ArrayBlockingQueue<ByteBuffer>(10);
@@ -55,9 +55,9 @@ public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtoc
     start(dos);
   }
 
-  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException {
+  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames, List<int[]> openedFiles) {
     try {
-      writeTestFinished(dos, className, methodName, classToVisitedMethods, classToMethodNames);
+      writeTestFinished(dos, className, methodName, classToVisitedMethods, classToMethodNames, openedFiles);
     } catch (IOException e) {
       e.printStackTrace();
     }
