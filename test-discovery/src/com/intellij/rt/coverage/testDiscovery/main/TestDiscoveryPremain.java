@@ -17,8 +17,10 @@
 package com.intellij.rt.coverage.testDiscovery.main;
 
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
+import com.intellij.rt.coverage.testDiscovery.instrumentation.OpenCloseFileTransformer;
 
 import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +33,7 @@ public class TestDiscoveryPremain {
   @SuppressWarnings("WeakerAccess")
   public static final String EXCLUDE_PATTERNS_VM_OP = "test.discovery.exclude.class.patterns";
 
-  private void performPremain(Instrumentation instrumentation) {
+  private void performPremain(Instrumentation instrumentation) throws Exception {
     System.out.println("---- IntelliJ IDEA Test Discovery ---- ");
 
     // separated by ;
@@ -43,6 +45,16 @@ public class TestDiscoveryPremain {
     TestDiscoveryProjectData projectData = TestDiscoveryProjectData.getProjectData();
 
     instrumentation.addTransformer(new TestDiscoveryTransformer(exclude, include));
+
+    addOpenCloseTransformer(instrumentation);
+  }
+
+  private static void addOpenCloseTransformer(Instrumentation instrumentation) throws UnmodifiableClassException {
+    if (System.getProperty(TestDiscoveryProjectData.AFFECTED_ROOTS) == null) return;
+
+    OpenCloseFileTransformer openCloseFileTransformer = new OpenCloseFileTransformer();
+    instrumentation.addTransformer(openCloseFileTransformer, true);
+    instrumentation.retransformClasses(openCloseFileTransformer.classesToTransform());
   }
 
   private static List<Pattern> patterns(String key) {
@@ -63,8 +75,7 @@ public class TestDiscoveryPremain {
     return patterns;
   }
 
-  public static void premain(String argsString, Instrumentation instrumentation) {
+  public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
     new TestDiscoveryPremain().performPremain(instrumentation);
   }
-
 }

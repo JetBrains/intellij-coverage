@@ -2,13 +2,13 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/buildSrc.iml" filepath="$PROJECT_DIR$/.idea/modules/buildSrc.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/buildSrc_main.iml" filepath="$PROJECT_DIR$/.idea/modules/buildSrc_main.iml" group="buildSrc" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/buildSrc_test.iml" filepath="$PROJECT_DIR$/.idea/modules/buildSrc_test.iml" group="buildSrc" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation.iml" filepath="$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation.iml" group="instrumentation" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation_main.iml" filepath="$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation_main.iml" group="instrumentation" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation_test.iml" filepath="$PROJECT_DIR$/.idea/modules/instrumentation/instrumentation_test.iml" group="instrumentation" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage_buildSrc.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage_buildSrc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage_buildSrc_main.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage_buildSrc_main.iml" group="intellij-coverage_buildSrc" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage_buildSrc_test.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage_buildSrc_test.iml" group="intellij-coverage_buildSrc" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage_main.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage_main.iml" group="intellij-coverage" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/intellij-coverage_test.iml" filepath="$PROJECT_DIR$/.idea/modules/intellij-coverage_test.iml" group="intellij-coverage" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/junit4-test-discovery-launcher/junit4-test-discovery-launcher.iml" filepath="$PROJECT_DIR$/.idea/modules/junit4-test-discovery-launcher/junit4-test-discovery-launcher.iml" group="junit4-test-discovery-launcher" />

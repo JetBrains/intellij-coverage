@@ -46,19 +46,32 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
   }
 
   protected void writeTestFinished(DataOutput output, String className, String methodName,
-                                   Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException {
+                                   Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames,
+                                   List<int[]> openedFiles) throws IOException {
     NameEnumerator nameEnumerator = getNameEnumerator();
     final int testClassNameId = nameEnumerator.enumerate(className);
     final int testMethodNameId = nameEnumerator.enumerate(methodName);
 
     // Enumerator may send className and methodName if it's first test in class or this test caused classloading
     // Otherwise className and methodName was already sent with one of previous calls
+    // Also send enumerated file path chunks
     writeDictionaryIncrementIfNeeded(output);
 
     output.writeByte(TEST_FINISHED_MARKER);
     CoverageIOUtil.writeINT(output, testClassNameId);
     CoverageIOUtil.writeINT(output, testMethodNameId);
     writeVisitedMethod(classToVisitedMethods, classToMethodNames, output);
+    writeAffectedFiles(output, openedFiles);
+  }
+
+  private static void writeAffectedFiles(DataOutput output, List<int[]> files) throws IOException {
+    CoverageIOUtil.writeINT(output, files.size());
+    for (int[] file : files) {
+      CoverageIOUtil.writeINT(output, file.length);
+      for (int i : file) {
+        CoverageIOUtil.writeINT(output, i);
+      }
+    }
   }
 
   protected void start(DataOutput output) throws IOException {

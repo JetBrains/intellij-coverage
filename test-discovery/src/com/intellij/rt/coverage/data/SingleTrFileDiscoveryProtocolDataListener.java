@@ -67,10 +67,10 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
 
   private static Long ourSendTime = 0L;
 
-  public synchronized void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException {
+  public synchronized void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames, List<int[]> openedFiles) throws IOException {
     long s = System.nanoTime();
     try {
-      writeTestFinished(myStream, className, methodName, classToVisitedMethods, classToMethodNames);
+      writeTestFinished(myStream, className, methodName, classToVisitedMethods, classToMethodNames, openedFiles);
     } finally {
       Long diff = ourSendTime += System.nanoTime() - s;
     }

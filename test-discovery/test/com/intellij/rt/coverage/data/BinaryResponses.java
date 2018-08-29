@@ -47,6 +47,7 @@ public final class BinaryResponses {
         .withIncrementalDictionaryStart(1)
         .withDictionaryElement(1, 0x41, 0x42, 0x43) // 1-ABC
         .withTestResultStart(1, 1, 0) // Test ABC.ABC, 0 coverage
+        .withNoneAffectedFiles()
         .build();
   }
 
@@ -60,6 +61,7 @@ public final class BinaryResponses {
         .withTestResultStart(1, 2, 1) // Test A.B, 1 class
         .withTestResultClass(2, 1) // Class B, 1 method
         .withTestResultMethod(3) // Method C
+        .withNoneAffectedFiles()
         .build();
   }
 }

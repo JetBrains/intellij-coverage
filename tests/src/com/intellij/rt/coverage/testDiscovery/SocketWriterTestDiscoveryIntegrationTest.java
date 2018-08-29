@@ -209,6 +209,11 @@ public class SocketWriterTestDiscoveryIntegrationTest {
           public void testDataProcessed() {
 
           }
+
+          @Override
+          public void processAffectedFile(int[] chunks) {
+
+          }
         };
       }
 
