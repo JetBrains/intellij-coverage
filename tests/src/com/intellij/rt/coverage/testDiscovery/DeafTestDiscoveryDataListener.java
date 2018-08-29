@@ -27,7 +27,7 @@ import java.util.Map;
 public class DeafTestDiscoveryDataListener implements TestDiscoveryDataListener {
   private final List<ClassMetadata> classMetadata = new ArrayList<ClassMetadata>();
 
-  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) {
+  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames, List<int[]> openedFiles) {
   }
 
   public void testsFinished() {

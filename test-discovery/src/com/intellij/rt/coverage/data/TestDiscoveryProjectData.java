@@ -16,9 +16,9 @@
 
 package com.intellij.rt.coverage.data;
 
-import java.util.Collections;
+import java.io.File;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -53,6 +53,11 @@ public class TestDiscoveryProjectData {
         testDiscoveryFinished();
         System.out.println("Trace time: " + 1. * ourTraceTime / GIGA);
         System.out.println("Cleanup time: " + 1. * ourCleanupTime / GIGA);
+
+        System.out.println("Leaked files: " + myOpenFilesMap.size());
+        for (File value : new ArrayList<File>(myOpenFilesMap.values())) {
+          System.out.println(value.getPath());
+        }
       }
     }));
   }
@@ -101,7 +106,7 @@ public class TestDiscoveryProjectData {
 
   public synchronized void testDiscoveryEnded(final String className, final String methodName) {
     try {
-      myDataListener.testFinished(className, methodName, myClassToVisitedMethods, myClassToMethodNames);
+      myDataListener.testFinished(className, methodName, myClassToVisitedMethods, myClassToMethodNames, enumerateFiles(myOpenFilesPerTest));
       for (Map.Entry<Integer, boolean[]> e : myClassToVisitedMethods.entrySet()) {
         for (boolean isUsed : e.getValue()) {
           if (isUsed) {
@@ -116,6 +121,23 @@ public class TestDiscoveryProjectData {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  private List<int[]> enumerateFiles(List<String> openedFiles) {
+    List<int[]> files = new ArrayList<int[]>(openedFiles.size());
+    for (String file : openedFiles) {
+      files.add(fileToInts(file));
+    }
+    return files;
+  }
+
+  private int[] fileToInts(String file) {
+    String[] split = file.split("/");
+    int[] result = new int[split.length];
+    for (int i = 0; i < split.length; i++) {
+      result[i] = myNameEnumerator.enumerate(split[i]);
+    }
+    return result;
   }
 
   public synchronized void testDiscoveryStarted(final String className, final String methodName) {
@@ -134,6 +156,8 @@ public class TestDiscoveryProjectData {
         if (used[i]) used[i] = false;
       }
     }
+
+    myOpenFilesPerTest.clear();
   }
 
   private volatile boolean myFinished;
@@ -167,5 +191,58 @@ public class TestDiscoveryProjectData {
   //TestOnly
   ConcurrentMap<Integer, boolean[]> getClassToVisitedMethods() {
     return myClassToVisitedMethods;
+  }
+
+  private static Map<Object, File> myOpenFilesMap = new WeakHashMap<Object, File>();
+  private static List<String> myOpenFilesPerTest = new ArrayList<String>();
+
+  @SuppressWarnings("WeakerAccess")
+  public static final String AFFECTED_ROOTS = "test.discovery.affected.roots";
+  @SuppressWarnings("WeakerAccess")
+  public static final String EXCLUDED_ROOTS = "test.discovery.excluded.roots";
+
+  private static String [] myAffectedRoots = split(AFFECTED_ROOTS);
+  private static String [] myExcludedRoots = split(EXCLUDED_ROOTS);
+
+  private static String[] split(String key) {
+    String affected = System.getProperty(key);
+    return affected == null ? new String[]{} : affected.split(";");
+  }
+
+  private static String stripRoot(String path) {
+    for (String prefix : myAffectedRoots) {
+      if (path.startsWith(prefix)) {
+        return path.substring(prefix.length());
+      }
+    }
+    return null;
+  }
+
+  private static boolean excluded(String path) {
+    for (String prefix : myExcludedRoots) {
+      if (path.startsWith(prefix)) return true;
+    }
+    return false;
+  }
+
+  private static String toSystemIndependentName(String fileName) {
+    return fileName.replace('\\', '/');
+  }
+
+  public static synchronized void openFile(Object o, File file) {
+    if (file == null) return;
+
+    String absolutePath = file.getAbsolutePath();
+
+    String trimmedPath = stripRoot(absolutePath);
+    if (trimmedPath == null) return;
+    if (excluded(absolutePath)) return;
+
+    myOpenFilesMap.put(o, file);
+    myOpenFilesPerTest.add(toSystemIndependentName(trimmedPath));
+  }
+
+  public static synchronized void closeFile(Object o) {
+    myOpenFilesMap.remove(o);
   }
 }
