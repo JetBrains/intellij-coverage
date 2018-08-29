@@ -58,6 +58,11 @@ class BinaryResponseBuilder {
     return this;
   }
 
+  public BinaryResponseBuilder withNoneAffectedFiles() {
+    myBytes.add((byte) 0);
+    return this;
+  }
+
   public BinaryResponseBuilder withIncrementalDictionaryStart(int count) {
     myBytes.add((byte) 0x2);
     myBytes.add((byte) count);

@@ -64,5 +64,7 @@ public interface TestDiscoveryProtocolReader {
     void classProcessingFinished(int classId);
 
     void testDataProcessed();
+
+    void processAffectedFile(int[] chunks);
   }
 }

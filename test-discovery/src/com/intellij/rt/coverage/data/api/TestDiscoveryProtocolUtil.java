@@ -151,6 +151,25 @@ public class TestDiscoveryProtocolUtil {
       }
       testDataReader.classProcessingFinished(classId);
     }
+
+    // read affected resource files
+    int filesCount = CoverageIOUtil.readINT(input);
+    while (filesCount-- > 0) {
+      readFile(input, testDataReader);
+    }
+
     testDataReader.testDataProcessed();
+  }
+
+  private static void readFile(DataInputStream input, TestDiscoveryProtocolReader.TestDataReader testDataReader) throws IOException {
+    int count = CoverageIOUtil.readINT(input);
+    int[] chunks = new int[count];
+    int len = count;
+    while (count > 0) {
+      int i = CoverageIOUtil.readINT(input);
+      chunks[len - count] = i;
+      count--;
+    }
+    testDataReader.processAffectedFile(chunks);
   }
 }
