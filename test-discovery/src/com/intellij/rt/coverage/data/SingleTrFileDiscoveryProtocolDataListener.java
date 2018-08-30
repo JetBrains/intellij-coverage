@@ -34,7 +34,7 @@ public class SingleTrFileDiscoveryProtocolDataListener extends TestDiscoveryProt
   public static final byte HEADER_START = 0x49; // "I"
   public static final byte[] HEADER_TAIL = new byte[]{0x4a, 0x54, 0x43}; // "JTC"
 
-  private static final int DEFAULT_VERSION = 0x2;
+  private static final int DEFAULT_VERSION = 0x3;
 
   private final DataOutputStream myStream;
   private final NameEnumerator.Incremental myNameEnumerator;

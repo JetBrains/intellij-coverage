@@ -64,7 +64,8 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
     writeAffectedFiles(output, openedFiles);
   }
 
-  private static void writeAffectedFiles(DataOutput output, List<int[]> files) throws IOException {
+  private void writeAffectedFiles(DataOutput output, List<int[]> files) throws IOException {
+    if (myVersion < 3) return;
     CoverageIOUtil.writeINT(output, files.size());
     for (int[] file : files) {
       CoverageIOUtil.writeINT(output, file.length);
