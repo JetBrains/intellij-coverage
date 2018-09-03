@@ -20,5 +20,5 @@ final class TraceFileVersions {
   private TraceFileVersions() {
   }
 
-  static final Object[] VERSIONS = new Object[]{1, 2};
+  static final Object[] VERSIONS = new Object[]{1, 2, 3};
 }

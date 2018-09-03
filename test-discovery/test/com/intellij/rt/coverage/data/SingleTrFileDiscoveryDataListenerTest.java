@@ -33,7 +33,7 @@ import static org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class SingleTrFileDiscoveryDataListenerTest {
-  @Parameters
+  @Parameters(name = "V{0}")
   public static Object[] versions() {
     return TraceFileVersions.VERSIONS;
   }
@@ -137,20 +137,21 @@ public class SingleTrFileDiscoveryDataListenerTest {
 
   @Test
   public void testV2TwoTestsIncrementalDict() throws Exception {
-    byte[] twoTestsIncrementalDict = new BinaryResponseBuilder()
+    BinaryResponseBuilder builder = new BinaryResponseBuilder()
         .withHeader().withStart(version)
         .withIncrementalDictionaryStart(2)
         .withDictionaryElement(1, 0x41) // 1-A
         .withDictionaryElement(2, 0x42) // 2-B
         .withTestResultStart(1, 2, 1) // Test A.B, 1 class
         .withTestResultClass(1, 1) // Class A, 1 method
-        .withTestResultMethod(1) // Method A
-        .withNoneAffectedFiles()
+        .withTestResultMethod(1); // Method A
+    if (version >= 3) builder.withNoneAffectedFiles();
+    builder
         .withTestResultStart(2, 1, 1) // Test B.A, 1 class
         .withTestResultClass(1, 1) // Class A, 1 method
-        .withTestResultMethod(1) // Method A
-        .withNoneAffectedFiles()
-        .build();
+        .withTestResultMethod(1); // Method A
+    if (version >= 3) builder.withNoneAffectedFiles();
+    byte[] twoTestsIncrementalDict = builder.build();
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     final DataOutputStream dos = new DataOutputStream(baos);
     final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos, version);

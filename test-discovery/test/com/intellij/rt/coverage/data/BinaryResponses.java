@@ -42,17 +42,17 @@ public final class BinaryResponses {
   }
 
   public static byte[] singleTestNoMethods(int version) {
-    return new BinaryResponseBuilder()
+    BinaryResponseBuilder builder = new BinaryResponseBuilder()
         .withHeader().withStart(version)
         .withIncrementalDictionaryStart(1)
         .withDictionaryElement(1, 0x41, 0x42, 0x43) // 1-ABC
-        .withTestResultStart(1, 1, 0) // Test ABC.ABC, 0 coverage
-        .withNoneAffectedFiles()
-        .build();
+        .withTestResultStart(1, 1, 0); // Test ABC.ABC, 0 coverage
+    if (version >= 3) builder.withNoneAffectedFiles();
+    return builder.build();
   }
 
   public static byte[] singleTestSingleMethod(int version) {
-    return new BinaryResponseBuilder()
+    BinaryResponseBuilder builder = new BinaryResponseBuilder()
         .withHeader().withStart(version)
         .withIncrementalDictionaryStart(3)
         .withDictionaryElement(1, 0x41) // 1-A
@@ -60,8 +60,8 @@ public final class BinaryResponses {
         .withDictionaryElement(3, 0x43) // 3-C
         .withTestResultStart(1, 2, 1) // Test A.B, 1 class
         .withTestResultClass(2, 1) // Class B, 1 method
-        .withTestResultMethod(3) // Method C
-        .withNoneAffectedFiles()
-        .build();
+        .withTestResultMethod(3); // Method C
+    if (version >= 3) builder.withNoneAffectedFiles();
+    return builder.build();
   }
 }
