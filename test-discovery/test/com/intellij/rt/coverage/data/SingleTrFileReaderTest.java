@@ -36,7 +36,8 @@ import static org.junit.runners.Parameterized.*;
 
 @RunWith(Parameterized.class)
 public class SingleTrFileReaderTest {
-  @Parameters
+
+  @Parameters(name = "V{0}")
   public static Object[] versions() {
     return TraceFileVersions.VERSIONS;
   }
