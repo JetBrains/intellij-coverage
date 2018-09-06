@@ -124,7 +124,7 @@ public class TestDiscoveryProjectData {
     }
   }
 
-  private List<int[]> enumerateFiles(List<String> openedFiles) {
+  private List<int[]> enumerateFiles(Collection<String> openedFiles) {
     List<int[]> files = new ArrayList<int[]>(openedFiles.size());
     for (String file : openedFiles) {
       files.add(fileToInts(file));
@@ -195,7 +195,7 @@ public class TestDiscoveryProjectData {
   }
 
   private static Map<Object, File> myOpenFilesMap = new WeakHashMap<Object, File>();
-  private static List<String> myOpenFilesPerTest = new ArrayList<String>();
+  private static Collection<String> myOpenFilesPerTest = new LinkedHashSet<String>();
 
   @SuppressWarnings("WeakerAccess")
   public static final String AFFECTED_ROOTS = "test.discovery.affected.roots";
