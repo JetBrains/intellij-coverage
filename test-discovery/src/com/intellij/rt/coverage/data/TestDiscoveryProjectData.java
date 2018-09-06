@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.data;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -232,7 +233,7 @@ public class TestDiscoveryProjectData {
   public static synchronized void openFile(Object o, File file) {
     if (file == null) return;
 
-    String absolutePath = file.getAbsolutePath();
+    String absolutePath = getPath(file);
 
     String trimmedPath = stripRoot(absolutePath);
     if (trimmedPath == null) return;
@@ -240,6 +241,14 @@ public class TestDiscoveryProjectData {
 
     myOpenFilesMap.put(o, file);
     myOpenFilesPerTest.add(toSystemIndependentName(trimmedPath));
+  }
+
+  private static String getPath(File file) {
+    try {
+      return file.getCanonicalPath();
+    } catch (IOException e) {
+      return file.getAbsolutePath();
+    }
   }
 
   public static synchronized void closeFile(Object o) {
