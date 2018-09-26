@@ -35,7 +35,10 @@ public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtoc
   public static final String HOST_PROP = "test.discovery.data.host";
   @SuppressWarnings("WeakerAccess")
   public static final String PORT_PROP = "test.discovery.data.port";
-  public static final byte VERSION = 1;
+  @SuppressWarnings("WeakerAccess")
+  public static final String DATA_VERSION = "test.discovery.data.version";
+
+  private static final byte DEFAULT_VERSION = 1;
 
   private final Socket mySocket;
   private final BlockingQueue<ByteBuffer> myData = new ArrayBlockingQueue<ByteBuffer>(10);
@@ -44,7 +47,7 @@ public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtoc
   private final OutputStream os;
 
   public SocketTestDiscoveryProtocolDataListener() throws IOException {
-    super(VERSION);
+    super(Byte.parseByte(System.getProperty(DATA_VERSION, String.valueOf(DEFAULT_VERSION))));
     String host = System.getProperty(HOST_PROP, "127.0.0.1");
     int port = Integer.parseInt(System.getProperty(PORT_PROP));
     mySocket = new Socket(host, port);
@@ -55,9 +58,9 @@ public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtoc
     start(dos);
   }
 
-  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames) throws IOException {
+  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames, List<int[]> openedFiles) {
     try {
-      writeTestFinished(dos, className, methodName, classToVisitedMethods, classToMethodNames);
+      writeTestFinished(dos, className, methodName, classToVisitedMethods, classToMethodNames, openedFiles);
     } catch (IOException e) {
       e.printStackTrace();
     }

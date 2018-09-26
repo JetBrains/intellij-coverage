@@ -44,7 +44,7 @@ final class ReportReader {
         !isGrowthPositive && score <= 0
     def error = percentage(base.scoreError, base.score)
         .add(percentage(next.scoreError, next.score))
-    "${base.mode != null ? "[$base.mode] " : ''}${score.abs()}% ${isPositive ? 'speedup' : 'degradation'} ± $error%"
+    "${base.mode != null ? "[$base.mode] " : ''}${score.abs()}% ${isPositive ? 'speedup' : 'degradation'} +- $error%"
   }
 
   private static def percentage(BigDecimal x, BigDecimal y) {

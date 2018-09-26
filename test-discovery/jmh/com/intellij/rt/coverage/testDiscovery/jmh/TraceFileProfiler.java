@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
+@SuppressWarnings({"unused", "in jmh benchmarks"})
 public class TraceFileProfiler implements InternalProfiler {
   public String getDescription() {
     return null;

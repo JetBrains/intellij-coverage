@@ -26,6 +26,8 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,10 +39,21 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.runners.Parameterized.Parameter;
+import static org.junit.runners.Parameterized.Parameters;
 
+@RunWith(Parameterized.class)
 public class SocketWriterTestDiscoveryIntegrationTest {
   @Rule
   public final TemporaryFolder tmpDir  = new TemporaryFolder();
+
+  @Parameters(name = "V{0}")
+  public static Object[] versions() {
+    return new Object[]{1, 2, 3};
+  }
+
+  @Parameter
+  public int version;
 
   @Test
   public void testSimple() throws Exception {
@@ -108,6 +121,7 @@ public class SocketWriterTestDiscoveryIntegrationTest {
 
     List<String> ops = new ArrayList<String>(Arrays.asList(additionalOps));
     ops.add("-Dtest.discovery.data.listener=" + SocketTestDiscoveryProtocolDataListener.class.getName());
+    ops.add("-D" + SocketTestDiscoveryProtocolDataListener.DATA_VERSION + "=" + version);
     ops.add("-D" + SocketTestDiscoveryProtocolDataListener.HOST_PROP + "=127.0.0.1");
     ops.add("-D" + SocketTestDiscoveryProtocolDataListener.PORT_PROP + "=" + socketListener.getPort());
 //     ops.add("-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007");
@@ -207,6 +221,11 @@ public class SocketWriterTestDiscoveryIntegrationTest {
           }
 
           public void testDataProcessed() {
+
+          }
+
+          @Override
+          public void processAffectedFile(int[] chunks) {
 
           }
         };

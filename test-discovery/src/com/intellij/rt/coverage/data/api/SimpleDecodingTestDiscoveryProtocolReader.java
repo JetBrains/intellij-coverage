@@ -31,6 +31,11 @@ public abstract class SimpleDecodingTestDiscoveryProtocolReader implements
   private final TIntObjectHashMap<String> enumerator = new TIntObjectHashMap<String>();
 
   protected abstract void processData(String testClassName, String testMethodName, String className, String methodName);
+
+  protected void processAffectedFile(String testClassName, String testMethodName, String filePath) {
+
+  }
+
   protected abstract void processClassMetadataData(ClassMetadata metadata);
 
   public void debug(String message) {
@@ -44,7 +49,6 @@ public abstract class SimpleDecodingTestDiscoveryProtocolReader implements
   public void error(Exception error) {
 
   }
-
 
   public void testDiscoveryDataProcessingStarted(int version) {
 
@@ -123,6 +127,22 @@ public abstract class SimpleDecodingTestDiscoveryProtocolReader implements
       public void testDataProcessed() {
 
       }
+
+      @Override
+      public void processAffectedFile(int[] chunks) {
+        SimpleDecodingTestDiscoveryProtocolReader.this
+            .processAffectedFile(enumerator.get(testClassId), enumerator.get(testMethodId), decodeFile(chunks));
+      }
     };
+  }
+
+  private String decodeFile(int[] chunks) {
+    if (chunks.length == 0) return "";
+    StringBuilder sb = new StringBuilder();
+    for (int chunk : chunks) {
+      sb.append(enumerator.get(chunk)).append("/");
+    }
+    sb.setLength(sb.length() - "/".length());
+    return sb.toString();
   }
 }

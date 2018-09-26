@@ -18,6 +18,7 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineMapData;
+import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.gnu.trove.THashSet;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectFunction;
@@ -141,8 +142,8 @@ public class JSR45Util {
       } else {
         fileNameWithDots = path.substring(0, lastDot) + "_" + path.substring(lastDot + 1);
       }
-      fileNameWithDots = fileNameWithDots.replace('/', '.');
-
+      fileNameWithDots = ClassNameUtil.convertToFQName(fileNameWithDots);
+      
       generatedPrefix &= !fileNameWithDots.startsWith(defaultPrefix);
       currentClassName = fileNameWithDots;
       result.put(key, currentClassName);

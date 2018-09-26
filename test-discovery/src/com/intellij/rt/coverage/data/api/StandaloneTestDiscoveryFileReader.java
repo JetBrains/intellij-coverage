@@ -36,6 +36,11 @@ public class StandaloneTestDiscoveryFileReader {
       protected void processClassMetadataData(ClassMetadata metadata) {
         System.out.println("Class Metadata entry: " + metadata.getFqn());
       }
+
+      @Override
+      protected void processAffectedFile(String testClassName, String testMethodName, String filePath) {
+        System.out.println(testClassName + "." + testMethodName + " uses file " + filePath);
+      }
     });
   }
 }

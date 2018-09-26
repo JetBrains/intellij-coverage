@@ -16,19 +16,20 @@
 
 package com.intellij.rt.coverage.data;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+public class BranchData {
+  private final int myTotalBranches;
+  private final int myCoveredBranches;
 
-public interface TestDiscoveryDataListener {
+  public BranchData(int totalBranches, int touchedBranches) {
+    myTotalBranches = totalBranches;
+    myCoveredBranches = touchedBranches;
+  }
 
-  void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames, List<int[]> openedFiles) throws IOException;
+  public int getTotalBranches() {
+    return myTotalBranches;
+  }
 
-  void testsFinished() throws IOException;
-
-  void addMetadata(Map<String, String> metadata) throws IOException;
-
-  void addClassMetadata(List<ClassMetadata> metadata) throws IOException;
-
-  NameEnumerator getNameEnumerator();
+  public int getCoveredBranches() {
+    return myCoveredBranches;
+  }
 }

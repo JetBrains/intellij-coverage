@@ -36,6 +36,7 @@ public class TestDiscoveryProtocolUtil {
     DataInputStream input = new DataInputStream(testDiscoveryDataStream);
 
     boolean start = true;
+    Integer version = null;
     while (true) {
       final int read = input.read();
       if (read == -1) {
@@ -46,7 +47,8 @@ public class TestDiscoveryProtocolUtil {
       byte msgType = (byte) read;
       switch (msgType) {
         case TestDiscoveryProtocolDataListener.START_MARKER:
-          byte version = input.readByte();
+          byte v = input.readByte();
+          version = (int) v;
           reader.testDiscoveryDataProcessingStarted(version);
           reader.debug("start marker, format version: " + version);
           break;
@@ -57,7 +59,8 @@ public class TestDiscoveryProtocolUtil {
           return;
         case TestDiscoveryProtocolDataListener.TEST_FINISHED_MARKER:
           reader.debug("test data received");
-          readTestData(input, reader);
+          assert version != null;
+          readTestData(input, reader, version);
           break;
         case TestDiscoveryProtocolDataListener.NAMES_DICTIONARY_PART_MARKER:
           reader.debug("partial dictionary received");
@@ -133,7 +136,7 @@ public class TestDiscoveryProtocolUtil {
     }
   }
 
-  private static void readTestData(DataInputStream input, TestDiscoveryProtocolReader reader) throws IOException {
+  private static void readTestData(DataInputStream input, TestDiscoveryProtocolReader reader, int protocolVersion) throws IOException {
     // read test name
     int testClassName = CoverageIOUtil.readINT(input);
     int testMethodName = CoverageIOUtil.readINT(input);
@@ -151,6 +154,27 @@ public class TestDiscoveryProtocolUtil {
       }
       testDataReader.classProcessingFinished(classId);
     }
+
+    if (protocolVersion >= 3) {
+      // read affected resource files
+      int filesCount = CoverageIOUtil.readINT(input);
+      while (filesCount-- > 0) {
+        readFile(input, testDataReader);
+      }
+    }
+
     testDataReader.testDataProcessed();
+  }
+
+  private static void readFile(DataInputStream input, TestDiscoveryProtocolReader.TestDataReader testDataReader) throws IOException {
+    int count = CoverageIOUtil.readINT(input);
+    int[] chunks = new int[count];
+    int len = count;
+    while (count > 0) {
+      int i = CoverageIOUtil.readINT(input);
+      chunks[len - count] = i;
+      count--;
+    }
+    testDataReader.processAffectedFile(chunks);
   }
 }

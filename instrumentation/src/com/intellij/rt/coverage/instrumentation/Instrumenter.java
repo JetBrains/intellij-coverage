@@ -60,7 +60,7 @@ public abstract class Instrumenter extends ClassVisitor {
                                    final String signature,
                                    final String[] exceptions) {
     final MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
-    if (mv == null) return mv;
+    if (mv == null) return null;
     if ((access & Opcodes.ACC_BRIDGE) != 0) return mv; //try to skip bridge methods
     if ((access & Opcodes.ACC_ABSTRACT) != 0) return mv; //skip abstracts; do not include interfaces without non-abstract methods in result
     if (myEnum && isDefaultEnumMethod(name, desc, signature, myClassName)) {

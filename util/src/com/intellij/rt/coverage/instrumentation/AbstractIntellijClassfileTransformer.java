@@ -16,6 +16,8 @@
 
 package com.intellij.rt.coverage.instrumentation;
 
+import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import org.jetbrains.coverage.gnu.trove.THashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
@@ -26,7 +28,6 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -39,7 +40,31 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
   private final boolean computeFrames = computeFrames();
   private final WeakHashMap<ClassLoader, Map<String, ClassReader>> classReaders = new WeakHashMap<ClassLoader, Map<String, ClassReader>>();
 
-  public final byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) throws IllegalClassFormatException {
+  private long ourTime;
+  private int ourClassCount;
+
+  protected AbstractIntellijClassfileTransformer() {
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      public void run() {
+        double allTime = 1. * ourTime / CoverageIOUtil.GIGA;
+        System.out.println("Class transformation time: " + allTime + "s for " +
+            ourClassCount + " classes or " + allTime / ourClassCount + "s per class"
+        );
+      }
+    }));
+  }
+
+  public final byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) {
+    long s = System.nanoTime();
+    try {
+      return transformInner(loader, className, classFileBuffer);
+    } finally {
+      ourClassCount++;
+      ourTime += System.nanoTime() - s;
+    }
+  }
+
+  private byte[] transformInner(ClassLoader loader, String className, byte[] classFileBuffer) {
     if (isStopped()) {
       return null;
     }
@@ -51,7 +76,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
       if (className.endsWith(".class")) {
         className = className.substring(0, className.length() - 6);
       }
-      className = className.replace('\\', '.').replace('/', '.');
+      className = ClassNameUtil.convertToFQName(className);
 
       //do not instrument itself
       //and do not instrument packages which are used during instrumented method invocation

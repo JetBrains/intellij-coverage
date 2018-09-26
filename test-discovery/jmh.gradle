@@ -1,4 +1,6 @@
 import com.intellij.rt.coverage.testDiscovery.jmh.ReportReader
+import org.codehaus.groovy.runtime.ResourceGroovyMethods
+
 import java.nio.file.Files
 
 /*
@@ -41,7 +43,7 @@ dependencies {
   jmhCompile 'org.joda:joda-convert:1.2'
   jmhCompile 'junit:junit:4.12'
   jmhCompile fileTree('lib')
-  baseline "org.jetbrains.intellij.deps:intellij-test-discovery-agent:$baselineVersion"
+  baseline "$agentsGroupId:$test_discovery_jar_name:$baselineVersion"
   head project(':test-discovery')
 }
 
@@ -67,6 +69,7 @@ def configureBenchmark(JavaExec benchmark, Configuration agent = null) {
       main = 'org.openjdk.jmh.Main'
       classpath = sourceSets.jmh.runtimeClasspath
       args = [
+          '-jvmArgs', '-Dfile.encoding=UTF-8',
           // benchmarks
           'com\\.intellij\\.rt\\.coverage\\.testDiscovery\\.jmh\\.DiscoveryAgentBenchmark.*',
           // report
@@ -74,20 +77,19 @@ def configureBenchmark(JavaExec benchmark, Configuration agent = null) {
           // mode, see org.openjdk.jmh.annotations.Mode
           '-bm', 'ss',
           // number of forks, measurement iterations, warmups
-          '-f', 10, '-i', 1, '-wi', 0,
+          '-f', 1, '-i', 25, '-wi', 10,
           // fail-on-error
           '-foe', 'true',
           // verbosity [SILENT, NORMAL, EXTRA]
           '-v', 'NORMAL',
           // profilers
-          '-prof', 'org.openjdk.jmh.profile.StackProfiler:lines=10;top=5;detailLine=true;period=10',
           '-prof', 'org.openjdk.jmh.profile.GCProfiler',
           '-prof', 'com.intellij.rt.coverage.testDiscovery.jmh.TraceFileProfiler'
       ]
       if (agent != null) {
         args += [
             // discovery agent properties
-            '-jvmArgs', "-javaagent:${agent.first().absolutePath}",
+            '-jvmArgs', "-javaagent:${agent.find { it.name.startsWith(test_discovery_jar_name) }.absolutePath}",
             '-jvmArgs', '-Dtest.discovery.data.listener=com.intellij.rt.coverage.data.SingleTrFileDiscoveryProtocolDataListener'
         ]
       }
@@ -108,12 +110,12 @@ task benchmark(group: 'verification', dependsOn: [noDiscoveryBenchmark, baseline
         '·gc.alloc.rate',
         '·gc.count', '·gc.time'
     ]
-    def baselineReport = benchmarkReport(baselineBenchmark).text
+    def baselineReport = ResourceGroovyMethods.getText(benchmarkReport(baselineBenchmark), 'UTF-8')
     project.logger.quiet """Benchmark score:
     No discovery vs $baselineVersion:
     ${
       ReportReader.readScore(
-          benchmarkReport(noDiscoveryBenchmark).text,
+          ResourceGroovyMethods.getText(benchmarkReport(noDiscoveryBenchmark), 'UTF-8'),
           baselineReport,
           secondaryMetrics
       )
@@ -122,7 +124,7 @@ task benchmark(group: 'verification', dependsOn: [noDiscoveryBenchmark, baseline
     ${
       ReportReader.readScore(
           baselineReport,
-          benchmarkReport(headBenchmark).text,
+          ResourceGroovyMethods.getText(benchmarkReport(headBenchmark), 'UTF-8'),
           secondaryMetrics
       )
     }"""

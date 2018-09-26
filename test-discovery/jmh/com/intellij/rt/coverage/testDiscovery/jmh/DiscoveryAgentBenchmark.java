@@ -21,6 +21,7 @@ import org.openjdk.jmh.util.NullOutputStream;
 
 import java.io.PrintStream;
 
+@SuppressWarnings({"unused", "used in jmh"})
 public class DiscoveryAgentBenchmark {
   @Benchmark
   public void jodaTimeTestDiscovery() throws Exception {

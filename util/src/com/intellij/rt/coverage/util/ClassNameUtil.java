@@ -35,4 +35,8 @@ public class ClassNameUtil {
     }
     return false;
   }
+
+  public static String convertToFQName(String className) {
+    return className.replace('\\', '.').replace('/', '.');
+  }
 }

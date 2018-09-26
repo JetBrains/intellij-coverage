@@ -33,7 +33,7 @@ import static org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class SingleTrFileDiscoveryDataListenerTest {
-  @Parameters
+  @Parameters(name = "V{0}")
   public static Object[] versions() {
     return TraceFileVersions.VERSIONS;
   }
@@ -52,7 +52,7 @@ public class SingleTrFileDiscoveryDataListenerTest {
     final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();
     classes.put(1, new boolean[]{false});
     methods.put(1, new int[]{1});
-    listener.testFinished(name, name, classes, methods);
+    listener.testFinished(name, name, classes, methods, Collections.<int[]>emptyList());
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(BinaryResponses.singleTestNoMethods(version));
   }
@@ -130,25 +130,28 @@ public class SingleTrFileDiscoveryDataListenerTest {
     classes.put(2, new boolean[]{true});
     methods.put(1, new int[]{1});
     methods.put(2, new int[]{3});
-    listener.testFinished(name1, name2, classes, methods);
+    listener.testFinished(name1, name2, classes, methods, Collections.<int[]>emptyList());
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(BinaryResponses.singleTestSingleMethod(version));
   }
 
   @Test
   public void testV2TwoTestsIncrementalDict() throws Exception {
-    byte[] twoTestsIncrementalDict = new BinaryResponseBuilder()
+    BinaryResponseBuilder builder = new BinaryResponseBuilder()
         .withHeader().withStart(version)
         .withIncrementalDictionaryStart(2)
         .withDictionaryElement(1, 0x41) // 1-A
         .withDictionaryElement(2, 0x42) // 2-B
         .withTestResultStart(1, 2, 1) // Test A.B, 1 class
         .withTestResultClass(1, 1) // Class A, 1 method
-        .withTestResultMethod(1) // Method A
+        .withTestResultMethod(1); // Method A
+    if (version >= 3) builder.withNoneAffectedFiles();
+    builder
         .withTestResultStart(2, 1, 1) // Test B.A, 1 class
         .withTestResultClass(1, 1) // Class A, 1 method
-        .withTestResultMethod(1) // Method A
-        .build();
+        .withTestResultMethod(1); // Method A
+    if (version >= 3) builder.withNoneAffectedFiles();
+    byte[] twoTestsIncrementalDict = builder.build();
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     final DataOutputStream dos = new DataOutputStream(baos);
     final SingleTrFileDiscoveryProtocolDataListener listener = new SingleTrFileDiscoveryProtocolDataListener(dos, version);
@@ -160,8 +163,8 @@ public class SingleTrFileDiscoveryDataListenerTest {
     classes.put(1, new boolean[]{true});
     methods.put(1, new int[]{1});
 
-    listener.testFinished("A", "B", classes, methods);
-    listener.testFinished("B", "A", classes, methods);
+    listener.testFinished("A", "B", classes, methods, Collections.<int[]>emptyList());
+    listener.testFinished("B", "A", classes, methods, Collections.<int[]>emptyList());
 
 
     listener.testsFinished();

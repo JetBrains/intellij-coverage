@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2018 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,16 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
-import org.jetbrains.coverage.org.objectweb.asm.*;
+import com.intellij.rt.coverage.util.ClassNameUtil;
+import org.jetbrains.coverage.org.objectweb.asm.Label;
+import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import org.jetbrains.coverage.org.objectweb.asm.tree.MethodNode;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class LineEnumerator extends MethodVisitor implements Opcodes {
   private final ClassInstrumenter myClassInstrumenter;
@@ -40,16 +46,20 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   private Map<Label, Integer> mySwitches;
 
   private final MethodVisitor myWriterMethodVisitor;
-  private final boolean myIsReferencedType;
-  private boolean myRemoveNotNullJumps;
 
   private static final byte SEEN_NOTHING = 0;
-  private static final byte ILOAD_SEEN = 1;
-  private static final byte IFNE_SEEN = 2;
-  private static final byte ICONST_1_SEEN = 3;
-  private static final byte GOTO_SEEN = 4;
 
-  private static final byte GETSTATIC_SEEN = 5;
+  /**
+  * DUP
+  * IFNONNULL
+  * ICONST/BIPUSH
+  * INVOKESTATIC className.$$$reportNull$$$0 (I)V 
+  */
+  private static final byte DUP_SEEN = 1;
+  private static final byte IFNONNULL_SEEN = 2;
+  private static final byte PARAM_CONST_SEEN = 3;
+
+  private static final byte ASSERTIONS_DISABLED_STATE = 5;
 
   private byte myState = SEEN_NOTHING;
 
@@ -68,8 +78,6 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     myMethodName = name;
     mySignature = desc;
     methodNode = (MethodNode)this.mv;
-    final Type returnType = Type.getReturnType(desc);
-    myIsReferencedType = returnType.getSort() == Type.OBJECT || returnType.getSort() == Type.ARRAY;
   }
 
 
@@ -112,7 +120,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
         lineData.addJump(myCurrentJump++);
       }
     }
-    if (myState == GETSTATIC_SEEN && opcode == Opcodes.IFNE) {
+    if (myState == ASSERTIONS_DISABLED_STATE && opcode == Opcodes.IFNE) {
       myState = SEEN_NOTHING;
       final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
       if (lineData != null && isJump(label)) {
@@ -121,11 +129,9 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
         myLastJump = null;
       }
     }
-    if (myState == ILOAD_SEEN && opcode == Opcodes.IFNE) {
-      myState = IFNE_SEEN;
-    }
-    else if (myState == ICONST_1_SEEN && opcode == Opcodes.GOTO) {
-      myState = GOTO_SEEN;
+
+    if (myState == DUP_SEEN && opcode == Opcodes.IFNONNULL) {
+      myState = IFNONNULL_SEEN;
     }
     else {
       myState = SEEN_NOTHING;
@@ -191,24 +197,12 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
       myHasInstructions = true;
     }
 
-    //remove previous jump -> which is wrapper to throw IllegalStateException("method can't return null")
-    if (myRemoveNotNullJumps && opcode == Opcodes.ARETURN) {
-      final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
-      if (lineData != null) {
-        lineData.removeJump(myCurrentJump--);
-        myJumps.remove(myLastJump);
-      }
-    }
-    if (opcode == Opcodes.ICONST_1 && myState == IFNE_SEEN) {
-      myState = ICONST_1_SEEN;
-    }
-    else if (opcode == Opcodes.ICONST_0 && myState == GOTO_SEEN) {
-      final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
-      if (lineData != null) {
-        lineData.removeJump(myCurrentJump--);
-        myJumps.remove(myLastJump);
-      }
-      myState = SEEN_NOTHING;
+    if (opcode == Opcodes.DUP) {
+      myState = DUP_SEEN;
+    } 
+    else if (myState == IFNONNULL_SEEN && 
+        (opcode >= Opcodes.ICONST_0 && opcode <= Opcodes.ICONST_5 || opcode == Opcodes.BIPUSH || opcode == Opcodes.SIPUSH)) {
+      myState = PARAM_CONST_SEEN;
     }
     else {
       myState = SEEN_NOTHING;
@@ -225,11 +219,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   public void visitVarInsn(final int opcode, final int var) {
     super.visitVarInsn(opcode, var);
     if (!myHasExecutableLines) return;
-    if (opcode == Opcodes.ILOAD) {
-      myState = ILOAD_SEEN;
-    } else {
-      myState = SEEN_NOTHING;
-    }
+    myState = SEEN_NOTHING;
     myHasInstructions = true;
   }
 
@@ -244,8 +234,9 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     super.visitFieldInsn(opcode, owner, name, desc);
     if (!myHasExecutableLines) return;
     if (opcode == Opcodes.GETSTATIC && name.equals("$assertionsDisabled")) {
-      myState = GETSTATIC_SEEN;
-    } else {
+      myState = ASSERTIONS_DISABLED_STATE;
+    }
+    else {
       myState = SEEN_NOTHING;
     }
     myHasInstructions = true;
@@ -254,7 +245,21 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
     super.visitMethodInsn(opcode, owner, name, desc, itf);
     if (!myHasExecutableLines) return;
-    myState = SEEN_NOTHING;
+
+    if (myState == PARAM_CONST_SEEN && 
+        opcode == Opcodes.INVOKESTATIC &&
+        name.startsWith("$$$reportNull$$$") &&
+        ClassNameUtil.convertToFQName(owner).equals(myClassInstrumenter.getClassName())) {
+      final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
+      if (lineData != null) {
+        lineData.removeJump(myCurrentJump--);
+        myJumps.remove(myLastJump);
+      }
+      myState = SEEN_NOTHING;
+    }
+    else {
+      myState = SEEN_NOTHING;
+    }
     myHasInstructions = true;
   }
 
@@ -277,14 +282,5 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     if (!myHasExecutableLines) return;
     myState = SEEN_NOTHING;
     myHasInstructions = true;
-  }
-
-  public AnnotationVisitor visitAnnotation(final String anno, final boolean visible) {
-    final AnnotationVisitor visitor = super.visitAnnotation(anno, visible);
-    if (!myHasExecutableLines) return visitor;
-    if (myIsReferencedType && anno.equals("Lorg/jetbrains/annotations/NotNull;")) {
-      myRemoveNotNullJumps = true;
-    }
-    return visitor;
   }
 }

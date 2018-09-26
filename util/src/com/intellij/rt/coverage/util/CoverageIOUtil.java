@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
  * @since 18-May-2009
  */
 public class CoverageIOUtil {
+  public static final int GIGA = 1000 * 1000 * 1000;
   private static final int STRING_HEADER_SIZE = 1;
   private static final int STRING_LENGTH_THRESHOLD = 255;
 
@@ -75,7 +76,7 @@ public class CoverageIOUtil {
     }
   };
 
-  public static byte[] allocReadWriteUTFBuffer() {
+  private static byte[] allocReadWriteUTFBuffer() {
     return new byte[STRING_LENGTH_THRESHOLD + STRING_HEADER_SIZE];
   }
 
@@ -121,10 +122,10 @@ public class CoverageIOUtil {
     return new String(chars);
   }
 
-  static boolean isAscii(final String str) {
+  private static boolean isAscii(final String str) {
     for (int i = 0; i != str.length(); ++ i) {
       final char c = str.charAt(i);
-      if (c < 0 || c >= 128) {
+      if (c >= 128) {
         return false;
       }
     }
@@ -185,7 +186,8 @@ public class CoverageIOUtil {
   public static abstract class Consumer {
     protected abstract String consume(String str);
   }
-  public static String processWithDictionary(String methodSignature, Consumer consumer) {
+
+  static String processWithDictionary(String methodSignature, Consumer consumer) {
     final Matcher matcher = TYPE_PATTERN.matcher(methodSignature);
     while (matcher.find()) {
       String s = matcher.group();

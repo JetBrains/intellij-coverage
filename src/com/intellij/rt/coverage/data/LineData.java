@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2018 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -204,6 +204,32 @@ public class LineData implements CoverageData {
     if (myJumpsAndSwitches == null) return null;
     return getOrCreateJumpsAndSwitches().getSwitches();
   }
+
+  public BranchData getBranchData() {
+    if (myJumpsAndSwitches == null) return null;
+    int total = 0;
+    int covered = 0;
+
+    JumpData[] jumps = myJumpsAndSwitches.getJumps();
+    if (jumps != null) {
+      for (JumpData jump : jumps) {
+        total++;
+        if (jump.getFalseHits() > 0 && jump.getTrueHits() > 0) covered++;
+      }
+    }
+
+    SwitchData[] switches = myJumpsAndSwitches.getSwitches();
+    if (switches != null) {
+      for (SwitchData switchData : switches) {
+        for (int hit : switchData.getHits()) {
+          total++;
+          if (hit > 0) covered++;
+        }
+      }
+    }
+
+    return new BranchData(total, covered);
+  } 
 
   public void setHits(final int hits) {
     myHits = hits;

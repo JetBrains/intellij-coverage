@@ -30,8 +30,33 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   private final InstrumentedMethodsFilter myMethodFilter;
   volatile boolean myInstrumentConstructors;
   private int myCurrentMethodCount;
+  /**
+   * Name of generated static field which holds bitmap of class methods visited during any single test run
+   */
   static final String METHODS_VISITED = "__$methodsVisited$__";
   static final String METHODS_VISITED_CLASS = "[Z";
+  /**
+   * Name of generated static method which is called before any instrumented method
+   * to ensure that {@link TestDiscoveryInstrumenter#METHODS_VISITED} is initialized.
+   * Required because instrumented method may be called before static initializer, e.g.
+   * <pre>
+   * <code>
+   * public static void main(String[] args) {
+   *  new B();
+   * }
+   *
+   * class A {
+   *   static B b = new B();
+   * }
+   *
+   * class B extends A {
+   *   B() {
+   *     // called before B static initializer
+   *   }
+   * }
+   * </code>
+   * </pre>
+   */
   private static final String METHODS_VISITED_INIT = "__$initMethodsVisited$__";
   private final boolean myInterface;
   private boolean myCreatedMethod = false;
@@ -153,6 +178,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
    *   `access` static void __$initMethodsVisited$__() {
    *     if (__$methodsVisited$__ == null) {
    *       __$methodsVisited$__ = new boolean[myMethodNames.size()];
+   *       ...
    *     }
    *   }
    * </code>
