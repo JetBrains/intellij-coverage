@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2018 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
   private byte myState;
 
   public TouchCounter(final LineEnumerator enumerator, int access, String desc) {
-    super(Opcodes.ASM6, enumerator.getWV());
+    super(Opcodes.API_VERSION, enumerator.getWV());
     myEnumerator = enumerator;
     int variablesCount = ((Opcodes.ACC_STATIC & access) != 0) ? 0 : 1;
     final Type[] args = Type.getArgumentTypes(desc);

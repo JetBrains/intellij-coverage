@@ -148,7 +148,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
 
   private static int getClassFileVersion(ClassReader reader) {
     final int[] classFileVersion = new int[1];
-    reader.accept(new ClassVisitor(Opcodes.ASM6) {
+    reader.accept(new ClassVisitor(Opcodes.API_VERSION) {
       public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         classFileVersion[0] = version;
       }

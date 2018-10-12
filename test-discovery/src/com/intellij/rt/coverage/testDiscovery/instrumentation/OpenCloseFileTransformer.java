@@ -51,7 +51,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
 
     ClassReader cr = new ClassReader(classfileBuffer);
     ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-    cr.accept(new ClassVisitor(ASM6, cw) {
+    cr.accept(new ClassVisitor(Opcodes.API_VERSION, cw) {
       @Override
       public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor base = super.visitMethod(access, name, desc, signature, exceptions);
@@ -106,7 +106,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
 
     MethodVisitor createVisitor(MethodVisitor base) {
       final Generator cg = new Generator(base);
-      return new MethodVisitor(ASM6, base) {
+      return new MethodVisitor(Opcodes.API_VERSION, base) {
         @Override
         public void visitInsn(int opcode) {
           switch (opcode) {
@@ -147,7 +147,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
 
     private static class Generator extends MethodVisitor {
       Generator(MethodVisitor mv) {
-        super(ASM6, mv);
+        super(Opcodes.API_VERSION, mv);
       }
 
       private void createArray(String type, int size) {
