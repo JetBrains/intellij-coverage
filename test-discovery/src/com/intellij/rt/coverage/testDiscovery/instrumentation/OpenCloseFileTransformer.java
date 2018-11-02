@@ -41,7 +41,8 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
       add(classTransformation(FileInputStream.class, "(Ljava/io/File;)V"));
       add(classTransformation(RandomAccessFile.class, "(Ljava/io/File;Ljava/lang/String;)V"));
       add(classTransformation(ZipFile.class, "(Ljava/io/File;I)V"));
-      addNotNull(OpenCloseFileTransformer.nioInputStreamTransformation());
+
+      addNotNull(nioInputStreamTransformation());
     }
 
     private void addNotNull(ClassTransformation transformation) {
@@ -100,7 +101,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
     private ClassTransformation(Class<?> c, MethodTransformer... methodTransformers) {
       myClass = c;
       for (MethodTransformer s : methodTransformers) {
-        this.methodTransformers.put(s.name + s.signature, s);
+        this.methodTransformers.put(s.signature, s);
       }
     }
   }
@@ -108,7 +109,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
   private static ClassTransformation nioInputStreamTransformation() {
     try {
       Class<?> filesClass = Class.forName("java.nio.file.Files");
-      return new ClassTransformation(filesClass, new MethodTransformer("newInputStream",
+      return new ClassTransformation(filesClass, new MethodTransformer("newInputStream" +
           "(Ljava/nio/file/Path;[Ljava/nio/file/OpenOption;)Ljava/io/InputStream;") {
         @Override
         MethodVisitor createVisitor(MethodVisitor mv) {
@@ -122,11 +123,9 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
   }
 
   private abstract static class MethodTransformer {
-    final String name;
-    final String signature;
+    private final String signature;
 
-    MethodTransformer(String name, String signature) {
-      this.name = name;
+    MethodTransformer(String signature) {
       this.signature = signature;
     }
 
@@ -156,7 +155,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
 
     private static class CtorTransformer extends MethodTransformer {
       CtorTransformer(String constructorDesc) {
-        super("<init>", constructorDesc);
+        super("<init>" + constructorDesc);
       }
 
       protected void generate(Generator g) {
@@ -166,7 +165,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
 
     private static class CloseTransformer extends MethodTransformer {
       CloseTransformer(String methodName, String desc) {
-        super(methodName, desc);
+        super(methodName + desc);
       }
 
       protected void generate(Generator g) {
