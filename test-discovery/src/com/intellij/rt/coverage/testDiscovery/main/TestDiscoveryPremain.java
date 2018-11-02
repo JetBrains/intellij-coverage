@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class TestDiscoveryPremain {
-  @SuppressWarnings("WeakerAccess")
   public static final String INCLUDE_PATTERNS_VM_OP = "test.discovery.include.class.patterns";
   @SuppressWarnings("WeakerAccess")
   public static final String EXCLUDE_PATTERNS_VM_OP = "test.discovery.exclude.class.patterns";

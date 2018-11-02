@@ -194,16 +194,15 @@ public class TestDiscoveryProjectData {
     return myClassToVisitedMethods;
   }
 
-  private static Map<Object, File> myOpenFilesMap = new WeakHashMap<Object, File>();
-  private static Collection<String> myOpenFilesPerTest = new LinkedHashSet<String>();
+  private static final Map<Object, File> myOpenFilesMap = new WeakHashMap<Object, File>();
+  private static final Collection<String> myOpenFilesPerTest = new LinkedHashSet<String>();
 
-  @SuppressWarnings("WeakerAccess")
   public static final String AFFECTED_ROOTS = "test.discovery.affected.roots";
   @SuppressWarnings("WeakerAccess")
   public static final String EXCLUDED_ROOTS = "test.discovery.excluded.roots";
 
-  private static String [] myAffectedRoots = split(AFFECTED_ROOTS);
-  private static String [] myExcludedRoots = split(EXCLUDED_ROOTS);
+  private static final String [] myAffectedRoots = split(AFFECTED_ROOTS);
+  private static final String [] myExcludedRoots = split(EXCLUDED_ROOTS);
 
   private static String[] split(String key) {
     String affected = System.getProperty(key);
