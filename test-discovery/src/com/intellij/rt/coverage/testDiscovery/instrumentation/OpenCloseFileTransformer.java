@@ -19,43 +19,40 @@ package com.intellij.rt.coverage.testDiscovery.instrumentation;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.RandomAccessFile;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipFile;
 
 import static org.jetbrains.coverage.org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.jetbrains.coverage.org.objectweb.asm.Opcodes.*;
 
 public class OpenCloseFileTransformer implements ClassFileTransformer {
+  private static final List<ClassTransformation> CLASS_TRANSFORMATIONS = new LinkedList<ClassTransformation>() {
+    {
+      add(classTransformation(FileOutputStream.class, "(Ljava/io/File;Z)V"));
+      add(classTransformation(FileInputStream.class, "(Ljava/io/File;)V"));
+      add(classTransformation(RandomAccessFile.class, "(Ljava/io/File;Ljava/lang/String;)V"));
+      add(classTransformation(ZipFile.class, "(Ljava/io/File;I)V"));
+      addNotNull(OpenCloseFileTransformer.nioInputStreamTransformation());
+    }
+
+    private void addNotNull(ClassTransformation transformation) {
+      if (transformation != null) add(transformation);
+    }
+  };
+
   private final HashMap<String, ClassTransformation> myClassTransformations = new HashMap<String, ClassTransformation>();
 
   public OpenCloseFileTransformer() {
-    for (ClassTransformation ct : new ArrayList<ClassTransformation>() {
-      {
-        add(classTransformation(FileOutputStream.class, "(Ljava/io/File;Z)V"));
-        add(classTransformation(FileInputStream.class, "(Ljava/io/File;)V"));
-        add(classTransformation(RandomAccessFile.class, "(Ljava/io/File;Ljava/lang/String;)V"));
-        add(classTransformation(ZipFile.class, "(Ljava/io/File;I)V"));
-        addNioTransformations();
-      }
-
-      private void addNioTransformations() {
-        try {
-          Class<?> filesClass = Class.forName("java.nio.file.Files");
-          add(new ClassTransformation(filesClass, new MethodTransformer("newInputStream",
-              "(Ljava/nio/file/Path;[Ljava/nio/file/OpenOption;)Ljava/io/InputStream;") {
-            @Override
-            MethodVisitor createVisitor(MethodVisitor mv) {
-              new Generator(mv).call(TestDiscoveryProjectData.class.getName(), "openPath", new Class[]{Object.class});
-              return super.createVisitor(mv);
-            }
-          }));
-        } catch (ClassNotFoundException ignored) {
-        }
-      }
-    }) {
+    for (ClassTransformation ct : CLASS_TRANSFORMATIONS) {
       myClassTransformations.put(ct.myClass.getName().replace('.', '/'), ct);
     }
   }
@@ -105,6 +102,22 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
       for (MethodTransformer s : methodTransformers) {
         this.methodTransformers.put(s.name + s.signature, s);
       }
+    }
+  }
+
+  private static ClassTransformation nioInputStreamTransformation() {
+    try {
+      Class<?> filesClass = Class.forName("java.nio.file.Files");
+      return new ClassTransformation(filesClass, new MethodTransformer("newInputStream",
+          "(Ljava/nio/file/Path;[Ljava/nio/file/OpenOption;)Ljava/io/InputStream;") {
+        @Override
+        MethodVisitor createVisitor(MethodVisitor mv) {
+          new Generator(mv).call(TestDiscoveryProjectData.class.getName(), "openPath", new Class[]{Object.class});
+          return super.createVisitor(mv);
+        }
+      });
+    } catch (ClassNotFoundException e) {
+      return null;
     }
   }
 
