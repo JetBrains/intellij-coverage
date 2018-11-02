@@ -36,10 +36,10 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
 
   public OpenCloseFileTransformer() {
     for (ClassTransformation ct : new ArrayList<ClassTransformation>() {{
-      add(create(FileOutputStream.class, "(Ljava/io/File;Z)V"));
-      add(create(FileInputStream.class, "(Ljava/io/File;)V"));
-      add(create(RandomAccessFile.class, "(Ljava/io/File;Ljava/lang/String;)V"));
-      add(create(ZipFile.class, "(Ljava/io/File;I)V"));
+      add(classTransformation(FileOutputStream.class, "(Ljava/io/File;Z)V"));
+      add(classTransformation(FileInputStream.class, "(Ljava/io/File;)V"));
+      add(classTransformation(RandomAccessFile.class, "(Ljava/io/File;Ljava/lang/String;)V"));
+      add(classTransformation(ZipFile.class, "(Ljava/io/File;I)V"));
     }}) {
       myClassTransformations.put(ct.myClass.getName().replace('.', '/'), ct);
     }
@@ -74,7 +74,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
     return classes.toArray(new Class<?>[]{});
   }
 
-  private static ClassTransformation create(Class<?> c, String ctor) {
+  private static ClassTransformation classTransformation(Class<?> c, String ctor) {
     return new ClassTransformation(c,
         new MethodTransformer.CtorTransformer(ctor),
         new MethodTransformer.CloseTransformer("close", "()V")
