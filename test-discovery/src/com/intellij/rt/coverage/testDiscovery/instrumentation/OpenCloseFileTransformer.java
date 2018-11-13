@@ -25,22 +25,35 @@ import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipFile;
 
 import static org.jetbrains.coverage.org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.jetbrains.coverage.org.objectweb.asm.Opcodes.*;
 
 public class OpenCloseFileTransformer implements ClassFileTransformer {
+  private static final List<ClassTransformation> CLASS_TRANSFORMATIONS = new LinkedList<ClassTransformation>() {
+    {
+      add(classTransformation(FileOutputStream.class, "(Ljava/io/File;Z)V"));
+      add(classTransformation(FileInputStream.class, "(Ljava/io/File;)V"));
+      add(classTransformation(RandomAccessFile.class, "(Ljava/io/File;Ljava/lang/String;)V"));
+      add(classTransformation(ZipFile.class, "(Ljava/io/File;I)V"));
+
+      addNotNull(nioInputStreamTransformation());
+    }
+
+    private void addNotNull(ClassTransformation transformation) {
+      if (transformation != null) add(transformation);
+    }
+  };
+
   private final HashMap<String, ClassTransformation> myClassTransformations = new HashMap<String, ClassTransformation>();
 
   public OpenCloseFileTransformer() {
-    for (ClassTransformation ct : new ArrayList<ClassTransformation>() {{
-      add(create(FileOutputStream.class, "(Ljava/io/File;Z)V"));
-      add(create(FileInputStream.class, "(Ljava/io/File;)V"));
-      add(create(RandomAccessFile.class, "(Ljava/io/File;Ljava/lang/String;)V"));
-      add(create(ZipFile.class, "(Ljava/io/File;I)V"));
-    }}) {
+    for (ClassTransformation ct : CLASS_TRANSFORMATIONS) {
       myClassTransformations.put(ct.myClass.getName().replace('.', '/'), ct);
     }
   }
@@ -51,7 +64,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
 
     ClassReader cr = new ClassReader(classfileBuffer);
     ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-    cr.accept(new ClassVisitor(ASM6, cw) {
+    cr.accept(new ClassVisitor(Opcodes.API_VERSION, cw) {
       @Override
       public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         MethodVisitor base = super.visitMethod(access, name, desc, signature, exceptions);
@@ -74,7 +87,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
     return classes.toArray(new Class<?>[]{});
   }
 
-  private static ClassTransformation create(Class<?> c, String ctor) {
+  private static ClassTransformation classTransformation(Class<?> c, String ctor) {
     return new ClassTransformation(c,
         new MethodTransformer.CtorTransformer(ctor),
         new MethodTransformer.CloseTransformer("close", "()V")
@@ -88,25 +101,40 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
     private ClassTransformation(Class<?> c, MethodTransformer... methodTransformers) {
       myClass = c;
       for (MethodTransformer s : methodTransformers) {
-        this.methodTransformers.put(s.name + s.signature, s);
+        this.methodTransformers.put(s.signature, s);
       }
     }
   }
 
-  private abstract static class MethodTransformer {
-    final String name;
-    final String signature;
+  private static ClassTransformation nioInputStreamTransformation() {
+    try {
+      Class<?> filesClass = Class.forName("java.nio.file.Files");
+      return new ClassTransformation(filesClass, new MethodTransformer("newInputStream" +
+          "(Ljava/nio/file/Path;[Ljava/nio/file/OpenOption;)Ljava/io/InputStream;") {
+        @Override
+        MethodVisitor createVisitor(MethodVisitor mv) {
+          new Generator(mv).call(TestDiscoveryProjectData.class.getName(), "openPath", new Class[]{Object.class});
+          return super.createVisitor(mv);
+        }
+      });
+    } catch (ClassNotFoundException e) {
+      return null;
+    }
+  }
 
-    MethodTransformer(String name, String signature) {
-      this.name = name;
+  private abstract static class MethodTransformer {
+    private final String signature;
+
+    MethodTransformer(String signature) {
       this.signature = signature;
     }
 
-    abstract void generate(Generator g);
+    void generate(Generator g) {
+    }
 
     MethodVisitor createVisitor(MethodVisitor base) {
       final Generator cg = new Generator(base);
-      return new MethodVisitor(ASM6, base) {
+      return new MethodVisitor(Opcodes.API_VERSION, base) {
         @Override
         public void visitInsn(int opcode) {
           switch (opcode) {
@@ -127,7 +155,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
 
     private static class CtorTransformer extends MethodTransformer {
       CtorTransformer(String constructorDesc) {
-        super("<init>", constructorDesc);
+        super("<init>" + constructorDesc);
       }
 
       protected void generate(Generator g) {
@@ -137,7 +165,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
 
     private static class CloseTransformer extends MethodTransformer {
       CloseTransformer(String methodName, String desc) {
-        super(methodName, desc);
+        super(methodName + desc);
       }
 
       protected void generate(Generator g) {
@@ -145,9 +173,9 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
       }
     }
 
-    private static class Generator extends MethodVisitor {
+    static class Generator extends MethodVisitor {
       Generator(MethodVisitor mv) {
-        super(ASM6, mv);
+        super(Opcodes.API_VERSION, mv);
       }
 
       private void createArray(String type, int size) {

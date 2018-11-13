@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2015 JetBrains s.r.o.
+ * Copyright 2000-2018 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
                                    final ClassReader cr,
                                    final String className,
                                    final boolean shouldCalculateSource) {
-        super(Opcodes.ASM6, classVisitor);
+        super(Opcodes.API_VERSION, classVisitor);
         myProjectData = projectData;
         myClassName = className.replace('$', '.');
         myClassNameType = className.replace(".", "/");
@@ -56,7 +56,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
 
     private int calcMaxLineNumber(ClassReader cr) {
         final int[] maxLine = new int[] {0};
-        final ClassVisitor instrumentedMethodCounter =  new ClassVisitor(Opcodes.ASM6) {
+        final ClassVisitor instrumentedMethodCounter =  new ClassVisitor(Opcodes.API_VERSION) {
             private boolean myEnum;
             public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
                 myEnum = (access & Opcodes.ACC_ENUM) != 0;
@@ -67,7 +67,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
                 if (!shouldProcessMethod(access, name, desc, signature, myEnum)) {
                     return null;
                 }
-                return new MethodVisitor(Opcodes.ASM6) {
+                return new MethodVisitor(Opcodes.API_VERSION) {
                     public void visitLineNumber(int line, Label start) {
                         if (maxLine[0] < line) {
                             maxLine[0] = line;
@@ -100,7 +100,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
             return mv;
         }
         myProcess = true;
-        final MethodVisitor visitor = new MethodVisitor(Opcodes.ASM6, mv) {
+        final MethodVisitor visitor = new MethodVisitor(Opcodes.API_VERSION, mv) {
             public void visitLineNumber(final int line, final Label start) {
                 getOrCreateLineData(line, name, desc);
 
@@ -194,7 +194,7 @@ public class NewSamplingInstrumenter extends ClassVisitor {
 
     private class StaticBlockMethodVisitor extends MethodVisitor {
         public StaticBlockMethodVisitor(MethodVisitor mv) {
-            super(Opcodes.ASM6, mv);
+            super(Opcodes.API_VERSION, mv);
         }
 
         public void visitCode() {

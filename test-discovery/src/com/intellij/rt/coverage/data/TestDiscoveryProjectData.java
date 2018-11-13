@@ -18,8 +18,8 @@ package com.intellij.rt.coverage.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -194,16 +194,15 @@ public class TestDiscoveryProjectData {
     return myClassToVisitedMethods;
   }
 
-  private static Map<Object, File> myOpenFilesMap = new WeakHashMap<Object, File>();
-  private static Collection<String> myOpenFilesPerTest = new LinkedHashSet<String>();
+  private static final Map<Object, File> myOpenFilesMap = new WeakHashMap<Object, File>();
+  private static final Collection<String> myOpenFilesPerTest = new LinkedHashSet<String>();
 
-  @SuppressWarnings("WeakerAccess")
   public static final String AFFECTED_ROOTS = "test.discovery.affected.roots";
   @SuppressWarnings("WeakerAccess")
   public static final String EXCLUDED_ROOTS = "test.discovery.excluded.roots";
 
-  private static String [] myAffectedRoots = split(AFFECTED_ROOTS);
-  private static String [] myExcludedRoots = split(EXCLUDED_ROOTS);
+  private static final String[] myAffectedRoots = split(AFFECTED_ROOTS);
+  private static final String[] myExcludedRoots = split(EXCLUDED_ROOTS);
 
   private static String[] split(String key) {
     String affected = System.getProperty(key);
@@ -228,6 +227,18 @@ public class TestDiscoveryProjectData {
 
   private static String toSystemIndependentName(String fileName) {
     return fileName.replace('\\', '/');
+  }
+
+  public static synchronized void openPath(Object path) {
+    try {
+      Class<?> pathClass = Class.forName("java.nio.file.Path");
+      File file = (File) pathClass.getDeclaredMethod("toFile").invoke(path);
+      openFile(path, file);
+    } catch (IllegalAccessException ignored) {
+    } catch (InvocationTargetException ignored) {
+    } catch (NoSuchMethodException ignored) {
+    } catch (ClassNotFoundException ignored) {
+    }
   }
 
   public static synchronized void openFile(Object o, File file) {

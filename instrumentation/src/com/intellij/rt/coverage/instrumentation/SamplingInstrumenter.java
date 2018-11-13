@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2018 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
-import com.intellij.rt.coverage.util.LinesUtil;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.LinesUtil;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
 public class SamplingInstrumenter extends Instrumenter {
@@ -40,7 +40,7 @@ public class SamplingInstrumenter extends Instrumenter {
       variablesCount += arg.getSize();
     }
     final int varCount = variablesCount;
-    return new MethodVisitor(Opcodes.ASM6, mv) {
+    return new MethodVisitor(Opcodes.API_VERSION, mv) {
       private Label myStartLabel;
       private Label myEndLabel;
 

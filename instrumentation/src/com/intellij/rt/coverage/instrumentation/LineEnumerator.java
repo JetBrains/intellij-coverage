@@ -71,7 +71,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
                         final String desc,
                         final String signature,
                         final String[] exceptions) {
-    super(Opcodes.ASM6, new MethodNode(access, name, desc, signature, exceptions));
+    super(Opcodes.API_VERSION, new MethodNode(access, name, desc, signature, exceptions));
     myClassInstrumenter = classInstrumenter;
     myWriterMethodVisitor = mv;
     myAccess = access;

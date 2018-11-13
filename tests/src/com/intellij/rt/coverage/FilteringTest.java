@@ -58,7 +58,7 @@ public class FilteringTest extends TestCase {
     assertEquals(expected, ClassNameUtil.shouldExclude(className, excludePatterns));
   }
 
-  private List<Pattern> toPatterns(String regexs[]) {
+  private List<Pattern> toPatterns(String[] regexs) {
     List<Pattern> res = new ArrayList<Pattern>(regexs.length);
     for (String regex : regexs) {
       res.add(Pattern.compile(regex + "(\\$.*)?"));

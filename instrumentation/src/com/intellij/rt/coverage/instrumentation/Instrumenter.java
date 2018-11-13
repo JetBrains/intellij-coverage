@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2018 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public abstract class Instrumenter extends ClassVisitor {
   private boolean myEnum;
 
   public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
-    super(Opcodes.ASM6, classVisitor);
+    super(Opcodes.API_VERSION, classVisitor);
     myProjectData = projectData;
     myClassVisitor = classVisitor;
     myClassName = className;

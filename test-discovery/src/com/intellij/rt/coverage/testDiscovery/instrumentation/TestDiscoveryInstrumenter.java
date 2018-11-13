@@ -63,7 +63,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   private final String[] myMethodNames;
 
   public TestDiscoveryInstrumenter(ClassWriter classWriter, ClassReader cr, String className) {
-    super(Opcodes.ASM6, classWriter);
+    super(Opcodes.API_VERSION, classWriter);
     myMethodFilter = new InstrumentedMethodsFilter(className);
     myClassName = className;
     myInternalClassName = className.replace('.', '/');
@@ -108,7 +108,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     InstrumentedMethodsFilter.Decision decision = myMethodFilter.shouldVisitMethod(access, name, desc, signature, exceptions, myInstrumentConstructors);
     if (decision != InstrumentedMethodsFilter.Decision.YES) return mv;
 
-    return new MethodVisitor(Opcodes.ASM6, mv) {
+    return new MethodVisitor(Opcodes.API_VERSION, mv) {
       final int myMethodId = myCurrentMethodCount++;
 
       @Override
