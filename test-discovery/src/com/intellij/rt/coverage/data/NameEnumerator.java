@@ -81,13 +81,4 @@ public class NameEnumerator {
       }
     }
   }
-
-  static int[] enumerate(String[] names, NameEnumerator enumerator) {
-    int[] ids = new int[names.length];
-    for (int i = 0; i < names.length; i++) {
-      String name = names[i];
-      ids[i] = enumerator.enumerate(name);
-    }
-    return ids;
-  }
 }

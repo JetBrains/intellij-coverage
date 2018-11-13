@@ -125,7 +125,7 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     }};
 
     l1.loadClass("Foo").getDeclaredMethod("bar1").invoke(null);
-    String[] fooMethods = TestDiscoveryProjectDataTestAccessor.getClass2MethodNameMap().get("Foo");
+    String[][] fooMethods = TestDiscoveryProjectDataTestAccessor.getClass2MethodNameMap().get("Foo");
     boolean[] fooUsedMethods = TestDiscoveryProjectDataTestAccessor.getClass2UsedMethodsMap().get("Foo");
     assertEquals(1, fooMethods.length);
     assertEquals(1, fooUsedMethods.length);

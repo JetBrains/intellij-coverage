@@ -60,7 +60,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   private static final String METHODS_VISITED_INIT = "__$initMethodsVisited$__";
   private final boolean myInterface;
   private boolean myCreatedMethod = false;
-  private final String[] myMethodNames;
+  private final String[][] myMethodDescriptors;
 
   public TestDiscoveryInstrumenter(ClassWriter classWriter, ClassReader cr, String className) {
     super(Opcodes.API_VERSION, classWriter);
@@ -68,10 +68,10 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     myClassName = className;
     myInternalClassName = className.replace('.', '/');
     myInterface = (cr.getAccess() & Opcodes.ACC_INTERFACE) != 0;
-    myMethodNames = inspectClass(cr);
+    myMethodDescriptors = inspectClass(cr);
   }
 
-  private String[] inspectClass(ClassReader cr) {
+  private String[][] inspectClass(ClassReader cr) {
     // calculate checksums for class
     CheckSumCalculator checksumCalculator = new CheckSumCalculator(api, myClassName);
     // collect source files of class
@@ -146,7 +146,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
   @Override
   public void visitEnd() {
-    if (myMethodNames.length > 0) {
+    if (myMethodDescriptors.length > 0) {
       generateMembers();
     }
     super.visitEnd();
@@ -177,7 +177,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
    * <code>
    *   `access` static void __$initMethodsVisited$__() {
    *     if (__$methodsVisited$__ == null) {
-   *       __$methodsVisited$__ = new boolean[myMethodNames.size()];
+   *       __$methodsVisited$__ = new boolean[myMethodDescriptors.size()];
    *       ...
    *     }
    *   }
@@ -208,20 +208,20 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
    */
   void initArray(MethodVisitor mv) {
     mv.visitLdcInsn(myClassName);
-    pushInstruction(mv, myMethodNames.length);
+    pushInstruction(mv, myMethodDescriptors.length);
     mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_BOOLEAN);
 
-    pushInstruction(mv, myMethodNames.length);
+    pushInstruction(mv, myMethodDescriptors.length);
     mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/String");
 
-    for (int i = 0; i < myMethodNames.length; ++i) {
+    for (int i = 0; i < myMethodDescriptors.length; ++i) {
       mv.visitInsn(Opcodes.DUP);
       pushInstruction(mv, i);
-      mv.visitLdcInsn(myMethodNames[i]);
+      mv.visitLdcInsn(myMethodDescriptors[i]);
       mv.visitInsn(Opcodes.AASTORE);
     }
 
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, TestDiscoveryProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/String;[Z[Ljava/lang/String;)[Z", false);
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, TestDiscoveryProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/String;[Z[Z[Ljava/lang/String;)[Z", false);
     mv.visitFieldInsn(Opcodes.PUTSTATIC, getFieldClassName(), METHODS_VISITED, METHODS_VISITED_CLASS);
   }
 

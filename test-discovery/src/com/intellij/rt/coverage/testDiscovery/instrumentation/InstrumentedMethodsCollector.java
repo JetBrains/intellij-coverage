@@ -25,7 +25,7 @@ import java.util.List;
 class InstrumentedMethodsCollector extends ClassVisitor {
   private static final String INIT_METHOD_NAME = "<init>";
   private final TestDiscoveryInstrumenter instrumenter;
-  private final List<String> instrumentedMethods;
+  private final List<String[]> instrumentedMethods;
   private final InstrumentedMethodsFilter methodsFilter;
   private int defaultConstructorIndex = -1;
 
@@ -33,11 +33,11 @@ class InstrumentedMethodsCollector extends ClassVisitor {
     super(api, cv);
     this.instrumenter = instrumenter;
     this.methodsFilter = new InstrumentedMethodsFilter(className);
-    this.instrumentedMethods = new ArrayList<String>();
+    this.instrumentedMethods = new ArrayList<String[]>();
   }
 
-  String[] instrumentedMethods() {
-    return instrumentedMethods.toArray(new String[0]);
+  String[][] instrumentedMethods() {
+    return instrumentedMethods.toArray(new String[0][]);
   }
 
   @Override

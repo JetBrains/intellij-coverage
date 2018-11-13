@@ -32,18 +32,18 @@ public class TestDiscoveryProjectDataTestAccessor {
   }
 
   @NotNull
-  public static Map<String, String[]> getClass2MethodNameMap() {
+  public static Map<String, String[][]> getClass2MethodNameMap() {
     TestDiscoveryProjectData projectData = TestDiscoveryProjectData.getProjectData();
     TIntObjectHashMap<String> namesMap = reverse(projectData.getMyNameEnumerator().getNamesMap());
 
-    ConcurrentMap<Integer, int[]> classToMethodNames = projectData.getClassToMethodNames();
+    ConcurrentMap<Integer, int[][]> classToMethodNames = projectData.getClassToMethodNames();
 
-    Map<String, String[]> result = new HashMap<String, String[]>();
-    for (Map.Entry<Integer, int[]> entry : classToMethodNames.entrySet()) {
-      int[] methodIds = entry.getValue();
-      String[] methodNames = new String[methodIds.length];
+    Map<String, String[][]> result = new HashMap<String, String[][]>();
+    for (Map.Entry<Integer, int[][]> entry : classToMethodNames.entrySet()) {
+      int[][] methodIds = entry.getValue();
+      String[][] methodNames = new String[methodIds.length][];
       for (int i = 0; i < methodIds.length; i++) {
-        methodNames[i] = namesMap.get(methodIds[i]);
+        methodNames[i] = substituteEnumerated(methodIds[i], namesMap);
       }
       result.put(namesMap.get(entry.getKey()), methodNames);
     }
@@ -71,6 +71,14 @@ public class TestDiscoveryProjectDataTestAccessor {
         return true;
       }
     });
+    return result;
+  }
+
+  private static String[] substituteEnumerated(int[] entries, TIntObjectHashMap<String> namesMap) {
+    String[] result = new String[entries.length];
+    for (int i = 0; i < entries.length; i++) {
+      result[i] = namesMap.get(entries[i]);
+    }
     return result;
   }
 }

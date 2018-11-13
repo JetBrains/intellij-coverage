@@ -68,12 +68,12 @@ public class TestDiscoveryProjectData {
   }
 
   private final ConcurrentMap<Integer, boolean[]> myClassToVisitedMethods = new ConcurrentHashMap<Integer, boolean[]>();
-  private final ConcurrentMap<Integer, int[]> myClassToMethodNames = new ConcurrentHashMap<Integer, int[]>();
+  private final ConcurrentMap<Integer, int[][]> myClassToMethodNames = new ConcurrentHashMap<Integer, int[][]>();
   final ConcurrentMap<Integer, ClassMetadata> classesToMetadata = new ConcurrentHashMap<Integer, ClassMetadata>();
   private final TestDiscoveryDataListener myDataListener;
 
   // called from instrumented code during class's static init
-  public static boolean[] trace(String className, boolean[] methodFlags, String[] methodNames) {
+  public static boolean[] trace(String className, boolean[] methodFlags, String[][] methodNames) {
     long s = System.nanoTime();
     try {
       return ourProjectData.traceLines(className, methodFlags, methodNames);
@@ -85,7 +85,7 @@ public class TestDiscoveryProjectData {
   private static Long ourTraceTime = 0L;
   private static Long ourCleanupTime = 0L;
 
-  private synchronized boolean[] traceLines(String className, boolean[] methodFlags, String[] methodNames) {
+  private synchronized boolean[] traceLines(String className, boolean[] methodFlags, String[][] methodNames) {
     //System.out.println("Registering " + className);
     //assert methodFlags.length == methodNames.length;
     int classId = myNameEnumerator.enumerate(className);
@@ -101,7 +101,7 @@ public class TestDiscoveryProjectData {
       myClassToVisitedMethods.put(classId, methodFlags);
     }
 
-    myClassToMethodNames.put(classId, NameEnumerator.enumerate(methodNames, myNameEnumerator));
+    myClassToMethodNames.put(classId, enumerateMethodIds(methodNames, myNameEnumerator));
     return methodFlags;
   }
 
@@ -134,11 +134,7 @@ public class TestDiscoveryProjectData {
 
   private int[] fileToInts(String file) {
     String[] split = file.split("/");
-    int[] result = new int[split.length];
-    for (int i = 0; i < split.length; i++) {
-      result[i] = myNameEnumerator.enumerate(split[i]);
-    }
-    return result;
+    return enumerateStrings(split, myNameEnumerator);
   }
 
   public synchronized void testDiscoveryStarted(final String className, final String methodName) {
@@ -185,7 +181,7 @@ public class TestDiscoveryProjectData {
   }
 
   //TestOnly
-  ConcurrentMap<Integer, int[]> getClassToMethodNames() {
+  ConcurrentMap<Integer, int[][]> getClassToMethodNames() {
     return myClassToMethodNames;
   }
 
@@ -264,5 +260,22 @@ public class TestDiscoveryProjectData {
 
   public static synchronized void closeFile(Object o) {
     myOpenFilesMap.remove(o);
+  }
+
+  private static int[][] enumerateMethodIds(String[][] methodIds, NameEnumerator enumerator) {
+    int[][] ids = new int[methodIds.length][];
+    for (int i = 0; i < methodIds.length; i++) {
+      String[] id = methodIds[i];
+      ids[i] = enumerateStrings(id, enumerator);
+    }
+    return ids;
+  }
+
+  private static int[] enumerateStrings(String[] split, NameEnumerator myNameEnumerator) {
+    int[] result = new int[split.length];
+    for (int i = 0; i < split.length; i++) {
+      result[i] = myNameEnumerator.enumerate(split[i]);
+    }
+    return result;
   }
 }

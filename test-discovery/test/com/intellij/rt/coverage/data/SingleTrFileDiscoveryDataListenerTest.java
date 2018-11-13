@@ -49,9 +49,9 @@ public class SingleTrFileDiscoveryDataListenerTest {
     final String name = "ABC";
     listener.getNameEnumerator().enumerate(name);
     final Map<Integer, boolean[]> classes = new HashMap<Integer, boolean[]>();
-    final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();
+    final Map<Integer, int[][]> methods = new HashMap<Integer, int[][]>();
     classes.put(1, new boolean[]{false});
-    methods.put(1, new int[]{1});
+    methods.put(1, new int[][]{{1, 2}});
     listener.testFinished(name, name, classes, methods, Collections.<int[]>emptyList());
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(BinaryResponses.singleTestNoMethods(version));
@@ -125,11 +125,11 @@ public class SingleTrFileDiscoveryDataListenerTest {
     listener.getNameEnumerator().enumerate(name3);
 
     final Map<Integer, boolean[]> classes = new HashMap<Integer, boolean[]>();
-    final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();
+    final Map<Integer, int[][]> methods = new HashMap<Integer, int[][]>();
     classes.put(1, new boolean[]{false});
     classes.put(2, new boolean[]{true});
-    methods.put(1, new int[]{1});
-    methods.put(2, new int[]{3});
+    methods.put(1, new int[][]{{1, 2}});
+    methods.put(2, new int[][]{{3, 2}});
     listener.testFinished(name1, name2, classes, methods, Collections.<int[]>emptyList());
     listener.testsFinished();
     assertThat(baos.toByteArray()).isEqualTo(BinaryResponses.singleTestSingleMethod(version));
@@ -159,9 +159,9 @@ public class SingleTrFileDiscoveryDataListenerTest {
     listener.getNameEnumerator().enumerate("A");
 
     final Map<Integer, boolean[]> classes = new HashMap<Integer, boolean[]>();
-    final Map<Integer, int[]> methods = new HashMap<Integer, int[]>();
+    final Map<Integer, int[][]> methods = new HashMap<Integer, int[][]>();
     classes.put(1, new boolean[]{true});
-    methods.put(1, new int[]{1});
+    methods.put(1, new int[][]{{1, 3}});
 
     listener.testFinished("A", "B", classes, methods, Collections.<int[]>emptyList());
     listener.testFinished("B", "A", classes, methods, Collections.<int[]>emptyList());

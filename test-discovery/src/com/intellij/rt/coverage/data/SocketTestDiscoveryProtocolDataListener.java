@@ -58,7 +58,7 @@ public class SocketTestDiscoveryProtocolDataListener extends TestDiscoveryProtoc
     start(dos);
   }
 
-  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames, List<int[]> openedFiles) {
+  public void testFinished(String className, String methodName, Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[][]> classToMethodNames, List<int[]> openedFiles) {
     try {
       writeTestFinished(dos, className, methodName, classToVisitedMethods, classToMethodNames, openedFiles);
     } catch (IOException e) {

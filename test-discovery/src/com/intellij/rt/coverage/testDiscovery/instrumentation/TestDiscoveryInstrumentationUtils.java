@@ -16,9 +16,9 @@
 
 package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
-public final class TestDiscoveryInstrumentationUtils {
-  public static final String SEPARATOR = "/";
+import jdk.nashorn.internal.codegen.types.Type;
 
+final class TestDiscoveryInstrumentationUtils {
   private TestDiscoveryInstrumentationUtils() {
   }
 
@@ -27,7 +27,14 @@ public final class TestDiscoveryInstrumentationUtils {
    * @param signature description of method arguments and return type
    * @return generated method id
    */
-  public static String getMethodId(String name, String signature) {
-    return name + SEPARATOR + signature;
+  static String[] getMethodId(String name, String signature) {
+    Type[] types = Type.getMethodArguments(signature);
+    String[] result = new String[types.length + 2];
+    result[0] = name;
+    result[1] = Type.getMethodReturnType(signature).getInternalName();
+    for (int i = 0; i < types.length; i++) {
+      result[i + 2] = types[i].getInternalName();
+    }
+    return result;
   }
 }

@@ -46,7 +46,8 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
   }
 
   protected void writeTestFinished(DataOutput output, String className, String methodName,
-                                   Map<Integer, boolean[]> classToVisitedMethods, Map<Integer, int[]> classToMethodNames,
+                                   Map<Integer, boolean[]> classToVisitedMethods,
+                                   Map<Integer, int[][]> classToMethodIds,
                                    List<int[]> openedFiles) throws IOException {
     NameEnumerator nameEnumerator = getNameEnumerator();
     final int testClassNameId = nameEnumerator.enumerate(className);
@@ -60,7 +61,7 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
     output.writeByte(TEST_FINISHED_MARKER);
     CoverageIOUtil.writeINT(output, testClassNameId);
     CoverageIOUtil.writeINT(output, testMethodNameId);
-    writeVisitedMethod(classToVisitedMethods, classToMethodNames, output);
+    writeVisitedMethod(classToVisitedMethods, classToMethodIds, output);
     writeAffectedFiles(output, openedFiles);
   }
 
@@ -103,7 +104,7 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
   }
 
   protected void writeVisitedMethod(Map<Integer, boolean[]> classToVisitedMethods,
-                                    Map<Integer, int[]> classToMethodNames,
+                                    Map<Integer, int[][]> classToMethodIds,
                                     DataOutput os) throws IOException {
     TIntIntHashMap classToUsedMethods = new TIntIntHashMap();
     for (Map.Entry<Integer, boolean[]> o : classToVisitedMethods.entrySet()) {
@@ -131,13 +132,16 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
       CoverageIOUtil.writeINT(os, className);
       CoverageIOUtil.writeINT(os, usedMethodsCount);
 
-      final int[] methodNames = classToMethodNames.get(className);
+      final int[][] methodIds = classToMethodIds.get(className);
       final boolean[] used = classToVisitedMethods.get(className);
 
       for (int i = 0, len = used.length; i < len; ++i) {
         // we check usedMethodCount here since used can still be updated by other threads
         if (used[i] && usedMethodsCount-- > 0) {
-          CoverageIOUtil.writeINT(os, methodNames[i]);
+          CoverageIOUtil.writeINT(os, methodIds.length);
+          for (int[] idEntry : methodIds) {
+            CoverageIOUtil.writeINT(os, idEntry[i]);
+          }
         }
       }
     }
@@ -246,5 +250,4 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
       }
     }
   }
-
 }
