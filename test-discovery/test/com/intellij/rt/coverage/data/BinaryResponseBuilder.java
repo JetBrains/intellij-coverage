@@ -53,8 +53,16 @@ class BinaryResponseBuilder {
     return this;
   }
 
-  public BinaryResponseBuilder withTestResultMethod(int methodId) {
+  public BinaryResponseBuilder withTestResultMethodBeforeV4(int methodId) {
     myBytes.add((byte) methodId);
+    return this;
+  }
+
+  public BinaryResponseBuilder withTestResultMethod(int[] methodId) {
+    myBytes.add((byte) methodId.length);
+    for (int entry : methodId) {
+      myBytes.add((byte) entry);
+    }
     return this;
   }
 

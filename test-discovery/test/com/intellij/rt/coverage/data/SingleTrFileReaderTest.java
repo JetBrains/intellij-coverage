@@ -81,7 +81,7 @@ public class SingleTrFileReaderTest {
     final MySingleTrFileReader reader = read(BinaryResponses.singleTestSingleMethod(version));
     assertThat(reader.myData).isNotEmpty();
     final String[] data = reader.myData.iterator().next();
-    assertThat(data).doesNotContainNull().containsExactly("A", "B", "B", "C");
+    assertThat(data).doesNotContainNull().containsExactly("A", "B", "B", "C/()B");
   }
 
   private MySingleTrFileReader read(byte[] content) throws IOException {

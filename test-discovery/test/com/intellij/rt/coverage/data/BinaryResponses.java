@@ -56,11 +56,20 @@ public final class BinaryResponses {
         .withHeader().withStart(version)
         .withIncrementalDictionaryStart(3)
         .withDictionaryElement(1, 0x41) // 1-A
-        .withDictionaryElement(2, 0x42) // 2-B
-        .withDictionaryElement(3, 0x43) // 3-C
+        .withDictionaryElement(2, 0x42); // 2-B
+    if (version >= 4) {
+      builder = builder.withDictionaryElement(3, 0x43); // 3- C
+    } else {
+      builder = builder.withDictionaryElement(3, 0x43, 0x2F, 0x28, 0x29, 0x42); // 3-C/()B
+    }
+    builder = builder
         .withTestResultStart(1, 2, 1) // Test A.B, 1 class
-        .withTestResultClass(2, 1) // Class B, 1 method
-        .withTestResultMethod(3); // Method C
+        .withTestResultClass(2, 1); // Class B, 1 method
+    if (version >= 4) {
+      builder = builder.withTestResultMethod(new int[] {3, 2}); // Method C
+    } else {
+      builder = builder.withTestResultMethodBeforeV4(3); // Method C
+    }
     if (version >= 3) builder.withNoneAffectedFiles();
     return builder.build();
   }
