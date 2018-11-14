@@ -16,7 +16,7 @@
 
 package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
-import jdk.nashorn.internal.codegen.types.Type;
+import org.jetbrains.coverage.org.objectweb.asm.Type;
 
 final class TestDiscoveryInstrumentationUtils {
   private TestDiscoveryInstrumentationUtils() {
@@ -28,12 +28,13 @@ final class TestDiscoveryInstrumentationUtils {
    * @return generated method id
    */
   static String[] getMethodId(String name, String signature) {
-    Type[] types = Type.getMethodArguments(signature);
-    String[] result = new String[types.length + 2];
+    Type methodType = Type.getMethodType(signature);
+    Type[] argumentTypes = methodType.getArgumentTypes();
+    String[] result = new String[argumentTypes.length + 2];
     result[0] = name;
-    result[1] = Type.getMethodReturnType(signature).getInternalName();
-    for (int i = 0; i < types.length; i++) {
-      result[i + 2] = types[i].getInternalName();
+    result[1] = methodType.getReturnType().getInternalName();
+    for (int i = 0; i < argumentTypes.length; i++) {
+      result[i + 2] = argumentTypes[i].getInternalName();
     }
     return result;
   }

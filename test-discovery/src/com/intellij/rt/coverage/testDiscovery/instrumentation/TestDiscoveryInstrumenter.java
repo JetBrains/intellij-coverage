@@ -203,7 +203,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   }
 
   /**
-   * Pushes class name, array of boolean and method names from stack to the {@link TestDiscoveryProjectData#trace(java.lang.String, boolean[], java.lang.String[])}
+   * Pushes class name, array of boolean and method names from stack to the {@link TestDiscoveryProjectData#trace(java.lang.String, boolean[], java.lang.String[][])}
    * and store result in the field {@link TestDiscoveryInstrumenter#METHODS_VISITED}
    */
   void initArray(MethodVisitor mv) {
@@ -212,16 +212,26 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     mv.visitIntInsn(Opcodes.NEWARRAY, Opcodes.T_BOOLEAN);
 
     pushInstruction(mv, myMethodDescriptors.length);
-    mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/String");
+    mv.visitTypeInsn(Opcodes.ANEWARRAY, "[Ljava/lang/String;");
 
     for (int i = 0; i < myMethodDescriptors.length; ++i) {
       mv.visitInsn(Opcodes.DUP);
       pushInstruction(mv, i);
-      mv.visitLdcInsn(myMethodDescriptors[i]);
+
+      String[] descriptor = this.myMethodDescriptors[i];
+      pushInstruction(mv, descriptor.length);
+      mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/String");
+      for (int j = 0; j < descriptor.length; ++j) {
+        mv.visitInsn(Opcodes.DUP);
+        pushInstruction(mv, j);
+        mv.visitLdcInsn(descriptor[j]);
+        mv.visitInsn(Opcodes.AASTORE);
+      }
+
       mv.visitInsn(Opcodes.AASTORE);
     }
 
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, TestDiscoveryProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/String;[Z[Z[Ljava/lang/String;)[Z", false);
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, TestDiscoveryProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/String;[Z[[Ljava/lang/String;)[Z", false);
     mv.visitFieldInsn(Opcodes.PUTSTATIC, getFieldClassName(), METHODS_VISITED, METHODS_VISITED_CLASS);
   }
 
