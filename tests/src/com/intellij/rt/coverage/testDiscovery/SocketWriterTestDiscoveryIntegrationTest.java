@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.testDiscovery;
 
 import com.intellij.rt.coverage.data.SocketTestDiscoveryProtocolDataListener;
+import com.intellij.rt.coverage.data.api.SimpleDecodingTestDiscoveryProtocolReader;
 import com.intellij.rt.coverage.data.api.TestDiscoveryProtocolReader;
 import com.intellij.rt.coverage.data.api.TestDiscoveryProtocolUtil;
 import com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain;
@@ -220,13 +221,7 @@ public class SocketWriterTestDiscoveryIntegrationTest {
             } else {
               Assert.assertEquals(1, methodId.length);
             }
-            ArrayList<String> result = new ArrayList<String>();
-            result.add(testName);
-            result.add(enumerator.get(currentClassId));
-            for (int entry : methodId) {
-              result.add(enumerator.get(entry));
-            }
-            testDiscoveryData.add(result.toArray(new String[0]));
+            testDiscoveryData.add(new String[] {testName, enumerator.get(currentClassId), SimpleDecodingTestDiscoveryProtocolReader.decodeMethodId(methodId, enumerator)});
           }
 
           public void classProcessingFinished(int classId) {

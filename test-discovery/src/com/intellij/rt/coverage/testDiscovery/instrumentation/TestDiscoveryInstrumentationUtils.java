@@ -38,9 +38,9 @@ final class TestDiscoveryInstrumentationUtils {
     Type[] argumentTypes = methodType.getArgumentTypes();
     String[] result = new String[argumentTypes.length + 2];
     result[0] = name;
-    result[1] = methodType.getReturnType().getInternalName();
+    result[1] = methodType.getReturnType().getDescriptor();
     for (int i = 0; i < argumentTypes.length; i++) {
-      result[i + 2] = argumentTypes[i].getInternalName();
+      result[i + 2] = argumentTypes[i].getDescriptor();
     }
     return result;
   }

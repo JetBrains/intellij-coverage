@@ -147,6 +147,10 @@ public abstract class SimpleDecodingTestDiscoveryProtocolReader implements
   }
 
   private String decodeMethodId(int[] methodId) {
+    return decodeMethodId(methodId, enumerator);
+  }
+
+  public static String decodeMethodId(int[] methodId, TIntObjectHashMap<String> enumerator) {
     if (methodId.length == 1 /*means version < 4*/) {
       return enumerator.get(methodId[0]);
     }
