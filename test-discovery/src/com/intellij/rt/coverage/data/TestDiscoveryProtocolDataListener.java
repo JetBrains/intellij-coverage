@@ -45,6 +45,11 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
     this.myVersion = version;
   }
 
+  @Override
+  public byte getVersion() {
+    return myVersion;
+  }
+
   protected void writeTestFinished(DataOutput output, String className, String methodName,
                                    Map<Integer, boolean[]> classToVisitedMethods,
                                    Map<Integer, int[][]> classToMethodIds,
@@ -138,9 +143,14 @@ public abstract class TestDiscoveryProtocolDataListener implements TestDiscovery
       for (int i = 0, len = used.length; i < len; ++i) {
         // we check usedMethodCount here since used can still be updated by other threads
         if (used[i] && usedMethodsCount-- > 0) {
-          CoverageIOUtil.writeINT(os, methodIds.length);
-          for (int[] idEntry : methodIds) {
-            CoverageIOUtil.writeINT(os, idEntry[i]);
+          int[] methodId = methodIds[i];
+          if (myVersion >= 4) {
+            CoverageIOUtil.writeINT(os, methodId.length);
+            for (int entry : methodId) {
+              CoverageIOUtil.writeINT(os, entry);
+            }
+          } else {
+            CoverageIOUtil.writeINT(os, methodId[0]);
           }
         }
       }

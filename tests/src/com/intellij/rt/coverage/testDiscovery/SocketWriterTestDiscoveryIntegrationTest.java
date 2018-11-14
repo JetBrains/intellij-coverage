@@ -49,7 +49,7 @@ public class SocketWriterTestDiscoveryIntegrationTest {
 
   @Parameters(name = "V{0}")
   public static Object[] versions() {
-    return new Object[]{1, 2, 3};
+    return new Object[]{1, 2, 3, 4};
   }
 
   @Parameter
@@ -179,8 +179,10 @@ public class SocketWriterTestDiscoveryIntegrationTest {
     }
 
     private class MyTestDataListener implements TestDiscoveryProtocolReader {
-      public void testDiscoveryDataProcessingStarted(int version) {
+      private int myVersion;
 
+      public void testDiscoveryDataProcessingStarted(int version) {
+        myVersion = version;
       }
 
       public void testDiscoveryDataProcessingFinished() {
@@ -212,8 +214,19 @@ public class SocketWriterTestDiscoveryIntegrationTest {
             currentClassId = classId;
           }
 
-          public void processUsedMethod(int methodId) {
-            testDiscoveryData.add(new String[] {testName, enumerator.get(currentClassId), enumerator.get(methodId)});
+          public void processUsedMethod(int[] methodId) {
+            if (myVersion >= 4) {
+              Assert.assertTrue("methodId = " + Arrays.toString(methodId), methodId.length >= 2);
+            } else {
+              Assert.assertEquals(1, methodId.length);
+            }
+            ArrayList<String> result = new ArrayList<String>();
+            result.add(testName);
+            result.add(enumerator.get(currentClassId));
+            for (int entry : methodId) {
+              result.add(enumerator.get(entry));
+            }
+            testDiscoveryData.add(result.toArray(new String[0]));
           }
 
           public void classProcessingFinished(int classId) {

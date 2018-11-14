@@ -28,6 +28,8 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.*;
 import java.util.Collection;
@@ -36,17 +38,27 @@ import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
 
+@RunWith(Parameterized.class)
 public class ExplicitTestDiscoveryInstrumentationTest {
+  @Parameterized.Parameters(name = "V{0}")
+  public static Object[] versions() {
+    return new Object[]{1, 2, 3, 4};
+  }
+
+  @Parameterized.Parameter
+  public int version;
 
   @Before
   public void setUp() {
     System.setProperty(TestDiscoveryProjectData.TEST_DISCOVERY_DATA_LISTENER_PROP, DeafTestDiscoveryDataListener.class.getName());
+    System.setProperty(DeafTestDiscoveryDataListener.VERSION_PROP, Integer.toString(version));
     System.setProperty("idea.inline.counter.fields", "true");
   }
 
   @After
   public void tearDown() {
     System.clearProperty(TestDiscoveryProjectData.TEST_DISCOVERY_DATA_LISTENER_PROP);
+    System.clearProperty(DeafTestDiscoveryDataListener.VERSION_PROP);
     System.clearProperty("idea.inline.counter.fields");
   }
 
@@ -129,15 +141,15 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     boolean[] fooUsedMethods = TestDiscoveryProjectDataTestAccessor.getClass2UsedMethodsMap().get("Foo");
     assertEquals(1, fooMethods.length);
     assertEquals(1, fooUsedMethods.length);
-    assertEquals("bar1/()V", fooMethods[0]);
+    assertEquals("bar1/()V", decodeMethodId(fooMethods[0]));
 
     l2.loadClass("Foo").getDeclaredMethod("baz1").invoke(null);
     fooMethods = TestDiscoveryProjectDataTestAccessor.getClass2MethodNameMap().get("Foo");
     fooUsedMethods = TestDiscoveryProjectDataTestAccessor.getClass2UsedMethodsMap().get("Foo");
     assertEquals(2, fooMethods.length);
     assertEquals(2, fooUsedMethods.length);
-    assertEquals("baz1/()V", fooMethods[0]);
-    assertEquals("baz2/()V", fooMethods[1]);
+    assertEquals("baz1/()V", decodeMethodId(fooMethods[0]));
+    assertEquals("baz2/()V", decodeMethodId(fooMethods[1]));
 
     l2.loadClass("Foo").getDeclaredMethod("baz2").invoke(null);
   }
@@ -197,5 +209,18 @@ public class ExplicitTestDiscoveryInstrumentationTest {
     assertNotNull(transformed);
   }
 
-
+  private String decodeMethodId(String[] methodDescriptor) {
+    if (version < 4) {
+      return methodDescriptor[0];
+    }
+    StringBuilder res = new StringBuilder();
+    res.append(methodDescriptor[0]);
+    res.append("/(");
+    for (int i = 2; i < methodDescriptor.length; i++) {
+      res.append(methodDescriptor[i]);
+    }
+    res.append(")");
+    res.append(methodDescriptor[1]);
+    return res.toString();
+  }
 }

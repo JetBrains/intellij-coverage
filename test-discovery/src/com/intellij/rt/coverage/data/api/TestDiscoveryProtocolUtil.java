@@ -149,8 +149,16 @@ public class TestDiscoveryProtocolUtil {
       int methodCount = CoverageIOUtil.readINT(input);
       testDataReader.classProcessingStarted(classId);
       while (methodCount-- > 0) {
-        int methodId = CoverageIOUtil.readINT(input);
-        testDataReader.processUsedMethod(methodId);
+        if (protocolVersion < 4) {
+          testDataReader.processUsedMethod(new int[] {CoverageIOUtil.readINT(input)});
+        } else {
+          int methodIdLen = CoverageIOUtil.readINT(input);
+          int[] methodId = new int[methodIdLen];
+          for (int i = 0; i < methodIdLen; i++) {
+            methodId[i] = CoverageIOUtil.readINT(input);
+          }
+          testDataReader.processUsedMethod(methodId);
+        }
       }
       testDataReader.classProcessingFinished(classId);
     }

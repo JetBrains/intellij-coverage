@@ -59,7 +59,7 @@ public interface TestDiscoveryProtocolReader {
   interface TestDataReader {
     void classProcessingStarted(int classId);
 
-    void processUsedMethod(int methodId);
+    void processUsedMethod(int[] methodId);
 
     void classProcessingFinished(int classId);
 

@@ -16,9 +16,12 @@
 
 package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
+import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import org.jetbrains.coverage.org.objectweb.asm.Type;
 
 final class TestDiscoveryInstrumentationUtils {
+  public static final String SEPARATOR = "/";
+
   private TestDiscoveryInstrumentationUtils() {
   }
 
@@ -28,6 +31,9 @@ final class TestDiscoveryInstrumentationUtils {
    * @return generated method id
    */
   static String[] getMethodId(String name, String signature) {
+    if (TestDiscoveryProjectData.getProtocolVersion() < 4) {
+      return new String[]{name + SEPARATOR + signature};
+    }
     Type methodType = Type.getMethodType(signature);
     Type[] argumentTypes = methodType.getArgumentTypes();
     String[] result = new String[argumentTypes.length + 2];

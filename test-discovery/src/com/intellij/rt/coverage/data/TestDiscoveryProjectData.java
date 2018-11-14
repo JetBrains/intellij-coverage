@@ -85,6 +85,10 @@ public class TestDiscoveryProjectData {
   private static Long ourTraceTime = 0L;
   private static Long ourCleanupTime = 0L;
 
+  public static byte getProtocolVersion() {
+    return ourProjectData.myDataListener.getVersion();
+  }
+
   private synchronized boolean[] traceLines(String className, boolean[] methodFlags, String[][] methodNames) {
     //System.out.println("Registering " + className);
     //assert methodFlags.length == methodNames.length;

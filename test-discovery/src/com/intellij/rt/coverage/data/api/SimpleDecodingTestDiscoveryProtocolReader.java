@@ -116,8 +116,8 @@ public abstract class SimpleDecodingTestDiscoveryProtocolReader implements
         currentClassName = enumerator.get(classId);
       }
 
-      public void processUsedMethod(int methodId) {
-        processData(enumerator.get(testClassId), enumerator.get(testMethodId), currentClassName, enumerator.get(methodId));
+      public void processUsedMethod(int[] methodId) {
+        processData(enumerator.get(testClassId), enumerator.get(testMethodId), currentClassName, decodeMethodId(methodId));
       }
 
       public void classProcessingFinished(int classId) {
@@ -144,5 +144,20 @@ public abstract class SimpleDecodingTestDiscoveryProtocolReader implements
     }
     sb.setLength(sb.length() - "/".length());
     return sb.toString();
+  }
+
+  private String decodeMethodId(int[] methodId) {
+    if (methodId.length == 1 /*means version < 4*/) {
+      return enumerator.get(methodId[0]);
+    }
+    StringBuilder res = new StringBuilder();
+    res.append(enumerator.get(methodId[0]));
+    res.append("/(");
+    for (int i = 2; i < methodId.length; i++) {
+      res.append(enumerator.get(methodId[i]));
+    }
+    res.append(")");
+    res.append(enumerator.get(methodId[1]));
+    return res.toString();
   }
 }

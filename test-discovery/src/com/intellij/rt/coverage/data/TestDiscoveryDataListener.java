@@ -31,4 +31,6 @@ public interface TestDiscoveryDataListener {
   void addClassMetadata(List<ClassMetadata> metadata) throws IOException;
 
   NameEnumerator getNameEnumerator();
+
+  byte getVersion();
 }
