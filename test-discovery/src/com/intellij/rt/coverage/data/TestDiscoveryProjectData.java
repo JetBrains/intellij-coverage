@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.data;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -28,6 +29,7 @@ import static com.intellij.rt.coverage.util.CoverageIOUtil.GIGA;
 public class TestDiscoveryProjectData {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/TestDiscoveryProjectData";
   public static final String TEST_DISCOVERY_DATA_LISTENER_PROP = "test.discovery.data.listener";
+  public static final String INSTRUMENT_SHUTDOWN_HOOKS = "test.discovery.use.very.late.shutdown.hook";
 
   protected static final TestDiscoveryProjectData ourProjectData = new TestDiscoveryProjectData();
   private final NameEnumerator myNameEnumerator;
@@ -48,16 +50,16 @@ public class TestDiscoveryProjectData {
       throw new RuntimeException(e);
     }
 
-    //TODO do via event
+    boolean useVeryLateShutDownHook = !Boolean.FALSE.toString().equals(System.getProperty(INSTRUMENT_SHUTDOWN_HOOKS));
+    if (useVeryLateShutDownHook && !tryRegisterHook()) {
+      useVeryLateShutDownHook = false;
+    }
+    final boolean finalUseVeryLateShutDownHook = useVeryLateShutDownHook;
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
         testDiscoveryFinished();
-        System.out.println("Trace time: " + 1. * ourTraceTime / GIGA);
-        System.out.println("Cleanup time: " + 1. * ourCleanupTime / GIGA);
-
-        System.out.println("Leaked files: " + myOpenFilesMap.size());
-        for (File value : new ArrayList<File>(myOpenFilesMap.values())) {
-          System.out.println(value.getPath());
+        if (!finalUseVeryLateShutDownHook) {
+          logTestInfo();
         }
       }
     }));
@@ -264,5 +266,56 @@ public class TestDiscoveryProjectData {
 
   public static synchronized void closeFile(Object o) {
     myOpenFilesMap.remove(o);
+  }
+
+  private static synchronized void logTestInfo() {
+    System.out.println("Trace time: " + 1. * ourTraceTime / GIGA);
+    System.out.println("Cleanup time: " + 1. * ourCleanupTime / GIGA);
+
+    System.out.println("Leaked files: " + myOpenFilesMap.size());
+    for (File value : new ArrayList<File>(myOpenFilesMap.values())) {
+      System.out.println(value.getPath());
+    }
+  }
+
+  private static boolean tryRegisterHook() {
+    try {
+      Object javaLangAccess = getJavaLangAccess();
+      if (javaLangAccess == null) return false;
+      Method registerShutdownHook = null;
+      for (Method method : javaLangAccess.getClass().getDeclaredMethods()) {
+        if (method.getName().equals("registerShutdownHook")) {
+          registerShutdownHook = method;
+        }
+      }
+      if (registerShutdownHook == null) return false;
+      registerShutdownHook.setAccessible(true);
+      // assume we're only one hackers
+      registerShutdownHook.invoke(javaLangAccess, 9, true, new Runnable() {
+        @Override
+        public void run() {
+          TestDiscoveryProjectData.logTestInfo();
+        }
+      });
+      return true;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+
+  private static Object getJavaLangAccess() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    Class<?> sharedSecrets;
+    try {
+      sharedSecrets = Class.forName("sun.misc.SharedSecrets");
+    } catch (ClassNotFoundException e) {
+      try {
+        sharedSecrets = Class.forName("jdk.internal.misc.SharedSecrets");
+      } catch (ClassNotFoundException e1) {
+        return null;
+      }
+    }
+    Method getJavaLangAccessMethod = sharedSecrets.getDeclaredMethod("getJavaLangAccess");
+    return getJavaLangAccessMethod.invoke(null);
   }
 }
