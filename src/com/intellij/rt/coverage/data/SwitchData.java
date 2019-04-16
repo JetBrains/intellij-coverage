@@ -33,7 +33,6 @@ public class SwitchData implements CoverageData {
     myKeys = keys;
 
     myHits = new int[keys.length];
-    Arrays.fill(myHits, 0);
 
   }
 

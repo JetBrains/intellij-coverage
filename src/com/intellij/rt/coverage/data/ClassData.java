@@ -187,7 +187,6 @@ public class ClassData implements CoverageData {
   public void initLineMask(LineData[] lines) {
     if (myLineMask == null) {
       myLineMask = new int[myLinesArray != null ? Math.max(lines.length, myLinesArray.length) : lines.length];
-      Arrays.fill(myLineMask, 0);
       if (myLinesArray != null) {
         for (int i = 0; i < myLinesArray.length; i++) {
           final LineData data = myLinesArray[i];
