@@ -115,7 +115,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     final ClassWriter cw;
     if (computeFrames) {
       final int version = getClassFileVersion(cr);
-      int flags = version >= Opcodes.V1_6 && version != Opcodes.V1_1 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS;
+      int flags = (version & 0xFFFF) >= Opcodes.V1_6 && version != Opcodes.V1_1 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS;
       cw = new MyClassWriter(flags, loader);
     } else {
       cw = new MyClassWriter(ClassWriter.COMPUTE_MAXS, loader);
@@ -146,14 +146,13 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     return System.getProperty("idea.coverage.no.frames") == null;
   }
 
+  /**
+   * Returns class file version in the {@code minor << 16 | major} format.<br/>
+   * <b>Warning</b>: in classes compiled with <a href="https://openjdk.java.net/jeps/12">JEP 12's</a> {@code --enable-preview} option
+   * the minor version is {@code 0xFFFF}, making the whole version negative.
+   */
   private static int getClassFileVersion(ClassReader reader) {
-    final int[] classFileVersion = new int[1];
-    reader.accept(new ClassVisitor(Opcodes.API_VERSION) {
-      public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        classFileVersion[0] = version;
-      }
-    }, 0);
-    return classFileVersion[0];
+    return reader.readInt(4);
   }
 
   private class MyClassWriter extends ClassWriter {
