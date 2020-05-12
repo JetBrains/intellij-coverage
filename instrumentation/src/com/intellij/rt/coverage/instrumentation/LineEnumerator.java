@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
+import org.jetbrains.coverage.org.objectweb.asm.tree.LabelNode;
 import org.jetbrains.coverage.org.objectweb.asm.tree.MethodNode;
 
 import java.util.HashMap;
@@ -113,6 +114,9 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     }
     if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR && !myMethodName.equals("<clinit>")) {
       if (myJumps == null) myJumps = new HashSet<Label>();
+      if (label.info == null) {
+        label.info = new LabelNode(label);
+      }
       myJumps.add(label);
       myLastJump = label;
       final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
