@@ -23,7 +23,7 @@ import com.intellij.rt.coverage.util.FileUtil
 import com.intellij.rt.coverage.util.ProcessUtil
 import com.intellij.rt.coverage.util.ProjectDataLoader
 import com.intellij.rt.coverage.util.ResourceUtil
-import junit.framework.TestCase.assertEquals
+import org.junit.Assert.assertEquals
 import java.io.File
 
 
