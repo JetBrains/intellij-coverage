@@ -17,7 +17,7 @@
 package com.intellij.rt.coverage.kotlin
 
 
-import com.intellij.rt.coverage.kotlin.LineStatus.FULL
+import com.intellij.rt.coverage.data.LineCoverage.FULL
 import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
@@ -73,7 +73,7 @@ class KotlinCoverageStatusTest {
             20 to FULL
     ))
 
-    private fun testClassCoverage(testName: String, expected: Map<Int, LineStatus>, sampling: Boolean = true) {
+    private fun testClassCoverage(testName: String, expected: Map<Int, Byte>, sampling: Boolean = true) {
         val project = runWithCoverage(myDataFile, testName, sampling)
         project.assertEqualsClassLines("kotlinTestData.$testName.TestKt", expected)
     }

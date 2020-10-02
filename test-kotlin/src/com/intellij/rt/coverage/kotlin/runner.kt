@@ -27,10 +27,6 @@ import org.junit.Assert.assertEquals
 import java.io.File
 
 
-enum class LineStatus {
-    NONE, PARTIAL, FULL
-}
-
 fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean): ProjectData {
     val coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent")
     val classPath = System.getProperty("java.class.path")
@@ -44,16 +40,18 @@ fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean)
     return ProjectDataLoader.load(coverageDataFile)!!
 }
 
-fun ProjectData.assertEqualsClassLines(className: String, expectedLines: Map<Int, LineStatus>) {
+fun ProjectData.assertEqualsClassLines(className: String, expectedLines: Map<Int, Byte>) {
     val classData = getClassData(className)!!
-    val lines = classData.getLinesData().associateBy({ it.lineNumber }, { createLineStatus(it.status) })
-    assertEquals(expectedLines, lines)
+    val lines = classData.getLinesData().associateBy({ it.lineNumber }, { it.status.toByte() })
+    assertEquals(statusToString(expectedLines), statusToString(lines))
 }
 
-private fun createLineStatus(value: Int) = when (value) {
-    0 -> LineStatus.NONE
-    1 -> LineStatus.PARTIAL
-    else -> LineStatus.FULL
+private fun statusToString(lines: Map<Int, Byte>) = lines.mapValues {
+    when (it.value.toInt()) {
+        0 -> "NONE"
+        1 -> "PARTIAL"
+        else -> "FULL"
+    }
 }
 
 private fun ClassData.getLinesData() = lines.filterIsInstance(LineData::class.java).sortedBy { it.lineNumber }
