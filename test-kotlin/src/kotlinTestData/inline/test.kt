@@ -18,9 +18,17 @@ package kotlinTestData.inline
 
 private inline fun a(x: Int) {
     println(x)
+    return
 }
 
 fun test() {
     a(4)
     return
+}
+
+object Test {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        test()
+    }
 }

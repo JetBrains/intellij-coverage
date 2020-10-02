@@ -31,3 +31,10 @@ fun test() {
     a()
     return
 }
+
+object Test {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        test()
+    }
+}

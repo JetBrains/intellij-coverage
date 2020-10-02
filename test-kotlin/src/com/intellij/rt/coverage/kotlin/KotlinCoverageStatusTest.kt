@@ -17,7 +17,9 @@
 package com.intellij.rt.coverage.kotlin
 
 
+import com.intellij.rt.coverage.assertEqualsClassLines
 import com.intellij.rt.coverage.data.LineCoverage.FULL
+import com.intellij.rt.coverage.runWithCoverage
 import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
@@ -50,6 +52,7 @@ class KotlinCoverageStatusTest {
     @Test
     @Ignore("Not implemented")
     fun testInline() = testClassCoverage("inline", mapOf(
+            20 to FULL,
             21 to FULL,
             25 to FULL,
             26 to FULL

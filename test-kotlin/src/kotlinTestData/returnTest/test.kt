@@ -19,3 +19,10 @@ package kotlinTestData.returnTest
 fun test() {
     println("Hello world!")
 }
+
+object Test {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        test()
+    }
+}

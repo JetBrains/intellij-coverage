@@ -14,30 +14,18 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.kotlin
+package com.intellij.rt.coverage
 
 import com.intellij.rt.coverage.data.ClassData
 import com.intellij.rt.coverage.data.LineData
 import com.intellij.rt.coverage.data.ProjectData
-import com.intellij.rt.coverage.util.FileUtil
-import com.intellij.rt.coverage.util.ProcessUtil
-import com.intellij.rt.coverage.util.ProjectDataLoader
-import com.intellij.rt.coverage.util.ResourceUtil
 import org.junit.Assert.assertEquals
 import java.io.File
 
 
 fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean): ProjectData {
-    val coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent")
     val classPath = System.getProperty("java.class.path")
-    val commandLine = arrayOf("""-javaagent:$coverageAgentPath="${coverageDataFile.path}" false false false $sampling""",
-            "-classpath", classPath,
-            "kotlinTestData.Main",
-            testName
-    )
-    ProcessUtil.execJavaProcess(commandLine)
-    FileUtil.waitUntilFileCreated(coverageDataFile)
-    return ProjectDataLoader.load(coverageDataFile)!!
+    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, ".*", "kotlinTestData.$testName.Test", sampling)
 }
 
 fun ProjectData.assertEqualsClassLines(className: String, expectedLines: Map<Int, Byte>) {

@@ -24,3 +24,10 @@ fun test() {
     functionWithDefaultArgument(4)
     return
 }
+
+object Test {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        test()
+    }
+}
