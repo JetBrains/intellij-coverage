@@ -26,16 +26,16 @@ import java.io.File
 
 
 class KotlinCoverageStatusTest {
-    private var myDataFile: File? = null
+    private lateinit var myDataFile: File
 
     @Before
     fun setUp() {
-        myDataFile = File("data")
+        myDataFile = createTempFile("test")
     }
 
     @After
     fun tearDown() {
-        myDataFile?.delete()
+        myDataFile.delete()
     }
 
     @Test
@@ -74,7 +74,7 @@ class KotlinCoverageStatusTest {
     ))
 
     private fun testClassCoverage(testName: String, expected: Map<Int, LineStatus>, sampling: Boolean = true) {
-        val project = runWithCoverage(myDataFile!!, testName, sampling)
+        val project = runWithCoverage(myDataFile, testName, sampling)
         project.assertEqualsClassLines("kotlinTestData.$testName.TestKt", expected)
     }
 }
