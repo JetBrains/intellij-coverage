@@ -78,6 +78,6 @@ class KotlinCoverageStatusTest {
 
     private fun testClassCoverage(testName: String, expected: Map<Int, Byte>, sampling: Boolean = true) {
         val project = runWithCoverage(myDataFile, testName, sampling)
-        project.assertEqualsClassLines("kotlinTestData.$testName.TestKt", expected)
+        assertEqualsClassLines(project, "kotlinTestData.$testName.TestKt", expected)
     }
 }

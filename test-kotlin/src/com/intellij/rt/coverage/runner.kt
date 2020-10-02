@@ -28,8 +28,8 @@ fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean)
     return CoverageStatusTest.runCoverage(classPath, coverageDataFile, ".*", "kotlinTestData.$testName.Test", sampling)
 }
 
-fun ProjectData.assertEqualsClassLines(className: String, expectedLines: Map<Int, Byte>) {
-    val classData = getClassData(className)!!
+internal fun assertEqualsClassLines(project: ProjectData, className: String, expectedLines: Map<Int, Byte>) {
+    val classData = project.getClassData(className)!!
     val lines = classData.getLinesData().associateBy({ it.lineNumber }, { it.status.toByte() })
     assertEquals(statusToString(expectedLines), statusToString(lines))
 }
