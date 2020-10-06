@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.kotlin
 
 import com.intellij.rt.coverage.assertEqualsClassLines
 import com.intellij.rt.coverage.data.LineCoverage.FULL
+import com.intellij.rt.coverage.data.LineCoverage.NONE
 import com.intellij.rt.coverage.runWithCoverage
 import org.junit.After
 import org.junit.Before
@@ -41,11 +42,28 @@ class KotlinCoverageStatusTest {
     }
 
     @Test
-    @Ignore("Not implemented")
-    fun testDefaultArgs() = testClassCoverage("defaultArgs", mapOf(
+    fun testDefaultArgsCovered() = testClassCoverage("defaultArgs.covered", mapOf(
+            19 to FULL,
             20 to FULL,
             24 to FULL,
             25 to FULL
+    ))
+
+    @Test
+    fun testDefaultArgsUncovered() = testClassCoverage("defaultArgs.uncovered", mapOf(
+            19 to NONE,
+            20 to FULL,
+            24 to FULL,
+            25 to FULL
+    ))
+
+    @Test
+    fun testDefaultArgsSeveralArgs() = testClassCoverage("defaultArgs.severalArguments", mapOf(
+            20 to NONE,
+            21 to FULL,
+            23 to FULL,
+            27 to FULL,
+            28 to FULL
     ))
 
 

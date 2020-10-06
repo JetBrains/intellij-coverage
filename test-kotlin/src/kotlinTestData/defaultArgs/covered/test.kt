@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package kotlinTestData.defaultArgs
+package kotlinTestData.defaultArgs.covered
 
 private fun functionWithDefaultArgument(x: Int = 3): Int {
     return x + 5
 }
 
 fun test() {
-    functionWithDefaultArgument(4)
+    functionWithDefaultArgument()
     return
 }
 
