@@ -117,6 +117,14 @@ class KotlinCoverageStatusTest {
             22 to NONE // getter is not covered
     ), className = "kotlinTestData.properties.constructor.A")
 
+    @Test
+    fun testDataClass() = testClassCoverage("dataClass", mapOf(
+            19 to FULL,
+            21 to FULL,
+            24 to FULL,
+            25 to FULL
+    ), className = "kotlinTestData.dataClass.A")
+
     private fun testClassCoverage(testName: String, expected: Map<Int, Byte>, sampling: Boolean = true,
                                   className: String = "kotlinTestData.$testName.TestKt") {
         val project = runWithCoverage(myDataFile, testName, sampling)
