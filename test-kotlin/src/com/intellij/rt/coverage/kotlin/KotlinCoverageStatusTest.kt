@@ -18,8 +18,7 @@ package com.intellij.rt.coverage.kotlin
 
 
 import com.intellij.rt.coverage.assertEqualsClassLines
-import com.intellij.rt.coverage.data.LineCoverage.FULL
-import com.intellij.rt.coverage.data.LineCoverage.NONE
+import com.intellij.rt.coverage.data.LineCoverage.*
 import com.intellij.rt.coverage.runWithCoverage
 import org.junit.After
 import org.junit.Before
@@ -94,8 +93,33 @@ class KotlinCoverageStatusTest {
             20 to FULL
     ))
 
-    private fun testClassCoverage(testName: String, expected: Map<Int, Byte>, sampling: Boolean = true) {
+    @Test
+    fun testFileProperties() = testClassCoverage("properties.file", mapOf(
+            // line 20 is invisible for coverage as property is const
+            21 to FULL, // value is written in <cinit>
+            22 to NONE, // getter and setter are uncovered
+            23 to FULL, // value is written in <cinit>
+            // line 25 is invisible for coverage as property is private
+            26 to FULL // value is written in <cinit>
+    ))
+
+    @Test
+    @Ignore("Not implemented")
+    fun testGetterAndSetterOfPropertyAreDistinguishable() = testClassCoverage("properties.getter_setter", mapOf(
+            20 to PARTIAL, // setter is not covered
+            21 to PARTIAL // getter is not covered
+    ))
+
+    @Test
+    fun testPrimaryConstructorWithProperties() = testClassCoverage("properties.constructor", mapOf(
+            20 to FULL,
+            // line 21 is invisible for coverage as property is private
+            22 to NONE // getter is not covered
+    ), className = "kotlinTestData.properties.constructor.A")
+
+    private fun testClassCoverage(testName: String, expected: Map<Int, Byte>, sampling: Boolean = true,
+                                  className: String = "kotlinTestData.$testName.TestKt") {
         val project = runWithCoverage(myDataFile, testName, sampling)
-        assertEqualsClassLines(project, "kotlinTestData.$testName.TestKt", expected)
+        assertEqualsClassLines(project, className, expected)
     }
 }

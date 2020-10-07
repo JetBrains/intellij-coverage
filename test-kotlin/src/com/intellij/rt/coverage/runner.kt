@@ -25,7 +25,7 @@ import java.io.File
 
 fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean): ProjectData {
     val classPath = System.getProperty("java.class.path")
-    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, ".*", "kotlinTestData.$testName.Test", sampling)
+    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, "kotlinTestData.*", "kotlinTestData.$testName.Test", sampling)
 }
 
 internal fun assertEqualsClassLines(project: ProjectData, className: String, expectedLines: Map<Int, Byte>) {
