@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.filters.ImplementerDefaultInterfaceMemberFilter;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
@@ -67,7 +68,8 @@ public abstract class Instrumenter extends ClassVisitor {
       return mv;
     }
     myProcess = true;
-    return createMethodLineEnumerator(mv, name, desc, access, signature, exceptions);
+    return new ImplementerDefaultInterfaceMemberFilter(Opcodes.API_VERSION,
+        createMethodLineEnumerator(mv, name, desc, access, signature, exceptions), this);
   }
 
   private static boolean isDefaultEnumMethod(String name, String desc, String signature, String className) {

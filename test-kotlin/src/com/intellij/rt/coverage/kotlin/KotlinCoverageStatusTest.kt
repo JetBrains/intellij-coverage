@@ -76,13 +76,22 @@ class KotlinCoverageStatusTest {
     fun testDataClass() = test("dataClass", "kotlinTestData.dataClass.A")
 
     @Test
+    fun testDefaultInterfaceMember() = test("defaultInterfaceMember", "kotlinTestData.defaultInterfaceMember.Foo\$DefaultImpls", "kotlinTestData.defaultInterfaceMember.Bar")
+
+    @Test
+    fun testDefaultInterfaceMemberJava() = test("defaultInterfaceMember.java",
+            "kotlinTestData.defaultInterfaceMember.java.Foo", "kotlinTestData.defaultInterfaceMember.java.Bar",
+            fileName = "Test.java")
+
+    @Test
     fun testImplementationByDelegation() = test("implementationByDelegation", "kotlinTestData.implementationByDelegation.Derived")
 
     @Test
     fun testImplementationByDelegationGeneric() = test("implementationByDelegationGeneric", "kotlinTestData.implementationByDelegationGeneric.BDelegation")
 
-    private fun test(testName: String, vararg classes: String = arrayOf("kotlinTestData.$testName.TestKt"), sampling: Boolean = true) {
-        val testFile = pathToFile("src", "kotlinTestData", *testName.split('.').toTypedArray(), "test.kt")
+    private fun test(testName: String, vararg classes: String = arrayOf("kotlinTestData.$testName.TestKt"),
+                     sampling: Boolean = true, fileName: String = "test.kt") {
+        val testFile = pathToFile("src", "kotlinTestData", *testName.split('.').toTypedArray(), fileName)
         val expected = extractCoverageDataFromFile(testFile)
         val project = runWithCoverage(myDataFile, testName, sampling)
         assertEqualsLines(project, expected, classes.toList())
