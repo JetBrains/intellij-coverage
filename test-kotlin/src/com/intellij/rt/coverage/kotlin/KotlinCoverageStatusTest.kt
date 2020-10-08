@@ -125,6 +125,36 @@ class KotlinCoverageStatusTest {
             25 to FULL
     ), className = "kotlinTestData.dataClass.A")
 
+    @Test
+    fun testDefaultInterfaceMember() {
+        val project = runWithCoverage(myDataFile, "defaultInterfaceMember", true)
+        assertEqualsClassLines(project, "kotlinTestData.defaultInterfaceMember.Foo\$DefaultImpls", mapOf(
+                21 to NONE,
+                24 to FULL,
+                27 to NONE
+        ))
+        assertEqualsClassLines(project, "kotlinTestData.defaultInterfaceMember.Bar", mapOf(
+                // line 31 is invisible for coverage as default member is covered in Foo
+                32 to FULL,
+                34 to NONE
+        ))
+    }
+
+    @Test
+    fun testDefaultInterfaceMemberJava() {
+        val project = runWithCoverage(myDataFile, "defaultInterfaceMember.java", true)
+        assertEqualsClassLines(project, "kotlinTestData.defaultInterfaceMember.java.Foo", mapOf(
+                28 to NONE,
+                31 to FULL,
+                34 to NONE
+        ))
+        assertEqualsClassLines(project, "kotlinTestData.defaultInterfaceMember.java.Bar", mapOf(
+                38 to FULL,
+                42 to NONE
+        ))
+    }
+
+
     private fun testClassCoverage(testName: String, expected: Map<Int, Byte>, sampling: Boolean = true,
                                   className: String = "kotlinTestData.$testName.TestKt") {
         val project = runWithCoverage(myDataFile, testName, sampling)

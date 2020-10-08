@@ -19,13 +19,18 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.filters.DefaultInterfaceMemberFilter;
+import com.intellij.rt.coverage.instrumentation.filters.MethodFilter;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
+import org.jetbrains.coverage.org.objectweb.asm.tree.MethodNode;
 
 public abstract class Instrumenter extends ClassVisitor {
+  private static final MethodFilter[] ourMethodFilters = {new DefaultInterfaceMemberFilter()};
+
   protected final ProjectData myProjectData;
   protected final ClassVisitor myClassVisitor;
   private final String myClassName;
@@ -66,8 +71,29 @@ public abstract class Instrumenter extends ClassVisitor {
     if (myEnum && isDefaultEnumMethod(name, desc, signature, myClassName)) {
       return mv;
     }
-    myProcess = true;
-    return createMethodLineEnumerator(mv, name, desc, access, signature, exceptions);
+    return createFilterMethodVisitor(access, name, desc, signature, exceptions, mv);
+  }
+
+  /**
+   * Returns a method visitor that applies a coverage method visitor
+   * if method should be covered or {@code methodVisitor} otherwise.
+   */
+  private MethodVisitor createFilterMethodVisitor(final int methodAccess, final String methodName,
+                                                  final String methodDesc, final String methodSignature,
+                                                  final String[] methodExceptions, final MethodVisitor methodVisitor) {
+    return new MethodNode(Opcodes.API_VERSION, methodAccess, methodName, methodDesc, methodSignature, methodExceptions) {
+      @Override
+      public void visitEnd() {
+        for (MethodFilter filter : ourMethodFilters) {
+          if (!filter.shouldBeCovered(this)) {
+            accept(methodVisitor);
+            return;
+          }
+        }
+        Instrumenter.this.myProcess = true;
+        accept(createMethodLineEnumerator(methodVisitor, methodName, methodDesc, methodAccess, methodSignature, methodExceptions));
+      }
+    };
   }
 
   private static boolean isDefaultEnumMethod(String name, String desc, String signature, String className) {
