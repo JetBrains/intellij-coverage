@@ -125,6 +125,11 @@ class KotlinCoverageStatusTest {
             25 to FULL
     ), className = "kotlinTestData.dataClass.A")
 
+    @Test
+    fun testImplementationByDelegation() = testClassCoverage("implementationByDelegation", mapOf(
+        31 to FULL
+    ), className = "kotlinTestData.implementationByDelegation.Derived")
+
     private fun testClassCoverage(testName: String, expected: Map<Int, Byte>, sampling: Boolean = true,
                                   className: String = "kotlinTestData.$testName.TestKt") {
         val project = runWithCoverage(myDataFile, testName, sampling)
