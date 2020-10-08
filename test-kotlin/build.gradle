@@ -11,6 +11,9 @@ sourceSets {
     test.java.srcDirs = [file('src')]
 }
 
+targetCompatibility = "1.8"
+sourceCompatibility = "1.8"
+
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
