@@ -24,12 +24,14 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 /**
  * Default interface member should be filtered out from implementer.
  * Instructions list of such method consists exactly of:
- * 0. LABEL
- * 1. LINENUMBER
- * 2. ALOAD 0
- * 3. INVOKESTATIC to INTERFACE_NAME$DefaultImpls.INTERFACE_MEMBER
- * 4. RETURN
- * 5. LABEL
+ * <ol>
+ * <li>LABEL</li>
+ * <li>LINENUMBER</li>
+ * <li>ALOAD 0</li>
+ * <li>INVOKESTATIC to INTERFACE_NAME$DefaultImpls.INTERFACE_MEMBER</li>
+ * <li>RETURN</li>
+ * <li>LABEL</li>
+ * </ol>
  * A method is filtered out is it's instructions list matches this structure.
  */
 public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodFilter {
