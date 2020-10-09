@@ -102,4 +102,14 @@ public class ImplementerDefaultInterfaceMemberFilter extends MethodFilter {
       myState = State.SHOULD_COVER;
     }
   }
+
+  public static class Builder implements MethodFilter.Builder {
+    public MethodFilter createFilter(int api, MethodVisitor methodVisitor, Instrumenter context) {
+      return new ImplementerDefaultInterfaceMemberFilter(api, methodVisitor, context);
+    }
+
+    public boolean isApplicable(Instrumenter context) {
+      return context.isKotlinClass() && context.hasInterfaces();
+    }
+  }
 }

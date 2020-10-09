@@ -49,4 +49,9 @@ public abstract class MethodFilter extends MethodVisitor {
       filter(myContext);
     }
   }
+
+  public interface Builder {
+    MethodFilter createFilter(int api, MethodVisitor methodVisitor, Instrumenter context);
+    boolean isApplicable(Instrumenter context);
+  }
 }

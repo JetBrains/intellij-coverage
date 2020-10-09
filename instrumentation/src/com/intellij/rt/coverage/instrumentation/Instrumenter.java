@@ -20,13 +20,17 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.ImplementerDefaultInterfaceMemberFilter;
+import com.intellij.rt.coverage.instrumentation.filters.MethodFilter;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
+import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public abstract class Instrumenter extends ClassVisitor {
+  private static final MethodFilter.Builder[] ourFilters = {new ImplementerDefaultInterfaceMemberFilter.Builder()};
+
   protected final ProjectData myProjectData;
   protected final ClassVisitor myClassVisitor;
   private final String myClassName;
@@ -38,6 +42,8 @@ public abstract class Instrumenter extends ClassVisitor {
   protected ClassData myClassData;
   protected boolean myProcess;
   private boolean myEnum;
+  private boolean myHasInterfaces = false;
+  private boolean myIsKotlinClass = false;
 
   public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
     super(Opcodes.API_VERSION, classVisitor);
@@ -51,6 +57,7 @@ public abstract class Instrumenter extends ClassVisitor {
     myEnum = (access & Opcodes.ACC_ENUM) != 0;
     myProcess = (access & Opcodes.ACC_INTERFACE) == 0;
     myClassData = myProjectData.getOrCreateClassData(StringsPool.getFromPool(myClassName));
+    myHasInterfaces = interfaces != null && interfaces.length > 0;
     super.visit(version, access, name, signature, superName, interfaces);
   }
 
@@ -68,8 +75,16 @@ public abstract class Instrumenter extends ClassVisitor {
       return mv;
     }
     myProcess = true;
-    return new ImplementerDefaultInterfaceMemberFilter(Opcodes.API_VERSION,
-        createMethodLineEnumerator(mv, name, desc, access, signature, exceptions), this);
+    return chainFilters(createMethodLineEnumerator(mv, name, desc, access, signature, exceptions));
+  }
+
+  private MethodVisitor chainFilters(MethodVisitor root) {
+    for (MethodFilter.Builder builder : ourFilters) {
+      if (builder.isApplicable(this)) {
+        root = builder.createFilter(Opcodes.API_VERSION, root, this);
+      }
+    }
+    return root;
   }
 
   private static boolean isDefaultEnumMethod(String name, String desc, String signature, String className) {
@@ -124,5 +139,21 @@ public abstract class Instrumenter extends ClassVisitor {
       myProjectData.getOrCreateClassData(outerClassName).setSource(myClassData.getSource());
     }
     super.visitOuterClass(outerClassName, methodName, methodSig);
+  }
+
+  @Override
+  public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+    if (descriptor != null && descriptor.equals("Lkotlin/Metadata;")) {
+      myIsKotlinClass = true;
+    }
+    return super.visitAnnotation(descriptor, visible);
+  }
+
+  public boolean hasInterfaces() {
+    return myHasInterfaces;
+  }
+
+  public boolean isKotlinClass() {
+    return myIsKotlinClass;
   }
 }
