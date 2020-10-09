@@ -19,7 +19,7 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.filters.ImplementerDefaultInterfaceMemberFilter;
+import com.intellij.rt.coverage.instrumentation.filters.KotlinImplementerDefaultInterfaceMemberFilter;
 import com.intellij.rt.coverage.instrumentation.filters.MethodFilter;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
@@ -29,7 +29,7 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public abstract class Instrumenter extends ClassVisitor {
-  private static final MethodFilter.Builder[] ourFilters = {new ImplementerDefaultInterfaceMemberFilter.Builder()};
+  private static final MethodFilter.Builder[] ourFilters = {new KotlinImplementerDefaultInterfaceMemberFilter.Builder()};
 
   protected final ProjectData myProjectData;
   protected final ClassVisitor myClassVisitor;

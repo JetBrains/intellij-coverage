@@ -32,12 +32,12 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * 5. LABEL
  * A method is filtered out is it's instructions list matches this structure.
  */
-public class ImplementerDefaultInterfaceMemberFilter extends MethodFilter {
+public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodFilter {
   private byte matchedInstructions = 0;
   private int myLine = -1;
 
 
-  public ImplementerDefaultInterfaceMemberFilter(int api, MethodVisitor methodVisitor, Instrumenter context) {
+  public KotlinImplementerDefaultInterfaceMemberFilter(int api, MethodVisitor methodVisitor, Instrumenter context) {
     super(api, methodVisitor, context);
   }
 
@@ -105,7 +105,7 @@ public class ImplementerDefaultInterfaceMemberFilter extends MethodFilter {
 
   public static class Builder implements MethodFilter.Builder {
     public MethodFilter createFilter(int api, MethodVisitor methodVisitor, Instrumenter context) {
-      return new ImplementerDefaultInterfaceMemberFilter(api, methodVisitor, context);
+      return new KotlinImplementerDefaultInterfaceMemberFilter(api, methodVisitor, context);
     }
 
     public boolean isApplicable(Instrumenter context) {
