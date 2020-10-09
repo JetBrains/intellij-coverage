@@ -126,6 +126,8 @@ class KotlinCoverageStatusTest {
     fun testSealedClassConstructor() = test("sealedClassConstructor",
             "SealedClass", "SealedClassWithArgs", "ClassWithPrivateDefaultConstructor")
 
+    @Test
+    fun testFunInterface() = test("funInterface", "TestKt", "TestKt\$test\$1")
 
     private fun test(testName: String, vararg classes: String = arrayOf("TestKt"),
                      sampling: Boolean = true, fileName: String = "test.kt") {
