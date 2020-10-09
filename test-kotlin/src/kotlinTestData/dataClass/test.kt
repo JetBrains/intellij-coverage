@@ -16,13 +16,13 @@
 
 package kotlinTestData.dataClass
 
-data class A(
+data class A(                  // coverage: FULL
         private val x: Int,
-        val z: Int
+        val z: Int             // coverage: FULL
 ) {
     fun foo() {
-        println("Hello world")
-        return
+        println("Hello world") // coverage: FULL
+        return                 // coverage: FULL
     }
 }
 

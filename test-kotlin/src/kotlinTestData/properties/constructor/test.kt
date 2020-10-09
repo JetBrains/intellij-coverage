@@ -17,9 +17,9 @@
 package kotlinTestData.properties.constructor
 
 
-class A(
-        private val x: Int,
-        val y: String
+class A(                    // coverage: FULL
+        private val x: Int, // invisible as property is private
+        val y: String       // coverage: NONE as getter is not covered
 )
 
 

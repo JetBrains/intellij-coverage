@@ -16,13 +16,13 @@
 
 package kotlinTestData.defaultArgs.covered
 
-private fun functionWithDefaultArgument(x: Int = 3): Int {
-    return x + 5
+private fun functionWithDefaultArgument(x: Int = 3): Int {  // coverage: FULL
+    return x + 5                                            // coverage: FULL
 }
 
 fun test() {
-    functionWithDefaultArgument()
-    return
+    functionWithDefaultArgument()                           // coverage: FULL
+    return                                                  // coverage: FULL
 }
 
 object Test {

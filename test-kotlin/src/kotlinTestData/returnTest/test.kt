@@ -17,7 +17,7 @@
 package kotlinTestData.returnTest
 
 fun test() {
-    println("Hello world!")
+    println("Hello world!")  // coverage: FULL
 }
 
 object Test {

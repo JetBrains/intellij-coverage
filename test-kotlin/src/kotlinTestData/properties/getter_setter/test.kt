@@ -17,8 +17,8 @@
 package kotlinTestData.properties.getter_setter
 
 
-var x = 32
-var y = 48
+var x = 32  // coverage: PARTIAL as setter not covered
+var y = 48  // coverage: PARTIAL as getter not covered
 
 object Test {
     @JvmStatic

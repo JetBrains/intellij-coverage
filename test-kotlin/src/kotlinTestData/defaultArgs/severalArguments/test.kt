@@ -17,15 +17,15 @@
 package kotlinTestData.defaultArgs.severalArguments
 
 private fun functionWithDefaultArguments(
-        x: Int = 3,
-        y: Int = 42
+        x: Int = 3,                       // coverage: NONE
+        y: Int = 42                       // coverage: FULL
 ): Int {
-    return x + y
+    return x + y                          // coverage: FULL
 }
 
 fun test() {
-    functionWithDefaultArguments(4)
-    return
+    functionWithDefaultArguments(4)       // coverage: FULL
+    return                                // coverage: FULL
 }
 
 object Test {
