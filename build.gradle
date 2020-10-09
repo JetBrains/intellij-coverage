@@ -17,7 +17,7 @@
 import org.gradle.internal.jvm.Jvm
 
 plugins {
-  id "com.jfrog.bintray" version "1.7.3"
+  id "com.jfrog.bintray" version "1.8.5"
 }
 
 private calcVersion() {
@@ -63,10 +63,6 @@ dependencies {
   compile project(':util')
 }
 
-//noinspection GrUnresolvedAccess
-task wrapper(type: Wrapper) {
-  gradleVersion = '4.5'
-}
 
 ext.repackLibs = copySpec {
   from { zipTree(trove.path) } {
