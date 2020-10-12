@@ -128,7 +128,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
    * Insert call to the __$initMethodsVisited$__
    *
    * It also will create a method for interfaces which were skipped by default: for java 1.8- static methods in interfaces were not possible,
-   * but if there is non-<clinit> code in the interface, then it must be 1.8+
+   * but if there is non-&lt;clinit&gt; code in the interface, then it must be 1.8+
    */
   protected void ensureArrayInitialized(MethodVisitor mv) {
     if (myInterface && !myCreatedMethod) { //java 1.8 + can create static method
