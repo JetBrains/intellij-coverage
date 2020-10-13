@@ -28,7 +28,7 @@ class BaseImpl(private val x: Int) : Base {
 }
 
 class Derived
-(b: Base) : Base by b
+(b: Base) : Base by b              // coverage: FULL
 
 object Test {
     @JvmStatic

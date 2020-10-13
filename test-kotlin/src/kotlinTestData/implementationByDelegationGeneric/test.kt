@@ -24,8 +24,8 @@ class BImplementation : A<Int> {
     override fun get() = 42
 }
 
-class BDelegation
-(): A<Int> by BImplementation()
+class BDelegation                // generated methods are invisible
+(): A<Int> by BImplementation()  // coverage: FULL
 
 object Test {
     @JvmStatic

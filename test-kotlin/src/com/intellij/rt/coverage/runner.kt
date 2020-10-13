@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.data.LineData
 import com.intellij.rt.coverage.data.ProjectData
 import org.junit.Assert.assertEquals
 import java.io.File
+import java.nio.file.Paths
 
 
 fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean): ProjectData {
@@ -28,10 +29,13 @@ fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean)
     return CoverageStatusTest.runCoverage(classPath, coverageDataFile, "kotlinTestData.*", "kotlinTestData.$testName.Test", sampling)
 }
 
-internal fun assertEqualsClassLines(project: ProjectData, className: String, expectedLines: Map<Int, Byte>) {
-    val classData = project.getClassData(className)!!
-    val lines = classData.getLinesData().associateBy({ it.lineNumber }, { it.status.toByte() })
-    assertEquals(statusToString(expectedLines), statusToString(lines))
+internal fun assertEqualsLines(project: ProjectData, expectedLines: Map<Int, String>, classNames: List<String>) {
+    val allData = ClassData("")
+    classNames
+            .map { project.getClassData(it) }
+            .forEach { allData.merge(it) }
+    val lines = allData.getLinesData().associateBy({ it.lineNumber }, { it.status.toByte() })
+    assertEquals(expectedLines, statusToString(lines))
 }
 
 private fun statusToString(lines: Map<Int, Byte>) = lines.mapValues {
@@ -43,3 +47,14 @@ private fun statusToString(lines: Map<Int, Byte>) = lines.mapValues {
 }
 
 private fun ClassData.getLinesData() = lines.filterIsInstance(LineData::class.java).sortedBy { it.lineNumber }
+
+private val coverageMarkerRegex = Regex("// coverage: (FULL|PARTIAL|NONE)( .*)?\$")
+
+internal fun extractCoverageDataFromFile(file: File): Map<Int, String> = file.bufferedReader()
+        .lineSequence()
+        .mapIndexed { index, s -> index + 1 to coverageMarkerRegex.find(s) }
+        .filter { it.second != null }
+        .toMap()
+        .mapValues { it.value!!.groupValues[1] }
+
+internal fun pathToFile(name: String, vararg names: String): File = Paths.get(name, *names).toFile()

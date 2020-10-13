@@ -17,19 +17,19 @@
 package kotlinTestData.inlineInline
 
 private inline fun a() {
-    print("Hello")
-    b()
-    return
+    print("Hello")         // coverage: FULL
+    b()                    // coverage: FULL
+    return                 // coverage: FULL
 }
 
 private inline fun b() {
-    println(" World")
-    return
+    println(" World")      // coverage: FULL
+    return                 // coverage: FULL
 }
 
 fun test() {
-    a()
-    return
+    a()                    // coverage: FULL
+    return                 // coverage: FULL
 }
 
 object Test {

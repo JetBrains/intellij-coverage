@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package kotlinTestData.defaultArgs.uncovered
+package com.intellij.rt.coverage
 
-private fun functionWithDefaultArgument(x: Int = 3): Int {  // coverage: NONE
-    return x + 5                                            // coverage: FULL
-}
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
-fun test() {
-    functionWithDefaultArgument(4)                          // coverage: FULL
-    return                                                  // coverage: FULL
-}
+class ExtractCoverageFromFileTest {
 
-object Test {
-    @JvmStatic
-    fun main(args: Array<String>) {
-        test()
+    @Test
+    fun extractCoverageDataFromFile() {
+        val expected = mapOf(
+                4 to "FULL",
+                5 to "PARTIAL",
+                6 to "NONE",
+                10 to "FULL"
+        )
+        val testFile = pathToFile("src", "kotlinTestData", "testFileExtraction", "extractionTest.txt")
+        val actual = extractCoverageDataFromFile(testFile)
+        assertEquals(expected, actual)
     }
 }

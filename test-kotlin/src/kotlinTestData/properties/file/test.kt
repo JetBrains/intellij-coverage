@@ -17,13 +17,13 @@
 package kotlinTestData.properties.file
 
 
-private const val x = 42
-private val x2 = 42
-val y: List<Int>
-        = ArrayList()
+private const val x = 42   // invisible as property is const
+private val x2 = 42        // coverage: FULL as value is written in <cinit>
+val y: List<Int>           // coverage: NONE as getter and setter are uncovered
+        = ArrayList()      // coverage: FULL as value is written in <cinit>
 
-private val z
-        = ArrayList<Int>()
+private val z              // invisible as property is private
+        = ArrayList<Int>() // coverage: FULL as value is written in <cinit>
 
 
 object Test {
