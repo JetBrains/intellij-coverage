@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.data.LineData
 import com.intellij.rt.coverage.data.ProjectData
 import org.junit.Assert.assertEquals
 import java.io.File
+import java.nio.file.Paths
 
 
 fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean): ProjectData {
@@ -56,4 +57,4 @@ internal fun extractCoverageDataFromFile(file: File): Map<Int, String> = file.bu
         .toMap()
         .mapValues { it.value!!.groupValues[1] }
 
-internal fun pathToFile(vararg names: String) = File(names.joinToString(File.separator))
+internal fun pathToFile(name: String, vararg names: String): File = Paths.get(name, *names).toFile()
