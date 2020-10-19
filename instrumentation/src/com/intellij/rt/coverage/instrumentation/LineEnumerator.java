@@ -302,6 +302,19 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     }
   }
 
+  public void removeLastSwitch(Label dflt, Label... labels) {
+    mySwitchLabels.remove(dflt);
+    if (mySwitches != null) {
+      for (Label label : labels) {
+        mySwitches.remove(label);
+      }
+    }
+    final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
+    if (lineData != null) {
+      lineData.removeSwitch(--myCurrentSwitch);
+    }
+  }
+
   public void visitLdcInsn(final Object cst) {
     super.visitLdcInsn(cst);
     if (!myHasExecutableLines) return;
@@ -329,6 +342,10 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
 
   public String getDescriptor() {
     return mySignature;
+  }
+
+  public Instrumenter getInstrumenter() {
+    return myClassInstrumenter;
   }
 
   private static List<LineEnumeratorFilter> createLineEnumeratorFilters() {

@@ -69,6 +69,12 @@ public class JumpsAndSwitches implements CoverageData {
     return mySwitches.get(switchNumber);
   }
 
+  public void removeSwitch(int switchNumber) {
+    if (mySwitches != null && 0 <= switchNumber && switchNumber < mySwitches.size()) {
+      mySwitches.remove(switchNumber);
+    }
+  }
+
   public SwitchData getSwitchData(int switchNumber) {
     return mySwitchesArray == null ? null : mySwitchesArray[switchNumber];
   }

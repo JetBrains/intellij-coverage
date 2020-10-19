@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.instrumentation.kotlin;
 
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinCoroutinesFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinWhenMappingExceptionFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
@@ -63,6 +64,7 @@ public class KotlinUtils {
     List<LineEnumeratorFilter> result = new ArrayList<LineEnumeratorFilter>();
     result.add(new KotlinWhenMappingExceptionFilter());
     result.add(new KotlinDefaultArgsBranchFilter());
+    result.add(new KotlinCoroutinesFilter());
     return result;
   }
 }

@@ -113,6 +113,37 @@ class KotlinCoverageStatusTest {
             fileName = "Test.java")
 
     @Test
+    fun testCoroutinesLambda() = test("coroutines.lambda",
+            "TestKt", "TestKt\$test\$1",
+            sampling = false)
+
+    @Test
+    fun testCoroutinesFunction() = test("coroutines.function",
+            "TestKt", "TestKt\$test\$1",
+            sampling = false)
+
+    @Test
+    fun testCoroutinesTailSuspend() = test("coroutines.tailSuspendCall", sampling = false)
+
+    @Test
+    fun testCoroutinesNoSuspend() = test("coroutines.noSuspend", sampling = false)
+
+    @Test
+    fun testCoroutinesNonVoid() = test("coroutines.nonVoid",
+            "TestKt", "TestKt\$test\$1",
+            sampling = false)
+
+    @Test
+    fun testCoroutinesAsync() = test("coroutines.async",
+            "TestKt", "TestKt\$test\$1", "TestKt\$test\$1\$time\$1\$one\$1", "TestKt\$test\$1\$time\$1\$two\$1",
+            sampling = false)
+
+    @Test
+    fun testCoroutinesInline() = test("coroutines.inline",
+            "TestKt\$test\$1", "TestKt",
+            sampling = false)
+
+    @Test
     fun testImplementationByDelegation() = test("implementationByDelegation", "Derived")
 
     @Test
