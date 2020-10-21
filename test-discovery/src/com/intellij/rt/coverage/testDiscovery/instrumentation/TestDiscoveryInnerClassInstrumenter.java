@@ -37,10 +37,6 @@ public class TestDiscoveryInnerClassInstrumenter extends TestDiscoveryInstrument
   }
 
   @Override
-  protected void ensureArrayInitialized(MethodVisitor mv) {
-  }
-
-  @Override
   protected String getFieldClassName() {
     return myInternalCounterClassJVMName;
   }

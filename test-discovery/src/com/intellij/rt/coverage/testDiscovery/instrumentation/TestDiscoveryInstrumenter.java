@@ -26,6 +26,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
   static final int ADDED_CODE_STACK_SIZE = 6;
   private final String myClassName;
   final String myInternalClassName;
+  private final boolean myJava8AndAbove;
   int myClassVersion;
   private final InstrumentedMethodsFilter myMethodFilter;
   volatile boolean myInstrumentConstructors;
@@ -59,7 +60,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
    */
   private static final String METHODS_VISITED_INIT = "__$initMethodsVisited$__";
   private final boolean myInterface;
-  private boolean myCreatedMethod = false;
+  private boolean mySeenClinit = false;
   private final String[] myMethodNames;
 
   public TestDiscoveryInstrumenter(ClassWriter classWriter, ClassReader cr, String className) {
@@ -69,6 +70,7 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
     myInternalClassName = className.replace('.', '/');
     myInterface = (cr.getAccess() & Opcodes.ACC_INTERFACE) != 0;
     myMethodNames = inspectClass(cr);
+    myJava8AndAbove = (cr.readInt(4) & 0xFFFF) >= Opcodes.V1_8;
   }
 
   private String[] inspectClass(ClassReader cr) {
@@ -101,9 +103,23 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
                                    final String[] exceptions) {
     final MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
     if (mv == null) return null;
-    if ("<clinit>".equals(name) || METHODS_VISITED_INIT.equals(name)) {
+    if (METHODS_VISITED_INIT.equals(name)) {
       return mv;
     }
+    if ("<clinit>".equals(name)) {
+      if (myInterface && myJava8AndAbove) {
+        return new MethodVisitor(Opcodes.API_VERSION, mv) {
+          @Override
+          public void visitCode() {
+            visitField(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL | Opcodes.ACC_SYNTHETIC, METHODS_VISITED, METHODS_VISITED_CLASS, null, null);
+            initArray(mv);
+            mySeenClinit = true;
+            super.visitCode();
+          }
+        };
+      }
+      return mv;
+    } 
 
     InstrumentedMethodsFilter.Decision decision = myMethodFilter.shouldVisitMethod(access, name, desc, signature, exceptions, myInstrumentConstructors);
     if (decision != InstrumentedMethodsFilter.Decision.YES) return mv;
@@ -113,7 +129,9 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
       @Override
       public void visitCode() {
-        ensureArrayInitialized(mv);
+        if (!myInterface) {
+          mv.visitMethodInsn(Opcodes.INVOKESTATIC, myInternalClassName, METHODS_VISITED_INIT, "()V", myInterface);
+        }
         mv.visitFieldInsn(Opcodes.GETSTATIC, getFieldClassName(), METHODS_VISITED, METHODS_VISITED_CLASS);
         pushInstruction(this, myMethodId);
         visitInsn(Opcodes.ICONST_1);
@@ -122,22 +140,6 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
         super.visitCode();
       }
     };
-  }
-
-  /**
-   * Insert call to the __$initMethodsVisited$__
-   *
-   * It also will create a method for interfaces which were skipped by default: for java 1.8- static methods in interfaces were not possible,
-   * but if there is non-<clinit> code in the interface, then it must be 1.8+
-   */
-  protected void ensureArrayInitialized(MethodVisitor mv) {
-    if (myInterface && !myCreatedMethod) { //java 1.8 + can create static method
-      myCreatedMethod = true;
-      //don't care about serialization for interfaces, class is required => allowed to create public method
-      createInitFieldMethod(Opcodes.ACC_SYNTHETIC | Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC);
-    }
-
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, myInternalClassName, METHODS_VISITED_INIT, "()V", false);
   }
 
   protected String getFieldClassName() {
@@ -156,6 +158,22 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
    * Generate field with boolean array to put true if we enter a method
    */
   protected void generateMembers() {
+    if (myInterface) {
+      if (mySeenClinit) {
+        //already added in <clinit>, e.g. if interface has constant
+        //interface I {
+        //  I DEFAULT = new I (); 
+        //}
+        return;
+      }
+      
+      if (!myJava8AndAbove) {
+        //only java 8+ may contain non-abstract methods in interfaces
+        //no need to instrument otherwise
+        return;
+      }
+    }
+
     int access;
     if (myInterface) {
       access = Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL | Opcodes.ACC_SYNTHETIC;
@@ -168,6 +186,12 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
     if (!myInterface) {
       createInitFieldMethod(Opcodes.ACC_SYNTHETIC | Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC);
+    }
+    else {
+      //interface has no clinit method
+      //java 11 verifies that constants are initialized in clinit
+      //let's generate it!
+      generateExplicitClinitForInterfaces();
     }
   }
 
@@ -197,6 +221,14 @@ public class TestDiscoveryInstrumenter extends ClassVisitor {
 
     mv.visitLabel(alreadyInitialized);
 
+    mv.visitInsn(Opcodes.RETURN);
+    mv.visitMaxs(ADDED_CODE_STACK_SIZE, 0);
+    mv.visitEnd();
+  }
+  
+  private void generateExplicitClinitForInterfaces() {
+    MethodVisitor mv = visitMethod(Opcodes.ACC_SYNTHETIC | Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
+    initArray(mv);
     mv.visitInsn(Opcodes.RETURN);
     mv.visitMaxs(ADDED_CODE_STACK_SIZE, 0);
     mv.visitEnd();
