@@ -50,7 +50,7 @@ public class TestDiscoveryProjectData {
       throw new RuntimeException(e);
     }
 
-    boolean useVeryLateShutDownHook = !Boolean.FALSE.toString().equals(System.getProperty(INSTRUMENT_SHUTDOWN_HOOKS));
+    boolean useVeryLateShutDownHook = Boolean.TRUE.toString().equals(System.getProperty(INSTRUMENT_SHUTDOWN_HOOKS));
     if (useVeryLateShutDownHook && !tryRegisterHook()) {
       useVeryLateShutDownHook = false;
     }
