@@ -24,13 +24,13 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
  */
 public abstract class MethodFilter extends MethodVisitor {
 
-  protected abstract void filter(Instrumenter context);
+  protected abstract void filter();
 
   protected enum State {
     SHOULD_COVER, SHOULD_NOT_COVER, UNKNOWN
   }
 
-  private final Instrumenter myContext;
+  protected final Instrumenter myContext;
   protected State myState = State.UNKNOWN;
 
   public MethodFilter(int api, MethodVisitor methodVisitor, Instrumenter context) {
@@ -46,7 +46,7 @@ public abstract class MethodFilter extends MethodVisitor {
   public void visitEnd() {
     super.visitEnd();
     if (myState == State.SHOULD_NOT_COVER) {
-      filter(myContext);
+      filter();
     }
   }
 

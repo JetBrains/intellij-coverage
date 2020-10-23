@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters;
 
+import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
@@ -37,14 +38,17 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodFilter {
   private byte matchedInstructions = 0;
   private int myLine = -1;
+  private LineData myPreviousLineData;
 
 
   public KotlinImplementerDefaultInterfaceMemberFilter(int api, MethodVisitor methodVisitor, Instrumenter context) {
     super(api, methodVisitor, context);
   }
 
-  protected void filter(Instrumenter context) {
-    context.removeLine(myLine);
+  protected void filter() {
+    if (myPreviousLineData == null) {
+      myContext.removeLine(myLine);
+    }
   }
 
   @Override
@@ -62,6 +66,7 @@ public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodFilter 
 
   @Override
   public void visitLineNumber(int line, Label start) {
+    myPreviousLineData = myContext.getLineData(line);
     super.visitLineNumber(line, start);
     if (completed()) return;
     if (matchedInstructions == 1) {

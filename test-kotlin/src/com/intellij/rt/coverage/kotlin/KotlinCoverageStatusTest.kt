@@ -79,6 +79,9 @@ class KotlinCoverageStatusTest {
     fun testDefaultInterfaceMember() = test("defaultInterfaceMember", "kotlinTestData.defaultInterfaceMember.Foo\$DefaultImpls", "kotlinTestData.defaultInterfaceMember.Bar")
 
     @Test
+    fun testDefaultInterfaceMemberRemoveOnlyInterfaceMember() = test("defaultInterfaceMember.removeOnlyDefaultInterfaceMember", "kotlinTestData.defaultInterfaceMember.removeOnlyDefaultInterfaceMember.Bar")
+
+    @Test
     fun testDefaultInterfaceMemberJava() = test("defaultInterfaceMember.java",
             "kotlinTestData.defaultInterfaceMember.java.Foo", "kotlinTestData.defaultInterfaceMember.java.Bar",
             fileName = "Test.java")

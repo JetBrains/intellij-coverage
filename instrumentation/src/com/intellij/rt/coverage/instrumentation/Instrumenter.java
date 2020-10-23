@@ -156,4 +156,8 @@ public abstract class Instrumenter extends ClassVisitor {
   public boolean isKotlinClass() {
     return myIsKotlinClass;
   }
+
+  public LineData getLineData(int line) {
+    return myLines.get(line);
+  }
 }
