@@ -18,6 +18,7 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.SwitchData;
+import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinWhenMappingExceptionFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
@@ -264,17 +265,21 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
         opcode == Opcodes.INVOKESTATIC &&
         name.startsWith("$$$reportNull$$$") &&
         ClassNameUtil.convertToFQName(owner).equals(myClassInstrumenter.getClassName())) {
-      final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
-      if (lineData != null) {
-        lineData.removeJump(myCurrentJump--);
-        myJumps.remove(myLastJump);
-      }
+      removeLastJump();
       myState = SEEN_NOTHING;
     }
     else {
       myState = SEEN_NOTHING;
     }
     myHasInstructions = true;
+  }
+
+  public void removeLastJump() {
+    final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
+    if (lineData != null) {
+      lineData.removeJump(myCurrentJump--);
+      myJumps.remove(myLastJump);
+    }
   }
 
   public void visitLdcInsn(final Object cst) {
@@ -302,9 +307,14 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     return mySwitchLabels;
   }
 
+  public String getDescriptor() {
+    return mySignature;
+  }
+
   private static List<LineEnumeratorFilter> createLineEnumeratorFilters() {
     List<LineEnumeratorFilter> result = new ArrayList<LineEnumeratorFilter>();
     result.add(new KotlinWhenMappingExceptionFilter());
+    result.add(new KotlinDefaultArgsBranchFilter());
     return result;
   }
 }
