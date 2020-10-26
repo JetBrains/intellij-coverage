@@ -3,6 +3,11 @@ dependencies {
   compile library_project_trove4j
 }
 
+
+sourceSets {
+  main.java.srcDirs 'src'
+}
+
 jar {
   baseName = "coverage-util"
 }

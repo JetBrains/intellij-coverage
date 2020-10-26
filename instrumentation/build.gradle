@@ -5,6 +5,10 @@ dependencies {
   compile library_project_asm_all
 }
 
+sourceSets {
+  main.java.srcDirs 'src'
+}
+
 task coverageAgentJar(type: Jar) {
   baseName = coverage_jar_name
   destinationDir = file("../dist")
@@ -19,7 +23,6 @@ task coverageAgentJar(type: Jar) {
 
 build.dependsOn(coverageAgentJar)
 
-jar.enabled = false
 artifacts {
   archives coverageAgentJar
 }

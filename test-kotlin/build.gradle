@@ -19,6 +19,7 @@ dependencies {
 
     testImplementation(files(project(":tests").sourceSets.test.output))
     testImplementation(project(":instrumentation"))
+    testImplementation(project(":kotlin-plugin"))
 
     testImplementation("junit:junit:4.13")
 }

@@ -23,6 +23,7 @@ dependencies {
 }
 
 sourceSets {
+  main.java.srcDirs 'src'
   test.java.srcDirs = [file('test')]
 }
 

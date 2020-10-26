@@ -19,7 +19,6 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinImplementerDefaultInterfaceMemberFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
@@ -180,7 +179,10 @@ public abstract class Instrumenter extends ClassVisitor {
 
   private static List<MethodVisitingFilter.Builder> getMethodVisitingFilters() {
     List<MethodVisitingFilter.Builder> result = new ArrayList<MethodVisitingFilter.Builder>();
-    result.add(new KotlinImplementerDefaultInterfaceMemberFilter.Builder());
+    ServiceLoader<MethodVisitingFilter.Builder> loader = ServiceLoader.load(MethodVisitingFilter.Builder.class);
+    for (MethodVisitingFilter.Builder builder : loader) {
+      result.add(builder);
+    }
     return result;
   }
 }
