@@ -19,8 +19,8 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.filters.KotlinImplementerDefaultInterfaceMemberFilter;
-import com.intellij.rt.coverage.instrumentation.filters.MethodFilter;
+import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinImplementerDefaultInterfaceMemberFilter;
+import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
@@ -28,8 +28,10 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+import java.util.*;
+
 public abstract class Instrumenter extends ClassVisitor {
-  private static final MethodFilter.Builder[] ourFilters = {new KotlinImplementerDefaultInterfaceMemberFilter.Builder()};
+  private static final List<MethodVisitingFilter.Builder> ourVisitingFilters = getMethodVisitingFilters();
 
   protected final ProjectData myProjectData;
   protected final ClassVisitor myClassVisitor;
@@ -43,7 +45,8 @@ public abstract class Instrumenter extends ClassVisitor {
   protected boolean myProcess;
   private boolean myEnum;
   private boolean myHasInterfaces = false;
-  private boolean myIsKotlinClass = false;
+  private final List<String> myAnnotations = new ArrayList<String>();
+  private HashSet<ClassProperty> myProperties;
 
   public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
     super(Opcodes.API_VERSION, classVisitor);
@@ -79,7 +82,7 @@ public abstract class Instrumenter extends ClassVisitor {
   }
 
   private MethodVisitor chainFilters(MethodVisitor root) {
-    for (MethodFilter.Builder builder : ourFilters) {
+    for (MethodVisitingFilter.Builder builder : ourVisitingFilters) {
       if (builder.isApplicable(this)) {
         root = builder.createFilter(Opcodes.API_VERSION, root, this);
       }
@@ -143,9 +146,7 @@ public abstract class Instrumenter extends ClassVisitor {
 
   @Override
   public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-    if (descriptor != null && descriptor.equals("Lkotlin/Metadata;")) {
-      myIsKotlinClass = true;
-    }
+    myAnnotations.add(StringsPool.getFromPool(descriptor));
     return super.visitAnnotation(descriptor, visible);
   }
 
@@ -153,11 +154,33 @@ public abstract class Instrumenter extends ClassVisitor {
     return myHasInterfaces;
   }
 
-  public boolean isKotlinClass() {
-    return myIsKotlinClass;
+  public List<String> getAnnotations() {
+    return myAnnotations;
   }
 
   public LineData getLineData(int line) {
     return myLines.get(line);
+  }
+
+  public boolean containsProperty(ClassProperty property) {
+    createProperties();
+    return myProperties.contains(property);
+  }
+
+  public void addProperty(ClassProperty property) {
+    createProperties();
+    myProperties.add(property);
+  }
+
+  private void createProperties() {
+    if (myProperties == null) {
+      myProperties = new HashSet<ClassProperty>();
+    }
+  }
+
+  private static List<MethodVisitingFilter.Builder> getMethodVisitingFilters() {
+    List<MethodVisitingFilter.Builder> result = new ArrayList<MethodVisitingFilter.Builder>();
+    result.add(new KotlinImplementerDefaultInterfaceMemberFilter.Builder());
+    return result;
   }
 }

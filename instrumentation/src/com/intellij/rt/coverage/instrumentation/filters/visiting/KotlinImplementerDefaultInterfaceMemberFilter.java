@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.instrumentation.filters;
+package com.intellij.rt.coverage.instrumentation.filters.visiting;
 
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
@@ -35,7 +36,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * </ol>
  * A method is filtered out is it's instructions list matches this structure.
  */
-public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodFilter {
+public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodVisitingFilter {
   private byte matchedInstructions = 0;
   private int myLine = -1;
   private LineData myPreviousLineData;
@@ -110,13 +111,13 @@ public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodFilter 
     }
   }
 
-  public static class Builder implements MethodFilter.Builder {
-    public MethodFilter createFilter(int api, MethodVisitor methodVisitor, Instrumenter context) {
+  public static class Builder implements MethodVisitingFilter.Builder {
+    public MethodVisitingFilter createFilter(int api, MethodVisitor methodVisitor, Instrumenter context) {
       return new KotlinImplementerDefaultInterfaceMemberFilter(api, methodVisitor, context);
     }
 
     public boolean isApplicable(Instrumenter context) {
-      return context.isKotlinClass() && context.hasInterfaces();
+      return KotlinUtils.isKotlinClass(context) && context.hasInterfaces();
     }
   }
 }

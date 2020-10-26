@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.instrumentation.filters;
+package com.intellij.rt.coverage.instrumentation.filters.visiting;
 
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
@@ -22,7 +22,7 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 /**
  * Filters out coverage from method if matches filter.
  */
-public abstract class MethodFilter extends MethodVisitor {
+public abstract class MethodVisitingFilter extends MethodVisitor {
 
   protected abstract void filter();
 
@@ -33,7 +33,7 @@ public abstract class MethodFilter extends MethodVisitor {
   protected final Instrumenter myContext;
   protected State myState = State.UNKNOWN;
 
-  public MethodFilter(int api, MethodVisitor methodVisitor, Instrumenter context) {
+  public MethodVisitingFilter(int api, MethodVisitor methodVisitor, Instrumenter context) {
     super(api, methodVisitor);
     myContext = context;
   }
@@ -51,7 +51,7 @@ public abstract class MethodFilter extends MethodVisitor {
   }
 
   public interface Builder {
-    MethodFilter createFilter(int api, MethodVisitor methodVisitor, Instrumenter context);
+    MethodVisitingFilter createFilter(int api, MethodVisitor methodVisitor, Instrumenter context);
     boolean isApplicable(Instrumenter context);
   }
 }
