@@ -17,6 +17,18 @@
 package com.intellij.rt.coverage.instrumentation.kotlin;
 
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
+import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinWhenMappingExceptionFilter;
+import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
+import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticAccessMethodFilter;
+import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticConstructorOfSealedClassFilter;
+import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
+import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinImplementerDefaultInterfaceMemberFilter;
+import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class KotlinUtils {
   private static final String KOTLIN_CLASS_LABEL = "IS_KOTLIN";
@@ -27,5 +39,30 @@ public class KotlinUtils {
     boolean isKotlin = context.getAnnotations().contains("Lkotlin/Metadata;");
     context.addProperty(KOTLIN_CLASS_LABEL, isKotlin);
     return isKotlin;
+  }
+
+  private static final boolean ourKotlinEnabled = !"false".equals(System.getProperty("coverage.kotlin.enable", "true"));
+
+  public static List<MethodSignatureFilter> createSignatureFilters() {
+    if (!ourKotlinEnabled) return Collections.emptyList();
+    List<MethodSignatureFilter> result = new ArrayList<MethodSignatureFilter>();
+    result.add(new KotlinSyntheticConstructorOfSealedClassFilter());
+    result.add(new KotlinSyntheticAccessMethodFilter());
+    return result;
+  }
+
+  public static List<MethodVisitingFilter> createVisitingFilters() {
+    if (!ourKotlinEnabled) return Collections.emptyList();
+    List<MethodVisitingFilter> result = new ArrayList<MethodVisitingFilter>();
+    result.add(new KotlinImplementerDefaultInterfaceMemberFilter());
+    return result;
+  }
+
+  public static List<LineEnumeratorFilter> createLineEnumeratorFilters() {
+    if (!ourKotlinEnabled) return Collections.emptyList();
+    List<LineEnumeratorFilter> result = new ArrayList<LineEnumeratorFilter>();
+    result.add(new KotlinWhenMappingExceptionFilter());
+    result.add(new KotlinDefaultArgsBranchFilter());
+    return result;
   }
 }
