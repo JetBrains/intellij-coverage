@@ -59,6 +59,11 @@ class KotlinCoverageStatusTest {
     @Test
     fun test32ArgsTracing() = test("defaultArgs.args32", sampling = false)
 
+    @Test
+    fun testUnloadedSingleFile() = test("unloaded.singleFile", "UnusedClass", calcUnloaded = true)
+
+    @Test
+    fun testUnloadedMultiFile() = test("unloaded.multiFile", "UnusedClass", calcUnloaded = true, fileName = "UnusedClass.kt")
 
     @Test
     fun testSimpleInline() = test("inline.simple")
@@ -130,10 +135,11 @@ class KotlinCoverageStatusTest {
     fun testFunInterface() = test("funInterface", "TestKt", "TestKt\$test\$1")
 
     private fun test(testName: String, vararg classes: String = arrayOf("TestKt"),
-                     sampling: Boolean = true, fileName: String = "test.kt") {
+                     sampling: Boolean = true, fileName: String = "test.kt",
+                     calcUnloaded: Boolean = false) {
         val testFile = pathToFile("src", "kotlinTestData", *testName.split('.').toTypedArray(), fileName)
         val expected = extractCoverageDataFromFile(testFile)
-        val project = runWithCoverage(myDataFile, testName, sampling)
+        val project = runWithCoverage(myDataFile, testName, sampling, calcUnloaded)
         val fullClassNames = classes.map { "kotlinTestData.$testName.$it" }
         assertEqualsLines(project, expected, fullClassNames)
     }
