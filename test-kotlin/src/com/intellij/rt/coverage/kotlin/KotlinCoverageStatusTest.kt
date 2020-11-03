@@ -93,6 +93,9 @@ class KotlinCoverageStatusTest {
     fun testImplementationByDelegationGeneric() = test("implementationByDelegationGeneric", "kotlinTestData.implementationByDelegationGeneric.BDelegation")
 
     @Test
+    fun testJavaSwitch() = test("javaSwitch", "kotlinTestData.javaSwitch.JavaSwitchTest", sampling = false, fileName = "JavaSwitchTest.java")
+
+    @Test
     fun testSealedClassConstructor() = test("sealedClassConstructor",
             "kotlinTestData.sealedClassConstructor.SealedClass",
             "kotlinTestData.sealedClassConstructor.SealedClassWithArgs",
