@@ -17,16 +17,16 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
+import com.intellij.rt.coverage.data.SwitchData;
+import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinWhenMappingExceptionFilter;
+import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import org.jetbrains.coverage.org.objectweb.asm.tree.MethodNode;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class LineEnumerator extends MethodVisitor implements Opcodes {
   private final ClassInstrumenter myClassInstrumenter;
@@ -65,19 +65,32 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
 
   private boolean myHasInstructions;
 
+  private final HashMap<Label, SwitchData> mySwitchLabels = new HashMap<Label, SwitchData>();
+
   public LineEnumerator(ClassInstrumenter classInstrumenter, final MethodVisitor mv,
                         final int access,
                         final String name,
                         final String desc,
                         final String signature,
                         final String[] exceptions) {
-    super(Opcodes.API_VERSION, new SaveLabelsMethodNode(access, name, desc, signature, exceptions));
+    super(Opcodes.API_VERSION);
+
+    methodNode = new SaveLabelsMethodNode(access, name, desc, signature, exceptions);
+
+    MethodVisitor root = methodNode;
+    for (LineEnumeratorFilter filter : createLineEnumeratorFilters()) {
+      if (filter.isApplicable(classInstrumenter, access, name, desc, signature, exceptions)) {
+        filter.initFilter(root, this);
+        root = filter;
+      }
+    }
+    super.mv = root;
+
     myClassInstrumenter = classInstrumenter;
     myWriterMethodVisitor = mv;
     myAccess = access;
     myMethodName = name;
     mySignature = desc;
-    methodNode = (MethodNode)this.mv;
   }
 
 
@@ -163,7 +176,8 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     rememberSwitchLabels(dflt, labels);
     final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
     if (lineData != null) {
-      lineData.addSwitch(myCurrentSwitch++, min, max);
+      SwitchData switchData = lineData.addSwitch(myCurrentSwitch++, min, max);
+      mySwitchLabels.put(dflt, switchData);
     }
     myState = SEEN_NOTHING;
     myHasInstructions = true;
@@ -282,5 +296,15 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     if (!myHasExecutableLines) return;
     myState = SEEN_NOTHING;
     myHasInstructions = true;
+  }
+
+  public Map<Label, SwitchData> getSwitchLabels() {
+    return mySwitchLabels;
+  }
+
+  private static List<LineEnumeratorFilter> createLineEnumeratorFilters() {
+    List<LineEnumeratorFilter> result = new ArrayList<LineEnumeratorFilter>();
+    result.add(new KotlinWhenMappingExceptionFilter());
+    return result;
   }
 }

@@ -93,6 +93,12 @@ class KotlinCoverageStatusTest {
     fun testImplementationByDelegationGeneric() = test("implementationByDelegationGeneric", "kotlinTestData.implementationByDelegationGeneric.BDelegation")
 
     @Test
+    fun testWhenMappingsSampling() = test("whenMapping.sampling")
+
+    @Test
+    fun testWhenMappingTracing() = test("whenMapping.tracing", sampling = false)
+
+    @Test
     fun testJavaSwitch() = test("javaSwitch", "kotlinTestData.javaSwitch.JavaSwitchTest", sampling = false, fileName = "JavaSwitchTest.java")
 
     @Test
