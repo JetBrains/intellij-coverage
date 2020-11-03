@@ -92,6 +92,13 @@ class KotlinCoverageStatusTest {
     @Test
     fun testImplementationByDelegationGeneric() = test("implementationByDelegationGeneric", "kotlinTestData.implementationByDelegationGeneric.BDelegation")
 
+    @Test
+    fun testSealedClassConstructor() = test("sealedClassConstructor",
+            "kotlinTestData.sealedClassConstructor.SealedClass",
+            "kotlinTestData.sealedClassConstructor.SealedClassWithArgs",
+            "kotlinTestData.sealedClassConstructor.ClassWithPrivateDefaultConstructor")
+
+
     private fun test(testName: String, vararg classes: String = arrayOf("kotlinTestData.$testName.TestKt"),
                      sampling: Boolean = true, fileName: String = "test.kt") {
         val testFile = pathToFile("src", "kotlinTestData", *testName.split('.').toTypedArray(), fileName)

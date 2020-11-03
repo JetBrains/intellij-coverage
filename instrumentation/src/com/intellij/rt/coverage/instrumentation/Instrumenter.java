@@ -19,6 +19,8 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticConstructorOfSealedClassFilter;
+import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinImplementerDefaultInterfaceMemberFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
 import com.intellij.rt.coverage.util.StringsPool;
@@ -31,6 +33,8 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import java.util.*;
 
 public abstract class Instrumenter extends ClassVisitor {
+  private static final List<MethodSignatureFilter> ourSignatureFilters = getMethodSignatureFilters();
+
   protected final ProjectData myProjectData;
   protected final ClassVisitor myClassVisitor;
   private final String myClassName;
@@ -74,6 +78,11 @@ public abstract class Instrumenter extends ClassVisitor {
     if ((access & Opcodes.ACC_ABSTRACT) != 0) return mv; //skip abstracts; do not include interfaces without non-abstract methods in result
     if (myEnum && isDefaultEnumMethod(name, desc, signature, myClassName)) {
       return mv;
+    }
+    for (MethodSignatureFilter filter : ourSignatureFilters) {
+      if (filter.shouldFilter(access, name, desc, signature, exceptions)) {
+        return mv;
+      }
     }
     myProcess = true;
     return chainFilters(createMethodLineEnumerator(mv, name, desc, access, signature, exceptions));
@@ -180,6 +189,12 @@ public abstract class Instrumenter extends ClassVisitor {
   private static List<MethodVisitingFilter> createVisitingFilters() {
     List<MethodVisitingFilter> result = new ArrayList<MethodVisitingFilter>();
     result.add(new KotlinImplementerDefaultInterfaceMemberFilter());
+    return result;
+  }
+
+  private static List<MethodSignatureFilter> getMethodSignatureFilters() {
+    List<MethodSignatureFilter> result = new ArrayList<MethodSignatureFilter>();
+    result.add(new KotlinSyntheticConstructorOfSealedClassFilter());
     return result;
   }
 }
