@@ -51,12 +51,23 @@ class KotlinCoverageStatusTest {
     fun testDefaultArgsSeveralArgs() = test("defaultArgs.severalArguments")
 
     @Test
-    @Ignore("Not implemented")
-    fun testInline() = test("inline")
+    fun testSimpleInline() = test("inline.simple")
 
     @Test
-    @Ignore("Not implemented")
-    fun testInlineInline() = test("inlineInline")
+    fun testInlineInline() = test("inline.inlineInline")
+
+    @Test
+    fun testLambdaInline() = test("inline.lambda")
+
+    @Test
+    fun testReflection() = test("inline.reflection", "kotlinTestData.inline.reflection.Test")
+
+    @Test
+    fun testReified() = test("inline.reified")
+
+    @Test
+    fun testMultiplyFilesInline() = test("inline.multiplyFiles", "kotlinTestData.inline.multiplyFiles.Test2Kt",
+            fileName = "test2.kt")
 
     @Test
     @Ignore("Not implemented")

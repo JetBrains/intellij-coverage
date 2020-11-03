@@ -16,9 +16,11 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.signature;
 
+import com.intellij.rt.coverage.instrumentation.Instrumenter;
+
 /**
  * Filters out coverage from method if it's signature matches filter.
  */
 public interface MethodSignatureFilter {
-  boolean shouldFilter(int access, String name, String desc, String signature, String[] exceptions);
+  boolean shouldFilter(int access, String name, String desc, String signature, String[] exceptions, Instrumenter context);
 }

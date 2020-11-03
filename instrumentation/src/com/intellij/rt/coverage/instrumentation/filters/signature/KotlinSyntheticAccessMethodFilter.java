@@ -17,12 +17,13 @@
 package com.intellij.rt.coverage.instrumentation.filters.signature;
 
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
-public class KotlinSyntheticConstructorOfSealedClassFilter implements MethodSignatureFilter {
+public class KotlinSyntheticAccessMethodFilter implements MethodSignatureFilter {
   public boolean shouldFilter(int access, String name, String desc, String signature, String[] exceptions, Instrumenter context) {
     return (access & Opcodes.ACC_SYNTHETIC) != 0
-        && name.equals("<init>")
-        && desc.endsWith("Lkotlin/jvm/internal/DefaultConstructorMarker;)V");
+        && KotlinUtils.isKotlinClass(context)
+        && name.startsWith("access$");
   }
 }
