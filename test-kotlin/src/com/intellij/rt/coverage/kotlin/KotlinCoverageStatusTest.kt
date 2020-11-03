@@ -51,6 +51,16 @@ class KotlinCoverageStatusTest {
     fun testDefaultArgsSeveralArgs() = test("defaultArgs.severalArguments")
 
     @Test
+    fun testDefaultArgsSeveralArgsTracing() = test("defaultArgs.tracing", "kotlinTestData.defaultArgs.tracing.TestKt", "kotlinTestData.defaultArgs.tracing.X", sampling = false)
+
+    @Test
+    fun test32DefaultArgsTracing() = test("defaultArgs.defaultArgs32", sampling = false)
+
+    @Test
+    fun test32ArgsTracing() = test("defaultArgs.args32", sampling = false)
+
+
+    @Test
     fun testSimpleInline() = test("inline.simple")
 
     @Test
