@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
-package kotlinTestData.inline
+package kotlinTestData.implementationByDelegation
 
-private inline fun a(x: Int) {
-    println(x)                // coverage: FULL
-    return                    // coverage: FULL
+interface Base {
+    fun print()
 }
 
-fun test() {
-    a(4)                      // coverage: FULL
-    return                    // coverage: FULL
+class BaseImpl(private val x: Int) : Base {
+    override fun print() {
+        print(x)
+        return
+    }
 }
+
+class Derived
+(b: Base) : Base by b              // coverage: FULL
 
 object Test {
     @JvmStatic
     fun main(args: Array<String>) {
-        test()
+        val b = BaseImpl(10)
+        Derived(b).print()
+        return
     }
 }

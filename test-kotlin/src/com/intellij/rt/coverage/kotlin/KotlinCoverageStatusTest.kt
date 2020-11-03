@@ -17,8 +17,9 @@
 package com.intellij.rt.coverage.kotlin
 
 
-import com.intellij.rt.coverage.assertEqualsClassLines
-import com.intellij.rt.coverage.data.LineCoverage.FULL
+import com.intellij.rt.coverage.assertEqualsLines
+import com.intellij.rt.coverage.extractCoverageDataFromFile
+import com.intellij.rt.coverage.pathToFile
 import com.intellij.rt.coverage.runWithCoverage
 import org.junit.After
 import org.junit.Before
@@ -41,43 +42,49 @@ class KotlinCoverageStatusTest {
     }
 
     @Test
-    @Ignore("Not implemented")
-    fun testDefaultArgs() = testClassCoverage("defaultArgs", mapOf(
-            20 to FULL,
-            24 to FULL,
-            25 to FULL
-    ))
+    fun testDefaultArgsCovered() = test("defaultArgs.covered")
 
+    @Test
+    fun testDefaultArgsUncovered() = test("defaultArgs.uncovered")
+
+    @Test
+    fun testDefaultArgsSeveralArgs() = test("defaultArgs.severalArguments")
 
     @Test
     @Ignore("Not implemented")
-    fun testInline() = testClassCoverage("inline", mapOf(
-            20 to FULL,
-            21 to FULL,
-            25 to FULL,
-            26 to FULL
-    ))
+    fun testInline() = test("inline")
 
     @Test
     @Ignore("Not implemented")
-    fun testInlineInline() = testClassCoverage("inlineInline", mapOf(
-            20 to FULL,
-            21 to FULL,
-            22 to FULL,
-            26 to FULL,
-            27 to FULL,
-            31 to FULL,
-            32 to FULL
-    ))
+    fun testInlineInline() = test("inlineInline")
 
     @Test
     @Ignore("Not implemented")
-    fun testReturn() = testClassCoverage("returnTest", mapOf(
-            20 to FULL
-    ))
+    fun testReturn() = test("returnTest")
 
-    private fun testClassCoverage(testName: String, expected: Map<Int, Byte>, sampling: Boolean = true) {
+    @Test
+    fun testFileProperties() = test("properties.file")
+
+    @Test
+    @Ignore("Not implemented")
+    fun testGetterAndSetterOfPropertyAreDistinguishable() = test("properties.getter_setter")
+
+    @Test
+    fun testPrimaryConstructorWithProperties() = test("properties.constructor", "kotlinTestData.properties.constructor.A")
+
+    @Test
+    fun testDataClass() = test("dataClass", "kotlinTestData.dataClass.A")
+
+    @Test
+    fun testImplementationByDelegation() = test("implementationByDelegation", "kotlinTestData.implementationByDelegation.Derived")
+
+    @Test
+    fun testImplementationByDelegationGeneric() = test("implementationByDelegationGeneric", "kotlinTestData.implementationByDelegationGeneric.BDelegation")
+
+    private fun test(testName: String, vararg classes: String = arrayOf("kotlinTestData.$testName.TestKt"), sampling: Boolean = true) {
+        val testFile = pathToFile("src", "kotlinTestData", *testName.split('.').toTypedArray(), "test.kt")
+        val expected = extractCoverageDataFromFile(testFile)
         val project = runWithCoverage(myDataFile, testName, sampling)
-        assertEqualsClassLines(project, "kotlinTestData.$testName.TestKt", expected)
+        assertEqualsLines(project, expected, classes.toList())
     }
 }

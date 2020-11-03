@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package kotlinTestData.inline
+package kotlinTestData.properties.getter_setter
 
-private inline fun a(x: Int) {
-    println(x)                // coverage: FULL
-    return                    // coverage: FULL
-}
 
-fun test() {
-    a(4)                      // coverage: FULL
-    return                    // coverage: FULL
-}
+var x = 32  // coverage: PARTIAL as setter not covered
+var y = 48  // coverage: PARTIAL as getter not covered
 
 object Test {
     @JvmStatic
     fun main(args: Array<String>) {
-        test()
+        println(x)
+        y = 15
     }
 }

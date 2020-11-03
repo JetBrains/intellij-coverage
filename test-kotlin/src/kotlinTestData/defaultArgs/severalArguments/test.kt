@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package kotlinTestData.inline
+package kotlinTestData.defaultArgs.severalArguments
 
-private inline fun a(x: Int) {
-    println(x)                // coverage: FULL
-    return                    // coverage: FULL
+private fun functionWithDefaultArguments(
+        x: Int = 3,                       // coverage: NONE
+        y: Int = 42                       // coverage: FULL
+): Int {
+    return x + y                          // coverage: FULL
 }
 
 fun test() {
-    a(4)                      // coverage: FULL
-    return                    // coverage: FULL
+    functionWithDefaultArguments(4)       // coverage: FULL
+    return                                // coverage: FULL
 }
 
 object Test {

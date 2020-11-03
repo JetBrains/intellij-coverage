@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package kotlinTestData.inline
+package kotlinTestData.properties.file
 
-private inline fun a(x: Int) {
-    println(x)                // coverage: FULL
-    return                    // coverage: FULL
-}
 
-fun test() {
-    a(4)                      // coverage: FULL
-    return                    // coverage: FULL
-}
+private const val x = 42   // invisible as property is const
+private val x2 = 42        // coverage: FULL as value is written in <cinit>
+val y: List<Int>           // coverage: NONE as getter and setter are uncovered
+        = ArrayList()      // coverage: FULL as value is written in <cinit>
+
+private val z              // invisible as property is private
+        = ArrayList<Int>() // coverage: FULL as value is written in <cinit>
+
 
 object Test {
     @JvmStatic
     fun main(args: Array<String>) {
-        test()
+        Class.forName("kotlinTestData.properties.file.TestKt")
+        return
     }
 }

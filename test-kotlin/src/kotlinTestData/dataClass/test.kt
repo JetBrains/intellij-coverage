@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package kotlinTestData.inline
+package kotlinTestData.dataClass
 
-private inline fun a(x: Int) {
-    println(x)                // coverage: FULL
-    return                    // coverage: FULL
-}
-
-fun test() {
-    a(4)                      // coverage: FULL
-    return                    // coverage: FULL
+data class A(                  // coverage: FULL
+        private val x: Int,
+        val z: Int             // coverage: FULL
+) {
+    fun foo() {
+        println("Hello world") // coverage: FULL
+        return                 // coverage: FULL
+    }
 }
 
 object Test {
     @JvmStatic
     fun main(args: Array<String>) {
-        test()
+        val a = A(42, 42)
+        println(a.z)
+        a.foo()
     }
 }

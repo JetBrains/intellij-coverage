@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package kotlinTestData.inline
+package kotlinTestData.implementationByDelegationGeneric
 
-private inline fun a(x: Int) {
-    println(x)                // coverage: FULL
-    return                    // coverage: FULL
+interface A<T> {
+    fun get(): T
 }
 
-fun test() {
-    a(4)                      // coverage: FULL
-    return                    // coverage: FULL
+class BImplementation : A<Int> {
+    override fun get() = 42
 }
+
+class BDelegation                // generated methods are invisible
+(): A<Int> by BImplementation()  // coverage: FULL
 
 object Test {
     @JvmStatic
     fun main(args: Array<String>) {
-        test()
+        BDelegation().get()
+        return
     }
 }

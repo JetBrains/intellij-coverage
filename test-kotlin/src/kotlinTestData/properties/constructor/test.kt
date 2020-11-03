@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package kotlinTestData.inline
+package kotlinTestData.properties.constructor
 
-private inline fun a(x: Int) {
-    println(x)                // coverage: FULL
-    return                    // coverage: FULL
-}
 
-fun test() {
-    a(4)                      // coverage: FULL
-    return                    // coverage: FULL
-}
+class A(                    // coverage: FULL
+        private val x: Int, // invisible as property is private
+        val y: String       // coverage: NONE as getter is not covered
+)
+
 
 object Test {
     @JvmStatic
     fun main(args: Array<String>) {
-        test()
+        A(42, "42")
+        return
     }
 }

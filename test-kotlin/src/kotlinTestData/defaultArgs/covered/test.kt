@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package kotlinTestData.inline
+package kotlinTestData.defaultArgs.covered
 
-private inline fun a(x: Int) {
-    println(x)                // coverage: FULL
-    return                    // coverage: FULL
+private fun functionWithDefaultArgument(x: Int = 3): Int {  // coverage: FULL
+    return x + 5                                            // coverage: FULL
 }
 
 fun test() {
-    a(4)                      // coverage: FULL
-    return                    // coverage: FULL
+    functionWithDefaultArgument()                           // coverage: FULL
+    return                                                  // coverage: FULL
 }
 
 object Test {
