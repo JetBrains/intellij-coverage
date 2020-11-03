@@ -217,14 +217,38 @@ public class ClassData implements CoverageData {
     }
   }
 
+  private int maxSourceLineNumber(LineMapData[] linesMap) {
+    int max = 0;
+    for (final LineMapData mapData : linesMap) {
+      if (mapData != null) {
+        max = Math.max(max, mapData.getSourceLineNumber());
+      }
+    }
+    return max;
+  }
+
   public void checkLineMappings(LineMapData[] linesMap, ClassData classData) {
     if (linesMap != null) {
       LineData[] result;
       try {
-        result = new LineData[linesMap.length];
+        int maxMappedSourceLineNumber = maxSourceLineNumber(linesMap);
+        if (classData == this || myLinesArray == null) {
+          result = new LineData[1 + maxMappedSourceLineNumber];
+        } else {
+          int size = Math.max(1 + maxMappedSourceLineNumber, myLinesArray.length);
+          result = new LineData[size];
+          copyCurrentLineData(result);
+        }
+
         for (final LineMapData mapData : linesMap) {
           if (mapData != null) {
-            result[mapData.getSourceLineNumber()] = classData.createSourceLineData(mapData);
+            int sourceLineNumber = mapData.getSourceLineNumber();
+            if (result[sourceLineNumber] == null) {
+              result[sourceLineNumber] = classData.createSourceLineData(mapData);
+            }
+            for (int i = mapData.getTargetMinLine(); i <= mapData.getTargetMaxLine(); i++) {
+              classData.mergeTargetIntoSource(result[sourceLineNumber], i);
+            }
           }
         }
       }
@@ -237,23 +261,34 @@ public class ClassData implements CoverageData {
     }
   }
 
-  private LineData createSourceLineData(LineMapData lineMapData) {
-    for (int i = lineMapData.getTargetMinLine(); i <= lineMapData.getTargetMaxLine() && i < myLinesArray.length; i++) {
-      final LineData targetLineData = getLineData(i);
-      if (targetLineData != null) { //todo ??? show info according to one target line
-
-        final LineData lineData = new LineData(lineMapData.getSourceLineNumber(), targetLineData.getMethodSignature());
-
-        lineData.merge(targetLineData);
-        if (myLineMask != null) {
-          lineData.setHits(myLineMask[i]);
-        }
-
-        return lineData;
-
+  private void copyCurrentLineData(LineData[] result) {
+    for (int i = 0; i < myLinesArray.length; i++) {
+      result[i] = myLinesArray[i];
+      if (myLineMask != null) {
+        result[i].setHits(result[i].getHits() + myLineMask[i]);
       }
     }
-    return null;
+  }
+
+  private LineData createSourceLineData(LineMapData lineMapData) {
+    int i = lineMapData.getTargetMinLine();
+    if (myLinesArray == null || myLinesArray.length <= i) return null;
+    final LineData targetLineData = getLineData(i);
+    if (targetLineData == null) return null;
+    return new LineData(lineMapData.getSourceLineNumber(), targetLineData.getMethodSignature());
+  }
+
+  private void mergeTargetIntoSource(LineData source, int targetLineNumber) {
+    if (source != null) {
+      if (myLinesArray == null || myLinesArray.length <= targetLineNumber) return;
+      LineData targetLineData = getLineData(targetLineNumber);
+      if (targetLineData != null) {
+        source.merge(targetLineData);
+        if (myLineMask != null) {
+          source.setHits(source.getHits() + myLineMask[targetLineNumber]);
+        }
+      }
+    }
   }
 
   public void setSource(String source) {

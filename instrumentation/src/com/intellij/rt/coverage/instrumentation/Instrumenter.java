@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticAccessMethodFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticConstructorOfSealedClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinImplementerDefaultInterfaceMemberFilter;
@@ -80,7 +81,7 @@ public abstract class Instrumenter extends ClassVisitor {
       return mv;
     }
     for (MethodSignatureFilter filter : ourSignatureFilters) {
-      if (filter.shouldFilter(access, name, desc, signature, exceptions)) {
+      if (filter.shouldFilter(access, name, desc, signature, exceptions, this)) {
         return mv;
       }
     }
@@ -195,6 +196,7 @@ public abstract class Instrumenter extends ClassVisitor {
   private static List<MethodSignatureFilter> getMethodSignatureFilters() {
     List<MethodSignatureFilter> result = new ArrayList<MethodSignatureFilter>();
     result.add(new KotlinSyntheticConstructorOfSealedClassFilter());
+    result.add(new KotlinSyntheticAccessMethodFilter());
     return result;
   }
 }

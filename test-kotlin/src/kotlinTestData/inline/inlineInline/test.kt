@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package kotlinTestData.inlineInline
+package kotlinTestData.inline.inlineInline
 
 private inline fun a() {
     print("Hello")         // coverage: FULL

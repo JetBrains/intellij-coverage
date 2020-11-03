@@ -14,15 +14,21 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.instrumentation.filters.signature;
+package kotlinTestData.inline.simple
 
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
+private inline fun a(x: Int) {
+    println(x)                // coverage: FULL
+    return                    // coverage: FULL
+}
 
-public class KotlinSyntheticConstructorOfSealedClassFilter implements MethodSignatureFilter {
-  public boolean shouldFilter(int access, String name, String desc, String signature, String[] exceptions, Instrumenter context) {
-    return (access & Opcodes.ACC_SYNTHETIC) != 0
-        && name.equals("<init>")
-        && desc.endsWith("Lkotlin/jvm/internal/DefaultConstructorMarker;)V");
-  }
+fun test() {
+    a(4)                      // coverage: FULL
+    return                    // coverage: FULL
+}
+
+object Test {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        test()
+    }
 }

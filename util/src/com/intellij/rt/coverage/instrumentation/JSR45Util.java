@@ -23,10 +23,7 @@ import org.jetbrains.coverage.gnu.trove.THashSet;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectFunction;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author anna
@@ -36,6 +33,8 @@ public class JSR45Util {
   private static final String FILE_SECTION = "*F\n";
   private static final String LINE_SECTION = "*L\n";
   private static final String END_SECTION = "*E";
+
+  private static final LineMapData[] EMPTY_LINE_MAP = new LineMapData[0];
 
   private static String checkSMAP(String debug) {
     return debug.startsWith("SMAP") ? debug.substring(4) : null;
@@ -187,20 +186,20 @@ public class JSR45Util {
   }
 
   private static LineMapData[] getLinesMapping(THashSet<LineMapData> linesMap) {
-
-    int max = 0;
-    for (Object aLinesMap1 : linesMap) {
-      LineMapData lmd = (LineMapData) aLinesMap1;
-      if (max < lmd.getSourceLineNumber()) {
-        max = lmd.getSourceLineNumber();
+    final LineMapData[] result = linesMap.toArray(EMPTY_LINE_MAP);
+    Arrays.sort(result, new Comparator<LineMapData>() {
+      public int compare(LineMapData o1, LineMapData o2) {
+        int compareSource = o1.getSourceLineNumber() - o2.getSourceLineNumber();
+        if (compareSource == 0) {
+          int compareMin = o1.getTargetMinLine() - o2.getTargetMinLine();
+          if (compareMin == 0) {
+            return o1.getTargetMaxLine() - o2.getTargetMaxLine();
+          }
+          return compareMin;
+        }
+        return compareSource;
       }
-    }
-
-    final LineMapData[] result = new LineMapData[max + 1];
-    for (Object aLinesMap : linesMap) {
-      LineMapData lmd = (LineMapData) aLinesMap;
-      result[lmd.getSourceLineNumber()] = lmd;
-    }
+    });
     return result;
   }
 

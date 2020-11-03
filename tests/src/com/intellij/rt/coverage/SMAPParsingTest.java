@@ -67,6 +67,26 @@ public class SMAPParsingTest extends TestCase {
       "9#1,6:17\n" +
       "*E";
 
+  /** test-kotlin/src/kotlinTestData/inline/simpleInline.kt */
+  private static final String KOTLIN_SMAP_WITH_INLINE2 = "SMAP\n" +
+      "simpleInline.kt\n" +
+      "Kotlin\n" +
+      "*S Kotlin\n" +
+      "*F\n" +
+      "+ 1 simpleInline.kt\n" +
+      "kotlinTestData/inline/SimpleInlineKt\n" +
+      "*L\n" +
+      "1#1,4:1\n" +
+      "3#1:5\n" +
+      "*E\n" +
+      "*S KotlinDebug\n" +
+      "*F\n" +
+      "+ 1 simpleInline.kt\n" +
+      "kotlinTestData/inline/SimpleInlineKt\n" +
+      "*L\n" +
+      "4#1:5\n" +
+      "*E";
+
   private static final String JSP_SMAP = "SMAP\n" +
       "Hello_jsp.java\n" +
       "JSP\n" +
@@ -100,6 +120,19 @@ public class SMAPParsingTest extends TestCase {
       "15#0,5:91\n" +
       "*E";
 
+  public void testJspSMAPKotlinInline() {
+    final FileMapData[] expected = new FileMapData[]{new FileMapData("kotlinTestData.inline.SimpleInlineKt",
+        new LineMapData[]{
+            new LineMapData(1, 1, 1),
+            new LineMapData(2, 2, 2),
+            new LineMapData(3, 3, 3),
+            new LineMapData(3, 5, 5),
+            new LineMapData(4, 4, 4)
+        })};
+    final FileMapData[] datas = JSR45Util.extractLineMapping(KOTLIN_SMAP_WITH_INLINE2, "kotlinTestData.inline.SimpleInlineKt");
+    testJspSmapData(expected, datas);
+  }
+
   public void testJspSMAP() {
     final FileMapData[] expected = new FileMapData[]{new FileMapData("org.apache.jsp.Hello_jsp",
         new LineMapData[]{
@@ -119,10 +152,14 @@ public class SMAPParsingTest extends TestCase {
                 new LineMapData(3, 66, 69)})};
 
     final FileMapData[] datas = JSR45Util.extractLineMapping(JSP_SMAP, "org.apache.jsp.Hello_jsp");
-    Assert.assertNotNull(datas);
-    Assert.assertEquals(expected.length, datas.length);
-    for (int i = 0; i < datas.length; i++) {
-      final FileMapData data = datas[i];
+    testJspSmapData(expected, datas);
+  }
+
+  private void testJspSmapData(FileMapData[] expected, FileMapData[] actual) {
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(expected.length, actual.length);
+    for (int i = 0; i < actual.length; i++) {
+      final FileMapData data = actual[i];
       final FileMapData expectedData = expected[i];
       Assert.assertEquals(data.toString(), expectedData.toString(), data.toString());
     }
