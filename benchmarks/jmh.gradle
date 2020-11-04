@@ -55,6 +55,11 @@ task headBenchmark(type: JavaExec, dependsOn: jar) {
   configureBenchmark it as JavaExec, configurations.head
 }
 
+// benchmark with current version of agent, new instrumentation
+task newInstrumentationBenchmark(type: JavaExec, dependsOn: jar) {
+  configureBenchmark it as JavaExec, configurations.head
+}
+
 def configureBenchmark(JavaExec benchmark, Configuration agent = null) {
   benchmark.with {
     dependsOn ":benchmarks:jmhClasses"

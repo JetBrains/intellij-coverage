@@ -34,3 +34,10 @@ dependencies {
 headBenchmark {
   dependsOn(":instrumentation:coverageAgentJar")
 }
+
+newInstrumentationBenchmark {
+  dependsOn(":instrumentation:coverageAgentJar")
+  doFirst {
+    benchmarkExtraArgs = ['-jvmArgs', "-Didea.new.sampling.coverage=true"]
+  }
+}
