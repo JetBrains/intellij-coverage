@@ -39,7 +39,7 @@ configurations {
 
 dependencies {
   jmhCompile "org.openjdk.jmh:jmh-core:$jmhVersion"
-  jmhCompile "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
+  jmhAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
   jmhCompile 'org.joda:joda-convert:1.2'
   jmhCompile 'junit:junit:4.12'
   jmhCompile fileTree('lib')
@@ -65,8 +65,8 @@ task headBenchmark(type: JavaExec, dependsOn: jar) {
 def configureBenchmark(JavaExec benchmark, Configuration agent = null) {
   benchmark.with {
     dependsOn jmhClasses
+    main = 'org.openjdk.jmh.Main'
     doFirst {
-      main = 'org.openjdk.jmh.Main'
       classpath = sourceSets.jmh.runtimeClasspath
       args = [
           '-jvmArgs', '-Dfile.encoding=UTF-8',
