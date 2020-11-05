@@ -1,0 +1,22 @@
+plugins {
+  id 'java'
+}
+
+repositories {
+  mavenCentral()
+}
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+sourceSets {
+  test.java.srcDir 'test'
+  test.resources.srcDir 'resources'
+}
+
+dependencies {
+  implementation project(":")
+
+  testImplementation("junit:junit:4.13")
+  testImplementation(files(project(":tests").sourceSets.test.output))
+}

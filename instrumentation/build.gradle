@@ -5,7 +5,14 @@ dependencies {
   compile library_project_asm_all
 }
 
+task compileJava6Utils {
+  if (JavaVersion.current() >= JavaVersion.VERSION_1_6) {
+    dependsOn(":java6-utils:jar")
+  }
+}
+
 task coverageAgentJar(type: Jar) {
+  dependsOn(compileJava6Utils)
   baseName = coverage_jar_name
   destinationDir = file("../dist")
   manifest.attributes(
@@ -13,7 +20,7 @@ task coverageAgentJar(type: Jar) {
       "Boot-Class-Path": "$archiveName"
   )
   from(sourceSets.main.output)
-  from(["util", ""].collect({ project(":$it").sourceSets.main.output }))
+  from(["util", "", "java6-utils"].collect({ project(":$it").sourceSets.main.output }))
   with repackLibs
 }
 
