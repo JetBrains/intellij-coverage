@@ -19,11 +19,9 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticAccessMethodFilter;
-import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticConstructorOfSealedClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
-import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinImplementerDefaultInterfaceMemberFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
+import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
@@ -188,15 +186,10 @@ public abstract class Instrumenter extends ClassVisitor {
   }
 
   private static List<MethodVisitingFilter> createVisitingFilters() {
-    List<MethodVisitingFilter> result = new ArrayList<MethodVisitingFilter>();
-    result.add(new KotlinImplementerDefaultInterfaceMemberFilter());
-    return result;
+    return KotlinUtils.createVisitingFilters();
   }
 
   private static List<MethodSignatureFilter> getMethodSignatureFilters() {
-    List<MethodSignatureFilter> result = new ArrayList<MethodSignatureFilter>();
-    result.add(new KotlinSyntheticConstructorOfSealedClassFilter());
-    result.add(new KotlinSyntheticAccessMethodFilter());
-    return result;
+    return KotlinUtils.createSignatureFilters();
   }
 }

@@ -18,9 +18,8 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.SwitchData;
-import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
-import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinWhenMappingExceptionFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
+import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
@@ -312,9 +311,6 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   }
 
   private static List<LineEnumeratorFilter> createLineEnumeratorFilters() {
-    List<LineEnumeratorFilter> result = new ArrayList<LineEnumeratorFilter>();
-    result.add(new KotlinWhenMappingExceptionFilter());
-    result.add(new KotlinDefaultArgsBranchFilter());
-    return result;
+    return KotlinUtils.createLineEnumeratorFilters();
   }
 }
