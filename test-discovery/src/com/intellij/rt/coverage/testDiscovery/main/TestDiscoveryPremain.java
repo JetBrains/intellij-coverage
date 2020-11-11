@@ -49,7 +49,15 @@ public class TestDiscoveryPremain {
   }
 
   private static void addOpenCloseTransformer(Instrumentation instrumentation) throws UnmodifiableClassException {
-    if (System.getProperty(TestDiscoveryProjectData.AFFECTED_ROOTS) == null) return;
+    if (!Boolean.parseBoolean(System.getProperty(TestDiscoveryProjectData.TRACK_FILES, "true"))) {
+      System.out.println("Tracking for opened/closed files disabled by '" + TestDiscoveryProjectData.TRACK_FILES + "' system property");
+      return;
+    }
+
+    if (System.getProperty(TestDiscoveryProjectData.AFFECTED_ROOTS) == null) {
+      System.out.println("Tracking for opened/closed files disabled due to undefined '" + TestDiscoveryProjectData.AFFECTED_ROOTS + "' system property");
+      return;
+    }
 
     OpenCloseFileTransformer openCloseFileTransformer = new OpenCloseFileTransformer();
     instrumentation.addTransformer(openCloseFileTransformer, true);
