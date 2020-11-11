@@ -202,6 +202,8 @@ public class TestDiscoveryProjectData {
   public static final String AFFECTED_ROOTS = "test.discovery.affected.roots";
   @SuppressWarnings("WeakerAccess")
   public static final String EXCLUDED_ROOTS = "test.discovery.excluded.roots";
+  @SuppressWarnings("WeakerAccess")
+  public static final String TRACK_FILES = "test.discovery.track.files";
 
   private static final String[] myAffectedRoots = split(AFFECTED_ROOTS);
   private static final String[] myExcludedRoots = split(EXCLUDED_ROOTS);
