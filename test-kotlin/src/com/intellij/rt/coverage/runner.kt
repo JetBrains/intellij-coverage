@@ -50,6 +50,8 @@ private fun coverageLines(project: ProjectData, classNames: List<String>): Map<I
     return statusToString(lines)
 }
 
+internal fun getLineHits(data: ClassData, line: Int) = data.getLinesData().single { it.lineNumber == line }.hits
+
 private fun logCoverageDiff(expectedLines: Map<Int, String>, actualCoverage: Map<Int, String>) {
     val expected = expectedLines.toList()
     val actual = actualCoverage.toList()

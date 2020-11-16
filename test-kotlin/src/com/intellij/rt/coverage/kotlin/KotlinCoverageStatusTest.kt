@@ -18,7 +18,10 @@ package com.intellij.rt.coverage.kotlin
 
 
 import com.intellij.rt.coverage.*
+import kotlinTestData.threadSafe.data.THREAD_SAFE_DATA_EXPECTED_HITS
+import kotlinTestData.threadSafe.structure.THREAD_SAFE_STRUCTURE_CLASSES
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -142,6 +145,22 @@ class KotlinCoverageStatusTest {
 
     @Test
     fun test_IDEA_250825() = test("fixes.IDEA_250825", "JavaTest", fileName = "JavaTest.java", sampling = false)
+
+    @Test
+    fun testThreadSafeStructure() {
+        val n = THREAD_SAFE_STRUCTURE_CLASSES
+        val expected = (1..n).associateWith { "FULL" }
+        val project = runWithCoverage(myDataFile, "threadSafe.structure", false)
+        assertEqualsLines(project, expected, (0 until n).map { "kotlinTestData.threadSafe.structure.Class$it" })
+    }
+
+    @Test
+    @Ignore("Coverage hit increment is not atomic.")
+    fun testThreadSafeData() {
+        val project = runWithCoverage(myDataFile, "threadSafe.data", false)
+        val data = project.getClassData("kotlinTestData.threadSafe.data.SimpleClass")
+        assertEquals(THREAD_SAFE_DATA_EXPECTED_HITS, getLineHits(data, 24))
+    }
 
     private fun test(testName: String, vararg classes: String = arrayOf("TestKt"),
                      sampling: Boolean = true, fileName: String = "test.kt",
