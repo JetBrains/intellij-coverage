@@ -262,9 +262,10 @@ public class ClassData implements CoverageData {
   }
 
   private void copyCurrentLineData(LineData[] result) {
+    System.arraycopy(myLinesArray, 0, result, 0, myLinesArray.length);
+    if (myLineMask == null) return;
     for (int i = 0; i < myLinesArray.length; i++) {
-      result[i] = myLinesArray[i];
-      if (myLineMask != null) {
+      if (result[i] != null) {
         result[i].setHits(result[i].getHits() + myLineMask[i]);
       }
     }
@@ -272,7 +273,7 @@ public class ClassData implements CoverageData {
 
   private LineData createSourceLineData(LineMapData lineMapData) {
     int i = lineMapData.getTargetMinLine();
-    if (myLinesArray == null || myLinesArray.length <= i) return null;
+    if (myLinesArray == null || i >= myLinesArray.length) return null;
     final LineData targetLineData = getLineData(i);
     if (targetLineData == null) return null;
     return new LineData(lineMapData.getSourceLineNumber(), targetLineData.getMethodSignature());
@@ -280,7 +281,7 @@ public class ClassData implements CoverageData {
 
   private void mergeTargetIntoSource(LineData source, int targetLineNumber) {
     if (source != null) {
-      if (myLinesArray == null || myLinesArray.length <= targetLineNumber) return;
+      if (myLinesArray == null || targetLineNumber >= myLinesArray.length) return;
       LineData targetLineData = getLineData(targetLineNumber);
       if (targetLineData != null) {
         source.merge(targetLineData);
