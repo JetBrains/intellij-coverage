@@ -290,8 +290,10 @@ public class ClassData implements CoverageData {
       LineData targetLineData = getLineData(targetLineNumber);
       if (targetLineData != null) {
         source.merge(targetLineData);
+        myLinesArray[targetLineNumber] = null;
         if (myLineMask != null) {
           source.setHits(source.getHits() + myLineMask[targetLineNumber]);
+          myLineMask[targetLineNumber] = 0;
         }
       }
     }

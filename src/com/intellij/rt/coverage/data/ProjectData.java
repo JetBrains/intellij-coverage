@@ -133,8 +133,6 @@ public class ProjectData implements CoverageData, Serializable {
 
         if (mainData != null) {
           classData.checkLineMappings(mainData.getLines(), classData);
-        } else {
-          ErrorReporter.reportError("Class data was not extracted: " + className, new Throwable());
         }
       }
     }

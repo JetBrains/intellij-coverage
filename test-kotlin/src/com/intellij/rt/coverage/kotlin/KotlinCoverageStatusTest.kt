@@ -88,6 +88,14 @@ class KotlinCoverageStatusTest {
     fun testInlineCoroutinesSampling() = test("inline.coroutines.sampling", all)
 
     @Test
+    fun testNoInline() = test("inline.noinline",
+            "TestKt", "TestKt\$test\$1", "TestKt\$test\$3")
+
+    @Test
+    fun testCrossInline() = test("inline.crossinline",
+            "TestKt", "TestKt\$test\$\$inlined\$save\$1", "TestKt\$save\$1")
+
+    @Test
     fun testMultiplyFilesInline() = test("inline.multiplyFiles", "Test2Kt",
             fileName = "test2.kt")
 
