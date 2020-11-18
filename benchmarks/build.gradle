@@ -14,19 +14,23 @@
  * limitations under the License.
  */
 
-apply from: project(":benchmarks").file("jmh.gradle")
+sourceSets {
+    jmh.java.srcDirs = [file('jmh')]
+    main.java.srcDirs = []
+}
 
 ext {
-  benchmarkRegexp = 'com\\.intellij\\.rt\\.coverage\\.jmh\\.DiscoveryAgentBenchmark.*'
-  benchmarkMode = 'ss'
-  benchmarkProfilers = ['org.openjdk.jmh.profile.GCProfiler', 'com.intellij.rt.coverage.jmh.TraceFileProfiler']
-  benchmarkAgentName = test_discovery_jar_name
-  benchmarkExtraArgs = [
-      '-jvmArgs', '-Dtest.discovery.data.listener=com.intellij.rt.coverage.data.SingleTrFileDiscoveryProtocolDataListener'
-  ]
+    jmhVersion = '1.20'
+}
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {
-  baseline "$agentsGroupId:$test_discovery_jar_name:$baselineVersion"
-  head project(':test-discovery')
+    jmhCompile "org.openjdk.jmh:jmh-core:$jmhVersion"
+    jmhAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
+    jmhCompile 'org.joda:joda-convert:1.2'
+    jmhCompile 'junit:junit:4.12'
+    jmhCompile fileTree('lib')
 }

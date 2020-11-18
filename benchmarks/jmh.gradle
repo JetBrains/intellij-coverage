@@ -1,0 +1,122 @@
+/*
+ * Copyright 2000-2020 JetBrains s.r.o.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import com.intellij.rt.coverage.testDiscovery.jmh.ReportReader
+import org.codehaus.groovy.runtime.ResourceGroovyMethods
+
+import java.nio.file.Files
+
+repositories {
+  mavenCentral()
+  maven { url = 'https://jetbrains.bintray.com/intellij-third-party-dependencies' }
+}
+
+
+ext {
+  baselineVersion = '1.0.424'
+  becnhmarkForks = 1
+  benchmarkIterations = 25
+  benchmarkWarmupIterations = 10
+  benchmarkProfilers = []
+  benchmarkExtraAgentArgs = ""
+  benchmarkExtraArgs = []
+}
+
+configurations {
+  baseline
+  head
+}
+
+// benchmark without agent
+task noAgentBenchmark(type: JavaExec) {
+  configureBenchmark it as JavaExec
+}
+
+// benchmark with baseline version of agent
+task baselineBenchmark(type: JavaExec) {
+  configureBenchmark it as JavaExec, configurations.baseline
+}
+
+// benchmark with current version of agent
+task headBenchmark(type: JavaExec, dependsOn: jar) {
+  configureBenchmark it as JavaExec, configurations.head
+}
+
+def configureBenchmark(JavaExec benchmark, Configuration agent = null) {
+  benchmark.with {
+    dependsOn ":benchmarks:jmhClasses"
+    main = 'org.openjdk.jmh.Main'
+    doFirst {
+      classpath = project(":benchmarks").sourceSets.jmh.runtimeClasspath
+      args = [
+          '-jvmArgs', '-Dfile.encoding=UTF-8',
+          // benchmarks
+          benchmarkRegexp,
+          // report
+          '-rf', 'json', '-rff', benchmarkReport(benchmark),
+          // mode, see org.openjdk.jmh.annotations.Mode
+          '-bm', benchmarkMode,
+          // number of forks, measurement iterations, warmups
+          '-f', becnhmarkForks, '-i', benchmarkIterations, '-wi', benchmarkWarmupIterations,
+          // fail-on-error
+          '-foe', 'true',
+          // verbosity [SILENT, NORMAL, EXTRA]
+          '-v', 'NORMAL'
+      ]
+      for (String profiler : benchmarkProfilers) {
+        args += ['-prof', profiler]
+      }
+      if (agent != null) {
+        args += ['-jvmArgs', "-javaagent:${agent.find { it.name.startsWith(benchmarkAgentName) }.absolutePath}$benchmarkExtraAgentArgs"]
+        args += benchmarkExtraArgs
+      }
+      benchmarkReport(benchmark).createNewFile()
+      Files.deleteIfExists(file('td.ijtc').toPath())
+    }
+  }
+}
+
+def benchmarkReport(Task benchmark) {
+  file("$benchmark.temporaryDir/${benchmark.name}.json")
+}
+
+task benchmark(group: 'verification', dependsOn: [noAgentBenchmark, baselineBenchmark, headBenchmark]) {
+  doLast {
+    def secondaryMetrics = [
+        'trace.file.size',
+        '·gc.alloc.rate',
+        '·gc.count', '·gc.time'
+    ]
+    def baselineReport = ResourceGroovyMethods.getText(benchmarkReport(baselineBenchmark), 'UTF-8')
+    project.logger.quiet """Benchmark score:
+    No agent vs $baselineVersion:
+    ${
+      ReportReader.readScore(
+          ResourceGroovyMethods.getText(benchmarkReport(noAgentBenchmark), 'UTF-8'),
+          baselineReport,
+          secondaryMetrics
+      )
+    }
+    $baselineVersion vs $version:
+    ${
+      ReportReader.readScore(
+          baselineReport,
+          ResourceGroovyMethods.getText(benchmarkReport(headBenchmark), 'UTF-8'),
+          secondaryMetrics
+      )
+    }"""
+  }
+}

@@ -17,16 +17,20 @@
 apply from: project(":benchmarks").file("jmh.gradle")
 
 ext {
-  benchmarkRegexp = 'com\\.intellij\\.rt\\.coverage\\.jmh\\.DiscoveryAgentBenchmark.*'
+  baselineVersion = '1.0.573'
+  benchmarkIterations = 10
+  benchmarkWarmupIterations = 10
+  benchmarkRegexp = 'com\\.intellij\\.rt\\.coverage\\.jmh\\.CoverageAgentBenchmark.*'
   benchmarkMode = 'ss'
-  benchmarkProfilers = ['org.openjdk.jmh.profile.GCProfiler', 'com.intellij.rt.coverage.jmh.TraceFileProfiler']
-  benchmarkAgentName = test_discovery_jar_name
-  benchmarkExtraArgs = [
-      '-jvmArgs', '-Dtest.discovery.data.listener=com.intellij.rt.coverage.data.SingleTrFileDiscoveryProtocolDataListener'
-  ]
+  benchmarkAgentName = coverage_jar_name
+  benchmarkExtraAgentArgs = "=coverage.ic false false false true org\\.joda.*"
 }
 
 dependencies {
-  baseline "$agentsGroupId:$test_discovery_jar_name:$baselineVersion"
-  head project(':test-discovery')
+  baseline "$agentsGroupId:$coverage_jar_name:$baselineVersion"
+  head project(path: ':instrumentation', configuration: 'archives')
+}
+
+headBenchmark {
+  dependsOn(":instrumentation:coverageAgentJar")
 }
