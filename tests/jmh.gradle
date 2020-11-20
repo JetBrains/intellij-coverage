@@ -23,7 +23,7 @@ ext {
   benchmarkRegexp = 'com\\.intellij\\.rt\\.coverage\\.jmh\\.CoverageAgentBenchmark.*'
   benchmarkMode = 'ss'
   benchmarkAgentName = coverage_jar_name
-  benchmarkExtraAgentArgs = "=coverage.ic false false false true org\\.joda.*"
+  benchmarkExtraAgentArgs = "=coverage.ic false false false true org\\.joda.* org\\.apache\\.commons.*"
 }
 
 dependencies {

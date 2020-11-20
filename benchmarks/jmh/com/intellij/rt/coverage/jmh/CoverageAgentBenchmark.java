@@ -33,4 +33,15 @@ public class CoverageAgentBenchmark {
       System.setOut(original);
     }
   }
+
+  @Benchmark
+  public void apacheCollectionsTestCoverage() throws Exception {
+    PrintStream original = System.out;
+    try {
+      System.setOut(new PrintStream(new NullOutputStream()));
+      ApacheCollectionsTests.runTests();
+    } finally {
+      System.setOut(original);
+    }
+  }
 }
