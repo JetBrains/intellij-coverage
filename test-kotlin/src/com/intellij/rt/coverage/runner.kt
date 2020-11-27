@@ -24,7 +24,7 @@ import java.io.File
 import java.nio.file.Paths
 
 
-fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean, calcUnloaded: Boolean): ProjectData {
+fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean, calcUnloaded: Boolean = false): ProjectData {
     val classPath = System.getProperty("java.class.path")
     return CoverageStatusTest.runCoverage(classPath, coverageDataFile, "kotlinTestData.*", "kotlinTestData.$testName.Test", sampling, calcUnloaded)
 }

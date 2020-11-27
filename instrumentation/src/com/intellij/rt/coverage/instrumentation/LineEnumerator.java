@@ -36,25 +36,25 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   private final MethodNode methodNode;
 
   private int myCurrentLine;
-  private int myCurrentJump;
   private int myCurrentSwitch;
 
-  private Label myLastJump;
+  private Label myLastFalseJump;
+  private Label myLastTrueJump;
 
   private boolean myHasExecutableLines = false;
-  private Set<Label> myJumps;
-  private Map<Label, Integer> mySwitches;
+  private Map<Label, Jump> myJumps;
+  private Map<Label, Switch> mySwitches;
 
   private final MethodVisitor myWriterMethodVisitor;
 
   private static final byte SEEN_NOTHING = 0;
 
   /**
-  * DUP
-  * IFNONNULL
-  * ICONST/BIPUSH
-  * INVOKESTATIC className.$$$reportNull$$$0 (I)V 
-  */
+   * DUP
+   * IFNONNULL
+   * ICONST/BIPUSH
+   * INVOKESTATIC className.$$$reportNull$$$0 (I)V
+   */
   private static final byte DUP_SEEN = 1;
   private static final byte IFNONNULL_SEEN = 2;
   private static final byte PARAM_CONST_SEEN = 3;
@@ -104,7 +104,6 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     super.visitLineNumber(line, start);
     myHasInstructions = false;
     myCurrentLine = line;
-    myCurrentJump = 0;
     myCurrentSwitch = 0;
     myHasExecutableLines = true;
     myClassInstrumenter.getOrCreateLineData(myCurrentLine, myMethodName, mySignature);
@@ -124,22 +123,38 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
       super.visitJumpInsn(opcode, label);
       return;
     }
+    boolean jumpInstrumented = false;
     if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR && !myMethodName.equals("<clinit>")) {
-      if (myJumps == null) myJumps = new HashSet<Label>();
-      myJumps.add(label);
-      myLastJump = label;
       final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
       if (lineData != null) {
-        lineData.addJump(myCurrentJump++);
+        int currentJump = lineData.jumpsCount();
+        Jump trueJump = new Jump(currentJump, myCurrentLine, true);
+        Jump falseJump = new Jump(currentJump, myCurrentLine, false);
+        Label trueLabel = new Label();
+        Label falseLabel = new Label();
+
+        myLastTrueJump = trueLabel;
+        myLastFalseJump = falseLabel;
+
+        if (myJumps == null) myJumps = new HashMap<Label, Jump>();
+        myJumps.put(myLastFalseJump, falseJump);
+        myJumps.put(myLastTrueJump, trueJump);
+
+        lineData.addJump(currentJump);
+
+        jumpInstrumented = true;
+        // a super call to filters may remove this jump, so myLastJump may be null after this line
+        super.visitJumpInsn(opcode, trueLabel);
+        super.visitJumpInsn(Opcodes.GOTO, falseLabel);
+        super.visitLabel(trueLabel);  // true hit will be inserted here
+        super.visitJumpInsn(Opcodes.GOTO, label);
+        super.visitLabel(falseLabel); // false hit will be inserted here
       }
     }
     if (myState == ASSERTIONS_DISABLED_STATE && opcode == Opcodes.IFNE) {
       myState = SEEN_NOTHING;
-      final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
-      if (lineData != null && isJump(label)) {
-        lineData.removeJump(myCurrentJump--);
-        myJumps.remove(myLastJump);
-        myLastJump = null;
+      if (jumpInstrumented) {
+        removeLastJump();
       }
     }
 
@@ -150,20 +165,23 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
       myState = SEEN_NOTHING;
     }
     myHasInstructions = true;
-    super.visitJumpInsn(opcode, label);
+    if (!jumpInstrumented) {
+      super.visitJumpInsn(opcode, label);
+    }
   }
 
-  public boolean isJump(Label jump) {
-    return myJumps != null && myJumps.contains(jump);
+  Jump getJump(Label jump) {
+    if (myJumps == null) return null;
+    return myJumps.get(jump);
   }
 
 
   public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
     super.visitLookupSwitchInsn(dflt, keys, labels);
     if (!myHasExecutableLines) return;
-    rememberSwitchLabels(dflt, labels);
     final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
     if (lineData != null) {
+      rememberSwitchLabels(dflt, labels);
       lineData.addSwitch(myCurrentSwitch++, keys);
     }
     myState = SEEN_NOTHING;
@@ -173,9 +191,9 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
     super.visitTableSwitchInsn(min, max, dflt, labels);
     if (!myHasExecutableLines) return;
-    rememberSwitchLabels(dflt, labels);
     final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
     if (lineData != null) {
+      rememberSwitchLabels(dflt, labels);
       SwitchData switchData = lineData.addSwitch(myCurrentSwitch++, min, max);
       mySwitchLabels.put(dflt, switchData);
     }
@@ -184,15 +202,15 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   }
 
   private void rememberSwitchLabels(final Label dflt, final Label[] labels) {
-    if (mySwitches == null) mySwitches = new HashMap<Label, Integer>();
-    mySwitches.put(dflt, -1);
+    if (mySwitches == null) mySwitches = new HashMap<Label, Switch>();
+    mySwitches.put(dflt, new Switch(myCurrentSwitch, myCurrentLine, -1));
     for (int i = labels.length - 1; i >= 0; i--) {
-      mySwitches.put(labels[i], i);
+      mySwitches.put(labels[i], new Switch(myCurrentSwitch, myCurrentLine, i));
     }
   }
 
 
-  public Integer getSwitchKey(Label label) {
+  public Switch getSwitch(Label label) {
     if (mySwitches == null) return null;
     return mySwitches.get(label);
   }
@@ -213,8 +231,8 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
 
     if (opcode == Opcodes.DUP) {
       myState = DUP_SEEN;
-    } 
-    else if (myState == IFNONNULL_SEEN && 
+    }
+    else if (myState == IFNONNULL_SEEN &&
         (opcode >= Opcodes.ICONST_0 && opcode <= Opcodes.ICONST_5 || opcode == Opcodes.BIPUSH || opcode == Opcodes.SIPUSH)) {
       myState = PARAM_CONST_SEEN;
     }
@@ -260,7 +278,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     super.visitMethodInsn(opcode, owner, name, desc, itf);
     if (!myHasExecutableLines) return;
 
-    if (myState == PARAM_CONST_SEEN && 
+    if (myState == PARAM_CONST_SEEN &&
         opcode == Opcodes.INVOKESTATIC &&
         name.startsWith("$$$reportNull$$$") &&
         ClassNameUtil.convertToFQName(owner).equals(myClassInstrumenter.getClassName())) {
@@ -275,9 +293,12 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
 
   public void removeLastJump() {
     final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
-    if (lineData != null) {
-      lineData.removeJump(myCurrentJump--);
-      myJumps.remove(myLastJump);
+    if (lineData != null && myLastFalseJump != null) {
+      lineData.removeJump(lineData.jumpsCount() - 1);
+      myJumps.remove(myLastFalseJump);
+      myJumps.remove(myLastTrueJump);
+      myLastTrueJump = null;
+      myLastFalseJump = null;
     }
   }
 
@@ -312,5 +333,94 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
 
   private static List<LineEnumeratorFilter> createLineEnumeratorFilters() {
     return KotlinUtils.createLineEnumeratorFilters();
+  }
+
+  static class Jump {
+    private final int myIndex;
+    private final int myLine;
+    private final boolean myType;
+
+    public Jump(int index, int line, boolean type) {
+      myIndex = index;
+      myLine = line;
+      myType = type;
+    }
+
+    public int getIndex() {
+      return myIndex;
+    }
+
+    public int getLine() {
+      return myLine;
+    }
+
+    public boolean getType() {
+      return myType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      Jump jump = (Jump) o;
+
+      return myIndex == jump.myIndex
+          && myLine == jump.myLine
+          && myType == jump.myType;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = myIndex;
+      result = 31 * result + myLine;
+      result = 31 * result + (myType ? 1 : 0);
+      return result;
+    }
+  }
+
+
+  static class Switch {
+    private final int myIndex;
+    private final int myLine;
+    private final int myKey;
+
+    public Switch(int index, int line, int key) {
+      myIndex = index;
+      myLine = line;
+      myKey = key;
+    }
+
+    public int getIndex() {
+      return myIndex;
+    }
+
+    public int getLine() {
+      return myLine;
+    }
+
+    public int getKey() {
+      return myKey;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+
+      Switch aSwitch = (Switch) o;
+
+      return myIndex == aSwitch.myIndex
+          && myLine == aSwitch.myLine
+          && myKey == aSwitch.myKey;
+    }
+
+    @Override
+    public int hashCode() {
+      int result = myIndex;
+      result = 31 * result + myLine;
+      result = 31 * result + myKey;
+      return result;
+    }
   }
 }

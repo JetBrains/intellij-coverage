@@ -89,8 +89,8 @@ public class JumpsAndSwitches implements CoverageData {
   }
 
   public void removeJump(final int jump) {
-    if (jump > 0 && jump <= myJumps.size()) {
-      myJumps.remove(jump - 1);
+    if (0 <= jump && jump < myJumps.size()) {
+      myJumps.remove(jump);
     }
   }
 
@@ -163,5 +163,11 @@ public class JumpsAndSwitches implements CoverageData {
       }
       switchData.merge(array[i]);
     }
+  }
+
+  public int jumpsCount() {
+    if (myJumps != null) return myJumps.size();
+    if (myJumpsArray != null) return myJumpsArray.length;
+    return 0;
   }
 }
