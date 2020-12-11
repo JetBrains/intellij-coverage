@@ -146,6 +146,17 @@ public class CoverageStatusTest extends TestCase {
     doTest("longClass", expectedBuilder.toString());
   }
 
+  public void testNotNullAssertionsAreIgnored() throws Exception {
+    final String testDataPath = getTestPath("notNull");
+    myDataFile = new File(testDataPath + File.separator + "Test.ic");
+    final ProjectData projectInfo = runCoverage(testDataPath, myDataFile, "WithNotNulls.*", "WithNotNulls", false);
+    final ClassData classInfo = projectInfo.getClassData("WithNotNulls");
+    assertNotNull(classInfo);
+    final LineData line = classInfo.getLineData(6);
+    assertNotNull(line);
+    assertNull(line.getJumps());
+  }
+
   public void testIncompleteAgentArguments() throws Exception {
     final String testDataPath = prepareForAgentRun("simple");
     String coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent");
@@ -160,8 +171,12 @@ public class CoverageStatusTest extends TestCase {
     }
   }
 
+  private String getTestPath(String testName) {
+    return new File("").getAbsolutePath() + File.separator + "testData" + File.separator + "coverage" + File.separator + testName;
+  }
+
   private String prepareForAgentRun(String testName) {
-    String testDataPath = new File("").getAbsolutePath() + File.separator + "testData" + File.separator + "coverage" + File.separator + testName;
+    String testDataPath = getTestPath(testName);
     myDataFile = new File(testDataPath + File.separator + "Test.ic");
     if (Main.compile(new String[]{testDataPath + File.separator + "Test.java"}) != 0) {
       throw new RuntimeException("Compilation failed");
