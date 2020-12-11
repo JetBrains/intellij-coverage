@@ -51,7 +51,7 @@ class KotlinCoverageStatusTest {
     fun testDefaultArgsSeveralArgs() = test("defaultArgs.severalArguments")
 
     @Test
-    fun testDefaultArgsSeveralArgsTracing() = test("defaultArgs.tracing", "kotlinTestData.defaultArgs.tracing.TestKt", "kotlinTestData.defaultArgs.tracing.X", sampling = false)
+    fun testDefaultArgsSeveralArgsTracing() = test("defaultArgs.tracing", "TestKt", "X", sampling = false)
 
     @Test
     fun test32DefaultArgsTracing() = test("defaultArgs.defaultArgs32", sampling = false)
@@ -59,6 +59,11 @@ class KotlinCoverageStatusTest {
     @Test
     fun test32ArgsTracing() = test("defaultArgs.args32", sampling = false)
 
+    @Test
+    fun testUnloadedSingleFile() = test("unloaded.singleFile", "UnusedClass", calcUnloaded = true)
+
+    @Test
+    fun testUnloadedMultiFile() = test("unloaded.multiFile", "UnusedClass", calcUnloaded = true, fileName = "UnusedClass.kt")
 
     @Test
     fun testSimpleInline() = test("inline.simple")
@@ -70,13 +75,13 @@ class KotlinCoverageStatusTest {
     fun testLambdaInline() = test("inline.lambda")
 
     @Test
-    fun testReflection() = test("inline.reflection", "kotlinTestData.inline.reflection.Test")
+    fun testReflection() = test("inline.reflection", "Test")
 
     @Test
     fun testReified() = test("inline.reified")
 
     @Test
-    fun testMultiplyFilesInline() = test("inline.multiplyFiles", "kotlinTestData.inline.multiplyFiles.Test2Kt",
+    fun testMultiplyFilesInline() = test("inline.multiplyFiles", "Test2Kt",
             fileName = "test2.kt")
 
     @Test
@@ -91,27 +96,27 @@ class KotlinCoverageStatusTest {
     fun testGetterAndSetterOfPropertyAreDistinguishable() = test("properties.getter_setter")
 
     @Test
-    fun testPrimaryConstructorWithProperties() = test("properties.constructor", "kotlinTestData.properties.constructor.A")
+    fun testPrimaryConstructorWithProperties() = test("properties.constructor", "A")
 
     @Test
-    fun testDataClass() = test("dataClass", "kotlinTestData.dataClass.A")
+    fun testDataClass() = test("dataClass", "A")
 
     @Test
-    fun testDefaultInterfaceMember() = test("defaultInterfaceMember", "kotlinTestData.defaultInterfaceMember.Foo\$DefaultImpls", "kotlinTestData.defaultInterfaceMember.Bar")
+    fun testDefaultInterfaceMember() = test("defaultInterfaceMember", "Foo\$DefaultImpls", "Bar")
 
     @Test
-    fun testDefaultInterfaceMemberRemoveOnlyInterfaceMember() = test("defaultInterfaceMember.removeOnlyDefaultInterfaceMember", "kotlinTestData.defaultInterfaceMember.removeOnlyDefaultInterfaceMember.Bar")
+    fun testDefaultInterfaceMemberRemoveOnlyInterfaceMember() = test("defaultInterfaceMember.removeOnlyDefaultInterfaceMember", "Bar")
 
     @Test
     fun testDefaultInterfaceMemberJava() = test("defaultInterfaceMember.java",
-            "kotlinTestData.defaultInterfaceMember.java.Foo", "kotlinTestData.defaultInterfaceMember.java.Bar",
+            "Foo", "Bar",
             fileName = "Test.java")
 
     @Test
-    fun testImplementationByDelegation() = test("implementationByDelegation", "kotlinTestData.implementationByDelegation.Derived")
+    fun testImplementationByDelegation() = test("implementationByDelegation", "Derived")
 
     @Test
-    fun testImplementationByDelegationGeneric() = test("implementationByDelegationGeneric", "kotlinTestData.implementationByDelegationGeneric.BDelegation")
+    fun testImplementationByDelegationGeneric() = test("implementationByDelegationGeneric", "BDelegation")
 
     @Test
     fun testWhenMappingsSampling() = test("whenMapping.sampling")
@@ -120,20 +125,22 @@ class KotlinCoverageStatusTest {
     fun testWhenMappingTracing() = test("whenMapping.tracing", sampling = false)
 
     @Test
-    fun testJavaSwitch() = test("javaSwitch", "kotlinTestData.javaSwitch.JavaSwitchTest", sampling = false, fileName = "JavaSwitchTest.java")
+    fun testJavaSwitch() = test("javaSwitch", "JavaSwitchTest", sampling = false, fileName = "JavaSwitchTest.java")
 
     @Test
     fun testSealedClassConstructor() = test("sealedClassConstructor",
-            "kotlinTestData.sealedClassConstructor.SealedClass",
-            "kotlinTestData.sealedClassConstructor.SealedClassWithArgs",
-            "kotlinTestData.sealedClassConstructor.ClassWithPrivateDefaultConstructor")
+            "SealedClass", "SealedClassWithArgs", "ClassWithPrivateDefaultConstructor")
 
+    @Test
+    fun testFunInterface() = test("funInterface", "TestKt", "TestKt\$test\$1")
 
-    private fun test(testName: String, vararg classes: String = arrayOf("kotlinTestData.$testName.TestKt"),
-                     sampling: Boolean = true, fileName: String = "test.kt") {
+    private fun test(testName: String, vararg classes: String = arrayOf("TestKt"),
+                     sampling: Boolean = true, fileName: String = "test.kt",
+                     calcUnloaded: Boolean = false) {
         val testFile = pathToFile("src", "kotlinTestData", *testName.split('.').toTypedArray(), fileName)
         val expected = extractCoverageDataFromFile(testFile)
-        val project = runWithCoverage(myDataFile, testName, sampling)
-        assertEqualsLines(project, expected, classes.toList())
+        val project = runWithCoverage(myDataFile, testName, sampling, calcUnloaded)
+        val fullClassNames = classes.map { "kotlinTestData.$testName.$it" }
+        assertEqualsLines(project, expected, fullClassNames)
     }
 }

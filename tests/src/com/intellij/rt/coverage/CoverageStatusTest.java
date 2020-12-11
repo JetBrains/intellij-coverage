@@ -188,11 +188,16 @@ public class CoverageStatusTest extends TestCase {
 
   static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
                                  String classToRun, final boolean sampling) throws IOException, InterruptedException {
+    return runCoverage(testDataPath, coverageDataFile, patterns, classToRun, sampling, false);
+  }
+
+  static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
+                                 String classToRun, final boolean sampling, boolean calcUnloaded) throws IOException, InterruptedException {
     String coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent");
 
     String[] commandLine = {
 //        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
-        "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" false false false "
+        "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" false " + calcUnloaded + " false "
             + sampling + " " + patterns,
         "-classpath", testDataPath, classToRun};
 
