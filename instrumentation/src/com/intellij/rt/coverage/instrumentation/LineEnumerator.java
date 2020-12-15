@@ -76,6 +76,11 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     super(Opcodes.API_VERSION);
 
     methodNode = new SaveLabelsMethodNode(access, name, desc, signature, exceptions);
+    myClassInstrumenter = classInstrumenter;
+    myWriterMethodVisitor = mv;
+    myAccess = access;
+    myMethodName = name;
+    mySignature = desc;
 
     MethodVisitor root = methodNode;
     for (LineEnumeratorFilter filter : createLineEnumeratorFilters()) {
@@ -85,12 +90,6 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
       }
     }
     super.mv = root;
-
-    myClassInstrumenter = classInstrumenter;
-    myWriterMethodVisitor = mv;
-    myAccess = access;
-    myMethodName = name;
-    mySignature = desc;
   }
 
 

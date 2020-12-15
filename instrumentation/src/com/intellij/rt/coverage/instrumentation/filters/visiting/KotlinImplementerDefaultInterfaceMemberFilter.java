@@ -47,7 +47,8 @@ public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodVisitin
   private State myState;
 
   @Override
-  public boolean isApplicable(Instrumenter context) {
+  public boolean isApplicable(Instrumenter context, int access, String name,
+                              String desc, String signature, String[] exceptions) {
     return KotlinUtils.isKotlinClass(context) && context.hasInterfaces();
   }
 

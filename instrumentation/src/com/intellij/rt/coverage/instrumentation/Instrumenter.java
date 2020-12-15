@@ -84,12 +84,14 @@ public abstract class Instrumenter extends ClassVisitor {
       }
     }
     myProcess = true;
-    return chainFilters(createMethodLineEnumerator(mv, name, desc, access, signature, exceptions));
+    return chainFilters(mv, access, name, desc, signature, exceptions);
   }
 
-  private MethodVisitor chainFilters(MethodVisitor root) {
+  private MethodVisitor chainFilters(MethodVisitor root, int access, String name,
+                                     String desc, String signature, String[] exceptions) {
+    root = createMethodLineEnumerator(root, name, desc, access, signature, exceptions);
     for (MethodVisitingFilter filter : createVisitingFilters()) {
-      if (filter.isApplicable(this)) {
+      if (filter.isApplicable(this, access, name, desc, signature, exceptions)) {
         filter.initFilter(root, this);
         root = filter;
       }
@@ -155,6 +157,10 @@ public abstract class Instrumenter extends ClassVisitor {
   public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
     myAnnotations.add(StringsPool.getFromPool(descriptor));
     return super.visitAnnotation(descriptor, visible);
+  }
+
+  public boolean isSampling() {
+    return myProjectData.isSampling();
   }
 
   public boolean hasInterfaces() {

@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.instrumentation.filters.enumerating;
+package com.intellij.rt.coverage.instrumentation.filters;
 
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Handle;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
+import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 /**
  * Filter out generated Kotlin coroutines state machines.
  * Namely, TABLESWITCH on state and 'if suspend' checks are ignored.
  */
-public class KotlinCoroutinesFilter extends LineEnumeratorFilter {
+public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   private boolean myGetCoroutinesSuspendedVisited = false;
   private boolean myStoreCoroutinesSuspendedVisited = false;
   private boolean myLoadCoroutinesSuspendedVisited = false;
@@ -37,22 +38,36 @@ public class KotlinCoroutinesFilter extends LineEnumeratorFilter {
   private int myLine = -1;
   private boolean myHadLineDataBefore = false;
   private boolean myHasExecutableCode = false;
+  private final Instrumenter myContext;
+
+  public KotlinCoroutinesFilter(MethodVisitor methodVisitor, Instrumenter instrumenter) {
+    super(Opcodes.API_VERSION, methodVisitor);
+    myContext = instrumenter;
+  }
+
+
+  protected abstract void onIgnoredJump();
+
+  protected abstract void onIgnoredSwitch(Label dflt, Label... labels);
+
+  protected void onIgnoredLine(int line) {
+    myContext.removeLine(line);
+  }
 
   /**
    * This filter is applicable for suspend methods of Kotlin class.
    * It could be a suspend lambda, then it's name is 'invokeSuspend'.
    * Or it could be a suspend method, then it's last parameter is a Continuation.
    */
-  @Override
-  public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
+  public static boolean isApplicable(Instrumenter context, String name, String desc) {
     return KotlinUtils.isKotlinClass(context)
         && (name.equals("invokeSuspend") || desc.endsWith("Lkotlin/coroutines/Continuation;)Ljava/lang/Object;"));
   }
 
   @Override
   public void visitLineNumber(int line, Label start) {
+    myHadLineDataBefore = myContext.getLineData(line) != null;
     super.visitLineNumber(line, start);
-    myHadLineDataBefore = myContext.getInstrumenter().getLineData(line) != null;
     myLine = line;
     myHasExecutableCode = false;
   }
@@ -99,7 +114,7 @@ public class KotlinCoroutinesFilter extends LineEnumeratorFilter {
     myHasExecutableCode = true;
     boolean compareWithCoroutinesSuspend = myLoadCoroutinesSuspendedVisited || myGetCoroutinesSuspendedVisited;
     if (compareWithCoroutinesSuspend && mySuspendCallVisited && opcode == Opcodes.IF_ACMPNE) {
-      myContext.removeLastJump();
+      onIgnoredJump();
       mySuspendCallVisited = false;
     }
     myLoadCoroutinesSuspendedVisited = false;
@@ -126,9 +141,9 @@ public class KotlinCoroutinesFilter extends LineEnumeratorFilter {
     super.visitTableSwitchInsn(min, max, dflt, labels);
     myHasExecutableCode = true;
     if (myStateLabelVisited) {
-      myContext.removeLastSwitch(dflt, labels);
+      onIgnoredSwitch(dflt, labels);
       if (!myHadLineDataBefore) {
-        myContext.getInstrumenter().removeLine(myLine);
+        onIgnoredLine(myLine);
       }
     }
     myStateLabelVisited = false;
@@ -138,13 +153,13 @@ public class KotlinCoroutinesFilter extends LineEnumeratorFilter {
   public void visitInsn(int opcode) {
     super.visitInsn(opcode);
     if (opcode == Opcodes.ARETURN && !myHasExecutableCode && !myHadLineDataBefore) {
-      myContext.getInstrumenter().removeLine(myLine);
+      onIgnoredLine(myLine);
       return;
     }
     myHasExecutableCode = true;
     // ignore generated return on the first line
     if (opcode == Opcodes.ARETURN && myLoadCoroutinesSuspendedVisited && !myHadLineDataBefore) {
-      myContext.getInstrumenter().removeLine(myLine);
+      onIgnoredLine(myLine);
     }
   }
 

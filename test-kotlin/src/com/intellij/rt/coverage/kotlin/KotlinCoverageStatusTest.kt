@@ -81,6 +81,13 @@ class KotlinCoverageStatusTest {
     fun testReified() = test("inline.reified")
 
     @Test
+    @Ignore("To be fixed")
+    fun testInlineCoroutinesTracing() = test("inline.coroutines.tracing", classes = all, sampling = false)
+
+    @Test
+    fun testInlineCoroutinesSampling() = test("inline.coroutines.sampling", classes = all)
+
+    @Test
     fun testMultiplyFilesInline() = test("inline.multiplyFiles", "Test2Kt",
             fileName = "test2.kt")
 

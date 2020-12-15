@@ -17,13 +17,14 @@
 package com.intellij.rt.coverage.instrumentation.kotlin;
 
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
-import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinCoroutinesFilter;
+import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinCoroutinesEnumeratingFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinWhenMappingExceptionFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticAccessMethodFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticConstructorOfSealedClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
+import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinCoroutinesVisitingFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinImplementerDefaultInterfaceMemberFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
 
@@ -56,6 +57,7 @@ public class KotlinUtils {
     if (!ourKotlinEnabled) return Collections.emptyList();
     List<MethodVisitingFilter> result = new ArrayList<MethodVisitingFilter>();
     result.add(new KotlinImplementerDefaultInterfaceMemberFilter());
+    result.add(new KotlinCoroutinesVisitingFilter());
     return result;
   }
 
@@ -64,7 +66,7 @@ public class KotlinUtils {
     List<LineEnumeratorFilter> result = new ArrayList<LineEnumeratorFilter>();
     result.add(new KotlinWhenMappingExceptionFilter());
     result.add(new KotlinDefaultArgsBranchFilter());
-    result.add(new KotlinCoroutinesFilter());
+    result.add(new KotlinCoroutinesEnumeratingFilter());
     return result;
   }
 }

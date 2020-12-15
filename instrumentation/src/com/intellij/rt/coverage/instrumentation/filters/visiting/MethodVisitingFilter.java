@@ -35,5 +35,6 @@ public abstract class MethodVisitingFilter extends MethodVisitor {
     myContext = context;
   }
 
-  public abstract boolean isApplicable(Instrumenter context);
+  public abstract boolean isApplicable(Instrumenter context, int access, String name,
+                                       String desc, String signature, String[] exceptions);
 }
