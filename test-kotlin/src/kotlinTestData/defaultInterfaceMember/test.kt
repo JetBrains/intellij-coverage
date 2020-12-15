@@ -18,20 +18,20 @@ package kotlinTestData.defaultInterfaceMember
 
 interface Foo {
     fun foo1() {
-        return                // coverage: NONE
+        println()             // coverage: NONE
     }
     fun foo2() {
-        return                // coverage: FULL
+        println()             // coverage: FULL
     }
     fun foo3() {
-        return                // coverage: NONE
+        println()             // coverage: NONE
     }
 }
 
 class Bar                     // line is invisible for coverage as default member is covered in Foo
 () : Foo {                    // coverage: FULL
     override fun foo1() {
-        return                // coverage: NONE
+        println()             // coverage: NONE
     }
 }
 

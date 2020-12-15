@@ -25,7 +25,6 @@ private fun functionWithDefaultArguments(
 
 fun test() {
     functionWithDefaultArguments(4)       // coverage: FULL
-    return                                // coverage: FULL
 }
 
 object Test {

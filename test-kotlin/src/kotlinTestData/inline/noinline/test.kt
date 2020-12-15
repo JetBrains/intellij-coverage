@@ -35,11 +35,11 @@ fun test() {
                 43         // coverage: FULL
             }
     )
-}                          // coverage: FULL
+}
 
 object Test {              // coverage: FULL
     @JvmStatic
     fun main(args: Array<String>) {
         test()             // coverage: FULL
-    }                      // coverage: FULL
+    }
 }

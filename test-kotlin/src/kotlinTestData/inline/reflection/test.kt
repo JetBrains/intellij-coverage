@@ -20,23 +20,19 @@ object Test {                    // coverage: FULL
     @JvmStatic
     fun main(args: Array<String>) {
         test()                   // coverage: FULL
-        return                   // coverage: FULL
     }
 
     inline fun a(x: Int) {
         println(x)                // coverage: FULL
-        return                    // coverage: FULL
     }
 
     inline fun b(f: (Int) -> Int) {
         println(f(4))             // coverage: FULL
-        return                    // coverage: FULL
     }
 
     fun test() {
         this::class.java.getDeclaredMethod("a", Int::class.java).invoke(this, 42)   // coverage: FULL
         val f =  { x: Int -> x + 42 }                                               // coverage: FULL
         this::class.java.declaredMethods.single { it.name == "b" }.invoke(this, f)  // coverage: FULL
-        return                                                                      // coverage: FULL
     }
 }

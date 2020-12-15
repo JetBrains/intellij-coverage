@@ -28,7 +28,7 @@ inline fun <reified T> createArray(size: Int): Any = when (T::class) { // covera
 fun test() {
     val a = createArray<Int>(10)                                      // coverage: FULL
     val b = createArray<Any>(30)                                      // coverage: FULL
-}                                                                     // coverage: FULL
+}
 
 object Test {
     @JvmStatic

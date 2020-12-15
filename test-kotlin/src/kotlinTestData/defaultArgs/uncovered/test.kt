@@ -22,7 +22,6 @@ private fun functionWithDefaultArgument(x: Int = 3): Int {  // coverage: NONE
 
 fun test() {
     functionWithDefaultArgument(4)                          // coverage: FULL
-    return                                                  // coverage: FULL
 }
 
 object Test {

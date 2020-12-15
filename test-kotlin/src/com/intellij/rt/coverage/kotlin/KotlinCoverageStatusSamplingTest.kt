@@ -72,7 +72,6 @@ abstract class KotlinCoverageStatusAbstractSamplingTest : KotlinCoverageStatusTe
     fun testMultiplyFilesInline() = test("inline.multiplyFiles", "Test2Kt", fileName = "test2.kt")
 
     @Test
-    @Ignore("Not implemented")
     fun testReturn() = test("returnTest")
 
     @Test

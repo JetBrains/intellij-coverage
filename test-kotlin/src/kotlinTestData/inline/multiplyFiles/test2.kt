@@ -23,12 +23,10 @@ inline fun separateA(f: (Int) -> Unit, gen: () -> Int) {
     val x = gen()                // coverage: FULL
     print("Got x = ")            // coverage: FULL
     f(x)                         // coverage: FULL
-    return                       // coverage: FULL
-}
+}                                // coverage: FULL
 
 inline fun separateC(f: (x: Int) -> Unit) {
     separateA(f) {               // coverage: FULL
         Random.nextInt()         // coverage: FULL
     }
-    return                       // coverage: FULL
-}
+}                                // coverage: FULL

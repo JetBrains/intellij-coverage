@@ -21,25 +21,25 @@ private var counter = 0
 fun logAndDo(s: String, operation: (String) -> Unit) {
     println("Log: \"$s\"")               // coverage: FULL
     operation("${++counter} $s")         // coverage: FULL
-}                                        // coverage: FULL
+}
 
 val list = mutableListOf<String>()       // coverage: FULL
 inline fun save(message: String, crossinline foo: (String) -> Unit) {
     logAndDo(message) { loggedMessage -> // coverage: FULL
         list.add(loggedMessage)          // coverage: FULL
         foo(loggedMessage)               // coverage: FULL
-    }                                    // coverage: FULL
+    }
 }                                        // coverage: FULL
 
 fun test() {
     save("Hello") {                      // coverage: FULL
         println("\"$it\" saved")         // coverage: FULL
     }                                    // coverage: FULL
-}                                        // coverage: FULL
+}
 
 object Test {                            // coverage: FULL
     @JvmStatic
     fun main(args: Array<String>) {
         test()                           // coverage: FULL
-    }                                    // coverage: FULL
+    }
 }

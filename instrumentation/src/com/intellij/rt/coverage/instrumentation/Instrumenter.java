@@ -19,15 +19,13 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
-import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
-
-import java.util.List;
 
 public abstract class Instrumenter extends MethodFilteringVisitor {
   protected final ProjectData myProjectData;
@@ -67,7 +65,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   private MethodVisitor chainFilters(MethodVisitor root, int access, String name,
                                      String desc, String signature, String[] exceptions) {
     root = createMethodLineEnumerator(root, name, desc, access, signature, exceptions);
-    for (MethodVisitingFilter filter : createVisitingFilters()) {
+    for (MethodVisitingFilter filter : FilterUtils.createVisitingFilters()) {
       if (filter.isApplicable(this, access, name, desc, signature, exceptions)) {
         filter.initFilter(root, this, desc);
         root = filter;
@@ -126,9 +124,5 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
 
   public void removeLine(final int line) {
     myLines.remove(line);
-  }
-
-  private static List<MethodVisitingFilter> createVisitingFilters() {
-    return KotlinUtils.createVisitingFilters();
   }
 }

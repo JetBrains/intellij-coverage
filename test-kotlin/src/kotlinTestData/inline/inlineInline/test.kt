@@ -19,17 +19,14 @@ package kotlinTestData.inline.inlineInline
 private inline fun a() {
     print("Hello")         // coverage: FULL
     b()                    // coverage: FULL
-    return                 // coverage: FULL
-}
+}                          // coverage: FULL
 
 private inline fun b() {
     println(" World")      // coverage: FULL
-    return                 // coverage: FULL
-}
+}                          // coverage: FULL
 
 fun test() {
     a()                    // coverage: FULL
-    return                 // coverage: FULL
 }
 
 object Test {

@@ -131,7 +131,7 @@ public class CoverageStatusTest extends TestCase {
   public void testLongClass() throws Exception {
     StringBuilder expectedBuilder = new StringBuilder("1:NONE\n" +
         "3:FULL\n");
-    for (int line = 32004; line <= 34004; line++) {
+    for (int line = 32004; line < 34004; line++) {
       expectedBuilder.append(line).append(":FULL\n");
     }
     doTest("longClass", expectedBuilder.toString(), true);

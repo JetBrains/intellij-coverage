@@ -16,9 +16,8 @@
 
 package com.intellij.rt.coverage.instrumentation;
 
-import com.intellij.rt.coverage.instrumentation.filters.signature.EnumMethodsFilter;
+import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
-import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
@@ -32,7 +31,7 @@ import java.util.List;
  * This visitor defines methods that should be visited.
  */
 public class MethodFilteringVisitor extends ClassVisitor {
-  private static final List<MethodSignatureFilter> ourSignatureFilters = getMethodSignatureFilters();
+  private static final List<MethodSignatureFilter> ourSignatureFilters = FilterUtils.createSignatureFilters();
 
   private final String myClassName;
   private boolean myEnum = false;
@@ -105,11 +104,5 @@ public class MethodFilteringVisitor extends ClassVisitor {
     if (myProperties == null) {
       myProperties = new HashMap<String, Object>();
     }
-  }
-
-  private static List<MethodSignatureFilter> getMethodSignatureFilters() {
-    List<MethodSignatureFilter> result = KotlinUtils.createSignatureFilters();
-    result.add(new EnumMethodsFilter());
-    return result;
   }
 }

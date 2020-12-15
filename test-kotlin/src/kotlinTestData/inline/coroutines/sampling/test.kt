@@ -29,7 +29,7 @@ suspend fun foo1(flag: Boolean) {
         println(foo {            // coverage: FULL
             ctxOuter()           // coverage: FULL
         })                       // coverage: FULL
-    }                            // coverage: FULL
+    }
 }
 suspend inline fun ctxOuter() {
     ctx()                        // coverage: FULL
@@ -56,5 +56,5 @@ object Test {                           // coverage: FULL
     @JvmStatic
     fun main(args: Array<String>) {
         test()                          // coverage: FULL
-    }                                   // coverage: FULL
+    }
 }
