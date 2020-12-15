@@ -24,15 +24,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * Filters out coverage from method if matches filter.
  */
 public abstract class MethodVisitingFilter extends MethodVisitor {
-
-  protected abstract void filter();
-
-  protected enum State {
-    SHOULD_COVER, SHOULD_NOT_COVER, UNKNOWN
-  }
-
   protected Instrumenter myContext;
-  protected State myState;
 
   public MethodVisitingFilter() {
     super(Opcodes.API_VERSION);
@@ -41,20 +33,7 @@ public abstract class MethodVisitingFilter extends MethodVisitor {
   public void initFilter(MethodVisitor methodVisitor, Instrumenter context) {
     mv = methodVisitor;
     myContext = context;
-    myState = State.UNKNOWN;
   }
 
   public abstract boolean isApplicable(Instrumenter context);
-
-  protected boolean completed() {
-    return myState != State.UNKNOWN;
-  }
-
-  @Override
-  public void visitEnd() {
-    super.visitEnd();
-    if (myState == State.SHOULD_NOT_COVER) {
-      filter();
-    }
-  }
 }

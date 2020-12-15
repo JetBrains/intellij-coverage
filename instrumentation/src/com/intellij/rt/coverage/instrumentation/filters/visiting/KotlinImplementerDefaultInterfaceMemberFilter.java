@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
+import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 /**
@@ -36,16 +37,31 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * A method is filtered out is it's instructions list matches this structure.
  */
 public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodVisitingFilter {
+  private enum State {
+    SHOULD_COVER, SHOULD_NOT_COVER, UNKNOWN
+  }
+
   private byte matchedInstructions = 0;
   private int myLine = -1;
   private LineData myPreviousLineData;
+  private State myState;
 
   @Override
   public boolean isApplicable(Instrumenter context) {
     return KotlinUtils.isKotlinClass(context) && context.hasInterfaces();
   }
 
-  protected void filter() {
+  @Override
+  public void initFilter(MethodVisitor methodVisitor, Instrumenter context) {
+    super.initFilter(methodVisitor, context);
+    myState = State.UNKNOWN;
+  }
+
+  private boolean completed() {
+    return myState != State.UNKNOWN;
+  }
+
+  private void filter() {
     if (myPreviousLineData == null) {
       myContext.removeLine(myLine);
     }
@@ -59,6 +75,7 @@ public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodVisitin
       matchedInstructions = 1;
     } else if (matchedInstructions == 5) {
       myState = State.SHOULD_NOT_COVER;
+      filter();
     } else {
       myState = State.SHOULD_COVER;
     }
