@@ -52,21 +52,30 @@ public class Instrumentator {
       return;
     }
 
-    final boolean traceLines = args.length > 0 && Boolean.valueOf(args[1]);
-    final boolean sampling = args.length == 0 || Boolean.valueOf(args[4]);
+    if (0 < args.length && args.length < 5) {
+      System.err.println("At least 5 arguments expected but " + args.length + " found.\n"
+          + "Expected arguments are:\n"
+          + "1) data file to save coverage result\n"
+          + "2) a flag to enable tracking per test coverage\n"
+          + "3) a flag to calculate coverage for unloaded classes\n"
+          + "4) a flag to use data file as initial coverage\n"
+          + "5) a flag to run coverage in sampling mode or in tracing mode otherwise\n");
+      System.exit(1);
+    }
+
     final File dataFile = args.length > 0 ? new File(args[0]) : null;
+    final boolean traceLines = args.length > 0 && Boolean.parseBoolean(args[1]);
+    final boolean calcUnloaded = args.length > 0 && Boolean.parseBoolean(args[2]);
+    final ProjectData initialData = args.length > 0 && Boolean.parseBoolean(args[3]) && dataFile.isFile()
+        ? ProjectDataLoader.load(dataFile) : null;
+    final boolean sampling = args.length == 0 || Boolean.parseBoolean(args[4]);
     if (dataFile != null) {
       ErrorReporter.setBasePath(dataFile.getParent());
-    }
-    final boolean calcUnloaded = args.length > 0 && Boolean.valueOf(args[2]);
-    ProjectData initialData = null;
-    if (args.length > 0 && Boolean.valueOf(args[3]) && dataFile.isFile()) {
-      initialData = ProjectDataLoader.load(dataFile);
     }
     int i = 5;
 
     final File sourceMapFile;
-    if (args.length > 5 && Boolean.valueOf(args[5])) {
+    if (args.length > 5 && Boolean.parseBoolean(args[5])) {
       sourceMapFile = new File(args[6]);
       i = 7;
     } else {

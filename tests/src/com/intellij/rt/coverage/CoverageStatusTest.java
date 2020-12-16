@@ -25,6 +25,7 @@ import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.ResourceUtil;
 import com.sun.tools.javac.Main;
 import junit.framework.TestCase;
+import org.junit.Assert;
 
 import java.io.File;
 import java.io.IOException;
@@ -144,20 +145,36 @@ public class CoverageStatusTest extends TestCase {
     doTest("longClass", expectedBuilder.toString());
   }
 
+  public void testIncompleteAgentArguments() throws Exception {
+    final String testDataPath = prepareForAgentRun("simple");
+    String coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent");
+    String[] commandLine = {
+        "-javaagent:" + coverageAgentPath + "=\"" + myDataFile.getPath() + "\"",
+        "-classpath", testDataPath, "Test"};
+    try {
+      ProcessUtil.execJavaProcess(commandLine);
+      Assert.fail();
+    } catch (RuntimeException e) {
+      assertTrue(e.getMessage().endsWith("Actual code = 1"));
+    }
+  }
+
+  private String prepareForAgentRun(String testName) {
+    String testDataPath = new File("").getAbsolutePath() + File.separator + "testData" + File.separator + "coverage" + File.separator + testName;
+    myDataFile = new File(testDataPath + File.separator + "Test.ic");
+    if (Main.compile(new String[]{testDataPath + File.separator + "Test.java"}) != 0) {
+      throw new RuntimeException("Compilation failed");
+    }
+    myClassFile = new File(testDataPath + File.separator + "Test.class");
+    return testDataPath;
+  }
+
   private void doTest(final String className, String expected) throws Exception {
     doTest(className, expected, false);
   }
 
   private void doTest(final String className, String expected, boolean sampling) throws Exception {
-    final String testDataPath = new File("").getAbsolutePath() + File.separator + "testData" + File.separator + "coverage" + File.separator + className;
-
-    myDataFile = new File(testDataPath +File.separator+ "Test.ic");
-
-    if (Main.compile(new String[]{testDataPath + File.separator + "Test.java"}) != 0) {
-      throw new RuntimeException("Compilation failed");
-    }
-
-    myClassFile = new File(testDataPath +File.separator + "Test.class");
+    final String testDataPath = prepareForAgentRun(className);
 
     final ProjectData projectInfo = runCoverage(testDataPath, myDataFile, "Test(\\$.*)*", "Test", sampling);
 
