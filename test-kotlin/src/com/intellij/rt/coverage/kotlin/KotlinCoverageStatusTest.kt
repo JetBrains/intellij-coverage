@@ -18,10 +18,6 @@ package com.intellij.rt.coverage.kotlin
 
 
 import com.intellij.rt.coverage.*
-import com.intellij.rt.coverage.allNames
-import com.intellij.rt.coverage.assertEqualsLines
-import com.intellij.rt.coverage.extractCoverageDataFromFile
-import com.intellij.rt.coverage.pathToFile
 import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
@@ -138,7 +134,6 @@ class KotlinCoverageStatusTest {
     @Test
     fun test_IDEA_250825() = test("fixes.IDEA_250825", "JavaTest", fileName = "JavaTest.java", sampling = false)
 
-    private val all = arrayOf("ALL CLASSES")
     private fun test(testName: String, vararg classes: String = arrayOf("TestKt"),
                      sampling: Boolean = true, fileName: String = "test.kt",
                      calcUnloaded: Boolean = false) {
@@ -146,6 +141,6 @@ class KotlinCoverageStatusTest {
         val expected = extractCoverageDataFromFile(testFile)
         val project = runWithCoverage(myDataFile, testName, sampling, calcUnloaded)
         val fullClassNames = classes.map { "kotlinTestData.$testName.$it" }
-        assertEqualsLines(project, expected, if (classes.contentEquals(all)) allNames else fullClassNames)
+        assertEqualsLines(project, expected, if (classes.contains(all)) listOf(all) else fullClassNames)
     }
 }

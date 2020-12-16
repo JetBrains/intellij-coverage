@@ -29,11 +29,11 @@ fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean,
     return CoverageStatusTest.runCoverage(classPath, coverageDataFile, "kotlinTestData.*", "kotlinTestData.$testName.Test", sampling, calcUnloaded)
 }
 
-internal val allNames = listOf("ALL CLASSES")
+internal const val all = "ALL CLASSES"
 
 private fun coverageLines(project: ProjectData, classNames: List<String>): Map<Int, String> {
     val allData = ClassData("")
-    if (classNames === allNames) {
+    if (classNames.contains(all)) {
         project.classes.values.forEach { allData.merge(it) }
     } else {
         classNames
