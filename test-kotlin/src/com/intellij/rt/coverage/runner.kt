@@ -29,6 +29,12 @@ fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean,
     return CoverageStatusTest.runCoverage(classPath, coverageDataFile, "kotlinTestData.*", "kotlinTestData.$testName.Test", sampling, calcUnloaded)
 }
 
+internal fun assertEqualsLines(project: ProjectData, expectedLines: Map<Int, String>, classNames: List<String>) {
+    val actualCoverage = coverageLines(project, classNames)
+    logCoverageDiff(expectedLines, actualCoverage)
+    Assert.assertEquals(expectedLines, actualCoverage)
+}
+
 internal const val all = "ALL CLASSES"
 
 private fun coverageLines(project: ProjectData, classNames: List<String>): Map<Int, String> {
@@ -44,23 +50,16 @@ private fun coverageLines(project: ProjectData, classNames: List<String>): Map<I
     return statusToString(lines)
 }
 
-internal fun assertEqualsLines(project: ProjectData, expectedLines: Map<Int, String>, classNames: List<String>) {
+private fun logCoverageDiff(expectedLines: Map<Int, String>, actualCoverage: Map<Int, String>) {
     val expected = expectedLines.toList()
-    val actual = coverageLines(project, classNames).toList()
-    var fail = false
+    val actual = actualCoverage.toList()
     compareCoverage(expected, actual, wrongLineCoverage = { i, j ->
         System.err.println("Line ${expected[i].first}: expected ${expected[i].second} but ${actual[j].second} found")
-        fail = true
     }, missedLine = { i ->
         System.err.println("Line ${expected[i].first} expected with coverage ${expected[i].second}")
-        fail = true
     }, unexpectedLine = { i ->
         System.err.println("Unexpected line ${actual[i].first} with coverage ${actual[i].second}")
-        fail = true
     })
-    if (fail) {
-        Assert.fail("Coverage mismatch")
-    }
 }
 
 private fun compareCoverage(expected: List<Pair<Int, String>>,
