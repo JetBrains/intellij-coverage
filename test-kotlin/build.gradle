@@ -19,6 +19,7 @@ dependencies {
 
     testImplementation(files(project(":tests").sourceSets.test.output))
     testImplementation(project(path: ":instrumentation", configuration: "archives"))
+    testImplementation(project(":instrumentation"))
     testImplementation(library_project_asm_all)
 
     testImplementation("junit:junit:4.13")

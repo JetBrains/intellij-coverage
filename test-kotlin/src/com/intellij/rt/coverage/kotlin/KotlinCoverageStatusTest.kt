@@ -17,10 +17,7 @@
 package com.intellij.rt.coverage.kotlin
 
 
-import com.intellij.rt.coverage.assertEqualsLines
-import com.intellij.rt.coverage.extractCoverageDataFromFile
-import com.intellij.rt.coverage.pathToFile
-import com.intellij.rt.coverage.runWithCoverage
+import com.intellij.rt.coverage.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Ignore
@@ -144,6 +141,6 @@ class KotlinCoverageStatusTest {
         val expected = extractCoverageDataFromFile(testFile)
         val project = runWithCoverage(myDataFile, testName, sampling, calcUnloaded)
         val fullClassNames = classes.map { "kotlinTestData.$testName.$it" }
-        assertEqualsLines(project, expected, fullClassNames)
+        assertEqualsLines(project, expected, if (classes.contains(all)) listOf(all) else fullClassNames)
     }
 }
