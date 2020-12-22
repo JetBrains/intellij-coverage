@@ -124,6 +124,11 @@ public class LineData implements CoverageData {
     }
   }
 
+  public int jumpsCount() {
+    if (myJumpsAndSwitches == null) return 0;
+    return myJumpsAndSwitches.jumpsCount();
+  }
+
   public JumpData addJump(final int jump) {
     return getOrCreateJumpsAndSwitches().addJump(jump);
   }

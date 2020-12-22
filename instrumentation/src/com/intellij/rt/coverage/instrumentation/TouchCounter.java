@@ -30,18 +30,6 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
   private Label myStartLabel;
   private Label myEndLabel;
 
-  private int myCurrentLine;
-  private int myCurrentJumpIdx;
-  private int myCurrentSwitchIdx;
-
-  private int myLastJump = -1;
-  private int myLastLineJump = -1;
-
-  private static final byte SEEN_NOTHING = 0;
-  private static final byte GETSTATIC_SEEN = 1;
-
-  private byte myState;
-
   public TouchCounter(final LineEnumerator enumerator, int access, String desc) {
     super(Opcodes.API_VERSION, enumerator.getWV());
     myEnumerator = enumerator;
@@ -55,12 +43,8 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
 
 
   public void visitLineNumber(int line, Label start) {
-    myCurrentLine = line;
-    myCurrentJumpIdx = 0;
-    myCurrentSwitchIdx = 0;
-
     mv.visitVarInsn(Opcodes.ALOAD, getCurrentClassDataNumber());
-    pushLineNumber(line);
+    pushIntValue(line);
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/Object;I)V", false);
     super.visitLineNumber(line, start);
   }
@@ -73,98 +57,34 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
 
     super.visitLabel(label);
 
+    visitPossibleJump(label);
 
-    final boolean isJump = myEnumerator.isJump(label);
-    if (myLastJump != -1) {
-      Label l = new Label();
-
-      mv.visitVarInsn(Opcodes.ILOAD, getLineVariableNumber());
-      pushLineNumber(myLastLineJump);
-      mv.visitJumpInsn(Opcodes.IF_ICMPNE, l);
-
-      mv.visitVarInsn(Opcodes.ILOAD, getJumpVariableNumber());
-      mv.visitIntInsn(Opcodes.SIPUSH, myLastJump);
-      mv.visitJumpInsn(Opcodes.IF_ICMPNE, l);
-
-      touchLastJump();
-
-      if (isJump) {
-        Label l1 = new Label();
-        mv.visitJumpInsn(Opcodes.GOTO, l1);
-        mv.visitLabel(l);
-        mv.visitVarInsn(Opcodes.ILOAD, getJumpVariableNumber());
-        mv.visitJumpInsn(Opcodes.IFLT, l1);
-        touchBranch(true);
-        mv.visitLabel(l1);
-      }
-      else {
-        mv.visitLabel(l);
-      }
-    }
-    else if (isJump) {
-      mv.visitVarInsn(Opcodes.ILOAD, getJumpVariableNumber());
-      Label newLabelX = new Label();
-      mv.visitJumpInsn(Opcodes.IFLT, newLabelX);
-      touchBranch(true);
-      mv.visitLabel(newLabelX);
-    }
-
-
-    final Integer key = myEnumerator.getSwitchKey(label);
-    if (key != null) {
+    final LineEnumerator.Switch aSwitch = myEnumerator.getSwitch(label);
+    if (aSwitch != null) {
       mv.visitVarInsn(Opcodes.ALOAD, getCurrentClassDataNumber());
-      mv.visitVarInsn(Opcodes.ILOAD, getLineVariableNumber());
-      mv.visitVarInsn(Opcodes.ILOAD, getSwitchVariableNumber());
-      mv.visitIntInsn(Opcodes.SIPUSH, key);
+      pushIntValue(aSwitch.getLine());
+      pushIntValue(aSwitch.getIndex());
+      mv.visitIntInsn(Opcodes.SIPUSH, aSwitch.getKey());
       mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchSwitch", "(Ljava/lang/Object;III)V", false);
     }
   }
 
-  private void touchBranch(final boolean trueHit) {
+  private void touchBranch(final boolean trueHit, final int jumpIndex, int line) {
     mv.visitVarInsn(Opcodes.ALOAD, getCurrentClassDataNumber());
-    mv.visitVarInsn(Opcodes.ILOAD, getLineVariableNumber());
-    mv.visitVarInsn(Opcodes.ILOAD, getJumpVariableNumber());
+    pushIntValue(line);
+    pushIntValue(jumpIndex);
     mv.visitInsn(trueHit ? Opcodes.ICONST_0 : Opcodes.ICONST_1);
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchJump", "(Ljava/lang/Object;IIZ)V", false);
-
-    mv.visitIntInsn(Opcodes.SIPUSH, -1);
-    mv.visitVarInsn(Opcodes.ISTORE, getJumpVariableNumber());
   }
 
-  private void touchLastJump() {
-    if (myLastJump != -1) {
-      myLastJump = -1;
-      touchBranch(false);
+  private void visitPossibleJump(Label label) {
+    final LineEnumerator.Jump jump = myEnumerator.getJump(label);
+    if (jump != null) {
+      touchBranch(jump.getType(), jump.getIndex(), jump.getLine());
     }
-    myState = SEEN_NOTHING;
   }
-
-
-  public void visitJumpInsn(final int opcode, final Label label) {
-    byte state = myState;
-    touchLastJump();
-    if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR && !myEnumerator.getMethodName().equals("<clinit>") && myEnumerator.isJump(label) && !(state == GETSTATIC_SEEN && opcode == Opcodes.IFNE)) {
-      myLastJump = myCurrentJumpIdx;
-      myLastLineJump = myCurrentLine;
-      pushLineNumber(myCurrentLine);
-      mv.visitVarInsn(Opcodes.ISTORE, getLineVariableNumber());
-      mv.visitIntInsn(Opcodes.SIPUSH, myCurrentJumpIdx++);
-      mv.visitVarInsn(Opcodes.ISTORE, getJumpVariableNumber());
-    }
-    super.visitJumpInsn(opcode, label);
-  }
-
 
   public void visitCode() {
-    mv.visitInsn(Opcodes.ICONST_0);
-    mv.visitVarInsn(Opcodes.ISTORE, getLineVariableNumber());
-
-    mv.visitIntInsn(Opcodes.SIPUSH, -1);
-    mv.visitVarInsn(Opcodes.ISTORE, getJumpVariableNumber());
-
-    mv.visitInsn(Opcodes.ICONST_0);
-    mv.visitVarInsn(Opcodes.ISTORE, getSwitchVariableNumber());
-
     mv.visitLdcInsn(myEnumerator.getClassName());
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)Ljava/lang/Object;", false);
     mv.visitVarInsn(Opcodes.ASTORE, getCurrentClassDataNumber());
@@ -172,122 +92,36 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
     super.visitCode();
   }
 
-  public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-    touchLastJump();
-    storeSwitchDescriptor();
-    super.visitLookupSwitchInsn(dflt, keys, labels);
-  }
-
-  public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
-    touchLastJump();
-    storeSwitchDescriptor();
-    super.visitTableSwitchInsn(min, max, dflt, labels);
-  }
-
-  private void storeSwitchDescriptor() {
-    pushLineNumber(myCurrentLine);
-    mv.visitVarInsn(Opcodes.ISTORE, getLineVariableNumber());
-
-    mv.visitIntInsn(Opcodes.SIPUSH, myCurrentSwitchIdx++);
-    mv.visitVarInsn(Opcodes.ISTORE, getSwitchVariableNumber());
-  }
-
-  private void pushLineNumber(int line) {
-    if (line <= Short.MAX_VALUE) {
-      mv.visitIntInsn(Opcodes.SIPUSH, line);
-    }
-    else {
-      mv.visitLdcInsn(line);
+  private void pushIntValue(int value) {
+    if (value <= Short.MAX_VALUE) {
+      mv.visitIntInsn(Opcodes.SIPUSH, value);
+    } else {
+      mv.visitLdcInsn(value);
     }
   }
-
-
-  public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-    touchLastJump();
-    if (opcode == Opcodes.GETSTATIC && name.equals("$assertionsDisabled")) {
-      myState = GETSTATIC_SEEN;
-    }
-    super.visitFieldInsn(opcode, owner, name, desc);
-  }
-
-
-  public void visitInsn(int opcode) {
-    touchLastJump();
-    super.visitInsn(opcode);
-  }
-
-  public void visitIntInsn(int opcode, int operand) {
-    touchLastJump();
-    super.visitIntInsn(opcode, operand);
-  }
-
-  public void visitLdcInsn(Object cst) {
-    touchLastJump();
-    super.visitLdcInsn(cst);
-  }
-
-  public void visitMultiANewArrayInsn(String desc, int dims) {
-    touchLastJump();
-    super.visitMultiANewArrayInsn(desc, dims);
-  }
-
-
-  public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
-    touchLastJump();
-    super.visitTryCatchBlock(start, end, handler, type);
-  }
-
-  public void visitTypeInsn(int opcode, String desc) {
-    touchLastJump();
-    super.visitTypeInsn(opcode, desc);
-  }
-
-  public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-    touchLastJump();
-    super.visitMethodInsn(opcode, owner, name, desc, itf);
-  }
-
 
   public void visitVarInsn(int opcode, int var) {
-    touchLastJump();
     mv.visitVarInsn(opcode, adjustVariable(var));
   }
 
   public void visitIincInsn(int var, int increment) {
-    touchLastJump();
     mv.visitIincInsn(adjustVariable(var), increment);
   }
 
   public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
-    touchLastJump();
     mv.visitLocalVariable(name, desc, signature, start, end, adjustVariable(index));
   }
 
   private int adjustVariable(final int var) {
-    return (var >= getLineVariableNumber()) ? var + 4 : var;
-  }
-
-  public int getLineVariableNumber() {
-    return myVariablesCount;
-  }
-
-  private int getJumpVariableNumber() {
-    return myVariablesCount + 1;
-  }
-
-  private int getSwitchVariableNumber() {
-    return myVariablesCount + 2;
+    return (var >= getCurrentClassDataNumber()) ? var + 1 : var;
   }
 
   public int getCurrentClassDataNumber() {
-    return myVariablesCount + 3;
+    return myVariablesCount;
   }
 
   public void visitMaxs(int maxStack, int maxLocals) {
     if (myStartLabel != null && myEndLabel != null) {
-      mv.visitLocalVariable("__line__number__", "I", null, myStartLabel, myEndLabel, getLineVariableNumber());
-      mv.visitLocalVariable("__jump__number__", "I", null, myStartLabel, myEndLabel, getJumpVariableNumber());
-      mv.visitLocalVariable("__switch__number__", "I", null, myStartLabel, myEndLabel, getSwitchVariableNumber());
       mv.visitLocalVariable("__class__data__", "Ljava/lang/Object;", null, myStartLabel, myEndLabel, getCurrentClassDataNumber());
     }
     super.visitMaxs(maxStack, maxLocals);
