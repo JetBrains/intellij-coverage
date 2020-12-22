@@ -82,10 +82,10 @@ class KotlinCoverageStatusTest {
 
     @Test
     @Ignore("To be fixed")
-    fun testInlineCoroutinesTracing() = test("inline.coroutines.tracing", classes = all, sampling = false)
+    fun testInlineCoroutinesTracing() = test("inline.coroutines.tracing", all, sampling = false)
 
     @Test
-    fun testInlineCoroutinesSampling() = test("inline.coroutines.sampling", classes = all)
+    fun testInlineCoroutinesSampling() = test("inline.coroutines.sampling", all)
 
     @Test
     fun testMultiplyFilesInline() = test("inline.multiplyFiles", "Test2Kt",
@@ -149,6 +149,14 @@ class KotlinCoverageStatusTest {
     fun testCoroutinesInline() = test("coroutines.inline",
             "TestKt\$test\$1", "TestKt",
             sampling = false)
+
+    @Test
+    @Ignore("To be fixed")
+    fun testCoroutinesFix1Sampling() = test("coroutines.fix1.sampling", all)
+
+    @Test
+    @Ignore("To be fixed")
+    fun testCoroutinesFix1Tracing() = test("coroutines.fix1.tracing", all, sampling = false)
 
     @Test
     fun testImplementationByDelegation() = test("implementationByDelegation", "Derived")
