@@ -143,6 +143,9 @@ class KotlinCoverageStatusTest {
     @Test
     fun test_IDEA_250825() = test("fixes.IDEA_250825", "JavaTest", fileName = "JavaTest.java", sampling = false)
 
+    @Test
+    fun test_IDEA_259332() = test("fixes.IDEA_259332", "SwitchWithFallthrough", fileName = "SwitchWithFallthrough.java", sampling = false)
+
     private fun test(testName: String, vararg classes: String = arrayOf("TestKt"),
                      sampling: Boolean = true, fileName: String = "test.kt",
                      calcUnloaded: Boolean = false) {
