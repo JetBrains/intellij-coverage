@@ -22,20 +22,10 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import org.junit.Assert;
 import org.junit.Test;
-import org.w3c.dom.Document;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Scanner;
 
 public class XMLCoverageReportTest {
   private ProjectData createProject() {
@@ -64,7 +54,7 @@ public class XMLCoverageReportTest {
   public void testVerifyXML() throws Throwable {
     File file = File.createTempFile("report_tmp", ".xml");
     new XMLCoverageReport().write(new FileOutputStream(file), createProject());
-    verifyProjectXML(file);
+    verifyProjectXML(file, "xmlTest.xml");
   }
 
   @Test
@@ -72,40 +62,34 @@ public class XMLCoverageReportTest {
     try {
       File file = File.createTempFile("report_tmp", ".xml");
       CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), file, "-xml .*", "testData.Main", false);
-      verifyProjectXML(file);
+      verifyProjectXML(file, "xmlIntegrationTest.xml");
     } finally {
       // xml cannot be parsed to load project
       new File("coverage-error.log").delete();
     }
   }
 
-  private void verifyProjectXML(File file) throws Throwable {
-    String dtdFilePath = getClass().getClassLoader().getResource("report.dtd").getPath();
-    File resultFile = File.createTempFile("report", ".xml");
-    Transformer transformer = TransformerFactory.newInstance().newTransformer();
-    transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, dtdFilePath);
-    transformer.transform(new StreamSource(file), new StreamResult(resultFile));
-
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    factory.setValidating(true);
-    DocumentBuilder builder = factory.newDocumentBuilder();
-    ErrorHandler handler = new ThrowErrorHandler();
-    builder.setErrorHandler(handler);
-    Document document = builder.parse(resultFile);
-    Assert.assertNotNull(document);
+  private void verifyProjectXML(File file, String expectedFileName) throws Throwable {
+    String expectedPath = getClass().getClassLoader().getResource(expectedFileName).getPath();
+    File expected = new File(expectedPath);
+    Assert.assertEquals(readAll(expected), readAll(file));
   }
 
-  private static class ThrowErrorHandler implements ErrorHandler {
-    public void warning(SAXParseException exception) throws SAXException {
-      throw exception;
-    }
-
-    public void error(SAXParseException exception) throws SAXException {
-      throw exception;
-    }
-
-    public void fatalError(SAXParseException exception) throws SAXException {
-      throw exception;
+  private String readAll(File file) throws Throwable {
+    StringBuilder fileContents = new StringBuilder((int) file.length());
+    Scanner scanner = null;
+    try {
+      scanner = new Scanner(file);
+      while (scanner.hasNextLine()) {
+        fileContents
+            .append(scanner.nextLine())
+            .append("\n");
+      }
+      return fileContents.toString();
+    } finally {
+      if (scanner != null) {
+        scanner.close();
+      }
     }
   }
 }
