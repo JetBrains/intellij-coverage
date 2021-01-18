@@ -84,13 +84,13 @@ public abstract class Instrumenter extends ClassVisitor {
       }
     }
     myProcess = true;
-    return chainFilters(createMethodLineEnumerator(mv, name, desc, access, signature, exceptions));
+    return chainFilters(createMethodLineEnumerator(mv, name, desc, access, signature, exceptions), desc);
   }
 
-  private MethodVisitor chainFilters(MethodVisitor root) {
+  private MethodVisitor chainFilters(MethodVisitor root, String desc) {
     for (MethodVisitingFilter filter : createVisitingFilters()) {
       if (filter.isApplicable(this)) {
-        filter.initFilter(root, this);
+        filter.initFilter(root, this, desc);
         root = filter;
       }
     }

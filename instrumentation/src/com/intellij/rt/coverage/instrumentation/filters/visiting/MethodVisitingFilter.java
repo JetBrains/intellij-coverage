@@ -25,14 +25,16 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  */
 public abstract class MethodVisitingFilter extends MethodVisitor {
   protected Instrumenter myContext;
+  protected String myDesc;
 
   public MethodVisitingFilter() {
     super(Opcodes.API_VERSION);
   }
 
-  public void initFilter(MethodVisitor methodVisitor, Instrumenter context) {
+  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String desc) {
     mv = methodVisitor;
     myContext = context;
+    myDesc = desc;
   }
 
   public abstract boolean isApplicable(Instrumenter context);
