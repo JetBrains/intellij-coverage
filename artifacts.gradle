@@ -16,23 +16,21 @@
 
 ext.agentsGroupId = 'org.jetbrains.intellij.deps'
 
-task coverageArtifact(type: Jar) {
-  dependsOn(":instrumentation:coverageAgentJar")
-}
-
-publishing {
-  publications {
-    CoveragePublication(MavenPublication) {
-      groupId agentsGroupId
-      artifactId coverage_jar_name
-      version version
-      artifact coverageArtifact
-    }
-    TestDiscoveryPublication(MavenPublication) {
-      groupId agentsGroupId
-      artifactId test_discovery_jar_name
-      version version
-      artifact project(":test-discovery").jar
+project(":instrumentation").afterEvaluate { instr ->
+  publishing {
+    publications {
+      CoveragePublication(MavenPublication) {
+        groupId agentsGroupId
+        artifactId coverage_jar_name
+        version version
+        artifact instr.tasks.getByName("coverageAgentJar")
+      }
+      TestDiscoveryPublication(MavenPublication) {
+        groupId agentsGroupId
+        artifactId test_discovery_jar_name
+        version version
+        artifact project(":test-discovery").jar
+      }
     }
   }
 }
