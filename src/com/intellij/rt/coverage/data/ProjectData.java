@@ -378,12 +378,13 @@ public class ProjectData implements CoverageData, Serializable {
    * This class was introduced to reduce number of equals().
    */
   private static class ClassesMap {
-    private static final int POOL_SIZE = 1000;
+    private static final int POOL_SIZE = 1024; // must be a power of two
+    private static final int MASK = POOL_SIZE - 1;
     private final IdentityClassData[] myIdentityArray = new IdentityClassData[POOL_SIZE];
-    private final Map<String, ClassData> myClasses = new HashMap<String, ClassData>(1000);
+    private final Map<String, ClassData> myClasses = new ConcurrentHashMap<String, ClassData>(1000);
 
     public ClassData get(String name) {
-      int idx = Math.abs(name.hashCode() % POOL_SIZE);
+      int idx = name.hashCode() & MASK;
       final IdentityClassData lastClassData = myIdentityArray[idx];
       if (lastClassData != null) {
         final ClassData data = lastClassData.getClassData(name);
