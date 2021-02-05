@@ -235,7 +235,7 @@ public class ProjectData implements CoverageData, Serializable {
   // -------------------------------------------------------------------------------------------------- //
 
   public static void touchLine(Object classData, int line) {
-    if (ourProjectData != null) {
+    if (ourProjectData != null && classData != null) {
       ((ClassData) classData).touchLine(line);
       return;
     }
@@ -245,7 +245,7 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public static void touchSwitch(Object classData, int line, int switchNumber, int key) {
-    if (ourProjectData != null) {
+    if (ourProjectData != null && classData != null) {
       ((ClassData) classData).touch(line, switchNumber, key);
       return;
     }
@@ -255,7 +255,7 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public static void touchJump(Object classData, int line, int jump, boolean hit) {
-    if (ourProjectData != null) {
+    if (ourProjectData != null && classData != null) {
       ((ClassData) classData).touch(line, jump, hit);
       return;
     }
@@ -265,7 +265,7 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public static void trace(Object classData, int line) {
-    if (ourProjectData != null) {
+    if (ourProjectData != null && classData != null) {
       ((ClassData) classData).touch(line);
       ourProjectData.traceLine((ClassData) classData, line);
       return;
