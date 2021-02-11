@@ -203,7 +203,7 @@ public class CoverageStatusTest extends TestCase {
     assertEquals(expected, buf.toString());
   }
 
-  static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
+  public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
                                  String classToRun, final boolean sampling) throws IOException, InterruptedException {
     return runCoverage(testDataPath, coverageDataFile, patterns, classToRun, sampling, false);
   }
