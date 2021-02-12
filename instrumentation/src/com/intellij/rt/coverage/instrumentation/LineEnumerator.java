@@ -18,7 +18,6 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.SwitchData;
-import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
@@ -34,7 +33,6 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   private final MethodNode myMethodNode;
 
   private int myCurrentLine;
-  private int myCurrentSwitch;
 
   private Label myLastFalseJump;
   private Label myLastTrueJump;
@@ -63,7 +61,6 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     mySignature = desc;
   }
 
-
   public void visitEnd() {
     super.visitEnd();
     myMethodNode.accept(!myHasExecutableLines ? myWriterMethodVisitor : new TouchCounter(this, myAccess, mySignature));
@@ -72,7 +69,6 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   public void visitLineNumber(int line, Label start) {
     super.visitLineNumber(line, start);
     myCurrentLine = line;
-    myCurrentSwitch = 0;
     myHasExecutableLines = true;
     myClassInstrumenter.getOrCreateLineData(myCurrentLine, myMethodName, mySignature);
   }
@@ -148,8 +144,9 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
     if (lineData != null) {
       switchLabels = replaceLabels(switchLabels);
-      rememberSwitchLabels(switchLabels.getDefault(), switchLabels.getLabels());
-      lineData.addSwitch(myCurrentSwitch++, keys);
+      int switchIndex = lineData.switchesCount();
+      rememberSwitchLabels(switchLabels.getDefault(), switchLabels.getLabels(), switchIndex);
+      lineData.addSwitch(switchIndex, keys);
     }
     super.visitLookupSwitchInsn(switchLabels.getDefault(), keys, switchLabels.getLabels());
   }
@@ -163,19 +160,20 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
     if (lineData != null) {
       switchLabels = replaceLabels(switchLabels);
-      rememberSwitchLabels(switchLabels.getDefault(), switchLabels.getLabels());
-      SwitchData switchData = lineData.addSwitch(myCurrentSwitch++, min, max);
+      int switchIndex = lineData.switchesCount();
+      rememberSwitchLabels(switchLabels.getDefault(), switchLabels.getLabels(), switchIndex);
+      SwitchData switchData = lineData.addSwitch(switchIndex, min, max);
       if (myDefaultTableSwitchLabels == null) myDefaultTableSwitchLabels = new HashMap<Label, SwitchData>();
       myDefaultTableSwitchLabels.put(dflt, switchData);
     }
     super.visitTableSwitchInsn(min, max, switchLabels.getDefault(), switchLabels.getLabels());
   }
 
-  private void rememberSwitchLabels(final Label dflt, final Label[] labels) {
+  private void rememberSwitchLabels(final Label dflt, final Label[] labels, int switchIndex) {
     if (mySwitches == null) mySwitches = new HashMap<Label, Switch>();
-    mySwitches.put(dflt, new Switch(myCurrentSwitch, myCurrentLine, -1));
+    mySwitches.put(dflt, new Switch(switchIndex, myCurrentLine, -1));
     for (int i = labels.length - 1; i >= 0; i--) {
-      mySwitches.put(labels[i], new Switch(myCurrentSwitch, myCurrentLine, i));
+      mySwitches.put(labels[i], new Switch(switchIndex, myCurrentLine, i));
     }
   }
 
@@ -218,18 +216,15 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   }
 
   public void removeLastSwitch(Label dflt, Label... labels) {
-    if (myDefaultTableSwitchLabels != null) {
-      myDefaultTableSwitchLabels.remove(dflt);
-    }
-    if (mySwitches != null) {
-      mySwitches.remove(dflt);
-      for (Label label : labels) {
-        mySwitches.remove(label);
-      }
+    if (mySwitches == null) return;
+    Switch aSwitch = mySwitches.remove(dflt);
+    for (Label label : labels) {
+      mySwitches.remove(label);
     }
     final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
-    if (lineData != null) {
-      lineData.removeSwitch(--myCurrentSwitch);
+    if (lineData != null && aSwitch != null) {
+      int switchIndex = lineData.switchesCount() - 1;
+      lineData.removeSwitch(switchIndex);
     }
   }
 

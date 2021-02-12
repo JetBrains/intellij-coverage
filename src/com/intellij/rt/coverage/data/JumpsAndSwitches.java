@@ -181,4 +181,10 @@ public class JumpsAndSwitches implements CoverageData {
     if (myJumpsArray != null) return myJumpsArray.length;
     return 0;
   }
+
+  public int switchesCount() {
+    if (mySwitches != null) return mySwitches.size();
+    if (mySwitchesArray != null) return mySwitchesArray.length;
+    return 0;
+  }
 }
