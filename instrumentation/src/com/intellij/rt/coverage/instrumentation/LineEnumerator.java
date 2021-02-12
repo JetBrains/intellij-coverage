@@ -63,7 +63,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
 
   private boolean myHasInstructions;
 
-  private final HashMap<Label, SwitchData> mySwitchLabels = new HashMap<Label, SwitchData>();
+  private HashMap<Label, SwitchData> myDefaultTableSwitchLabels;
 
   public LineEnumerator(ClassInstrumenter classInstrumenter, final MethodVisitor mv,
                         final int access,
@@ -214,7 +214,8 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
       switchLabels = replaceLabels(switchLabels);
       rememberSwitchLabels(switchLabels.getDefault(), switchLabels.getLabels());
       SwitchData switchData = lineData.addSwitch(myCurrentSwitch++, min, max);
-      mySwitchLabels.put(dflt, switchData);
+      if (myDefaultTableSwitchLabels == null) myDefaultTableSwitchLabels = new HashMap<Label, SwitchData>();
+      myDefaultTableSwitchLabels.put(dflt, switchData);
     }
     super.visitTableSwitchInsn(min, max, switchLabels.getDefault(), switchLabels.getLabels());
     myState = SEEN_NOTHING;
@@ -323,7 +324,9 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   }
 
   public void removeLastSwitch(Label dflt, Label... labels) {
-    mySwitchLabels.remove(dflt);
+    if (myDefaultTableSwitchLabels != null) {
+      myDefaultTableSwitchLabels.remove(dflt);
+    }
     if (mySwitches != null) {
       mySwitches.remove(dflt);
       for (Label label : labels) {
@@ -357,8 +360,8 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     myHasInstructions = true;
   }
 
-  public Map<Label, SwitchData> getSwitchLabels() {
-    return mySwitchLabels;
+  public Map<Label, SwitchData> getDefaultTableSwitchLabels() {
+    return myDefaultTableSwitchLabels;
   }
 
   public String getDescriptor() {
