@@ -60,7 +60,7 @@ public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodVisitin
   public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String desc) {
     super.initFilter(methodVisitor, context, desc);
     myState = State.UNKNOWN;
-    myLoadArgsNumber = Type.getType(desc).getArgumentTypes().length + 1;
+    myLoadArgsNumber = Type.getArgumentTypes(desc).length + 1;
     myLoadArgIndex = 0;
   }
 
