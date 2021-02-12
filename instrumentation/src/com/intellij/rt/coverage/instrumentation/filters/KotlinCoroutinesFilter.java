@@ -18,10 +18,7 @@ package com.intellij.rt.coverage.instrumentation.filters;
 
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
-import org.jetbrains.coverage.org.objectweb.asm.Handle;
-import org.jetbrains.coverage.org.objectweb.asm.Label;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
+import org.jetbrains.coverage.org.objectweb.asm.*;
 
 /**
  * Filter out generated Kotlin coroutines state machines.
@@ -34,7 +31,6 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   private boolean myStateLabelVisited = false;
   private boolean mySuspendCallVisited = false;
   private int myCoroutinesSuspendedIndex = -1;
-  private String myClassName = null;
   private int myLine = -1;
   private boolean myHadLineDataBefore = false;
   private boolean myHasExecutableCode = false;
@@ -130,7 +126,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
     myStateLabelVisited = opcode == Opcodes.GETFIELD
         && name.equals("label")
         && descriptor.equals("I")
-        && owner.startsWith(getClassName());
+        && Type.getObjectType(owner).getClassName().startsWith(myContext.getClassName());
   }
 
   /**
@@ -203,15 +199,5 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
     super.visitLookupSwitchInsn(dflt, keys, labels);
     myHasExecutableCode = true;
-  }
-
-  private String getClassName() {
-    if (myClassName == null) {
-      String name = myContext.getClassName();
-      if (name != null) {
-        myClassName = name.replace('.', '/');
-      }
-    }
-    return myClassName;
   }
 }
