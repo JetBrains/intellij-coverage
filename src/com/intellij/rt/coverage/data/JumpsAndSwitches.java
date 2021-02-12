@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.util.CoverageIOUtil;
+import com.intellij.rt.coverage.util.ErrorReporter;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -70,8 +71,10 @@ public class JumpsAndSwitches implements CoverageData {
   }
 
   public void removeSwitch(int switchNumber) {
-    if (mySwitches != null && 0 <= switchNumber && switchNumber < mySwitches.size()) {
+    if (0 <= switchNumber && switchNumber < mySwitches.size()) {
       mySwitches.remove(switchNumber);
+    } else {
+      ErrorReporter.reportError("Remove switch", new ArrayIndexOutOfBoundsException(switchNumber));
     }
   }
 
@@ -97,6 +100,8 @@ public class JumpsAndSwitches implements CoverageData {
   public void removeJump(final int jump) {
     if (0 <= jump && jump < myJumps.size()) {
       myJumps.remove(jump);
+    } else {
+      ErrorReporter.reportError("Remove jump", new ArrayIndexOutOfBoundsException(jump));
     }
   }
 
