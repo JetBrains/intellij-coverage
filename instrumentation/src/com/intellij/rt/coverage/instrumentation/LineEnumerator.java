@@ -292,6 +292,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   public void removeLastSwitch(Label dflt, Label... labels) {
     mySwitchLabels.remove(dflt);
     if (mySwitches != null) {
+      mySwitches.remove(dflt);
       for (Label label : labels) {
         mySwitches.remove(label);
       }
