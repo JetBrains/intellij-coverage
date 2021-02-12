@@ -88,12 +88,10 @@ class KotlinCoverageStatusTest {
     fun testInlineCoroutinesSampling() = test("inline.coroutines.sampling", all)
 
     @Test
-    fun testNoInline() = test("inline.noinline",
-            "TestKt", "TestKt\$test\$1", "TestKt\$test\$3")
+    fun testNoInline() = test("inline.noinline", all)
 
     @Test
-    fun testCrossInline() = test("inline.crossinline",
-            "TestKt", "TestKt\$test\$\$inlined\$save\$1", "TestKt\$save\$1")
+    fun testCrossInline() = test("inline.crossinline", all)
 
     @Test
     fun testMultiplyFilesInline() = test("inline.multiplyFiles", "Test2Kt",
@@ -152,9 +150,7 @@ class KotlinCoverageStatusTest {
             sampling = false)
 
     @Test
-    fun testCoroutinesAsync() = test("coroutines.async",
-            "TestKt", "TestKt\$test\$1", "TestKt\$test\$1\$time\$1\$one\$1", "TestKt\$test\$1\$time\$1\$two\$1",
-            sampling = false)
+    fun testCoroutinesAsync() = test("coroutines.async", all, sampling = false)
 
     @Test
     fun testCoroutinesInline() = test("coroutines.inline",

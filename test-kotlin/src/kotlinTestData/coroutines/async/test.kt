@@ -42,9 +42,9 @@ suspend fun doSomethingUsefulTwo(): Int {
     return 29                                                  // coverage: FULL
 }
 
-object Test {
+object Test {                                                  // coverage: FULL
     @JvmStatic
-    fun main(args: Array<String>): Unit = runBlocking {
-        test()
+    fun main(args: Array<String>): Unit = runBlocking {        // coverage: FULL
+        test()                                                 // coverage: FULL
     }
 }

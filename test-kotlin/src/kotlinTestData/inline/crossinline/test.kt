@@ -37,9 +37,9 @@ fun test() {
     }                                    // coverage: FULL
 }                                        // coverage: FULL
 
-object Test {
+object Test {                            // coverage: FULL
     @JvmStatic
     fun main(args: Array<String>) {
-        test()
-    }
+        test()                           // coverage: FULL
+    }                                    // coverage: FULL
 }
