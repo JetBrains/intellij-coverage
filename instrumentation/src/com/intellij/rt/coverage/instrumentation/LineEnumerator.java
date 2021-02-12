@@ -18,8 +18,6 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.SwitchData;
-import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
-import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
@@ -33,7 +31,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   private final int myAccess;
   private final String myMethodName;
   private final String mySignature;
-  private final MethodNode methodNode;
+  private final MethodNode myMethodNode;
 
   private int myCurrentLine;
   private int myCurrentSwitch;
@@ -73,29 +71,20 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
                         final String desc,
                         final String signature,
                         final String[] exceptions) {
-    super(Opcodes.API_VERSION);
+    super(Opcodes.API_VERSION, new SaveLabelsMethodNode(access, name, desc, signature, exceptions));
 
-    methodNode = new SaveLabelsMethodNode(access, name, desc, signature, exceptions);
+    myMethodNode = (MethodNode) super.mv;
     myClassInstrumenter = classInstrumenter;
     myWriterMethodVisitor = mv;
     myAccess = access;
     myMethodName = name;
     mySignature = desc;
-
-    MethodVisitor root = methodNode;
-    for (LineEnumeratorFilter filter : createLineEnumeratorFilters()) {
-      if (filter.isApplicable(classInstrumenter, access, name, desc, signature, exceptions)) {
-        filter.initFilter(root, this);
-        root = filter;
-      }
-    }
-    super.mv = root;
   }
 
 
   public void visitEnd() {
     super.visitEnd();
-    methodNode.accept(!myHasExecutableLines ? myWriterMethodVisitor : new TouchCounter(this, myAccess, mySignature));
+    myMethodNode.accept(!myHasExecutableLines ? myWriterMethodVisitor : new TouchCounter(this, myAccess, mySignature));
   }
 
 
@@ -142,7 +131,6 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
         lineData.addJump(currentJump);
 
         jumpInstrumented = true;
-        // a super call to filters may remove this jump, so myLastJump may be null after this line
         super.visitJumpInsn(opcode, trueLabel);
         super.visitJumpInsn(Opcodes.GOTO, falseLabel);
         super.visitLabel(trueLabel);  // true hit will be inserted here
@@ -345,10 +333,6 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
 
   public Instrumenter getInstrumenter() {
     return myClassInstrumenter;
-  }
-
-  private static List<LineEnumeratorFilter> createLineEnumeratorFilters() {
-    return KotlinUtils.createLineEnumeratorFilters();
   }
 
   static class Jump {
