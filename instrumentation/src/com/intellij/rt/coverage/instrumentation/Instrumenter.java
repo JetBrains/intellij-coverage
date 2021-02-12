@@ -92,7 +92,7 @@ public abstract class Instrumenter extends ClassVisitor {
     root = createMethodLineEnumerator(root, name, desc, access, signature, exceptions);
     for (MethodVisitingFilter filter : createVisitingFilters()) {
       if (filter.isApplicable(this, access, name, desc, signature, exceptions)) {
-        filter.initFilter(root, this);
+        filter.initFilter(root, this, desc);
         root = filter;
       }
     }
