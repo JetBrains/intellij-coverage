@@ -81,6 +81,13 @@ class KotlinCoverageStatusTest {
     fun testReified() = test("inline.reified")
 
     @Test
+    @Ignore("To be fixed")
+    fun testInlineCoroutinesTracing() = test("inline.coroutines.tracing", all, sampling = false)
+
+    @Test
+    fun testInlineCoroutinesSampling() = test("inline.coroutines.sampling", all)
+
+    @Test
     fun testMultiplyFilesInline() = test("inline.multiplyFiles", "Test2Kt",
             fileName = "test2.kt")
 
@@ -111,6 +118,45 @@ class KotlinCoverageStatusTest {
     fun testDefaultInterfaceMemberJava() = test("defaultInterfaceMember.java",
             "Foo", "Bar",
             fileName = "Test.java")
+
+    @Test
+    fun testCoroutinesLambda() = test("coroutines.lambda",
+            "TestKt", "TestKt\$test\$1",
+            sampling = false)
+
+    @Test
+    fun testCoroutinesFunction() = test("coroutines.function",
+            "TestKt", "TestKt\$test\$1",
+            sampling = false)
+
+    @Test
+    fun testCoroutinesTailSuspend() = test("coroutines.tailSuspendCall", sampling = false)
+
+    @Test
+    fun testCoroutinesNoSuspend() = test("coroutines.noSuspend", sampling = false)
+
+    @Test
+    fun testCoroutinesNonVoid() = test("coroutines.nonVoid",
+            "TestKt", "TestKt\$test\$1",
+            sampling = false)
+
+    @Test
+    fun testCoroutinesAsync() = test("coroutines.async",
+            "TestKt", "TestKt\$test\$1", "TestKt\$test\$1\$time\$1\$one\$1", "TestKt\$test\$1\$time\$1\$two\$1",
+            sampling = false)
+
+    @Test
+    fun testCoroutinesInline() = test("coroutines.inline",
+            "TestKt\$test\$1", "TestKt",
+            sampling = false)
+
+    @Test
+    @Ignore("To be fixed")
+    fun testCoroutinesFix1Sampling() = test("coroutines.fix1.sampling", all)
+
+    @Test
+    @Ignore("To be fixed")
+    fun testCoroutinesFix1Tracing() = test("coroutines.fix1.tracing", all, sampling = false)
 
     @Test
     fun testImplementationByDelegation() = test("implementationByDelegation", "Derived")
