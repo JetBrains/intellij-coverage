@@ -1,3 +1,8 @@
+import com.intellij.rt.coverage.testDiscovery.jmh.ReportReader
+import org.codehaus.groovy.runtime.ResourceGroovyMethods
+
+import java.nio.file.Files
+
 /*
  * Copyright 2000-2018 JetBrains s.r.o.
  *
@@ -14,19 +19,114 @@
  * limitations under the License.
  */
 
-apply from: project(":benchmarks").file("jmh.gradle")
+repositories {
+  maven { url = 'https://jetbrains.bintray.com/intellij-third-party-dependencies' }
+}
 
 ext {
-  benchmarkRegexp = 'com\\.intellij\\.rt\\.coverage\\.jmh\\.DiscoveryAgentBenchmark.*'
-  benchmarkMode = 'ss'
-  benchmarkProfilers = ['org.openjdk.jmh.profile.GCProfiler', 'com.intellij.rt.coverage.jmh.TraceFileProfiler']
-  benchmarkAgentName = test_discovery_jar_name
-  benchmarkExtraArgs = [
-      '-jvmArgs', '-Dtest.discovery.data.listener=com.intellij.rt.coverage.data.SingleTrFileDiscoveryProtocolDataListener'
-  ]
+  jmhVersion = '1.20'
+  baselineVersion = '1.0.424'
+}
+
+sourceSets {
+  jmh.java.srcDirs = [file('jmh')]
+}
+
+configurations {
+  baseline
+  head
 }
 
 dependencies {
+  jmhCompile "org.openjdk.jmh:jmh-core:$jmhVersion"
+  jmhAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
+  jmhCompile 'org.joda:joda-convert:1.2'
+  jmhCompile 'junit:junit:4.12'
+  jmhCompile fileTree('lib')
   baseline "$agentsGroupId:$test_discovery_jar_name:$baselineVersion"
   head project(':test-discovery')
+}
+
+// benchmark without discovery agent
+task noDiscoveryBenchmark(type: JavaExec) {
+  configureBenchmark it as JavaExec
+}
+
+// benchmark with baseline version of agent
+task baselineBenchmark(type: JavaExec) {
+  configureBenchmark it as JavaExec, configurations.baseline
+}
+
+// benchmark with current version of agent
+task headBenchmark(type: JavaExec, dependsOn: jar) {
+  configureBenchmark it as JavaExec, configurations.head
+}
+
+def configureBenchmark(JavaExec benchmark, Configuration agent = null) {
+  benchmark.with {
+    dependsOn jmhClasses
+    main = 'org.openjdk.jmh.Main'
+    doFirst {
+      classpath = sourceSets.jmh.runtimeClasspath
+      args = [
+          '-jvmArgs', '-Dfile.encoding=UTF-8',
+          // benchmarks
+          'com\\.intellij\\.rt\\.coverage\\.testDiscovery\\.jmh\\.DiscoveryAgentBenchmark.*',
+          // report
+          '-rf', 'json', '-rff', benchmarkReport(benchmark),
+          // mode, see org.openjdk.jmh.annotations.Mode
+          '-bm', 'ss',
+          // number of forks, measurement iterations, warmups
+          '-f', 1, '-i', 25, '-wi', 10,
+          // fail-on-error
+          '-foe', 'true',
+          // verbosity [SILENT, NORMAL, EXTRA]
+          '-v', 'NORMAL',
+          // profilers
+          '-prof', 'org.openjdk.jmh.profile.GCProfiler',
+          '-prof', 'com.intellij.rt.coverage.testDiscovery.jmh.TraceFileProfiler'
+      ]
+      if (agent != null) {
+        args += [
+            // discovery agent properties
+            '-jvmArgs', "-javaagent:${agent.find { it.name.startsWith(test_discovery_jar_name) }.absolutePath}",
+            '-jvmArgs', '-Dtest.discovery.data.listener=com.intellij.rt.coverage.data.SingleTrFileDiscoveryProtocolDataListener'
+        ]
+      }
+      benchmarkReport(benchmark).createNewFile()
+      Files.deleteIfExists(file('td.ijtc').toPath())
+    }
+  }
+}
+
+def benchmarkReport(Task benchmark) {
+  file("$benchmark.temporaryDir/${benchmark.name}.json")
+}
+
+task benchmark(group: 'verification', dependsOn: [noDiscoveryBenchmark, baselineBenchmark, headBenchmark]) {
+  doLast {
+    def secondaryMetrics = [
+        'trace.file.size',
+        '·gc.alloc.rate',
+        '·gc.count', '·gc.time'
+    ]
+    def baselineReport = ResourceGroovyMethods.getText(benchmarkReport(baselineBenchmark), 'UTF-8')
+    project.logger.quiet """Benchmark score:
+    No discovery vs $baselineVersion:
+    ${
+      ReportReader.readScore(
+          ResourceGroovyMethods.getText(benchmarkReport(noDiscoveryBenchmark), 'UTF-8'),
+          baselineReport,
+          secondaryMetrics
+      )
+    }
+    $baselineVersion vs $version:
+    ${
+      ReportReader.readScore(
+          baselineReport,
+          ResourceGroovyMethods.getText(benchmarkReport(headBenchmark), 'UTF-8'),
+          secondaryMetrics
+      )
+    }"""
+  }
 }

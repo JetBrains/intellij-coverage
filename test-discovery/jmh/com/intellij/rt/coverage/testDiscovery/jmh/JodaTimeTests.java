@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2020 JetBrains s.r.o.
+ * Copyright 2000-2018 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.jmh;
+package com.intellij.rt.coverage.testDiscovery.jmh;
 
 import junit.framework.TestResult;
 import junit.textui.TestRunner;
@@ -24,30 +24,22 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class JodaTimeTests {
-  private static void runTests(TestRunner runner) throws Exception {
+  public static void testDiscovery() throws Exception {
     // setup a time zone other than one tester is in
     TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
 
     // setup a locale other than one the tester is in
     Locale.setDefault(new Locale("th", "TH"));
 
-    runner.start(new String[]{
-        TestAllPackages.class.getName()
-    });
-  }
-
-  public static void testDiscovery() throws Exception {
-    runTests(new TestRunner() {
+    new TestRunner() {
       @Override
       protected TestResult createTestResult() {
         TestResult result = super.createTestResult();
         result.addListener(new TestDiscoveryListener());
         return result;
       }
+    }.start(new String[]{
+        TestAllPackages.class.getName()
     });
-  }
-
-  public static void testCoverage() throws Exception {
-    runTests(new TestRunner());
   }
 }
