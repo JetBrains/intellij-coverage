@@ -20,7 +20,9 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
+import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
+import org.jetbrains.coverage.org.objectweb.asm.Type;
 
 /**
  * Default interface member should be filtered out from implementer.
@@ -29,6 +31,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * <li>LABEL</li>
  * <li>LINENUMBER</li>
  * <li>ALOAD 0</li>
+ * <li>ALOAD 1..k - load all arguments</li>
  * <li>INVOKESTATIC to INTERFACE_NAME$DefaultImpls.INTERFACE_MEMBER</li>
  * <li>RETURN</li>
  * <li>LABEL</li>
@@ -36,16 +39,36 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * A method is filtered out is it's instructions list matches this structure.
  */
 public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodVisitingFilter {
+  private enum State {
+    SHOULD_COVER, SHOULD_NOT_COVER, UNKNOWN
+  }
+
   private byte matchedInstructions = 0;
   private int myLine = -1;
   private LineData myPreviousLineData;
+  private State myState;
+  private int myLoadArgsNumber;
+  private int myLoadArgIndex;
 
   @Override
-  public boolean isApplicable(Instrumenter context) {
+  public boolean isApplicable(Instrumenter context, int access, String name,
+                              String desc, String signature, String[] exceptions) {
     return KotlinUtils.isKotlinClass(context) && context.hasInterfaces();
   }
 
-  protected void filter() {
+  @Override
+  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String desc) {
+    super.initFilter(methodVisitor, context, desc);
+    myState = State.UNKNOWN;
+    myLoadArgsNumber = Type.getArgumentTypes(desc).length + 1;
+    myLoadArgIndex = 0;
+  }
+
+  private boolean completed() {
+    return myState != State.UNKNOWN;
+  }
+
+  private void filter() {
     if (myPreviousLineData == null) {
       myContext.removeLine(myLine);
     }
@@ -59,6 +82,7 @@ public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodVisitin
       matchedInstructions = 1;
     } else if (matchedInstructions == 5) {
       myState = State.SHOULD_NOT_COVER;
+      filter();
     } else {
       myState = State.SHOULD_COVER;
     }
@@ -81,8 +105,11 @@ public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodVisitin
   public void visitVarInsn(int opcode, int var) {
     super.visitVarInsn(opcode, var);
     if (completed()) return;
-    if (matchedInstructions == 2 && opcode == Opcodes.ALOAD && var == 0) {
-      matchedInstructions = 3;
+    if (matchedInstructions == 2 && isLoadOpcode(opcode) && var == myLoadArgIndex) {
+      myLoadArgIndex++;
+      if (myLoadArgIndex == myLoadArgsNumber) {
+        matchedInstructions = 3;
+      }
     } else {
       myState = State.SHOULD_COVER;
     }
@@ -108,5 +135,9 @@ public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodVisitin
     } else {
       myState = State.SHOULD_COVER;
     }
+  }
+
+  private static boolean isLoadOpcode(int opcode) {
+    return Opcodes.ILOAD <= opcode && opcode <= Opcodes.SALOAD;
   }
 }

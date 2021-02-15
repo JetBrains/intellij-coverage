@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
+import com.intellij.rt.coverage.util.ReportFormat;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 
 import java.io.*;
@@ -82,6 +83,13 @@ public class Instrumentator {
       sourceMapFile = null;
     }
 
+    ReportFormat reportFormat = ReportFormat.BINARY;
+    if (i < args.length && args[i].equals("-xml")) {
+      checkXMLReportCompatibility();
+      i++;
+      reportFormat = ReportFormat.XML;
+    }
+
     final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling);
     final List<Pattern> includePatterns = new ArrayList<Pattern>();
     System.out.println("---- IntelliJ IDEA coverage runner ---- ");
@@ -118,13 +126,26 @@ public class Instrumentator {
 
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
     if (dataFile != null) {
-      final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf);
+      final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf, reportFormat);
       hook.setSourceMapFile(sourceMapFile);
       Runtime.getRuntime().addShutdownHook(new Thread(hook));
     }
 
-    final boolean shouldCalculateSource = sourceMapFile != null;
+    final boolean shouldCalculateSource = sourceMapFile != null || reportFormat == ReportFormat.XML;
     instrumentation.addTransformer(new CoverageClassfileTransformer(data, shouldCalculateSource, excludePatterns, includePatterns, cf));
+  }
+
+  /**
+   * XML report is available if JDK version is higher than 6.
+   * Namely, <code>javax.xml.stream.XMLStreamWriter</code> is available at runtime.
+   */
+  private void checkXMLReportCompatibility() {
+    try {
+      Class.forName("javax.xml.stream.XMLStreamWriter");
+    } catch (ClassNotFoundException e) {
+      System.err.println("XML report is available if JDK version is higher than 6. javax.xml.stream.* classes were not found.");
+      System.exit(1);
+    }
   }
 
   private String[] readArgsFromFile(String arg) throws IOException {

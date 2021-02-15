@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<report name="Intellij Coverage Report">
+<package name="testData">
+<class name="testData.Main" sourcefilename="Main.java">
+<method name="main" desc="([Ljava/lang/String;)V">
+<counter type="LINE" covered="1" missed="0"/>
+<counter type="BRANCH" covered="0" missed="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="LINE" covered="0" missed="1"/>
+<counter type="BRANCH" covered="0" missed="0"/>
+</method>
+</class>
+<sourcefile name="Main.java">
+<line nr="19" cb="0" mb="0" ci="0" mi="1"/>
+<line nr="21" cb="0" mb="0" ci="1" mi="0"/>
+</sourcefile>
+</package>
+</report>
+

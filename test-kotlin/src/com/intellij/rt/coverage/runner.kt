@@ -23,10 +23,11 @@ import org.junit.Assert
 import java.io.File
 import java.nio.file.Paths
 
+private const val TEST_PACKAGE = "kotlinTestData"
 
 fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean, calcUnloaded: Boolean = false): ProjectData {
     val classPath = System.getProperty("java.class.path")
-    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, "kotlinTestData.*", "kotlinTestData.$testName.Test", sampling, calcUnloaded)
+    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, "$TEST_PACKAGE.*", "kotlinTestData.$testName.Test", sampling, calcUnloaded)
 }
 
 internal fun assertEqualsLines(project: ProjectData, expectedLines: Map<Int, String>, classNames: List<String>) {
@@ -40,7 +41,7 @@ internal const val all = "ALL CLASSES"
 private fun coverageLines(project: ProjectData, classNames: List<String>): Map<Int, String> {
     val allData = ClassData("")
     if (classNames.contains(all)) {
-        project.classes.values.forEach { allData.merge(it) }
+        project.classes.values.filter { it.name.startsWith(TEST_PACKAGE) }.forEach { allData.merge(it) }
     } else {
         classNames
                 .map { project.getClassData(it) }
