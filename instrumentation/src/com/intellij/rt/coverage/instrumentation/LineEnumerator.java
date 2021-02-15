@@ -162,28 +162,61 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     return myJumps.get(jump);
   }
 
+  /** Insert new labels before switch in order to let every branch have it's own label without fallthrough. */
+  private SwitchLabels replaceLabels(SwitchLabels original) {
+    Label beforeSwitchLabel = new Label();
+    Label newDefaultLabel = new Label();
+    Label[] newLabels = new Label[original.getLabels().length];
+    for (int i = 0; i < original.getLabels().length; i++) {
+      newLabels[i] = new Label();
+    }
+
+    super.visitJumpInsn(Opcodes.GOTO, beforeSwitchLabel);
+
+    for (int i = 0; i < newLabels.length; i++) {
+      super.visitLabel(newLabels[i]);
+      super.visitJumpInsn(Opcodes.GOTO, original.getLabels()[i]);
+    }
+
+    super.visitLabel(newDefaultLabel);
+    super.visitJumpInsn(Opcodes.GOTO, original.getDefault());
+
+    super.visitLabel(beforeSwitchLabel);
+
+    return new SwitchLabels(newDefaultLabel, newLabels);
+  }
 
   public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-    super.visitLookupSwitchInsn(dflt, keys, labels);
-    if (!myHasExecutableLines) return;
+    if (!myHasExecutableLines) {
+      super.visitLookupSwitchInsn(dflt, keys, labels);
+      return;
+    }
+    SwitchLabels switchLabels = new SwitchLabels(dflt, labels);
     final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
     if (lineData != null) {
-      rememberSwitchLabels(dflt, labels);
+      switchLabels = replaceLabels(switchLabels);
+      rememberSwitchLabels(switchLabels.getDefault(), switchLabels.getLabels());
       lineData.addSwitch(myCurrentSwitch++, keys);
     }
+    super.visitLookupSwitchInsn(switchLabels.getDefault(), keys, switchLabels.getLabels());
     myState = SEEN_NOTHING;
     myHasInstructions = true;
   }
 
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
-    super.visitTableSwitchInsn(min, max, dflt, labels);
-    if (!myHasExecutableLines) return;
+    if (!myHasExecutableLines) {
+      super.visitTableSwitchInsn(min, max, dflt, labels);
+      return;
+    }
+    SwitchLabels switchLabels = new SwitchLabels(dflt, labels);
     final LineData lineData = myClassInstrumenter.getLineData(myCurrentLine);
     if (lineData != null) {
-      rememberSwitchLabels(dflt, labels);
+      switchLabels = replaceLabels(switchLabels);
+      rememberSwitchLabels(switchLabels.getDefault(), switchLabels.getLabels());
       SwitchData switchData = lineData.addSwitch(myCurrentSwitch++, min, max);
       mySwitchLabels.put(dflt, switchData);
     }
+    super.visitTableSwitchInsn(min, max, switchLabels.getDefault(), switchLabels.getLabels());
     myState = SEEN_NOTHING;
     myHasInstructions = true;
   }
@@ -422,6 +455,24 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
       result = 31 * result + myLine;
       result = 31 * result + myKey;
       return result;
+    }
+  }
+
+  private static class SwitchLabels {
+    private final Label myDefault;
+    private final Label[] myLabels;
+
+    private SwitchLabels(Label dflt, Label[] labels) {
+      this.myDefault = dflt;
+      this.myLabels = labels;
+    }
+
+    public Label getDefault() {
+      return myDefault;
+    }
+
+    public Label[] getLabels() {
+      return myLabels;
     }
   }
 }

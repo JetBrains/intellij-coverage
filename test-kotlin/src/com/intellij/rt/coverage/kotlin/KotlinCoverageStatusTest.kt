@@ -215,6 +215,9 @@ class KotlinCoverageStatusTest {
         assertEquals(THREAD_SAFE_DATA_EXPECTED_HITS, getLineHits(data, 24))
     }
 
+    @Test
+    fun test_IDEA_259332() = test("fixes.IDEA_259332", "SwitchWithFallthrough", fileName = "SwitchWithFallthrough.java", sampling = false)
+
     private fun test(testName: String, vararg classes: String = arrayOf("TestKt"),
                      sampling: Boolean = true, fileName: String = "test.kt",
                      calcUnloaded: Boolean = false) {
