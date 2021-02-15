@@ -47,6 +47,10 @@ public class SaveHook implements Runnable {
     private final ClassFinder myClassFinder;
     private final ReportFormat myFormat;
 
+    public SaveHook(File dataFile, boolean appendUnloaded, ClassFinder classFinder) {
+        this(dataFile, appendUnloaded, classFinder, ReportFormat.BINARY);
+    }
+
     public SaveHook(File dataFile, boolean appendUnloaded, ClassFinder classFinder, ReportFormat format) {
         myDataFile = dataFile;
         myAppendUnloaded = appendUnloaded;
