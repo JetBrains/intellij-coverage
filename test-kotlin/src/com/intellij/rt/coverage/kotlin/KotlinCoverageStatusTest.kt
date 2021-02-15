@@ -18,7 +18,10 @@ package com.intellij.rt.coverage.kotlin
 
 
 import com.intellij.rt.coverage.*
+import kotlinTestData.threadSafe.data.THREAD_SAFE_DATA_EXPECTED_HITS
+import kotlinTestData.threadSafe.structure.THREAD_SAFE_STRUCTURE_CLASSES
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -81,6 +84,19 @@ class KotlinCoverageStatusTest {
     fun testReified() = test("inline.reified")
 
     @Test
+    @Ignore("To be fixed")
+    fun testInlineCoroutinesTracing() = test("inline.coroutines.tracing", all, sampling = false)
+
+    @Test
+    fun testInlineCoroutinesSampling() = test("inline.coroutines.sampling", all)
+
+    @Test
+    fun testNoInline() = test("inline.noinline", all)
+
+    @Test
+    fun testCrossInline() = test("inline.crossinline", all)
+
+    @Test
     fun testMultiplyFilesInline() = test("inline.multiplyFiles", "Test2Kt",
             fileName = "test2.kt")
 
@@ -108,9 +124,49 @@ class KotlinCoverageStatusTest {
     fun testDefaultInterfaceMemberRemoveOnlyInterfaceMember() = test("defaultInterfaceMember.removeOnlyDefaultInterfaceMember", "Bar")
 
     @Test
+    fun test_IDEA_259731() = test("fixes.IDEA_259731", "C")
+
+    @Test
     fun testDefaultInterfaceMemberJava() = test("defaultInterfaceMember.java",
             "Foo", "Bar",
             fileName = "Test.java")
+
+    @Test
+    fun testCoroutinesLambda() = test("coroutines.lambda",
+            "TestKt", "TestKt\$test\$1",
+            sampling = false)
+
+    @Test
+    fun testCoroutinesFunction() = test("coroutines.function",
+            "TestKt", "TestKt\$test\$1",
+            sampling = false)
+
+    @Test
+    fun testCoroutinesTailSuspend() = test("coroutines.tailSuspendCall", sampling = false)
+
+    @Test
+    fun testCoroutinesNoSuspend() = test("coroutines.noSuspend", sampling = false)
+
+    @Test
+    fun testCoroutinesNonVoid() = test("coroutines.nonVoid",
+            "TestKt", "TestKt\$test\$1",
+            sampling = false)
+
+    @Test
+    fun testCoroutinesAsync() = test("coroutines.async", all, sampling = false)
+
+    @Test
+    fun testCoroutinesInline() = test("coroutines.inline",
+            "TestKt\$test\$1", "TestKt",
+            sampling = false)
+
+    @Test
+    @Ignore("To be fixed")
+    fun testCoroutinesFix1Sampling() = test("coroutines.fix1.sampling", all)
+
+    @Test
+    @Ignore("To be fixed")
+    fun testCoroutinesFix1Tracing() = test("coroutines.fix1.tracing", all, sampling = false)
 
     @Test
     fun testImplementationByDelegation() = test("implementationByDelegation", "Derived")
@@ -142,6 +198,22 @@ class KotlinCoverageStatusTest {
 
     @Test
     fun test_IDEA_250825() = test("fixes.IDEA_250825", "JavaTest", fileName = "JavaTest.java", sampling = false)
+
+    @Test
+    fun testThreadSafeStructure() {
+        val n = THREAD_SAFE_STRUCTURE_CLASSES
+        val expected = (1..n).associateWith { "FULL" }
+        val project = runWithCoverage(myDataFile, "threadSafe.structure", false)
+        assertEqualsLines(project, expected, (0 until n).map { "kotlinTestData.threadSafe.structure.Class$it" })
+    }
+
+    @Test
+    @Ignore("Coverage hit increment is not atomic.")
+    fun testThreadSafeData() {
+        val project = runWithCoverage(myDataFile, "threadSafe.data", false)
+        val data = project.getClassData("kotlinTestData.threadSafe.data.SimpleClass")
+        assertEquals(THREAD_SAFE_DATA_EXPECTED_HITS, getLineHits(data, 24))
+    }
 
     @Test
     fun test_IDEA_259332() = test("fixes.IDEA_259332", "SwitchWithFallthrough", fileName = "SwitchWithFallthrough.java", sampling = false)

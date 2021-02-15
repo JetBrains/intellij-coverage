@@ -42,7 +42,7 @@ public class ClassData implements CoverageData {
 
   public void save(final DataOutputStream os, DictionaryLookup dictionaryLookup) throws IOException {
     CoverageIOUtil.writeINT(os, dictionaryLookup.getDictionaryIndex(myClassName));
-    final Map<String, List<LineData>> sigLines = prepareSignaturesMap(dictionaryLookup);
+    final Map<String, List<LineData>> sigLines = prepareSignaturesMap(dictionaryLookup, true);
     final Set<String> sigs = sigLines.keySet();
     CoverageIOUtil.writeINT(os, sigs.size());
     for (Object sig1 : sigs) {
@@ -56,7 +56,7 @@ public class ClassData implements CoverageData {
     }
   }
 
-  private Map<String, List<LineData>> prepareSignaturesMap(DictionaryLookup dictionaryLookup) {
+  private Map<String, List<LineData>> prepareSignaturesMap(DictionaryLookup dictionaryLookup, boolean collapseSignatures) {
     final Map<String, List<LineData>> sigLines = new HashMap<String, List<LineData>>();
     if (myLinesArray == null) return sigLines;
     for (final LineData lineData : myLinesArray) {
@@ -64,7 +64,8 @@ public class ClassData implements CoverageData {
       if (myLineMask != null) {
         lineData.setHits(myLineMask[lineData.getLineNumber()]);
       }
-      final String sig = CoverageIOUtil.collapse(lineData.getMethodSignature(), dictionaryLookup);
+      final String methodSignature = lineData.getMethodSignature();
+      final String sig = collapseSignatures ? CoverageIOUtil.collapse(methodSignature, dictionaryLookup) : methodSignature;
       List<LineData> lines = sigLines.get(sig);
       if (lines == null) {
         lines = new ArrayList<LineData>();
@@ -73,6 +74,10 @@ public class ClassData implements CoverageData {
       lines.add(lineData);
     }
     return sigLines;
+  }
+
+  public Map<String, List<LineData>> mapLinesToMethods() {
+    return prepareSignaturesMap(null, false);
   }
 
   public void merge(final CoverageData data) {
@@ -285,8 +290,10 @@ public class ClassData implements CoverageData {
       LineData targetLineData = getLineData(targetLineNumber);
       if (targetLineData != null) {
         source.merge(targetLineData);
+        myLinesArray[targetLineNumber] = null;
         if (myLineMask != null) {
           source.setHits(source.getHits() + myLineMask[targetLineNumber]);
+          myLineMask[targetLineNumber] = 0;
         }
       }
     }

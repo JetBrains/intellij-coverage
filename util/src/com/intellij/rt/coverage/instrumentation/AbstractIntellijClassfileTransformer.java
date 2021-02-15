@@ -251,7 +251,10 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     if (classReader == null) {
       InputStream is = null;
       try {
-        is = classLoader.getResourceAsStream(className + ".class");
+        String resource = className + ".class";
+        is = classLoader == null
+            ? ClassLoader.getSystemResourceAsStream(resource)
+            : classLoader.getResourceAsStream(resource);
         if (is == null) {
           throw new IOException("Class " + className + " not found");
         }
