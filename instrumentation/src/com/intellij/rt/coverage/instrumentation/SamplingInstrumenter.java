@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.LinesUtil;
 import org.jetbrains.coverage.org.objectweb.asm.*;
+import org.jetbrains.coverage.org.objectweb.asm.commons.LocalVariablesSorter;
 
 public class SamplingInstrumenter extends Instrumenter {
   private static final String OBJECT_TYPE = "Ljava/lang/Object;";
@@ -34,15 +35,10 @@ public class SamplingInstrumenter extends Instrumenter {
                                                      final int access,
                                                      final String signature,
                                                      final String[] exceptions) {
-    int variablesCount = ((Opcodes.ACC_STATIC & access) != 0) ? 0 : 1;
-    final Type[] args = Type.getArgumentTypes(desc);
-    for (Type arg : args) {
-      variablesCount += arg.getSize();
-    }
-    final int varCount = variablesCount;
-    return new MethodVisitor(Opcodes.API_VERSION, mv) {
+    return new LocalVariablesSorter(Opcodes.API_VERSION, access, desc, mv) {
       private Label myStartLabel;
       private Label myEndLabel;
+      private int myClassDataIndex;
 
       public void visitLabel(Label label) {
         if (myStartLabel == null) {
@@ -54,7 +50,7 @@ public class SamplingInstrumenter extends Instrumenter {
 
       public void visitLineNumber(final int line, final Label start) {
         getOrCreateLineData(line, name, desc);
-        mv.visitVarInsn(Opcodes.ALOAD, getCurrentClassDataNumber());
+        mv.visitVarInsn(Opcodes.ALOAD, myClassDataIndex);
         if (line <= Short.MAX_VALUE) {
           mv.visitIntInsn(Opcodes.SIPUSH, line);
         }
@@ -68,33 +64,14 @@ public class SamplingInstrumenter extends Instrumenter {
       public void visitCode() {
         mv.visitLdcInsn(getClassName());
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)" + OBJECT_TYPE, false);
-        mv.visitVarInsn(Opcodes.ASTORE, getCurrentClassDataNumber());
+        myClassDataIndex = newLocal(Type.getType(OBJECT_TYPE));
+        mv.visitVarInsn(Opcodes.ASTORE, myClassDataIndex);
         super.visitCode();
-      }
-
-      public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
-        super.visitLocalVariable(name, desc, signature, start, end, adjustVariable(index));
-      }
-
-      public void visitIincInsn(int var, int increment) {
-        super.visitIincInsn(adjustVariable(var), increment);
-      }
-
-      public void visitVarInsn(int opcode, int var) {
-        super.visitVarInsn(opcode, adjustVariable(var));
-      }
-
-      private int adjustVariable(final int var) {
-        return (var >= varCount) ? var + 1 : var;
-      }
-
-      private int getCurrentClassDataNumber() {
-        return varCount;
       }
 
       public void visitMaxs(int maxStack, int maxLocals) {
         if (myStartLabel != null && myEndLabel != null) {
-          mv.visitLocalVariable("__class__data__", OBJECT_TYPE, null, myStartLabel, myEndLabel, getCurrentClassDataNumber());
+          mv.visitLocalVariable("__class__data__", OBJECT_TYPE, null, myStartLabel, myEndLabel, myClassDataIndex);
         }
         super.visitMaxs(maxStack, maxLocals);
       }
