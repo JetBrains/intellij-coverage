@@ -23,9 +23,10 @@ private inline fun inlineFunWithDefaultArgs(param: Int = 0) { // coverage: FULL
     return                      // coverage: FULL
 }
 
-private fun test() {
+private fun test(): Int {
     inlineFunWithDefaultArgs()  // coverage: FULL
-}                               // coverage: FULL
+    return 42                   // coverage: FULL
+}
 
 object Test {
     @JvmStatic

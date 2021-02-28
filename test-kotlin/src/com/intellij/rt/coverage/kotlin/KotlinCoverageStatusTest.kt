@@ -66,6 +66,9 @@ class KotlinCoverageStatusTest {
     fun testDefaultArgsInline() = test("defaultArgs.inline")
 
     @Test
+    fun testDefaultArgsInlineTracing() = test("defaultArgs.inline", sampling = false)
+
+    @Test
     fun testUnloadedSingleFile() = test("unloaded.singleFile", "UnusedClass", calcUnloaded = true)
 
     @Test
