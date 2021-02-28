@@ -18,32 +18,25 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import org.jetbrains.coverage.org.objectweb.asm.Type;
+import org.jetbrains.coverage.org.objectweb.asm.commons.LocalVariablesSorter;
 
-public class TouchCounter extends MethodVisitor implements Opcodes {
-  private final int myVariablesCount;
-
+public class TouchCounter extends LocalVariablesSorter implements Opcodes {
   private final LineEnumerator myEnumerator;
 
   private Label myStartLabel;
   private Label myEndLabel;
+  private int myClassDataIndex;
 
   public TouchCounter(final LineEnumerator enumerator, int access, String desc) {
-    super(Opcodes.API_VERSION, enumerator.getWV());
+    super(Opcodes.API_VERSION, access, desc, enumerator.getWV());
     myEnumerator = enumerator;
-    int variablesCount = ((Opcodes.ACC_STATIC & access) != 0) ? 0 : 1;
-    final Type[] args = Type.getArgumentTypes(desc);
-    for (Type arg : args) {
-      variablesCount += arg.getSize();
-    }
-    myVariablesCount = variablesCount;
   }
 
 
   public void visitLineNumber(int line, Label start) {
-    mv.visitVarInsn(Opcodes.ALOAD, getCurrentClassDataNumber());
+    mv.visitVarInsn(Opcodes.ALOAD, myClassDataIndex);
     pushIntValue(line);
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/Object;I)V", false);
     super.visitLineNumber(line, start);
@@ -61,7 +54,7 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
 
     final LineEnumerator.Switch aSwitch = myEnumerator.getSwitch(label);
     if (aSwitch != null) {
-      mv.visitVarInsn(Opcodes.ALOAD, getCurrentClassDataNumber());
+      mv.visitVarInsn(Opcodes.ALOAD, myClassDataIndex);
       pushIntValue(aSwitch.getLine());
       pushIntValue(aSwitch.getIndex());
       mv.visitIntInsn(Opcodes.SIPUSH, aSwitch.getKey());
@@ -70,7 +63,7 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
   }
 
   private void touchBranch(final boolean trueHit, final int jumpIndex, int line) {
-    mv.visitVarInsn(Opcodes.ALOAD, getCurrentClassDataNumber());
+    mv.visitVarInsn(Opcodes.ALOAD, myClassDataIndex);
     pushIntValue(line);
     pushIntValue(jumpIndex);
     mv.visitInsn(trueHit ? Opcodes.ICONST_0 : Opcodes.ICONST_1);
@@ -87,8 +80,8 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
   public void visitCode() {
     mv.visitLdcInsn(myEnumerator.getClassName());
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)Ljava/lang/Object;", false);
-    mv.visitVarInsn(Opcodes.ASTORE, getCurrentClassDataNumber());
-
+    myClassDataIndex = newLocal(Type.getType("Ljava/lang/Object;"));
+    mv.visitVarInsn(Opcodes.ASTORE, myClassDataIndex);
     super.visitCode();
   }
 
@@ -100,29 +93,9 @@ public class TouchCounter extends MethodVisitor implements Opcodes {
     }
   }
 
-  public void visitVarInsn(int opcode, int var) {
-    mv.visitVarInsn(opcode, adjustVariable(var));
-  }
-
-  public void visitIincInsn(int var, int increment) {
-    mv.visitIincInsn(adjustVariable(var), increment);
-  }
-
-  public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
-    mv.visitLocalVariable(name, desc, signature, start, end, adjustVariable(index));
-  }
-
-  private int adjustVariable(final int var) {
-    return (var >= getCurrentClassDataNumber()) ? var + 1 : var;
-  }
-
-  public int getCurrentClassDataNumber() {
-    return myVariablesCount;
-  }
-
   public void visitMaxs(int maxStack, int maxLocals) {
     if (myStartLabel != null && myEndLabel != null) {
-      mv.visitLocalVariable("__class__data__", "Ljava/lang/Object;", null, myStartLabel, myEndLabel, getCurrentClassDataNumber());
+      mv.visitLocalVariable("__class__data__", "Ljava/lang/Object;", null, myStartLabel, myEndLabel, myClassDataIndex);
     }
     super.visitMaxs(maxStack, maxLocals);
   }
