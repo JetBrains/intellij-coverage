@@ -18,18 +18,13 @@ package com.intellij.rt.coverage.kotlin
 
 
 import com.intellij.rt.coverage.*
-import kotlinTestData.threadSafe.data.THREAD_SAFE_DATA_EXPECTED_HITS
-import kotlinTestData.threadSafe.structure.THREAD_SAFE_STRUCTURE_CLASSES
 import org.junit.After
-import org.junit.Assert.assertEquals
 import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
 import java.io.File
 
 
-class KotlinCoverageStatusTest {
-    private lateinit var myDataFile: File
+abstract class KotlinCoverageStatusTest {
+    protected lateinit var myDataFile: File
 
     @Before
     fun setUp() {
@@ -41,195 +36,13 @@ class KotlinCoverageStatusTest {
         myDataFile.delete()
     }
 
-    @Test
-    fun testSimpleIfElse() = test("simple.ifelse", sampling = false)
+    abstract val coverage: Coverage
 
-    @Test
-    fun testDefaultArgsCovered() = test("defaultArgs.covered")
-
-    @Test
-    fun testDefaultArgsUncovered() = test("defaultArgs.uncovered")
-
-    @Test
-    fun testDefaultArgsSeveralArgs() = test("defaultArgs.severalArguments")
-
-    @Test
-    fun testDefaultArgsSeveralArgsTracing() = test("defaultArgs.tracing", "TestKt", "X", sampling = false)
-
-    @Test
-    fun test32DefaultArgsTracing() = test("defaultArgs.defaultArgs32", sampling = false)
-
-    @Test
-    fun test32ArgsTracing() = test("defaultArgs.args32", sampling = false)
-
-    @Test
-    fun testDefaultArgsInline() = test("defaultArgs.inline")
-
-    @Test
-    fun testDefaultArgsInlineTracing() = test("defaultArgs.inline", sampling = false)
-
-    @Test
-    fun testUnloadedSingleFile() = test("unloaded.singleFile", "UnusedClass", calcUnloaded = true)
-
-    @Test
-    fun testUnloadedMultiFile() = test("unloaded.multiFile", "UnusedClass", calcUnloaded = true, fileName = "UnusedClass.kt")
-
-    @Test
-    fun testSimpleInline() = test("inline.simple")
-
-    @Test
-    fun testInlineInline() = test("inline.inlineInline")
-
-    @Test
-    fun testLambdaInline() = test("inline.lambda")
-
-    @Test
-    fun testReflection() = test("inline.reflection", "Test")
-
-    @Test
-    fun testReified() = test("inline.reified")
-
-    @Test
-    @Ignore("To be fixed")
-    fun testInlineCoroutinesTracing() = test("inline.coroutines.tracing", all, sampling = false)
-
-    @Test
-    fun testInlineCoroutinesSampling() = test("inline.coroutines.sampling", all)
-
-    @Test
-    fun testNoInline() = test("inline.noinline", all)
-
-    @Test
-    fun testCrossInline() = test("inline.crossinline", all)
-
-    @Test
-    fun testMultiplyFilesInline() = test("inline.multiplyFiles", "Test2Kt",
-            fileName = "test2.kt")
-
-    @Test
-    @Ignore("Not implemented")
-    fun testReturn() = test("returnTest")
-
-    @Test
-    fun testFileProperties() = test("properties.file")
-
-    @Test
-    @Ignore("Not implemented")
-    fun testGetterAndSetterOfPropertyAreDistinguishable() = test("properties.getter_setter")
-
-    @Test
-    fun testPrimaryConstructorWithProperties() = test("properties.constructor", "A")
-
-    @Test
-    fun testDataClass() = test("dataClass", "A")
-
-    @Test
-    fun testDefaultInterfaceMember() = test("defaultInterfaceMember", "Foo\$DefaultImpls", "Bar")
-
-    @Test
-    fun testDefaultInterfaceMemberRemoveOnlyInterfaceMember() = test("defaultInterfaceMember.removeOnlyDefaultInterfaceMember", "Bar")
-
-    @Test
-    fun test_IDEA_259731() = test("fixes.IDEA_259731", "C")
-
-    @Test
-    fun testDefaultInterfaceMemberJava() = test("defaultInterfaceMember.java",
-            "Foo", "Bar",
-            fileName = "Test.java")
-
-    @Test
-    fun testCoroutinesLambda() = test("coroutines.lambda",
-            "TestKt", "TestKt\$test\$1",
-            sampling = false)
-
-    @Test
-    fun testCoroutinesFunction() = test("coroutines.function",
-            "TestKt", "TestKt\$test\$1",
-            sampling = false)
-
-    @Test
-    fun testCoroutinesTailSuspend() = test("coroutines.tailSuspendCall", sampling = false)
-
-    @Test
-    fun testCoroutinesNoSuspend() = test("coroutines.noSuspend", sampling = false)
-
-    @Test
-    fun testCoroutinesNonVoid() = test("coroutines.nonVoid",
-            "TestKt", "TestKt\$test\$1",
-            sampling = false)
-
-    @Test
-    fun testCoroutinesAsync() = test("coroutines.async", all, sampling = false)
-
-    @Test
-    fun testCoroutinesInline() = test("coroutines.inline",
-            "TestKt\$test\$1", "TestKt",
-            sampling = false)
-
-    @Test
-    @Ignore("To be fixed")
-    fun testCoroutinesFix1Sampling() = test("coroutines.fix1.sampling", all)
-
-    @Test
-    @Ignore("To be fixed")
-    fun testCoroutinesFix1Tracing() = test("coroutines.fix1.tracing", all, sampling = false)
-
-    @Test
-    fun testImplementationByDelegation() = test("implementationByDelegation", "Derived")
-
-    @Test
-    fun testImplementationByDelegationGeneric() = test("implementationByDelegationGeneric", "BDelegation")
-
-    @Test
-    fun testWhenMappingsSampling() = test("whenMapping.sampling")
-
-    @Test
-    fun testWhenMappingTracing() = test("whenMapping.tracing", sampling = false)
-
-    @Test
-    fun testJavaSwitch() = test("javaSwitch", "JavaSwitchTest", sampling = false, fileName = "JavaSwitchTest.java")
-
-    @Test
-    fun testSealedClassConstructor() = test("sealedClassConstructor",
-            "SealedClass", "SealedClassWithArgs", "ClassWithPrivateDefaultConstructor")
-
-    @Test
-    fun testFunInterface() = test("funInterface", "TestKt", "TestKt\$test\$1")
-
-    @Test
-    fun test_IDEA_57695() {
-        val project = runWithCoverage(myDataFile, "fixes.IDEA_57695", false)
-        assertEqualsLines(project, hashMapOf(1 to "PARTIAL", 2 to "FULL"), listOf("kotlinTestData.fixes.IDEA_57695.TestClass"))
-    }
-
-    @Test
-    fun test_IDEA_250825() = test("fixes.IDEA_250825", "JavaTest", fileName = "JavaTest.java", sampling = false)
-
-    @Test
-    fun testThreadSafeStructure() {
-        val n = THREAD_SAFE_STRUCTURE_CLASSES
-        val expected = (1..n).associateWith { "FULL" }
-        val project = runWithCoverage(myDataFile, "threadSafe.structure", false)
-        assertEqualsLines(project, expected, (0 until n).map { "kotlinTestData.threadSafe.structure.Class$it" })
-    }
-
-    @Test
-    @Ignore("Coverage hit increment is not atomic.")
-    fun testThreadSafeData() {
-        val project = runWithCoverage(myDataFile, "threadSafe.data", false)
-        val data = project.getClassData("kotlinTestData.threadSafe.data.SimpleClass")
-        assertEquals(THREAD_SAFE_DATA_EXPECTED_HITS, getLineHits(data, 24))
-    }
-
-    @Test
-    fun test_IDEA_259332() = test("fixes.IDEA_259332", "SwitchWithFallthrough", fileName = "SwitchWithFallthrough.java", sampling = false)
-
-    private fun test(testName: String, vararg classes: String = arrayOf("TestKt"),
-                     sampling: Boolean = true, fileName: String = "test.kt",
-                     calcUnloaded: Boolean = false) {
+    protected fun test(testName: String, vararg classes: String = arrayOf("TestKt"),
+                       fileName: String = "test.kt", calcUnloaded: Boolean = false) {
         val testFile = pathToFile("src", "kotlinTestData", *testName.split('.').toTypedArray(), fileName)
         val expected = extractCoverageDataFromFile(testFile)
-        val project = runWithCoverage(myDataFile, testName, sampling, calcUnloaded)
+        val project = runWithCoverage(myDataFile, testName, coverage, calcUnloaded)
         val fullClassNames = classes.map { "kotlinTestData.$testName.$it" }
         assertEqualsLines(project, expected, if (classes.contains(all)) listOf(all) else fullClassNames)
     }

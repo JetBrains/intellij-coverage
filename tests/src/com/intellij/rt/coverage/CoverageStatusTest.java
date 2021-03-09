@@ -38,6 +38,7 @@ import java.util.Comparator;
  * @since 22-May-2008
  */
 public class CoverageStatusTest extends TestCase {
+  private static final String[] EMPTY = new String[0];
   private File myDataFile;
   private File myClassFile;
 
@@ -205,11 +206,11 @@ public class CoverageStatusTest extends TestCase {
 
   public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
                                  String classToRun, final boolean sampling) throws IOException, InterruptedException {
-    return runCoverage(testDataPath, coverageDataFile, patterns, classToRun, sampling, false);
+    return runCoverage(testDataPath, coverageDataFile, patterns, classToRun, sampling, EMPTY, false);
   }
 
   static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
-                                 String classToRun, final boolean sampling, boolean calcUnloaded) throws IOException, InterruptedException {
+                                 String classToRun, final boolean sampling, String[] extraArgs, boolean calcUnloaded) throws IOException, InterruptedException {
     String coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent");
 
     String[] commandLine = {
@@ -217,7 +218,12 @@ public class CoverageStatusTest extends TestCase {
         "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" false " + calcUnloaded + " false "
             + sampling + " " + patterns,
         "-classpath", testDataPath, classToRun};
-
+    if (extraArgs.length > 0) {
+      String[] args = new String[extraArgs.length + commandLine.length];
+      System.arraycopy(extraArgs, 0, args, 0, extraArgs.length);
+      System.arraycopy(commandLine, 0, args, extraArgs.length, commandLine.length);
+      commandLine = args;
+    }
     ProcessUtil.execJavaProcess(commandLine);
 
     FileUtil.waitUntilFileCreated(coverageDataFile);

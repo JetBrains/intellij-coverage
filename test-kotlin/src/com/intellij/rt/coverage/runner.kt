@@ -23,11 +23,17 @@ import org.junit.Assert
 import java.io.File
 import java.nio.file.Paths
 
+enum class Coverage {
+    SAMPLING, NEW_SAMPLING, TRACING
+}
+
 private const val TEST_PACKAGE = "kotlinTestData"
 
-fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean, calcUnloaded: Boolean = false): ProjectData {
+fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false): ProjectData {
     val classPath = System.getProperty("java.class.path")
-    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, "$TEST_PACKAGE.*", "kotlinTestData.$testName.Test", sampling, calcUnloaded)
+    val extraArgs = if (coverage == Coverage.NEW_SAMPLING) arrayOf("-Didea.new.sampling.coverage=true") else emptyArray()
+    val sampling = coverage != Coverage.TRACING
+    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, "$TEST_PACKAGE.*", "kotlinTestData.$testName.Test", sampling, extraArgs, calcUnloaded)
 }
 
 internal fun assertEqualsLines(project: ProjectData, expectedLines: Map<Int, String>, classNames: List<String>) {
