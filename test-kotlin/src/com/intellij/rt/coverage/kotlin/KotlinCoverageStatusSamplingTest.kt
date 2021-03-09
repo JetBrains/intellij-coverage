@@ -135,6 +135,9 @@ abstract class KotlinCoverageStatusAbstractSamplingTest : KotlinCoverageStatusTe
         val data = project.getClassData("kotlinTestData.threadSafe.data.SimpleClass")
         Assert.assertEquals(THREAD_SAFE_DATA_EXPECTED_HITS, getLineHits(data, 24))
     }
+
+    @Test
+    fun test_KT_39038() = test("fixes.KT_39038")
 }
 
 class KotlinCoverageStatusSamplingTest : KotlinCoverageStatusAbstractSamplingTest() {
