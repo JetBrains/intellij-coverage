@@ -19,53 +19,44 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ProjectData;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
-import org.jetbrains.coverage.org.objectweb.asm.Type;
-import org.jetbrains.coverage.org.objectweb.asm.commons.LocalVariablesSorter;
 
-public class TouchCounter extends LocalVariablesSorter implements Opcodes {
+public class TouchCounter extends LocalVariableInserter implements Opcodes {
+  private static final String OBJECT_TYPE = "Ljava/lang/Object;";
+  private static final String CLASS_DATA_LOCAL_VARIABLE_NAME = "__class__data__";
   private final LineEnumerator myEnumerator;
 
-  private Label myStartLabel;
-  private Label myEndLabel;
-  private int myClassDataIndex;
-
   public TouchCounter(final LineEnumerator enumerator, int access, String desc) {
-    super(Opcodes.API_VERSION, access, desc, enumerator.getWV());
+    super(enumerator.getWV(), access, desc, CLASS_DATA_LOCAL_VARIABLE_NAME, OBJECT_TYPE);
     myEnumerator = enumerator;
   }
 
 
   public void visitLineNumber(int line, Label start) {
-    mv.visitVarInsn(Opcodes.ALOAD, myClassDataIndex);
-    pushIntValue(line);
+    mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+    InstrumentationUtils.pushInt(mv, line);
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/Object;I)V", false);
     super.visitLineNumber(line, start);
   }
 
   public void visitLabel(Label label) {
-    if (myStartLabel == null) {
-      myStartLabel = label;
-    }
-    myEndLabel = label;
-
     super.visitLabel(label);
 
     visitPossibleJump(label);
 
     final LineEnumerator.Switch aSwitch = myEnumerator.getSwitch(label);
     if (aSwitch != null) {
-      mv.visitVarInsn(Opcodes.ALOAD, myClassDataIndex);
-      pushIntValue(aSwitch.getLine());
-      pushIntValue(aSwitch.getIndex());
+      mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+      InstrumentationUtils.pushInt(mv, aSwitch.getLine());
+      InstrumentationUtils.pushInt(mv, aSwitch.getIndex());
       mv.visitIntInsn(Opcodes.SIPUSH, aSwitch.getKey());
       mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchSwitch", "(Ljava/lang/Object;III)V", false);
     }
   }
 
   private void touchBranch(final boolean trueHit, final int jumpIndex, int line) {
-    mv.visitVarInsn(Opcodes.ALOAD, myClassDataIndex);
-    pushIntValue(line);
-    pushIntValue(jumpIndex);
+    mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+    InstrumentationUtils.pushInt(mv, line);
+    InstrumentationUtils.pushInt(mv, jumpIndex);
     mv.visitInsn(trueHit ? Opcodes.ICONST_0 : Opcodes.ICONST_1);
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchJump", "(Ljava/lang/Object;IIZ)V", false);
   }
@@ -80,23 +71,7 @@ public class TouchCounter extends LocalVariablesSorter implements Opcodes {
   public void visitCode() {
     mv.visitLdcInsn(myEnumerator.getClassName());
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)Ljava/lang/Object;", false);
-    myClassDataIndex = newLocal(Type.getType("Ljava/lang/Object;"));
-    mv.visitVarInsn(Opcodes.ASTORE, myClassDataIndex);
+    mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
     super.visitCode();
-  }
-
-  private void pushIntValue(int value) {
-    if (value <= Short.MAX_VALUE) {
-      mv.visitIntInsn(Opcodes.SIPUSH, value);
-    } else {
-      mv.visitLdcInsn(value);
-    }
-  }
-
-  public void visitMaxs(int maxStack, int maxLocals) {
-    if (myStartLabel != null && myEndLabel != null) {
-      mv.visitLocalVariable("__class__data__", "Ljava/lang/Object;", null, myStartLabel, myEndLabel, myClassDataIndex);
-    }
-    super.visitMaxs(maxStack, maxLocals);
   }
 }

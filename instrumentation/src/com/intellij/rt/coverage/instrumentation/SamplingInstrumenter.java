@@ -20,10 +20,10 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.LinesUtil;
 import org.jetbrains.coverage.org.objectweb.asm.*;
-import org.jetbrains.coverage.org.objectweb.asm.commons.LocalVariablesSorter;
 
 public class SamplingInstrumenter extends Instrumenter {
   private static final String OBJECT_TYPE = "Ljava/lang/Object;";
+  private static final String CLASS_DATA_LOCAL_VARIABLE_NAME = "__class__data__";
 
   public SamplingInstrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
     super(projectData, classVisitor, className, shouldCalculateSource);
@@ -35,28 +35,12 @@ public class SamplingInstrumenter extends Instrumenter {
                                                      final int access,
                                                      final String signature,
                                                      final String[] exceptions) {
-    return new LocalVariablesSorter(Opcodes.API_VERSION, access, desc, mv) {
-      private Label myStartLabel;
-      private Label myEndLabel;
-      private int myClassDataIndex;
-
-      public void visitLabel(Label label) {
-        if (myStartLabel == null) {
-          myStartLabel = label;
-        }
-        myEndLabel = label;
-        super.visitLabel(label);
-      }
+    return new LocalVariableInserter(mv, access, desc, CLASS_DATA_LOCAL_VARIABLE_NAME, OBJECT_TYPE) {
 
       public void visitLineNumber(final int line, final Label start) {
         getOrCreateLineData(line, name, desc);
-        mv.visitVarInsn(Opcodes.ALOAD, myClassDataIndex);
-        if (line <= Short.MAX_VALUE) {
-          mv.visitIntInsn(Opcodes.SIPUSH, line);
-        }
-        else {
-          mv.visitLdcInsn(line);
-        }
+        mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+        InstrumentationUtils.pushInt(mv, line);
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchLine", "(" + OBJECT_TYPE + "I)V", false);
         super.visitLineNumber(line, start);
       }
@@ -64,16 +48,8 @@ public class SamplingInstrumenter extends Instrumenter {
       public void visitCode() {
         mv.visitLdcInsn(getClassName());
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)" + OBJECT_TYPE, false);
-        myClassDataIndex = newLocal(Type.getType(OBJECT_TYPE));
-        mv.visitVarInsn(Opcodes.ASTORE, myClassDataIndex);
+        mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
         super.visitCode();
-      }
-
-      public void visitMaxs(int maxStack, int maxLocals) {
-        if (myStartLabel != null && myEndLabel != null) {
-          mv.visitLocalVariable("__class__data__", OBJECT_TYPE, null, myStartLabel, myEndLabel, myClassDataIndex);
-        }
-        super.visitMaxs(maxStack, maxLocals);
       }
     };
   }
