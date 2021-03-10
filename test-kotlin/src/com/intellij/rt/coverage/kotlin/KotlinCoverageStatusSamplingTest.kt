@@ -137,9 +137,19 @@ abstract class KotlinCoverageStatusAbstractSamplingTest : KotlinCoverageStatusTe
     }
 
     @Test
+    fun testBadCycleClasses() = test("badCycle.classes", "JavaTest\$BaseClass", "JavaTest\$DerivedClass", fileName = "JavaTest.java")
+
+    @Test
+    fun testBadCycleInterfaces() = test("badCycle.interfaces", "JavaTest\$ImplementerInterface", fileName = "JavaTest.java")
+
+    @Test
     fun test_KT_39038() = test("fixes.KT_39038")
 }
 
 class KotlinCoverageStatusSamplingTest : KotlinCoverageStatusAbstractSamplingTest() {
     override val coverage = Coverage.SAMPLING
+}
+
+class KotlinCoverageStatusNewSamplingTest : KotlinCoverageStatusAbstractSamplingTest() {
+    override val coverage = Coverage.NEW_SAMPLING
 }

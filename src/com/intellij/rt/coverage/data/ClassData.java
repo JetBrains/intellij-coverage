@@ -311,4 +311,8 @@ public class ClassData implements CoverageData {
       myLineMask = lines;
       return lines;
   }
+
+  public int[] getLineMask() {
+    return myLineMask;
+  }
 }

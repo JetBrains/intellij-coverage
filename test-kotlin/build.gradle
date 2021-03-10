@@ -24,4 +24,6 @@ dependencies {
     testImplementation(library_project_asm_all)
 
     testImplementation("junit:junit:4.13")
+
+    testImplementation(fileTree(project(":test-discovery").file("lib")))
 }

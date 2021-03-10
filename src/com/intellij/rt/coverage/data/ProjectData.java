@@ -31,6 +31,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   private static final MethodCaller TOUCH_LINE_METHOD = new MethodCaller("touchLine", new Class[] {int.class});
   private static final MethodCaller TOUCH_LINES_METHOD = new MethodCaller("touchLines", new Class[] {int[].class});
+  private static final MethodCaller GET_LINE_MASK_METHOD = new MethodCaller("getLineMask", new Class[0]);
   private static final MethodCaller TOUCH_SWITCH_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, int.class});
   private static final MethodCaller TOUCH_JUMP_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, boolean.class});
   private static final MethodCaller TOUCH_METHOD = new MethodCaller("touch", new Class[] {int.class});
@@ -301,6 +302,20 @@ public class ProjectData implements CoverageData, Serializable {
           ErrorReporter.reportError("Error in class data loading: " + className, e);
           return lines;
       }
+  }
+
+  public static int[] getLineMask(String className) {
+    if (ourProjectData != null) {
+      return ourProjectData.getClassData(className).getLineMask();
+    }
+    try {
+      final Object projectDataObject = getProjectDataObject();
+      Object classData = GET_CLASS_DATA_METHOD.invoke(projectDataObject, new Object[]{className});
+      return (int[]) touch(GET_LINE_MASK_METHOD, classData, new Object[0]);
+    } catch (Exception e) {
+      ErrorReporter.reportError("Error in class data loading: " + className, e);
+      return null;
+    }
   }
 
   public static Object loadClassData(String className) {
