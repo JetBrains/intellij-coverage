@@ -16,7 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.kotlin;
 
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinCoroutinesEnumeratingFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinWhenMappingExceptionFilter;
@@ -35,7 +35,7 @@ import java.util.List;
 public class KotlinUtils {
   private static final String KOTLIN_CLASS_LABEL = "IS_KOTLIN";
 
-  public static boolean isKotlinClass(Instrumenter context) {
+  public static boolean isKotlinClass(MethodFilteringVisitor context) {
     Object currentProperty = context.getProperty(KOTLIN_CLASS_LABEL);
     if (currentProperty instanceof Boolean) return (Boolean) currentProperty;
     boolean isKotlin = context.getAnnotations().contains("Lkotlin/Metadata;");
