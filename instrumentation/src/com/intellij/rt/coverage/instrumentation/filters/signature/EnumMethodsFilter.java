@@ -17,13 +17,15 @@
 package com.intellij.rt.coverage.instrumentation.filters.signature;
 
 import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
-import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
-public class KotlinSyntheticAccessMethodFilter implements MethodSignatureFilter {
+public class EnumMethodsFilter implements MethodSignatureFilter {
   public boolean shouldFilter(int access, String name, String desc, String signature, String[] exceptions, MethodFilteringVisitor context) {
-    return (access & Opcodes.ACC_SYNTHETIC) != 0
-        && KotlinUtils.isKotlinClass(context)
-        && name.startsWith("access$");
+    return context.isEnum() && isDefaultEnumMethod(name, desc, signature, context.getClassName());
+  }
+
+  private static boolean isDefaultEnumMethod(String name, String desc, String signature, String className) {
+    return name.equals("values") && desc.equals("()[L" + className + ";") ||
+        name.equals("valueOf") && desc.equals("(Ljava/lang/String;)L" + className + ";") ||
+        name.equals("<init>") && signature != null && signature.equals("()V");
   }
 }

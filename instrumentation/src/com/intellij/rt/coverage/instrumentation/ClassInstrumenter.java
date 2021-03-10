@@ -16,7 +16,6 @@
 
 package com.intellij.rt.coverage.instrumentation;
 
-import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
@@ -51,10 +50,6 @@ public class ClassInstrumenter extends Instrumenter {
 
   protected void initLineData() {
     myClassData.setLines(LinesUtil.calcLineArray(myMaxLineNumber, myLines));
-  }
-
-  public LineData getLineData(int line) {
-    return myLines.get(line);
   }
 
   private static List<LineEnumeratorFilter> createLineEnumeratorFilters() {
