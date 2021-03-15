@@ -97,7 +97,7 @@ public class KotlinDefaultArgsBranchFilter extends LineEnumeratorFilter {
     super.visitJumpInsn(opcode, label);
     if (opcode == Opcodes.IFEQ && myIgnoreNextIf) {
       if (myAndVisited) {
-        myContext.removeLastJump();
+        myContext.getBranchData().removeLastJump();
       }
       myIgnoreNextIf = false;
       myAndVisited = false;

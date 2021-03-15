@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
 import com.intellij.rt.coverage.util.LinesUtil;
@@ -30,7 +31,8 @@ public class ClassInstrumenter extends Instrumenter {
 
   protected MethodVisitor createMethodLineEnumerator(MethodVisitor mv, String name, String desc, int access, String signature,
                                                      String[] exceptions) {
-    final LineEnumerator enumerator = new LineEnumerator(this, mv, access, name, desc, signature, exceptions);
+    BranchDataContainer branchData = new BranchDataContainer(this);
+    final LineEnumerator enumerator = new LineEnumerator(this, branchData, mv, access, name, desc, signature, exceptions);
     return chainFilters(name, desc, access, signature, exceptions, enumerator);
   }
 

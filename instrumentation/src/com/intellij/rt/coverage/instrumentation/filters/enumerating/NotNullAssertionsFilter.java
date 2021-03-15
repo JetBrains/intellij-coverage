@@ -55,8 +55,8 @@ public class NotNullAssertionsFilter extends LineEnumeratorFilter {
     if (!myContext.hasExecutableLines()) return;
     if (myState == ASSERTIONS_DISABLED_STATE && opcode == Opcodes.IFNE) {
       myState = SEEN_NOTHING;
-      if (myContext.getJump(label) != null) {
-        myContext.removeLastJump();
+      if (myContext.getBranchData().getJump(label) != null) {
+        myContext.getBranchData().removeLastJump();
       }
     }
     if (myState == DUP_SEEN && opcode == Opcodes.IFNONNULL) {
@@ -99,7 +99,7 @@ public class NotNullAssertionsFilter extends LineEnumeratorFilter {
         opcode == Opcodes.INVOKESTATIC &&
         name.startsWith("$$$reportNull$$$") &&
         ClassNameUtil.convertToFQName(owner).equals(myContext.getClassName())) {
-      myContext.removeLastJump();
+      myContext.getBranchData().removeLastJump();
     }
     myState = SEEN_NOTHING;
   }
