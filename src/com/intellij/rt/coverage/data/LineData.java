@@ -25,6 +25,7 @@ public class LineData implements CoverageData {
   private final int myLineNumber;
   private String myMethodSignature;
 
+  private int myId = -1;
   private int myHits = 0;
 
   private byte myStatus = -1;
@@ -243,7 +244,7 @@ public class LineData implements CoverageData {
     }
 
     return new BranchData(total, covered);
-  } 
+  }
 
   public void setHits(final int hits) {
     myHits = hits;
@@ -272,5 +273,13 @@ public class LineData implements CoverageData {
   public void fillArrays() {
     if (myJumpsAndSwitches == null) return;
     getOrCreateJumpsAndSwitches().fillArrays();
+  }
+
+  public int getId() {
+    return myId;
+  }
+
+  public void setId(int id) {
+    myId = id;
   }
 }

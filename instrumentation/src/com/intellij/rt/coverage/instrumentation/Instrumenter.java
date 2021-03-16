@@ -86,7 +86,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
 
   protected abstract void initLineData();
 
-  protected void getOrCreateLineData(int line, String name, String desc) {
+  protected LineData getOrCreateLineData(int line, String name, String desc) {
     //create lines again if class was loaded again by another class loader; may be myLinesArray should be cleared
     if (myLines == null) myLines = new TIntObjectHashMap<LineData>();
     LineData lineData = myLines.get(line);
@@ -95,6 +95,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
       myLines.put(line, lineData);
     }
     if (line > myMaxLineNumber) myMaxLineNumber = line;
+    return lineData;
   }
 
   public void visitSource(String source, String debug) {

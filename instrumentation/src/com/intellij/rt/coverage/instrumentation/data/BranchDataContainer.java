@@ -16,16 +16,21 @@
 
 package com.intellij.rt.coverage.instrumentation.data;
 
+import com.intellij.rt.coverage.data.JumpData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.SwitchData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BranchDataContainer {
   private final Instrumenter myContext;
+
+  private int myNextId = 0;
 
   private Label myLastFalseJump;
   private Label myLastTrueJump;
@@ -37,6 +42,10 @@ public class BranchDataContainer {
 
   public BranchDataContainer(Instrumenter context) {
     myContext = context;
+  }
+
+  public int getSize() {
+    return myNextId;
   }
 
   public void resetMethod() {
@@ -57,11 +66,19 @@ public class BranchDataContainer {
     return mySwitches.get(label);
   }
 
+  public void addLine(LineData lineData) {
+    int id = lineData.getId();
+    if (id == -1) {
+      id = myNextId++;
+      lineData.setId(id);
+    }
+  }
+
   public void addJump(LineData lineData, int index, Label trueLabel, Label falseLabel) {
     int line = lineData.getLineNumber();
     // jump type is inverted as jump occurs if value is true
-    Jump trueJump = new Jump(index, line, false);
-    Jump falseJump = new Jump(index, line, true);
+    Jump trueJump = new Jump(myNextId++, index, line, false);
+    Jump falseJump = new Jump(myNextId++, index, line, true);
     myLastTrueJump = trueLabel;
     myLastFalseJump = falseLabel;
 
@@ -69,17 +86,21 @@ public class BranchDataContainer {
     myJumps.put(falseLabel, falseJump);
     myJumps.put(trueLabel, trueJump);
 
-    lineData.addJump(index);
+    JumpData jumpData = lineData.addJump(index);
+    jumpData.setId(trueJump.getId(), trueJump.getType());
+    jumpData.setId(falseJump.getId(), falseJump.getType());
   }
 
   public void addLookupSwitch(LineData lineData, int index, Label dflt, int[] keys, Label[] labels) {
-    rememberSwitchLabels(lineData.getLineNumber(), dflt, labels, index);
-    lineData.addSwitch(index, keys);
+    List<Switch> switches = rememberSwitchLabels(lineData.getLineNumber(), dflt, labels, index);
+    SwitchData switchData = lineData.addSwitch(index, keys);
+    setSwitchIds(switchData, switches);
   }
 
   public void addTableSwitch(LineData lineData, int index, int min, int max, Label dflt, Label[] labels, Label originalDefault) {
-    rememberSwitchLabels(lineData.getLineNumber(), dflt, labels, index);
+    List<Switch> switches = rememberSwitchLabels(lineData.getLineNumber(), dflt, labels, index);
     SwitchData switchData = lineData.addSwitch(index, min, max);
+    setSwitchIds(switchData, switches);
     if (myDefaultTableSwitchLabels == null) myDefaultTableSwitchLabels = new HashMap<Label, SwitchData>();
     myDefaultTableSwitchLabels.put(originalDefault, switchData);
   }
@@ -113,11 +134,26 @@ public class BranchDataContainer {
     return myDefaultTableSwitchLabels;
   }
 
-  private void rememberSwitchLabels(final int line, final Label dflt, final Label[] labels, int switchIndex) {
+  private List<Switch> rememberSwitchLabels(final int line, final Label dflt, final Label[] labels, int switchIndex) {
+    List<Switch> result = new ArrayList<Switch>();
     if (mySwitches == null) mySwitches = new HashMap<Label, Switch>();
-    mySwitches.put(dflt, new Switch(switchIndex, line, -1));
+
+    Switch aSwitch = new Switch(myNextId++, switchIndex, line, -1);
+    result.add(aSwitch);
+    mySwitches.put(dflt, aSwitch);
+
     for (int i = labels.length - 1; i >= 0; i--) {
-      mySwitches.put(labels[i], new Switch(switchIndex, line, i));
+      aSwitch = new Switch(myNextId++, switchIndex, line, i);
+      result.add(aSwitch);
+      mySwitches.put(labels[i], aSwitch);
+    }
+
+    return result;
+  }
+
+  private void setSwitchIds(SwitchData data, List<Switch> switches) {
+    for (Switch aSwitch : switches) {
+      data.setId(aSwitch.getId(), aSwitch.getKey());
     }
   }
 }

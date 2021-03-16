@@ -17,14 +17,20 @@
 package com.intellij.rt.coverage.instrumentation.data;
 
 public class Switch {
+  private final int myId;
   private final int myIndex;
   private final int myLine;
   private final int myKey;
 
-  public Switch(int index, int line, int key) {
+  public Switch(int id, int index, int line, int key) {
+    myId = id;
     myIndex = index;
     myLine = line;
     myKey = key;
+  }
+
+  public int getId() {
+    return myId;
   }
 
   public int getIndex() {

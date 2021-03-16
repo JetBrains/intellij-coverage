@@ -28,6 +28,9 @@ public class SwitchData implements CoverageData {
   private int myDefaultHits;
   private int[] myHits;
 
+  private int myDefaultId = -1;
+  private int[] myIds;
+
   public SwitchData(final int[] keys) {
 
     myKeys = keys;
@@ -88,5 +91,24 @@ public class SwitchData implements CoverageData {
 
   public int[] getKeys() {
     return myKeys;
+  }
+
+  public int getId(int index) {
+    if (index == -1) return myDefaultId;
+    if (myIds == null) return 0;
+    if (index < 0 || index >= myIds.length) return 0;
+    return myIds[index];
+  }
+
+  public void setId(int id, int index) {
+    if (index == -1) {
+      myDefaultId = id;
+      return;
+    }
+    if (myIds == null) {
+      myIds = new int[myKeys.length];
+    }
+    if (index < 0 || index >= myIds.length) return;
+    myIds[index] = id;
   }
 }

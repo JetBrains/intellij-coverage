@@ -67,7 +67,8 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     super.visitLineNumber(line, start);
     myCurrentLine = line;
     myHasExecutableLines = true;
-    myInstrumenter.getOrCreateLineData(myCurrentLine, myMethodName, myDescriptor);
+    LineData lineData = myInstrumenter.getOrCreateLineData(myCurrentLine, myMethodName, myDescriptor);
+    myBranchData.addLine(lineData);
   }
 
   public void visitJumpInsn(final int opcode, final Label label) {

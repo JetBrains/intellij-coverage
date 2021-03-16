@@ -17,14 +17,20 @@
 package com.intellij.rt.coverage.instrumentation.data;
 
 public class Jump {
+  private final int myId;
   private final int myIndex;
   private final int myLine;
   private final boolean myType;
 
-  public Jump(int index, int line, boolean type) {
+  public Jump(int id, int index, int line, boolean type) {
+    myId = id;
     myIndex = index;
     myLine = line;
     myType = type;
+  }
+
+  public int getId() {
+    return myId;
   }
 
   public int getIndex() {
