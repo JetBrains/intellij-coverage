@@ -24,17 +24,21 @@ import com.intellij.rt.coverage.util.LinesUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 
-public class ClassInstrumenter extends Instrumenter {
-  public ClassInstrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
+public abstract class AbstractTracingInstrumenter extends Instrumenter {
+  protected final BranchDataContainer myBranchData = new BranchDataContainer(this);
+
+  public AbstractTracingInstrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
     super(projectData, classVisitor, className, shouldCalculateSource);
   }
 
   protected MethodVisitor createMethodLineEnumerator(MethodVisitor mv, String name, String desc, int access, String signature,
                                                      String[] exceptions) {
-    BranchDataContainer branchData = new BranchDataContainer(this);
-    final LineEnumerator enumerator = new LineEnumerator(this, branchData, mv, access, name, desc, signature, exceptions);
+    myBranchData.resetMethod();
+    final LineEnumerator enumerator = new LineEnumerator(this, myBranchData, mv, access, name, desc, signature, exceptions);
     return chainFilters(name, desc, access, signature, exceptions, enumerator);
   }
+
+  public abstract MethodVisitor createTouchCounter(MethodVisitor methodVisitor, BranchDataContainer branchData, int access, String name, String desc, String className);
 
   private MethodVisitor chainFilters(String name, String desc, int access, String signature, String[] exceptions,
                                      LineEnumerator enumerator) {

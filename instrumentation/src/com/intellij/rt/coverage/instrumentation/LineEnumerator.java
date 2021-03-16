@@ -24,7 +24,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import org.jetbrains.coverage.org.objectweb.asm.tree.MethodNode;
 
 public class LineEnumerator extends MethodVisitor implements Opcodes {
-  private final Instrumenter myInstrumenter;
+  private final AbstractTracingInstrumenter myInstrumenter;
   private final int myAccess;
   private final String myMethodName;
   private final String myDescriptor;
@@ -37,7 +37,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   private final MethodVisitor myWriterMethodVisitor;
   private final BranchDataContainer myBranchData;
 
-  public LineEnumerator(Instrumenter instrumenter,
+  public LineEnumerator(AbstractTracingInstrumenter instrumenter,
                         BranchDataContainer branchData,
                         final MethodVisitor mv,
                         final int access,
@@ -58,7 +58,9 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
 
   public void visitEnd() {
     super.visitEnd();
-    myMethodNode.accept(!myHasExecutableLines ? myWriterMethodVisitor : new TouchCounter(myWriterMethodVisitor, myBranchData, myAccess, myDescriptor, getClassName()));
+    myMethodNode.accept(!myHasExecutableLines
+        ? myWriterMethodVisitor
+        : myInstrumenter.createTouchCounter(myWriterMethodVisitor, myBranchData, myAccess, myMethodName, myDescriptor, getClassName()));
   }
 
   public void visitLineNumber(int line, Label start) {
