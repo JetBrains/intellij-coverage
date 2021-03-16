@@ -109,10 +109,10 @@ public class CoverageDiff {
 
     compareWithEmptyDefault(beforeLine.getSwitches(), afterLine.getSwitches(), new SwitchData[0], className, mySwitchesDiff, new CompareCallback<SwitchData>() {
       public void apply(SwitchData beforeSwitch, SwitchData afterSwitch) {
-        boolean same = (beforeSwitch.getDefaultHits() > 0) != (afterSwitch.getDefaultHits() > 0);
+        boolean same = (beforeSwitch.getDefaultHits() > 0) == (afterSwitch.getDefaultHits() > 0);
         same &= beforeSwitch.getHits().length == afterSwitch.getHits().length;
         for (int i = 0; i < Math.min(beforeSwitch.getHits().length, afterSwitch.getHits().length); i++) {
-          same &= (beforeSwitch.getHits()[i] > 0) != (afterSwitch.getHits()[i] > 0);
+          same &= (beforeSwitch.getHits()[i] > 0) == (afterSwitch.getHits()[i] > 0);
         }
         if (same) return;
         mySwitchesDiff.add(new ReplaceDiffElement<SwitchData>(className, beforeSwitch, afterSwitch));
