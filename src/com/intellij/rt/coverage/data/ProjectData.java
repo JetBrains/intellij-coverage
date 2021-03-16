@@ -139,6 +139,13 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
 
+  public void applyBranchData() {
+    if (mySampling) return;
+    for (ClassData data : myClasses.myClasses.values()) {
+      data.applyBranches();
+    }
+  }
+
   public void addLineMaps(String className, FileMapData[] fileDatas) {
     if (myLinesMap == null) {
       myLinesMap = new HashMap<String, FileMapData[]>();

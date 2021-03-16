@@ -306,13 +306,46 @@ public class ClassData implements CoverageData {
   public String getSource() {
     return mySource;
   }
-    
+
   public int[] touchLines(int[] lines) { //todo
-      myLineMask = lines;
-      return lines;
+    myLineMask = lines;
+    return lines;
   }
 
   public int[] getLineMask() {
     return myLineMask;
+  }
+
+  public void applyBranches() {
+    if (myLineMask == null) return;
+    for (LineData lineData : myLinesArray) {
+      if (lineData == null) continue;
+      lineData.setHits(myLineMask[lineData.getId()]);
+
+      JumpData[] jumps = lineData.getJumps();
+      if (jumps != null) {
+        for (JumpData jumpData : jumps) {
+          if (jumpData == null) continue;
+          jumpData.setTrueHits(myLineMask[jumpData.getId(true)]);
+          jumpData.setFalseHits(myLineMask[jumpData.getId(false)]);
+        }
+      }
+
+      SwitchData[] switches = lineData.getSwitches();
+      if (switches != null) {
+        for (SwitchData switchData : switches) {
+          if (switchData == null) continue;
+          switchData.setDefaultHits(switchData.getDefaultHits() + myLineMask[switchData.getId(-1)]);
+          int[] keys = switchData.getKeys();
+          int[] hits = new int[keys.length];
+
+          for (int i = 0; i < hits.length; i++) {
+            hits[i] = myLineMask[switchData.getId(i)];
+          }
+          switchData.setKeysAndHits(keys, hits);
+        }
+      }
+    }
+    myLineMask = null;
   }
 }

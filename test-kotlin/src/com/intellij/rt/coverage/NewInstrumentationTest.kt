@@ -23,9 +23,14 @@ import org.junit.Test
 class NewInstrumentationTest {
 
     @Test
-    fun testNewSamplingCoverageJoda() {
+    fun testNewSamplingCoverageJoda() = testCoverageJoda(Coverage.SAMPLING, Coverage.NEW_SAMPLING)
+
+    @Test
+    fun testNewTracingCoverageJoda() = testCoverageJoda(Coverage.TRACING, Coverage.NEW_TRACING)
+
+    private fun testCoverageJoda(before: Coverage, after: Coverage) {
         val patterns = "org\\.joda\\.time.* -exclude org\\.joda\\.time\\.convert.ConverterSet" // exclude non deterministic class from coverage
-        assertEqualCoverage(Coverage.SAMPLING, Coverage.NEW_SAMPLING, "newInstrumentation.joda", patterns)
+        assertEqualCoverage(before, after, "newInstrumentation.joda", patterns)
     }
 
     private fun assertEqualCoverage(before: Coverage, after: Coverage, testName: String, patterns: String) {

@@ -51,7 +51,10 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
         return new SamplingInstrumenter(data, cw, className, shouldCalculateSource);
       }
     } else {
-      return new ClassInstrumenter(data, cw, className, shouldCalculateSource);
+      if (System.getProperty("idea.new.tracing.coverage") != null) {
+        return new NewTracingInstrumenter(data, cw, cr, className, shouldCalculateSource);
+      }
+      return new TracingInstrumenter(data, cw, className, shouldCalculateSource);
     }
   }
 
