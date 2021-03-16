@@ -55,16 +55,7 @@ public class NewSamplingInstrumenter extends Instrumenter {
                 mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
                 InstrumentationUtils.pushInt(mv, line);
 
-                mv.visitInsn(Opcodes.DUP2);
-                //load array[index]
-                mv.visitInsn(Opcodes.IALOAD);
-
-                //increment
-                mv.visitInsn(Opcodes.ICONST_1);
-                mv.visitInsn(Opcodes.IADD);
-
-                //stack: array, index, incremented value: store value in array[index]
-                mv.visitInsn(Opcodes.IASTORE);
+                InstrumentationUtils.incrementIntArrayByIndex(mv);
                 super.visitLineNumber(line, start);
             }
 

@@ -27,4 +27,22 @@ public class InstrumentationUtils {
       mv.visitLdcInsn(value);
     }
   }
+
+  /**
+   * Util method for int array instrumentation.
+   * Stack must be: array, index.
+   * Generates code <code>array[index]++</code>.
+   */
+  public static void incrementIntArrayByIndex(MethodVisitor mv) {
+    mv.visitInsn(Opcodes.DUP2);
+    //load array[index]
+    mv.visitInsn(Opcodes.IALOAD);
+
+    //increment
+    mv.visitInsn(Opcodes.ICONST_1);
+    mv.visitInsn(Opcodes.IADD);
+
+    //stack: array, index, incremented value: store value in array[index]
+    mv.visitInsn(Opcodes.IASTORE);
+  }
 }
