@@ -95,4 +95,7 @@ class KotlinCoverageStatusTracingTest : KotlinCoverageStatusAbstractTracingTest(
 
 class KotlinCoverageStatusNewTracingTest : KotlinCoverageStatusAbstractTracingTest() {
     override val coverage = Coverage.NEW_TRACING
+
+    @Test
+    fun testInterfaceWithClinit() = test("newInstrumentation.interfaceWithClinit", "Foo")
 }

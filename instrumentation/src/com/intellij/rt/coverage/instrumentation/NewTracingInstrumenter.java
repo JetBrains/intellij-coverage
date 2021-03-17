@@ -42,10 +42,12 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
   @Override
   public MethodVisitor createTouchCounter(final MethodVisitor mv,
                                           final BranchDataContainer branchData,
+                                          final LineEnumerator enumerator,
                                           final int access,
                                           final String name,
                                           final String desc,
                                           final String className) {
+    if (!enumerator.hasExecutableLines()) return myExtraFieldInstrumenter.createMethodVisitor(this, mv, mv, name);
     final MethodVisitor visitor = new LocalVariableInserter(mv, access, desc, BRANCH_HITS_LOCAL_VARIABLE_NAME, BRANCH_HITS_FIELD_TYPE) {
       public void visitLineNumber(final int line, final Label start) {
         LineData lineData = getLineData(line);

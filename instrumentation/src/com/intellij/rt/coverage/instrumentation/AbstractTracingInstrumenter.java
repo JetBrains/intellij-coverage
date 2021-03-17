@@ -38,7 +38,7 @@ public abstract class AbstractTracingInstrumenter extends Instrumenter {
     return chainFilters(name, desc, access, signature, exceptions, enumerator);
   }
 
-  public abstract MethodVisitor createTouchCounter(MethodVisitor methodVisitor, BranchDataContainer branchData, int access, String name, String desc, String className);
+  public abstract MethodVisitor createTouchCounter(MethodVisitor methodVisitor, BranchDataContainer branchData, LineEnumerator enumerator, int access, String name, String desc, String className);
 
   private MethodVisitor chainFilters(String name, String desc, int access, String signature, String[] exceptions,
                                      LineEnumerator enumerator) {

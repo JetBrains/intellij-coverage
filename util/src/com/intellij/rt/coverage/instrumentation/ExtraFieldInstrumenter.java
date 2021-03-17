@@ -96,12 +96,11 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
     if (myFieldInitMethodName.equals(name)) return mv;
     if (CLASS_INIT.equals(name)) {
       if (myInterface && (myJava8AndAbove || myShouldCoverClinit)) {
+        mySeenClinit = true;
         newMv = new MethodVisitor(Opcodes.API_VERSION, newMv) {
           @Override
           public void visitCode() {
-            cv.visitField(INTERFACE_FIELD_ACCESS, myFieldName, myFieldType, null, null);
             initField(mv);
-            mySeenClinit = true;
             super.visitCode();
           }
         };
@@ -111,12 +110,12 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
       }
     }
 
+    if (myInterface) return newMv;
+
     return new MethodVisitor(Opcodes.API_VERSION, newMv) {
       @Override
       public void visitCode() {
-        if (!myInterface) {
-          mv.visitMethodInsn(Opcodes.INVOKESTATIC, myInternalClassName, myFieldInitMethodName, "()V", false);
-        }
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, myInternalClassName, myFieldInitMethodName, "()V", false);
         super.visitCode();
       }
     };
@@ -132,6 +131,8 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
    * Generate field with {@link ExtraFieldInstrumenter#myFieldType} array
    */
   public void generateMembers(ClassVisitor cv) {
+    cv.visitField(myInterface ? INTERFACE_FIELD_ACCESS : CLASS_FIELD_ACCESS,
+        myFieldName, myFieldType, null, null);
     if (myInterface) {
       if (mySeenClinit) {
         //already added in <clinit>, e.g. if interface has constant
@@ -147,9 +148,6 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
         return;
       }
     }
-
-    cv.visitField(myInterface ? INTERFACE_FIELD_ACCESS : CLASS_FIELD_ACCESS,
-        myFieldName, myFieldType, null, null);
 
     if (!myInterface) {
       createInitFieldMethod(cv);

@@ -26,7 +26,8 @@ public class TracingInstrumenter extends AbstractTracingInstrumenter {
     super(projectData, classVisitor, className, shouldCalculateSource);
   }
 
-  public MethodVisitor createTouchCounter(MethodVisitor methodVisitor, BranchDataContainer branchData, int access, String name, String desc, String className) {
+  public MethodVisitor createTouchCounter(MethodVisitor methodVisitor, BranchDataContainer branchData, LineEnumerator enumerator, int access, String name, String desc, String className) {
+    if (!enumerator.hasExecutableLines()) return methodVisitor;
     return new TouchCounter(methodVisitor, branchData, access, desc, className);
   }
 }
