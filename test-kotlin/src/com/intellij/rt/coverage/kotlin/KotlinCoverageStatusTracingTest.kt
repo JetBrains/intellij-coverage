@@ -89,4 +89,8 @@ class KotlinCoverageStatusTracingTest : KotlinCoverageStatusTest() {
 
     @Test
     fun test_IDEA_259332() = test("fixes.IDEA_259332", "SwitchWithFallthrough", fileName = "SwitchWithFallthrough.java")
+
+    @Test
+    @Ignore("To be fixed")
+    fun test_IDEA_264534() = test("fixes.IDEA_264534")
 }
