@@ -320,14 +320,23 @@ public class ClassData implements CoverageData {
     if (myLineMask == null) return;
     for (LineData lineData : myLinesArray) {
       if (lineData == null) continue;
-      lineData.setHits(myLineMask[lineData.getId()]);
+      int lineId = lineData.getId();
+      if (lineId != -1) {
+        lineData.setHits(myLineMask[lineId]);
+      }
 
       JumpData[] jumps = lineData.getJumps();
       if (jumps != null) {
         for (JumpData jumpData : jumps) {
           if (jumpData == null) continue;
-          jumpData.setTrueHits(myLineMask[jumpData.getId(true)]);
-          jumpData.setFalseHits(myLineMask[jumpData.getId(false)]);
+          int trueId = jumpData.getId(true);
+          if (trueId != -1) {
+            jumpData.setTrueHits(myLineMask[trueId]);
+          }
+          int falseId = jumpData.getId(false);
+          if (falseId != -1) {
+            jumpData.setFalseHits(myLineMask[falseId]);
+          }
         }
       }
 
@@ -335,12 +344,17 @@ public class ClassData implements CoverageData {
       if (switches != null) {
         for (SwitchData switchData : switches) {
           if (switchData == null) continue;
-          switchData.setDefaultHits(switchData.getDefaultHits() + myLineMask[switchData.getId(-1)]);
+          int defaultId = switchData.getId(-1);
+          if (defaultId != -1) {
+            switchData.setDefaultHits(switchData.getDefaultHits() + myLineMask[defaultId]);
+          }
           int[] keys = switchData.getKeys();
-          int[] hits = new int[keys.length];
+          int[] hits = switchData.getHits();
 
           for (int i = 0; i < hits.length; i++) {
-            hits[i] = myLineMask[switchData.getId(i)];
+            int caseId = switchData.getId(i);
+            if (caseId == -1) continue;
+            hits[i] = myLineMask[caseId];
           }
           switchData.setKeysAndHits(keys, hits);
         }
