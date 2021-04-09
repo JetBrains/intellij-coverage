@@ -96,11 +96,11 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
     if (myFieldInitMethodName.equals(name)) return mv;
     if (CLASS_INIT.equals(name)) {
       if (myInterface && (myJava8AndAbove || myShouldCoverClinit)) {
-        mySeenClinit = true;
         newMv = new MethodVisitor(Opcodes.API_VERSION, newMv) {
           @Override
           public void visitCode() {
             initField(mv);
+            mySeenClinit = true;
             super.visitCode();
           }
         };
@@ -131,31 +131,29 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
    * Generate field with {@link ExtraFieldInstrumenter#myFieldType} array
    */
   public void generateMembers(ClassVisitor cv) {
-    cv.visitField(myInterface ? INTERFACE_FIELD_ACCESS : CLASS_FIELD_ACCESS,
-        myFieldName, myFieldType, null, null);
     if (myInterface) {
+      if (!myJava8AndAbove && !mySeenClinit) {
+        //only java 8+ may contain non-abstract methods in interfaces
+        //no need to instrument otherwise
+        return;
+      }
+      cv.visitField(INTERFACE_FIELD_ACCESS, myFieldName, myFieldType, null, null);
+
       if (mySeenClinit) {
-        //already added in <clinit>, e.g. if interface has constant
+        //field init is already added in <clinit>, e.g. if interface has constant
         //interface I {
         //  I DEFAULT = new I ();
         //}
         return;
       }
 
-      if (!myJava8AndAbove) {
-        //only java 8+ may contain non-abstract methods in interfaces
-        //no need to instrument otherwise
-        return;
-      }
-    }
-
-    if (!myInterface) {
-      createInitFieldMethod(cv);
-    } else {
       //interface has no clinit method
       //java 11 verifies that constants are initialized in clinit
       //let's generate it!
       generateExplicitClinitForInterfaces(cv);
+    } else {
+      cv.visitField(CLASS_FIELD_ACCESS, myFieldName, myFieldType, null, null);
+      createInitFieldMethod(cv);
     }
   }
 
@@ -202,5 +200,9 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
 
   protected String getFieldClassName() {
     return myInternalClassName;
+  }
+
+  public boolean isInterface() {
+    return myInterface;
   }
 }
