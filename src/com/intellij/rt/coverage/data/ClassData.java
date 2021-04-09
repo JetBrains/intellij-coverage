@@ -318,47 +318,51 @@ public class ClassData implements CoverageData {
 
   public void applyBranches() {
     if (myLineMask == null) return;
-    for (LineData lineData : myLinesArray) {
-      if (lineData == null) continue;
-      int lineId = lineData.getId();
-      if (lineId != -1) {
-        lineData.setHits(myLineMask[lineId]);
-      }
+    try {
+      for (LineData lineData : myLinesArray) {
+        if (lineData == null) continue;
+        int lineId = lineData.getId();
+        if (lineId != -1) {
+          lineData.setHits(myLineMask[lineId]);
+        }
 
-      JumpData[] jumps = lineData.getJumps();
-      if (jumps != null) {
-        for (JumpData jumpData : jumps) {
-          if (jumpData == null) continue;
-          int trueId = jumpData.getId(true);
-          if (trueId != -1) {
-            jumpData.setTrueHits(myLineMask[trueId]);
+        JumpData[] jumps = lineData.getJumps();
+        if (jumps != null) {
+          for (JumpData jumpData : jumps) {
+            if (jumpData == null) continue;
+            int trueId = jumpData.getId(true);
+            if (trueId != -1) {
+              jumpData.setTrueHits(myLineMask[trueId]);
+            }
+            int falseId = jumpData.getId(false);
+            if (falseId != -1) {
+              jumpData.setFalseHits(myLineMask[falseId]);
+            }
           }
-          int falseId = jumpData.getId(false);
-          if (falseId != -1) {
-            jumpData.setFalseHits(myLineMask[falseId]);
+        }
+
+        SwitchData[] switches = lineData.getSwitches();
+        if (switches != null) {
+          for (SwitchData switchData : switches) {
+            if (switchData == null) continue;
+            int defaultId = switchData.getId(-1);
+            if (defaultId != -1) {
+              switchData.setDefaultHits(switchData.getDefaultHits() + myLineMask[defaultId]);
+            }
+            int[] keys = switchData.getKeys();
+            int[] hits = switchData.getHits();
+
+            for (int i = 0; i < hits.length; i++) {
+              int caseId = switchData.getId(i);
+              if (caseId == -1) continue;
+              hits[i] = myLineMask[caseId];
+            }
+            switchData.setKeysAndHits(keys, hits);
           }
         }
       }
-
-      SwitchData[] switches = lineData.getSwitches();
-      if (switches != null) {
-        for (SwitchData switchData : switches) {
-          if (switchData == null) continue;
-          int defaultId = switchData.getId(-1);
-          if (defaultId != -1) {
-            switchData.setDefaultHits(switchData.getDefaultHits() + myLineMask[defaultId]);
-          }
-          int[] keys = switchData.getKeys();
-          int[] hits = switchData.getHits();
-
-          for (int i = 0; i < hits.length; i++) {
-            int caseId = switchData.getId(i);
-            if (caseId == -1) continue;
-            hits[i] = myLineMask[caseId];
-          }
-          switchData.setKeysAndHits(keys, hits);
-        }
-      }
+    } catch (Throwable e) {
+      ErrorReporter.reportError("Unexpected error during applying branch data to class " + getName(), e);
     }
     myLineMask = null;
   }
