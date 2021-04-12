@@ -35,9 +35,18 @@ object UnusedObject { // should be ignored
     }                 // coverage: NONE
 }
 
+class SimpleClassWithDefaultConstructor {
+    companion object {
+        fun staticFoo() {
+            println()   // coverage: FULL
+        }
+    }
+}
+
 object Test {
     @JvmStatic
     fun main(args: Array<String>) {
         Util.foo1()
+        SimpleClassWithDefaultConstructor.staticFoo()
     }
 }

@@ -26,6 +26,7 @@ import java.util.List;
 public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
   private static final String CONSTRUCTOR = "<init>";
   private static final String CONSTRUCTOR_DESCRIPTOR = "()V";
+  private static final String KOTLIN_OBJECT_CONSTRUCTOR_DESCRIPTOR = "(Lkotlin/jvm/internal/DefaultConstructorMarker;)V";
 
   private boolean myAllMethodsStatic = true;
   private boolean myIsKotlinObject = false;
@@ -46,6 +47,7 @@ public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
     super.visit(version, access, name, signature, superName, interfaces);
     myName = name;
     mySuperName = superName;
+    myIsKotlinObject |= name != null && name.endsWith("$Companion");
   }
 
   @Override
@@ -59,7 +61,8 @@ public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
   @Override
   public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
     MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
-    if (isPrivateDefaultConstructor(access, name, descriptor)) {
+    if (isPrivateDefaultConstructor(access, name, descriptor)
+        || isKotlinObjectSyntheticConstructor(access, name, descriptor)) {
       return new EmptyConstructorVisitor(mv);
     }
     myAllMethodsStatic &= (access & Opcodes.ACC_STATIC) != 0;
@@ -113,7 +116,7 @@ public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
       super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
       if (myALoadVisited
           && opcode == Opcodes.INVOKESPECIAL
-          && owner != null && owner.equals(mySuperName)
+          && owner != null && (owner.equals(mySuperName) || owner.equals(myName))
           && CONSTRUCTOR.equals(name)
           && CONSTRUCTOR_DESCRIPTOR.equals(descriptor)) {
         myInvokeSpecialVisited = true;
@@ -194,6 +197,10 @@ public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
 
   private static boolean isPrivateDefaultConstructor(int access, String name, String descriptor) {
     return (access & Opcodes.ACC_PRIVATE) != 0 && CONSTRUCTOR.equals(name) && CONSTRUCTOR_DESCRIPTOR.equals(descriptor);
+  }
+
+  private static boolean isKotlinObjectSyntheticConstructor(int access, String name, String descriptor) {
+    return (access & (Opcodes.ACC_PUBLIC | Opcodes.ACC_SYNTHETIC)) != 0 && CONSTRUCTOR.equals(name) && KOTLIN_OBJECT_CONSTRUCTOR_DESCRIPTOR.equals(descriptor);
   }
 
   private void addLine(int line) {

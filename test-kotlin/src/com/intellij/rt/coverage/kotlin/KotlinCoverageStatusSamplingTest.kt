@@ -149,7 +149,7 @@ abstract class KotlinCoverageStatusAbstractSamplingTest : KotlinCoverageStatusTe
             fileName = "JavaTest.java", extraArgs = mutableListOf(IGNORE_UTIL_PRIVATE_CONSTRUCTOR_OPTION), calcUnloaded = true)
 
     @Test
-    fun testKotlinObject() = test("utilClass.kotlin", "Util", "UnusedObject",
+    fun testKotlinObject() = test("utilClass.kotlin", "Util", "UnusedObject", "SimpleClassWithDefaultConstructor\$Companion",
             extraArgs = mutableListOf(IGNORE_UTIL_PRIVATE_CONSTRUCTOR_OPTION), calcUnloaded = true)
 }
 
