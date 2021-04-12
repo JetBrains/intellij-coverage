@@ -18,6 +18,8 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
+import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
@@ -44,7 +46,26 @@ public class SourceLineCounter extends ClassVisitor {
   private boolean myEnum;
 
   public SourceLineCounter(final ClassData classData, final boolean excludeLines, final ProjectData projectData) {
-    super(Opcodes.API_VERSION, new ClassVisitor(Opcodes.API_VERSION) {});
+    this(classData, excludeLines, projectData, FilterUtils.ignorePrivateConstructorOfUtilClassEnabled());
+  }
+
+  public SourceLineCounter(final ClassData classData, final boolean excludeLines,
+                           final ProjectData projectData, final boolean ignorePrivateConstructorOfUtilClasses) {
+    super(Opcodes.API_VERSION);
+    ClassVisitor classVisitor = new ClassVisitor(Opcodes.API_VERSION) {};
+    if (ignorePrivateConstructorOfUtilClasses) {
+      classVisitor = new PrivateConstructorOfUtilClassFilter(classVisitor) {
+        @Override
+        protected void removeLine(int line) {
+          String methodSignature = myNSourceLines.remove(line);
+          if (methodSignature != null) {
+            myMethodsWithSourceCode.remove(methodSignature);
+          }
+        }
+      };
+    }
+    cv = classVisitor;
+
     myProjectData = projectData;
     myClassData = classData;
     myExcludeLines = excludeLines;
@@ -88,6 +109,7 @@ public class SourceLineCounter extends ClassVisitor {
 
 
       public void visitLineNumber(final int line, final Label start) {
+        super.visitLineNumber(line, start);
         myHasInstructions = false;
         myCurrentLine = line;
         if (!myExcludeLines ||
@@ -100,6 +122,7 @@ public class SourceLineCounter extends ClassVisitor {
       }
 
       public void visitInsn(final int opcode) {
+        super.visitInsn(opcode);
         if (myExcludeLines) {
           if (opcode == Opcodes.RETURN && !myHasInstructions) {
             myNSourceLines.remove(myCurrentLine);
@@ -145,33 +168,33 @@ public class SourceLineCounter extends ClassVisitor {
         myHasInstructions = true;
       }
 
-     
+
       public void visitIincInsn(final int var, final int increment) {
         super.visitIincInsn(var, increment);
         myHasInstructions = true;
       }
 
-     
+
       public void visitTableSwitchInsn(final int min, final int max, final Label dflt, final Label[] labels) {
         super.visitTableSwitchInsn(min, max, dflt, labels);
         myHasInstructions = true;
         myTotalBranches++;
       }
 
-     
+
       public void visitLookupSwitchInsn(final Label dflt, final int[] keys, final Label[] labels) {
         super.visitLookupSwitchInsn(dflt, keys, labels);
         myHasInstructions = true;
         myTotalBranches++;
       }
 
-     
+
       public void visitMultiANewArrayInsn(final String desc, final int dims) {
         super.visitMultiANewArrayInsn(desc, dims);
         myHasInstructions = true;
       }
 
-     
+
       public void visitTryCatchBlock(final Label start, final Label end, final Label handler, final String type) {
         super.visitTryCatchBlock(start, end, handler, type);
         myHasInstructions = true;
