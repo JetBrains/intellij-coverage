@@ -32,24 +32,14 @@ project(":instrumentation").afterEvaluate { instr ->
         artifact project(":test-discovery").jar
       }
     }
-  }
-}
-
-bintray {
-  user = System.getenv('BINTRAY_USER')
-  key = System.getenv('BINTRAY_KEY')
-
-  publish = true
-
-  pkg {
-    repo = 'intellij-third-party-dependencies'
-    name = 'intellij-coverage'
-    userOrg = 'jetbrains'
-
-    version {
-      name = project.version
+    repositories {
+      maven {
+        url "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies"
+        credentials {
+          username = System.getenv('INTELLIJ_DEPENDENCIES_BOT')
+          password = System.getenv('INTELLIJ_DEPENDENCIES_TOKEN')
+        }
+      }
     }
   }
-
-  publications = ['CoveragePublication', 'TestDiscoveryPublication']
 }
