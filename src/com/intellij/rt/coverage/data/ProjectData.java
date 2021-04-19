@@ -84,6 +84,10 @@ public class ProjectData implements CoverageData, Serializable {
     return mySampling;
   }
 
+  public int getClassesNumber() {
+    return myClasses.size();
+  }
+
   public static ProjectData createProjectData(final File dataFile,
                                               final ProjectData initialData,
                                               boolean traceLines,
@@ -403,6 +407,10 @@ public class ProjectData implements CoverageData, Serializable {
     private static final int DEFAULT_CAPACITY = 1000;
     private final IdentityClassData[] myIdentityArray = new IdentityClassData[POOL_SIZE];
     private final Map<String, ClassData> myClasses = createClassesMap();
+
+    public int size() {
+      return myClasses.size();
+    }
 
     public ClassData get(String name) {
       int idx = name.hashCode() & MASK;

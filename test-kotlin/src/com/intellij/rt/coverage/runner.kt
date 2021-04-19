@@ -28,17 +28,18 @@ enum class Coverage {
 }
 
 private const val TEST_PACKAGE = "kotlinTestData"
+internal const val IGNORE_UTIL_PRIVATE_CONSTRUCTOR_OPTION = "-Dcoverage.ignore.private.constructor.util.class=true"
 
 fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false,
-                    patterns: String = "$TEST_PACKAGE.*"): ProjectData {
+                    patterns: String = "$TEST_PACKAGE.*", extraArgs: MutableList<String> = mutableListOf()): ProjectData {
     val classPath = System.getProperty("java.class.path")
-    val extraArgs = when (coverage) {
-        Coverage.NEW_SAMPLING -> arrayOf("-Didea.new.sampling.coverage=true")
-        Coverage.NEW_TRACING -> arrayOf("-Didea.new.tracing.coverage=true")
-        else -> emptyArray()
+    when (coverage) {
+        Coverage.NEW_SAMPLING -> extraArgs.add("-Didea.new.sampling.coverage=true")
+        Coverage.NEW_TRACING -> extraArgs.add("-Didea.new.tracing.coverage=true")
     }
     val sampling = coverage == Coverage.SAMPLING || coverage == Coverage.NEW_SAMPLING
-    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, patterns, "kotlinTestData.$testName.Test", sampling, extraArgs, calcUnloaded)
+    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, patterns, "kotlinTestData.$testName.Test",
+            sampling, extraArgs.toTypedArray(), calcUnloaded)
 }
 
 internal fun assertEqualsLines(project: ProjectData, expectedLines: Map<Int, String>, classNames: List<String>) {

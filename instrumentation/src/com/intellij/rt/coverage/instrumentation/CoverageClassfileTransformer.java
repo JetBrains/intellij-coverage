@@ -17,6 +17,8 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
+import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
@@ -43,19 +45,26 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
 
   @Override
   protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
+    final Instrumenter instrumenter;
     if (data.isSampling()) {
       if (System.getProperty("idea.new.sampling.coverage") != null) {
         //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
-        return new NewSamplingInstrumenter(data, cw, cr, className, shouldCalculateSource);
+        instrumenter = new NewSamplingInstrumenter(data, cw, cr, className, shouldCalculateSource);
       } else {
-        return new SamplingInstrumenter(data, cw, className, shouldCalculateSource);
+        instrumenter = new SamplingInstrumenter(data, cw, className, shouldCalculateSource);
       }
     } else {
       if (System.getProperty("idea.new.tracing.coverage") != null) {
-        return new NewTracingInstrumenter(data, cw, cr, className, shouldCalculateSource);
+        instrumenter = new NewTracingInstrumenter(data, cw, cr, className, shouldCalculateSource);
+      } else {
+        instrumenter = new TracingInstrumenter(data, cw, className, shouldCalculateSource);
       }
-      return new TracingInstrumenter(data, cw, className, shouldCalculateSource);
     }
+    ClassVisitor result = instrumenter;
+    if (FilterUtils.ignorePrivateConstructorOfUtilClassEnabled()) {
+      result = PrivateConstructorOfUtilClassFilter.createWithContext(result, instrumenter);
+    }
+    return result;
   }
 
   @Override

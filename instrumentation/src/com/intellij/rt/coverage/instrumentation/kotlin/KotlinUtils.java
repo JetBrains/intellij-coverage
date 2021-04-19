@@ -34,11 +34,12 @@ import java.util.List;
 
 public class KotlinUtils {
   private static final String KOTLIN_CLASS_LABEL = "IS_KOTLIN";
+  public static final String KOTLIN_METADATA = "Lkotlin/Metadata;";
 
   public static boolean isKotlinClass(MethodFilteringVisitor context) {
     Object currentProperty = context.getProperty(KOTLIN_CLASS_LABEL);
     if (currentProperty instanceof Boolean) return (Boolean) currentProperty;
-    boolean isKotlin = context.getAnnotations().contains("Lkotlin/Metadata;");
+    boolean isKotlin = context.getAnnotations().contains(KOTLIN_METADATA);
     context.addProperty(KOTLIN_CLASS_LABEL, isKotlin);
     return isKotlin;
   }
