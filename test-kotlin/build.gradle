@@ -25,5 +25,5 @@ dependencies {
 
     testImplementation("junit:junit:4.13")
 
-    testImplementation(fileTree(project(":test-discovery").file("lib")))
+    testImplementation(fileTree(project(":benchmarks").file("lib")))
 }
