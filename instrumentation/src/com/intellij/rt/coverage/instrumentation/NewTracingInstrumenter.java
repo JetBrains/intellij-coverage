@@ -101,7 +101,7 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
   @Override
   protected void initLineData() {
     final LineData[] lines = LinesUtil.calcLineArray(myMaxLineNumber, myLines);
-    myClassData.touchLines(new int[myBranchData.getSize()]);
+    myClassData.createHitsMask(myBranchData.getSize());
     myClassData.setLines(lines);
   }
 

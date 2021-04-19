@@ -29,7 +29,7 @@ public class ClassData implements CoverageData {
   private final String myClassName;
   private LineData[] myLinesArray;
   private Map<String, Integer> myStatus;
-  private int[] myLineMask;
+  private volatile int[] myLineMask;
   private String mySource;
 
   public ClassData(final String name) {
@@ -307,9 +307,11 @@ public class ClassData implements CoverageData {
     return mySource;
   }
 
-  public int[] touchLines(int[] lines) { //todo
-    myLineMask = lines;
-    return lines;
+  public synchronized void createHitsMask(int size) {
+    if (myLineMask != null && myLineMask.length > size) {
+      size = myLineMask.length;
+    }
+    myLineMask = new int[size];
   }
 
   public int[] getLineMask() {
