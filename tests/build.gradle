@@ -33,3 +33,5 @@ dependencies {
 
   testCompile project(path: ':junit4-test-discovery-launcher', configuration: 'archives')
 }
+
+apply from: 'jmh.gradle'
