@@ -31,6 +31,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   private static final MethodCaller TOUCH_LINE_METHOD = new MethodCaller("touchLine", new Class[] {int.class});
   private static final MethodCaller TOUCH_LINES_METHOD = new MethodCaller("touchLines", new Class[] {int[].class});
+  private static final MethodCaller GET_LINE_MASK_METHOD = new MethodCaller("getLineMask", new Class[0]);
   private static final MethodCaller TOUCH_SWITCH_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, int.class});
   private static final MethodCaller TOUCH_JUMP_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, boolean.class});
   private static final MethodCaller TOUCH_METHOD = new MethodCaller("touch", new Class[] {int.class});
@@ -83,6 +84,10 @@ public class ProjectData implements CoverageData, Serializable {
     return mySampling;
   }
 
+  public int getClassesNumber() {
+    return myClasses.size();
+  }
+
   public static ProjectData createProjectData(final File dataFile,
                                               final ProjectData initialData,
                                               boolean traceLines,
@@ -133,8 +138,6 @@ public class ProjectData implements CoverageData, Serializable {
 
         if (mainData != null) {
           classData.checkLineMappings(mainData.getLines(), classData);
-        } else {
-          ErrorReporter.reportError("Class data was not extracted: " + className, new Throwable());
         }
       }
     }
@@ -305,6 +308,20 @@ public class ProjectData implements CoverageData, Serializable {
       }
   }
 
+  public static int[] getLineMask(String className) {
+    if (ourProjectData != null) {
+      return ourProjectData.getClassData(className).getLineMask();
+    }
+    try {
+      final Object projectDataObject = getProjectDataObject();
+      Object classData = GET_CLASS_DATA_METHOD.invoke(projectDataObject, new Object[]{className});
+      return (int[]) touch(GET_LINE_MASK_METHOD, classData, new Object[0]);
+    } catch (Exception e) {
+      ErrorReporter.reportError("Error in class data loading: " + className, e);
+      return null;
+    }
+  }
+
   public static Object loadClassData(String className) {
     if (ourProjectData != null) {
       return ourProjectData.getClassData(className);
@@ -378,12 +395,18 @@ public class ProjectData implements CoverageData, Serializable {
    * This class was introduced to reduce number of equals().
    */
   private static class ClassesMap {
-    private static final int POOL_SIZE = 1000;
+    private static final int POOL_SIZE = 1024; // must be a power of two
+    private static final int MASK = POOL_SIZE - 1;
+    private static final int DEFAULT_CAPACITY = 1000;
     private final IdentityClassData[] myIdentityArray = new IdentityClassData[POOL_SIZE];
-    private final Map<String, ClassData> myClasses = new HashMap<String, ClassData>(1000);
+    private final Map<String, ClassData> myClasses = createClassesMap();
+
+    public int size() {
+      return myClasses.size();
+    }
 
     public ClassData get(String name) {
-      int idx = Math.abs(name.hashCode() % POOL_SIZE);
+      int idx = name.hashCode() & MASK;
       final IdentityClassData lastClassData = myIdentityArray[idx];
       if (lastClassData != null) {
         final ClassData data = lastClassData.getClassData(name);
@@ -405,6 +428,13 @@ public class ProjectData implements CoverageData, Serializable {
 
     public Collection<String> names() {
       return myClasses.keySet();
+    }
+
+    private static Map<String, ClassData> createClassesMap() {
+      if ("true".equals(System.getProperty("idea.coverage.thread-safe.enabled", "true"))) {
+        return new ConcurrentHashMap<String, ClassData>(DEFAULT_CAPACITY);
+      }
+      return new HashMap<String, ClassData>(DEFAULT_CAPACITY);
     }
   }
 

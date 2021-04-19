@@ -22,15 +22,13 @@ fun interface Foo {
 
 fun fooConsumer(f: Foo) {
     f.foo()                // coverage: FULL
-    return                 // coverage: FULL
 }
 
 fun test() {
     fooConsumer {          // coverage: FULL
         println(42)        // coverage: FULL
-        return@fooConsumer // coverage: FULL
+        return@fooConsumer
     }
-    return                 // coverage: FULL
 }
 
 object Test {

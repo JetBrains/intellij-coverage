@@ -25,20 +25,24 @@ public class Test {
 
 interface Foo {
   default void foo1() {
-  }                           // coverage: NONE
+    System.out.println();  // coverage: NONE
+  }
 
   default void foo2() {
-  }                           // coverage: FULL
+    System.out.println();  // coverage: FULL
+  }
 
   default void foo3() {
-  }                           // coverage: NONE
+    System.out.println();  // coverage: NONE
+  }
 }
 
 class Bar implements Foo {
-  public Bar() { }            // coverage: FULL
+  public Bar() { }         // coverage: FULL
 
   @Override
   public void foo1() {
-  }                           // coverage: NONE
+    System.out.println();  // coverage: NONE
+  }
 
 }

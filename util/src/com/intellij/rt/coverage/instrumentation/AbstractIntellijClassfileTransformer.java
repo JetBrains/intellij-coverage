@@ -122,7 +122,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     }
 
     final ClassVisitor cv = createClassVisitor(className, loader, cr, cw);
-    cr.accept(cv, 0);
+    cr.accept(cv, ClassReader.EXPAND_FRAMES);
     return cw.toByteArray();
   }
 

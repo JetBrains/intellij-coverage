@@ -20,13 +20,11 @@ package com.intellij.rt.coverage.kotlin
 import com.intellij.rt.coverage.*
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
-import org.junit.Test
 import java.io.File
 
 
-class KotlinCoverageStatusTest {
-    private lateinit var myDataFile: File
+abstract class KotlinCoverageStatusTest {
+    protected lateinit var myDataFile: File
 
     @Before
     fun setUp() {
@@ -38,117 +36,14 @@ class KotlinCoverageStatusTest {
         myDataFile.delete()
     }
 
-    @Test
-    fun testSimpleIfElse() = test("simple.ifelse", sampling = false)
+    abstract val coverage: Coverage
 
-    @Test
-    fun testDefaultArgsCovered() = test("defaultArgs.covered")
-
-    @Test
-    fun testDefaultArgsUncovered() = test("defaultArgs.uncovered")
-
-    @Test
-    fun testDefaultArgsSeveralArgs() = test("defaultArgs.severalArguments")
-
-    @Test
-    fun testDefaultArgsSeveralArgsTracing() = test("defaultArgs.tracing", "TestKt", "X", sampling = false)
-
-    @Test
-    fun test32DefaultArgsTracing() = test("defaultArgs.defaultArgs32", sampling = false)
-
-    @Test
-    fun test32ArgsTracing() = test("defaultArgs.args32", sampling = false)
-
-    @Test
-    fun testUnloadedSingleFile() = test("unloaded.singleFile", "UnusedClass", calcUnloaded = true)
-
-    @Test
-    fun testUnloadedMultiFile() = test("unloaded.multiFile", "UnusedClass", calcUnloaded = true, fileName = "UnusedClass.kt")
-
-    @Test
-    fun testSimpleInline() = test("inline.simple")
-
-    @Test
-    fun testInlineInline() = test("inline.inlineInline")
-
-    @Test
-    fun testLambdaInline() = test("inline.lambda")
-
-    @Test
-    fun testReflection() = test("inline.reflection", "Test")
-
-    @Test
-    fun testReified() = test("inline.reified")
-
-    @Test
-    fun testMultiplyFilesInline() = test("inline.multiplyFiles", "Test2Kt",
-            fileName = "test2.kt")
-
-    @Test
-    @Ignore("Not implemented")
-    fun testReturn() = test("returnTest")
-
-    @Test
-    fun testFileProperties() = test("properties.file")
-
-    @Test
-    @Ignore("Not implemented")
-    fun testGetterAndSetterOfPropertyAreDistinguishable() = test("properties.getter_setter")
-
-    @Test
-    fun testPrimaryConstructorWithProperties() = test("properties.constructor", "A")
-
-    @Test
-    fun testDataClass() = test("dataClass", "A")
-
-    @Test
-    fun testDefaultInterfaceMember() = test("defaultInterfaceMember", "Foo\$DefaultImpls", "Bar")
-
-    @Test
-    fun testDefaultInterfaceMemberRemoveOnlyInterfaceMember() = test("defaultInterfaceMember.removeOnlyDefaultInterfaceMember", "Bar")
-
-    @Test
-    fun testDefaultInterfaceMemberJava() = test("defaultInterfaceMember.java",
-            "Foo", "Bar",
-            fileName = "Test.java")
-
-    @Test
-    fun testImplementationByDelegation() = test("implementationByDelegation", "Derived")
-
-    @Test
-    fun testImplementationByDelegationGeneric() = test("implementationByDelegationGeneric", "BDelegation")
-
-    @Test
-    fun testWhenMappingsSampling() = test("whenMapping.sampling")
-
-    @Test
-    fun testWhenMappingTracing() = test("whenMapping.tracing", sampling = false)
-
-    @Test
-    fun testJavaSwitch() = test("javaSwitch", "JavaSwitchTest", sampling = false, fileName = "JavaSwitchTest.java")
-
-    @Test
-    fun testSealedClassConstructor() = test("sealedClassConstructor",
-            "SealedClass", "SealedClassWithArgs", "ClassWithPrivateDefaultConstructor")
-
-    @Test
-    fun testFunInterface() = test("funInterface", "TestKt", "TestKt\$test\$1")
-
-    @Test
-    fun test_IDEA_57695() {
-        val project = runWithCoverage(myDataFile, "fixes.IDEA_57695", false)
-        assertEqualsLines(project, hashMapOf(1 to "PARTIAL", 2 to "FULL"), listOf("kotlinTestData.fixes.IDEA_57695.TestClass"))
-    }
-
-    @Test
-    fun test_IDEA_250825() = test("fixes.IDEA_250825", "JavaTest", fileName = "JavaTest.java", sampling = false)
-
-    private fun test(testName: String, vararg classes: String = arrayOf("TestKt"),
-                     sampling: Boolean = true, fileName: String = "test.kt",
-                     calcUnloaded: Boolean = false) {
+    protected fun test(testName: String, vararg classes: String = arrayOf("TestKt"),
+                       fileName: String = "test.kt", calcUnloaded: Boolean = false,
+                       extraArgs: MutableList<String> = mutableListOf()) {
         val testFile = pathToFile("src", "kotlinTestData", *testName.split('.').toTypedArray(), fileName)
         val expected = extractCoverageDataFromFile(testFile)
-        val project = runWithCoverage(myDataFile, testName, sampling, calcUnloaded)
+        val project = runWithCoverage(myDataFile, testName, coverage, calcUnloaded, extraArgs = extraArgs)
         val fullClassNames = classes.map { "kotlinTestData.$testName.$it" }
         assertEqualsLines(project, expected, if (classes.contains(all)) listOf(all) else fullClassNames)
     }

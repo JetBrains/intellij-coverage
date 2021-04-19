@@ -16,10 +16,6 @@
 
 import org.gradle.internal.jvm.Jvm
 
-plugins {
-  id "com.jfrog.bintray" version "1.8.5"
-}
-
 private calcVersion() {
   hasProperty("teamcity") ? "1.0.${teamcity["build.number"]}" : ""
 }

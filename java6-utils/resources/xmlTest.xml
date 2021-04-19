@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<report name="Intellij Coverage Report">
+<package name="MyClass">
+<class name="MyClass" sourcefilename="F.java">
+<method name="foo" desc="(I)V">
+<counter type="LINE" covered="0" missed="2"/>
+<counter type="BRANCH" covered="0" missed="0"/>
+</method>
+<method name="boo" desc="()V">
+<counter type="LINE" covered="0" missed="1"/>
+<counter type="BRANCH" covered="0" missed="0"/>
+</method>
+</class>
+<sourcefile name="F.java">
+<line nr="1" cb="0" mb="0" ci="0" mi="1"/>
+<line nr="2" cb="0" mb="0" ci="0" mi="1"/>
+<line nr="3" cb="0" mb="0" ci="0" mi="1"/>
+</sourcefile>
+</package>
+<package name="package">
+<class name="package.MyClass2" sourcefilename="A.java">
+<method name="a" desc="(II)I">
+<counter type="LINE" covered="0" missed="1"/>
+<counter type="BRANCH" covered="0" missed="0"/>
+</method>
+<method name="b" desc="(J)Z">
+<counter type="LINE" covered="0" missed="1"/>
+<counter type="BRANCH" covered="0" missed="0"/>
+</method>
+</class>
+<sourcefile name="A.java">
+<line nr="1" cb="0" mb="0" ci="0" mi="1"/>
+<line nr="2" cb="0" mb="0" ci="0" mi="1"/>
+</sourcefile>
+</package>
+</report>
+

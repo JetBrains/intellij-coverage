@@ -16,13 +16,15 @@
 
 package com.intellij.rt.coverage.instrumentation.kotlin;
 
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
+import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinCoroutinesEnumeratingFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinWhenMappingExceptionFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticAccessMethodFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticConstructorOfSealedClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
+import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinCoroutinesVisitingFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinImplementerDefaultInterfaceMemberFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
 
@@ -32,11 +34,12 @@ import java.util.List;
 
 public class KotlinUtils {
   private static final String KOTLIN_CLASS_LABEL = "IS_KOTLIN";
+  public static final String KOTLIN_METADATA = "Lkotlin/Metadata;";
 
-  public static boolean isKotlinClass(Instrumenter context) {
+  public static boolean isKotlinClass(MethodFilteringVisitor context) {
     Object currentProperty = context.getProperty(KOTLIN_CLASS_LABEL);
     if (currentProperty instanceof Boolean) return (Boolean) currentProperty;
-    boolean isKotlin = context.getAnnotations().contains("Lkotlin/Metadata;");
+    boolean isKotlin = context.getAnnotations().contains(KOTLIN_METADATA);
     context.addProperty(KOTLIN_CLASS_LABEL, isKotlin);
     return isKotlin;
   }
@@ -55,6 +58,7 @@ public class KotlinUtils {
     if (!ourKotlinEnabled) return Collections.emptyList();
     List<MethodVisitingFilter> result = new ArrayList<MethodVisitingFilter>();
     result.add(new KotlinImplementerDefaultInterfaceMemberFilter());
+    result.add(new KotlinCoroutinesVisitingFilter());
     return result;
   }
 
@@ -63,6 +67,7 @@ public class KotlinUtils {
     List<LineEnumeratorFilter> result = new ArrayList<LineEnumeratorFilter>();
     result.add(new KotlinWhenMappingExceptionFilter());
     result.add(new KotlinDefaultArgsBranchFilter());
+    result.add(new KotlinCoroutinesEnumeratingFilter());
     return result;
   }
 }

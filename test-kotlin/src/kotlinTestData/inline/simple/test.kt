@@ -18,12 +18,10 @@ package kotlinTestData.inline.simple
 
 private inline fun a(x: Int) {
     println(x)                // coverage: FULL
-    return                    // coverage: FULL
-}
+}                             // coverage: FULL
 
 fun test() {
     a(4)                      // coverage: FULL
-    return                    // coverage: FULL
 }
 
 object Test {

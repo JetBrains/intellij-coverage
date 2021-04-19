@@ -38,6 +38,7 @@ import java.util.Comparator;
  * @since 22-May-2008
  */
 public class CoverageStatusTest extends TestCase {
+  private static final String[] EMPTY = new String[0];
   private File myDataFile;
   private File myClassFile;
 
@@ -130,7 +131,7 @@ public class CoverageStatusTest extends TestCase {
   public void testLongClass() throws Exception {
     StringBuilder expectedBuilder = new StringBuilder("1:NONE\n" +
         "3:FULL\n");
-    for (int line = 32004; line <= 34004; line++) {
+    for (int line = 32004; line < 34004; line++) {
       expectedBuilder.append(line).append(":FULL\n");
     }
     doTest("longClass", expectedBuilder.toString(), true);
@@ -143,6 +144,17 @@ public class CoverageStatusTest extends TestCase {
       expectedBuilder.append(line).append(":FULL\n");
     }
     doTest("longClass", expectedBuilder.toString());
+  }
+
+  public void testNotNullAssertionsAreIgnored() throws Exception {
+    final String testDataPath = getTestPath("notNull");
+    myDataFile = new File(testDataPath + File.separator + "Test.ic");
+    final ProjectData projectInfo = runCoverage(testDataPath, myDataFile, "WithNotNulls.*", "WithNotNulls", false);
+    final ClassData classInfo = projectInfo.getClassData("WithNotNulls");
+    assertNotNull(classInfo);
+    final LineData line = classInfo.getLineData(6);
+    assertNotNull(line);
+    assertNull(line.getJumps());
   }
 
   public void testIncompleteAgentArguments() throws Exception {
@@ -159,8 +171,12 @@ public class CoverageStatusTest extends TestCase {
     }
   }
 
+  private String getTestPath(String testName) {
+    return new File("").getAbsolutePath() + File.separator + "testData" + File.separator + "coverage" + File.separator + testName;
+  }
+
   private String prepareForAgentRun(String testName) {
-    String testDataPath = new File("").getAbsolutePath() + File.separator + "testData" + File.separator + "coverage" + File.separator + testName;
+    String testDataPath = getTestPath(testName);
     myDataFile = new File(testDataPath + File.separator + "Test.ic");
     if (Main.compile(new String[]{testDataPath + File.separator + "Test.java"}) != 0) {
       throw new RuntimeException("Compilation failed");
@@ -203,13 +219,13 @@ public class CoverageStatusTest extends TestCase {
     assertEquals(expected, buf.toString());
   }
 
-  static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
+  public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
                                  String classToRun, final boolean sampling) throws IOException, InterruptedException {
-    return runCoverage(testDataPath, coverageDataFile, patterns, classToRun, sampling, false);
+    return runCoverage(testDataPath, coverageDataFile, patterns, classToRun, sampling, EMPTY, false);
   }
 
   static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
-                                 String classToRun, final boolean sampling, boolean calcUnloaded) throws IOException, InterruptedException {
+                                 String classToRun, final boolean sampling, String[] extraArgs, boolean calcUnloaded) throws IOException, InterruptedException {
     String coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent");
 
     String[] commandLine = {
@@ -217,7 +233,12 @@ public class CoverageStatusTest extends TestCase {
         "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" false " + calcUnloaded + " false "
             + sampling + " " + patterns,
         "-classpath", testDataPath, classToRun};
-
+    if (extraArgs.length > 0) {
+      String[] args = new String[extraArgs.length + commandLine.length];
+      System.arraycopy(extraArgs, 0, args, 0, extraArgs.length);
+      System.arraycopy(commandLine, 0, args, extraArgs.length, commandLine.length);
+      commandLine = args;
+    }
     ProcessUtil.execJavaProcess(commandLine);
 
     FileUtil.waitUntilFileCreated(coverageDataFile);

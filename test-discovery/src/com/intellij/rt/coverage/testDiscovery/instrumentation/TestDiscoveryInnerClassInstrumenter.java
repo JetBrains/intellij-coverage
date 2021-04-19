@@ -61,7 +61,7 @@ public class TestDiscoveryInnerClassInstrumenter extends TestDiscoveryInstrument
 
       MethodVisitor staticBlockVisitor = cw.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
       staticBlockVisitor.visitCode();
-      initArray(staticBlockVisitor);
+      initField(staticBlockVisitor);
       staticBlockVisitor.visitInsn(Opcodes.RETURN);
       staticBlockVisitor.visitMaxs(ADDED_CODE_STACK_SIZE, 0);
       staticBlockVisitor.visitEnd();

@@ -23,10 +23,20 @@ import org.junit.Assert
 import java.io.File
 import java.nio.file.Paths
 
+enum class Coverage {
+    SAMPLING, NEW_SAMPLING, TRACING
+}
 
-fun runWithCoverage(coverageDataFile: File, testName: String, sampling: Boolean, calcUnloaded: Boolean = false): ProjectData {
+private const val TEST_PACKAGE = "kotlinTestData"
+internal const val IGNORE_UTIL_PRIVATE_CONSTRUCTOR_OPTION = "-Dcoverage.ignore.private.constructor.util.class=true"
+
+fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false,
+                    patterns: String = "$TEST_PACKAGE.*", extraArgs: MutableList<String> = mutableListOf()): ProjectData {
     val classPath = System.getProperty("java.class.path")
-    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, "kotlinTestData.*", "kotlinTestData.$testName.Test", sampling, calcUnloaded)
+    if (coverage == Coverage.NEW_SAMPLING) extraArgs.add("-Didea.new.sampling.coverage=true")
+    val sampling = coverage != Coverage.TRACING
+    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, patterns, "kotlinTestData.$testName.Test",
+            sampling, extraArgs.toTypedArray(), calcUnloaded)
 }
 
 internal fun assertEqualsLines(project: ProjectData, expectedLines: Map<Int, String>, classNames: List<String>) {
@@ -40,7 +50,7 @@ internal const val all = "ALL CLASSES"
 private fun coverageLines(project: ProjectData, classNames: List<String>): Map<Int, String> {
     val allData = ClassData("")
     if (classNames.contains(all)) {
-        project.classes.values.forEach { allData.merge(it) }
+        project.classes.values.filter { it.name.startsWith(TEST_PACKAGE) }.forEach { allData.merge(it) }
     } else {
         classNames
                 .map { project.getClassData(it) }
@@ -49,6 +59,8 @@ private fun coverageLines(project: ProjectData, classNames: List<String>): Map<I
     val lines = allData.getLinesData().associateBy({ it.lineNumber }, { it.status.toByte() })
     return statusToString(lines)
 }
+
+internal fun getLineHits(data: ClassData, line: Int) = data.getLinesData().single { it.lineNumber == line }.hits
 
 private fun logCoverageDiff(expectedLines: Map<Int, String>, actualCoverage: Map<Int, String>) {
     val expected = expectedLines.toList()

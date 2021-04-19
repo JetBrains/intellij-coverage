@@ -23,21 +23,18 @@ private inline fun a(f: (Int) -> Unit, gen: () -> Int) {
     val x = gen()                // coverage: FULL
     print("Got x = ")            // coverage: FULL
     f(x)                         // coverage: FULL
-    return                       // coverage: FULL
-}
+}                                // coverage: FULL
 
 private inline fun c(f: (x: Int) -> Unit) {
     a(f) {                       // coverage: FULL
         Random.nextInt()         // coverage: FULL
     }
-    return                       // coverage: FULL
-}
+}                                // coverage: FULL
 
 private fun f() {
     c {                          // coverage: FULL
         println(it)              // coverage: FULL
     }                            // coverage: FULL
-    return                       // coverage: FULL
 }
 
 private inline fun b(
@@ -50,7 +47,6 @@ fun test() {
         it + 45                  // coverage: FULL
     }
     f()                          // coverage: FULL
-    return                       // coverage: FULL
 }
 
 object Test {

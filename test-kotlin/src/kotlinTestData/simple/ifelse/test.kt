@@ -21,7 +21,7 @@ fun test(x: Boolean, y: Boolean, z: Boolean) {
         println("X is true")  // coverage: FULL
     } else {
         println("X is false") // coverage: NONE
-    }                         // coverage: FULL
+    }
     if (y) {                  // coverage: PARTIAL
         println("Y is true")  // coverage: NONE
     }
@@ -36,7 +36,7 @@ fun test2(x: Boolean, y: Boolean) {
         println("X is true")  // coverage: FULL
     } else {
         println("X is false") // coverage: FULL
-    }                         // coverage: FULL
+    }
     if (y) {                  // coverage: PARTIAL
         println("Y is true")  // coverage: FULL
     }

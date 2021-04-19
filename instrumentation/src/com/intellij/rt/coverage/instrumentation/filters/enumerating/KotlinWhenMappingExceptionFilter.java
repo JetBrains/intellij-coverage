@@ -22,6 +22,8 @@ import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+import java.util.Map;
+
 public class KotlinWhenMappingExceptionFilter extends LineEnumeratorFilter {
 
   private Label myCurrentLabel = null;
@@ -41,7 +43,9 @@ public class KotlinWhenMappingExceptionFilter extends LineEnumeratorFilter {
   public void visitTypeInsn(int opcode, String type) {
     super.visitTypeInsn(opcode, type);
     if (opcode == Opcodes.NEW && type.equals("kotlin/NoWhenBranchMatchedException")) {
-      SwitchData switchData = myContext.getSwitchLabels().get(myCurrentLabel);
+      Map<Label, SwitchData> defaultTableSwitchLabels = myContext.getDefaultTableSwitchLabels();
+      if (defaultTableSwitchLabels == null) return;
+      SwitchData switchData = defaultTableSwitchLabels.get(myCurrentLabel);
       if (switchData != null) {
         switchData.touch(-1);
       }

@@ -19,25 +19,56 @@ package com.intellij.rt.coverage.util;
 
 import org.jetbrains.coverage.gnu.trove.TLongObjectHashMap;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * @author Pavel.Sher
  */
 public class StringsPool {
-  private final static TLongObjectHashMap<String> myReusableStrings = new TLongObjectHashMap<String>(30000);
+  private final static TLongObjectHashMap<String> myReusableStrings;
+  private final static Map<Long, String> myConcurrentReusableStrings;
   private final static String EMPTY = "";
+
+  static {
+    boolean useConcurrentMap = "true".equals(System.getProperty("idea.coverage.thread-safe.enabled", "true"));
+    int initialCapacity = 30000;
+    if (useConcurrentMap) {
+      myConcurrentReusableStrings = new ConcurrentHashMap<Long, String>(initialCapacity);
+      myReusableStrings = null;
+    } else {
+      myReusableStrings = new TLongObjectHashMap<String>(initialCapacity);
+      myConcurrentReusableStrings = null;
+    }
+  }
 
   public static String getFromPool(String value) {
     if (value == null) return null;
     if (value.length() == 0) return EMPTY;
 
     final long hash = StringHash.calc(value);
-    String reused = myReusableStrings.get(hash);
+    String reused = getReusable(hash);
     if (reused != null) return reused;
     // new String() is required because value often is passed as substring which has a reference to original char array
     // see {@link String.substring(int, int} method implementation.
     //noinspection RedundantStringConstructorCall
     reused = new String(value);
-    myReusableStrings.put(hash, reused);
+    putReusable(hash, reused);
     return reused;
+  }
+
+  private static String getReusable(long hash) {
+    if (myConcurrentReusableStrings != null) {
+      return myConcurrentReusableStrings.get(hash);
+    }
+    return myReusableStrings.get(hash);
+  }
+
+  private static void putReusable(long hash, String value) {
+    if (myConcurrentReusableStrings != null) {
+      myConcurrentReusableStrings.put(hash, value);
+    } else {
+      myReusableStrings.put(hash, value);
+    }
   }
 }
