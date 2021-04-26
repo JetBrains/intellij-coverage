@@ -27,7 +27,7 @@ enum class Coverage {
     SAMPLING, NEW_SAMPLING, TRACING
 }
 
-private const val TEST_PACKAGE = "kotlinTestData"
+internal const val TEST_PACKAGE = "kotlinTestData"
 internal const val IGNORE_UTIL_PRIVATE_CONSTRUCTOR_OPTION = "-Dcoverage.ignore.private.constructor.util.class=true"
 
 fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false,
