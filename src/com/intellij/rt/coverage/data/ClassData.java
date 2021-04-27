@@ -308,10 +308,12 @@ public class ClassData implements CoverageData {
   }
 
   public synchronized void createHitsMask(int size) {
-    if (myLineMask != null && myLineMask.length > size) {
-      size = myLineMask.length;
+    if (myLineMask != null && myLineMask.length >= size) return;
+    int[] newMask = new int[size];
+    if (myLineMask != null) {
+      System.arraycopy(newMask, 0, myLineMask, 0, myLineMask.length);
     }
-    myLineMask = new int[size];
+    myLineMask = newMask;
   }
 
   public int[] getLineMask() {
