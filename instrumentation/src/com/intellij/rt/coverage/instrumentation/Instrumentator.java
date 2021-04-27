@@ -90,7 +90,6 @@ public class Instrumentator {
       reportFormat = ReportFormat.XML;
     }
 
-    final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling);
     final List<Pattern> includePatterns = new ArrayList<Pattern>();
     System.out.println("---- IntelliJ IDEA coverage runner ---- ");
     System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
@@ -124,6 +123,7 @@ public class Instrumentator {
       }
     }
 
+    final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling, includePatterns, excludePatterns);
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
     if (dataFile != null) {
       final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf, reportFormat);

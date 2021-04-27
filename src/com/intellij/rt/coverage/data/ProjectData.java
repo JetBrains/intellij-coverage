@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.data;
 
+import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 
 import java.io.*;
@@ -23,8 +24,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 public class ProjectData implements CoverageData, Serializable {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/ProjectData";
@@ -48,6 +51,8 @@ public class ProjectData implements CoverageData, Serializable {
   private boolean mySampling;
   private Map<ClassData, boolean[]> myTrace;
   private File myTracesDir;
+  private List<Pattern> myIncludePatterns;
+  private List<Pattern> myExcludePatterns;
 
   private final ClassesMap myClasses = new ClassesMap();
   private Map<String, FileMapData[]> myLinesMap;
@@ -90,7 +95,9 @@ public class ProjectData implements CoverageData, Serializable {
   public static ProjectData createProjectData(final File dataFile,
                                               final ProjectData initialData,
                                               boolean traceLines,
-                                              boolean isSampling) throws IOException {
+                                              boolean isSampling,
+                                              List<Pattern> includePatterns,
+                                              List<Pattern> excludePatterns) throws IOException {
     ourProjectData = initialData == null ? new ProjectData() : initialData;
     if (dataFile != null && !dataFile.exists()) {
       final File parentDir = dataFile.getParentFile();
@@ -100,6 +107,8 @@ public class ProjectData implements CoverageData, Serializable {
     ourProjectData.mySampling = isSampling;
     ourProjectData.myTraceLines = traceLines;
     ourProjectData.myDataFile = dataFile;
+    ourProjectData.myIncludePatterns = includePatterns;
+    ourProjectData.myExcludePatterns = excludePatterns;
     return ourProjectData;
   }
 
@@ -131,8 +140,11 @@ public class ProjectData implements CoverageData, Serializable {
             mainData = aFileData;
             continue;
           }
-          final ClassData classInfo = getOrCreateClassData(fileName);
-          classInfo.checkLineMappings(aFileData.getLines(), classData);
+          if ((myExcludePatterns == null || !ClassNameUtil.matchesPatterns(fileName, myExcludePatterns))
+              && (myIncludePatterns == null || myIncludePatterns.isEmpty() || ClassNameUtil.matchesPatterns(fileName, myIncludePatterns))) {
+            final ClassData classInfo = getOrCreateClassData(fileName);
+            classInfo.checkLineMappings(aFileData.getLines(), classData);
+          }
         }
 
         if (mainData != null) {

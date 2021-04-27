@@ -40,10 +40,11 @@ abstract class KotlinCoverageStatusTest {
 
     protected fun test(testName: String, vararg classes: String = arrayOf("TestKt"),
                        fileName: String = "test.kt", calcUnloaded: Boolean = false,
-                       extraArgs: MutableList<String> = mutableListOf()) {
+                       extraArgs: MutableList<String> = mutableListOf(),
+                       patterns: String = "$TEST_PACKAGE.*") {
         val testFile = pathToFile("src", "kotlinTestData", *testName.split('.').toTypedArray(), fileName)
         val expected = extractCoverageDataFromFile(testFile)
-        val project = runWithCoverage(myDataFile, testName, coverage, calcUnloaded, extraArgs = extraArgs)
+        val project = runWithCoverage(myDataFile, testName, coverage, calcUnloaded, extraArgs = extraArgs, patterns = patterns)
         val fullClassNames = classes.map { "kotlinTestData.$testName.$it" }
         assertEqualsLines(project, expected, if (classes.contains(all)) listOf(all) else fullClassNames)
     }
