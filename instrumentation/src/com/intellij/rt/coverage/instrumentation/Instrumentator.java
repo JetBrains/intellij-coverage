@@ -123,7 +123,7 @@ public class Instrumentator {
       }
     }
 
-    final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling, excludePatterns);
+    final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling, includePatterns, excludePatterns);
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
     if (dataFile != null) {
       final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf, reportFormat);

@@ -65,19 +65,14 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
 
   @Override
   protected boolean shouldExclude(String className) {
-    return ClassNameUtil.shouldExclude(className, excludePatterns);
+    return ClassNameUtil.matchesPatterns(className, excludePatterns);
   }
 
   @Override
   protected InclusionPattern getInclusionPattern() {
     return includePatterns.isEmpty() ? null : new InclusionPattern() {
       public boolean accept(String className) {
-        for (Pattern includePattern : includePatterns) {
-          if (includePattern.matcher(className).matches()) { // matching inner class name
-            return true;
-          }
-        }
-        return false;
+        return ClassNameUtil.matchesPatterns(className, includePatterns);
       }
     };
   }

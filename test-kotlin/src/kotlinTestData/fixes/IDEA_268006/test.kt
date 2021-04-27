@@ -26,9 +26,9 @@ fun test() {
     ExcludedClass.foo() // coverage: FULL
 }
 
-object Test {           // coverage: FULL
+object Test {
     @JvmStatic
     fun main(args: Array<String>) {
-        test()          // coverage: FULL
+        test()
     }
 }

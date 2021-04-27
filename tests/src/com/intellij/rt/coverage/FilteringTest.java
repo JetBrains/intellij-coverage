@@ -55,7 +55,7 @@ public class FilteringTest extends TestCase {
   }
 
   private void doTestExcludeFilter(String className, List<Pattern> excludePatterns, boolean expected) {
-    assertEquals(expected, ClassNameUtil.shouldExclude(className, excludePatterns));
+    assertEquals(expected, ClassNameUtil.matchesPatterns(className, excludePatterns));
   }
 
   private List<Pattern> toPatterns(String[] regexs) {

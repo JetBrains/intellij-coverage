@@ -145,7 +145,10 @@ abstract class KotlinCoverageStatusAbstractSamplingTest : KotlinCoverageStatusTe
     fun test_KT_39038() = test("fixes.KT_39038")
 
     @Test
-    fun test_IDEA_268006() = test("fixes.IDEA_268006", all, patterns = "$TEST_PACKAGE.* -exclude $TEST_PACKAGE.fixes.IDEA_268006.ExcludedClass")
+    fun test_IDEA_268006_exclude() = test("fixes.IDEA_268006", all, patterns = "$TEST_PACKAGE.fixes.IDEA_268006.TestKt -exclude $TEST_PACKAGE.fixes.IDEA_268006.ExcludedClass")
+
+    @Test
+    fun test_IDEA_268006_no_include() = test("fixes.IDEA_268006", all, patterns = "$TEST_PACKAGE.fixes.IDEA_268006.TestKt")
 
     @Test
     fun testUtilJavaClass() = test("utilClass.java", "JavaTest", "JavaTest\$UnusedJavaTest",

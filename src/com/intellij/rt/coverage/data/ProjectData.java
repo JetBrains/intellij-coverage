@@ -52,6 +52,7 @@ public class ProjectData implements CoverageData, Serializable {
   private boolean mySampling;
   private Map<ClassData, boolean[]> myTrace;
   private File myTracesDir;
+  private List<Pattern> myIncludePatterns;
   private List<Pattern> myExcludePatterns;
 
   private final ClassesMap myClasses = new ClassesMap();
@@ -96,6 +97,7 @@ public class ProjectData implements CoverageData, Serializable {
                                               final ProjectData initialData,
                                               boolean traceLines,
                                               boolean isSampling,
+                                              List<Pattern> includePatterns,
                                               List<Pattern> excludePatterns) throws IOException {
     ourProjectData = initialData == null ? new ProjectData() : initialData;
     if (dataFile != null && !dataFile.exists()) {
@@ -106,6 +108,7 @@ public class ProjectData implements CoverageData, Serializable {
     ourProjectData.mySampling = isSampling;
     ourProjectData.myTraceLines = traceLines;
     ourProjectData.myDataFile = dataFile;
+    ourProjectData.myIncludePatterns = includePatterns;
     ourProjectData.myExcludePatterns = excludePatterns;
     return ourProjectData;
   }
@@ -138,7 +141,8 @@ public class ProjectData implements CoverageData, Serializable {
             mainData = aFileData;
             continue;
           }
-          if (myExcludePatterns == null || !ClassNameUtil.shouldExclude(fileName, myExcludePatterns)) {
+          if ((myExcludePatterns == null || !ClassNameUtil.matchesPatterns(fileName, myExcludePatterns))
+              && (myIncludePatterns == null || myIncludePatterns.isEmpty() || ClassNameUtil.matchesPatterns(fileName, myIncludePatterns))) {
             final ClassData classInfo = getOrCreateClassData(fileName);
             classInfo.checkLineMappings(aFileData.getLines(), classData);
           }
