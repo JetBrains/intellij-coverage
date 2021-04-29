@@ -160,7 +160,9 @@ public class SourceLineCounter extends ClassVisitor {
       public void visitJumpInsn(final int opcode, final Label label) {
         super.visitJumpInsn(opcode, label);
         myHasInstructions = true;
-        myTotalBranches++;
+        if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR) {
+          myTotalBranches++;
+        }
       }
 
       public void visitLdcInsn(final Object cst) {
