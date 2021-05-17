@@ -85,9 +85,7 @@ public class ClassFinder {
           if (!"file".equals(url.getProtocol())) continue;
 
           String path = fixPath(url.getPath());
-          if (path != null) {
-            result.add(new ClassPathEntry(path, cl));
-          }
+          result.add(new ClassPathEntry(path, cl));
         }
       } catch (Exception e) {
         System.out.println("Exception occurred on trying collect ClassPath URLs. One of possible reasons is shutting down " +
@@ -103,7 +101,7 @@ public class ClassFinder {
     try {
       result = URLDecoder.decode(path, "UTF-8");
     } catch (UnsupportedEncodingException e) {
-      e.printStackTrace();
+      System.err.println("Could not decode the path: " + path + ", error: " + e.getMessage());
     }
 
     if (result.length() == 0) return result;
