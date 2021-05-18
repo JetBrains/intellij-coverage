@@ -115,7 +115,7 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
       mv.visitLdcInsn(getClassName());
 
       //get hits array
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "getLineMask", "(Ljava/lang/String;)[I", false);
+      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "getHitsMask", "(Ljava/lang/String;)[I", false);
 
       //save hits array
       mv.visitFieldInsn(Opcodes.PUTSTATIC, myClassNameType, BRANCH_HITS_FIELD_NAME, BRANCH_HITS_FIELD_TYPE);

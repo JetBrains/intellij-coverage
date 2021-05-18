@@ -29,8 +29,11 @@ public class ClassData implements CoverageData {
   private final String myClassName;
   private LineData[] myLinesArray;
   private Map<String, Integer> myStatus;
-  private volatile int[] myLineMask;
+  private int[] myLineMask;
   private String mySource;
+
+  /** Storage for line and branch hits in new tracing mode. */
+  private volatile int[] myHitsMask;
 
   public ClassData(final String name) {
     myClassName = name;
@@ -308,26 +311,30 @@ public class ClassData implements CoverageData {
   }
 
   public synchronized void createHitsMask(int size) {
-    if (myLineMask != null && myLineMask.length >= size) return;
+    if (myHitsMask != null && myHitsMask.length >= size) return;
     int[] newMask = new int[size];
-    if (myLineMask != null) {
-      System.arraycopy(newMask, 0, myLineMask, 0, myLineMask.length);
+    if (myHitsMask != null) {
+      System.arraycopy(newMask, 0, myHitsMask, 0, myHitsMask.length);
     }
-    myLineMask = newMask;
+    myHitsMask = newMask;
   }
 
   public int[] getLineMask() {
     return myLineMask;
   }
 
+  public int[] getHitsMask() {
+    return myHitsMask;
+  }
+
   public void applyBranches() {
-    if (myLineMask == null) return;
+    if (myHitsMask == null) return;
     try {
       for (LineData lineData : myLinesArray) {
         if (lineData == null) continue;
         int lineId = lineData.getId();
         if (lineId != -1) {
-          lineData.setHits(myLineMask[lineId]);
+          lineData.setHits(myHitsMask[lineId]);
         }
 
         JumpData[] jumps = lineData.getJumps();
@@ -336,11 +343,11 @@ public class ClassData implements CoverageData {
             if (jumpData == null) continue;
             int trueId = jumpData.getId(true);
             if (trueId != -1) {
-              jumpData.setTrueHits(myLineMask[trueId]);
+              jumpData.setTrueHits(myHitsMask[trueId]);
             }
             int falseId = jumpData.getId(false);
             if (falseId != -1) {
-              jumpData.setFalseHits(myLineMask[falseId]);
+              jumpData.setFalseHits(myHitsMask[falseId]);
             }
           }
         }
@@ -351,7 +358,7 @@ public class ClassData implements CoverageData {
             if (switchData == null) continue;
             int defaultId = switchData.getId(-1);
             if (defaultId != -1) {
-              switchData.setDefaultHits(switchData.getDefaultHits() + myLineMask[defaultId]);
+              switchData.setDefaultHits(switchData.getDefaultHits() + myHitsMask[defaultId]);
             }
             int[] keys = switchData.getKeys();
             int[] hits = switchData.getHits();
@@ -359,7 +366,7 @@ public class ClassData implements CoverageData {
             for (int i = 0; i < hits.length; i++) {
               int caseId = switchData.getId(i);
               if (caseId == -1) continue;
-              hits[i] = myLineMask[caseId];
+              hits[i] = myHitsMask[caseId];
             }
             switchData.setKeysAndHits(keys, hits);
           }
@@ -368,6 +375,6 @@ public class ClassData implements CoverageData {
     } catch (Throwable e) {
       ErrorReporter.reportError("Unexpected error during applying branch data to class " + getName(), e);
     }
-    myLineMask = null;
+    myHitsMask = null;
   }
 }
