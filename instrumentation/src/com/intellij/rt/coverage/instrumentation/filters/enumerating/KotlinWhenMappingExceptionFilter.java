@@ -43,7 +43,7 @@ public class KotlinWhenMappingExceptionFilter extends LineEnumeratorFilter {
   public void visitTypeInsn(int opcode, String type) {
     super.visitTypeInsn(opcode, type);
     if (opcode == Opcodes.NEW && type.equals("kotlin/NoWhenBranchMatchedException")) {
-      Map<Label, SwitchData> defaultTableSwitchLabels = myContext.getDefaultTableSwitchLabels();
+      Map<Label, SwitchData> defaultTableSwitchLabels = myContext.getBranchData().getDefaultTableSwitchLabels();
       if (defaultTableSwitchLabels == null) return;
       SwitchData switchData = defaultTableSwitchLabels.get(myCurrentLabel);
       if (switchData != null) {

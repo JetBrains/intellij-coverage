@@ -99,7 +99,6 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
         newMv = new MethodVisitor(Opcodes.API_VERSION, newMv) {
           @Override
           public void visitCode() {
-            cv.visitField(INTERFACE_FIELD_ACCESS, myFieldName, myFieldType, null, null);
             initField(mv);
             mySeenClinit = true;
             super.visitCode();
@@ -111,12 +110,12 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
       }
     }
 
+    if (myInterface) return newMv;
+
     return new MethodVisitor(Opcodes.API_VERSION, newMv) {
       @Override
       public void visitCode() {
-        if (!myInterface) {
-          mv.visitMethodInsn(Opcodes.INVOKESTATIC, myInternalClassName, myFieldInitMethodName, "()V", false);
-        }
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, myInternalClassName, myFieldInitMethodName, "()V", false);
         super.visitCode();
       }
     };
@@ -133,31 +132,28 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
    */
   public void generateMembers(ClassVisitor cv) {
     if (myInterface) {
+      if (!myJava8AndAbove && !mySeenClinit) {
+        //only java 8+ may contain non-abstract methods in interfaces
+        //no need to instrument otherwise
+        return;
+      }
+      cv.visitField(INTERFACE_FIELD_ACCESS, myFieldName, myFieldType, null, null);
+
       if (mySeenClinit) {
-        //already added in <clinit>, e.g. if interface has constant
+        //field init is already added in <clinit>, e.g. if interface has constant
         //interface I {
         //  I DEFAULT = new I ();
         //}
         return;
       }
 
-      if (!myJava8AndAbove) {
-        //only java 8+ may contain non-abstract methods in interfaces
-        //no need to instrument otherwise
-        return;
-      }
-    }
-
-    cv.visitField(myInterface ? INTERFACE_FIELD_ACCESS : CLASS_FIELD_ACCESS,
-        myFieldName, myFieldType, null, null);
-
-    if (!myInterface) {
-      createInitFieldMethod(cv);
-    } else {
       //interface has no clinit method
       //java 11 verifies that constants are initialized in clinit
       //let's generate it!
       generateExplicitClinitForInterfaces(cv);
+    } else {
+      cv.visitField(CLASS_FIELD_ACCESS, myFieldName, myFieldType, null, null);
+      createInitFieldMethod(cv);
     }
   }
 
@@ -204,5 +200,9 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
 
   protected String getFieldClassName() {
     return myInternalClassName;
+  }
+
+  public boolean isInterface() {
+    return myInterface;
   }
 }

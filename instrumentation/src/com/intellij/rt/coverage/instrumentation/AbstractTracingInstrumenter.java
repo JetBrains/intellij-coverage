@@ -17,22 +17,28 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
 import com.intellij.rt.coverage.util.LinesUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 
-public class ClassInstrumenter extends Instrumenter {
-  public ClassInstrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
+public abstract class AbstractTracingInstrumenter extends Instrumenter {
+  protected final BranchDataContainer myBranchData = new BranchDataContainer(this);
+
+  public AbstractTracingInstrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
     super(projectData, classVisitor, className, shouldCalculateSource);
   }
 
   protected MethodVisitor createMethodLineEnumerator(MethodVisitor mv, String name, String desc, int access, String signature,
                                                      String[] exceptions) {
-    final LineEnumerator enumerator = new LineEnumerator(this, mv, access, name, desc, signature, exceptions);
+    myBranchData.resetMethod();
+    final LineEnumerator enumerator = new LineEnumerator(this, myBranchData, mv, access, name, desc, signature, exceptions);
     return chainFilters(name, desc, access, signature, exceptions, enumerator);
   }
+
+  public abstract MethodVisitor createTouchCounter(MethodVisitor methodVisitor, BranchDataContainer branchData, LineEnumerator enumerator, int access, String name, String desc, String className);
 
   private MethodVisitor chainFilters(String name, String desc, int access, String signature, String[] exceptions,
                                      LineEnumerator enumerator) {

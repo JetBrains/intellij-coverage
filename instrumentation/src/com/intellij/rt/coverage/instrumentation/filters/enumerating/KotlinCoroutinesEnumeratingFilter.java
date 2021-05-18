@@ -41,11 +41,11 @@ public class KotlinCoroutinesEnumeratingFilter extends LineEnumeratorFilter {
     }
 
     protected void onIgnoredJump() {
-      KotlinCoroutinesEnumeratingFilter.this.myContext.removeLastJump();
+      KotlinCoroutinesEnumeratingFilter.this.myContext.getBranchData().removeLastJump();
     }
 
     protected void onIgnoredSwitch(Label dflt, Label... labels) {
-      KotlinCoroutinesEnumeratingFilter.this.myContext.removeLastSwitch(dflt, labels);
+      KotlinCoroutinesEnumeratingFilter.this.myContext.getBranchData().removeLastSwitch(dflt, labels);
     }
   }
 }

@@ -24,7 +24,7 @@ import java.io.File
 import java.nio.file.Paths
 
 enum class Coverage {
-    SAMPLING, NEW_SAMPLING, TRACING
+    SAMPLING, NEW_SAMPLING, TRACING, NEW_TRACING
 }
 
 internal const val TEST_PACKAGE = "kotlinTestData"
@@ -33,8 +33,11 @@ internal const val IGNORE_UTIL_PRIVATE_CONSTRUCTOR_OPTION = "-Dcoverage.ignore.p
 fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false,
                     patterns: String = "$TEST_PACKAGE.*", extraArgs: MutableList<String> = mutableListOf()): ProjectData {
     val classPath = System.getProperty("java.class.path")
-    if (coverage == Coverage.NEW_SAMPLING) extraArgs.add("-Didea.new.sampling.coverage=true")
-    val sampling = coverage != Coverage.TRACING
+    when (coverage) {
+        Coverage.NEW_SAMPLING -> extraArgs.add("-Didea.new.sampling.coverage=true")
+        Coverage.NEW_TRACING -> extraArgs.add("-Didea.new.tracing.coverage=true")
+    }
+    val sampling = coverage == Coverage.SAMPLING || coverage == Coverage.NEW_SAMPLING
     return CoverageStatusTest.runCoverage(classPath, coverageDataFile, patterns, "kotlinTestData.$testName.Test",
             sampling, extraArgs.toTypedArray(), calcUnloaded)
 }

@@ -25,9 +25,7 @@ import org.junit.Ignore
 import org.junit.Test
 
 
-class KotlinCoverageStatusTracingTest : KotlinCoverageStatusTest() {
-    override val coverage = Coverage.TRACING
-
+abstract class KotlinCoverageStatusAbstractTracingTest : KotlinCoverageStatusTest() {
     @Test
     fun testSimpleIfElse() = test("simple.ifelse")
 
@@ -93,4 +91,15 @@ class KotlinCoverageStatusTracingTest : KotlinCoverageStatusTest() {
     @Test
     @Ignore("To be fixed")
     fun test_IDEA_264534() = test("fixes.IDEA_264534")
+}
+
+class KotlinCoverageStatusTracingTest : KotlinCoverageStatusAbstractTracingTest() {
+    override val coverage = Coverage.TRACING
+}
+
+class KotlinCoverageStatusNewTracingTest : KotlinCoverageStatusAbstractTracingTest() {
+    override val coverage = Coverage.NEW_TRACING
+
+    @Test
+    fun testInterfaceWithClinit() = test("newInstrumentation.interfaceWithClinit", "Foo")
 }
