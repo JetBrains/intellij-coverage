@@ -50,7 +50,7 @@ public class ProjectData implements CoverageData, Serializable {
   private String myCurrentTestName;
   private boolean myTraceLines;
   private boolean mySampling;
-  private Map<ClassData, boolean[]> myTrace;
+  private Map<Object, boolean[]> myTrace;
   private File myTracesDir;
   private List<Pattern> myIncludePatterns;
   private List<Pattern> myExcludePatterns;
@@ -181,7 +181,7 @@ public class ProjectData implements CoverageData, Serializable {
      try {
        os = new DataOutputStream(new FileOutputStream(traceFile));
        os.writeInt(myTrace.size());
-       for (ClassData classData : myTrace.keySet()) {
+       for (Object classData : myTrace.keySet()) {
          os.writeUTF(classData.toString());
          final boolean[] lines = myTrace.get(classData);
          int numberOfTraces = 0;
@@ -213,7 +213,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   public void testStarted(final String name) {
     myCurrentTestName = name;
-    if (myTraceLines) myTrace = new ConcurrentHashMap<ClassData, boolean[]>();
+    if (myTraceLines) myTrace = new ConcurrentHashMap<Object, boolean[]>();
   }
   //---------------------------------------------------------- //
 
@@ -289,7 +289,7 @@ public class ProjectData implements CoverageData, Serializable {
   public static void trace(Object classData, int line) {
     if (ourProjectData != null) {
       ((ClassData) classData).touch(line);
-      ourProjectData.traceLine((ClassData) classData, line);
+      ourProjectData.traceLine(classData, line);
       return;
     }
 
@@ -362,7 +362,7 @@ public class ProjectData implements CoverageData, Serializable {
     return ourProjectDataObject;
   }
 
-  public void traceLine(ClassData classData, int line) {
+  public void traceLine(Object classData, int line) {
     if (myTrace != null) {
       synchronized (myTrace) {
         boolean[] lines = myTrace.get(classData);
