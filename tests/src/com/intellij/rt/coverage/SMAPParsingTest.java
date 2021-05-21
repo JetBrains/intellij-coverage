@@ -19,8 +19,8 @@ package com.intellij.rt.coverage;
 import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineMapData;
 import com.intellij.rt.coverage.instrumentation.JSR45Util;
-import org.junit.Assert;
 import junit.framework.TestCase;
+import org.junit.Assert;
 
 import java.util.Arrays;
 
@@ -85,6 +85,29 @@ public class SMAPParsingTest extends TestCase {
       "kotlinTestData/inline/SimpleInlineKt\n" +
       "*L\n" +
       "4#1:5\n" +
+      "*E";
+
+  private static final String KOTLIN_SMAP_WITH_INLINE_WITHOUT_END_SECTION = "SMAP\n" +
+      "test.kt\n" +
+      "Kotlin\n" +
+      "*S Kotlin\n" +
+      "*F\n" +
+      "+ 1 test.kt\n" +
+      "one/TestKt\n" +
+      "+ 2 inline.kt\n" +
+      "one/coverageinline/InlineKt\n" +
+      "*L\n" +
+      "1#1,10:1\n" +
+      "8#2,6:11\n" +
+      "8#2,6:17\n" +
+      // no *E here
+      "*S KotlinDebug\n" +
+      "*F\n" +
+      "+ 1 test.kt\n" +
+      "one/TestKt\n" +
+      "*L\n" +
+      "8#1,6:11\n" +
+      "9#1,6:17\n" +
       "*E";
 
   private static final String JSP_SMAP = "SMAP\n" +
@@ -179,6 +202,12 @@ public class SMAPParsingTest extends TestCase {
 
   public void testKotlinWithInlineSMAP() {
     doTestClassNames(KOTLIN_SMAP_WITH_INLINE,
+        "one.TestKt one.coverageinline.InlineKt",
+        "one.Test");
+  }
+
+  public void testKotlinWithInlineSMAPWithoutEndSection() {
+    doTestClassNames(KOTLIN_SMAP_WITH_INLINE_WITHOUT_END_SECTION,
         "one.TestKt one.coverageinline.InlineKt",
         "one.Test");
   }

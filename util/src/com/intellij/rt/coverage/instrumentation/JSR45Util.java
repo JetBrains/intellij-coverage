@@ -32,7 +32,7 @@ import java.util.*;
 public class JSR45Util {
   private static final String FILE_SECTION = "*F\n";
   private static final String LINE_SECTION = "*L\n";
-  private static final String END_SECTION = "*E";
+  private static final String SECTION_SEPARATOR = "*";
 
   private static final LineMapData[] EMPTY_LINE_MAP = new LineMapData[0];
 
@@ -47,7 +47,9 @@ public class JSR45Util {
       final int fileSectionIdx = debug.indexOf(FILE_SECTION);
       final int lineInfoIdx = debug.indexOf(LINE_SECTION);
       final TIntObjectHashMap<String> fileNames = parseFileNames(debug, fileSectionIdx, lineInfoIdx, className);
-      final String lineInfo = debug.substring(lineInfoIdx + LINE_SECTION.length(), debug.indexOf(END_SECTION));
+      final int lineInfoStart = lineInfoIdx + LINE_SECTION.length();
+      final int lineInfoEnd = debug.indexOf(SECTION_SEPARATOR, lineInfoStart);
+      final String lineInfo = debug.substring(lineInfoStart, lineInfoEnd);
       final String[] lines = lineInfo.split("\n");
       int fileId = 1;
       for (String line : lines) {
