@@ -87,7 +87,7 @@ public class TestDiscoveryInstrumenter extends ExtraFieldInstrumenter {
 
       @Override
       public void visitCode() {
-        mv.visitFieldInsn(Opcodes.GETSTATIC, getFieldClassName(), METHODS_VISITED, METHODS_VISITED_CLASS);
+        mv.visitFieldInsn(Opcodes.GETSTATIC, getInternalClassName(), METHODS_VISITED, METHODS_VISITED_CLASS);
         pushInstruction(this, myMethodId);
         visitInsn(Opcodes.ICONST_1);
         visitInsn(Opcodes.BASTORE);
@@ -127,7 +127,7 @@ public class TestDiscoveryInstrumenter extends ExtraFieldInstrumenter {
     }
 
     mv.visitMethodInsn(Opcodes.INVOKESTATIC, TestDiscoveryProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/String;[Z[Ljava/lang/String;)[Z", false);
-    mv.visitFieldInsn(Opcodes.PUTSTATIC, getFieldClassName(), METHODS_VISITED, METHODS_VISITED_CLASS);
+    mv.visitFieldInsn(Opcodes.PUTSTATIC, getInternalClassName(), METHODS_VISITED, METHODS_VISITED_CLASS);
   }
 
   private static void pushInstruction(MethodVisitor mv, int operand) {

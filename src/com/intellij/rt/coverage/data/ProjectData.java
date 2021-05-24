@@ -90,6 +90,10 @@ public class ProjectData implements CoverageData, Serializable {
     return mySampling;
   }
 
+  public boolean isTestTracking() {
+    return myTraceLines;
+  }
+
   public int getClassesNumber() {
     return myClasses.size();
   }
@@ -172,16 +176,27 @@ public class ProjectData implements CoverageData, Serializable {
 
  // --------------- used from listeners --------------------- //
  public void testEnded(final String name) {
-   if (myTrace == null) return;
+   final Map<Object, boolean[]> trace =  myTrace;
+   myTrace = null;
+   if (trace == null) return;
+   for (Map.Entry<Object, boolean[]> entry : trace.entrySet()) {
+     final ClassData classData = (ClassData)entry.getKey();
+     classData.clearTrace();
+     final boolean[] touched = entry.getValue();
+     final Object[] lines = classData.getLines();
+     final int lineCount = Math.min(lines.length, touched.length);
+     for (int i = 0; i < lineCount; i++) {
+       final LineData lineData = (LineData) lines[i];
+       if (lineData == null || !touched[i]) continue;
+       lineData.setTestName(name);
+     }
+   }
    File tracesDir = getTracesDir();
    try {
-     TestTrackingIOUtil.saveTestResults(tracesDir, name, myTrace);
+     TestTrackingIOUtil.saveTestResults(tracesDir, name, trace);
    }
    catch (IOException e) {
      ErrorReporter.reportError("Error writing traces for test '" + name + "' to directory " + tracesDir.getPath(), e);
-   }
-   finally {
-     myTrace = null;
    }
  }
 
@@ -266,15 +281,28 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public static void trace(Object classData, int line) {
+    traceLine(classData, line);
     if (ourProjectData != null) {
       ((ClassData) classData).touch(line);
-      ourProjectData.traceLine(classData, line);
       return;
     }
 
     touch(TOUCH_METHOD,
           classData,
           new Object[]{line});
+  }
+
+  public static void traceLine(Object classData, int line) {
+    if (ourProjectData != null) {
+      final Map<Object, boolean[]> traces = ourProjectData.myTrace;
+      if (traces != null) {
+        boolean[] trace = ((ClassData)classData).traceLine(line);
+        if (trace != null) {
+          traces.put(classData, trace);
+        }
+      }
+      return;
+    }
     try {
       final Object projectData = getProjectDataObject();
       TRACE_LINE_METHOD.invoke(projectData, new Object[]{classData, line});
@@ -341,24 +369,6 @@ public class ProjectData implements CoverageData, Serializable {
     return ourProjectDataObject;
   }
 
-  public void traceLine(Object classData, int line) {
-    if (myTrace != null) {
-      synchronized (myTrace) {
-        boolean[] lines = myTrace.get(classData);
-        if (lines == null) {
-          lines = new boolean[line + 20];
-          myTrace.put(classData, lines);
-        }
-        if (lines.length <= line) {
-          boolean[] longLines = new boolean[line + 20];
-          System.arraycopy(lines, 0, longLines, 0, lines.length);
-          lines = longLines;
-          myTrace.put(classData, lines);
-        }
-        lines[line] = true;
-      }
-    }
-  }
   // ----------------------------------------------------------------------------------------------- //
 
   private static class MethodCaller {

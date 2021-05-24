@@ -34,6 +34,7 @@ public class ClassData implements CoverageData {
 
   /** Storage for line and branch hits in new tracing mode. */
   private volatile int[] myHitsMask;
+  private volatile boolean[] myLinesTrace;
 
   public ClassData(final String name) {
     myClassName = name;
@@ -114,6 +115,26 @@ public class ClassData implements CoverageData {
       }
       lineData.merge(mergedData);
     }
+  }
+
+  /** Set line traced. Creates trace array if null.
+   * @return a trace array if it had been created, else null
+   */
+  public boolean[] traceLine(int line) {
+    boolean[] linesTrace = myLinesTrace;
+    boolean[] result = null;
+    if (linesTrace == null) {
+      synchronized (this) {
+        linesTrace = myLinesTrace;
+        if (linesTrace == null) {
+          linesTrace = new boolean[myLinesArray.length];
+          myLinesTrace = linesTrace;
+          result = linesTrace;
+        }
+      }
+    }
+    linesTrace[line] = true;
+    return result;
   }
 
   public void touchLine(int line) {
@@ -376,5 +397,9 @@ public class ClassData implements CoverageData {
       ErrorReporter.reportError("Unexpected error during applying branch data to class " + getName(), e);
     }
     myHitsMask = null;
+  }
+
+  public void clearTrace() {
+    myLinesTrace = null;
   }
 }

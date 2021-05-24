@@ -34,7 +34,6 @@ internal class KotlinTestTrackingTracingTest : KotlinAbstractTestTrackingTest() 
     override val coverage = Coverage.TRACING
 }
 
-@Ignore("not implemented")
 internal class KotlinTestTrackingNewTracingTest : KotlinAbstractTestTrackingTest() {
     override val coverage = Coverage.NEW_TRACING
 }
