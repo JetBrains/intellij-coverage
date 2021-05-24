@@ -19,6 +19,7 @@ package com.intellij.rt.coverage
 import com.intellij.rt.coverage.data.ClassData
 import com.intellij.rt.coverage.data.LineData
 import com.intellij.rt.coverage.data.ProjectData
+import com.intellij.rt.coverage.util.TestTrackingIOUtil
 import org.junit.Assert
 import java.io.File
 import java.nio.file.Paths
@@ -30,7 +31,7 @@ enum class Coverage {
 internal const val TEST_PACKAGE = "kotlinTestData"
 internal const val IGNORE_UTIL_PRIVATE_CONSTRUCTOR_OPTION = "-Dcoverage.ignore.private.constructor.util.class=true"
 
-fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false,
+fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false, testTracking: Boolean = false,
                     patterns: String = "$TEST_PACKAGE.*", extraArgs: MutableList<String> = mutableListOf()): ProjectData {
     val classPath = System.getProperty("java.class.path")
     when (coverage) {
@@ -39,13 +40,18 @@ fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage
     }
     val sampling = coverage == Coverage.SAMPLING || coverage == Coverage.NEW_SAMPLING
     return CoverageStatusTest.runCoverage(classPath, coverageDataFile, patterns, "kotlinTestData.$testName.Test",
-            sampling, extraArgs.toTypedArray(), calcUnloaded)
+            sampling, extraArgs.toTypedArray(), calcUnloaded, testTracking)
 }
 
 internal fun assertEqualsLines(project: ProjectData, expectedLines: Map<Int, String>, classNames: List<String>) {
     val actualCoverage = coverageLines(project, classNames)
     logCoverageDiff(expectedLines, actualCoverage)
     Assert.assertEquals(expectedLines, actualCoverage)
+}
+
+internal fun assertEqualsTestTracking(coverageDataFile: File, expected: Map<Int, Set<String>>, classNames: List<String>) {
+    val actual = testTrackingLines(coverageDataFile, classNames)
+    Assert.assertEquals(expected, actual)
 }
 
 internal const val all = "ALL CLASSES"
@@ -61,6 +67,30 @@ private fun coverageLines(project: ProjectData, classNames: List<String>): Map<I
     }
     val lines = allData.getLinesData().associateBy({ it.lineNumber }, { it.status.toByte() })
     return statusToString(lines)
+}
+
+private fun testTrackingLines(coverageDataFile: File, classNames: List<String>): Map<Int, Set<String>> {
+    val result = hashMapOf<Int, MutableSet<String>>()
+    val data = loadTestTrackingData(coverageDataFile)
+    for ((testName, testData) in data) {
+        for ((className, coveredLines) in testData) {
+            if (all in classNames || className in classNames) {
+                for (line in coveredLines) {
+                    result.computeIfAbsent(line) { hashSetOf() }.add(testName)
+                }
+            }
+        }
+    }
+    return result
+}
+
+private fun loadTestTrackingData(coverageDataFile: File): Map<String, Map<String, IntArray>> {
+    val tracesDir = ProjectData.createTracesDir(coverageDataFile)
+    return try {
+        TestTrackingIOUtil.loadTestTrackingData(tracesDir)
+    } finally {
+        tracesDir.deleteRecursively()
+    }
 }
 
 internal fun getLineHits(data: ClassData, line: Int) = data.getLinesData().single { it.lineNumber == line }.hits
@@ -112,12 +142,18 @@ private fun statusToString(lines: Map<Int, Byte>) = lines.mapValues {
 private fun ClassData.getLinesData() = lines.filterIsInstance(LineData::class.java).sortedBy { it.lineNumber }
 
 private val coverageMarkerRegex = Regex("// coverage: (FULL|PARTIAL|NONE)( .*)?\$")
+private val testTrackingMarkerRegex = Regex("// tests: (.*)\$")
 
-internal fun extractCoverageDataFromFile(file: File): Map<Int, String> = file.bufferedReader()
+internal fun extractCoverageDataFromFile(file: File): Map<Int, String> = findMatches(file, coverageMarkerRegex)
+        .mapValues { it.value!!.groupValues[1] }
+
+internal fun extractTestTrackingDataFromFile(file: File): Map<Int, Set<String>> = findMatches(file, testTrackingMarkerRegex)
+        .mapValues { it.value!!.groupValues[1].split(' ').toSet() }
+
+private fun findMatches(file: File, regex: Regex) = file.bufferedReader()
         .lineSequence()
-        .mapIndexed { index, s -> index + 1 to coverageMarkerRegex.find(s) }
+        .mapIndexed { index, s -> index + 1 to regex.find(s) }
         .filter { it.second != null }
         .toMap()
-        .mapValues { it.value!!.groupValues[1] }
 
 internal fun pathToFile(name: String, vararg names: String): File = Paths.get(name, *names).toFile()

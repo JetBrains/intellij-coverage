@@ -18,6 +18,7 @@ package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
+import com.intellij.rt.coverage.util.TestTrackingIOUtil;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -172,39 +173,12 @@ public class ProjectData implements CoverageData, Serializable {
  // --------------- used from listeners --------------------- //
  public void testEnded(final String name) {
    if (myTrace == null) return;
-   final File traceFile = new File(getTracesDir(), name + ".tr");
+   File tracesDir = getTracesDir();
    try {
-     if (!traceFile.exists()) {
-       traceFile.createNewFile();
-     }
-     DataOutputStream os = null;
-     try {
-       os = new DataOutputStream(new FileOutputStream(traceFile));
-       os.writeInt(myTrace.size());
-       for (Object classData : myTrace.keySet()) {
-         os.writeUTF(classData.toString());
-         final boolean[] lines = myTrace.get(classData);
-         int numberOfTraces = 0;
-         for (boolean line : lines) {
-           if (line) numberOfTraces++;
-         }
-         os.writeInt(numberOfTraces);
-         for (int idx = 0; idx < lines.length; idx++) {
-           final boolean incl = lines[idx];
-           if (incl) {
-             os.writeInt(idx);
-           }
-         }
-       }
-     }
-     finally {
-       if (os != null) {
-         os.close();
-       }
-     }
+     TestTrackingIOUtil.saveTestResults(tracesDir, name, myTrace);
    }
    catch (IOException e) {
-     ErrorReporter.reportError("Error writing traces to file " + traceFile.getPath(), e);
+     ErrorReporter.reportError("Error writing traces for test '" + name + "' to directory " + tracesDir.getPath(), e);
    }
    finally {
      myTrace = null;
@@ -220,15 +194,20 @@ public class ProjectData implements CoverageData, Serializable {
 
   private File getTracesDir() {
     if (myTracesDir == null) {
-      final String fileName = myDataFile.getName();
-      final int i = fileName.lastIndexOf('.');
-      final String dirName = i != -1 ? fileName.substring(0, i) : fileName;
-      myTracesDir = new File(myDataFile.getParent(), dirName);
-      if (!myTracesDir.exists()) {
-        myTracesDir.mkdirs();
-      }
+      myTracesDir = createTracesDir(myDataFile);
     }
     return myTracesDir;
+  }
+
+  public static File createTracesDir(File dataFile) {
+    final String fileName = dataFile.getName();
+    final int i = fileName.lastIndexOf('.');
+    final String dirName = i != -1 ? fileName.substring(0, i) : fileName;
+    final File result = new File(dataFile.getParent(), dirName);
+    if (!result.exists()) {
+      result.mkdirs();
+    }
+    return result;
   }
 
   public static String getCurrentTestName() {

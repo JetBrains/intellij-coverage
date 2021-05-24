@@ -221,17 +221,17 @@ public class CoverageStatusTest extends TestCase {
 
   public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
                                  String classToRun, final boolean sampling) throws IOException, InterruptedException {
-    return runCoverage(testDataPath, coverageDataFile, patterns, classToRun, sampling, EMPTY, false);
+    return runCoverage(testDataPath, coverageDataFile, patterns, classToRun, sampling, EMPTY, false, false);
   }
 
   static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
-                                 String classToRun, final boolean sampling, String[] extraArgs, boolean calcUnloaded) throws IOException, InterruptedException {
+                                 String classToRun, final boolean sampling, String[] extraArgs, boolean calcUnloaded, boolean testTracking) throws IOException, InterruptedException {
     String coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent");
 
     String[] commandLine = {
 //        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
-        "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" false " + calcUnloaded + " false "
-            + sampling + " " + patterns,
+        "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" "
+            + testTracking + " " + calcUnloaded + " false " + sampling + " " + patterns,
         "-classpath", testDataPath, classToRun};
     if (extraArgs.length > 0) {
       String[] args = new String[extraArgs.length + commandLine.length];
