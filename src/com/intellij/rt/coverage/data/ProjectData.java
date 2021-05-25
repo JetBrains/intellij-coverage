@@ -33,12 +33,15 @@ import java.util.regex.Pattern;
 public class ProjectData implements CoverageData, Serializable {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/ProjectData";
 
+  // ClassData methods
   private static final MethodCaller TOUCH_LINE_METHOD = new MethodCaller("touchLine", new Class[] {int.class});
   private static final MethodCaller GET_LINE_MASK_METHOD = new MethodCaller("getLineMask", new Class[0]);
   private static final MethodCaller GET_HITS_MASK_METHOD = new MethodCaller("getHitsMask", new Class[0]);
   private static final MethodCaller TOUCH_SWITCH_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, int.class});
   private static final MethodCaller TOUCH_JUMP_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, boolean.class});
   private static final MethodCaller TOUCH_METHOD = new MethodCaller("touch", new Class[] {int.class});
+
+  // ProjectData methods
   private static final MethodCaller GET_CLASS_DATA_METHOD = new MethodCaller("getClassData", new Class[]{String.class});
   private static final MethodCaller TRACE_LINE_METHOD = new MethodCaller("traceLine", new Class[]{Object.class, int.class});
 
@@ -325,8 +328,7 @@ public class ProjectData implements CoverageData, Serializable {
       return ourProjectData.getClassData(className).getLineMask();
     }
     try {
-      final Object projectDataObject = getProjectDataObject();
-      Object classData = GET_CLASS_DATA_METHOD.invoke(projectDataObject, new Object[]{className});
+      final Object classData = getClassDataObject(className);
       return (int[]) touch(GET_LINE_MASK_METHOD, classData, new Object[0]);
     } catch (Exception e) {
       ErrorReporter.reportError("Error in class data loading: " + className, e);
@@ -339,8 +341,7 @@ public class ProjectData implements CoverageData, Serializable {
       return ourProjectData.getClassData(className).getHitsMask();
     }
     try {
-      final Object projectDataObject = getProjectDataObject();
-      Object classData = GET_CLASS_DATA_METHOD.invoke(projectDataObject, new Object[]{className});
+      final Object classData = getClassDataObject(className);
       return (int[]) touch(GET_HITS_MASK_METHOD, classData, new Object[0]);
     } catch (Exception e) {
       ErrorReporter.reportError("Error in class data access: " + className, e);
@@ -353,8 +354,7 @@ public class ProjectData implements CoverageData, Serializable {
       return ourProjectData.getClassData(className);
     }
     try {
-      final Object projectDataObject = getProjectDataObject();
-      return GET_CLASS_DATA_METHOD.invoke(projectDataObject, new Object[]{className});
+      return getClassDataObject(className);
     } catch (Exception e) {
       ErrorReporter.reportError("Error in class data loading: " + className, e);
       return null;
@@ -367,6 +367,11 @@ public class ProjectData implements CoverageData, Serializable {
       ourProjectDataObject = projectDataClass.getDeclaredField("ourProjectData").get(null);
     }
     return ourProjectDataObject;
+  }
+
+  private static Object getClassDataObject(String className) throws Exception {
+    final Object projectDataObject = getProjectDataObject();
+    return GET_CLASS_DATA_METHOD.invoke(projectDataObject, new Object[]{className});
   }
 
   // ----------------------------------------------------------------------------------------------- //

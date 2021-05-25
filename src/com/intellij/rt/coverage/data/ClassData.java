@@ -34,7 +34,8 @@ public class ClassData implements CoverageData {
 
   /** Storage for line and branch hits in new tracing mode. */
   private volatile int[] myHitsMask;
-  private volatile boolean[] myLinesTrace;
+  /** Storage for test tracking data. */
+  private volatile boolean[] myTraceMask;
 
   public ClassData(final String name) {
     myClassName = name;
@@ -117,18 +118,19 @@ public class ClassData implements CoverageData {
     }
   }
 
-  /** Set line traced. Creates trace array if null.
+  /**
+   * Set line traced. Creates trace array if null.
    * @return a trace array if it had been created, else null
    */
   public boolean[] traceLine(int line) {
-    boolean[] linesTrace = myLinesTrace;
+    boolean[] linesTrace = myTraceMask;
     boolean[] result = null;
     if (linesTrace == null) {
       synchronized (this) {
-        linesTrace = myLinesTrace;
+        linesTrace = myTraceMask;
         if (linesTrace == null) {
           linesTrace = new boolean[myLinesArray.length];
-          myLinesTrace = linesTrace;
+          myTraceMask = linesTrace;
           result = linesTrace;
         }
       }
@@ -400,6 +402,6 @@ public class ClassData implements CoverageData {
   }
 
   public void clearTrace() {
-    myLinesTrace = null;
+    myTraceMask = null;
   }
 }
