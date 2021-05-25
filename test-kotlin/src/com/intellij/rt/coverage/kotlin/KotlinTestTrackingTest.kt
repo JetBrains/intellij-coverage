@@ -17,7 +17,6 @@
 package com.intellij.rt.coverage.kotlin
 
 import com.intellij.rt.coverage.Coverage
-import org.junit.Ignore
 import org.junit.Test
 
 internal abstract class KotlinAbstractTestTrackingTest : KotlinCoverageStatusTest() {
