@@ -24,7 +24,6 @@ import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
-import org.jetbrains.coverage.org.objectweb.asm.util.CheckClassAdapter;
 
 import java.util.List;
 import java.util.regex.Pattern;
