@@ -50,8 +50,6 @@ public class ProjectData implements CoverageData, Serializable {
   public static ProjectData ourProjectData;
   private File myDataFile;
 
-  /** @noinspection UnusedDeclaration*/
-  private String myCurrentTestName;
   private boolean myTraceLines;
   private boolean mySampling;
   private Map<Object, boolean[]> myTrace;
@@ -177,34 +175,32 @@ public class ProjectData implements CoverageData, Serializable {
     myLinesMap.put(className, fileDatas);
   }
 
- // --------------- used from listeners --------------------- //
- public void testEnded(final String name) {
-   final Map<Object, boolean[]> trace =  myTrace;
-   myTrace = null;
-   if (trace == null) return;
-   for (Map.Entry<Object, boolean[]> entry : trace.entrySet()) {
-     final ClassData classData = (ClassData)entry.getKey();
-     classData.clearTrace();
-     final boolean[] touched = entry.getValue();
-     final Object[] lines = classData.getLines();
-     final int lineCount = Math.min(lines.length, touched.length);
-     for (int i = 0; i < lineCount; i++) {
-       final LineData lineData = (LineData) lines[i];
-       if (lineData == null || !touched[i]) continue;
-       lineData.setTestName(name);
-     }
-   }
-   File tracesDir = getTracesDir();
-   try {
-     TestTrackingIOUtil.saveTestResults(tracesDir, name, trace);
-   }
-   catch (IOException e) {
-     ErrorReporter.reportError("Error writing traces for test '" + name + "' to directory " + tracesDir.getPath(), e);
-   }
- }
+  // --------------- used from listeners --------------------- //
+  public void testEnded(final String name) {
+    final Map<Object, boolean[]> trace = myTrace;
+    myTrace = null;
+    if (trace == null) return;
+    for (Map.Entry<Object, boolean[]> entry : trace.entrySet()) {
+      final ClassData classData = (ClassData) entry.getKey();
+      classData.clearTrace();
+      final boolean[] touched = entry.getValue();
+      final Object[] lines = classData.getLines();
+      final int lineCount = Math.min(lines.length, touched.length);
+      for (int i = 0; i < lineCount; i++) {
+        final LineData lineData = (LineData) lines[i];
+        if (lineData == null || !touched[i]) continue;
+        lineData.setTestName(name);
+      }
+    }
+    File tracesDir = getTracesDir();
+    try {
+      TestTrackingIOUtil.saveTestResults(tracesDir, name, trace);
+    } catch (IOException e) {
+      ErrorReporter.reportError("Error writing traces for test '" + name + "' to directory " + tracesDir.getPath(), e);
+    }
+  }
 
   public void testStarted(final String name) {
-    myCurrentTestName = name;
     if (myTraceLines) myTrace = new ConcurrentHashMap<Object, boolean[]>();
   }
   //---------------------------------------------------------- //
@@ -226,16 +222,6 @@ public class ProjectData implements CoverageData, Serializable {
       result.mkdirs();
     }
     return result;
-  }
-
-  public static String getCurrentTestName() {
-    try {
-      final Object projectDataObject = getProjectDataObject();
-      return (String) projectDataObject.getClass().getDeclaredField("myCurrentTestName").get(projectDataObject);
-    } catch (Exception e) {
-      ErrorReporter.reportError("Current test name was not retrieved:", e);
-      return null;
-    }
   }
 
   /** @noinspection UnusedDeclaration*/
