@@ -118,7 +118,6 @@ public class ClassData implements CoverageData {
     }
   }
 
-
   public void touchLine(int line) {
     myLineMask[line]++;
   }

@@ -399,7 +399,6 @@ public class ProjectData implements CoverageData, Serializable {
       }
     }
   }
-
   // ----------------------------------------------------------------------------------------------- //
 
   private static class MethodCaller {
