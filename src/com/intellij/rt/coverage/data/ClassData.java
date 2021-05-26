@@ -118,26 +118,6 @@ public class ClassData implements CoverageData {
     }
   }
 
-  /**
-   * Set line traced. Creates trace array if null.
-   * @return a trace array if it had been created, else null
-   */
-  public boolean[] traceLine(int line) {
-    boolean[] linesTrace = myTraceMask;
-    boolean[] result = null;
-    if (linesTrace == null) {
-      synchronized (this) {
-        linesTrace = myTraceMask;
-        if (linesTrace == null) {
-          linesTrace = new boolean[myLinesArray.length];
-          myTraceMask = linesTrace;
-          result = linesTrace;
-        }
-      }
-    }
-    linesTrace[line] = true;
-    return result;
-  }
 
   public void touchLine(int line) {
     myLineMask[line]++;

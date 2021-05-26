@@ -42,6 +42,7 @@ public class ProjectData implements CoverageData, Serializable {
   // ProjectData methods
   private static final MethodCaller GET_CLASS_DATA_METHOD = new MethodCaller("getClassData", new Class[]{String.class});
   private static final MethodCaller REGISTER_CLASS_FOR_TRACE_METHOD = new MethodCaller("registerClassForTrace", new Class[]{Object.class});
+  private static final MethodCaller TRACE_LINE_METHOD = new MethodCaller("traceLine", new Class[]{Object.class, int.class});
 
   private static boolean ourStopped = false;
 
@@ -269,15 +270,21 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public static void trace(Object classData, int line) {
-//    traceLine(classData, line);
     if (ourProjectData != null) {
       ((ClassData) classData).touch(line);
+      ourProjectData.traceLine(classData, line);
       return;
     }
 
     touch(TOUCH_METHOD,
           classData,
           new Object[]{line});
+    try {
+      final Object projectData = getProjectDataObject();
+      TRACE_LINE_METHOD.invoke(projectData, new Object[]{classData, line});
+    } catch (Exception e) {
+      ErrorReporter.reportError("Error tracing class " + classData.toString(), e);
+    }
   }
 
   public static void registerClassForTrace(Object classData) {
@@ -372,6 +379,25 @@ public class ProjectData implements CoverageData, Serializable {
   private static Object getClassDataObject(String className) throws Exception {
     final Object projectDataObject = getProjectDataObject();
     return GET_CLASS_DATA_METHOD.invoke(projectDataObject, new Object[]{className});
+  }
+
+  public void traceLine(Object classData, int line) {
+    if (myTrace != null) {
+      synchronized (myTrace) {
+        boolean[] lines = myTrace.get(classData);
+        if (lines == null) {
+          lines = new boolean[line + 20];
+          myTrace.put(classData, lines);
+        }
+        if (lines.length <= line) {
+          boolean[] longLines = new boolean[line + 20];
+          System.arraycopy(lines, 0, longLines, 0, lines.length);
+          lines = longLines;
+          myTrace.put(classData, lines);
+        }
+        lines[line] = true;
+      }
+    }
   }
 
   // ----------------------------------------------------------------------------------------------- //
