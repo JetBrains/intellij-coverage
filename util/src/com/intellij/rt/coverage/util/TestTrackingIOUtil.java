@@ -34,11 +34,11 @@ public class TestTrackingIOUtil {
         os.writeUTF(entry.getKey().toString());
         final boolean[] lines = entry.getValue();
         int numberOfTraces = 0;
-        for (boolean line : lines) {
-          if (line) numberOfTraces++;
+        for (int idx = 1; idx < lines.length; idx++) {
+          if (lines[idx]) numberOfTraces++;
         }
         os.writeInt(numberOfTraces);
-        for (int idx = 0; idx < lines.length; idx++) {
+        for (int idx = 1; idx < lines.length; idx++) {
           final boolean incl = lines[idx];
           if (incl) {
             os.writeInt(idx);

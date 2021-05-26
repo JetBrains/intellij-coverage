@@ -342,12 +342,25 @@ public class ClassData implements CoverageData {
     myHitsMask = newMask;
   }
 
+  public synchronized void createTraceMask(int size) {
+    if (myTraceMask != null && myTraceMask.length >= size) return;
+    final boolean[] newMask = new boolean[size];
+    if (myTraceMask != null) {
+      System.arraycopy(newMask, 0, myTraceMask, 0, myTraceMask.length);
+    }
+    myTraceMask = newMask;
+  }
+
   public int[] getLineMask() {
     return myLineMask;
   }
 
   public int[] getHitsMask() {
     return myHitsMask;
+  }
+
+  public boolean[] getTraceMask() {
+    return myTraceMask;
   }
 
   public void applyBranches() {
@@ -399,9 +412,5 @@ public class ClassData implements CoverageData {
       ErrorReporter.reportError("Unexpected error during applying branch data to class " + getName(), e);
     }
     myHitsMask = null;
-  }
-
-  public void clearTrace() {
-    myTraceMask = null;
   }
 }

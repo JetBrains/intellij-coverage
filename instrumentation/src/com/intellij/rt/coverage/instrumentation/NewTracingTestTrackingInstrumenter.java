@@ -25,14 +25,19 @@ public class NewTracingTestTrackingInstrumenter extends NewTracingInstrumenter {
   private static final String CLASS_DATA_FIELD_NAME = "__$classData$__";
   private static final String CLASS_DATA_FIELD_TYPE = "Ljava/lang/Object;";
   private static final String CLASS_DATA_FIELD_INIT_NAME = "__$classDataInit$__";
-  private static final String CLASS_DATA_LOCAL_VARIABLE_NAME = "__$localClassData$__";
+  private static final String TRACE_MASK_FIELD_NAME = "__$traceMask$__";
+  private static final String TRACE_MASK_FIELD_TYPE = "[Z";
+  private static final String TRACE_MASK_FIELD_INIT_NAME = "__$traceMaskInit$__";
+  private static final String TRACE_MASK_LOCAL_VARIABLE_NAME = "__$traceMaskLocal$__";
   private static final String CLASS_INIT = "<clinit>";
 
-  private final ExtraFieldInstrumenter myExtraFieldInstrumenter;
+  private final ExtraFieldInstrumenter myExtraClassDataFieldInstrumenter;
+  private final ExtraFieldInstrumenter myExtraTraceMaskFieldInstrumenter;
 
   public NewTracingTestTrackingInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource) {
     super(projectData, classVisitor, cr, className, shouldCalculateSource);
-    myExtraFieldInstrumenter = new ExtraFieldTestTrackingInstrumenter(cr, className);
+    myExtraClassDataFieldInstrumenter = new ExtraClassDataFieldTestTrackingInstrumenter(cr, className);
+    myExtraTraceMaskFieldInstrumenter = new ExtraTraceMaskFieldTestTrackingInstrumenter(cr, className);
   }
 
 
@@ -45,39 +50,69 @@ public class NewTracingTestTrackingInstrumenter extends NewTracingInstrumenter {
                                           final String desc,
                                           final String className) {
     mv = super.createTouchCounter(mv, branchData, enumerator, access, name, desc, className);
-    if (myExtraFieldInstrumenter.isInterface() && CLASS_INIT.equals(name)) {
-      return myExtraFieldInstrumenter.createMethodVisitor(this, mv, mv, name);
+    if (myExtraClassDataFieldInstrumenter.isInterface() && CLASS_INIT.equals(name)) {
+      final MethodVisitor mv1 = myExtraClassDataFieldInstrumenter.createMethodVisitor(this, mv, mv, name);
+      return myExtraTraceMaskFieldInstrumenter.createMethodVisitor(this, mv1, mv1, name);
     }
     if (!enumerator.hasExecutableLines()) return mv;
-    final MethodVisitor visitor = new LocalVariableInserter(mv, access, desc, CLASS_DATA_LOCAL_VARIABLE_NAME, CLASS_DATA_FIELD_TYPE) {
+    final MethodVisitor visitor = new LocalVariableInserter(mv, access, desc, TRACE_MASK_LOCAL_VARIABLE_NAME, TRACE_MASK_FIELD_TYPE) {
       public void visitLineNumber(final int line, final Label start) {
         LineData lineData = getLineData(line);
         if (lineData != null) {
+          // load trace mask array
           mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+
+          // check if register method should be called. array[0] == false => register has not been called
+          mv.visitInsn(Opcodes.DUP);
+          mv.visitInsn(Opcodes.ICONST_0);
+          mv.visitInsn(Opcodes.BALOAD);
+          final Label skip = new Label();
+          mv.visitJumpInsn(Opcodes.IFNE, skip);
+
+          // call register and set array[0] = true
+          mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraClassDataFieldInstrumenter.getInternalClassName(), CLASS_DATA_FIELD_NAME, CLASS_DATA_FIELD_TYPE);
+          mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "registerClassForTrace", "(Ljava/lang/Object;)V", false);
+          mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+          mv.visitInsn(Opcodes.ICONST_0);
+          mv.visitInsn(Opcodes.ICONST_1);
+          mv.visitInsn(Opcodes.BASTORE);
+
+          mv.visitLabel(skip);
+
+          // load true value, stack: array. do: array[line] = true
           InstrumentationUtils.pushInt(mv, line);
-          mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "traceLine", "(Ljava/lang/Object;I)V", false);
+          mv.visitInsn(Opcodes.ICONST_1);
+          mv.visitInsn(Opcodes.BASTORE);
         }
         super.visitLineNumber(line, start);
       }
 
       public void visitCode() {
-        mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraFieldInstrumenter.getInternalClassName(), CLASS_DATA_FIELD_NAME, CLASS_DATA_FIELD_TYPE);
+        mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraTraceMaskFieldInstrumenter.getInternalClassName(), TRACE_MASK_FIELD_NAME, TRACE_MASK_FIELD_TYPE);
         mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
         super.visitCode();
       }
     };
-    return myExtraFieldInstrumenter.createMethodVisitor(this, mv, visitor, name);
+    final MethodVisitor mv1 = myExtraClassDataFieldInstrumenter.createMethodVisitor(this, mv, visitor, name);
+    return myExtraTraceMaskFieldInstrumenter.createMethodVisitor(this, mv, mv1, name);
   }
 
   @Override
   public void visitEnd() {
-    myExtraFieldInstrumenter.generateMembers(this);
+    myExtraClassDataFieldInstrumenter.generateMembers(this);
+    myExtraTraceMaskFieldInstrumenter.generateMembers(this);
     super.visitEnd();
   }
 
-  private class ExtraFieldTestTrackingInstrumenter extends ExtraFieldInstrumenter {
+  @Override
+  protected void initLineData() {
+    myClassData.createTraceMask(myMaxLineNumber + 1);
+    super.initLineData();
+  }
 
-    public ExtraFieldTestTrackingInstrumenter(ClassReader cr, String className) {
+  private class ExtraClassDataFieldTestTrackingInstrumenter extends ExtraFieldInstrumenter {
+
+    public ExtraClassDataFieldTestTrackingInstrumenter(ClassReader cr, String className) {
       super(cr, null, className, CLASS_DATA_FIELD_NAME, CLASS_DATA_FIELD_TYPE, CLASS_DATA_FIELD_INIT_NAME, true);
     }
 
@@ -88,7 +123,24 @@ public class NewTracingTestTrackingInstrumenter extends NewTracingInstrumenter {
       mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)Ljava/lang/Object;", false);
 
       //save ClassData
-      mv.visitFieldInsn(Opcodes.PUTSTATIC, myExtraFieldInstrumenter.getInternalClassName(), CLASS_DATA_FIELD_NAME, CLASS_DATA_FIELD_TYPE);
+      mv.visitFieldInsn(Opcodes.PUTSTATIC, myExtraClassDataFieldInstrumenter.getInternalClassName(), CLASS_DATA_FIELD_NAME, CLASS_DATA_FIELD_TYPE);
+    }
+  }
+
+  private class ExtraTraceMaskFieldTestTrackingInstrumenter extends ExtraFieldInstrumenter {
+
+    public ExtraTraceMaskFieldTestTrackingInstrumenter(ClassReader cr, String className) {
+      super(cr, null, className, TRACE_MASK_FIELD_NAME, TRACE_MASK_FIELD_TYPE, TRACE_MASK_FIELD_INIT_NAME, true);
+    }
+
+    public void initField(MethodVisitor mv) {
+      mv.visitLdcInsn(getClassName());
+
+      //get trace mask array
+      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "getTraceMask", "(Ljava/lang/String;)[Z", false);
+
+      //save trace mask array
+      mv.visitFieldInsn(Opcodes.PUTSTATIC, myExtraTraceMaskFieldInstrumenter.getInternalClassName(), TRACE_MASK_FIELD_NAME, TRACE_MASK_FIELD_TYPE);
     }
   }
 }
