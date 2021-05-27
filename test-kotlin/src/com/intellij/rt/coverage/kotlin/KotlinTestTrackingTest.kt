@@ -17,6 +17,11 @@
 package com.intellij.rt.coverage.kotlin
 
 import com.intellij.rt.coverage.Coverage
+import com.intellij.rt.coverage.TEST_PACKAGE
+import com.intellij.rt.coverage.runWithCoverage
+import com.intellij.rt.coverage.testTrackingLines
+import kotlinTestData.testTracking.threadSafe.CALLS_PER_LINE
+import org.junit.Assert
 import org.junit.Test
 
 internal abstract class KotlinAbstractTestTrackingTest : KotlinCoverageStatusTest() {
@@ -27,6 +32,24 @@ internal abstract class KotlinAbstractTestTrackingTest : KotlinCoverageStatusTes
 
     @Test
     fun testTwoTests() = test("testTracking.twoTests")
+
+    @Test
+    fun testManyTests() = testManyTests(1)
+
+    @Test
+    fun testThreadSafeStructure() = testManyTests(2)
+
+    private fun testManyTests(threads: Int) {
+        val testName = "testTracking.threadSafe"
+        runWithCoverage(myDataFile, testName, coverage, testTracking = true, patterns = "$TEST_PACKAGE.*", extraArgs = mutableListOf("-Dthreads=$threads"))
+        val fullClassNames = listOf("Class0", "Class1", "Class2", "Class3", "Class4", "Class5")
+                .map { "kotlinTestData.$testName.$it" }
+        val lines = testTrackingLines(myDataFile, fullClassNames)
+        Assert.assertEquals(5, lines.size)
+        if (threads == 1) {
+            lines.values.forEach { Assert.assertEquals(CALLS_PER_LINE, it.size) }
+        }
+    }
 }
 
 internal class KotlinTestTrackingTracingTest : KotlinAbstractTestTrackingTest() {

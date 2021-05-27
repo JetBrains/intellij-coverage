@@ -69,7 +69,7 @@ private fun coverageLines(project: ProjectData, classNames: List<String>): Map<I
     return statusToString(lines)
 }
 
-private fun testTrackingLines(coverageDataFile: File, classNames: List<String>): Map<Int, Set<String>> {
+internal fun testTrackingLines(coverageDataFile: File, classNames: List<String>): Map<Int, Set<String>> {
     val result = hashMapOf<Int, MutableSet<String>>()
     val data = loadTestTrackingData(coverageDataFile)
     for ((testName, testData) in data) {
