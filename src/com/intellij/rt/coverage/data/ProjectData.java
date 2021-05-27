@@ -382,21 +382,21 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public void traceLine(Object classData, int line) {
-    if (myTrace != null) {
-      synchronized (myTrace) {
-        boolean[] lines = myTrace.get(classData);
-        if (lines == null) {
-          lines = new boolean[line + 20];
-          myTrace.put(classData, lines);
-        }
-        if (lines.length <= line) {
-          boolean[] longLines = new boolean[line + 20];
-          System.arraycopy(lines, 0, longLines, 0, lines.length);
-          lines = longLines;
-          myTrace.put(classData, lines);
-        }
-        lines[line] = true;
+    final Map<Object, boolean[]> trace = myTrace;
+    if (trace == null) return;
+    synchronized (trace) {
+      boolean[] lines = trace.get(classData);
+      if (lines == null) {
+        lines = new boolean[line + 20];
+        trace.put(classData, lines);
       }
+      if (lines.length <= line) {
+        boolean[] longLines = new boolean[line + 20];
+        System.arraycopy(lines, 0, longLines, 0, lines.length);
+        lines = longLines;
+        trace.put(classData, lines);
+      }
+      lines[line] = true;
     }
   }
   // ----------------------------------------------------------------------------------------------- //
