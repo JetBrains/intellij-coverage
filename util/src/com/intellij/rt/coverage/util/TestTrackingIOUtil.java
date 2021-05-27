@@ -29,10 +29,18 @@ public class TestTrackingIOUtil {
     DataOutputStream os = null;
     try {
       os = new DataOutputStream(new FileOutputStream(traceFile));
-      os.writeInt(trace.size());
+      final int size = trace.size();
+      os.writeInt(size);
+      int entries = 0;
       for (Map.Entry<Object, boolean[]> entry : trace.entrySet()) {
+        // check how many classes were already written as the map size may be increased by another thread
+        if (entries >= size) break;
+        entries++;
         os.writeUTF(entry.getKey().toString());
-        final boolean[] lines = entry.getValue();
+        // copy lines array as it can be modified or cleared by another thread
+        final boolean[] oldLines = entry.getValue();
+        final boolean[] lines = new boolean[oldLines.length];
+        System.arraycopy(oldLines, 0, lines, 0, lines.length);
         int numberOfTraces = 0;
         for (int idx = 1; idx < lines.length; idx++) {
           if (lines[idx]) numberOfTraces++;

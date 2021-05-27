@@ -195,7 +195,7 @@ public class ProjectData implements CoverageData, Serializable {
           if (lineData == null || !touched[i]) continue;
           lineData.setTestName(name);
         }
-        Arrays.fill(touched, false);
+        touched[0] = false;
       }
     }
   }
@@ -287,24 +287,31 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
 
-  public static void registerClassForTrace(Object classData) {
+  /**
+   * Returns true if a test is running now, then the class has been registered.
+   */
+  public static boolean registerClassForTrace(Object classData) {
     if (ourProjectData != null) {
       final Map<Object, boolean[]> traces = ourProjectData.myTrace;
       if (traces != null) {
         boolean[] trace = ((ClassData)classData).getTraceMask();
         synchronized (classData) {
           if (!traces.containsKey(classData)) {
+            // clear trace before register for a new test to prevent reporting about code running between tests
+            Arrays.fill(trace, false);
             traces.put(classData, trace);
           }
         }
+        return true;
       }
-      return;
+      return false;
     }
     try {
       final Object projectData = getProjectDataObject();
-      REGISTER_CLASS_FOR_TRACE_METHOD.invoke(projectData, new Object[]{classData});
+      return (Boolean) REGISTER_CLASS_FOR_TRACE_METHOD.invoke(projectData, new Object[]{classData});
     } catch (Exception e) {
       ErrorReporter.reportError("Error tracing class " + classData.toString(), e);
+      return false;
     }
   }
 

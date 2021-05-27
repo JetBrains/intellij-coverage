@@ -69,9 +69,13 @@ public class NewTracingTestTrackingInstrumenter extends NewTracingInstrumenter {
           final Label skip = new Label();
           mv.visitJumpInsn(Opcodes.IFNE, skip);
 
-          // call register and set array[0] = true
+          // call register
           mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraClassDataFieldInstrumenter.getInternalClassName(), CLASS_DATA_FIELD_NAME, CLASS_DATA_FIELD_TYPE);
-          mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "registerClassForTrace", "(Ljava/lang/Object;)V", false);
+          mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "registerClassForTrace", "(Ljava/lang/Object;)Z", false);
+
+          // if register is successful set array[0] = true
+          // it may be unsuccessful if no test is running now
+          mv.visitJumpInsn(Opcodes.IFEQ, skip);
           mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
           mv.visitInsn(Opcodes.ICONST_0);
           mv.visitInsn(Opcodes.ICONST_1);
