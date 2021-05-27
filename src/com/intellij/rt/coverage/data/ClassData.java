@@ -34,7 +34,15 @@ public class ClassData implements CoverageData {
 
   /** Storage for line and branch hits in new tracing mode. */
   private volatile int[] myHitsMask;
-  /** Storage for test tracking data. */
+
+  /**
+   * Storage for test tracking data in new tracing mode.
+   * Zero element of this array is used as a flag for class registration for the current running test.
+   * Initially the flag is false, then during execution com.intellij.rt.coverage.data.ProjectData#registerClassForTrace(java.lang.Object) is called.
+   * When the registration is successful, the flag is set to true which means that there is no need to make registration calls.
+   * When the current test is ended, the flag is set to false.
+   * see also com.intellij.rt.coverage.instrumentation.NewTracingTestTrackingInstrumenter
+   */
   private volatile boolean[] myTraceMask;
 
   public ClassData(final String name) {
