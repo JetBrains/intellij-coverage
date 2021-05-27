@@ -38,9 +38,11 @@ public class TouchCounter extends LocalVariableInserter implements Opcodes {
 
 
   public void visitLineNumber(int line, Label start) {
-    mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
-    InstrumentationUtils.pushInt(mv, line);
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/Object;I)V", false);
+    if (myBranchData.getContext().getLineData(line) != null) {
+      mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+      InstrumentationUtils.pushInt(mv, line);
+      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "trace", "(Ljava/lang/Object;I)V", false);
+    }
     super.visitLineNumber(line, start);
   }
 
