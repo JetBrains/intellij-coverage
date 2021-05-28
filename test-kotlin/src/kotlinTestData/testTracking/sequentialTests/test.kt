@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package kotlinTestData.testTracking.threadSafe
+package kotlinTestData.testTracking.sequentialTests
 
 import kotlinTestData.testTracking.runTestTracking
 import java.util.concurrent.CyclicBarrier
-import kotlin.random.Random
+import java.util.concurrent.Executors
 import kotlin.system.exitProcess
 
-private fun doWork(limit: Int = Random.nextInt(1, 7)): Int {
+private fun doWork(limit: Int = 5): Int {
     var result = 1
     for (i in 1..limit) {
         result += doWork(limit - 1)
@@ -59,41 +59,42 @@ private class Class4 {
     }
 }
 
-private val threads = System.getProperty("threads").toInt()
-private const val TESTS = 5000
+private const val THREADS = 10
+internal const val TESTS = 1000
 private const val CLASSES = 5
-internal const val CALLS_PER_LINE = TESTS / CLASSES
 
 private val testMethods: List<() -> Any> = List(CLASSES) {
-    val clazz = Class.forName("kotlinTestData.testTracking.threadSafe.Class$it")
+    val clazz = Class.forName("kotlinTestData.testTracking.sequentialTests.Class$it")
     val instance = clazz.getConstructor().newInstance()
     val method = clazz.getMethod("foo")
     return@List { method.invoke(instance) }
 }
 
-private val tasks = List(threads) { iThread ->
+private val tasks = List(THREADS) { iClass ->
     Runnable {
         runCatching {
-            repeat(TESTS / threads) { iTask ->
-                val iTest = iThread * (TESTS / threads) + iTask
-                val iClass = iTest % CLASSES
-                runTestTracking("Test$iTest") {
-                    testMethods[iClass]()
-                }
-            }
+            testMethods[iClass % CLASSES]()
         }.onFailure { it.printStackTrace(System.err); exitProcess(1) }
         barrier.await()
     }
 }
 
-private val barrier = CyclicBarrier(threads + 1)
+private val barrier = CyclicBarrier(THREADS + 1)
 
 object Test {
     @JvmStatic
     fun main(args: Array<String>) {
-        repeat(threads) { i ->
-            Thread(tasks[i]).start()
+        testMethods
+        val pool = Executors.newFixedThreadPool(THREADS)
+        repeat(TESTS) { iTest ->
+            barrier.reset()
+            runTestTracking("Test$iTest") {
+                tasks.shuffled().forEach {
+                    pool.execute(it)
+                }
+                barrier.await()
+            }
         }
-        barrier.await()
+        check(pool.shutdownNow().isEmpty())
     }
 }

@@ -20,7 +20,8 @@ import com.intellij.rt.coverage.Coverage
 import com.intellij.rt.coverage.TEST_PACKAGE
 import com.intellij.rt.coverage.runWithCoverage
 import com.intellij.rt.coverage.testTrackingLines
-import kotlinTestData.testTracking.threadSafe.CALLS_PER_LINE
+import kotlinTestData.testTracking.parallelTests.CALLS_PER_LINE
+import kotlinTestData.testTracking.sequentialTests.TESTS
 import org.junit.Assert
 import org.junit.Test
 
@@ -40,15 +41,24 @@ internal abstract class KotlinAbstractTestTrackingTest : KotlinCoverageStatusTes
     fun testThreadSafeStructure() = testManyTests(2)
 
     private fun testManyTests(threads: Int) {
-        val testName = "testTracking.threadSafe"
+        val testName = "testTracking.parallelTests"
         runWithCoverage(myDataFile, testName, coverage, testTracking = true, patterns = "$TEST_PACKAGE.*", extraArgs = mutableListOf("-Dthreads=$threads"))
-        val fullClassNames = listOf("Class0", "Class1", "Class2", "Class3", "Class4", "Class5")
-                .map { "kotlinTestData.$testName.$it" }
+        val fullClassNames = listOf("Class0", "Class1", "Class2", "Class3", "Class4").map { "kotlinTestData.$testName.$it" }
         val lines = testTrackingLines(myDataFile, fullClassNames)
-        Assert.assertEquals(5, lines.size)
         if (threads == 1) {
+            Assert.assertEquals(5, lines.size)
             lines.values.forEach { Assert.assertEquals(CALLS_PER_LINE, it.size) }
         }
+    }
+
+    @Test
+    fun testSequentialTests() {
+        val testName = "testTracking.sequentialTests"
+        runWithCoverage(myDataFile, testName, coverage, testTracking = true, patterns = "$TEST_PACKAGE.*")
+        val fullClassNames = listOf("Class0", "Class1", "Class2", "Class3", "Class4").map { "kotlinTestData.$testName.$it" }
+        val lines = testTrackingLines(myDataFile, fullClassNames)
+        Assert.assertEquals(5, lines.size)
+        lines.values.forEach { Assert.assertEquals(TESTS, it.size) }
     }
 }
 
