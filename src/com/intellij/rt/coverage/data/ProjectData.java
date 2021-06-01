@@ -52,6 +52,12 @@ public class ProjectData implements CoverageData, Serializable {
 
   private boolean myTraceLines;
   private boolean mySampling;
+
+  /**
+   * Test tracking trace storage. Test tracking supports only sequential tests (but code inside one test could be parallel).
+   * Nevertheless in case of parallel tests run setting storage to null truncates coverage significantly.
+   * Using CAS for the storage update slightly improves test tracking coverage as the data are not cleared too frequently.
+   */
   private final AtomicReference<Map<Object, boolean[]>> myTrace = new AtomicReference<Map<Object, boolean[]>>();
   private File myTracesDir;
   private List<Pattern> myIncludePatterns;
@@ -195,6 +201,7 @@ public class ProjectData implements CoverageData, Serializable {
           if (lineData == null || !touched[i]) continue;
           lineData.setTestName(name);
         }
+        // reset coverage registration
         touched[0] = false;
       }
       myTrace.compareAndSet(trace, null);
