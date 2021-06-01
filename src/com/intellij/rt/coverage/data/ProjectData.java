@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 public class ProjectData implements CoverageData, Serializable {
@@ -51,7 +52,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   private boolean myTraceLines;
   private boolean mySampling;
-  private Map<Object, boolean[]> myTrace;
+  private final AtomicReference<Map<Object, boolean[]>> myTrace = new AtomicReference<Map<Object, boolean[]>>();
   private File myTracesDir;
   private List<Pattern> myIncludePatterns;
   private List<Pattern> myExcludePatterns;
@@ -176,8 +177,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   // --------------- used from listeners --------------------- //
   public void testEnded(final String name) {
-    final Map<Object, boolean[]> trace = myTrace;
-    myTrace = null;
+    final Map<Object, boolean[]> trace = myTrace.get();
     if (trace == null) return;
     File tracesDir = getTracesDir();
     try {
@@ -197,11 +197,12 @@ public class ProjectData implements CoverageData, Serializable {
         }
         touched[0] = false;
       }
+      myTrace.compareAndSet(trace, null);
     }
   }
 
   public void testStarted(final String name) {
-    if (myTraceLines) myTrace = new ConcurrentHashMap<Object, boolean[]>();
+    if (myTraceLines) myTrace.compareAndSet(null, new ConcurrentHashMap<Object, boolean[]>());
   }
   //---------------------------------------------------------- //
 
@@ -292,14 +293,13 @@ public class ProjectData implements CoverageData, Serializable {
    */
   public static boolean registerClassForTrace(Object classData) {
     if (ourProjectData != null) {
-      final Map<Object, boolean[]> traces = ourProjectData.myTrace;
+      final Map<Object, boolean[]> traces = ourProjectData.myTrace.get();
       if (traces != null) {
-        boolean[] trace = ((ClassData)classData).getTraceMask();
         synchronized (classData) {
-          if (!traces.containsKey(classData)) {
-            // clear trace before register for a new test to prevent reporting about code running between tests
+          final boolean[] trace = ((ClassData)classData).getTraceMask();
+          if (traces.put(classData, trace) == null) {
+            // clear trace on register for a new test to prevent reporting about code running between tests
             Arrays.fill(trace, false);
-            traces.put(classData, trace);
           }
         }
         return true;
@@ -389,7 +389,7 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public void traceLine(Object classData, int line) {
-    final Map<Object, boolean[]> trace = myTrace;
+    final Map<Object, boolean[]> trace = myTrace.get();
     if (trace == null) return;
     synchronized (trace) {
       boolean[] lines = trace.get(classData);
