@@ -195,7 +195,7 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
     mv.visitEnd();
   }
 
-  protected String getInternalClassName() {
+  public String getInternalClassName() {
     return myInternalClassName;
   }
 

@@ -16,9 +16,7 @@
 
 package com.intellij.rt.coverage.data;
 
-import com.intellij.rt.coverage.util.ClassNameUtil;
-import com.intellij.rt.coverage.util.ErrorReporter;
-import com.intellij.rt.coverage.util.TestTrackingIOUtil;
+import com.intellij.rt.coverage.util.*;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -68,6 +66,8 @@ public class ProjectData implements CoverageData, Serializable {
 
   private static Object ourProjectDataObject;
 
+  private TestTrackingCallback myTestTrackingCallback;
+
   public ClassData getClassData(final String name) {
     return myClasses.get(name);
   }
@@ -110,7 +110,8 @@ public class ProjectData implements CoverageData, Serializable {
                                               boolean traceLines,
                                               boolean isSampling,
                                               List<Pattern> includePatterns,
-                                              List<Pattern> excludePatterns) throws IOException {
+                                              List<Pattern> excludePatterns,
+                                              final TestTrackingCallback testTrackingCallback) throws IOException {
     ourProjectData = initialData == null ? new ProjectData() : initialData;
     if (dataFile != null && !dataFile.exists()) {
       final File parentDir = dataFile.getParentFile();
@@ -122,6 +123,7 @@ public class ProjectData implements CoverageData, Serializable {
     ourProjectData.myDataFile = dataFile;
     ourProjectData.myIncludePatterns = includePatterns;
     ourProjectData.myExcludePatterns = excludePatterns;
+    ourProjectData.myTestTrackingCallback = testTrackingCallback;
     return ourProjectData;
   }
 
@@ -201,8 +203,7 @@ public class ProjectData implements CoverageData, Serializable {
           if (lineData == null || !touched[i]) continue;
           lineData.setTestName(name);
         }
-        // reset coverage registration
-        touched[0] = false;
+        myTestTrackingCallback.clearTrace(classData);
       }
       myTrace.compareAndSet(trace, null);
     }
@@ -278,15 +279,28 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public static void trace(Object classData, int line) {
+    traceLine(classData, line);
     if (ourProjectData != null) {
       ((ClassData) classData).touch(line);
-      ourProjectData.traceLine(classData, line);
       return;
     }
 
     touch(TOUCH_METHOD,
           classData,
           new Object[]{line});
+  }
+
+  public static void traceLine(Object classData, int line) {
+    if (ourProjectData != null) {
+      final Map<Object, boolean[]> traces = ourProjectData.myTrace.get();
+      if (traces != null) {
+        final boolean[] lines = ourProjectData.myTestTrackingCallback.traceLine((ClassData) classData, line);
+        if (lines != null) {
+          traces.put(classData, lines);
+        }
+      }
+      return;
+    }
     try {
       final Object projectData = getProjectDataObject();
       TRACE_LINE_METHOD.invoke(projectData, new Object[]{classData, line});
@@ -395,24 +409,6 @@ public class ProjectData implements CoverageData, Serializable {
     return GET_CLASS_DATA_METHOD.invoke(projectDataObject, new Object[]{className});
   }
 
-  public void traceLine(Object classData, int line) {
-    final Map<Object, boolean[]> trace = myTrace.get();
-    if (trace == null) return;
-    synchronized (trace) {
-      boolean[] lines = trace.get(classData);
-      if (lines == null) {
-        lines = new boolean[line + 20];
-        trace.put(classData, lines);
-      }
-      if (lines.length <= line) {
-        boolean[] longLines = new boolean[line + 20];
-        System.arraycopy(lines, 0, longLines, 0, lines.length);
-        lines = longLines;
-        trace.put(classData, lines);
-      }
-      lines[line] = true;
-    }
-  }
   // ----------------------------------------------------------------------------------------------- //
 
   private static class MethodCaller {

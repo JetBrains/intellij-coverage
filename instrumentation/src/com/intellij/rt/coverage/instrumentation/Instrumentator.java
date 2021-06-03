@@ -17,6 +17,10 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.testTracking.NoTestTrackingMode;
+import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingArrayMode;
+import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingClassDataMode;
+import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.ReportFormat;
@@ -123,7 +127,8 @@ public class Instrumentator {
       }
     }
 
-    final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling, includePatterns, excludePatterns);
+    final TestTrackingMode testTrackingMode = createTestTrackingMode(traceLines);
+    final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling, includePatterns, excludePatterns, testTrackingMode.createTestTrackingCallback());
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
     if (dataFile != null) {
       final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf, reportFormat);
@@ -132,7 +137,7 @@ public class Instrumentator {
     }
 
     final boolean shouldCalculateSource = sourceMapFile != null || reportFormat == ReportFormat.XML;
-    instrumentation.addTransformer(new CoverageClassfileTransformer(data, shouldCalculateSource, excludePatterns, includePatterns, cf));
+    instrumentation.addTransformer(new CoverageClassfileTransformer(data, shouldCalculateSource, excludePatterns, includePatterns, cf, testTrackingMode));
   }
 
   /**
@@ -146,6 +151,15 @@ public class Instrumentator {
       System.err.println("XML report is available if JDK version is higher than 6. javax.xml.stream.* classes were not found.");
       System.exit(1);
     }
+  }
+
+  private TestTrackingMode createTestTrackingMode(boolean traceLines) {
+    if (!traceLines) return new NoTestTrackingMode();
+    if (System.getProperty("idea.new.tracing.coverage") != null &&
+        "true".equals(System.getProperty("idea.new.test.tracking.coverage", "true"))) {
+      return new TestTrackingArrayMode();
+    }
+    return new TestTrackingClassDataMode();
   }
 
   private String[] readArgsFromFile(String arg) throws IOException {

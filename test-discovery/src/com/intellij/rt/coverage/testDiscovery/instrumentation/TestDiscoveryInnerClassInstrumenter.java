@@ -37,7 +37,7 @@ public class TestDiscoveryInnerClassInstrumenter extends TestDiscoveryInstrument
   }
 
   @Override
-  protected String getInternalClassName() {
+  public String getInternalClassName() {
     return myInternalCounterClassJVMName;
   }
 

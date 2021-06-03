@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
@@ -34,13 +35,19 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
   private final List<Pattern> excludePatterns;
   private final List<Pattern> includePatterns;
   private final ClassFinder cf;
+  private final TestTrackingMode testTrackingMode;
 
   public CoverageClassfileTransformer(ProjectData data, boolean shouldCalculateSource, List<Pattern> excludePatterns, List<Pattern> includePatterns, ClassFinder cf) {
+    this(data, shouldCalculateSource, excludePatterns, includePatterns, cf, null);
+  }
+
+  public CoverageClassfileTransformer(ProjectData data, boolean shouldCalculateSource, List<Pattern> excludePatterns, List<Pattern> includePatterns, ClassFinder cf, TestTrackingMode testTrackingMode) {
     this.data = data;
     this.shouldCalculateSource = shouldCalculateSource;
     this.excludePatterns = excludePatterns;
     this.includePatterns = includePatterns;
     this.cf = cf;
+    this.testTrackingMode = testTrackingMode;
   }
 
   @Override
@@ -56,7 +63,7 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
     } else {
       if (System.getProperty("idea.new.tracing.coverage") != null) {
         if (data.isTestTracking()) {
-          instrumenter = new NewTracingTestTrackingInstrumenter(data, cw, cr, className, shouldCalculateSource);
+          instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldCalculateSource);
         } else {
           instrumenter = new NewTracingInstrumenter(data, cw, cr, className, shouldCalculateSource);
         }
