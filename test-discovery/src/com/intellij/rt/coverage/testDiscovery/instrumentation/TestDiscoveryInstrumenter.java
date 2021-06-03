@@ -75,14 +75,17 @@ public class TestDiscoveryInstrumenter extends ExtraFieldInstrumenter {
                                    final String[] exceptions) {
     final MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
     if (mv == null) return null;
+    if (myMethodNames.length == 0) {
+      return mv;
+    }
     if ("<clinit>".equals(name)) {
-      return createMethodVisitor(mv, name);
+      return createMethodVisitor(mv, mv, name);
     }
 
     InstrumentedMethodsFilter.Decision decision = myMethodFilter.shouldVisitMethod(access, name, desc, signature, exceptions, myInstrumentConstructors);
     if (decision != InstrumentedMethodsFilter.Decision.YES) return mv;
 
-    final MethodVisitor visitor = new MethodVisitor(Opcodes.API_VERSION, mv) {
+    MethodVisitor newMv = new MethodVisitor(Opcodes.API_VERSION, mv) {
       final int myMethodId = myCurrentMethodCount++;
 
       @Override
@@ -95,7 +98,7 @@ public class TestDiscoveryInstrumenter extends ExtraFieldInstrumenter {
         super.visitCode();
       }
     };
-    return createMethodVisitor(visitor, name);
+    return createMethodVisitor(mv, newMv, name);
   }
 
   @Override

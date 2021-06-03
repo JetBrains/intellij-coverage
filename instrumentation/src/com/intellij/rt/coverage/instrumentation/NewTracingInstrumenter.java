@@ -48,7 +48,7 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
                                           final String className) {
     if (!enumerator.hasExecutableLines()) {
       if (myExtraFieldInstrumenter.isInterface() && CLASS_INIT.equals(name)) {
-        return myExtraFieldInstrumenter.createMethodVisitor(cv, mv, name);
+        return myExtraFieldInstrumenter.createMethodVisitor(this, mv, mv, name);
       }
       return mv;
     }
@@ -89,12 +89,12 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
         super.visitCode();
       }
     };
-    return myExtraFieldInstrumenter.createMethodVisitor(cv, visitor, name);
+    return myExtraFieldInstrumenter.createMethodVisitor(this, mv, visitor, name);
   }
 
   @Override
   public void visitEnd() {
-    myExtraFieldInstrumenter.generateMembers(cv);
+    myExtraFieldInstrumenter.generateMembers(this);
     super.visitEnd();
   }
 
