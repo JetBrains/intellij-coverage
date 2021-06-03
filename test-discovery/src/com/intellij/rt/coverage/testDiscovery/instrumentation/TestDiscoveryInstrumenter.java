@@ -75,6 +75,9 @@ public class TestDiscoveryInstrumenter extends ExtraFieldInstrumenter {
                                    final String[] exceptions) {
     final MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
     if (mv == null) return null;
+    if (myMethodNames.length == 0) {
+      return mv;
+    }
     if ("<clinit>".equals(name)) {
       return createMethodVisitor(mv, mv, name);
     }
