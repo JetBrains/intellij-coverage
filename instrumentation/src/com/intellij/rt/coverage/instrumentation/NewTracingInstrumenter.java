@@ -48,10 +48,12 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
                                           final String name,
                                           final String desc,
                                           final String className) {
-    if (myExtraFieldInstrumenter.isInterface() && CLASS_INIT.equals(name)) {
-      return myExtraFieldInstrumenter.createMethodVisitor(this, mv, mv, name);
+    if (!enumerator.hasExecutableLines()) {
+      if (myExtraFieldInstrumenter.isInterface() && CLASS_INIT.equals(name)) {
+        return myExtraFieldInstrumenter.createMethodVisitor(cv, mv, name);
+      }
+      return mv;
     }
-    if (!enumerator.hasExecutableLines()) return mv;
     final MethodVisitor visitor = new LocalVariableInserter(mv, access, desc, BRANCH_HITS_LOCAL_VARIABLE_NAME, BRANCH_HITS_FIELD_TYPE) {
       public void visitLineNumber(final int line, final Label start) {
         LineData lineData = getLineData(line);
@@ -89,12 +91,12 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
         super.visitCode();
       }
     };
-    return myExtraFieldInstrumenter.createMethodVisitor(this, mv, visitor, name);
+    return myExtraFieldInstrumenter.createMethodVisitor(cv, visitor, name);
   }
 
   @Override
   public void visitEnd() {
-    myExtraFieldInstrumenter.generateMembers(this);
+    myExtraFieldInstrumenter.generateMembers(cv);
     super.visitEnd();
   }
 

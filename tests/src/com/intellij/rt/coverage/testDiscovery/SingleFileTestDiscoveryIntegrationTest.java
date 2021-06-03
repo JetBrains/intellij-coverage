@@ -98,6 +98,19 @@ public class SingleFileTestDiscoveryIntegrationTest {
   }
 
   @Test
+  public void testInterfaceWithClinitNoMethods() throws Exception {
+    final File result = doTest("interfaceWithClinitNoMethods");
+    MySingleTrFileReader reader = new MySingleTrFileReader();
+    TestDiscoveryProtocolUtil.readFile(result, reader);
+    final List<String[]> data = reader.data;
+    assertThat(data).isNotEmpty();
+    assertThat(data).contains(
+        new String[]{"Test", "test1", "Foo", "doInvoke/()V"}
+    );
+    checkClassMeta(reader);
+  }
+
+  @Test
   public void testSimpleExcludeLibs() throws Exception {
     final File result = doTest("simple",
         "-Dtest.discovery.include.class.patterns=Test.*;Class.*",
