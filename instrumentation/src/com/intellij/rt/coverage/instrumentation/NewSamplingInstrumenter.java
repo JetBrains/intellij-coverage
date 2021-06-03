@@ -65,12 +65,12 @@ public class NewSamplingInstrumenter extends Instrumenter {
                 super.visitCode();
             }
         };
-        return myExtraFieldInstrumenter.createMethodVisitor(this, mv, visitor, name);
+        return myExtraFieldInstrumenter.createMethodVisitor(cv, visitor, name);
     }
 
     @Override
     public void visitEnd() {
-        myExtraFieldInstrumenter.generateMembers(this);
+        myExtraFieldInstrumenter.generateMembers(cv);
         super.visitEnd();
     }
 

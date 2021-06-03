@@ -85,34 +85,32 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
 
   /**
    * Create method visitor that ensures field initialization.
-   * @param mv method visitor without instrumentation
-   * @param newMv instrumenting method visitor
+   * @param mv instrumenting method visitor
    */
   public MethodVisitor createMethodVisitor(final ClassVisitor cv,
-                                           final MethodVisitor mv,
-                                           MethodVisitor newMv,
+                                           MethodVisitor mv,
                                            final String name) {
     if (mv == null) return null;
-    if (myFieldInitMethodName.equals(name)) return mv;
     if (CLASS_INIT.equals(name)) {
       if (myInterface && (myJava8AndAbove || myShouldCoverClinit)) {
-        newMv = new MethodVisitor(Opcodes.API_VERSION, newMv) {
+        mv = new MethodVisitor(Opcodes.API_VERSION, mv) {
           @Override
           public void visitCode() {
             initField(mv);
+            cv.visitField(INTERFACE_FIELD_ACCESS, myFieldName, myFieldType, null, null);
             mySeenClinit = true;
             super.visitCode();
           }
         };
       }
       if (!myShouldCoverClinit) {
-        return newMv;
+        return mv;
       }
     }
 
-    if (myInterface) return newMv;
+    if (myInterface) return mv;
 
-    return new MethodVisitor(Opcodes.API_VERSION, newMv) {
+    return new MethodVisitor(Opcodes.API_VERSION, mv) {
       @Override
       public void visitCode() {
         mv.visitMethodInsn(Opcodes.INVOKESTATIC, myInternalClassName, myFieldInitMethodName, "()V", false);
@@ -122,9 +120,8 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
   }
 
   protected MethodVisitor createMethodVisitor(final MethodVisitor mv,
-                                              MethodVisitor newMv,
                                               final String name) {
-    return createMethodVisitor(this, mv, newMv, name);
+    return createMethodVisitor(cv, mv, name);
   }
 
   /**
@@ -132,12 +129,11 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
    */
   public void generateMembers(ClassVisitor cv) {
     if (myInterface) {
-      if (!myJava8AndAbove && !mySeenClinit) {
+      if (!myJava8AndAbove) {
         //only java 8+ may contain non-abstract methods in interfaces
         //no need to instrument otherwise
         return;
       }
-      cv.visitField(INTERFACE_FIELD_ACCESS, myFieldName, myFieldType, null, null);
 
       if (mySeenClinit) {
         //field init is already added in <clinit>, e.g. if interface has constant
@@ -147,6 +143,7 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
         return;
       }
 
+      cv.visitField(INTERFACE_FIELD_ACCESS, myFieldName, myFieldType, null, null);
       //interface has no clinit method
       //java 11 verifies that constants are initialized in clinit
       //let's generate it!
@@ -158,7 +155,7 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
   }
 
   protected void generateMembers() {
-    generateMembers(this);
+    generateMembers(cv);
   }
 
   /**
