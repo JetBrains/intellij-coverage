@@ -93,11 +93,11 @@ abstract class KotlinCoverageStatusAbstractTracingTest : KotlinCoverageStatusTes
     fun test_IDEA_264534() = test("fixes.IDEA_264534")
 }
 
-class KotlinCoverageStatusTracingTest : KotlinCoverageStatusAbstractTracingTest() {
+open class KotlinCoverageStatusTracingTest : KotlinCoverageStatusAbstractTracingTest() {
     override val coverage = Coverage.TRACING
 }
 
-class KotlinCoverageStatusNewTracingTest : KotlinCoverageStatusAbstractTracingTest() {
+open class KotlinCoverageStatusNewTracingTest : KotlinCoverageStatusAbstractTracingTest() {
     override val coverage = Coverage.NEW_TRACING
 
     @Test

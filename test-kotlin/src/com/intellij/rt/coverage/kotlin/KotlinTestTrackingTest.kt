@@ -69,3 +69,38 @@ internal class KotlinTestTrackingTracingTest : KotlinAbstractTestTrackingTest() 
 internal class KotlinTestTrackingNewTracingTest : KotlinAbstractTestTrackingTest() {
     override val coverage = Coverage.NEW_TRACING
 }
+
+// test how test tracking with this code base
+class KotlinCoverageStatusSamplingTestTrackingTest : KotlinCoverageStatusSamplingTest() {
+    override val coverage = Coverage.TRACING
+    override val testTracking = true
+}
+
+// test how test tracking with this code base
+class KotlinCoverageStatusNewSamplingTestTrackingTest : KotlinCoverageStatusNewSamplingTest() {
+    override val coverage = Coverage.NEW_TRACING
+    override val testTracking = true
+}
+
+// test how test tracking with this code base
+class KotlinCoverageStatusNewSamplingTestTrackingClassDataTest : KotlinCoverageStatusNewSamplingTest() {
+    override val coverage = Coverage.NEW_TRACING
+    override val testTracking = true
+    override val commonExtraArgs = listOf("-Didea.new.test.tracking.coverage=false")
+}
+
+// test how test tracking with this code base
+class KotlinCoverageStatusTracingTestTrackingTest : KotlinCoverageStatusTracingTest() {
+    override val testTracking = true
+}
+
+// test how test tracking with this code base
+class KotlinCoverageStatusNewTracingTestTrackingTest : KotlinCoverageStatusNewTracingTest() {
+    override val testTracking = true
+}
+
+// test how test tracking with this code base
+class KotlinCoverageStatusNewTracingTestTrackingClassDataTest : KotlinCoverageStatusNewTracingTest() {
+    override val testTracking = true
+    override val commonExtraArgs = listOf("-Didea.new.test.tracking.coverage=false")
+}
