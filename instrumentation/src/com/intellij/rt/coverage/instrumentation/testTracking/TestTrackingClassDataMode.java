@@ -25,16 +25,12 @@ import com.intellij.rt.coverage.util.TestTrackingCallback;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
 public class TestTrackingClassDataMode implements TestTrackingMode {
-
-  @Override
   public TestTrackingCallback createTestTrackingCallback() {
     return new TestTrackingCallback() {
-      @Override
       public void clearTrace(ClassData classData) {
         classData.setTraceMask(null);
       }
 
-      @Override
       public boolean[] traceLine(final ClassData classData, final int line) {
         boolean[] linesTrace = classData.getTraceMask();
         boolean[] result = null;
@@ -54,7 +50,6 @@ public class TestTrackingClassDataMode implements TestTrackingMode {
     };
   }
 
-  @Override
   public Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource) {
     return new TestTrackingClassDataInstrumenter(projectData, classVisitor, cr, className, shouldCalculateSource);
   }
@@ -89,7 +84,7 @@ class TestTrackingClassDataInstrumenter extends NewTracingInstrumenter {
   protected MethodVisitor createMethodTransformer(final MethodVisitor mv, LineEnumerator enumerator, final int access, String name, final String desc) {
     if (!enumerator.hasExecutableLines()) {
       if (myExtraClassDataFieldInstrumenter.isInterface() && CLASS_INIT.equals(name)) {
-        return myExtraClassDataFieldInstrumenter.createMethodVisitor(cv, mv, name);
+        return myExtraClassDataFieldInstrumenter.createMethodVisitor(this, mv, mv, name);
       }
       return mv;
     }
@@ -110,12 +105,12 @@ class TestTrackingClassDataInstrumenter extends NewTracingInstrumenter {
         super.visitCode();
       }
     };
-    return myExtraClassDataFieldInstrumenter.createMethodVisitor(cv, visitor, name);
+    return myExtraClassDataFieldInstrumenter.createMethodVisitor(this, mv, visitor, name);
   }
 
   @Override
   public void visitEnd() {
-    myExtraClassDataFieldInstrumenter.generateMembers(cv);
+    myExtraClassDataFieldInstrumenter.generateMembers(this);
     super.visitEnd();
   }
 

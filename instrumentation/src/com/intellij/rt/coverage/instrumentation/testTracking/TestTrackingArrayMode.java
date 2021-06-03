@@ -29,29 +29,24 @@ import org.jetbrains.coverage.org.objectweb.asm.*;
  * Initially the flag is false, then during execution com.intellij.rt.coverage.data.ProjectData#registerClassForTrace(java.lang.Object) is called.
  * When the registration is successful, the flag is set to true which means that there is no need to make registration calls.
  * When the current test is ended, the flag is set to false.
- *
+ * <p>
  * N.B. load and store of zero element should be volatile. It could be done with java.lang.invoke.VarHandle#[set|get]Volatile.
  * It is available only with JDK9 which is incompatible with JDK5, so this method is not used for now.
  * If absent volatile semantic leads to errors, use com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingClassDataMode instead.
  */
 public class TestTrackingArrayMode implements TestTrackingMode {
-
-  @Override
   public TestTrackingCallback createTestTrackingCallback() {
     return new TestTrackingCallback() {
-      @Override
       public void clearTrace(ClassData classData) {
         classData.getTraceMask()[0] = false;
       }
 
-      @Override
       public boolean[] traceLine(ClassData classData, int line) {
         throw new RuntimeException("traceLine method should not be called in array test tracking mode");
       }
     };
   }
 
-  @Override
   public Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource) {
     return new TestTrackingArrayInstrumenter(projectData, classVisitor, cr, className, shouldCalculateSource);
   }
@@ -74,8 +69,8 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
   protected MethodVisitor createMethodTransformer(final MethodVisitor mv, LineEnumerator enumerator, final int access, String name, final String desc) {
     if (!enumerator.hasExecutableLines()) {
       if (myExtraClassDataFieldInstrumenter.isInterface() && CLASS_INIT.equals(name)) {
-        final MethodVisitor mv1 = myExtraClassDataFieldInstrumenter.createMethodVisitor(cv, mv, name);
-        return myExtraTraceMaskFieldInstrumenter.createMethodVisitor(cv, mv1, name);
+        final MethodVisitor mv1 = myExtraClassDataFieldInstrumenter.createMethodVisitor(this, mv, mv, name);
+        return myExtraTraceMaskFieldInstrumenter.createMethodVisitor(this, mv, mv1, name);
       }
       return mv;
     }
@@ -121,13 +116,13 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
         super.visitCode();
       }
     };
-    final MethodVisitor mv1 = myExtraClassDataFieldInstrumenter.createMethodVisitor(cv, visitor, name);
-    return myExtraTraceMaskFieldInstrumenter.createMethodVisitor(cv, mv1, name);
+    final MethodVisitor mv1 = myExtraClassDataFieldInstrumenter.createMethodVisitor(this, mv, visitor, name);
+    return myExtraTraceMaskFieldInstrumenter.createMethodVisitor(this, mv, mv1, name);
   }
 
   @Override
   public void visitEnd() {
-    myExtraTraceMaskFieldInstrumenter.generateMembers(cv);
+    myExtraTraceMaskFieldInstrumenter.generateMembers(this);
     super.visitEnd();
   }
 

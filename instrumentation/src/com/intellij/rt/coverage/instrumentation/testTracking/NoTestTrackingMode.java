@@ -23,12 +23,10 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 
 public class NoTestTrackingMode implements TestTrackingMode {
-  @Override
   public TestTrackingCallback createTestTrackingCallback() {
     return null;
   }
 
-  @Override
   public Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource) {
     return null;
   }
