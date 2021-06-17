@@ -41,7 +41,6 @@ public class LineData implements CoverageData {
 
   public void touch() {
     myHits++;
-    setTestName(ProjectData.getCurrentTestName());
   }
 
   public int getHits() {

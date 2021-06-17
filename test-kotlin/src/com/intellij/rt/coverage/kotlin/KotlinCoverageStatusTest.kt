@@ -37,15 +37,23 @@ abstract class KotlinCoverageStatusTest {
     }
 
     abstract val coverage: Coverage
+    open val testTracking = false
+    open val commonExtraArgs = emptyList<String>()
 
     protected fun test(testName: String, vararg classes: String = arrayOf("TestKt"),
                        fileName: String = "test.kt", calcUnloaded: Boolean = false,
                        extraArgs: MutableList<String> = mutableListOf(),
                        patterns: String = "$TEST_PACKAGE.*") {
+        extraArgs.addAll(commonExtraArgs)
+        val project = runWithCoverage(myDataFile, testName, coverage, calcUnloaded, testTracking, patterns, extraArgs)
         val testFile = pathToFile("src", "kotlinTestData", *testName.split('.').toTypedArray(), fileName)
-        val expected = extractCoverageDataFromFile(testFile)
-        val project = runWithCoverage(myDataFile, testName, coverage, calcUnloaded, extraArgs = extraArgs, patterns = patterns)
-        val fullClassNames = classes.map { "kotlinTestData.$testName.$it" }
-        assertEqualsLines(project, expected, if (classes.contains(all)) listOf(all) else fullClassNames)
+        val fullClassNames = if (classes.contains(all)) listOf(all) else classes.map { "kotlinTestData.$testName.$it" }
+        if (testTracking) {
+            val expected = extractTestTrackingDataFromFile(testFile)
+            assertEqualsTestTracking(myDataFile, expected, fullClassNames)
+        } else {
+            val expected = extractCoverageDataFromFile(testFile)
+            assertEqualsLines(project, expected, fullClassNames)
+        }
     }
 }

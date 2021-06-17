@@ -159,10 +159,10 @@ abstract class KotlinCoverageStatusAbstractSamplingTest : KotlinCoverageStatusTe
             extraArgs = mutableListOf(IGNORE_UTIL_PRIVATE_CONSTRUCTOR_OPTION), calcUnloaded = true)
 }
 
-class KotlinCoverageStatusSamplingTest : KotlinCoverageStatusAbstractSamplingTest() {
+open class KotlinCoverageStatusSamplingTest : KotlinCoverageStatusAbstractSamplingTest() {
     override val coverage = Coverage.SAMPLING
 }
 
-class KotlinCoverageStatusNewSamplingTest : KotlinCoverageStatusAbstractSamplingTest() {
+open class KotlinCoverageStatusNewSamplingTest : KotlinCoverageStatusAbstractSamplingTest() {
     override val coverage = Coverage.NEW_SAMPLING
 }

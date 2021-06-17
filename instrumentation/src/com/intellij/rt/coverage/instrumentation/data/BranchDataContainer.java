@@ -56,6 +56,10 @@ public class BranchDataContainer {
     myDefaultTableSwitchLabels = null;
   }
 
+  public Instrumenter getContext() {
+    return myContext;
+  }
+
   public Jump getJump(Label jump) {
     if (myJumps == null) return null;
     return myJumps.get(jump);

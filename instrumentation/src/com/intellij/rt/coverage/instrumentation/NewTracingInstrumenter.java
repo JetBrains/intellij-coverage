@@ -31,13 +31,11 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
   private static final String BRANCH_HITS_LOCAL_VARIABLE_NAME = "__$localBranchHits$__";
   private static final String CLASS_INIT = "<clinit>";
 
-  private final String myClassNameType;
   private final ExtraFieldInstrumenter myExtraFieldInstrumenter;
 
   public NewTracingInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource) {
     super(projectData, classVisitor, className, shouldCalculateSource);
     myExtraFieldInstrumenter = new ExtraFieldTracingInstrumenter(cr, className);
-    myClassNameType = className.replace(".", "/");
   }
 
   @Override
@@ -86,7 +84,7 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
       }
 
       public void visitCode() {
-        mv.visitFieldInsn(Opcodes.GETSTATIC, myClassNameType, BRANCH_HITS_FIELD_NAME, BRANCH_HITS_FIELD_TYPE);
+        mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraFieldInstrumenter.getInternalClassName(), BRANCH_HITS_FIELD_NAME, BRANCH_HITS_FIELD_TYPE);
         mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
         super.visitCode();
       }
@@ -102,9 +100,8 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
 
   @Override
   protected void initLineData() {
-    final LineData[] lines = LinesUtil.calcLineArray(myMaxLineNumber, myLines);
     myClassData.createHitsMask(myBranchData.getSize());
-    myClassData.setLines(lines);
+    super.initLineData();
   }
 
   private class ExtraFieldTracingInstrumenter extends ExtraFieldInstrumenter {
@@ -120,7 +117,7 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
       mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "getHitsMask", "(Ljava/lang/String;)[I", false);
 
       //save hits array
-      mv.visitFieldInsn(Opcodes.PUTSTATIC, myClassNameType, BRANCH_HITS_FIELD_NAME, BRANCH_HITS_FIELD_TYPE);
+      mv.visitFieldInsn(Opcodes.PUTSTATIC, myExtraFieldInstrumenter.getInternalClassName(), BRANCH_HITS_FIELD_NAME, BRANCH_HITS_FIELD_TYPE);
     }
   }
 }
