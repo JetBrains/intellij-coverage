@@ -113,7 +113,7 @@ public class LineData implements CoverageData {
     if (myJumpsAndSwitches != null || lineData.myJumpsAndSwitches != null) {
       getOrCreateJumpsAndSwitches().merge(lineData.getOrCreateJumpsAndSwitches());
     }
-    if (lineData.myMethodSignature != null) {
+    if (myMethodSignature == null) {
       myMethodSignature = lineData.myMethodSignature;
     }
     if (myStatus != -1) {
