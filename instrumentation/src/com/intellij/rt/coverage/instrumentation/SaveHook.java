@@ -67,6 +67,7 @@ public class SaveHook implements Runnable {
         try {
             projectData.applyLinesMask();
             projectData.applyBranchData();
+            projectData.checkLineMappings();
             if (myAppendUnloaded) {
                 appendUnloaded(projectData);
             }
@@ -79,7 +80,6 @@ public class SaveHook implements Runnable {
                 }
 
                 os = CoverageIOUtil.openFile(myDataFile);
-                projectData.checkLineMappings();
                 final TObjectIntHashMap<String> dict = new TObjectIntHashMap<String>();
                 final Map<String, ClassData> classes = new HashMap<String, ClassData>(projectData.getClasses());
                 CoverageIOUtil.writeINT(os, classes.size());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2020 JetBrains s.r.o.
+ * Copyright 2000-2021 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,28 @@
  * limitations under the License.
  */
 
-package testData;
+package testData.inline
 
-public class Main {
-  public static void main(String[] args) {
-    System.out.println("Hello world");
-  }
+inline fun inline1(int: Int): Int {
+    return int + 10
+}
+
+fun biz(): String {
+    return "biz=${inline1(1)}"
+}
+
+inline fun inline2(): Int {
+    return 2
+}
+
+fun bar(): String {
+    return "bar"
+}
+
+
+object Test {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        println(biz())
+    }
 }

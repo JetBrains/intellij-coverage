@@ -61,8 +61,20 @@ public class XMLCoverageReportTest {
   public void integrationTestVerifyXML() throws Throwable {
     try {
       File file = File.createTempFile("report_tmp", ".xml");
-      CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), file, "-xml .*", "testData.Main", false);
+      CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), file, "-xml .*", "testData.simple.Main", false);
       verifyProjectXML(file, "xmlIntegrationTest.xml");
+    } finally {
+      // xml cannot be parsed to load project
+      new File("coverage-error.log").delete();
+    }
+  }
+
+  @Test
+  public void integrationTestInline() throws Throwable {
+    try {
+      File file = File.createTempFile("report_tmp", ".xml");
+      CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), file, "-xml testData\\.inline\\..*", "testData.inline.Test", false);
+      verifyProjectXML(file, "inlineIntegrationTest.xml");
     } finally {
       // xml cannot be parsed to load project
       new File("coverage-error.log").delete();
