@@ -169,6 +169,13 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
 
+  public void applyLinesMask() {
+    if (!mySampling) return;
+    for (ClassData data : myClasses.myClasses.values()) {
+      data.applyLinesMask();
+    }
+  }
+
   public void applyBranchData() {
     if (mySampling) return;
     for (ClassData data : myClasses.myClasses.values()) {

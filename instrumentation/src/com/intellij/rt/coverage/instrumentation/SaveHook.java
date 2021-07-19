@@ -65,6 +65,7 @@ public class SaveHook implements Runnable {
     public void save(ProjectData projectData) {
         projectData.stop();
         try {
+            projectData.applyLinesMask();
             projectData.applyBranchData();
             if (myAppendUnloaded) {
                 appendUnloaded(projectData);

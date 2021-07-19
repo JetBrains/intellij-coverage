@@ -29,6 +29,7 @@ public class ClassData implements CoverageData {
   private final String myClassName;
   private LineData[] myLinesArray;
   private Map<String, Integer> myStatus;
+  /** Storage for line hits in sampling mode. */
   private int[] myLineMask;
   private String mySource;
 
@@ -66,9 +67,6 @@ public class ClassData implements CoverageData {
     if (myLinesArray == null) return sigLines;
     for (final LineData lineData : myLinesArray) {
       if (lineData == null) continue;
-      if (myLineMask != null) {
-        lineData.setHits(myLineMask[lineData.getLineNumber()]);
-      }
       final String methodSignature = lineData.getMethodSignature();
       final String sig = collapseSignatures ? CoverageIOUtil.collapse(methodSignature, dictionaryLookup) : methodSignature;
       List<LineData> lines = sigLines.get(sig);
@@ -267,18 +265,11 @@ public class ClassData implements CoverageData {
         return;
       }
       myLinesArray = result;
-      myLineMask = null;
     }
   }
 
   private void copyCurrentLineData(LineData[] result) {
     System.arraycopy(myLinesArray, 0, result, 0, myLinesArray.length);
-    if (myLineMask == null) return;
-    for (int i = 0; i < myLinesArray.length; i++) {
-      if (result[i] != null) {
-        result[i].setHits(result[i].getHits() + myLineMask[i]);
-      }
-    }
   }
 
   private LineData createSourceLineData(LineMapData lineMapData) {
@@ -296,10 +287,6 @@ public class ClassData implements CoverageData {
       if (targetLineData != null) {
         source.merge(targetLineData);
         myLinesArray[targetLineNumber] = null;
-        if (myLineMask != null) {
-          source.setHits(source.getHits() + myLineMask[targetLineNumber]);
-          myLineMask[targetLineNumber] = 0;
-        }
       }
     }
   }
@@ -344,6 +331,17 @@ public class ClassData implements CoverageData {
 
   public void setTraceMask(boolean[] traceMask) {
     myTraceMask = traceMask;
+  }
+
+  public void applyLinesMask() {
+    if (myLineMask == null) return;
+    final int size = myLineMask.length;
+    for (LineData lineData : myLinesArray) {
+      if (lineData == null) continue;
+      if (lineData.getLineNumber() >= size) continue;
+      lineData.setHits(myLineMask[lineData.getLineNumber()]);
+    }
+    myLineMask = null;
   }
 
   public void applyBranches() {
