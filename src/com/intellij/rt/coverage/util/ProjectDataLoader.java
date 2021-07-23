@@ -106,13 +106,14 @@ public class ProjectDataLoader {
   private static String expand(DataInputStream in, final TIntObjectHashMap<ClassData> dict) throws IOException {
     return CoverageIOUtil.processWithDictionary(CoverageIOUtil.readUTFFast(in), new CoverageIOUtil.Consumer() {
       protected String consume(String type) {
-          final int typeIdx;
+        if (type.length() > 0 && Character.isDigit(type.charAt(0))) {
           try {
-            typeIdx = Integer.parseInt(type);
-          } catch (NumberFormatException e) {
-            return type;
+            final int typeIdx = Integer.parseInt(type);
+            return (dict.get(typeIdx)).getName();
+          } catch (NumberFormatException ignored) {
           }
-          return (dict.get(typeIdx)).getName();
+        }
+        return type;
       }
     });
   }

@@ -181,7 +181,7 @@ public class CoverageIOUtil {
     });
   }
 
-  private static final Pattern TYPE_PATTERN = Pattern.compile("(L.*;)*");
+  private static final Pattern TYPE_PATTERN = Pattern.compile("L[^;]*;");
 
   public static abstract class Consumer {
     protected abstract String consume(String str);
@@ -193,7 +193,11 @@ public class CoverageIOUtil {
       String s = matcher.group();
       if (s.startsWith("L") && s.endsWith(";")) {
         final String type = s.substring(1, s.length() - 1);
-        methodSignature = methodSignature.replace(type, consumer.consume(type));
+        final String replacement = consumer.consume(type);
+        //noinspection StringEquality
+        if (replacement != type) {
+          methodSignature = methodSignature.replace(type, replacement);
+        }
       }
     }
     return methodSignature;
