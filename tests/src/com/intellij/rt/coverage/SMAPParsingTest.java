@@ -67,14 +67,14 @@ public class SMAPParsingTest extends TestCase {
       "9#1,6:17\n" +
       "*E";
 
-  /** test-kotlin/src/kotlinTestData/inline/simpleInline.kt */
+  /** test-kotlin/src/testData/inline/simpleInline.kt */
   private static final String KOTLIN_SMAP_WITH_INLINE2 = "SMAP\n" +
       "simpleInline.kt\n" +
       "Kotlin\n" +
       "*S Kotlin\n" +
       "*F\n" +
       "+ 1 simpleInline.kt\n" +
-      "kotlinTestData/inline/SimpleInlineKt\n" +
+      "testData/inline/SimpleInlineKt\n" +
       "*L\n" +
       "1#1,4:1\n" +
       "3#1:5\n" +
@@ -82,7 +82,7 @@ public class SMAPParsingTest extends TestCase {
       "*S KotlinDebug\n" +
       "*F\n" +
       "+ 1 simpleInline.kt\n" +
-      "kotlinTestData/inline/SimpleInlineKt\n" +
+      "testData/inline/SimpleInlineKt\n" +
       "*L\n" +
       "4#1:5\n" +
       "*E";
@@ -144,7 +144,7 @@ public class SMAPParsingTest extends TestCase {
       "*E";
 
   public void testJspSMAPKotlinInline() {
-    final FileMapData[] expected = new FileMapData[]{new FileMapData("kotlinTestData.inline.SimpleInlineKt",
+    final FileMapData[] expected = new FileMapData[]{new FileMapData("testData.inline.SimpleInlineKt",
         new LineMapData[]{
             new LineMapData(1, 1, 1),
             new LineMapData(2, 2, 2),
@@ -152,7 +152,7 @@ public class SMAPParsingTest extends TestCase {
             new LineMapData(3, 5, 5),
             new LineMapData(4, 4, 4)
         })};
-    final FileMapData[] datas = JSR45Util.extractLineMapping(KOTLIN_SMAP_WITH_INLINE2, "kotlinTestData.inline.SimpleInlineKt");
+    final FileMapData[] datas = JSR45Util.extractLineMapping(KOTLIN_SMAP_WITH_INLINE2, "testData.inline.SimpleInlineKt");
     testJspSmapData(expected, datas);
   }
 

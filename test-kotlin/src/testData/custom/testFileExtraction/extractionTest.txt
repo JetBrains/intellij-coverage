@@ -1,0 +1,13 @@
+abdkbcka
+adcasd// coverage
+adscads// coverage : FULL
+adscafvf// coverage: FULL
+adscafvf// coverage: PARTIAL
+adscafvf// coverage: NONE
+adscafvf// coverage: FULLbdchajb
+adscafvf// coverage:    FULL bdchajb
+adscafvf// coverage:   FULL bdchajb
+// coverage: FULL bdchajb
+// classes: A B C D
+// calculate unloaded: true
+// extra args: -hello bye

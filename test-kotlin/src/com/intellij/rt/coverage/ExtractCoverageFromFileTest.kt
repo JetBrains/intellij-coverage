@@ -17,20 +17,24 @@
 package com.intellij.rt.coverage
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
-class ExtractCoverageFromFileTest {
+internal class ExtractCoverageFromFileTest {
 
     @Test
     fun extractCoverageDataFromFile() {
         val expected = mapOf(
-                4 to "FULL",
-                5 to "PARTIAL",
-                6 to "NONE",
-                10 to "FULL"
+            4 to "FULL",
+            5 to "PARTIAL",
+            6 to "NONE",
+            10 to "FULL"
         )
-        val testFile = pathToFile("src", "kotlinTestData", "testFileExtraction", "extractionTest.txt")
-        val actual = extractCoverageDataFromFile(testFile)
-        assertEquals(expected, actual)
+        val testFile = pathToFile("src", TEST_PACKAGE, "custom", "testFileExtraction", "extractionTest.txt")
+        val testConfiguration = extractTestConfiguration(testFile)
+        assertEquals(expected, testConfiguration.coverageData)
+        assertEquals(listOf("A", "B", "C", "D"), testConfiguration.classes)
+        assertEquals(listOf("-hello", "bye"), testConfiguration.extraArgs)
+        assertTrue(testConfiguration.calculateUnloaded)
     }
 }

@@ -20,7 +20,7 @@ import com.intellij.rt.coverage.util.diff.CoverageDiff
 import org.junit.Assert
 import org.junit.Test
 
-class NewInstrumentationTest {
+internal class NewInstrumentationTest {
 
     @Test
     fun testNewSamplingCoverageJoda() = testCoverageJoda(Coverage.SAMPLING, Coverage.NEW_SAMPLING)
@@ -30,12 +30,12 @@ class NewInstrumentationTest {
 
     private fun testCoverageJoda(before: Coverage, after: Coverage) {
         val exclude = listOf( // exclude non deterministic classes from coverage
-                "org\\.joda\\.time\\.TestDateTimeZone\\$4",
-                "org\\.joda\\.time\\.convert.ConverterSet",
-                "org\\.joda\\.time\\.chrono\\.gj\\.MainTest"
+            "org\\.joda\\.time\\.TestDateTimeZone\\$4",
+            "org\\.joda\\.time\\.convert.ConverterSet",
+            "org\\.joda\\.time\\.chrono\\.gj\\.MainTest"
         )
         val patterns = "org\\.joda\\.time.* -exclude ${exclude.joinToString(" ")}"
-        assertEqualCoverage(before, after, "newInstrumentation.joda", patterns)
+        assertEqualCoverage(before, after, "custom.newInstrumentation.joda", patterns)
     }
 
     private fun assertEqualCoverage(before: Coverage, after: Coverage, testName: String, patterns: String) {

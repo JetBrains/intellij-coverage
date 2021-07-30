@@ -24,22 +24,20 @@ import org.junit.Assert
 import java.io.File
 import java.nio.file.Paths
 
-enum class Coverage {
+internal enum class Coverage {
     SAMPLING, NEW_SAMPLING, TRACING, NEW_TRACING
 }
 
-internal const val TEST_PACKAGE = "kotlinTestData"
-internal const val IGNORE_UTIL_PRIVATE_CONSTRUCTOR_OPTION = "-Dcoverage.ignore.private.constructor.util.class=true"
-
-fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false, testTracking: Boolean = false,
-                    patterns: String = "$TEST_PACKAGE.*", extraArgs: MutableList<String> = mutableListOf()): ProjectData {
+internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false, testTracking: Boolean = false,
+                    patterns: String = "$TEST_PACKAGE.*", extraArgs: MutableList<String> = mutableListOf(),
+                    mainClass: String = getTestFile(testName).mainClass): ProjectData {
     val classPath = System.getProperty("java.class.path")
     when (coverage) {
         Coverage.NEW_SAMPLING -> extraArgs.add("-Didea.new.sampling.coverage=true")
         Coverage.NEW_TRACING -> extraArgs.add("-Didea.new.tracing.coverage=true")
     }
     val sampling = coverage == Coverage.SAMPLING || coverage == Coverage.NEW_SAMPLING
-    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, patterns, "kotlinTestData.$testName.Test",
+    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, patterns, mainClass,
             sampling, extraArgs.toTypedArray(), calcUnloaded, testTracking)
 }
 
@@ -62,8 +60,8 @@ private fun coverageLines(project: ProjectData, classNames: List<String>): Map<I
         project.classes.values.filter { it.name.startsWith(TEST_PACKAGE) }.forEach { allData.merge(it) }
     } else {
         classNames
-                .map { project.getClassData(it) }
-                .forEach { allData.merge(it) }
+            .map { project.getClassData(it) }
+            .forEach { allData.merge(it) }
     }
     val lines = allData.getLinesData().associateBy({ it.lineNumber }, { it.status.toByte() })
     return statusToString(lines)
@@ -141,19 +139,97 @@ private fun statusToString(lines: Map<Int, Byte>) = lines.mapValues {
 
 private fun ClassData.getLinesData() = lines.filterIsInstance(LineData::class.java).sortedBy { it.lineNumber }
 
-private val coverageMarkerRegex = Regex("// coverage: (FULL|PARTIAL|NONE)( .*)?\$")
-private val testTrackingMarkerRegex = Regex("// tests: (.*)\$")
-
-internal fun extractCoverageDataFromFile(file: File): Map<Int, String> = findMatches(file, coverageMarkerRegex)
-        .mapValues { it.value!!.groupValues[1] }
-
-internal fun extractTestTrackingDataFromFile(file: File): Map<Int, Set<String>> = findMatches(file, testTrackingMarkerRegex)
-        .mapValues { it.value!!.groupValues[1].split(' ').toSet() }
-
-private fun findMatches(file: File, regex: Regex) = file.bufferedReader()
-        .lineSequence()
-        .mapIndexed { index, s -> index + 1 to regex.find(s) }
-        .filter { it.second != null }
-        .toMap()
+internal fun extractTestTrackingDataFromFile(file: File): Map<Int, Set<String>> =
+    TestTrackingMatcher().let { callback ->
+        processFile(file, callback)
+        callback.result
+    }
 
 internal fun pathToFile(name: String, vararg names: String): File = Paths.get(name, *names).toFile()
+
+internal fun extractTestConfiguration(file: File): TestConfiguration {
+    val coverage = CoverageMatcher()
+    val classes = StringListMatcher(classesMarkerRegex, 1)
+    val extraArgs = StringListMatcher(extraArgumentsMarkerRegex, 1)
+    val patterns = StringMatcher(patternsMarkerRegex, 1)
+    val calculateUnloaded = FlagMatcher(calculateUnloadedMarkerRegex, 1)
+
+    processFile(file, coverage, classes, extraArgs, patterns, calculateUnloaded)
+    return TestConfiguration(
+        coverage.result,
+        classes.values,
+        patterns.value,
+        extraArgs.values,
+        calculateUnloaded.value
+    )
+}
+
+internal fun processFile(file: File, vararg callbacks: Matcher) {
+    file.useLines {
+        it.forEachIndexed { line, s ->
+            for (callback in callbacks) {
+                callback.match(line + 1, s)
+            }
+        }
+    }
+}
+
+private val coverageMarkerRegex = Regex("// coverage: (FULL|PARTIAL|NONE)( .*)?\$")
+private val classesMarkerRegex = Regex("// classes: (.*)\$")
+private val patternsMarkerRegex = Regex("// patterns: (.*)\$")
+private val calculateUnloadedMarkerRegex = Regex("// calculate unloaded: (.*)\$")
+private val extraArgumentsMarkerRegex = Regex("// extra args: (.*)\$")
+private val testTrackingMarkerRegex = Regex("// tests: (.*)\$")
+
+/**
+ * Collect state from found matches in the lines of a file.
+ */
+abstract class Matcher(private val regex: Regex, private val group: Int) {
+    abstract fun onMatchFound(line: Int, match: String)
+    fun match(line: Int, s: String) {
+        val match = regex.find(s)
+        if (match != null) {
+            onMatchFound(line, match.groupValues[group])
+        }
+    }
+}
+
+class StringMatcher(regex: Regex, group: Int) : Matcher(regex, group) {
+    var value: String? = null
+        private set
+
+    override fun onMatchFound(line: Int, match: String) {
+        value = match
+    }
+}
+
+class StringListMatcher(regex: Regex, group: Int) : Matcher(regex, group) {
+    val values = mutableListOf<String>()
+    override fun onMatchFound(line: Int, match: String) {
+        values.addAll(match.split(' '))
+    }
+}
+
+class FlagMatcher(regex: Regex, group: Int) : Matcher(regex, group) {
+    var value = false
+        private set
+
+    override fun onMatchFound(line: Int, match: String) {
+        check(match == "true" || match == "false") { "Boolean value expected: $match" }
+        value = match == "true"
+    }
+}
+
+class CoverageMatcher : Matcher(coverageMarkerRegex, 1) {
+    val result = linkedMapOf<Int, String>()
+    override fun onMatchFound(line: Int, match: String) {
+        result[line] = match
+    }
+}
+
+class TestTrackingMatcher : Matcher(testTrackingMarkerRegex, 1) {
+    val result = linkedMapOf<Int, Set<String>>()
+    override fun onMatchFound(line: Int, match: String) {
+        result[line] = match.split(' ').toSet()
+    }
+}
