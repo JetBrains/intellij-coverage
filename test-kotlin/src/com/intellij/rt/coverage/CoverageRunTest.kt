@@ -220,6 +220,19 @@ internal abstract class CoverageRunTest : CoverageTest() {
         val test = getTestFile("custom.inlineMultiplyFiles")
         test(test.testName, test, extractTestConfiguration(File(test.file.parentFile, "test2.kt")))
     }
+
+    @Test
+    fun test_IDEA_275520Loaded() = test("custom.IDEA_275520.loaded", verify={ projectData, _, _ ->
+        val classData = projectData.getClassData("$TEST_PACKAGE.custom.IDEA_275520.Test2Kt")
+        Assert.assertEquals("f()V", classData.getLineData(20).methodSignature)
+    })
+
+    @Test
+    @Ignore("To be fixed")
+    fun test_IDEA_275520Unloaded() = test("custom.IDEA_275520.unloaded", verify={ projectData, _, _ ->
+        val classData = projectData.getClassData("$TEST_PACKAGE.custom.IDEA_275520.Test2Kt")
+        Assert.assertEquals("f()V", classData.getLineData(20).methodSignature)
+    })
 }
 
 internal abstract class CoverageVerifyResultsTest(override val coverage: Coverage) : CoverageRunTest() {
