@@ -253,7 +253,7 @@ public class LineData implements CoverageData {
     if (testName != null) {
       if (myUniqueTestName == null) {
         if (myMayBeUnique) myUniqueTestName = testName;
-      } else if (!myUniqueTestName.equals(testName)) {
+      } else if (!testName.equals(myUniqueTestName)) {
         myUniqueTestName = null;
         myMayBeUnique = false;
       }
