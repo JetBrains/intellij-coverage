@@ -39,6 +39,9 @@ internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage:
     val sampling = coverage == Coverage.SAMPLING || coverage == Coverage.NEW_SAMPLING
     return CoverageStatusTest.runCoverage(classPath, coverageDataFile, patterns, mainClass,
             sampling, extraArgs.toTypedArray(), calcUnloaded, testTracking)
+            .also {
+                logFile(coverageDataFile)?.readText()?.also { log-> throw RuntimeException(log) }
+            }
 }
 
 internal fun assertEqualsLines(project: ProjectData, expectedLines: Map<Int, String>, classNames: List<String>) {

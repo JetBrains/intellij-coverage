@@ -202,12 +202,10 @@ internal abstract class CoverageRunTest : CoverageTest() {
 
     @Test
     @Ignore("Coverage hit increment is not atomic.")
-    fun testThreadSafeData() {
-        val testFile = getTestFile("custom.threadSafe.data")
-        val project = runWithCoverage(myDataFile, testFile.testName, coverage, mainClass = testFile.mainClass)
-        val data = project.getClassData("testData.custom.threadSafe.data.SimpleClass")
-        Assert.assertEquals(THREAD_SAFE_DATA_EXPECTED_HITS, getLineHits(data, 24))
-    }
+    fun testThreadSafeData() = test("custom.threadSafe.data", verify = { projectData, _, _ ->
+        val classData = projectData.getClassData("testData.custom.threadSafe.data.SimpleClass")
+        Assert.assertEquals(THREAD_SAFE_DATA_EXPECTED_HITS, getLineHits(classData, 24))
+    })
 
     @Test
     fun test_IDEA_57695() = test(

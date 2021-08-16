@@ -40,6 +40,11 @@ internal data class TestConfiguration(
     val calculateUnloaded: Boolean = false
 )
 
+internal const val LOG_NAME = "coverage-error.log"
+internal fun logFile(dataFile: File) = File(dataFile.parent, LOG_NAME).let { log->
+    if (log.exists()) log else null
+}
+
 internal abstract class CoverageTest {
     protected lateinit var myDataFile: File
     abstract val coverage: Coverage
@@ -49,6 +54,7 @@ internal abstract class CoverageTest {
     @Before
     fun setUp() {
         myDataFile = createTempFile("test")
+        logFile(myDataFile)?.delete()
     }
 
     @After
