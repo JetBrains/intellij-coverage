@@ -22,7 +22,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
 
-// ignore: To be fixed
 // classes: ALL
 
 suspend fun foo1(flag: Boolean) {

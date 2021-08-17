@@ -99,6 +99,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testFixesIDEA_250825() = test("fixes.IDEA_250825")
 
     @Test
+    fun testFixesIDEA_258370() = test("fixes.IDEA_258370")
+
+    @Test
     fun testFixesIDEA_259332() = test("fixes.IDEA_259332")
 
     @Test
@@ -126,7 +129,6 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testImplementationByDelegationGeneric() = test("implementationByDelegationGeneric")
 
     @Test
-    @Ignore("To be fixed")
     fun testInlineCoroutines() = test("inline.coroutines")
 
     @Test

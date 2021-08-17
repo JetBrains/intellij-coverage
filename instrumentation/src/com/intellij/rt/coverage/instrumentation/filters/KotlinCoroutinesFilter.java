@@ -28,7 +28,8 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   private boolean myGetCoroutinesSuspendedVisited = false;
   private boolean myStoreCoroutinesSuspendedVisited = false;
   private boolean myLoadCoroutinesSuspendedVisited = false;
-  private boolean myStateLabelVisited = false;
+  private boolean myLoadStateLabelVisited = false;
+  private boolean myStoreStateLabelVisited = false;
   private boolean mySuspendCallVisited = false;
   private int myCoroutinesSuspendedIndex = -1;
   private int myLine = -1;
@@ -77,7 +78,9 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
         && owner.equals("kotlin/coroutines/intrinsics/IntrinsicsKt")
         && name.equals("getCOROUTINE_SUSPENDED")
         && descriptor.equals("()Ljava/lang/Object;");
-    boolean suspendCallVisited = descriptor.endsWith("Lkotlin/coroutines/Continuation;)Ljava/lang/Object;");
+    boolean suspendCallVisited = descriptor.endsWith("Lkotlin/coroutines/Continuation;)Ljava/lang/Object;")
+        || owner.startsWith("kotlin/jvm/functions/Function") && myStoreStateLabelVisited
+        && name.equals("invoke") && opcode == Opcodes.INVOKEINTERFACE;
     if (getCoroutinesSuspendedVisited || suspendCallVisited) {
       myGetCoroutinesSuspendedVisited |= getCoroutinesSuspendedVisited;
       mySuspendCallVisited |= suspendCallVisited;
@@ -123,10 +126,11 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
     myHasExecutableCode |= !(owner.equals("kotlin/Unit")
         && name.equals("INSTANCE")
         && descriptor.equals("Lkotlin/Unit;"));
-    myStateLabelVisited = opcode == Opcodes.GETFIELD
-        && name.equals("label")
+    final boolean labelVisited = name.equals("label")
         && descriptor.equals("I")
         && Type.getObjectType(owner).getClassName().startsWith(myContext.getClassName());
+    myLoadStateLabelVisited = labelVisited && opcode == Opcodes.GETFIELD;
+    myStoreStateLabelVisited = labelVisited && opcode == Opcodes.PUTFIELD;
   }
 
   /**
@@ -136,13 +140,13 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
     super.visitTableSwitchInsn(min, max, dflt, labels);
     myHasExecutableCode = true;
-    if (myStateLabelVisited) {
+    if (myLoadStateLabelVisited) {
       onIgnoredSwitch(dflt, labels);
       if (!myHadLineDataBefore) {
         onIgnoredLine(myLine);
       }
     }
-    myStateLabelVisited = false;
+    myLoadStateLabelVisited = false;
   }
 
   @Override
