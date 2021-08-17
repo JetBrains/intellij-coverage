@@ -143,10 +143,10 @@ public class ProjectData implements CoverageData, Serializable {
 
   public void checkLineMappings() {
     if (myLinesMap != null) {
-      for (Object o : myLinesMap.keySet()) {
-        final String className = (String) o;
+      for (Map.Entry<String, FileMapData[]> entry : myLinesMap.entrySet()) {
+        final String className = entry.getKey();
         final ClassData classData = getClassData(className);
-        final FileMapData[] fileData = myLinesMap.get(className);
+        final FileMapData[] fileData = entry.getValue();
         //postpone process main file because its lines would be reset and next files won't be processed correctly
         FileMapData mainData = null;
         for (FileMapData aFileData : fileData) {
