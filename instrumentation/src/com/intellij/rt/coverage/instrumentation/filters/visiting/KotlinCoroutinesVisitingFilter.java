@@ -23,8 +23,8 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 
 public class KotlinCoroutinesVisitingFilter extends MethodVisitingFilter {
   @Override
-  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String desc) {
-    super.initFilter(new SamplingFilter(methodVisitor, context), context, desc);
+  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
+    super.initFilter(new SamplingFilter(methodVisitor, context), context, name, desc);
   }
 
   /**

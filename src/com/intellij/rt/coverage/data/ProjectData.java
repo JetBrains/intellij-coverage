@@ -150,14 +150,17 @@ public class ProjectData implements CoverageData, Serializable {
         //postpone process main file because its lines would be reset and next files won't be processed correctly
         FileMapData mainData = null;
         for (FileMapData aFileData : fileData) {
-          final String fileName = aFileData.getClassName();
-          if (fileName.equals(className)) {
+          final String mappedClassName = aFileData.getClassName();
+          if (mappedClassName.equals(className)) {
             mainData = aFileData;
             continue;
           }
-          if ((myExcludePatterns == null || !ClassNameUtil.matchesPatterns(fileName, myExcludePatterns))
-              && (myIncludePatterns == null || myIncludePatterns.isEmpty() || ClassNameUtil.matchesPatterns(fileName, myIncludePatterns))) {
-            final ClassData classInfo = getOrCreateClassData(fileName);
+          if ((myExcludePatterns == null || !ClassNameUtil.matchesPatterns(mappedClassName, myExcludePatterns))
+              && (myIncludePatterns == null || myIncludePatterns.isEmpty() || ClassNameUtil.matchesPatterns(mappedClassName, myIncludePatterns))) {
+            final ClassData classInfo = getOrCreateClassData(mappedClassName);
+            if (classInfo.getSource() == null || classInfo.getSource().length() == 0) {
+              classInfo.setSource(aFileData.getFileName());
+            }
             classInfo.checkLineMappings(aFileData.getLines(), classData);
           }
         }

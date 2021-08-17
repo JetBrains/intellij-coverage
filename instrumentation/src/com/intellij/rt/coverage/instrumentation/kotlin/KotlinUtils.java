@@ -26,6 +26,7 @@ import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheti
 import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinCoroutinesVisitingFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinImplementerDefaultInterfaceMemberFilter;
+import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinInlineVisitingFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
 
 import java.util.ArrayList;
@@ -59,6 +60,7 @@ public class KotlinUtils {
     List<MethodVisitingFilter> result = new ArrayList<MethodVisitingFilter>();
     result.add(new KotlinImplementerDefaultInterfaceMemberFilter());
     result.add(new KotlinCoroutinesVisitingFilter());
+    result.add(new KotlinInlineVisitingFilter());
     return result;
   }
 

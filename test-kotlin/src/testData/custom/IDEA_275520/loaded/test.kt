@@ -20,7 +20,7 @@ import testData.custom.IDEA_275520.nestedInlines
 import testData.custom.IDEA_275520.simpleInline
 
 fun main() {
-    simpleInline()
-    nestedInlines()
+    simpleInline(3)
+    nestedInlines(3)
     Class.forName("testData.custom.IDEA_275520.Test2Kt")
 }

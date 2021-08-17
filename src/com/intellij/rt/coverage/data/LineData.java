@@ -189,6 +189,10 @@ public class LineData implements CoverageData {
     return myMethodSignature;
   }
 
+  public void setMethodSignature(String methodSignature) {
+    myMethodSignature = methodSignature;
+  }
+
   public void setStatus(final byte status) {
     myStatus = status;
   }

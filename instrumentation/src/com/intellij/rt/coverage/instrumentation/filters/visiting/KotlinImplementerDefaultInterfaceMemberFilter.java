@@ -57,8 +57,8 @@ public class KotlinImplementerDefaultInterfaceMemberFilter extends MethodVisitin
   }
 
   @Override
-  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String desc) {
-    super.initFilter(methodVisitor, context, desc);
+  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
+    super.initFilter(methodVisitor, context, name, desc);
     myState = State.UNKNOWN;
     myLoadArgsNumber = Type.getArgumentTypes(desc).length + 1;
     myLoadArgIndex = 0;

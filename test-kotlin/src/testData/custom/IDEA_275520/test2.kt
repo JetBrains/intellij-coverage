@@ -16,14 +16,14 @@
 
 package testData.custom.IDEA_275520
 
-inline fun simpleInline() {
+inline fun simpleInline(x: Int) {
     println("Test")
 }
 
-inline fun nestedInlines() {
+inline fun nestedInlines(x: Int) {
     println("Hello")
-    simpleInline()
+    simpleInline(x)
     println()
-    simpleInline()
-    simpleInline()
+    simpleInline(x)
+    simpleInline(x)
 }

@@ -31,8 +31,8 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
   private int myCurrentLine;
 
   @Override
-  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String desc) {
-    super.initFilter(methodVisitor, context, desc);
+  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
+    super.initFilter(methodVisitor, context, name, desc);
     myHasInstructions = false;
     myHasLines = false;
     mySeenLineBefore = false;

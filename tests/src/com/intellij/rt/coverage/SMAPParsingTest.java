@@ -144,7 +144,7 @@ public class SMAPParsingTest extends TestCase {
       "*E";
 
   public void testJspSMAPKotlinInline() {
-    final FileMapData[] expected = new FileMapData[]{new FileMapData("testData.inline.SimpleInlineKt",
+    final FileMapData[] expected = new FileMapData[]{new FileMapData("testData.inline.SimpleInlineKt", "simpleInline.kt",
         new LineMapData[]{
             new LineMapData(1, 1, 1),
             new LineMapData(2, 2, 2),
@@ -157,7 +157,7 @@ public class SMAPParsingTest extends TestCase {
   }
 
   public void testJspSMAP() {
-    final FileMapData[] expected = new FileMapData[]{new FileMapData("org.apache.jsp.Hello_jsp",
+    final FileMapData[] expected = new FileMapData[]{new FileMapData("org.apache.jsp.Hello_jsp", "hello.jsp",
         new LineMapData[]{
             new LineMapData(1, 59, 59),
             new LineMapData(2, 60, 60),
@@ -168,7 +168,7 @@ public class SMAPParsingTest extends TestCase {
             new LineMapData(7, 71, 71),
             new LineMapData(8, 72, 72),
         }),
-        new FileMapData("org.apache.jsp.greeting_jsp",
+        new FileMapData("org.apache.jsp.greeting_jsp", "greeting.jsp",
             new LineMapData[]{
                 new LineMapData(1, 64, 64),
                 new LineMapData(2, 65, 65),

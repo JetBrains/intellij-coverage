@@ -222,16 +222,22 @@ internal abstract class CoverageRunTest : CoverageTest() {
 
     @Test
     fun test_IDEA_275520Loaded() = test("custom.IDEA_275520.loaded", verify={ projectData, _, _ ->
-        val classData = projectData.getClassData("$TEST_PACKAGE.custom.IDEA_275520.Test2Kt")
-        Assert.assertEquals("f()V", classData.getLineData(20).methodSignature)
+        test_IDEA_275520(projectData, hashMapOf("simpleInline(I)V" to 20..20, "nestedInlines(I)V" to 24..28))
     })
 
     @Test
-    @Ignore("To be fixed")
     fun test_IDEA_275520Unloaded() = test("custom.IDEA_275520.unloaded", verify={ projectData, _, _ ->
-        val classData = projectData.getClassData("$TEST_PACKAGE.custom.IDEA_275520.Test2Kt")
-        Assert.assertEquals("f()V", classData.getLineData(20).methodSignature)
+        test_IDEA_275520(projectData, hashMapOf("simpleInline()V" to 20..20, "nestedInlines()V" to 24..28))
     })
+
+    private fun test_IDEA_275520(projectData: ProjectData, signatures: HashMap<String, IntRange>) {
+        val classData = projectData.getClassData("$TEST_PACKAGE.custom.IDEA_275520.Test2Kt")
+        for ((signature, lines) in signatures) {
+            for (line in lines) {
+                Assert.assertEquals(signature, classData.getLineData(line).methodSignature)
+            }
+        }
+    }
 }
 
 internal abstract class CoverageVerifyResultsTest(override val coverage: Coverage) : CoverageRunTest() {

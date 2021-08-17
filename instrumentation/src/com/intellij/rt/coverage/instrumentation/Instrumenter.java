@@ -67,7 +67,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
     root = createMethodLineEnumerator(root, name, desc, access, signature, exceptions);
     for (MethodVisitingFilter filter : FilterUtils.createVisitingFilters()) {
       if (filter.isApplicable(this, access, name, desc, signature, exceptions)) {
-        filter.initFilter(root, this, desc);
+        filter.initFilter(root, this, name, desc);
         root = filter;
       }
     }

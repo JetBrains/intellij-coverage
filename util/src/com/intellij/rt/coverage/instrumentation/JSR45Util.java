@@ -46,7 +46,7 @@ public class JSR45Util {
       final TIntObjectHashMap<THashSet<LineMapData>> linesMap = new TIntObjectHashMap<THashSet<LineMapData>>();
       final int fileSectionIdx = debug.indexOf(FILE_SECTION);
       final int lineInfoIdx = debug.indexOf(LINE_SECTION);
-      final TIntObjectHashMap<String> fileNames = parseFileNames(debug, fileSectionIdx, lineInfoIdx, className);
+      final TIntObjectHashMap<FileInfo> fileNames = parseFileNames(debug, fileSectionIdx, lineInfoIdx, className);
       final int lineInfoStart = lineInfoIdx + LINE_SECTION.length();
       final int lineInfoEnd = debug.indexOf(SECTION_SEPARATOR, lineInfoStart);
       final String lineInfo = debug.substring(lineInfoStart, lineInfoEnd);
@@ -102,7 +102,8 @@ public class JSR45Util {
       final int[] keys = linesMap.keys();
       Arrays.sort(keys);
       for (final int key : keys) {
-        result.add(new FileMapData(fileNames.get(key), getLinesMapping(linesMap.get(key))));
+        final FileInfo fileInfo = fileNames.get(key);
+        result.add(new FileMapData(fileInfo.myPath, fileInfo.myName, getLinesMapping(linesMap.get(key))));
       }
       return result.toArray(FileMapData.EMPTY_FILE_MAP);
     }
@@ -118,42 +119,37 @@ public class JSR45Util {
     return fileSection.split("\n");
   }
 
-  private static TIntObjectHashMap<String> parseFileNames(String debug, int fileSectionIdx, int lineInfoIdx, String className) {
+  private static TIntObjectHashMap<FileInfo> parseFileNames(String debug, int fileSectionIdx, int lineInfoIdx, String className) {
     final String defaultPrefix = getClassPackageName(className);
     final String[] fileNameIdx = getFileSectionLines(debug, fileSectionIdx, lineInfoIdx);
-    final TIntObjectHashMap<String> result = new TIntObjectHashMap<String>();
+    final TIntObjectHashMap<FileInfo> result = new TIntObjectHashMap<FileInfo>();
     boolean generatedPrefix = true;
     for (int i = 0; i < fileNameIdx.length; i++) {
-      String fileName = fileNameIdx[i];
-      String idAndName = fileName;
+      final String fileInfoLine = fileNameIdx[i];
+      String idAndName = fileInfoLine;
       String path = null;
-      if (fileName.startsWith("+ ")) {
-        idAndName = fileName.substring(2);
+      if (fileInfoLine.startsWith("+ ")) {
+        idAndName = fileInfoLine.substring(2);
         path = fileNameIdx[++i];
       }
       int idx = idAndName.indexOf(" ");
       int key = Integer.parseInt(idAndName.substring(0, idx));
-      String currentClassName = idAndName.substring(idx + 1);
+      final String fileName = idAndName.substring(idx + 1);
 
-      path = path == null ? currentClassName : processRelative(path);
+      path = path == null ? fileName : processRelative(path);
       final int lastDot = path.lastIndexOf(".");
-      String fileNameWithDots;
-      if (lastDot < 0) {
-        fileNameWithDots = path;
-      } else {
-        fileNameWithDots = path.substring(0, lastDot) + "_" + path.substring(lastDot + 1);
-      }
-      fileNameWithDots = ClassNameUtil.convertToFQName(fileNameWithDots);
+      final String pathWithDots = ClassNameUtil.convertToFQName(lastDot < 0
+          ? path
+          : path.substring(0, lastDot) + "_" + path.substring(lastDot + 1));
       
-      generatedPrefix &= !fileNameWithDots.startsWith(defaultPrefix);
-      currentClassName = fileNameWithDots;
-      result.put(key, currentClassName);
+      generatedPrefix &= !pathWithDots.startsWith(defaultPrefix);
+      result.put(key, new FileInfo(fileName, pathWithDots));
     }
 
     if (generatedPrefix) {
-      result.transformValues(new TObjectFunction<String, String>() {
-        public String execute(String selfValue) {
-          return defaultPrefix + selfValue;
+      result.transformValues(new TObjectFunction<FileInfo, FileInfo>() {
+        public FileInfo execute(FileInfo selfValue) {
+          return new FileInfo(selfValue.myName, defaultPrefix + selfValue.myPath);
         }
       });
     }
@@ -239,5 +235,16 @@ public class JSR45Util {
       return paths;
     }
     return Collections.emptyList();
+  }
+
+
+  private static class FileInfo {
+    private final String myName;
+    private final String myPath;
+
+    public FileInfo(String name, String path) {
+      myName = name;
+      myPath = path;
+    }
   }
 }

@@ -22,15 +22,21 @@ package com.intellij.rt.coverage.data;
 public class FileMapData { 
   public static final FileMapData[] EMPTY_FILE_MAP = new FileMapData[0];
   private final String myClassName;
+  private final String myFileName;
   private final LineMapData[] myLines;
 
-  public FileMapData(String className, LineMapData[] lines) {
+  public FileMapData(String className, String fileName, LineMapData[] lines) {
     myClassName = className;
+    myFileName = fileName;
     myLines = lines;
   }
 
   public String getClassName() {
     return myClassName;
+  }
+
+  public String getFileName() {
+    return myFileName;
   }
 
   public LineMapData[] getLines() {
