@@ -360,11 +360,11 @@ public class ClassData implements CoverageData {
             if (jumpData == null) continue;
             int trueId = jumpData.getId(true);
             if (trueId != -1) {
-              jumpData.setTrueHits(myHitsMask[trueId]);
+              jumpData.setTrueHits(jumpData.getTrueHits() + myHitsMask[trueId]);
             }
             int falseId = jumpData.getId(false);
             if (falseId != -1) {
-              jumpData.setFalseHits(myHitsMask[falseId]);
+              jumpData.setFalseHits(jumpData.getFalseHits() + myHitsMask[falseId]);
             }
           }
         }
@@ -383,7 +383,7 @@ public class ClassData implements CoverageData {
             for (int i = 0; i < hits.length; i++) {
               int caseId = switchData.getId(i);
               if (caseId == -1) continue;
-              hits[i] = myHitsMask[caseId];
+              hits[i] += myHitsMask[caseId];
             }
             switchData.setKeysAndHits(keys, hits);
           }

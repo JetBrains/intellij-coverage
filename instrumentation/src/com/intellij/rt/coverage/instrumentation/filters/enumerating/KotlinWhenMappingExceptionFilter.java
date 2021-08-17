@@ -16,21 +16,32 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.enumerating;
 
+import com.intellij.rt.coverage.data.JumpData;
+import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.SwitchData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class KotlinWhenMappingExceptionFilter extends LineEnumeratorFilter {
-
+  private Map<Label, PositionData> myJumpLabels;
+  private Map<Label, PositionData> mySwitchLabels;
   private Label myCurrentLabel = null;
+  private int myCurrentLine;
 
   @Override
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
     return KotlinUtils.isKotlinClass(context);
+  }
+
+  @Override
+  public void visitLineNumber(int line, Label start) {
+    super.visitLineNumber(line, start);
+    myCurrentLine = line;
   }
 
   @Override
@@ -40,15 +51,61 @@ public class KotlinWhenMappingExceptionFilter extends LineEnumeratorFilter {
   }
 
   @Override
+  public void visitJumpInsn(int opcode, Label label) {
+    if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR) {
+      final LineData lineData = myContext.getInstrumenter().getLineData(myCurrentLine);
+      if (lineData != null) {
+        if (myJumpLabels == null) myJumpLabels = new HashMap<Label, PositionData>();
+        myJumpLabels.put(label, new PositionData(myCurrentLine, lineData.jumpsCount()));
+      }
+    }
+    super.visitJumpInsn(opcode, label);
+  }
+
+  @Override
+  public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
+    final LineData lineData = myContext.getInstrumenter().getLineData(myCurrentLine);
+    if (lineData != null) {
+      if (mySwitchLabels == null) mySwitchLabels = new HashMap<Label, PositionData>();
+      mySwitchLabels.put(dflt, new PositionData(myCurrentLine, lineData.switchesCount()));
+    }
+    super.visitTableSwitchInsn(min, max, dflt, labels);
+  }
+
+  @Override
   public void visitTypeInsn(int opcode, String type) {
     super.visitTypeInsn(opcode, type);
     if (opcode == Opcodes.NEW && type.equals("kotlin/NoWhenBranchMatchedException")) {
-      Map<Label, SwitchData> defaultTableSwitchLabels = myContext.getBranchData().getDefaultTableSwitchLabels();
-      if (defaultTableSwitchLabels == null) return;
-      SwitchData switchData = defaultTableSwitchLabels.get(myCurrentLabel);
-      if (switchData != null) {
-        switchData.touch(-1);
+      final PositionData jumpPosition = myJumpLabels == null ? null : myJumpLabels.get(myCurrentLabel);
+      if (jumpPosition != null) {
+        final LineData lineData = myContext.getInstrumenter().getLineData(jumpPosition.myLine);
+        if (lineData != null && jumpPosition.myIndex < lineData.jumpsCount()) {
+          final JumpData jumpData = lineData.getJumpData(jumpPosition.myIndex);
+          if (jumpData != null) {
+            jumpData.touchFalseHit();
+          }
+        }
       }
+      final PositionData switchPosition = mySwitchLabels == null ? null : mySwitchLabels.get(myCurrentLabel);
+      if (switchPosition != null) {
+        final LineData lineData = myContext.getInstrumenter().getLineData(switchPosition.myLine);
+        if (lineData != null && switchPosition.myIndex < lineData.switchesCount()) {
+          final SwitchData switchData = lineData.getSwitchData(switchPosition.myIndex);
+          if (switchData != null) {
+            switchData.touch(-1);
+          }
+        }
+      }
+    }
+  }
+
+  private static class PositionData {
+    private final int myLine;
+    private final int myIndex;
+
+    private PositionData(int line, int index) {
+      myLine = line;
+      myIndex = index;
     }
   }
 }

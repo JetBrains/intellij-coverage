@@ -146,7 +146,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     if (lineData != null) {
       switchLabels = replaceLabels(switchLabels);
       int switchIndex = lineData.switchesCount();
-      myBranchData.addTableSwitch(lineData, switchIndex, min, max, switchLabels.getDefault(), switchLabels.getLabels(), dflt);
+      myBranchData.addTableSwitch(lineData, switchIndex, min, max, switchLabels.getDefault(), switchLabels.getLabels());
     }
     super.visitTableSwitchInsn(min, max, switchLabels.getDefault(), switchLabels.getLabels());
   }

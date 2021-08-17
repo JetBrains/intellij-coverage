@@ -105,7 +105,6 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testFixesIDEA_259731() = test("fixes.IDEA_259731")
 
     @Test
-    @Ignore("To be fixed")
     fun testFixesIDEA_264534() = test("fixes.IDEA_264534")
 
     @Test

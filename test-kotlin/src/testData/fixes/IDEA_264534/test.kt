@@ -16,16 +16,42 @@
 
 package testData.fixes.IDEA_264534
 
-// ignore: To be fixed
+import kotlin.random.Random
 
 fun test(value: Boolean) {
-    return when (value) { // coverage: FULL
-        true -> Unit      // coverage: FULL
-        false -> Unit     // coverage: FULL
+    return when (value) {                            // coverage: FULL
+        true -> Unit                                 // coverage: FULL
+        false -> Unit                                // coverage: FULL
+    }
+}
+
+fun testTrue(value: Boolean) {
+    return when (value) {                            // coverage: FULL
+        true -> Unit                                 // coverage: PARTIAL
+        false -> Unit                                // coverage: FULL
+    }
+}
+
+fun testFalse(value: Boolean) {
+    return when (value) {                            // coverage: FULL
+        true -> Unit                                 // coverage: PARTIAL
+        false -> Unit                                // coverage: NONE
+    }
+}
+
+fun testNestedWhen(value: Boolean) {
+    return when (value) {                            // coverage: FULL
+        true ->                                      // coverage: FULL
+            if (Random.nextBoolean()) Unit else Unit // coverage: PARTIAL
+        false -> Unit                                // coverage: FULL
     }
 }
 
 fun main() {
-    test(true)            // coverage: FULL
-    test(false)           // coverage: FULL
+    test(true)                                       // coverage: FULL
+    test(false)                                      // coverage: FULL
+    testFalse(true)                                  // coverage: FULL
+    testTrue(false)                                  // coverage: FULL
+    testNestedWhen(true)                             // coverage: FULL
+    testNestedWhen(false)                            // coverage: FULL
 }

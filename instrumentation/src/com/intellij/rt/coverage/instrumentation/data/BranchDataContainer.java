@@ -38,8 +38,6 @@ public class BranchDataContainer {
   private Map<Label, Jump> myJumps;
   private Map<Label, Switch> mySwitches;
 
-  private HashMap<Label, SwitchData> myDefaultTableSwitchLabels;
-
   public BranchDataContainer(Instrumenter context) {
     myContext = context;
   }
@@ -53,7 +51,6 @@ public class BranchDataContainer {
     myLastTrueJump = null;
     if (myJumps != null) myJumps.clear();
     if (mySwitches != null) mySwitches.clear();
-    myDefaultTableSwitchLabels = null;
   }
 
   public Instrumenter getContext() {
@@ -101,12 +98,10 @@ public class BranchDataContainer {
     setSwitchIds(switchData, switches);
   }
 
-  public void addTableSwitch(LineData lineData, int index, int min, int max, Label dflt, Label[] labels, Label originalDefault) {
+  public void addTableSwitch(LineData lineData, int index, int min, int max, Label dflt, Label[] labels) {
     List<Switch> switches = rememberSwitchLabels(lineData.getLineNumber(), dflt, labels, index);
     SwitchData switchData = lineData.addSwitch(index, min, max);
     setSwitchIds(switchData, switches);
-    if (myDefaultTableSwitchLabels == null) myDefaultTableSwitchLabels = new HashMap<Label, SwitchData>();
-    myDefaultTableSwitchLabels.put(originalDefault, switchData);
   }
 
   public void removeLastJump() {
@@ -132,10 +127,6 @@ public class BranchDataContainer {
     final LineData lineData = myContext.getLineData(aSwitch.getLine());
     if (lineData == null) return;
     lineData.removeSwitch(lineData.switchesCount() - 1);
-  }
-
-  public Map<Label, SwitchData> getDefaultTableSwitchLabels() {
-    return myDefaultTableSwitchLabels;
   }
 
   private List<Switch> rememberSwitchLabels(final int line, final Label dflt, final Label[] labels, int switchIndex) {

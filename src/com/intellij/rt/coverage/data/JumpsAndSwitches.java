@@ -53,7 +53,7 @@ public class JumpsAndSwitches implements CoverageData {
   }
 
   public JumpData getJumpData(int jump) {
-    return myJumpsArray == null ? null : myJumpsArray[jump];
+    return myJumpsArray == null ? (myJumps == null ? null : myJumps.get(jump)) : myJumpsArray[jump];
   }
 
   public SwitchData addSwitch(final int switchNumber, final int[] keys) {
@@ -79,7 +79,7 @@ public class JumpsAndSwitches implements CoverageData {
   }
 
   public SwitchData getSwitchData(int switchNumber) {
-    return mySwitchesArray == null ? null : mySwitchesArray[switchNumber];
+    return mySwitchesArray == null ? (mySwitches == null ? null : mySwitches.get(switchNumber)) : mySwitchesArray[switchNumber];
   }
 
   public void save(final DataOutputStream os) throws IOException {
