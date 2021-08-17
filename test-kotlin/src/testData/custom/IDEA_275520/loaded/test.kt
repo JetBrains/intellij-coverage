@@ -16,9 +16,11 @@
 
 package testData.custom.IDEA_275520.loaded
 
-import testData.custom.IDEA_275520.f
+import testData.custom.IDEA_275520.nestedInlines
+import testData.custom.IDEA_275520.simpleInline
 
 fun main() {
-    f()
+    simpleInline()
+    nestedInlines()
     Class.forName("testData.custom.IDEA_275520.Test2Kt")
 }

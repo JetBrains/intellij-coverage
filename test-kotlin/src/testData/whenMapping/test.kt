@@ -36,12 +36,12 @@ enum class SimpleEnum {
 fun simpleF(v: SimpleEnum) =
     when (v) {                  // coverage: FULL as no branching for else
         SimpleEnum.Single -> 42 // coverage: FULL
-    }                           // coverage: FULL as return is here
+    }
 
 fun noneF(v: SimpleEnum) =
     when (v) {                  // coverage: NONE
         SimpleEnum.Single -> 42 // coverage: NONE
-    }                           // coverage: NONE
+    }
 
 fun main() {
     f(F.A)                      // coverage: FULL

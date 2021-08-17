@@ -27,4 +27,4 @@ suspend fun test() {
 
 fun main(): Unit = runBlocking { // coverage: FULL
     test()                       // coverage: FULL
-}                                // coverage: FULL
+}

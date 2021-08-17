@@ -156,6 +156,8 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
       onIgnoredLine(myLine);
       return;
     }
+    // ignore code like: POP; LOAD Unit.INSTANCE; ARETURN
+    if (opcode == Opcodes.POP) return;
     myHasExecutableCode = true;
     // ignore generated return on the first line
     if (opcode == Opcodes.ARETURN && myLoadCoroutinesSuspendedVisited && !myHadLineDataBefore) {

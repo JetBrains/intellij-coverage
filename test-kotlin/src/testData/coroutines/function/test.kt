@@ -32,7 +32,7 @@ suspend fun suspendFunction() {
 fun main() {
     GlobalScope.launch {       // coverage: FULL
         suspendFunction()      // coverage: FULL
-    }                          // coverage: FULL
+    }
     println("Hello,")          // coverage: FULL
     Thread.sleep(100L)         // coverage: FULL
 }

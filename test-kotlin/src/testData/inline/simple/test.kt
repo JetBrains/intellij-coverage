@@ -18,8 +18,13 @@ package testData.inline.simple
 
 private inline fun a(x: Int) {
     println(x) // coverage: FULL
-}              // coverage: FULL
+}
+
+private inline fun a() {
+    println()  // coverage: FULL
+}
 
 fun main() {
     a(4)       // coverage: FULL
+    a()        // coverage: FULL
 }

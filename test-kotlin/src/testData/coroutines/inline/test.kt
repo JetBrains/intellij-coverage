@@ -25,7 +25,7 @@ fun test() = runBlocking {       // coverage: FULL
     foo {                        // coverage: FULL
         34                       // coverage: FULL
     }
-}                                // coverage: FULL
+}
 
 suspend inline fun foo(f: () -> Int): Int {
     delay(100)                   // coverage: FULL

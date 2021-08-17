@@ -65,7 +65,7 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
   public void visitInsn(int opcode) {
     super.visitInsn(opcode);
     if (!myHasLines) return;
-    if (opcode != Opcodes.RETURN) {
+    if (opcode != Opcodes.NOP && (opcode < Opcodes.IRETURN || opcode > Opcodes.RETURN)) {
       myHasInstructions = true;
     }
   }
