@@ -37,7 +37,7 @@ suspend fun foo1(useStateMachineCodePath: Boolean) {
 suspend inline fun ctxOuter(useStateMachineCodePath: Boolean) {
     ctx(useStateMachineCodePath)                         // coverage: FULL
     println("Done")                                      // coverage: FULL
-}
+}                                                        // coverage: FULL
 
 suspend inline fun ctx(useStateMachineCodePath: Boolean) {
     if (useStateMachineCodePath) {                       // coverage: PARTIAL
@@ -48,7 +48,7 @@ suspend inline fun ctx(useStateMachineCodePath: Boolean) {
         println(kotlin.coroutines.coroutineContext[Job]) // coverage: FULL
     }
     println(coroutineContext[Job])                       // coverage: FULL
-}
+}                                                        // coverage: FULL
 
 suspend fun foo2(useStateMachineCodePath: Boolean) {
     println(1)                                           // coverage: FULL

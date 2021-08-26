@@ -17,6 +17,8 @@
 package com.intellij.rt.coverage.instrumentation.filters.visiting;
 
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import org.jetbrains.coverage.gnu.trove.TIntHashSet;
+import org.jetbrains.coverage.gnu.trove.TIntProcedure;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
@@ -25,30 +27,41 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * Remove } lines from coverage report.
  */
 public class ClosingBracesFilter extends MethodVisitingFilter {
+  private String myName;
   private boolean myHasInstructions;
   private boolean myHasLines;
   private boolean mySeenLineBefore;
   private int myCurrentLine;
 
+  /**
+   * Do not ignore return statements in Kotlin inline methods as there is no way to ignore these lines in
+   * the inlined code as only NOP instructions stay there.
+   */
+  private TIntHashSet myLinesToIgnore;
+  private boolean myInline;
+
   @Override
   public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
     super.initFilter(methodVisitor, context, name, desc);
+    myName = name;
     myHasInstructions = false;
     myHasLines = false;
     mySeenLineBefore = false;
     myCurrentLine = -1;
+    myLinesToIgnore = new TIntHashSet();
+    myInline = false;
   }
 
-  private void removeEmptyLine() {
+  private void addEmptyLineToRemove() {
     if (myHasLines && !myHasInstructions && !mySeenLineBefore) {
-      myContext.removeLine(myCurrentLine);
+      myLinesToIgnore.add(myCurrentLine);
     }
   }
 
   @Override
   public void visitLineNumber(int line, Label start) {
-    removeEmptyLine();
-    mySeenLineBefore = myContext.getLineData(line) != null;
+    addEmptyLineToRemove();
+    mySeenLineBefore = myContext.getLineData(line) != null & !myLinesToIgnore.remove(line);
     super.visitLineNumber(line, start);
     myHasLines = true;
     myHasInstructions = false;
@@ -56,8 +69,22 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
   }
 
   @Override
+  public void visitLocalVariable(String name, String descriptor, String signature, Label start, Label end, int index) {
+    super.visitLocalVariable(name, descriptor, signature, start, end, index);
+    myInline |= KotlinInlineVisitingFilter.isInlineMethod(myName, name);
+  }
+
+  @Override
   public void visitEnd() {
-    removeEmptyLine();
+    addEmptyLineToRemove();
+    if (!myInline) {
+      myLinesToIgnore.forEach(new TIntProcedure() {
+        public boolean execute(int line) {
+          myContext.removeLine(line);
+          return true;
+        }
+      });
+    }
     super.visitEnd();
   }
 
@@ -65,7 +92,7 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
   public void visitInsn(int opcode) {
     super.visitInsn(opcode);
     if (!myHasLines) return;
-    if (opcode != Opcodes.NOP && (opcode < Opcodes.IRETURN || opcode > Opcodes.RETURN)) {
+    if (opcode < Opcodes.IRETURN || opcode > Opcodes.RETURN) {
       myHasInstructions = true;
     }
   }

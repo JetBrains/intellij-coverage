@@ -87,6 +87,10 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
     }
   }
 
+  public static boolean isInlineMethod(String methodName, String variableName) {
+    return variableName.equals(INLINE_FUNCTION_PREFIX + methodName);
+  }
+
   private static class InlineRange implements Comparable<InlineRange> {
     private final String myName;
     private final Label myStart;

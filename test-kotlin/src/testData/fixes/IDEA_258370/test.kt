@@ -24,7 +24,7 @@ import kotlinx.coroutines.yield
 suspend inline fun foo(crossinline block: suspend () -> Unit) {
     yield()                      // coverage: FULL
     block()                      // coverage: FULL
-}
+}                                // coverage: FULL
 
 fun main() = runBlocking {       // coverage: FULL
     foo {}                       // coverage: FULL

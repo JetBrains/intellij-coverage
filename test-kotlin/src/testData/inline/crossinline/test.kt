@@ -30,12 +30,12 @@ inline fun save(message: String, crossinline foo: (String) -> Unit) {
         list.add(loggedMessage)          // coverage: FULL
         foo(loggedMessage)               // coverage: FULL
     }
-}
+}                                        // coverage: FULL
 
 fun test() {
     save("Hello") {                      // coverage: FULL
         println("\"$it\" saved")         // coverage: FULL
-    }
+    }                                    // coverage: FULL
 }
 
 fun main() {

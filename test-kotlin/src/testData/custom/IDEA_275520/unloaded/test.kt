@@ -17,9 +17,11 @@
 package testData.custom.IDEA_275520.unloaded
 
 import testData.custom.IDEA_275520.nestedInlines
+import testData.custom.IDEA_275520.oneLineInline
 import testData.custom.IDEA_275520.simpleInline
 
 fun main() {
     simpleInline(3)
     nestedInlines(3)
+    oneLineInline()
 }

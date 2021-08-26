@@ -27,3 +27,5 @@ inline fun nestedInlines(x: Int) {
     simpleInline(x)
     simpleInline(x)
 }
+
+inline fun oneLineInline() = 42

@@ -23,7 +23,7 @@ inline fun <reified T> createArray(size: Int): Any = when (T::class) { // covera
         LongArray(size)                                                // coverage: NONE
     else ->
         Array<T?>(size) { null }                                       // coverage: FULL
-}
+}                                                                      // coverage: FULL
 
 fun main() {
     val a = createArray<Int>(10)                                       // coverage: FULL

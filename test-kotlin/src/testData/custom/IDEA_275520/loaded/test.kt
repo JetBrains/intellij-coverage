@@ -17,10 +17,12 @@
 package testData.custom.IDEA_275520.loaded
 
 import testData.custom.IDEA_275520.nestedInlines
+import testData.custom.IDEA_275520.oneLineInline
 import testData.custom.IDEA_275520.simpleInline
 
 fun main() {
     simpleInline(3)
     nestedInlines(3)
+    oneLineInline()
     Class.forName("testData.custom.IDEA_275520.Test2Kt")
 }

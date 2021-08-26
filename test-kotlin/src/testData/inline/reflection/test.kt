@@ -25,11 +25,11 @@ fun main() {
 object Test {                                                                      // coverage: FULL
     inline fun a(x: Int) {
         println(x)                                                                 // coverage: FULL
-    }
+    }                                                                              // coverage: FULL
 
     inline fun b(f: (Int) -> Int) {
         println(f(4))                                                              // coverage: FULL
-    }
+    }                                                                              // coverage: FULL
 
     fun test() {
         this::class.java.getDeclaredMethod("a", Int::class.java).invoke(this, 42)  // coverage: FULL

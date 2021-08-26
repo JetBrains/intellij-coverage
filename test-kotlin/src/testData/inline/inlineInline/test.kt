@@ -19,11 +19,11 @@ package testData.inline.inlineInline
 private inline fun a() {
     print("Hello")    // coverage: FULL
     b()               // coverage: FULL
-}
+}                     // coverage: FULL
 
 private inline fun b() {
     println(" World") // coverage: FULL
-}
+}                     // coverage: FULL
 
 fun main() {
     a()               // coverage: FULL

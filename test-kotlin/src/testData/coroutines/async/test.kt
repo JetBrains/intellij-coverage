@@ -32,7 +32,7 @@ fun test() = runBlocking {                                    // coverage: FULL
             doSomethingUsefulTwo()                            // coverage: FULL
         }
         println("The answer is ${one.await() + two.await()}") // coverage: FULL
-    }
+    }                                                         // coverage: FULL
     println("Completed in $time ms")                          // coverage: FULL
 }
 

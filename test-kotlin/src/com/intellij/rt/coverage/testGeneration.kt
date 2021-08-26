@@ -53,8 +53,14 @@ fun generateTests(testDataRoot: File, ignoredTests: List<String>): String {
     require(testDataRoot.isDirectory)
     val testNames = mutableListOf<String>()
     listTestNames("", testDataRoot, ignoredTests, testNames)
-    return testNames.joinToString("\n") { s ->
-        val test = getTestFile(s)
+    return testNames.mapNotNull { s ->
+        try {
+            getTestFile(s)
+        } catch (e: Throwable) {
+            println("Error in $s: ${e.message}")
+            null
+        }
+    }.joinToString("\n") { test ->
         var ignore = ""
         val ignored = object : Matcher(Regex("// ignore: (.*)\$"), 1) {
             override fun onMatchFound(line: Int, match: String) {
@@ -63,8 +69,8 @@ fun generateTests(testDataRoot: File, ignoredTests: List<String>): String {
         }
         processFile(test.file, ignored)
 
-        val capitalized = s.split('.').joinToString("") { it.capitalize() }
-        "    @Test\n$ignore    fun test$capitalized() = test(\"$s\")\n"
+        val capitalized = test.testName.split('.').joinToString("") { it.capitalize() }
+        "    @Test\n$ignore    fun test$capitalized() = test(\"${test.testName}\")\n"
     }
 }
 
