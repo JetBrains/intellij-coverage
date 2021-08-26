@@ -35,11 +35,10 @@ public class TestDiscoveryInstrumenter extends ExtraFieldInstrumenter {
 
   static final String METHODS_VISITED = "__$methodsVisited$__";
   static final String METHODS_VISITED_CLASS = "[Z";
-  private static final String METHODS_VISITED_INIT = "__$initMethodsVisited$__";
   private final String[] myMethodNames;
 
   public TestDiscoveryInstrumenter(ClassWriter classWriter, ClassReader cr, String className) {
-    super(cr, classWriter, className, METHODS_VISITED, METHODS_VISITED_CLASS, METHODS_VISITED_INIT, false);
+    super(cr, classWriter, className, METHODS_VISITED, METHODS_VISITED_CLASS, false);
     myMethodFilter = new InstrumentedMethodsFilter(className);
     myClassName = className;
     myMethodNames = inspectClass(cr);

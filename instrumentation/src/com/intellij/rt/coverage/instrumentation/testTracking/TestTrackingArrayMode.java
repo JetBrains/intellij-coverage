@@ -55,7 +55,6 @@ public class TestTrackingArrayMode implements TestTrackingMode {
 class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
   private static final String TRACE_MASK_FIELD_NAME = "__$traceMask$__";
   private static final String TRACE_MASK_FIELD_TYPE = "[Z";
-  private static final String TRACE_MASK_FIELD_INIT_NAME = "__$traceMaskInit$__";
   private static final String TRACE_MASK_LOCAL_VARIABLE_NAME = "__$traceMaskLocal$__";
   private static final String CLASS_INIT = "<clinit>";
 
@@ -135,7 +134,7 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
   private class ExtraTraceMaskFieldTestTrackingInstrumenter extends ExtraFieldInstrumenter {
 
     public ExtraTraceMaskFieldTestTrackingInstrumenter(ClassReader cr, String className) {
-      super(cr, null, className, TRACE_MASK_FIELD_NAME, TRACE_MASK_FIELD_TYPE, TRACE_MASK_FIELD_INIT_NAME, true);
+      super(cr, null, className, TRACE_MASK_FIELD_NAME, TRACE_MASK_FIELD_TYPE, true);
     }
 
     public void initField(MethodVisitor mv) {

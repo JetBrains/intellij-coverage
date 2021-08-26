@@ -21,13 +21,11 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.instrumentation.data.Jump;
 import com.intellij.rt.coverage.instrumentation.data.Switch;
-import com.intellij.rt.coverage.util.LinesUtil;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
 public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
   private static final String BRANCH_HITS_FIELD_NAME = "__$branchHits$__";
   private static final String BRANCH_HITS_FIELD_TYPE = "[I";
-  private static final String BRANCH_HITS_FIELD_INIT_NAME = "__$branchHitsInit$__";
   private static final String BRANCH_HITS_LOCAL_VARIABLE_NAME = "__$localBranchHits$__";
   private static final String CLASS_INIT = "<clinit>";
 
@@ -107,7 +105,7 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
   private class ExtraFieldTracingInstrumenter extends ExtraFieldInstrumenter {
 
     public ExtraFieldTracingInstrumenter(ClassReader cr, String className) {
-      super(cr, null, className, BRANCH_HITS_FIELD_NAME, BRANCH_HITS_FIELD_TYPE, BRANCH_HITS_FIELD_INIT_NAME, true);
+      super(cr, null, className, BRANCH_HITS_FIELD_NAME, BRANCH_HITS_FIELD_TYPE, true);
     }
 
     public void initField(MethodVisitor mv) {

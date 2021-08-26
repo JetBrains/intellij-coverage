@@ -24,7 +24,6 @@ import org.jetbrains.coverage.org.objectweb.asm.*;
 public class NewSamplingInstrumenter extends Instrumenter {
     private static final String LINE_HITS_FIELD_NAME = "__$lineHits$__";
     private static final String LINE_HITS_FIELD_TYPE = "[I";
-    private static final String LINE_HITS_FIELD_INIT_NAME = "__$lineHitsInit$__";
     private static final String LINE_HITS_LOCAL_VARIABLE_NAME = "__$localLineHits$__";
 
     private final String myClassNameType;
@@ -84,7 +83,7 @@ public class NewSamplingInstrumenter extends Instrumenter {
     private class ExtraFieldSamplingInstrumenter extends ExtraFieldInstrumenter {
 
         public ExtraFieldSamplingInstrumenter(ClassReader cr, String className) {
-            super(cr, null, className, LINE_HITS_FIELD_NAME, LINE_HITS_FIELD_TYPE, LINE_HITS_FIELD_INIT_NAME, true);
+            super(cr, null, className, LINE_HITS_FIELD_NAME, LINE_HITS_FIELD_TYPE, true);
         }
 
         public void initField(MethodVisitor mv) {

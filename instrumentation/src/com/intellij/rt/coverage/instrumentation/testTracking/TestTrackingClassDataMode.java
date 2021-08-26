@@ -58,7 +58,6 @@ public class TestTrackingClassDataMode implements TestTrackingMode {
 class TestTrackingClassDataInstrumenter extends NewTracingInstrumenter {
   protected static final String CLASS_DATA_FIELD_NAME = "__$classData$__";
   protected static final String CLASS_DATA_FIELD_TYPE = "Ljava/lang/Object;";
-  private static final String CLASS_DATA_FIELD_INIT_NAME = "__$classDataInit$__";
   private static final String CLASS_DATA_LOCAL_VARIABLE_NAME = "__$classDataLocal$__";
   private static final String CLASS_INIT = "<clinit>";
 
@@ -117,7 +116,7 @@ class TestTrackingClassDataInstrumenter extends NewTracingInstrumenter {
   private class ExtraClassDataFieldTestTrackingInstrumenter extends ExtraFieldInstrumenter {
 
     public ExtraClassDataFieldTestTrackingInstrumenter(ClassReader cr, String className) {
-      super(cr, null, className, CLASS_DATA_FIELD_NAME, CLASS_DATA_FIELD_TYPE, CLASS_DATA_FIELD_INIT_NAME, true);
+      super(cr, null, className, CLASS_DATA_FIELD_NAME, CLASS_DATA_FIELD_TYPE, true);
     }
 
     public void initField(MethodVisitor mv) {

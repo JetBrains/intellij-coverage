@@ -172,6 +172,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testPropertiesGetterAndSetter() = test("properties.getterAndSetter")
 
     @Test
+    fun testRedefine() = test("redefine")
+
+    @Test
     fun testReturnTest() = test("returnTest")
 
     @Test

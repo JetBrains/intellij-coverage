@@ -26,4 +26,7 @@ dependencies {
     testImplementation("junit:junit:4.13")
 
     testImplementation(fileTree(project(":benchmarks").file("lib")))
+
+    testImplementation("net.bytebuddy:byte-buddy:1.11.12")
+    testImplementation("net.bytebuddy:byte-buddy-agent:1.11.12")
 }
