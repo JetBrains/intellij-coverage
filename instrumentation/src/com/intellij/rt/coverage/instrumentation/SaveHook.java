@@ -27,9 +27,11 @@ import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author anna
@@ -40,17 +42,11 @@ public class SaveHook implements Runnable {
     private File mySourceMapFile;
     private final boolean myAppendUnloaded;
     private final ClassFinder myClassFinder;
-    private final ReportFormat myFormat;
 
     public SaveHook(File dataFile, boolean appendUnloaded, ClassFinder classFinder) {
-        this(dataFile, appendUnloaded, classFinder, ReportFormat.BINARY);
-    }
-
-    public SaveHook(File dataFile, boolean appendUnloaded, ClassFinder classFinder, ReportFormat format) {
         myDataFile = dataFile;
         myAppendUnloaded = appendUnloaded;
         myClassFinder = classFinder;
-        myFormat = format;
     }
 
     public void run() {
@@ -70,11 +66,6 @@ public class SaveHook implements Runnable {
 
             DataOutputStream os = null;
             try {
-                if (myFormat == ReportFormat.XML) {
-                    reportXML(projectData);
-                    return;
-                }
-
                 os = CoverageIOUtil.openFile(myDataFile);
                 final TObjectIntHashMap<String> dict = new TObjectIntHashMap<String>();
                 final Map<String, ClassData> classes = new HashMap<String, ClassData>(projectData.getClasses());
@@ -101,22 +92,6 @@ public class SaveHook implements Runnable {
         }
     }
 
-    private void reportXML(ProjectData projectData) throws IOException {
-        try {
-            Class<?> xmlReportClass = Class.forName("com.intellij.rt.coverage.util.XMLCoverageReport");
-            Object xmlReport = xmlReportClass.getConstructor().newInstance();
-            Method writeMethod = xmlReportClass.getMethod("write", FileOutputStream.class, ProjectData.class);
-            writeMethod.invoke(xmlReport, new FileOutputStream(myDataFile), projectData);
-        } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof IOException) {
-                throw (IOException) e.getCause();
-            }
-            throw new RuntimeException(e.getCause());
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static void saveSourceMap(Map str_clData_classes, File sourceMapFile) {
         if (sourceMapFile != null) {
             Map<Object, Object> readNames = Collections.emptyMap();
@@ -132,6 +107,19 @@ public class SaveHook implements Runnable {
                 doSaveSourceMap(readNames, sourceMapFile, str_clData_classes);
             } catch (IOException e) {
                 ErrorReporter.reportError("Error writing source map " + sourceMapFile.getPath(), e);
+            }
+        }
+    }
+
+    public static void loadAndApplySourceMap(ProjectData projectData, File sourceMapFile) throws IOException {
+        Map<Object, Object> map = loadSourceMapFromFile(new HashMap(), sourceMapFile);
+        for (Object o : map.entrySet()) {
+            @SuppressWarnings("unchecked") Map.Entry<String, String> entry = (Map.Entry<String, String>) o;
+            String className = entry.getKey();
+            String source = entry.getValue();
+            ClassData data = projectData.getClassData(className);
+            if (data != null) {
+              data.setSource(source);
             }
         }
     }

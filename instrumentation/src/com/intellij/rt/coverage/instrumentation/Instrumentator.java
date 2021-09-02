@@ -23,7 +23,6 @@ import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingClassDa
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
-import com.intellij.rt.coverage.util.ReportFormat;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 
 import java.io.*;
@@ -88,13 +87,6 @@ public class Instrumentator {
       sourceMapFile = null;
     }
 
-    ReportFormat reportFormat = ReportFormat.BINARY;
-    if (i < args.length && args[i].equals("-xml")) {
-      checkXMLReportCompatibility();
-      i++;
-      reportFormat = ReportFormat.XML;
-    }
-
     final List<Pattern> includePatterns = new ArrayList<Pattern>();
     System.out.println("---- IntelliJ IDEA coverage runner ---- ");
     System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
@@ -132,26 +124,13 @@ public class Instrumentator {
     final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling, includePatterns, excludePatterns, testTrackingMode.createTestTrackingCallback());
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
     if (dataFile != null) {
-      final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf, reportFormat);
+      final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf);
       hook.setSourceMapFile(sourceMapFile);
       Runtime.getRuntime().addShutdownHook(new Thread(hook));
     }
 
-    final boolean shouldCalculateSource = sourceMapFile != null || reportFormat == ReportFormat.XML;
+    final boolean shouldCalculateSource = sourceMapFile != null;
     instrumentation.addTransformer(new CoverageClassfileTransformer(data, shouldCalculateSource, excludePatterns, includePatterns, cf, testTrackingMode));
-  }
-
-  /**
-   * XML report is available if JDK version is higher than 6.
-   * Namely, <code>javax.xml.stream.XMLStreamWriter</code> is available at runtime.
-   */
-  private void checkXMLReportCompatibility() {
-    try {
-      Class.forName("javax.xml.stream.XMLStreamWriter");
-    } catch (ClassNotFoundException e) {
-      System.err.println("XML report is available if JDK version is higher than 6. javax.xml.stream.* classes were not found.");
-      System.exit(1);
-    }
   }
 
   private TestTrackingMode createTestTrackingMode(boolean traceLines) {

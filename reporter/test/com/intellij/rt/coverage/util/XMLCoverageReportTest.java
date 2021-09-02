@@ -59,26 +59,23 @@ public class XMLCoverageReportTest {
 
   @Test
   public void integrationTestVerifyXML() throws Throwable {
-    try {
-      File file = File.createTempFile("report_tmp", ".xml");
-      CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), file, "-xml .*", "testData.simple.Main", false);
-      verifyProjectXML(file, "xmlIntegrationTest.xml");
-    } finally {
-      // xml cannot be parsed to load project
-      new File("coverage-error.log").delete();
-    }
+    verifyProjectXML(runTestAndConvertToXML(".*", "testData.simple.Main"), "xmlIntegrationTest.xml");
   }
 
   @Test
   public void integrationTestInline() throws Throwable {
-    try {
-      File file = File.createTempFile("report_tmp", ".xml");
-      CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), file, "-xml testData\\.inline\\..*", "testData.inline.Test", false);
-      verifyProjectXML(file, "inlineIntegrationTest.xml");
-    } finally {
-      // xml cannot be parsed to load project
-      new File("coverage-error.log").delete();
-    }
+    verifyProjectXML(runTestAndConvertToXML("testData\\.inline\\..*", "testData.inline.Test"), "inlineIntegrationTest.xml");
+  }
+
+  private File runTestAndConvertToXML(String patterns, String className) throws Throwable {
+    final File icFile = File.createTempFile("report_tmp", ".ic");
+    final File sourceMapFile = File.createTempFile("report_tmp", ".sm");
+    patterns = "true " + sourceMapFile.getAbsolutePath() + " " + patterns;
+    CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), icFile, patterns, className, false);
+    final Reporter reporter = new Reporter(icFile, sourceMapFile);
+    final File xmlFile = File.createTempFile("report_tmp", ".xml");
+    reporter.createXMLReport(xmlFile);
+    return xmlFile;
   }
 
   private void verifyProjectXML(File file, String expectedFileName) throws Throwable {

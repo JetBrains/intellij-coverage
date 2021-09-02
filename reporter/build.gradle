@@ -17,8 +17,14 @@ sourceSets {
 
 dependencies {
   implementation project(":")
+  implementation(project(path: ":instrumentation", configuration: "archives"))
   implementation project(":util")
 
   testImplementation("junit:junit:4.13")
   testImplementation(files(project(":tests").sourceSets.test.output))
+}
+
+jar {
+  baseName = reporter_jar_name
+  destinationDir = file("../dist")
 }

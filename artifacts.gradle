@@ -31,6 +31,12 @@ project(":instrumentation").afterEvaluate { instr ->
         version version
         artifact project(":test-discovery").jar
       }
+      ReporterPublication(MavenPublication) {
+        groupId agentsGroupId
+        artifactId reporter_jar_name
+        version version
+        artifact project(":reporter").jar
+      }
     }
     repositories {
       maven {

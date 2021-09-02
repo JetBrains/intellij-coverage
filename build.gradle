@@ -30,6 +30,7 @@ ext.library_project_asm_all = files(asm)
 
 ext.test_discovery_jar_name = 'intellij-test-discovery-agent'
 ext.coverage_jar_name = 'intellij-coverage-agent'
+ext.reporter_jar_name = 'intellij-coverage-reporter'
 
 allprojects {
   version calcVersion()
