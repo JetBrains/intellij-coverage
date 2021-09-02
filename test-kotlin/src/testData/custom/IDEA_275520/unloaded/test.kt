@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// extra args: -Didea.coverage.check.inline.signatures=true
+
 package testData.custom.IDEA_275520.unloaded
 
 import testData.custom.IDEA_275520.nestedInlines

@@ -121,4 +121,8 @@ public class ClassFinder {
     }
     return result;
   }
+
+  public Set<ClassLoader> getClassloaders() {
+    return myClassloaders;
+  }
 }

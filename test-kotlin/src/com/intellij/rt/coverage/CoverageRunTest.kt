@@ -228,15 +228,16 @@ internal abstract class CoverageRunTest : CoverageTest() {
 
     @Test
     fun test_IDEA_275520Loaded() = test("custom.IDEA_275520.loaded", verify = { projectData, _, _ ->
-        test_IDEA_275520(projectData, hashMapOf("simpleInline(I)V" to 20..21, "nestedInlines(I)V" to 24..29, "oneLineInline()I" to 31..31))
+        test_IDEA_275520(projectData)
     })
 
     @Test
     fun test_IDEA_275520Unloaded() = test("custom.IDEA_275520.unloaded", verify = { projectData, _, _ ->
-        test_IDEA_275520(projectData, hashMapOf("simpleInline()V" to 20..21, "nestedInlines()V" to 24..29,"oneLineInline()V" to 31..31))
+        test_IDEA_275520(projectData)
     })
 
-    private fun test_IDEA_275520(projectData: ProjectData, signatures: HashMap<String, IntRange>) {
+    private fun test_IDEA_275520(projectData: ProjectData) {
+        val signatures = hashMapOf("simpleInline(I)V" to 20..21, "nestedInlines(I)V" to 24..29,"oneLineInline()I" to 31..31)
         val classData = projectData.getClassData("$TEST_PACKAGE.custom.IDEA_275520.Test2Kt")
         val expected = signatures.entries.joinToString("\n")
         { (s, lines) -> lines.joinToString("\n") { "$it $s" } }

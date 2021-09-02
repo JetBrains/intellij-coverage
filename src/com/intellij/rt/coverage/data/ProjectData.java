@@ -105,6 +105,10 @@ public class ProjectData implements CoverageData, Serializable {
     return myClasses.size();
   }
 
+  public Map<String, FileMapData[]> getLinesMap() {
+    return myLinesMap;
+  }
+
   public static ProjectData createProjectData(final File dataFile,
                                               final ProjectData initialData,
                                               boolean traceLines,

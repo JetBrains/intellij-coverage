@@ -16,10 +16,8 @@
 
 package com.intellij.rt.coverage.instrumentation;
 
-import com.intellij.rt.coverage.data.ClassData;
-import com.intellij.rt.coverage.data.LineCoverage;
-import com.intellij.rt.coverage.data.LineData;
-import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.*;
+import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinInlineVisitingFilter;
 import com.intellij.rt.coverage.util.*;
 import com.intellij.rt.coverage.util.classFinder.ClassEntry;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
@@ -31,10 +29,7 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author anna
@@ -71,6 +66,7 @@ public class SaveHook implements Runnable {
             if (myAppendUnloaded) {
                 appendUnloaded(projectData);
             }
+            checkLineSignatures(projectData);
 
             DataOutputStream os = null;
             try {
@@ -245,5 +241,24 @@ public class SaveHook implements Runnable {
 
     public void setSourceMapFile(File sourceMapFile) {
         mySourceMapFile = sourceMapFile;
+    }
+
+    private void checkLineSignatures(ProjectData projectData) {
+      final Map<String, FileMapData[]> linesMap = projectData.getLinesMap();
+      if (linesMap == null) return;
+      final Set<String> classes = new HashSet<String>();
+      for (Map.Entry<String, FileMapData[]> mapData : linesMap.entrySet()) {
+        if (mapData.getValue() == null) continue;
+        for (FileMapData data : mapData.getValue()) {
+          if (data == null) continue;
+          if (mapData.getKey().equals(data.getClassName())) continue;
+          classes.add(data.getClassName());
+        }
+      }
+      for (String className : classes) {
+        final ClassData classData = projectData.getClassData(className);
+        if (classData == null) continue;
+        KotlinInlineVisitingFilter.checkLineSignatures(classData, myClassFinder);
+      }
     }
 }

@@ -16,23 +16,33 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.visiting;
 
+import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import com.intellij.rt.coverage.util.ErrorReporter;
-import org.jetbrains.coverage.org.objectweb.asm.Label;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
+import com.intellij.rt.coverage.util.classFinder.ClassEntry;
+import com.intellij.rt.coverage.util.classFinder.ClassFinder;
+import com.intellij.rt.coverage.util.classFinder.ClassPathEntry;
+import org.jetbrains.coverage.gnu.trove.TIntHashSet;
+import org.jetbrains.coverage.gnu.trove.TIntProcedure;
+import org.jetbrains.coverage.org.objectweb.asm.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
   private static final String INLINE_FUNCTION_PREFIX = "$i$f$";
+  private static final boolean ourCheckInlineSignatures =
+      "true".equals(System.getProperty("idea.coverage.check.inline.signatures"));
 
   /**
    * A correct descriptor of inlined function is unknown is the class with the method definition is not loaded,
    * so a default descriptor is used.
    */
   private static final String DEFAULT_DESC = "()V";
+  private static final String UNKNOWN_DESC = "(?)?";
   private Map<Label, Integer> myLines;
   private List<InlineRange> myInlineRanges;
   private String myName;
@@ -79,7 +89,7 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
           if (lineData == null) continue;
           // in case of visiting an inline method definition
           if (range.myName.equals(myName)) continue;
-          lineData.setMethodSignature(range.myName + DEFAULT_DESC);
+          lineData.setMethodSignature(range.myName + (ourCheckInlineSignatures ? UNKNOWN_DESC : DEFAULT_DESC));
         }
       }
     } catch (Throwable e) {
@@ -109,5 +119,63 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
       }
       return startDiff;
     }
+  }
+
+  /**
+   * If an option is turned on, try to load bytecode of classes that have lines with unknown signature and
+   * find out the correct signature.
+   */
+  public static void checkLineSignatures(final ClassData classData, final ClassFinder classFinder) {
+    if (!ourCheckInlineSignatures) return;
+    final TIntHashSet linesWithIncorrectSignatures = new TIntHashSet();
+    for (LineData line : (LineData[]) classData.getLines()) {
+      if (line != null && line.getMethodSignature() != null && line.getMethodSignature().endsWith(UNKNOWN_DESC)) {
+        linesWithIncorrectSignatures.add(line.getLineNumber());
+      }
+    }
+    if (linesWithIncorrectSignatures.isEmpty()) return;
+    final Set<ClassLoader> classLoaders = new HashSet<ClassLoader>(classFinder.getClassloaders());
+    classLoaders.add(null);
+    for (ClassLoader loader : classLoaders) {
+      InputStream is = null;
+      try {
+        final ClassEntry classEntry = new ClassEntry(classData.getName(), loader);
+        is = classEntry.getClassInputStream();
+        if (is == null) continue;
+        final ClassReader reader = new ClassReader(classEntry.getClassInputStream());
+
+        reader.accept(new ClassVisitor(Opcodes.API_VERSION) {
+          @Override
+          public MethodVisitor visitMethod(int access, final String name, final String descriptor, String signature, String[] exceptions) {
+            return new MethodVisitor(Opcodes.API_VERSION) {
+              @Override
+              public void visitLineNumber(int line, Label start) {
+                super.visitLineNumber(line, start);
+                if (linesWithIncorrectSignatures.remove(line)) {
+                  final LineData lineData = classData.getLineData(line);
+                  lineData.setMethodSignature(name + descriptor);
+                }
+              }
+            };
+          }
+        }, ClassReader.SKIP_FRAMES);
+        break;
+      } catch (Throwable ignored) {
+      } finally {
+        if (is != null) {
+          try {
+            is.close();
+          } catch (IOException ignored) {
+          }
+        }
+      }
+    }
+    linesWithIncorrectSignatures.forEach(new TIntProcedure() {
+      public boolean execute(int line) {
+        final LineData lineData = classData.getLineData(line);
+        lineData.setMethodSignature(lineData.getMethodSignature().replace(UNKNOWN_DESC, DEFAULT_DESC));
+        return true;
+      }
+    });
   }
 }
