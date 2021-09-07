@@ -225,7 +225,7 @@ public class ClassData implements CoverageData {
     }
   }
 
-  private int maxSourceLineNumber(LineMapData[] linesMap) {
+  public static int maxSourceLineNumber(LineMapData[] linesMap) {
     int max = 0;
     for (final LineMapData mapData : linesMap) {
       if (mapData != null) {
@@ -281,14 +281,12 @@ public class ClassData implements CoverageData {
   }
 
   private void mergeTargetIntoSource(LineData source, int targetLineNumber) {
-    if (source != null) {
-      if (myLinesArray == null || targetLineNumber >= myLinesArray.length) return;
-      LineData targetLineData = getLineData(targetLineNumber);
-      if (targetLineData != null) {
-        source.merge(targetLineData);
-        myLinesArray[targetLineNumber] = null;
-      }
+    if (myLinesArray == null || targetLineNumber >= myLinesArray.length) return;
+    final LineData targetLineData = getLineData(targetLineNumber);
+    if (source != null && targetLineData != null) {
+      source.merge(targetLineData);
     }
+    myLinesArray[targetLineNumber] = null;
   }
 
   public void setSource(String source) {

@@ -17,14 +17,18 @@
 package com.intellij.rt.coverage.instrumentation.filters.visiting;
 
 import com.intellij.rt.coverage.data.ClassData;
+import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineData;
+import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.classFinder.ClassEntry;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
-import com.intellij.rt.coverage.util.classFinder.ClassPathEntry;
 import org.jetbrains.coverage.gnu.trove.TIntHashSet;
+import org.jetbrains.coverage.gnu.trove.TIntIntHashMap;
+import org.jetbrains.coverage.gnu.trove.TIntIntProcedure;
 import org.jetbrains.coverage.gnu.trove.TIntProcedure;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
@@ -34,6 +38,7 @@ import java.util.*;
 
 public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
   private static final String INLINE_FUNCTION_PREFIX = "$i$f$";
+  private static final String INLINE_ARGUMENT_PREFIX = "$i$a-$";
   private static final boolean ourCheckInlineSignatures =
       "true".equals(System.getProperty("idea.coverage.check.inline.signatures"));
 
@@ -43,9 +48,13 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
    */
   private static final String DEFAULT_DESC = "()V";
   private static final String UNKNOWN_DESC = "(?)?";
-  private Map<Label, Integer> myLines;
-  private List<InlineRange> myInlineRanges;
+  private TIntIntHashMap myLines;
+  private TIntHashSet myLinesSet;
+  private Map<Label, Integer> myLabelIds;
+  private List<InlineRange> myInlineFunctionRanges;
+  private List<InlineRange> myInlineArgumentRanges;
   private String myName;
+  private int myLabelCounter;
 
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
     return KotlinUtils.isKotlinClass(context);
@@ -54,41 +63,71 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
   @Override
   public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
     super.initFilter(methodVisitor, context, name, desc);
-    myLines = new HashMap<Label, Integer>();
-    myInlineRanges = new ArrayList<InlineRange>();
+    myLines = new TIntIntHashMap();
+    myLinesSet = new TIntHashSet();
+    myLabelIds = new HashMap<Label, Integer>();
+    myInlineFunctionRanges = new ArrayList<InlineRange>();
+    myInlineArgumentRanges = new ArrayList<InlineRange>();
     myName = name;
+    myLabelCounter = 0;
+  }
+
+  @Override
+  public void visitLabel(Label label) {
+    super.visitLabel(label);
+    myLabelIds.put(label, myLabelCounter++);
   }
 
   @Override
   public void visitLocalVariable(String name, String descriptor, String signature, Label start, Label end, int index) {
     super.visitLocalVariable(name, descriptor, signature, start, end, index);
-    if (!name.startsWith(INLINE_FUNCTION_PREFIX)) return;
-    final String inlineMethodName = name.substring(INLINE_FUNCTION_PREFIX.length());
-    myInlineRanges.add(new InlineRange(inlineMethodName, start, end));
+    if (name.startsWith(INLINE_FUNCTION_PREFIX)) {
+      final String inlineMethodName = name.substring(INLINE_FUNCTION_PREFIX.length());
+      if (isSameMethod(inlineMethodName)) return;
+      myInlineFunctionRanges.add(new InlineRange(inlineMethodName, myLabelIds.get(start), myLabelIds.get(end)));
+    }
+    if (name.startsWith(INLINE_ARGUMENT_PREFIX)) {
+      final int i = name.lastIndexOf('-');
+      if (i < 0) return;
+      final String inlineMethodName = name.substring(INLINE_ARGUMENT_PREFIX.length(), i);
+      if (isSameMethod(inlineMethodName)) return;
+      myInlineArgumentRanges.add(new InlineRange("", myLabelIds.get(start), myLabelIds.get(end)));
+    }
   }
 
   @Override
   public void visitLineNumber(int line, Label start) {
     super.visitLineNumber(line, start);
-    myLines.put(start, line);
+    // ignore repeated line numbers as line can have only one signature
+    if (myLinesSet.add(line)) {
+      myLines.put(myLabelIds.get(start), line);
+    }
   }
 
   @Override
   public void visitEnd() {
     super.visitEnd();
-    if (myInlineRanges.isEmpty()) return;
+    if (myInlineFunctionRanges.isEmpty()) return;
+    if (myName == null) return;
     try {
-      Collections.sort(myInlineRanges);
+      final Integer maxLine = getMaxSourceLine();
+      if (maxLine == null) return;
+      Collections.sort(myInlineFunctionRanges);
+      Collections.sort(myInlineArgumentRanges);
       final TreeMap<Integer, Integer> lines = new TreeMap<Integer, Integer>();
-      for (Map.Entry<Label, Integer> entry : myLines.entrySet()) {
-        lines.put(entry.getKey().getOffset(), entry.getValue());
-      }
-      for (InlineRange range : myInlineRanges) {
-        for (int line : lines.subMap(range.myStart.getOffset(), range.myEnd.getOffset()).values()) {
+      myLines.forEachEntry(new TIntIntProcedure() {
+        public boolean execute(int offset, int line) {
+          lines.put(offset, line);
+          return true;
+        }
+      });
+      for (InlineRange range : myInlineFunctionRanges) {
+        for (Map.Entry<Integer, Integer> entry : lines.subMap(range.myStart, range.myEnd).entrySet()) {
+          final int line = entry.getValue();
+          if (line <= maxLine) continue;
+          if (isInside(range, findInlineArgumentRange(entry.getKey()))) continue;
           final LineData lineData = myContext.getLineData(line);
           if (lineData == null) continue;
-          // in case of visiting an inline method definition
-          if (range.myName.equals(myName)) continue;
           lineData.setMethodSignature(range.myName + (ourCheckInlineSignatures ? UNKNOWN_DESC : DEFAULT_DESC));
         }
       }
@@ -97,25 +136,88 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
     }
   }
 
+  private Integer getMaxSourceLine() {
+    final ProjectData project = ProjectData.getProjectData();
+    if (project == null) return null;
+    final Map<String, FileMapData[]> mappings = project.getLinesMap();
+    if (mappings == null) return null;
+    final FileMapData[] classMappings = mappings.get(myContext.getClassName());
+    if (classMappings == null) return null;
+    int maxValue = -1;
+    for (FileMapData data : classMappings) {
+      if (data == null) continue;
+      if (!data.getClassName().equals(myContext.getClassName())) continue;
+      maxValue = Math.max(maxValue, ClassData.maxSourceLineNumber(data.getLines()));
+    }
+    return maxValue == -1 ? null : maxValue;
+  }
+
+  private boolean isSameMethod(String name) {
+    return myName.equals(name) // definition of inline method
+        || myName.equals(name + KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX) // default method
+        || myName.equals(name + "-impl"); // InlineOnly method
+  }
+
+  private static boolean isInside(InlineRange container, InlineRange content) {
+    return container != null && content != null
+        && content.myStart >= container.myStart
+        && content.myEnd <= container.myEnd;
+  }
+
+  private InlineRange findInlineArgumentRange(int offset) {
+    int low = 0;
+    int high = myInlineArgumentRanges.size() - 1;
+    InlineRange result = null;
+    while (low <= high) {
+      final int mid = (low + high) / 2;
+      final InlineRange midValue = myInlineArgumentRanges.get(mid);
+      if (offset < midValue.myStart) {
+        high = mid - 1;
+      } else if (offset >= midValue.myEnd) {
+        low = mid + 1;
+      } else {
+        if (result == null || result.length() > midValue.length()) {
+          result = midValue;
+        }
+        // try to find a nested range
+        if (midValue.myStart == offset) {
+          high = mid - 1;
+        } else {
+          low = mid + 1;
+        }
+      }
+    }
+    return result;
+  }
+
   public static boolean isInlineMethod(String methodName, String variableName) {
     return variableName.equals(INLINE_FUNCTION_PREFIX + methodName);
   }
 
   private static class InlineRange implements Comparable<InlineRange> {
     private final String myName;
-    private final Label myStart;
-    private final Label myEnd;
+    private final int myStart;
+    private final int myEnd;
 
-    private InlineRange(String name, Label start, Label end) {
+    private InlineRange(String name, int start, int end) {
       myName = name;
       myStart = start;
       myEnd = end;
     }
 
+    public int length() {
+      return myEnd - myStart;
+    }
+
+    @Override
+    public String toString() {
+      return "InlineRange{name=" + myName + ", start=" + myStart + ", end=" + myEnd + '}';
+    }
+
     public int compareTo(InlineRange o) {
-      final int startDiff = myStart.getOffset() - o.myStart.getOffset();
+      final int startDiff = myStart - o.myStart;
       if (startDiff == 0) {
-        return -(myEnd.getOffset() - o.myEnd.getOffset());
+        return myEnd - o.myEnd;
       }
       return startDiff;
     }
@@ -142,7 +244,7 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
         final ClassEntry classEntry = new ClassEntry(classData.getName(), loader);
         is = classEntry.getClassInputStream();
         if (is == null) continue;
-        final ClassReader reader = new ClassReader(classEntry.getClassInputStream());
+        final ClassReader reader = new ClassReader(is);
 
         reader.accept(new ClassVisitor(Opcodes.API_VERSION) {
           @Override

@@ -122,10 +122,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   @Override
   public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
     super.visitFieldInsn(opcode, owner, name, descriptor);
-    // ignore return Unit line
-    myHasExecutableCode |= !(owner.equals("kotlin/Unit")
-        && name.equals("INSTANCE")
-        && descriptor.equals("Lkotlin/Unit;"));
+    myHasExecutableCode = true;
     final boolean labelVisited = name.equals("label")
         && descriptor.equals("I")
         && Type.getObjectType(owner).getClassName().startsWith(myContext.getClassName());
@@ -152,12 +149,6 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   @Override
   public void visitInsn(int opcode) {
     super.visitInsn(opcode);
-    if (opcode == Opcodes.ARETURN && !myHasExecutableCode && !myHadLineDataBefore) {
-      onIgnoredLine(myLine);
-      return;
-    }
-    // ignore code like: POP; LOAD Unit.INSTANCE; ARETURN
-    if (opcode == Opcodes.POP) return;
     myHasExecutableCode = true;
     // ignore generated return on the first line
     if (opcode == Opcodes.ARETURN && myLoadCoroutinesSuspendedVisited && !myHadLineDataBefore) {

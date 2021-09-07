@@ -29,3 +29,11 @@ inline fun nestedInlines(x: Int) {
 }
 
 inline fun oneLineInline() = 42
+
+inline fun withLambda(f: () -> Int): Int {
+    return f() + 10
+}
+
+inline fun testWithLambda() {
+    withLambda { 4 }
+}

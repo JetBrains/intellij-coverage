@@ -14,18 +14,33 @@
  * limitations under the License.
  */
 
+package testData.custom.IDEA_275520.stdlib
+
+// classes: ALL
 // extra args: -Didea.coverage.check.inline.signatures=true
 
-package testData.custom.IDEA_275520.unloaded
-
-import testData.custom.IDEA_275520.nestedInlines
-import testData.custom.IDEA_275520.oneLineInline
-import testData.custom.IDEA_275520.simpleInline
-import testData.custom.IDEA_275520.testWithLambda
-
 fun main() {
-    simpleInline(3)
-    nestedInlines(3)
-    oneLineInline()
-    testWithLambda()
+    listOf(1).forEach { println(it) }
+    Result.success(42).getOrNull()
+    "hello".indexOfFirst { it == 'a' }
+    foo()
+    listOf("a", "b", "c").reindent()
+}
+
+inline fun List<String>.reindent(): String {
+    return mapIndexedNotNull { index, value ->
+        if (index == 0) null
+        else value
+    }.toString()
+}
+
+private fun foo() {
+    require("".isBlank()) { "" }
+    listOf("").mapNotNull2 { line ->
+        line.indexOfFirst { it == 'x' }
+    }
+}
+
+inline fun List<String>.mapNotNull2(f: (String) -> Unit) {
+    mapNotNull { f(it) }
 }

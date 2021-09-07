@@ -29,6 +29,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Type;
  * One extra if is generated for each default param.
  */
 public class KotlinDefaultArgsBranchFilter extends LineEnumeratorFilter {
+  public static final String DEFAULT_ARGS_SUFFIX = "$default";
 
   /**
    * Index of first mask variable.
@@ -47,7 +48,7 @@ public class KotlinDefaultArgsBranchFilter extends LineEnumeratorFilter {
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
     return (access & Opcodes.ACC_SYNTHETIC) != 0
         && KotlinUtils.isKotlinClass(context)
-        && name.endsWith("$default");
+        && name.endsWith(DEFAULT_ARGS_SUFFIX);
   }
 
 

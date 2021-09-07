@@ -14,17 +14,27 @@
  * limitations under the License.
  */
 
-package testData.custom.IDEA_275520.loaded
+package testData.custom.IDEA_275520.call
 
-import testData.custom.IDEA_275520.nestedInlines
-import testData.custom.IDEA_275520.oneLineInline
-import testData.custom.IDEA_275520.simpleInline
-import testData.custom.IDEA_275520.testWithLambda
+// classes: ALL
+// extra args: -Didea.coverage.check.inline.signatures=true
+
+object UnloadedObject {
+    @JvmStatic
+    inline fun foo(f: (Int) -> Int) {
+        println(f(3) + 10)
+    }
+
+    @JvmStatic
+    inline fun boo(f: (Int) -> Int) {
+        println(f(3) + 10)
+    }
+}
+
+inline fun Int.sum() = this
 
 fun main() {
-    simpleInline(3)
-    nestedInlines(3)
-    oneLineInline()
-    testWithLambda()
-    Class.forName("testData.custom.IDEA_275520.Test2Kt")
+    UnloadedObject.foo { 42 }
+    UnloadedObject.foo { UnloadedObject.boo { 42 }; 43}
+    5.sum()
 }

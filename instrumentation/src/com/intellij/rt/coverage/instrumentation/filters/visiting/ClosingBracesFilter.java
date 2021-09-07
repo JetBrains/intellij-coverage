@@ -32,6 +32,7 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
   private boolean myHasLines;
   private boolean mySeenLineBefore;
   private int myCurrentLine;
+  private boolean mySeenReturn;
 
   /**
    * Do not ignore return statements in Kotlin inline methods as there is no way to ignore these lines in
@@ -50,6 +51,7 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
     myCurrentLine = -1;
     myLinesToIgnore = new TIntHashSet();
     myInline = false;
+    mySeenReturn = false;
   }
 
   private void addEmptyLineToRemove() {
@@ -61,11 +63,14 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
   @Override
   public void visitLineNumber(int line, Label start) {
     addEmptyLineToRemove();
-    mySeenLineBefore = myContext.getLineData(line) != null & !myLinesToIgnore.remove(line);
+    if (myCurrentLine != line) {
+      mySeenLineBefore = myContext.getLineData(line) != null & !myLinesToIgnore.remove(line);
+      myHasInstructions = false;
+      myHasLines = true;
+      myCurrentLine = line;
+      mySeenReturn = false;
+    }
     super.visitLineNumber(line, start);
-    myHasLines = true;
-    myHasInstructions = false;
-    myCurrentLine = line;
   }
 
   @Override
@@ -92,9 +97,13 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
   public void visitInsn(int opcode) {
     super.visitInsn(opcode);
     if (!myHasLines) return;
-    if (opcode < Opcodes.IRETURN || opcode > Opcodes.RETURN) {
-      myHasInstructions = true;
+    if (Opcodes.IRETURN <= opcode && opcode <= Opcodes.RETURN) {
+      mySeenReturn = true;
+      return;
     }
+    // ignore code like: POP; LOAD Unit.INSTANCE; ARETURN
+    if (opcode == Opcodes.POP) return;
+    setHasInstructions();
   }
 
   @Override
@@ -148,6 +157,11 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
   @Override
   public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
     super.visitFieldInsn(opcode, owner, name, descriptor);
+    // ignore return Unit line
+    if (opcode == Opcodes.GETSTATIC
+        && owner.equals("kotlin/Unit")
+        && name.equals("INSTANCE")
+        && descriptor.equals("Lkotlin/Unit;")) return;
     setHasInstructions();
   }
 
@@ -164,9 +178,7 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
   }
 
   private void setHasInstructions() {
-    if (myHasLines) {
-      myHasInstructions = true;
-    }
+    myHasInstructions |= !mySeenReturn && myHasLines;
   }
 
   @Override
