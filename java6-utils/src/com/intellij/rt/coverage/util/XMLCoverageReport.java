@@ -84,7 +84,7 @@ public class XMLCoverageReport {
 
   private void writePackage(String packageName, List<ClassData> classes) throws XMLStreamException {
     myOut.writeStartElement("package");
-    myOut.writeAttribute("name", packageName);
+    myOut.writeAttribute("name", packageName.replace('.', '/'));
     newLine();
     myFiles.clear();
     for (ClassData classData : classes) {
@@ -113,7 +113,8 @@ public class XMLCoverageReport {
 
   private void writeClass(ClassData classData) throws XMLStreamException {
     myOut.writeStartElement("class");
-    myOut.writeAttribute("name", classData.getName());
+    final String className = classData.getName().replace('.', '/');
+    myOut.writeAttribute("name", className);
     String sourceName = classData.getSource();
     if (sourceName != null && sourceName.length() > 0) {
       myOut.writeAttribute("sourcefilename", classData.getSource());
@@ -163,8 +164,8 @@ public class XMLCoverageReport {
       coveredBranches += branchData.getCoveredBranches();
     }
 
-    writeCounter("LINE", totalLines, coveredLines);
     writeCounter("BRANCH", totalBranches, coveredBranches);
+    writeCounter("LINE", totalLines, coveredLines);
 
     myOut.writeEndElement();
     newLine();
@@ -174,22 +175,23 @@ public class XMLCoverageReport {
     myOut.writeEmptyElement("line");
     myOut.writeAttribute("nr", Integer.toString(lineData.getLineNumber()));
 
+    int lineCovered = lineData.getHits() > 0 ? 1 : 0;
+    myOut.writeAttribute("mi", Integer.toString(1 - lineCovered));
+    myOut.writeAttribute("ci", Integer.toString(lineCovered));
+
     BranchData branchData = lineData.getBranchData();
     int totalBranches = branchData == null ? 0 : branchData.getTotalBranches();
     int coveredBranches = branchData == null ? 0 : branchData.getCoveredBranches();
-    myOut.writeAttribute("cb", Integer.toString(coveredBranches));
     myOut.writeAttribute("mb", Integer.toString(totalBranches - coveredBranches));
-    int lineCovered = lineData.getHits() > 0 ? 1 : 0;
-    myOut.writeAttribute("ci", Integer.toString(lineCovered));
-    myOut.writeAttribute("mi", Integer.toString(1 - lineCovered));
+    myOut.writeAttribute("cb", Integer.toString(coveredBranches));
     newLine();
   }
 
   private void writeCounter(String type, int total, int covered) throws XMLStreamException {
     myOut.writeEmptyElement("counter");
     myOut.writeAttribute("type", type);
-    myOut.writeAttribute("covered", Integer.toString(covered));
     myOut.writeAttribute("missed", Integer.toString(total - covered));
+    myOut.writeAttribute("covered", Integer.toString(covered));
     newLine();
   }
 
