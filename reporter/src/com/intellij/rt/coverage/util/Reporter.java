@@ -18,10 +18,15 @@ package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.SaveHook;
+import jetbrains.coverage.report.ReportBuilderFactory;
+import jetbrains.coverage.report.SourceCodeProvider;
+import jetbrains.coverage.report.html.HTMLReportBuilder;
+import jetbrains.coverage.report.idea.IDEACoverageData;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 public class Reporter {
   private final File myDataFile;
@@ -31,6 +36,10 @@ public class Reporter {
   public Reporter(File dataFile, File sourceMapFile) {
     myDataFile = dataFile;
     mySourceMapFile = sourceMapFile;
+  }
+
+  public File getDataFile() {
+    return myDataFile;
   }
 
   private ProjectData getProjectData() throws IOException {
@@ -54,5 +63,12 @@ public class Reporter {
         out.close();
       }
     }
+  }
+
+  public void createHTMLReport(File htmlDir, final List<File> sourceDirectories) throws IOException {
+    final HTMLReportBuilder builder = ReportBuilderFactory.createHTMLReportBuilder();
+    builder.setReportDir(htmlDir);
+    final SourceCodeProvider sourceCodeProvider = new DirectorySourceCodeProvider(getProjectData(), sourceDirectories);
+    builder.generateReport(new IDEACoverageData(getProjectData(), sourceCodeProvider));
   }
 }

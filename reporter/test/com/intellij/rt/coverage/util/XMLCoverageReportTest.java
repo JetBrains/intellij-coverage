@@ -16,7 +16,6 @@
 
 package com.intellij.rt.coverage.util;
 
-import com.intellij.rt.coverage.CoverageStatusTest;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
@@ -68,11 +67,7 @@ public class XMLCoverageReportTest {
   }
 
   private File runTestAndConvertToXML(String patterns, String className) throws Throwable {
-    final File icFile = File.createTempFile("report_tmp", ".ic");
-    final File sourceMapFile = File.createTempFile("report_tmp", ".sm");
-    patterns = "true " + sourceMapFile.getAbsolutePath() + " " + patterns;
-    CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), icFile, patterns, className, false);
-    final Reporter reporter = new Reporter(icFile, sourceMapFile);
+    final Reporter reporter = TestUtils.runTest(patterns, className);
     final File xmlFile = File.createTempFile("report_tmp", ".xml");
     reporter.createXMLReport(xmlFile);
     return xmlFile;

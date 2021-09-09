@@ -16,34 +16,49 @@
 
 ext.agentsGroupId = 'org.jetbrains.intellij.deps'
 
-project(":instrumentation").afterEvaluate { instr ->
-  publishing {
-    publications {
-      CoveragePublication(MavenPublication) {
-        groupId agentsGroupId
-        artifactId coverage_jar_name
-        version version
-        artifact instr.tasks.getByName("coverageAgentJar")
-      }
-      TestDiscoveryPublication(MavenPublication) {
-        groupId agentsGroupId
-        artifactId test_discovery_jar_name
-        version version
-        artifact project(":test-discovery").jar
-      }
-      ReporterPublication(MavenPublication) {
-        groupId agentsGroupId
-        artifactId reporter_jar_name
-        version version
-        artifact project(":reporter").jar
-      }
+private addDependencies(publication, dependencyList) {
+  publication.pom.withXml {
+    def dependencies = asNode().appendNode('dependencies')
+    dependencyList.each {
+      def dependency = dependencies.appendNode('dependency')
+      dependency.appendNode('groupId', it.moduleGroup)
+      dependency.appendNode('artifactId', it.moduleName)
+      dependency.appendNode('version', it.moduleVersion)
     }
-    repositories {
-      maven {
-        url "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies"
-        credentials {
-          username = System.getenv('INTELLIJ_DEPENDENCIES_BOT')
-          password = System.getenv('INTELLIJ_DEPENDENCIES_TOKEN')
+  }
+}
+
+project(":instrumentation").afterEvaluate { instr ->
+  project(":reporter").afterEvaluate { reporter ->
+    publishing {
+      publications {
+        CoveragePublication(MavenPublication) {
+          groupId agentsGroupId
+          artifactId coverage_jar_name
+          version version
+          artifact instr.tasks.getByName("coverageAgentJar")
+        }
+        TestDiscoveryPublication(MavenPublication) {
+          groupId agentsGroupId
+          artifactId test_discovery_jar_name
+          version version
+          artifact project(":test-discovery").jar
+        }
+        ReporterPublication(MavenPublication) {
+          groupId agentsGroupId
+          artifactId reporter_jar_name
+          version version
+          artifact project(":reporter").jar
+          addDependencies(it, reporter.getPublishDependencies())
+        }
+      }
+      repositories {
+        maven {
+          url "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies"
+          credentials {
+            username = System.getenv('INTELLIJ_DEPENDENCIES_BOT')
+            password = System.getenv('INTELLIJ_DEPENDENCIES_TOKEN')
+          }
         }
       }
     }

@@ -5,6 +5,7 @@ plugins {
 
 repositories {
   mavenCentral()
+  maven { url "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies" }
 }
 
 sourceCompatibility = 1.6
@@ -15,13 +16,22 @@ sourceSets {
   test.resources.srcDir 'resources'
 }
 
+configurations {
+  implementation.extendsFrom(externalDependancies)
+}
+
 dependencies {
   implementation project(":")
   implementation(project(path: ":instrumentation", configuration: "archives"))
   implementation project(":util")
+  externalDependancies("org.jetbrains.intellij.deps:coverage-report:1.0.7")
 
   testImplementation("junit:junit:4.13")
   testImplementation(files(project(":tests").sourceSets.test.output))
+}
+
+public getPublishDependencies() {
+  configurations.getByName("externalDependancies").getResolvedConfiguration().getFirstLevelModuleDependencies()
 }
 
 jar {
