@@ -59,6 +59,7 @@ public class Instrumentator {
 
     if (0 < args.length && args.length < 5) {
       System.err.println("At least 5 arguments expected but " + args.length + " found.\n"
+          + '\'' + argsString + "'\n"
           + "Expected arguments are:\n"
           + "1) data file to save coverage result\n"
           + "2) a flag to enable tracking per test coverage\n"
