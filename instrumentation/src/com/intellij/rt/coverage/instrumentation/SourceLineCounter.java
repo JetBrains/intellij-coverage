@@ -86,7 +86,11 @@ public class SourceLineCounter extends ClassVisitor {
 
   public void visitOuterClass(String outerClassName, String methodName, String methodSig) {
     if (myProjectData != null) {
-      myProjectData.getOrCreateClassData(outerClassName).setSource(myClassData.getSource());
+      final String fqnName = outerClassName.replace('/', '.');
+      final ClassData outerClass = myProjectData.getOrCreateClassData(fqnName);
+      if (outerClass.getSource() == null) {
+        outerClass.setSource(myClassData.getSource());
+      }
     }
     super.visitOuterClass(outerClassName, methodName, methodSig);
   }

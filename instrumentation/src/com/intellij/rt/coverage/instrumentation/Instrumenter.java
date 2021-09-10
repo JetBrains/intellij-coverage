@@ -111,7 +111,10 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   public void visitOuterClass(String outerClassName, String methodName, String methodSig) {
     if (myShouldCalculateSource) {
       final String fqnName = outerClassName.replace('/', '.');
-      myProjectData.getOrCreateClassData(fqnName).setSource(myClassData.getSource());
+      final ClassData outerClass = myProjectData.getOrCreateClassData(fqnName);
+      if (outerClass.getSource() == null) {
+        outerClass.setSource(myClassData.getSource());
+      }
     }
     super.visitOuterClass(outerClassName, methodName, methodSig);
   }
