@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
+import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
@@ -86,7 +87,7 @@ public class SourceLineCounter extends ClassVisitor {
 
   public void visitOuterClass(String outerClassName, String methodName, String methodSig) {
     if (myProjectData != null) {
-      final String fqnName = outerClassName.replace('/', '.');
+      final String fqnName = ClassNameUtil.convertToFQName(outerClassName);
       final ClassData outerClass = myProjectData.getOrCreateClassData(fqnName);
       if (outerClass.getSource() == null) {
         outerClass.setSource(myClassData.getSource());

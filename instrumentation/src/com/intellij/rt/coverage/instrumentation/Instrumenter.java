@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
+import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
@@ -110,7 +111,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
 
   public void visitOuterClass(String outerClassName, String methodName, String methodSig) {
     if (myShouldCalculateSource) {
-      final String fqnName = outerClassName.replace('/', '.');
+      final String fqnName = ClassNameUtil.convertToFQName(outerClassName);
       final ClassData outerClass = myProjectData.getOrCreateClassData(fqnName);
       if (outerClass.getSource() == null) {
         outerClass.setSource(myClassData.getSource());

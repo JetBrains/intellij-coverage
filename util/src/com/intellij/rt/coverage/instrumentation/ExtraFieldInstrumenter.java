@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation;
 
+import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
 /**
@@ -64,7 +65,7 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
     super(Opcodes.API_VERSION, classVisitor);
     myFieldName = fieldName;
     myFieldType = fieldType;
-    myInternalClassName = className.replace('.', '/');
+    myInternalClassName = ClassNameUtil.convertToInternalName(className);
     myInterface = (cr.getAccess() & Opcodes.ACC_INTERFACE) != 0;
     myJava8AndAbove = (cr.readInt(4) & 0xFFFF) >= Opcodes.V1_8;
     myShouldCoverClinit = shouldCoverClinit;

@@ -16,6 +16,8 @@
 
 package com.intellij.rt.coverage.util.classFinder;
 
+import com.intellij.rt.coverage.util.ClassNameUtil;
+
 import java.io.InputStream;
 
 /**
@@ -35,7 +37,7 @@ public class ClassEntry {
   }
 
   public InputStream getClassInputStream() {
-    String resourceName = myClassName.replace('.', '/') + ".class";
+    String resourceName = ClassNameUtil.convertToInternalName(myClassName) + ".class";
     InputStream is = getResourceStream(resourceName);
     if (is != null) return is;
     return getResourceStream("/" + resourceName);

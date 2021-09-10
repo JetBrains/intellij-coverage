@@ -17,6 +17,7 @@ sourceSets {
 
 dependencies {
   implementation project(":")
+  implementation project(":util")
 
   testImplementation("junit:junit:4.13")
   testImplementation(files(project(":tests").sourceSets.test.output))

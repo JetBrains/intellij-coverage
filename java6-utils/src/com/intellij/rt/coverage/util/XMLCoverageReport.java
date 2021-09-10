@@ -84,7 +84,7 @@ public class XMLCoverageReport {
 
   private void writePackage(String packageName, List<ClassData> classes) throws XMLStreamException {
     myOut.writeStartElement("package");
-    myOut.writeAttribute("name", packageName.replace('.', '/'));
+    myOut.writeAttribute("name", ClassNameUtil.convertToInternalName(packageName));
     newLine();
     myFiles.clear();
     for (ClassData classData : classes) {
@@ -113,7 +113,7 @@ public class XMLCoverageReport {
 
   private void writeClass(ClassData classData) throws XMLStreamException {
     myOut.writeStartElement("class");
-    final String className = classData.getName().replace('.', '/');
+    final String className = ClassNameUtil.convertToInternalName(classData.getName());
     myOut.writeAttribute("name", className);
     String sourceName = classData.getSource();
     if (sourceName != null && sourceName.length() > 0) {

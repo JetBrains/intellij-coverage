@@ -18,6 +18,7 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.LinesUtil;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
@@ -36,7 +37,7 @@ public class NewSamplingInstrumenter extends Instrumenter {
                                    final boolean shouldCalculateSource) {
         super(projectData, classVisitor, className, shouldCalculateSource);
         myExtraFieldInstrumenter = new ExtraFieldSamplingInstrumenter(cr, className);
-        myClassNameType = className.replace(".", "/");
+        myClassNameType = ClassNameUtil.convertToInternalName(className);
     }
 
     public MethodVisitor createMethodLineEnumerator(
