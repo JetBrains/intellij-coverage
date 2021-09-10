@@ -62,10 +62,10 @@ public class SaveHook implements Runnable {
         try {
             projectData.applyLinesMask();
             projectData.applyBranchData();
-            projectData.checkLineMappings();
             if (myAppendUnloaded) {
                 appendUnloaded(projectData);
             }
+            projectData.checkLineMappings();
             checkLineSignatures(projectData);
 
             DataOutputStream os = null;

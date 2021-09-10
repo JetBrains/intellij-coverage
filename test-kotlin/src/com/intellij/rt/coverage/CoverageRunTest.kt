@@ -184,7 +184,7 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testSimpleIfelse() = test("simple.ifelse")
 
     @Test
-    fun testUnloadedMultiFile() = test("unloaded.multiFile")
+    fun testUnloadedInline() = test("unloaded.inline")
 
     @Test
     fun testUnloadedSingleFile() = test("unloaded.singleFile")
@@ -254,6 +254,12 @@ internal abstract class CoverageRunTest : CoverageTest() {
                 "reindent(Ljava/util/List;)Ljava/lang/String;" to 31..34,
                 "foo()V" to 38..40)))
     })
+
+    @Test
+    fun testUnloadedMultiFile() {
+        val test = getTestFile("custom.unloaded.multiFile")
+        test(test.testName, test, extractTestConfiguration(File(test.file.parentFile, "UnusedClass.kt")))
+    }
 
     private fun test_IDEA_275520(projectData: ProjectData, classes: Map<String, Map<String, IntRange>> = hashMapOf(
         "$TEST_PACKAGE.custom.IDEA_275520.Test2Kt" to hashMapOf(

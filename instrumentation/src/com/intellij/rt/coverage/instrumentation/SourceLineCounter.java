@@ -128,12 +128,10 @@ public class SourceLineCounter extends ClassVisitor {
 
       public void visitInsn(final int opcode) {
         super.visitInsn(opcode);
-        if (myExcludeLines) {
-          if (opcode == Opcodes.RETURN && !myHasInstructions) {
-            myNSourceLines.remove(myCurrentLine);
-          } else {
-            myHasInstructions = true;
-          }
+        if (opcode == Opcodes.RETURN && !myHasInstructions) {
+          myNSourceLines.remove(myCurrentLine);
+        } else {
+          myHasInstructions = true;
         }
       }
 
