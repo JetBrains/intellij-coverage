@@ -75,14 +75,20 @@ internal class ClassDataTestTrackingNewTracingTest : AbstractTestTrackingTest(Co
     }
 }
 
-/**
- * Inheritors of this class check that running coverage with test tracking works OK on the test corpus.
- */
-internal abstract class TestTrackingVerifyInstrumentationTest(override val coverage: Coverage) : CoverageRunTest() {
+internal abstract class TestTrackingVerifyInstrumentationTest(override val coverage: Coverage) : CoverageTest() {
     override val testTracking = true
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
         // just check that instrumentation does not cause runtime issues
     }
+
+    @Test
+    fun testBadCycleClasses() = test("badCycle.classes")
+
+    @Test
+    fun testBadCycleInterfaces() = test("badCycle.interfaces")
+
+    @Test
+    fun testCoroutinesInline() = test("coroutines.inline")
 }
 
 internal class TestTrackingTracingCoverageTest : TestTrackingVerifyInstrumentationTest(Coverage.TRACING)
