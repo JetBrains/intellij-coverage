@@ -25,7 +25,7 @@ public class Main {
     try {
       final ReporterArgs args = ReporterArgs.from(argsList);
 
-      final Reporter reporter = new Reporter(args.getDataFile(), args.getSourceMapFile());
+      final Reporter reporter = new Reporter(args.getDataFile(), args.getSourceMapFile(), args.getOutputDirs());
 
       boolean fail = false;
 

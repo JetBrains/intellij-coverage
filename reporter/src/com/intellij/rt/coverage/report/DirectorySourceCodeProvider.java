@@ -30,19 +30,11 @@ import java.util.List;
 
 public class DirectorySourceCodeProvider implements SourceCodeProvider {
   private final ProjectData myProjectData;
-  private final List<File> mySources;
+  private final FileLocator myFileLocator;
 
   public DirectorySourceCodeProvider(ProjectData projectData, List<File> sources) {
     myProjectData = projectData;
-    mySources = sources;
-  }
-
-  private static String[] getPath(final String packageName, final String fileName) {
-    final String[] parts = packageName.split("\\.");
-    final String[] pathParts = new String[parts.length + 1];
-    System.arraycopy(parts, 0, pathParts, 0, parts.length);
-    pathParts[parts.length] = fileName;
-    return pathParts;
+    myFileLocator = new FileLocator(sources);
   }
 
   private static CharSequence readText(File file) throws IOException {
@@ -63,17 +55,6 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
     }
   }
 
-  private static String joinPath(String... parts) {
-    if (parts.length == 0) return "";
-    final StringBuilder builder = new StringBuilder();
-    builder.append(parts[0]);
-    for (int i = 1; i < parts.length; i++) {
-      builder.append(File.separator);
-      builder.append(parts[i]);
-    }
-    return builder.toString();
-  }
-
   @Nullable
   @Override
   public CharSequence getSourceCode(@NotNull String className) {
@@ -84,14 +65,10 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
     final String packageName = className.substring(0, packageIndex);
     final String fileName = classData.getSource();
     if (fileName == null) return null;
-    final String path = joinPath(getPath(packageName, fileName));
-    for (File f : mySources) {
-      final File candidate = new File(f, path);
-      if (candidate.exists() && candidate.isFile()) {
-        try {
-          return readText(candidate);
-        } catch (IOException ignored) {
-        }
+    for (File candidate : myFileLocator.locateFile(packageName, fileName)) {
+      try {
+        return readText(candidate);
+      } catch (IOException ignored) {
       }
     }
     return null;

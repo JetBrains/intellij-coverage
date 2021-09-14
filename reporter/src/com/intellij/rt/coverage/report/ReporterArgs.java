@@ -27,9 +27,10 @@ public class ReporterArgs {
   private static final String XML_FILE_ARG = "xml";
   private static final String HTML_DIR_ARG = "html";
   private static final String SOURCE_DIRS_ARG = "sources";
+  private static final String OUTPUT_DIRS_ARG = "output";
 
   private static final List<String> ourAcceptableArgs = Arrays.asList(
-      DATAFILE_ARG, SOURCE_MAP_FILE_ARG, XML_FILE_ARG, HTML_DIR_ARG, SOURCE_DIRS_ARG);
+      DATAFILE_ARG, SOURCE_MAP_FILE_ARG, XML_FILE_ARG, HTML_DIR_ARG, SOURCE_DIRS_ARG, OUTPUT_DIRS_ARG);
 
   private static final String ARG_VALUE_DELIMITER = "=";
   private static final String LIST_DELIMITER = ",";
@@ -52,6 +53,7 @@ public class ReporterArgs {
         + XML_FILE_ARG + ARG_VALUE_DELIMITER + "<Path to xml file> - generate xml report\n"
         + HTML_DIR_ARG + ARG_VALUE_DELIMITER + "<Path to html directory> - generate html report\n"
         + SOURCE_DIRS_ARG + ARG_VALUE_DELIMITER + "<List of paths to source root directories separated with " + LIST_DELIMITER + "> (obligatory for html)\n"
+        + OUTPUT_DIRS_ARG + ARG_VALUE_DELIMITER + "<List of paths to output root directories separated with " + LIST_DELIMITER + "> (obligatory)\n"
         + "\n"
         + "A file path may be wrapped with quotes (" + QUOTES + ") to handle spaces.\n";
   }
@@ -93,7 +95,16 @@ public class ReporterArgs {
 
   public List<File> getSourceDirs() throws ArgParseException {
     final String arg = getString(SOURCE_DIRS_ARG, getString(HTML_DIR_ARG, false) != null);
-    final String[] paths = arg.split(LIST_DELIMITER);
+    return getFiles(arg);
+  }
+
+  public List<File> getOutputDirs() throws ArgParseException {
+    final String arg = getString(OUTPUT_DIRS_ARG, true);
+    return getFiles(arg);
+  }
+
+  private List<File> getFiles(String args) {
+    final String[] paths = args.split(LIST_DELIMITER);
     final List<File> result = new ArrayList<File>();
     for (String path : paths) {
       result.add(getFile(path));

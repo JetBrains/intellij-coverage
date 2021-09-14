@@ -33,7 +33,8 @@ public class IntegrationTest {
         "com.intellij.rt.coverage.report.Main",
         "datafile=\"" + reporter.getDataFile().getAbsolutePath() + "\"",
         "smapfile=\"" + reporter.getSourceMapFile().getAbsolutePath() + "\"",
-        "xml=\"" + xmlFile.getAbsolutePath() + "\""};
+        "xml=\"" + xmlFile.getAbsolutePath() + "\"",
+        "output=\"" + outputPath() + "\""};
     ProcessUtil.execJavaProcess(commandLine);
     XMLCoverageReportTest.verifyProjectXML(xmlFile, "xmlIntegrationTest.xml");
   }
@@ -49,8 +50,13 @@ public class IntegrationTest {
         "datafile=\"" + reporter.getDataFile().getAbsolutePath() + "\"",
         "smapfile=\"" + reporter.getSourceMapFile().getAbsolutePath() + "\"",
         "html=\"" + htmlDir.getAbsolutePath() + "\"",
-        "sources=\"" + new File("test").getAbsolutePath() + "\""};
+        "sources=\"" + new File("test").getAbsolutePath() + "\"",
+        "output=\"" + outputPath() + "\""};
     ProcessUtil.execJavaProcess(commandLine);
     HTMLCoverageReportTest.verifyHTMLDir(htmlDir);
+  }
+
+  private static String outputPath() {
+    return "build" + File.separator + "classes" + File.separator + "java" + File.separator + "test";
   }
 }

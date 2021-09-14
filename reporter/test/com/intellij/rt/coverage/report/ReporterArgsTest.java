@@ -25,11 +25,17 @@ import java.util.List;
 public class ReporterArgsTest {
   @Test
   public void testRequiredArgs() throws Exception {
-    final ReporterArgs args = ReporterArgs.from(new String[]{"datafile=test.ic", "smapfile=test.smap"});
+    final ReporterArgs args = ReporterArgs.from(new String[]{"datafile=test.ic", "smapfile=test.smap", "output=out1,out2"});
     Assert.assertNotNull(args.getDataFile());
     Assert.assertNotNull(args.getSourceMapFile());
     Assert.assertEquals("test.ic", args.getDataFile().getName());
     Assert.assertEquals("test.smap", args.getSourceMapFile().getName());
+    final List<File> output = args.getOutputDirs();
+    Assert.assertNotNull(output);
+    Assert.assertEquals(2, output.size());
+    for (File f : output) {
+      Assert.assertTrue(f.getName().startsWith("out"));
+    }
   }
 
   @Test(expected = ReporterArgs.ArgParseException.class)
@@ -44,6 +50,14 @@ public class ReporterArgsTest {
     final ReporterArgs args = ReporterArgs.from(new String[]{"datafile=test.ic"});
     Assert.assertNotNull(args.getDataFile());
     args.getSourceMapFile();
+  }
+
+  @Test(expected = ReporterArgs.ArgParseException.class)
+  public void testAbsentOutput() throws Exception {
+    final ReporterArgs args = ReporterArgs.from(new String[]{"datafile=test.ic", "smapfile=test.smap"});
+    Assert.assertNotNull(args.getDataFile());
+    Assert.assertNotNull(args.getSourceMapFile());
+    args.getOutputDirs();
   }
 
   @Test(expected = ReporterArgs.ArgParseException.class)

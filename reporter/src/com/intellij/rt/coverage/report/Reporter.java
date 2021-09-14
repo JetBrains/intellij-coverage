@@ -16,6 +16,8 @@
 
 package com.intellij.rt.coverage.report;
 
+import com.intellij.rt.coverage.data.ClassData;
+import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.SaveHook;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
@@ -23,20 +25,29 @@ import jetbrains.coverage.report.ReportBuilderFactory;
 import jetbrains.coverage.report.SourceCodeProvider;
 import jetbrains.coverage.report.html.HTMLReportBuilder;
 import jetbrains.coverage.report.idea.IDEACoverageData;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 public class Reporter {
   private final File myDataFile;
   private final File mySourceMapFile;
+  @Nullable
+  private List<File> myOutputRoots;
   private ProjectData myProjectData;
 
   public Reporter(File dataFile, File sourceMapFile) {
+    this(dataFile, sourceMapFile, null);
+  }
+
+  public Reporter(File dataFile, File sourceMapFile, @Nullable List<File> outputRoots) {
     myDataFile = dataFile;
     mySourceMapFile = sourceMapFile;
+    myOutputRoots = outputRoots;
   }
 
   public File getDataFile() {
@@ -49,7 +60,19 @@ public class Reporter {
 
   private ProjectData getProjectData() throws IOException {
     if (myProjectData == null) {
-      myProjectData = ProjectDataLoader.load(myDataFile);
+      final ProjectData projectData = ProjectDataLoader.load(myDataFile);
+      if (myOutputRoots != null) {
+        myProjectData = new ProjectData();
+        final FileLocator fileLocator = new FileLocator(myOutputRoots);
+        myOutputRoots = null;
+        for (Map.Entry<String, ClassData> entry : projectData.getClasses().entrySet()) {
+          if (fileLocator.locateClassFile(entry.getKey()).isEmpty()) continue;
+          final ClassData classData = myProjectData.getOrCreateClassData(entry.getKey());
+          classData.setLines((LineData[]) entry.getValue().getLines());
+        }
+      } else {
+        myProjectData = projectData;
+      }
       if (mySourceMapFile != null && mySourceMapFile.exists()) {
         SaveHook.loadAndApplySourceMap(myProjectData, mySourceMapFile);
       }
