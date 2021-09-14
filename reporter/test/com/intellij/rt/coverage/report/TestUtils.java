@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.util;
+package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.CoverageStatusTest;
 import org.jetbrains.annotations.NotNull;

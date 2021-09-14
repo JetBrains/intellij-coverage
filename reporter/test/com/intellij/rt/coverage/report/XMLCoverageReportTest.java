@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2020 JetBrains s.r.o.
+ * Copyright 2000-2021 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.util;
+package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Scanner;
 
 public class XMLCoverageReportTest {
@@ -51,7 +53,7 @@ public class XMLCoverageReportTest {
 
   @Test
   public void testVerifyXML() throws Throwable {
-    File file = File.createTempFile("report_tmp", ".xml");
+    File file = createXMLFile();
     new XMLCoverageReport().write(new FileOutputStream(file), createProject());
     verifyProjectXML(file, "xmlTest.xml");
   }
@@ -68,18 +70,23 @@ public class XMLCoverageReportTest {
 
   private File runTestAndConvertToXML(String patterns, String className) throws Throwable {
     final Reporter reporter = TestUtils.runTest(patterns, className);
-    final File xmlFile = File.createTempFile("report_tmp", ".xml");
+    final File xmlFile = createXMLFile();
     reporter.createXMLReport(xmlFile);
     return xmlFile;
   }
 
-  private void verifyProjectXML(File file, String expectedFileName) throws Throwable {
-    String expectedPath = getClass().getClassLoader().getResource(expectedFileName).getPath();
+  @NotNull
+  public static File createXMLFile() throws IOException {
+    return File.createTempFile("report_tmp", ".xml");
+  }
+
+  public static void verifyProjectXML(File file, String expectedFileName) throws Throwable {
+    String expectedPath = XMLCoverageReportTest.class.getClassLoader().getResource(expectedFileName).getPath();
     File expected = new File(expectedPath);
     Assert.assertEquals(readAll(expected), readAll(file));
   }
 
-  private String readAll(File file) throws Throwable {
+  private static String readAll(File file) throws Throwable {
     StringBuilder fileContents = new StringBuilder((int) file.length());
     Scanner scanner = null;
     try {

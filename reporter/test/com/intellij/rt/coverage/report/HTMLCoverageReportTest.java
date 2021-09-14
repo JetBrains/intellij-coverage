@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.util;
+package com.intellij.rt.coverage.report;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
@@ -35,7 +35,7 @@ public class HTMLCoverageReportTest {
     verifyHTMLDir(runTestAndConvertToHTML("testData\\.inline\\..*", "testData.inline.Test", getSources()));
   }
 
-  private void verifyHTMLDir(File htmlDir) {
+  public static void verifyHTMLDir(File htmlDir) {
     Assert.assertTrue(htmlDir.exists());
     Assert.assertTrue(htmlDir.isDirectory());
     final File[] children = htmlDir.listFiles();
@@ -46,9 +46,16 @@ public class HTMLCoverageReportTest {
 
   private File runTestAndConvertToHTML(String patterns, String className, List<File> sources) throws Throwable {
     final Reporter reporter = TestUtils.runTest(patterns, className);
-    final File htmlDir = new File(reporter.getDataFile().getParentFile(), reporter.getDataFile().getName().replace(".ic", "html"));
-    htmlDir.mkdir();
+    final File htmlDir = createHtmlDir(reporter.getDataFile());
     reporter.createHTMLReport(htmlDir, sources);
+    return htmlDir;
+  }
+
+  @NotNull
+  public static File createHtmlDir(File icFile) {
+    final String dirName = icFile.getName().replace(".ic", "html");
+    final File htmlDir = new File(icFile.getParentFile(), dirName);
+    htmlDir.mkdir();
     return htmlDir;
   }
 

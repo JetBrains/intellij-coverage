@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.util;
+package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
@@ -37,29 +37,6 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
     mySources = sources;
   }
 
-  @Nullable
-  @Override
-  public CharSequence getSourceCode(@NotNull String className) throws IOException {
-    final ClassData classData = myProjectData.getClassData(className);
-    if (classData == null) return null;
-    final int packageIndex = className.lastIndexOf('.');
-    if (packageIndex < 0) return null;
-    final String packageName = className.substring(0, packageIndex);
-    final String fileName = classData.getSource();
-    if (fileName == null) return null;
-    final String path = joinPath(getPath(packageName, fileName));
-    for (File f : mySources) {
-      final File candidate = new File(f, path);
-      if (candidate.exists() && candidate.isFile()) {
-        try {
-          return readText(candidate);
-        } catch (IOException ignored) {
-        }
-      }
-    }
-    return null;
-  }
-
   private static String[] getPath(final String packageName, final String fileName) {
     final String[] parts = packageName.split("\\.");
     final String[] pathParts = new String[parts.length + 1];
@@ -67,7 +44,6 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
     pathParts[parts.length] = fileName;
     return pathParts;
   }
-
 
   private static CharSequence readText(File file) throws IOException {
     BufferedReader reader = null;
@@ -96,5 +72,28 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
       builder.append(parts[i]);
     }
     return builder.toString();
+  }
+
+  @Nullable
+  @Override
+  public CharSequence getSourceCode(@NotNull String className) {
+    final ClassData classData = myProjectData.getClassData(className);
+    if (classData == null) return null;
+    final int packageIndex = className.lastIndexOf('.');
+    if (packageIndex < 0) return null;
+    final String packageName = className.substring(0, packageIndex);
+    final String fileName = classData.getSource();
+    if (fileName == null) return null;
+    final String path = joinPath(getPath(packageName, fileName));
+    for (File f : mySources) {
+      final File candidate = new File(f, path);
+      if (candidate.exists() && candidate.isFile()) {
+        try {
+          return readText(candidate);
+        } catch (IOException ignored) {
+        }
+      }
+    }
+    return null;
   }
 }

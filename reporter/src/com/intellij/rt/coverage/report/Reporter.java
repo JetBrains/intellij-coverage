@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.util;
+package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.SaveHook;
+import com.intellij.rt.coverage.util.ProjectDataLoader;
 import jetbrains.coverage.report.ReportBuilderFactory;
 import jetbrains.coverage.report.SourceCodeProvider;
 import jetbrains.coverage.report.html.HTMLReportBuilder;
@@ -40,6 +41,10 @@ public class Reporter {
 
   public File getDataFile() {
     return myDataFile;
+  }
+
+  public File getSourceMapFile() {
+    return mySourceMapFile;
   }
 
   private ProjectData getProjectData() throws IOException {
