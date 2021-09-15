@@ -58,7 +58,7 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
   }
 
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
-    return KotlinUtils.isKotlinClass(context);
+    return KotlinUtils.isKotlinClass(context) && ourCheckInlineSignatures;
   }
 
   @Override
@@ -129,7 +129,7 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
           if (isInside(range, findInlineArgumentRange(entry.getKey()))) continue;
           final LineData lineData = myContext.getLineData(line);
           if (lineData == null) continue;
-          lineData.setMethodSignature(range.myName + (ourCheckInlineSignatures ? UNKNOWN_DESC : DEFAULT_DESC));
+          lineData.setMethodSignature(range.myName + UNKNOWN_DESC);
         }
       }
     } catch (Throwable e) {
