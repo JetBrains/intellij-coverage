@@ -63,7 +63,7 @@ public class CoverageIOUtil {
     }
 
     public static FileLock lock(final File targetFile) {
-      return lock(targetFile, 30, TimeUnit.SECONDS, 100);
+      return lock(targetFile, 2, TimeUnit.MINUTES, 100);
     }
 
     /**
