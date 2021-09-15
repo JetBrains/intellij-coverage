@@ -242,7 +242,7 @@ public class CoverageStatusTest extends TestCase {
     ProcessUtil.execJavaProcess(commandLine);
 
     FileUtil.waitUntilFileCreated(coverageDataFile);
-    final ProjectData projectInfo = ProjectDataLoader.load(coverageDataFile);
+    final ProjectData projectInfo = ProjectDataLoader.loadLocked(coverageDataFile);
     assert projectInfo != null;
     return projectInfo;
   }

@@ -41,9 +41,9 @@ internal data class TestConfiguration(
 )
 
 internal const val LOG_NAME = "coverage-error.log"
-internal fun logFile(dataFile: File) = File(dataFile.parent, LOG_NAME).let { log->
-    if (log.exists()) log else null
-}
+private fun File.ifExists() = takeIf { it.exists() }
+internal fun logFile(dataFile: File) = File(dataFile.parent, LOG_NAME).ifExists()
+        ?: File(LOG_NAME).ifExists()
 
 internal abstract class CoverageTest {
     protected lateinit var myDataFile: File
