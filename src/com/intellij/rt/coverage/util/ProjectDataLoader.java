@@ -29,9 +29,22 @@ import java.io.*;
  */
 public class ProjectDataLoader {
 
+  public static ProjectData loadLocked(final File sessionDataFile) {
+    CoverageIOUtil.FileLock lock = null;
+    try {
+      lock = CoverageIOUtil.FileLock.lock(sessionDataFile);
+      return load(sessionDataFile);
+    } finally {
+      CoverageIOUtil.FileLock.unlock(lock);
+    }
+  }
+
   public static ProjectData load(File sessionDataFile) {
     final ProjectData projectInfo = new ProjectData();
     DataInputStream in = null;
+    if (sessionDataFile.length() == 0) {
+      return projectInfo;
+    }
     try {
       in = new DataInputStream(new BufferedInputStream(new FileInputStream(sessionDataFile)));
       final TIntObjectHashMap<ClassData> dict = new TIntObjectHashMap<ClassData>(1000, 0.99f);

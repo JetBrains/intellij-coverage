@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.util;
 
 import java.io.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,6 +36,72 @@ public class CoverageIOUtil {
   private CoverageIOUtil() {
   }
 
+  public final static class FileLock {
+    final File myLock;
+
+    private FileLock(final File target) {
+      myLock = new File(target.getParentFile(), target.getName() + ".lck");
+      if (myLock.getParentFile() != null) {
+        myLock.getParentFile().mkdirs();
+      }
+    }
+
+    private boolean isLocked() {
+      return myLock.exists();
+    }
+
+    private boolean tryLock() {
+      try {
+        return myLock.createNewFile();
+      } catch (IOException e) {
+        return false;
+      }
+    }
+
+    private boolean tryUnlock() {
+      return myLock.delete();
+    }
+
+    public static FileLock lock(final File targetFile) {
+      return lock(targetFile, 30, TimeUnit.SECONDS, 100);
+    }
+
+    /**
+     * @param targetFile File to lock
+     * @return Lock object
+     */
+    public static FileLock lock(final File targetFile, final long totalTimeout, final TimeUnit unit, final long waitTimeMS) {
+      final FileLock lock = new FileLock(targetFile);
+      for (long timePassed = 0; timePassed < unit.toMillis(totalTimeout); timePassed += waitTimeMS) {
+        if (lock.tryLock()) return lock;
+        wait(lock, waitTimeMS, "lock");
+      }
+      ErrorReporter.reportError("Failed to lock with file lock: " + lock.myLock.getAbsolutePath());
+      return null;
+    }
+
+    public static void unlock(final FileLock lock) {
+      unlock(lock, 5, 100);
+    }
+
+    public static void unlock(final FileLock lock, final int retries, final long waitTimeMS) {
+      if (lock == null) return;
+      for (int attempt = 0; attempt < retries; attempt++) {
+        if (!lock.isLocked()) return;
+        if (lock.tryUnlock()) return;
+        wait(lock, waitTimeMS, "unlock");
+      }
+      ErrorReporter.reportError("Failed to unlock with file lock: " + lock.myLock.getAbsolutePath());
+    }
+
+    private static void wait(final FileLock lock, final long waitTimeMS, final String action) {
+      try {
+        Thread.sleep(waitTimeMS);
+      } catch (InterruptedException e) {
+        throw new RuntimeException("Failed to " + action + " with file lock: " + lock.myLock.getAbsolutePath(), e);
+      }
+    }
+  }
 
   private static String readString(DataInput stream) throws IOException {
     int length = stream.readInt();

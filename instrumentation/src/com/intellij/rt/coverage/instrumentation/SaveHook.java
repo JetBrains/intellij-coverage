@@ -28,10 +28,6 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
 import java.io.*;
 import java.util.*;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author anna
@@ -42,11 +38,13 @@ public class SaveHook implements Runnable {
     private File mySourceMapFile;
     private final boolean myAppendUnloaded;
     private final ClassFinder myClassFinder;
+    private final boolean myMergeFile;
 
-    public SaveHook(File dataFile, boolean appendUnloaded, ClassFinder classFinder) {
+    public SaveHook(File dataFile, boolean appendUnloaded, ClassFinder classFinder, boolean mergeFile) {
         myDataFile = dataFile;
         myAppendUnloaded = appendUnloaded;
         myClassFinder = classFinder;
+        myMergeFile = mergeFile;
     }
 
     public void run() {
@@ -55,6 +53,7 @@ public class SaveHook implements Runnable {
 
     public void save(ProjectData projectData) {
         projectData.stop();
+        CoverageIOUtil.FileLock lock = null;
         try {
             projectData.applyLinesMask();
             projectData.applyBranchData();
@@ -63,6 +62,11 @@ public class SaveHook implements Runnable {
             }
             projectData.checkLineMappings();
             checkLineSignatures(projectData);
+            lock = CoverageIOUtil.FileLock.lock(myDataFile);
+            if (myMergeFile) {
+                final ProjectData load = ProjectDataLoader.load(myDataFile);
+                projectData.merge(load);
+            }
 
             DataOutputStream os = null;
             try {
@@ -89,6 +93,8 @@ public class SaveHook implements Runnable {
             ErrorReporter.reportError("Out of memory error occurred, try to increase memory available for the JVM, or make include / exclude patterns more specific", e);
         } catch (Throwable e) {
             ErrorReporter.reportError("Unexpected error", e);
+        } finally {
+            CoverageIOUtil.FileLock.unlock(lock);
         }
     }
 

@@ -71,8 +71,7 @@ public class Instrumentator {
     final File dataFile = args.length > 0 ? new File(args[0]) : null;
     final boolean traceLines = args.length > 0 && Boolean.parseBoolean(args[1]);
     final boolean calcUnloaded = args.length > 0 && Boolean.parseBoolean(args[2]);
-    final ProjectData initialData = args.length > 0 && Boolean.parseBoolean(args[3]) && dataFile.isFile()
-        ? ProjectDataLoader.load(dataFile) : null;
+    final boolean mergeData = args.length > 0 && Boolean.parseBoolean(args[3]) && dataFile.isFile();
     final boolean sampling = args.length == 0 || Boolean.parseBoolean(args[4]);
     if (dataFile != null) {
       ErrorReporter.setBasePath(dataFile.getParent());
@@ -121,10 +120,10 @@ public class Instrumentator {
     }
 
     final TestTrackingMode testTrackingMode = createTestTrackingMode(traceLines);
-    final ProjectData data = ProjectData.createProjectData(dataFile, initialData, traceLines, sampling, includePatterns, excludePatterns, testTrackingMode.createTestTrackingCallback());
+    final ProjectData data = ProjectData.createProjectData(dataFile, null, traceLines, sampling, includePatterns, excludePatterns, testTrackingMode.createTestTrackingCallback());
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
     if (dataFile != null) {
-      final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf);
+      final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf, mergeData);
       hook.setSourceMapFile(sourceMapFile);
       Runtime.getRuntime().addShutdownHook(new Thread(hook));
     }
