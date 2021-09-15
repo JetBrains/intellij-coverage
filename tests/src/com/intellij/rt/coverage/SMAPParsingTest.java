@@ -149,8 +149,8 @@ public class SMAPParsingTest extends TestCase {
             new LineMapData(1, 1, 1),
             new LineMapData(2, 2, 2),
             new LineMapData(3, 3, 3),
-            new LineMapData(3, 5, 5),
-            new LineMapData(4, 4, 4)
+            new LineMapData(4, 4, 4),
+            new LineMapData(3, 5, 5)
         })};
     final FileMapData[] datas = JSR45Util.extractLineMapping(KOTLIN_SMAP_WITH_INLINE2, "testData.inline.SimpleInlineKt");
     testJspSmapData(expected, datas);

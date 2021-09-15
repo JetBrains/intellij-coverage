@@ -232,6 +232,7 @@ public class SaveHook implements Runnable {
     }
 
     private void checkLineSignatures(ProjectData projectData) {
+      if (!KotlinInlineVisitingFilter.shouldCheckLineSignatures()) return;
       final Map<String, FileMapData[]> linesMap = projectData.getLinesMap();
       if (linesMap == null) return;
       final Set<String> classes = new HashSet<String>();

@@ -16,10 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.visiting;
 
-import com.intellij.rt.coverage.data.ClassData;
-import com.intellij.rt.coverage.data.FileMapData;
-import com.intellij.rt.coverage.data.LineData;
-import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
@@ -55,6 +52,10 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
   private List<InlineRange> myInlineArgumentRanges;
   private String myName;
   private int myLabelCounter;
+
+  public static boolean shouldCheckLineSignatures() {
+    return ourCheckInlineSignatures;
+  }
 
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
     return KotlinUtils.isKotlinClass(context);
@@ -110,8 +111,8 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
     if (myInlineFunctionRanges.isEmpty()) return;
     if (myName == null) return;
     try {
-      final Integer maxLine = getMaxSourceLine();
-      if (maxLine == null) return;
+      final FileMapData[] mappings = getMappings();
+      if (mappings == null) return;
       Collections.sort(myInlineFunctionRanges);
       Collections.sort(myInlineArgumentRanges);
       final TreeMap<Integer, Integer> lines = new TreeMap<Integer, Integer>();
@@ -124,7 +125,7 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
       for (InlineRange range : myInlineFunctionRanges) {
         for (Map.Entry<Integer, Integer> entry : lines.subMap(range.myStart, range.myEnd).entrySet()) {
           final int line = entry.getValue();
-          if (line <= maxLine) continue;
+          if (!isLineMapped(line, mappings)) continue;
           if (isInside(range, findInlineArgumentRange(entry.getKey()))) continue;
           final LineData lineData = myContext.getLineData(line);
           if (lineData == null) continue;
@@ -136,20 +137,35 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
     }
   }
 
-  private Integer getMaxSourceLine() {
+  private boolean isLineMapped(int line, FileMapData[] mappings) {
+    for (FileMapData map : mappings) {
+      if (map == null) continue;
+      if (map.getClassName().equals(myContext.getClassName())) continue;
+      final LineMapData[] lines = map.getLines();
+      if (lines == null) continue;
+      int low = 0;
+      int high = lines.length - 1;
+      while (low <= high) {
+        final int mid = (low + high) / 2;
+        final LineMapData lineMapData = lines[mid];
+        if (line < lineMapData.getTargetMinLine()) {
+          high = mid - 1;
+        } else if (line > lineMapData.getTargetMaxLine()) {
+          low = mid + 1;
+        } else {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  private FileMapData[] getMappings() {
     final ProjectData project = ProjectData.getProjectData();
     if (project == null) return null;
     final Map<String, FileMapData[]> mappings = project.getLinesMap();
     if (mappings == null) return null;
-    final FileMapData[] classMappings = mappings.get(myContext.getClassName());
-    if (classMappings == null) return null;
-    int maxValue = -1;
-    for (FileMapData data : classMappings) {
-      if (data == null) continue;
-      if (!data.getClassName().equals(myContext.getClassName())) continue;
-      maxValue = Math.max(maxValue, ClassData.maxSourceLineNumber(data.getLines()));
-    }
-    return maxValue == -1 ? null : maxValue;
+    return mappings.get(myContext.getClassName());
   }
 
   private boolean isSameMethod(String name) {

@@ -187,15 +187,15 @@ public class JSR45Util {
     final LineMapData[] result = linesMap.toArray(EMPTY_LINE_MAP);
     Arrays.sort(result, new Comparator<LineMapData>() {
       public int compare(LineMapData o1, LineMapData o2) {
-        int compareSource = o1.getSourceLineNumber() - o2.getSourceLineNumber();
-        if (compareSource == 0) {
-          int compareMin = o1.getTargetMinLine() - o2.getTargetMinLine();
-          if (compareMin == 0) {
-            return o1.getTargetMaxLine() - o2.getTargetMaxLine();
+        int compareMin = o1.getTargetMinLine() - o2.getTargetMinLine();
+        if (compareMin == 0) {
+          int compareMax = o1.getTargetMaxLine() - o2.getTargetMaxLine();
+          if (compareMax == 0) {
+            return o1.getSourceLineNumber() - o2.getSourceLineNumber();
           }
-          return compareMin;
+          return compareMax;
         }
-        return compareSource;
+        return compareMin;
       }
     });
     return result;
