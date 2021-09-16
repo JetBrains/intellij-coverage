@@ -46,7 +46,7 @@ public class HTMLCoverageReportTest {
 
   private File runTestAndConvertToHTML(String patterns, String className, List<File> sources) throws Throwable {
     final Reporter reporter = TestUtils.runTest(patterns, className);
-    final File htmlDir = createHtmlDir(reporter.getDataFile());
+    final File htmlDir = createHtmlDir(reporter.getReport().getDataFile());
     reporter.createHTMLReport(htmlDir, sources);
     return htmlDir;
   }

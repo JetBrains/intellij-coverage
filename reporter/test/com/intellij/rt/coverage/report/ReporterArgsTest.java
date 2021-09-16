@@ -25,11 +25,13 @@ import java.util.List;
 public class ReporterArgsTest {
   @Test
   public void testRequiredArgs() throws Exception {
-    final ReporterArgs args = ReporterArgs.from(new String[]{"datafile=test.ic", "smapfile=test.smap", "output=out1,out2"});
-    Assert.assertNotNull(args.getDataFile());
-    Assert.assertNotNull(args.getSourceMapFile());
-    Assert.assertEquals("test.ic", args.getDataFile().getName());
-    Assert.assertEquals("test.smap", args.getSourceMapFile().getName());
+    final ReporterArgs args = ReporterArgs.from(new String[]{"reports=test.ic:test.smap", "output=out1,out2"});
+    final List<BinaryReport> reports = args.getReports();
+    Assert.assertNotNull(reports);
+    Assert.assertEquals(1, reports.size());
+    final BinaryReport report = reports.get(0);
+    Assert.assertEquals("test.ic", report.getDataFile().getName());
+    Assert.assertEquals("test.smap", report.getSourceMapFile().getName());
     final List<File> output = args.getOutputDirs();
     Assert.assertNotNull(output);
     Assert.assertEquals(2, output.size());
@@ -40,45 +42,31 @@ public class ReporterArgsTest {
 
   @Test(expected = ReporterArgs.ArgParseException.class)
   public void testAbsentDataFile() throws Exception {
-    final ReporterArgs args = ReporterArgs.from(new String[]{"smapfile=test.smap"});
-    Assert.assertNotNull(args.getSourceMapFile());
-    args.getDataFile();
-  }
-
-  @Test(expected = ReporterArgs.ArgParseException.class)
-  public void testAbsentSourceMapFile() throws Exception {
-    final ReporterArgs args = ReporterArgs.from(new String[]{"datafile=test.ic"});
-    Assert.assertNotNull(args.getDataFile());
-    args.getSourceMapFile();
+    final ReporterArgs args = ReporterArgs.from(new String[]{"reports=test.smap"});
+    args.getReports();
   }
 
   @Test(expected = ReporterArgs.ArgParseException.class)
   public void testAbsentOutput() throws Exception {
-    final ReporterArgs args = ReporterArgs.from(new String[]{"datafile=test.ic", "smapfile=test.smap"});
-    Assert.assertNotNull(args.getDataFile());
-    Assert.assertNotNull(args.getSourceMapFile());
+    final ReporterArgs args = ReporterArgs.from(new String[]{"reports=test.ic:test.smap"});
     args.getOutputDirs();
   }
 
   @Test(expected = ReporterArgs.ArgParseException.class)
   public void testUnacceptableArgument() throws Exception {
-    ReporterArgs.from(new String[]{"datafile=test.ic", "smapfile=test.smap", "unknown=42"});
+    ReporterArgs.from(new String[]{"reports=test.ic:test.smap", "unknown=42"});
   }
 
   @Test
   public void testXMLArgs() throws Exception {
-    final ReporterArgs args = ReporterArgs.from(new String[]{"datafile=test.ic", "smapfile=test.smap", "xml=test.xml"});
-    Assert.assertNotNull(args.getDataFile());
-    Assert.assertNotNull(args.getSourceMapFile());
+    final ReporterArgs args = ReporterArgs.from(new String[]{"reports=test.ic:test.smap", "xml=test.xml"});
     Assert.assertNotNull(args.getXmlFile());
     Assert.assertEquals("test.xml", args.getXmlFile().getName());
   }
 
   @Test
   public void testHTMLArgs() throws Exception {
-    final ReporterArgs args = ReporterArgs.from(new String[]{"datafile=test.ic", "smapfile=test.smap", "html=test", "sources=s1,s2,s3"});
-    Assert.assertNotNull(args.getDataFile());
-    Assert.assertNotNull(args.getSourceMapFile());
+    final ReporterArgs args = ReporterArgs.from(new String[]{"reports=test.ic:test.smap", "html=test", "sources=s1,s2,s3"});
     Assert.assertNotNull(args.getHtmlDir());
     Assert.assertEquals("test", args.getHtmlDir().getName());
     final List<File> sources = args.getSourceDirs();
@@ -91,11 +79,13 @@ public class ReporterArgsTest {
 
   @Test
   public void testQuotes() throws Exception {
-    final ReporterArgs args = ReporterArgs.from(new String[]{"datafile=\"test.ic\"", "smapfile=\"test.smap\"", "html=\"test\"", "sources=\"s1\",\"s2\",\"s3\""});
-    Assert.assertNotNull(args.getDataFile());
-    Assert.assertEquals("test.ic", args.getDataFile().getName());
-    Assert.assertNotNull(args.getSourceMapFile());
-    Assert.assertEquals("test.smap", args.getSourceMapFile().getName());
+    final ReporterArgs args = ReporterArgs.from(new String[]{"reports=\"test.ic\":\"test.smap\"", "html=\"test\"", "sources=\"s1\",\"s2\",\"s3\""});
+    final List<BinaryReport> reports = args.getReports();
+    Assert.assertNotNull(reports);
+    Assert.assertEquals(1, reports.size());
+    final BinaryReport report = reports.get(0);
+    Assert.assertEquals("test.ic", report.getDataFile().getName());
+    Assert.assertEquals("test.smap", report.getSourceMapFile().getName());
     Assert.assertNotNull(args.getHtmlDir());
     Assert.assertEquals("test", args.getHtmlDir().getName());
     final List<File> sources = args.getSourceDirs();

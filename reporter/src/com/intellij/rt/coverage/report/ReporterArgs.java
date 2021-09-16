@@ -16,24 +16,22 @@
 
 package com.intellij.rt.coverage.report;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 import java.util.*;
 
 public class ReporterArgs {
-  private static final String DATAFILE_ARG = "datafile";
-  private static final String SOURCE_MAP_FILE_ARG = "smapfile";
+  private static final String REPORTS_ARG = "reports";
   private static final String XML_FILE_ARG = "xml";
   private static final String HTML_DIR_ARG = "html";
   private static final String SOURCE_DIRS_ARG = "sources";
   private static final String OUTPUT_DIRS_ARG = "output";
 
   private static final List<String> ourAcceptableArgs = Arrays.asList(
-      DATAFILE_ARG, SOURCE_MAP_FILE_ARG, XML_FILE_ARG, HTML_DIR_ARG, SOURCE_DIRS_ARG, OUTPUT_DIRS_ARG);
+      REPORTS_ARG, XML_FILE_ARG, HTML_DIR_ARG, SOURCE_DIRS_ARG, OUTPUT_DIRS_ARG);
 
   private static final String ARG_VALUE_DELIMITER = "=";
   private static final String LIST_DELIMITER = ",";
+  private static final String PAIR_DELIMITER = ":";
   private static final String QUOTES = "\"";
 
   private final Map<String, String> myArgs;
@@ -48,8 +46,7 @@ public class ReporterArgs {
 
   public static String getHelpString() {
     return "Reporter args help:\n"
-        + DATAFILE_ARG + ARG_VALUE_DELIMITER + "<Path to ic file> (obligatory)\n"
-        + SOURCE_MAP_FILE_ARG + ARG_VALUE_DELIMITER + "<Path to source map file> (obligatory)\n"
+        + REPORTS_ARG + ARG_VALUE_DELIMITER + "<List of pairs <Path to ic file>" + PAIR_DELIMITER + "<Path to source map file> separated with " + LIST_DELIMITER + ">  (obligatory, at least one pair)\n"
         + XML_FILE_ARG + ARG_VALUE_DELIMITER + "<Path to xml file> - generate xml report\n"
         + HTML_DIR_ARG + ARG_VALUE_DELIMITER + "<Path to html directory> - generate html report\n"
         + SOURCE_DIRS_ARG + ARG_VALUE_DELIMITER + "<List of paths to source root directories separated with " + LIST_DELIMITER + "> (obligatory for html)\n"
@@ -76,13 +73,14 @@ public class ReporterArgs {
     return result;
   }
 
-  @NotNull
-  public File getDataFile() throws ArgParseException {
-    return getFile(getString(DATAFILE_ARG, true));
-  }
-
-  public File getSourceMapFile() throws ArgParseException {
-    return getFile(getString(SOURCE_MAP_FILE_ARG, true));
+  public List<BinaryReport> getReports() throws ArgParseException {
+    final String args = getString(REPORTS_ARG, true);
+    final List<BinaryReport> reports = new ArrayList<BinaryReport>();
+    for (String pair : getStrings(args)) {
+      final String[] paths = getPair(pair);
+      reports.add(new BinaryReport(getFile(paths[0]), getFile(paths[1])));
+    }
+    return reports;
   }
 
   public File getXmlFile() throws ArgParseException {
@@ -104,10 +102,21 @@ public class ReporterArgs {
   }
 
   private List<File> getFiles(String args) {
-    final String[] paths = args.split(LIST_DELIMITER);
     final List<File> result = new ArrayList<File>();
-    for (String path : paths) {
+    for (String path : getStrings(args)) {
       result.add(getFile(path));
+    }
+    return result;
+  }
+
+  private String[] getStrings(String args) {
+    return args.split(LIST_DELIMITER);
+  }
+
+  private String[] getPair(String arg) throws ArgParseException {
+    final String[] result = arg.split(PAIR_DELIMITER);
+    if (result.length != 2) {
+      throw new ArgParseException("Pair must contain 2 elements separated with '" + PAIR_DELIMITER + "':" + arg);
     }
     return result;
   }

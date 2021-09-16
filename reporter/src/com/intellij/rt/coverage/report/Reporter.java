@@ -30,52 +30,50 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class Reporter {
-  private final File myDataFile;
-  private final File mySourceMapFile;
+  private final List<BinaryReport> myReports;
   @Nullable
   private List<File> myOutputRoots;
   private ProjectData myProjectData;
 
   public Reporter(File dataFile, File sourceMapFile) {
-    this(dataFile, sourceMapFile, null);
+    this(Collections.singletonList(new BinaryReport(dataFile, sourceMapFile)), null);
   }
 
-  public Reporter(File dataFile, File sourceMapFile, @Nullable List<File> outputRoots) {
-    myDataFile = dataFile;
-    mySourceMapFile = sourceMapFile;
+  public Reporter(List<BinaryReport> reports, @Nullable List<File> outputRoots) {
+    if (reports.isEmpty()) throw new RuntimeException("Report list is empty");
+    myReports = reports;
     myOutputRoots = outputRoots;
   }
 
-  public File getDataFile() {
-    return myDataFile;
-  }
-
-  public File getSourceMapFile() {
-    return mySourceMapFile;
+  public BinaryReport getReport() {
+    return myReports.get(0);
   }
 
   private ProjectData getProjectData() throws IOException {
-    if (myProjectData == null) {
-      final ProjectData projectData = ProjectDataLoader.load(myDataFile);
-      if (myOutputRoots != null) {
-        myProjectData = new ProjectData();
-        final FileLocator fileLocator = new FileLocator(myOutputRoots);
-        myOutputRoots = null;
-        for (Map.Entry<String, ClassData> entry : projectData.getClasses().entrySet()) {
-          if (fileLocator.locateClassFile(entry.getKey()).isEmpty()) continue;
-          final ClassData classData = myProjectData.getOrCreateClassData(entry.getKey());
-          classData.setLines((LineData[]) entry.getValue().getLines());
-        }
-      } else {
-        myProjectData = projectData;
+    if (myProjectData != null) return myProjectData;
+    final ProjectData projectData = ProjectDataLoader.load(myReports.get(0).getDataFile());
+    for (int i = 1; i < myReports.size(); i++) {
+      projectData.merge(ProjectDataLoader.load(myReports.get(i).getDataFile()));
+    }
+    if (myOutputRoots != null) {
+      myProjectData = new ProjectData();
+      final FileLocator fileLocator = new FileLocator(myOutputRoots);
+      myOutputRoots = null;
+      for (Map.Entry<String, ClassData> entry : projectData.getClasses().entrySet()) {
+        if (fileLocator.locateClassFile(entry.getKey()).isEmpty()) continue;
+        final ClassData classData = myProjectData.getOrCreateClassData(entry.getKey());
+        classData.setLines((LineData[]) entry.getValue().getLines());
       }
-      if (mySourceMapFile != null && mySourceMapFile.exists()) {
-        SaveHook.loadAndApplySourceMap(myProjectData, mySourceMapFile);
-      }
+    } else {
+      myProjectData = projectData;
+    }
+    for (BinaryReport report : myReports) {
+      SaveHook.loadAndApplySourceMap(myProjectData, report.getSourceMapFile());
     }
     return myProjectData;
   }

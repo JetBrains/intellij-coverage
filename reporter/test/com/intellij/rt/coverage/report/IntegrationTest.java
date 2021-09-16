@@ -31,8 +31,8 @@ public class IntegrationTest {
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),
         "com.intellij.rt.coverage.report.Main",
-        "datafile=\"" + reporter.getDataFile().getAbsolutePath() + "\"",
-        "smapfile=\"" + reporter.getSourceMapFile().getAbsolutePath() + "\"",
+        "reports=\"" + reporter.getReport().getDataFile().getAbsolutePath() + "\""
+        + ":\"" + reporter.getReport().getSourceMapFile().getAbsolutePath() + "\"",
         "xml=\"" + xmlFile.getAbsolutePath() + "\"",
         "output=\"" + outputPath() + "\""};
     ProcessUtil.execJavaProcess(commandLine);
@@ -42,13 +42,13 @@ public class IntegrationTest {
   @Test
   public void testHTML() throws Throwable {
     final Reporter reporter = TestUtils.runTest(".*", "testData.simple.Main");
-    final File htmlDir = HTMLCoverageReportTest.createHtmlDir(reporter.getDataFile());
+    final File htmlDir = HTMLCoverageReportTest.createHtmlDir(reporter.getReport().getDataFile());
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),
         "com.intellij.rt.coverage.report.Main",
-        "datafile=\"" + reporter.getDataFile().getAbsolutePath() + "\"",
-        "smapfile=\"" + reporter.getSourceMapFile().getAbsolutePath() + "\"",
+        "reports=\"" + reporter.getReport().getDataFile().getAbsolutePath() + "\""
+        + ":\"" + reporter.getReport().getSourceMapFile().getAbsolutePath() + "\"",
         "html=\"" + htmlDir.getAbsolutePath() + "\"",
         "sources=\"" + new File("test").getAbsolutePath() + "\"",
         "output=\"" + outputPath() + "\""};
