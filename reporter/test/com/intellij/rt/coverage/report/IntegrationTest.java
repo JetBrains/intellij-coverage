@@ -27,14 +27,15 @@ public class IntegrationTest {
   public void testXML() throws Throwable {
     final Reporter reporter = TestUtils.runTest(".*", "testData.simple.Main");
     final File xmlFile = XMLCoverageReportTest.createXMLFile();
+    final String quotes = getQuotes();
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),
         "com.intellij.rt.coverage.report.Main",
-        "reports=\"" + reporter.getReport().getDataFile().getAbsolutePath() + "\""
-        + ":\"" + reporter.getReport().getSourceMapFile().getAbsolutePath() + "\"",
-        "xml=\"" + xmlFile.getAbsolutePath() + "\"",
-        "output=\"" + outputPath() + "\""};
+        "reports=" + quotes + reporter.getReport().getDataFile().getAbsolutePath() + quotes
+            + ":" + quotes + reporter.getReport().getSourceMapFile().getAbsolutePath() + quotes,
+        "xml=" + quotes + xmlFile.getAbsolutePath() + quotes,
+        "output=" + quotes + outputPath() + quotes};
     ProcessUtil.execJavaProcess(commandLine);
     XMLCoverageReportTest.verifyProjectXML(xmlFile, "xmlIntegrationTest.xml");
   }
@@ -43,17 +44,22 @@ public class IntegrationTest {
   public void testHTML() throws Throwable {
     final Reporter reporter = TestUtils.runTest(".*", "testData.simple.Main");
     final File htmlDir = HTMLCoverageReportTest.createHtmlDir(reporter.getReport().getDataFile());
+    final String quotes = getQuotes();
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),
         "com.intellij.rt.coverage.report.Main",
-        "reports=\"" + reporter.getReport().getDataFile().getAbsolutePath() + "\""
-        + ":\"" + reporter.getReport().getSourceMapFile().getAbsolutePath() + "\"",
-        "html=\"" + htmlDir.getAbsolutePath() + "\"",
-        "sources=\"" + new File("test").getAbsolutePath() + "\"",
-        "output=\"" + outputPath() + "\""};
+        "reports=" + quotes + reporter.getReport().getDataFile().getAbsolutePath() + quotes
+            + ":" + quotes + reporter.getReport().getSourceMapFile().getAbsolutePath() + quotes,
+        "html=" + quotes + htmlDir.getAbsolutePath() + quotes,
+        "sources=" + quotes + new File("test").getAbsolutePath() + quotes,
+        "output=" + quotes + outputPath() + quotes};
     ProcessUtil.execJavaProcess(commandLine);
     HTMLCoverageReportTest.verifyHTMLDir(htmlDir);
+  }
+
+  private String getQuotes() {
+    return System.getProperty("os.name").startsWith("Windows") ? "\\\"" : "\"";
   }
 
   private static String outputPath() {
