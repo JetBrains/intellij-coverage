@@ -117,7 +117,7 @@ public class ReporterArgs {
   List<String> getPair(String arg) throws ArgParseException {
     final List<String> result = split(arg, PAIR_DELIMITER);
     if (result.size() != 2) {
-      throw new ArgParseException("Pair must contain 2 elements separated with '" + PAIR_DELIMITER + "':" + arg);
+      throw new ArgParseException("Pair must contain 2 elements separated with '" + PAIR_DELIMITER + "': " + arg);
     }
     return result;
   }

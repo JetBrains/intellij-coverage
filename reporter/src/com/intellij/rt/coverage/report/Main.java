@@ -62,6 +62,12 @@ public class Main {
       }
     } catch (ReporterArgs.ArgParseException e) {
       System.err.println(e.getMessage());
+
+      for (String arg : argsList) {
+        System.err.println(arg);
+      }
+
+      System.err.println();
       System.err.println(ReporterArgs.getHelpString());
       System.exit(1);
     }
