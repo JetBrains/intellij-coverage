@@ -29,10 +29,10 @@ public class ReporterArgs {
   private static final List<String> ourAcceptableArgs = Arrays.asList(
       REPORTS_ARG, XML_FILE_ARG, HTML_DIR_ARG, SOURCE_DIRS_ARG, OUTPUT_DIRS_ARG);
 
-  private static final String ARG_VALUE_DELIMITER = "=";
-  private static final String LIST_DELIMITER = ",";
-  private static final String PAIR_DELIMITER = ":";
-  private static final String QUOTES = "\"";
+  private static final char ARG_VALUE_DELIMITER = '=';
+  private static final char LIST_DELIMITER = ',';
+  private static final char PAIR_DELIMITER = ':';
+  private static final char QUOTES = '\"';
 
   private final Map<String, String> myArgs;
 
@@ -77,8 +77,8 @@ public class ReporterArgs {
     final String args = getString(REPORTS_ARG, true);
     final List<BinaryReport> reports = new ArrayList<BinaryReport>();
     for (String pair : getStrings(args)) {
-      final String[] paths = getPair(pair);
-      reports.add(new BinaryReport(getFile(paths[0]), getFile(paths[1])));
+      final List<String> paths = getPair(pair);
+      reports.add(new BinaryReport(getFile(paths.get(0)), getFile(paths.get(1))));
     }
     return reports;
   }
@@ -109,13 +109,14 @@ public class ReporterArgs {
     return result;
   }
 
-  private String[] getStrings(String args) {
-    return args.split(LIST_DELIMITER);
+  private List<String> getStrings(String args) {
+    return split(args, LIST_DELIMITER);
   }
 
-  private String[] getPair(String arg) throws ArgParseException {
-    final String[] result = arg.split(PAIR_DELIMITER);
-    if (result.length != 2) {
+  // internal for test
+  List<String> getPair(String arg) throws ArgParseException {
+    final List<String> result = split(arg, PAIR_DELIMITER);
+    if (result.size() != 2) {
       throw new ArgParseException("Pair must contain 2 elements separated with '" + PAIR_DELIMITER + "':" + arg);
     }
     return result;
@@ -134,10 +135,28 @@ public class ReporterArgs {
    */
   private File getFile(String path) {
     if (path == null) return null;
-    if (path.length() > 2 && path.startsWith(QUOTES) && path.endsWith(QUOTES)) {
+    if (path.length() > 2 && path.charAt(0) == QUOTES && path.charAt(path.length() - 1) == QUOTES) {
       path = path.substring(1, path.length() - 1);
     }
     return new File(path);
+  }
+
+  private List<String> split(String arg, char delimiter) {
+    final List<String> result = new ArrayList<String>();
+    StringBuilder builder = new StringBuilder();
+    boolean quoted = false;
+    for (int i = 0; i < arg.length(); i++) {
+      final char c = arg.charAt(i);
+      if (c == QUOTES) quoted = !quoted;
+      if (!quoted && c == delimiter) {
+        result.add(builder.toString());
+        builder = new StringBuilder();
+        continue;
+      }
+      builder.append(c);
+    }
+    result.add(builder.toString());
+    return result;
   }
 
   public static class ArgParseException extends Exception {

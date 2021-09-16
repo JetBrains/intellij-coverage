@@ -100,4 +100,9 @@ public class ReporterArgsTest {
   public void testHelp() {
     Assert.assertNotNull(ReporterArgs.getHelpString());
   }
+
+  @Test
+  public void testWindowsPath() throws Exception {
+    Assert.assertNotNull(ReporterArgs.from(new String[] {"reports=\"C:\\test.ic\":\"C:\\test.sm\""}).getReports());
+  }
 }
