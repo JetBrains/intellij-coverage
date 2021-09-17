@@ -71,6 +71,15 @@ public class CoverageIOUtil {
      */
     public static FileLock lock(final File targetFile, final long totalTimeoutMS, final long waitTimeMS) {
       final FileLock lock = new FileLock(targetFile);
+      if (lock.myLock.exists()) {
+        // If file exists, and it was created long time ago then looks like it stayed from a previous run.
+        // This may lead to a race, as modification check and deletion is not atomic.
+        final long current = System.currentTimeMillis();
+        final long modified = lock.myLock.lastModified();
+        if (modified != 0 && modified + totalTimeoutMS < current) {
+          lock.tryUnlock();
+        }
+      }
       for (long timePassed = 0; timePassed < totalTimeoutMS; timePassed += waitTimeMS) {
         if (lock.tryLock()) return lock;
         wait(lock, waitTimeMS, "lock");
