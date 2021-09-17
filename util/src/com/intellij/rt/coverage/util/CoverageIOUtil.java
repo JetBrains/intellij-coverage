@@ -17,7 +17,6 @@
 package com.intellij.rt.coverage.util;
 
 import java.io.*;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -63,16 +62,16 @@ public class CoverageIOUtil {
     }
 
     public static FileLock lock(final File targetFile) {
-      return lock(targetFile, 2, TimeUnit.MINUTES, 100);
+      return lock(targetFile, 2 * 60 * 1000, 100);
     }
 
     /**
      * @param targetFile File to lock
      * @return Lock object
      */
-    public static FileLock lock(final File targetFile, final long totalTimeout, final TimeUnit unit, final long waitTimeMS) {
+    public static FileLock lock(final File targetFile, final long totalTimeoutMS, final long waitTimeMS) {
       final FileLock lock = new FileLock(targetFile);
-      for (long timePassed = 0; timePassed < unit.toMillis(totalTimeout); timePassed += waitTimeMS) {
+      for (long timePassed = 0; timePassed < totalTimeoutMS; timePassed += waitTimeMS) {
         if (lock.tryLock()) return lock;
         wait(lock, waitTimeMS, "lock");
       }
