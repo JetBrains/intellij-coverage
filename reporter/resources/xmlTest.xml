@@ -3,35 +3,68 @@
 <package name="MyClass">
 <class name="MyClass" sourcefilename="F.java">
 <method name="foo" desc="(I)V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="2" covered="0"/>
 </method>
 <method name="boo" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="1" covered="0"/>
 </method>
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
 </class>
 <sourcefile name="F.java">
 <line nr="1" mi="1" ci="0" mb="0" cb="0"/>
 <line nr="2" mi="1" ci="0" mb="0" cb="0"/>
 <line nr="3" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
 </sourcefile>
+<counter type="INSTRUCTION" missed="3" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
 </package>
 <package name="package">
 <class name="package/MyClass2" sourcefilename="A.java">
 <method name="a" desc="(II)I">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="1" covered="0"/>
 </method>
 <method name="b" desc="(J)Z">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="1" covered="0"/>
 </method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
 </class>
 <sourcefile name="A.java">
 <line nr="1" mi="1" ci="0" mb="0" cb="0"/>
 <line nr="2" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
 </sourcefile>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
 </package>
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+<counter type="CLASS" missed="2" covered="0"/>
 </report>
 

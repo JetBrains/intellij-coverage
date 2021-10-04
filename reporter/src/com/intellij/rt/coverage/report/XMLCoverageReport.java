@@ -32,6 +32,18 @@ import java.io.IOException;
 import java.util.*;
 
 public class XMLCoverageReport {
+  private static final String LINE_COUNTER = "LINE";
+  private static final String BRANCH_COUNTER = "BRANCH";
+  private static final String METHOD_COUNTER = "METHOD";
+  private static final String CLASS_COUNTER = "CLASS";
+  private static final String INSTRUCTION_COUNTER = "INSTRUCTION";
+
+  private static final int LINE_MASK = 1;
+  private static final int BRANCH_MASK = 2;
+  private static final int METHOD_MASK = 4;
+  private static final int CLASS_MASK = 8;
+  private static final int INSTRUCTION_MASK = 16;
+
   private static final String NEW_LINE = System.getProperty("line.separator");
   private final Map<String, List<LineData>> myFiles = new HashMap<String, List<LineData>>();
   private XMLStreamWriter myOut;
@@ -72,48 +84,60 @@ public class XMLCoverageReport {
 
     HashMap<String, List<ClassData>> packages = mapClassesToPackages(project);
 
+    final Counter counter = new Counter();
     for (Map.Entry<String, List<ClassData>> packageEntry : packages.entrySet()) {
       String packageName = packageEntry.getKey();
       List<ClassData> classes = packageEntry.getValue();
-      writePackage(packageName, classes);
+      final Counter packageCounter = writePackage(packageName, classes);
+      counter.add(packageCounter);
     }
-
+    writeCounter(counter, INSTRUCTION_MASK | LINE_MASK | BRANCH_MASK | METHOD_MASK | CLASS_MASK);
     myOut.writeEndElement();
     newLine();
     myOut.writeEndDocument();
     newLine();
   }
 
-  private void writePackage(String packageName, List<ClassData> classes) throws XMLStreamException {
+  private Counter writePackage(String packageName, List<ClassData> classes) throws XMLStreamException {
     myOut.writeStartElement("package");
     myOut.writeAttribute("name", ClassNameUtil.convertToInternalName(packageName));
     newLine();
     myFiles.clear();
+    final Counter counter = new Counter();
     for (ClassData classData : classes) {
-      writeClass(classData);
+      final Counter classCounter = writeClass(classData);
+      counter.add(classCounter);
     }
     for (Map.Entry<String, List<LineData>> fileEntry : myFiles.entrySet()) {
       String fileName = fileEntry.getKey();
       List<LineData> lines = fileEntry.getValue();
       writeFile(fileName, lines);
     }
+
+    writeCounter(counter, INSTRUCTION_MASK | LINE_MASK | BRANCH_MASK | METHOD_MASK | CLASS_MASK);
+
     myOut.writeEndElement();
     newLine();
+
+    return counter;
   }
 
   private void writeFile(String fileName, List<LineData> lines) throws XMLStreamException {
     myOut.writeStartElement("sourcefile");
     myOut.writeAttribute("name", fileName);
     newLine();
+    final Counter counter = new Counter();
     for (LineData lineData : lines) {
       if (lineData == null) continue;
-      writeLine(lineData);
+      final Counter lineCounter = writeLine(lineData);
+      counter.add(lineCounter);
     }
+    writeCounter(counter, INSTRUCTION_MASK | LINE_MASK | BRANCH_MASK);
     myOut.writeEndElement();
     newLine();
   }
 
-  private void writeClass(ClassData classData) throws XMLStreamException {
+  private Counter writeClass(ClassData classData) throws XMLStreamException {
     myOut.writeStartElement("class");
     final String className = ClassNameUtil.convertToInternalName(classData.getName());
     myOut.writeAttribute("name", className);
@@ -135,15 +159,21 @@ public class XMLCoverageReport {
     } else {
       newLine();
     }
+    final Counter counter = new Counter();
     Map<String, List<LineData>> methods = classData.mapLinesToMethods();
     for (Map.Entry<String, List<LineData>> methodEntry : methods.entrySet()) {
-      writeMethod(methodEntry.getKey(), methodEntry.getValue());
+      final Counter methodCounter = writeMethod(methodEntry.getKey(), methodEntry.getValue());
+      counter.add(methodCounter);
     }
+    counter.totalClasses = 1;
+    if (counter.coveredMethods > 0) counter.coveredClasses = 1;
+    writeCounter(counter, INSTRUCTION_MASK | LINE_MASK | BRANCH_MASK | METHOD_MASK);
     myOut.writeEndElement();
     newLine();
+    return counter;
   }
 
-  private void writeMethod(String signature, List<LineData> lines) throws XMLStreamException {
+  private Counter writeMethod(String signature, List<LineData> lines) throws XMLStreamException {
     myOut.writeStartElement("method");
     int nameIndex = signature.indexOf('(');
     String name = signature.substring(0, nameIndex);
@@ -152,41 +182,49 @@ public class XMLCoverageReport {
     myOut.writeAttribute("desc", descriptor);
     newLine();
 
-    int totalLines = 0;
-    int coveredLines = 0;
-    int totalBranches = 0;
-    int coveredBranches = 0;
+    final Counter counter = new Counter();
     for (LineData lineData : lines) {
       if (lineData == null) continue;
-      totalLines++;
-      coveredLines += lineData.getHits() > 0 ? 1 : 0;
-      BranchData branchData = lineData.getBranchData();
-      if (branchData == null) continue;
-      totalBranches += branchData.getTotalBranches();
-      coveredBranches += branchData.getCoveredBranches();
+      counter.add(getLineCounter(lineData));
     }
-
-    writeCounter("BRANCH", totalBranches, coveredBranches);
-    writeCounter("LINE", totalLines, coveredLines);
+    counter.totalMethods = 1;
+    if (counter.coveredLines > 0) counter.coveredMethods = 1;
+    writeCounter(counter, INSTRUCTION_MASK | LINE_MASK | BRANCH_MASK);
 
     myOut.writeEndElement();
     newLine();
+    return counter;
   }
 
-  private void writeLine(LineData lineData) throws XMLStreamException {
+  private Counter writeLine(LineData lineData) throws XMLStreamException {
     myOut.writeEmptyElement("line");
     myOut.writeAttribute("nr", Integer.toString(lineData.getLineNumber()));
 
-    int lineCovered = lineData.getHits() > 0 ? 1 : 0;
-    myOut.writeAttribute("mi", Integer.toString(1 - lineCovered));
-    myOut.writeAttribute("ci", Integer.toString(lineCovered));
-
-    BranchData branchData = lineData.getBranchData();
-    int totalBranches = branchData == null ? 0 : branchData.getTotalBranches();
-    int coveredBranches = branchData == null ? 0 : branchData.getCoveredBranches();
-    myOut.writeAttribute("mb", Integer.toString(totalBranches - coveredBranches));
-    myOut.writeAttribute("cb", Integer.toString(coveredBranches));
+    final Counter counter = getLineCounter(lineData);
+    myOut.writeAttribute("mi", Integer.toString(1 - counter.coveredLines));
+    myOut.writeAttribute("ci", Integer.toString(counter.coveredLines));
+    myOut.writeAttribute("mb", Integer.toString(counter.totalBranches - counter.coveredBranches));
+    myOut.writeAttribute("cb", Integer.toString(counter.coveredBranches));
     newLine();
+    return counter;
+  }
+
+  private Counter getLineCounter(LineData lineData) {
+    final Counter counter = new Counter();
+    counter.totalLines = 1;
+    counter.coveredLines = lineData.getHits() > 0 ? 1 : 0;
+    final BranchData branchData = lineData.getBranchData();
+    counter.totalBranches = branchData == null ? 0 : branchData.getTotalBranches();
+    counter.coveredBranches = branchData == null ? 0 : branchData.getCoveredBranches();
+    return counter;
+  }
+
+  private void writeCounter(Counter counter, int mask) throws XMLStreamException {
+    if ((mask & INSTRUCTION_MASK) != 0) writeCounter(INSTRUCTION_COUNTER, counter.totalLines, counter.coveredLines);
+    if ((mask & BRANCH_MASK) != 0) writeCounter(BRANCH_COUNTER, counter.totalBranches, counter.coveredBranches);
+    if ((mask & LINE_MASK) != 0) writeCounter(LINE_COUNTER, counter.totalLines, counter.coveredLines);
+    if ((mask & METHOD_MASK) != 0) writeCounter(METHOD_COUNTER, counter.totalMethods, counter.coveredMethods);
+    if ((mask & CLASS_MASK) != 0) writeCounter(CLASS_COUNTER, counter.totalClasses, counter.coveredClasses);
   }
 
   private void writeCounter(String type, int total, int covered) throws XMLStreamException {
@@ -217,5 +255,30 @@ public class XMLCoverageReport {
     IOException e = new IOException(t.getClass().getSimpleName() + ": " + t.getMessage());
     e.setStackTrace(t.getStackTrace());
     return e;
+  }
+
+  private static class Counter {
+    public int totalClasses;
+    public int coveredClasses;
+
+    public int totalMethods;
+    public int coveredMethods;
+
+    public int totalLines;
+    public int coveredLines;
+
+    public int coveredBranches;
+    public int totalBranches;
+
+    public void add(Counter other) {
+      totalClasses += other.totalClasses;
+      coveredClasses += other.coveredClasses;
+      totalMethods += other.totalMethods;
+      coveredMethods += other.coveredMethods;
+      totalLines += other.totalLines;
+      coveredLines += other.coveredLines;
+      totalBranches += other.totalBranches;
+      coveredBranches += other.coveredBranches;
+    }
   }
 }
