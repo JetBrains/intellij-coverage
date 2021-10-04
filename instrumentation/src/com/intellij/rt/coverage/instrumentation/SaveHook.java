@@ -58,7 +58,7 @@ public class SaveHook implements Runnable {
             projectData.applyLinesMask();
             projectData.applyBranchData();
             if (myAppendUnloaded) {
-                appendUnloaded(projectData);
+                appendUnloaded(projectData, myClassFinder, mySourceMapFile != null);
             }
             projectData.checkLineMappings();
             checkLineSignatures(projectData);
@@ -196,19 +196,23 @@ public class SaveHook implements Runnable {
         }
     }
 
-    private void appendUnloaded(final ProjectData projectData) {
-      Collection<ClassEntry> matchedClasses = myClassFinder.findMatchedClasses();
+  /**
+   * Append classes that had not been loaded during the program run into the <code>projectData</code>.
+   *
+   * Classes are searched using <code>classFinder</code>.
+   */
+    public static void appendUnloaded(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource) {
+      Collection<ClassEntry> matchedClasses = classFinder.findMatchedClasses();
 
-      for (Object matchedClass : matchedClasses) {
-        ClassEntry classEntry = (ClassEntry) matchedClass;
+      for (ClassEntry classEntry : matchedClasses) {
         ClassData cd = projectData.getClassData(classEntry.getClassName());
         if (cd != null) continue;
         try {
           ClassReader reader = new ClassReader(classEntry.getClassInputStream());
-          if (mySourceMapFile != null) {
+          if (calculateSource) {
             cd = projectData.getOrCreateClassData(classEntry.getClassName());
           }
-          SourceLineCounter slc = new SourceLineCounter(cd, !projectData.isSampling(), mySourceMapFile != null ? projectData : null);
+          SourceLineCounter slc = new SourceLineCounter(cd, !projectData.isSampling(), calculateSource ? projectData : null);
           reader.accept(slc, 0);
           if (slc.getNSourceLines() > 0) { // ignore classes without executable code
             final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
