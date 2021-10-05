@@ -24,7 +24,7 @@ dependencies {
   implementation project(":")
   implementation(project(path: ":instrumentation", configuration: "archives"))
   implementation project(":util")
-  externalDependancies("org.jetbrains.intellij.deps:coverage-report:1.0.7")
+  externalDependancies("org.jetbrains.intellij.deps:coverage-report:1.0.8")
 
   testImplementation("junit:junit:4.13")
   testImplementation(files(project(":tests").sourceSets.test.output))
