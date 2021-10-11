@@ -170,8 +170,8 @@ public class ClassData implements CoverageData {
     if (myStatus == null) myStatus = new HashMap<String, Integer>();
   }
 
-  /** @noinspection UnusedDeclaration*/
   public Integer getStatus(String methodSignature) {
+    if (myStatus == null) return null;
     Integer methodStatus = myStatus.get(methodSignature);
     if (methodStatus == null) {
       for (final LineData lineData : myLinesArray) {

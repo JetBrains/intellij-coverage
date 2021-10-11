@@ -50,6 +50,13 @@ public class SourceLineCounter extends ClassVisitor {
     this(classData, excludeLines, projectData, FilterUtils.ignorePrivateConstructorOfUtilClassEnabled());
   }
 
+  /**
+   * Create analyser of class that had not been unloaded during coverage execution.
+   * @param classData class data to store source data if <code>projectData</code> is not null
+   * @param excludeLines exclude lines for init/clinit methods in case of not null <code>classData</code>
+   * @param projectData source data should be collected only if not null
+   * @param ignorePrivateConstructorOfUtilClasses a flag to filter out private constructor of util classes
+   */
   public SourceLineCounter(final ClassData classData, final boolean excludeLines,
                            final ProjectData projectData, final boolean ignorePrivateConstructorOfUtilClasses) {
     super(Opcodes.API_VERSION);
@@ -79,14 +86,14 @@ public class SourceLineCounter extends ClassVisitor {
   }
 
   public void visitSource(String sourceFileName, String debug) {
-    if (myProjectData != null) {
+    if (shouldCalculateSource()) {
       myClassData.setSource(sourceFileName);
     }
     super.visitSource(sourceFileName, debug);
   }
 
   public void visitOuterClass(String outerClassName, String methodName, String methodSig) {
-    if (myProjectData != null) {
+    if (shouldCalculateSource()) {
       final String fqnName = ClassNameUtil.convertToFQName(outerClassName);
       final ClassData outerClass = myProjectData.getOrCreateClassData(fqnName);
       if (outerClass.getSource() == null) {
@@ -231,5 +238,9 @@ public class SourceLineCounter extends ClassVisitor {
 
   public int getTotalBranches() {
     return myTotalBranches;
+  }
+
+  private boolean shouldCalculateSource() {
+    return myProjectData != null;
   }
 }

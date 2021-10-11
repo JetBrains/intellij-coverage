@@ -212,7 +212,7 @@ public class SaveHook implements Runnable {
           if (calculateSource) {
             cd = projectData.getOrCreateClassData(classEntry.getClassName());
           }
-          SourceLineCounter slc = new SourceLineCounter(cd, !projectData.isSampling(), calculateSource ? projectData : null);
+          SourceLineCounter slc = new SourceLineCounter(cd, false, calculateSource ? projectData : null);
           reader.accept(slc, 0);
           if (slc.getNSourceLines() > 0) { // ignore classes without executable code
             final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
