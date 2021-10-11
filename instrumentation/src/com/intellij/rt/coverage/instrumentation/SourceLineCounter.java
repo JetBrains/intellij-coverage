@@ -236,6 +236,10 @@ public class SourceLineCounter extends ClassVisitor {
     return myInterface;
   }
 
+  public boolean isEnum() {
+    return myEnum;
+  }
+
   public int getTotalBranches() {
     return myTotalBranches;
   }

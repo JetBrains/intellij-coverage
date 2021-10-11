@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.instrumentation.filters.signature;
 
 import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
+import com.intellij.rt.coverage.util.ClassNameUtil;
 
 public class EnumMethodsFilter implements MethodSignatureFilter {
   public boolean shouldFilter(int access, String name, String desc, String signature, String[] exceptions, MethodFilteringVisitor context) {
@@ -24,8 +25,9 @@ public class EnumMethodsFilter implements MethodSignatureFilter {
   }
 
   private static boolean isDefaultEnumMethod(String name, String desc, String signature, String className) {
-    return name.equals("values") && desc.equals("()[L" + className + ";") ||
-        name.equals("valueOf") && desc.equals("(Ljava/lang/String;)L" + className + ";") ||
+    final String internalName = ClassNameUtil.convertToInternalName(className);
+    return name.equals("values") && desc.equals("()[L" + internalName + ";") ||
+        name.equals("valueOf") && desc.equals("(Ljava/lang/String;)L" + internalName + ";") ||
         name.equals("<init>") && signature != null && signature.equals("()V");
   }
 }

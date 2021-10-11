@@ -214,7 +214,7 @@ public class SaveHook implements Runnable {
           }
           SourceLineCounter slc = new SourceLineCounter(cd, false, calculateSource ? projectData : null);
           reader.accept(slc, 0);
-          if (slc.getNSourceLines() > 0) { // ignore classes without executable code
+          if (slc.isEnum() || slc.getNSourceLines() > 0) { // ignore classes without executable code
             final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
             final int[] maxLine = new int[]{1};
             final ClassData classData = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
