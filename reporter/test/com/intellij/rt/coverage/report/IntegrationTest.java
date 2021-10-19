@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.util.ProcessUtil;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.Collections;
 
 public class IntegrationTest {
 
@@ -27,15 +28,18 @@ public class IntegrationTest {
   public void testXML() throws Throwable {
     final Reporter reporter = TestUtils.runTest(".*", "testData.simple.Main");
     final File xmlFile = XMLCoverageReportTest.createXMLFile();
-    final String quotes = getQuotes();
+    final ReporterArgs args = new ReporterArgs(
+        Collections.singletonList(new BinaryReport(reporter.getReport().getDataFile(), reporter.getReport().getSourceMapFile())),
+        Collections.<File>emptyList(),
+        Collections.singletonList(new File(outputPath())),
+        xmlFile,
+        null);
+    final File argsFile = ReporterArgsTest.argsToFile(args);
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),
         "com.intellij.rt.coverage.report.Main",
-        "reports=" + quotes + reporter.getReport().getDataFile().getAbsolutePath() + quotes
-            + ":" + quotes + reporter.getReport().getSourceMapFile().getAbsolutePath() + quotes,
-        "xml=" + quotes + xmlFile.getAbsolutePath() + quotes,
-        "output=" + quotes + outputPath() + quotes};
+        argsFile.getAbsolutePath()};
     ProcessUtil.execJavaProcess(commandLine);
     XMLCoverageReportTest.verifyProjectXML(xmlFile, "xmlIntegrationTest.xml");
   }
@@ -44,22 +48,20 @@ public class IntegrationTest {
   public void testHTML() throws Throwable {
     final Reporter reporter = TestUtils.runTest(".*", "testData.simple.Main");
     final File htmlDir = HTMLCoverageReportTest.createHtmlDir(reporter.getReport().getDataFile());
-    final String quotes = getQuotes();
+    final ReporterArgs args = new ReporterArgs(
+        Collections.singletonList(new BinaryReport(reporter.getReport().getDataFile(), reporter.getReport().getSourceMapFile())),
+        Collections.singletonList(new File("test")),
+        Collections.singletonList(new File(outputPath())),
+        null,
+        htmlDir);
+    final File argsFile = ReporterArgsTest.argsToFile(args);
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),
         "com.intellij.rt.coverage.report.Main",
-        "reports=" + quotes + reporter.getReport().getDataFile().getAbsolutePath() + quotes
-            + ":" + quotes + reporter.getReport().getSourceMapFile().getAbsolutePath() + quotes,
-        "html=" + quotes + htmlDir.getAbsolutePath() + quotes,
-        "sources=" + quotes + new File("test").getAbsolutePath() + quotes,
-        "output=" + quotes + outputPath() + quotes};
+        argsFile.getAbsolutePath()};
     ProcessUtil.execJavaProcess(commandLine);
     HTMLCoverageReportTest.verifyHTMLDir(htmlDir);
-  }
-
-  private String getQuotes() {
-    return System.getProperty("os.name").startsWith("Windows") ? "\\\"" : "\"";
   }
 
   private static String outputPath() {

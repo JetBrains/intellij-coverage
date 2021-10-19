@@ -25,11 +25,11 @@ public class Main {
     try {
       final ReporterArgs args = ReporterArgs.from(argsList);
 
-      final Reporter reporter = new Reporter(args.getReports(), args.getOutputDirs());
+      final Reporter reporter = new Reporter(args.reports, args.outputs);
 
       boolean fail = false;
 
-      final File xmlFile = args.getXmlFile();
+      final File xmlFile = args.xmlFile;
       if (xmlFile != null) {
         try {
           reporter.createXMLReport(xmlFile);
@@ -40,9 +40,9 @@ public class Main {
         }
       }
 
-      final File htmlDir = args.getHtmlDir();
+      final File htmlDir = args.htmlDir;
       if (htmlDir != null) {
-        final List<File> sources = args.getSourceDirs();
+        final List<File> sources = args.sources;
         try {
           reporter.createHTMLReport(htmlDir, sources);
         } catch (IOException e) {
@@ -52,7 +52,7 @@ public class Main {
         }
       }
 
-      if (args.getXmlFile() == null && args.getHtmlDir() == null) {
+      if (args.xmlFile == null && args.htmlDir == null) {
         System.err.println("At least one format must be used: XML, HTML.");
         fail = true;
       }
