@@ -61,14 +61,10 @@ public class Reporter {
       projectData.merge(ProjectDataLoader.load(myReports.get(i).getDataFile()));
     }
     if (myOutputRoots != null) {
-      myProjectData = new ProjectData();
       final FileLocator fileLocator = new FileLocator(myOutputRoots);
       myOutputRoots = null;
-      for (Map.Entry<String, ClassData> entry : projectData.getClasses().entrySet()) {
-        if (fileLocator.locateClassFile(entry.getKey()).isEmpty()) continue;
-        final ClassData classData = myProjectData.getOrCreateClassData(entry.getKey());
-        classData.setLines((LineData[]) entry.getValue().getLines());
-      }
+      myProjectData = filterNonLocatableClasses(projectData, fileLocator);
+      filterNonLocatableClasses(projectData, fileLocator);
     } else {
       myProjectData = projectData;
     }
@@ -76,6 +72,16 @@ public class Reporter {
       SaveHook.loadAndApplySourceMap(myProjectData, report.getSourceMapFile());
     }
     return myProjectData;
+  }
+
+  private ProjectData filterNonLocatableClasses(ProjectData projectData, FileLocator fileLocator) {
+    final ProjectData filteredData = new ProjectData();
+    for (Map.Entry<String, ClassData> entry : projectData.getClasses().entrySet()) {
+      if (fileLocator.locateClassFile(entry.getKey()).isEmpty()) continue;
+      final ClassData classData = filteredData.getOrCreateClassData(entry.getKey());
+      classData.setLines((LineData[]) entry.getValue().getLines());
+    }
+    return filteredData;
   }
 
   public void createXMLReport(File xmlFile) throws IOException {
