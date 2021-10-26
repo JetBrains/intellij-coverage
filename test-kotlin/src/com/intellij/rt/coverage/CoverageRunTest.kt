@@ -237,6 +237,15 @@ internal abstract class CoverageRunTest : CoverageTest() {
         val test = getTestFile("custom.unloaded.multiFile")
         test(test.testName, test, extractTestConfiguration(File(test.file.parentFile, "UnusedClass.kt")))
     }
+
+    @Test
+    fun testIDEA_281195_JMochit() {
+        val test = getTestFile("custom.IDEA_281195")
+        val configuration = extractTestConfiguration(test.file)
+        val jmochitAgent = System.getProperty("java.class.path").split(File.pathSeparator).single { it.contains("jmockit") }
+        configuration.extraArgs.add("-javaagent:$jmochitAgent")
+        test(test.testName, test, configuration)
+    }
 }
 
 internal abstract class CoverageVerifyResultsTest(override val coverage: Coverage) : CoverageRunTest() {

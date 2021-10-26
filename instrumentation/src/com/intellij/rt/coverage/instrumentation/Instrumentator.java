@@ -22,11 +22,12 @@ import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingArrayMo
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingClassDataMode;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
 import com.intellij.rt.coverage.util.ErrorReporter;
-import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 
 import java.io.*;
+import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -129,7 +130,24 @@ public class Instrumentator {
     }
 
     final boolean shouldCalculateSource = sourceMapFile != null;
-    instrumentation.addTransformer(new CoverageClassfileTransformer(data, shouldCalculateSource, excludePatterns, includePatterns, cf, testTrackingMode));
+    final CoverageClassfileTransformer transformer = new CoverageClassfileTransformer(data, shouldCalculateSource, excludePatterns, includePatterns, cf, testTrackingMode);
+    addTransformer(instrumentation, transformer);
+  }
+
+  /**
+   * Add transformer with re-transformation enabled when possible.
+   * Reflection is used for 1.5 compatibility.
+   */
+  private void addTransformer(Instrumentation instrumentation, CoverageClassfileTransformer transformer) {
+    try {
+      final Method method = Instrumentation.class.getMethod("addTransformer", ClassFileTransformer.class, boolean.class);
+      method.invoke(instrumentation, transformer, true);
+    } catch (NoSuchMethodException e) {
+      instrumentation.addTransformer(transformer);
+    } catch (Exception e) {
+      e.printStackTrace(System.err);
+      System.exit(1);
+    }
   }
 
   private TestTrackingMode createTestTrackingMode(boolean traceLines) {

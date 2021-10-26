@@ -29,4 +29,12 @@ dependencies {
 
     testImplementation("net.bytebuddy:byte-buddy:1.11.12")
     testImplementation("net.bytebuddy:byte-buddy-agent:1.11.12")
+
+    testImplementation("org.jmockit:jmockit:1.49")
+}
+
+test {
+    filter {
+        excludeTestsMatching("testData.*")
+    }
 }
