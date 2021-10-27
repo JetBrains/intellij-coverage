@@ -10,7 +10,8 @@ task coverageAgentJar(type: Jar) {
   destinationDir = file("../dist")
   manifest.attributes(
       "Premain-Class": "com.intellij.rt.coverage.main.CoveragePremain",
-      "Boot-Class-Path": "$archiveName"
+      "Boot-Class-Path": "$archiveName",
+      "Can-Retransform-Classes" : "true"
   )
   from(sourceSets.main.output)
   from(["util", ""].collect({ project(":$it").sourceSets.main.output }))
