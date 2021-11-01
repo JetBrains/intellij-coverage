@@ -168,6 +168,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testJavaSwitch() = test("javaSwitch")
 
     @Test
+    fun testNullability() = test("nullability")
+
+    @Test
     fun testPropertiesConstructor() = test("properties.constructor")
 
     @Test

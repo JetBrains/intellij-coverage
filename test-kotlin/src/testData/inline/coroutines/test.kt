@@ -53,7 +53,7 @@ suspend inline fun foo(crossinline block: suspend () -> Unit) {
     println("Aha!")                                      // coverage: FULL
 }                                                        // coverage: FULL
 
-fun test() = runBlocking {                         // coverage: FULL
+fun test() = runBlocking {                               // coverage: FULL
     foo1(true)                                           // coverage: FULL
 }
 
