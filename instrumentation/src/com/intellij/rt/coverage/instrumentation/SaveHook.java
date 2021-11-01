@@ -231,7 +231,6 @@ public class SaveHook implements Runnable {
             classData.setLines(LinesUtil.calcLineArray(maxLine[0], lines));
           }
         } catch (Throwable e) {
-          e.printStackTrace();
           ErrorReporter.reportError("Failed to process class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
         }
       }

@@ -39,6 +39,8 @@ public class Instrumentator {
   }
 
   public void performPremain(String argsString, Instrumentation instrumentation) throws Exception {
+    checkLogLevel();
+
     String[] args;
     if (argsString != null) {
       File argsFile = new File(argsString);
@@ -58,7 +60,7 @@ public class Instrumentator {
     }
 
     if (0 < args.length && args.length < 5) {
-      System.err.println("At least 5 arguments expected but " + args.length + " found.\n"
+      ErrorReporter.logError("At least 5 arguments expected but " + args.length + " found.\n"
           + '\'' + argsString + "'\n"
           + "Expected arguments are:\n"
           + "1) data file to save coverage result\n"
@@ -88,34 +90,32 @@ public class Instrumentator {
     }
 
     final List<Pattern> includePatterns = new ArrayList<Pattern>();
-    System.out.println("---- IntelliJ IDEA coverage runner ---- ");
-    System.out.println(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
+    ErrorReporter.logInfo("---- IntelliJ IDEA coverage runner ---- ");
+    ErrorReporter.logInfo(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
     final String excludes = "-exclude";
-    System.out.println("include patterns:");
+    ErrorReporter.logInfo("include patterns:");
     for (; i < args.length; i++) {
       if (excludes.equals(args[i])) break;
       try {
         includePatterns.add(Pattern.compile(args[i]));
-        System.out.println(args[i]);
+        ErrorReporter.logInfo(args[i]);
       } catch (PatternSyntaxException ex) {
-        System.err.println("Problem occurred with include pattern " + args[i]);
-        System.err.println(ex.getDescription());
-        System.err.println("This may cause no tests run and no coverage collected");
+        ErrorReporter.reportError("Problem occurred with include pattern " + args[i] +
+            ". This may cause no tests run and no coverage collected", ex);
         System.exit(1);
       }
     }
-    System.out.println("exclude patterns:");
+    ErrorReporter.logInfo("exclude patterns:");
     i++;
     final List<Pattern> excludePatterns = new ArrayList<Pattern>();
     for (; i < args.length; i++) {
       try {
         final Pattern pattern = Pattern.compile(args[i]);
         excludePatterns.add(pattern);
-        System.out.println(pattern.pattern());
+        ErrorReporter.logInfo(pattern.pattern());
       } catch (PatternSyntaxException ex) {
-        System.err.println("Problem occurred with exclude pattern " + args[i]);
-        System.err.println(ex.getDescription());
-        System.err.println("This may cause no tests run and no coverage collected");
+        ErrorReporter.reportError("Problem occurred with exclude pattern " + args[i] +
+            ". This may cause no tests run and no coverage collected", ex);
         System.exit(1);
       }
     }
@@ -134,6 +134,15 @@ public class Instrumentator {
     addTransformer(instrumentation, transformer);
   }
 
+  private void checkLogLevel() {
+    final String logLevel = System.getProperty("idea.coverage.log.level");
+    if ("error".equals(logLevel)) {
+      ErrorReporter.setLogLevel(ErrorReporter.ERROR);
+    } else {
+      ErrorReporter.setLogLevel(ErrorReporter.INFO);
+    }
+  }
+
   /**
    * Add transformer with re-transformation enabled when possible.
    * Reflection is used for 1.5 compatibility.
@@ -145,7 +154,7 @@ public class Instrumentator {
     } catch (NoSuchMethodException e) {
       instrumentation.addTransformer(transformer);
     } catch (Exception e) {
-      e.printStackTrace(System.err);
+      ErrorReporter.reportError("Adding transformer failed.", e);
       System.exit(1);
     }
   }

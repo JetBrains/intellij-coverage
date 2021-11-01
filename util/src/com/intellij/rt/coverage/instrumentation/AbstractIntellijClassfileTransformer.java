@@ -47,7 +47,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
         double allTime = 1. * ourTime / CoverageIOUtil.GIGA;
-        System.out.println("Class transformation time: " + allTime + "s for " +
+        ErrorReporter.logInfo("Class transformation time: " + allTime + "s for " +
             ourClassCount + " classes or " + allTime / ourClassCount + "s per class"
         );
       }

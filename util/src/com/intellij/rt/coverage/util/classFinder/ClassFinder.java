@@ -16,6 +16,8 @@
 
 package com.intellij.rt.coverage.util.classFinder;
 
+import com.intellij.rt.coverage.util.ErrorReporter;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -58,7 +60,7 @@ public class ClassFinder {
       try {
         classes.addAll(entry.getClassesIterator(myIncludePatterns, myExcludePatterns));
       } catch (IOException e) {
-        e.printStackTrace();
+        ErrorReporter.reportError("Error during iterating classes.", e);
       }
     }
     return classes;
@@ -88,10 +90,9 @@ public class ClassFinder {
           result.add(new ClassPathEntry(path, cl));
         }
       } catch (Exception e) {
-        System.out.println("Exception occurred on trying collect ClassPath URLs. One of possible reasons is shutting down " +
+        ErrorReporter.reportError("Exception occurred on trying collect ClassPath URLs. One of possible reasons is shutting down " +
             "Tomcat before finishing tests. Coverage won't be affected but some of uncovered classes could be missing from " +
-            "the report.");
-        e.printStackTrace();
+            "the report.", e);
       }
     }
   }
@@ -101,7 +102,7 @@ public class ClassFinder {
     try {
       result = URLDecoder.decode(path, "UTF-8");
     } catch (UnsupportedEncodingException e) {
-      System.err.println("Could not decode the path: " + path + ", error: " + e.getMessage());
+      ErrorReporter.reportError("Could not decode the path: " + path + ", error: " + e.getMessage(), e);
     }
 
     if (result.length() == 0) return result;

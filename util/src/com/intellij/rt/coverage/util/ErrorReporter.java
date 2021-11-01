@@ -28,6 +28,10 @@ public class ErrorReporter {
   private final static SimpleDateFormat myDateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
   private static String basePath;
 
+  public static final int INFO = 0;
+  public static final int ERROR = 2;
+  private static int myLogLevel = INFO;
+
   public static synchronized void reportError(final String message) {
     PrintStream os = null;
     try {
@@ -66,18 +70,12 @@ public class ErrorReporter {
   }
 
   public static synchronized void logError(final String message) {
-    PrintStream os = null;
-    try {
-      os = getErrorLogStream();
-      StringBuffer buf = prepareMessage(message);
-      os.println(buf.toString());
-    } catch (IOException e) {
-      System.err.println("Failed to write to error log file: " + e.toString());
-    } finally {
-      if (os != null) {
-        os.close();
-      }
-    }
+    System.err.println(message);
+  }
+
+  public static void logInfo(String message) {
+    if (myLogLevel > INFO) return;
+    System.out.println(message);
   }
 
   private static PrintStream getErrorLogStream() throws FileNotFoundException {
@@ -95,5 +93,9 @@ public class ErrorReporter {
 
   public static void setBasePath(String basePath) {
     ErrorReporter.basePath = basePath;
+  }
+
+  public static void setLogLevel(int level) {
+    myLogLevel = level;
   }
 }
