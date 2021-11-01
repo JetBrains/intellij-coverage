@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage
+package com.intellij.rt.coverage.caseTests
 
+import com.intellij.rt.coverage.Coverage
+import com.intellij.rt.coverage.CoverageTest
+import com.intellij.rt.coverage.TestConfiguration
+import com.intellij.rt.coverage.assertEqualsLines
 import com.intellij.rt.coverage.data.ProjectData
 import org.junit.Test
 import java.io.File
