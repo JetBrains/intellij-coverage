@@ -38,3 +38,15 @@ jar {
   baseName = reporter_jar_name
   destinationDir = file("../dist")
 }
+
+task soursesJar(type: Jar, dependsOn: classes) {
+  baseName = reporter_jar_name
+  archiveClassifier = 'sources'
+  from(sourceSets.main.allSource)
+}
+
+task javadocJar(type: Jar) {
+  baseName = reporter_jar_name
+  archiveClassifier = 'javadoc'
+  from javadoc
+}

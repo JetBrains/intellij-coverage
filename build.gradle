@@ -15,6 +15,21 @@
  */
 
 import org.gradle.internal.jvm.Jvm
+import jetbrains.sign.GpgSignSignatoryProvider
+
+buildscript {
+  repositories {
+    maven { url 'https://packages.jetbrains.team/maven/p/jcs/maven' }
+  }
+  dependencies {
+    classpath 'com.jetbrains:jet-sign:38'
+  }
+}
+
+plugins {
+  id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
+}
+apply plugin: 'signing'
 
 private calcVersion() {
   hasProperty("teamcity") ? "1.0.${teamcity["build.number"]}" : ""
@@ -60,6 +75,10 @@ dependencies {
   compile project(':util')
 }
 
+javadoc {
+  options.tags = [ "noinspection" ]
+}
+
 
 ext.repackLibs = copySpec {
   from { zipTree(trove.path) } {
@@ -102,3 +121,11 @@ clean.doFirst {
 }
 
 apply from: 'artifacts.gradle'
+signing {
+  sign publishing.publications
+  signatories = new GpgSignSignatoryProvider()
+}
+
+tasks.withType(Sign) {
+  onlyIf { System.getenv("TEAMCITY_VERSION") != null }
+}

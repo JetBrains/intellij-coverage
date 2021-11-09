@@ -40,4 +40,23 @@ jar {
   with repackLibs
 }
 
+task soursesJar(type: Jar, dependsOn: classes) {
+  baseName = test_discovery_jar_name
+  archiveClassifier = 'sources'
+  from(sourceSets.main.allSource)
+  from(["util"].collect({ project(":$it").sourceSets.main.allSource }))
+}
+
+task allJavadoc(type: Javadoc) {
+  options.tags = [ "noinspection" ]
+  source = ["util", "test-discovery"].collect { project(":$it").sourceSets.main.allSource }
+  classpath = files(["util", "test-discovery"].collect { project(":$it").sourceSets.main.compileClasspath })
+}
+
+task javadocJar(type: Jar) {
+  baseName = test_discovery_jar_name
+  archiveClassifier = 'javadoc'
+  from allJavadoc
+}
+
 apply from: 'jmh.gradle'

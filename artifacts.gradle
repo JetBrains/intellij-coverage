@@ -28,39 +28,84 @@ private addDependencies(publication, dependencyList) {
   }
 }
 
+private setMavenMetadata(publication, publicationName, publicationDescription) {
+  publication.pom {
+    name = publicationName
+    description = publicationDescription
+    url = 'https://github.com/JetBrains/intellij-coverage'
+    licenses {
+      license {
+        name = 'Apache License, Version 2.0'
+        url = 'https://www.apache.org/licenses/LICENSE-2.0'
+      }
+    }
+    developers {
+      developer {
+        id = 'JetBrains'
+        name = 'JetBrains Team'
+        organization = 'JetBrains'
+        organizationUrl = 'https://www.jetbrains.com'
+      }
+    }
+    scm {
+      connection = 'scm:git:git@github.com:JetBrains/intellij-coverage.git'
+      developerConnection = 'scm:git:ssh:github.com/JetBrains/intellij-coverage.git'
+      url = 'https://github.com/JetBrains/intellij-coverage'
+    }
+  }
+}
+
 project(":instrumentation").afterEvaluate { instr ->
   project(":reporter").afterEvaluate { reporter ->
-    publishing {
-      publications {
-        CoveragePublication(MavenPublication) {
-          groupId agentsGroupId
-          artifactId coverage_jar_name
-          version version
-          artifact instr.tasks.getByName("coverageAgentJar")
-        }
-        TestDiscoveryPublication(MavenPublication) {
-          groupId agentsGroupId
-          artifactId test_discovery_jar_name
-          version version
-          artifact project(":test-discovery").jar
-        }
-        ReporterPublication(MavenPublication) {
-          groupId agentsGroupId
-          artifactId reporter_jar_name
-          version version
-          artifact project(":reporter").jar
-          addDependencies(it, reporter.getPublishDependencies())
-        }
+    project(":test-discovery").afterEvaluate { testDiscovery ->
+      setUpPublishing(instr, testDiscovery, reporter)
+    }
+  }
+}
+
+def setUpPublishing(instrumentation, testDiscovery, reporter) {
+  publishing {
+    publications {
+      Coverage(MavenPublication) {
+        group agentsGroupId
+        artifactId coverage_jar_name
+        version version
+        artifact instrumentation.tasks.getByName("coverageAgentJar")
+        artifact instrumentation.tasks.getByName("soursesJar")
+        artifact instrumentation.tasks.getByName("javadocJar")
+        setMavenMetadata(owner, "Intellij Coverage Agent", "Code coverage engine for JVM")
       }
-      repositories {
-        maven {
-          url "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies"
-          credentials {
-            username = System.getenv('INTELLIJ_DEPENDENCIES_BOT')
-            password = System.getenv('INTELLIJ_DEPENDENCIES_TOKEN')
-          }
-        }
+      TestDiscovery(MavenPublication) {
+        group agentsGroupId
+        artifactId test_discovery_jar_name
+        version version
+        artifact testDiscovery.jar
+        artifact testDiscovery.tasks.getByName("soursesJar")
+        artifact testDiscovery.tasks.getByName("javadocJar")
+        setMavenMetadata(owner, "Intellij Test Discovery Agent", "Lightweight coverage during a testing session")
       }
+      Reporter(MavenPublication) {
+        group agentsGroupId
+        artifactId reporter_jar_name
+        version version
+        artifact reporter.jar
+        artifact reporter.tasks.getByName("soursesJar")
+        artifact reporter.tasks.getByName("javadocJar")
+        addDependencies(it, reporter.getPublishDependencies())
+        setMavenMetadata(owner, "Intellij Coverage Report", "Library for presenting coverage results")
+      }
+    }
+  }
+}
+
+ext.publishingUser = System.getenv('PUBLISHING_USER')
+ext.publishingPassword = System.getenv('PUBLISHING_PASSWORD')
+
+nexusPublishing {
+  repositories {
+    sonatype {
+      username = rootProject.ext.publishingUser
+      password = rootProject.ext.publishingPassword
     }
   }
 }

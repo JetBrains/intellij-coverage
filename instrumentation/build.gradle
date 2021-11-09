@@ -18,6 +18,25 @@ task coverageAgentJar(type: Jar) {
   with repackLibs
 }
 
+task soursesJar(type: Jar, dependsOn: classes) {
+  baseName = coverage_jar_name
+  archiveClassifier = 'sources'
+  from(sourceSets.main.allSource)
+  from(["util", ""].collect({ project(":$it").sourceSets.main.allSource }))
+}
+
+task allJavadoc(type: Javadoc) {
+  options.tags = [ "noinspection" ]
+  source = ["util", "", "instrumentation"].collect { project(":$it").sourceSets.main.allSource }
+  classpath = files(["util", "", "instrumentation"].collect { project(":$it").sourceSets.main.compileClasspath })
+}
+
+task javadocJar(type: Jar) {
+  baseName = coverage_jar_name
+  archiveClassifier = 'javadoc'
+  from allJavadoc
+}
+
 build.dependsOn(coverageAgentJar)
 
 jar.enabled = false
