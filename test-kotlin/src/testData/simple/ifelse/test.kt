@@ -51,9 +51,19 @@ fun test3(b: Boolean) {
     }
 }
 
+fun foo(x: Boolean): Int? = if (x) 3 else null // coverage: FULL
+
+fun test4() {
+    foo(true) ?: foo(false)  // coverage: PARTIAL
+    foo(false) ?: foo(true)  // coverage: PARTIAL
+    foo(false) ?: foo(false) // coverage: PARTIAL
+    foo(true) ?: foo(true)   // coverage: PARTIAL
+}
+
 fun main(args: Array<String>) {
     test(x = true, y = false, z = true) // coverage: FULL
     test2(x = true, y = true)           // coverage: FULL
     test2(x = false, y = true)          // coverage: FULL
     test3(false)                        // coverage: FULL
+    test4()                             // coverage: FULL
 }

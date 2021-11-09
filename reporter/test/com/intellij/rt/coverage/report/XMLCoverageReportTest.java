@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -66,6 +67,12 @@ public class XMLCoverageReportTest {
   @Test
   public void integrationTestInline() throws Throwable {
     verifyProjectXML(runTestAndConvertToXML("testData\\.inline\\..*", "testData.inline.Test"), "inlineIntegrationTest.xml");
+  }
+
+  @Test
+  @Ignore("To be fixed")
+  public void integrationTestBranches() throws Throwable {
+    verifyProjectXML(runTestAndConvertToXML("testData\\.branches\\..*", "testData.branches.TestKt"), "branches.xml");
   }
 
   private File runTestAndConvertToXML(String patterns, String className) throws Throwable {

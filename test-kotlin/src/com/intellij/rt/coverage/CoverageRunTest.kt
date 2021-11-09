@@ -190,6 +190,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testSealedClassConstructor() = test("sealedClassConstructor")
 
     @Test
+    fun testSimpleBranches() = test("simple.branches")
+
+    @Test
     fun testSimpleIfelse() = test("simple.ifelse")
 
     @Test
