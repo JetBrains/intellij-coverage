@@ -3,36 +3,39 @@
 <package name="testData/simple">
 <class name="testData/simple/Main" sourcefilename="Main.java">
 <method name="main" desc="([Ljava/lang/String;)V">
-<counter type="INSTRUCTION" missed="0" covered="1"/>
-<counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="0" covered="1"/>
+<counter type="INSTRUCTION" missed="1" covered="3"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="1" covered="3"/>
 </method>
 <method name="&lt;init&gt;" desc="()V">
 <counter type="INSTRUCTION" missed="1" covered="0"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="1" covered="0"/>
 </method>
-<counter type="INSTRUCTION" missed="1" covered="1"/>
-<counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="1" covered="1"/>
+<counter type="INSTRUCTION" missed="2" covered="3"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="2" covered="3"/>
 <counter type="METHOD" missed="1" covered="1"/>
 </class>
 <sourcefile name="Main.java">
 <line nr="19" mi="1" ci="0" mb="0" cb="0"/>
-<line nr="21" mi="0" ci="1" mb="0" cb="0"/>
-<counter type="INSTRUCTION" missed="1" covered="1"/>
-<counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="1" covered="1"/>
+<line nr="21" mi="0" ci="1" mb="1" cb="1"/>
+<line nr="22" mi="0" ci="1" mb="0" cb="0"/>
+<line nr="24" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="0" ci="1" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="2" covered="3"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="2" covered="3"/>
 </sourcefile>
-<counter type="INSTRUCTION" missed="1" covered="1"/>
-<counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="1" covered="1"/>
+<counter type="INSTRUCTION" missed="2" covered="3"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="2" covered="3"/>
 <counter type="METHOD" missed="1" covered="1"/>
 <counter type="CLASS" missed="0" covered="1"/>
 </package>
-<counter type="INSTRUCTION" missed="1" covered="1"/>
-<counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="1" covered="1"/>
+<counter type="INSTRUCTION" missed="2" covered="3"/>
+<counter type="BRANCH" missed="1" covered="1"/>
+<counter type="LINE" missed="2" covered="3"/>
 <counter type="METHOD" missed="1" covered="1"/>
 <counter type="CLASS" missed="0" covered="1"/>
 </report>
