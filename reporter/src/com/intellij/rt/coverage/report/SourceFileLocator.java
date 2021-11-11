@@ -38,7 +38,7 @@ public class SourceFileLocator extends FileLocator {
   }
 
   private void locateProjectSourceFiles(ProjectData projectData) {
-    final Map<String, String> lostSources = new HashMap<String, String>();
+    final Map<String, List<String>> lostSources = new HashMap<String, List<String>>();
     for (ClassData classData : projectData.getClasses().values()) {
       if (classData == null) continue;
       final String className = classData.getName();
@@ -50,9 +50,18 @@ public class SourceFileLocator extends FileLocator {
       if (!candidates.isEmpty()) {
         mySourceFiles.put(className, candidates);
       } else {
-        lostSources.put(fileName, className);
+        List<String> classes = lostSources.get(fileName);
+        if (classes == null) {
+          classes = new ArrayList<String>();
+          lostSources.put(fileName, classes);
+        }
+        classes.add(className);
       }
     }
+    searchForLostSources(lostSources);
+  }
+
+  private void searchForLostSources(Map<String, List<String>> lostSources) {
     if (lostSources.isEmpty()) return;
     for (File root : myRoots) {
       final List<File> stack = new ArrayList<File>();
@@ -60,15 +69,7 @@ public class SourceFileLocator extends FileLocator {
       while (!stack.isEmpty()) {
         final File file = stack.remove(stack.size() - 1);
         if (file.isFile()) {
-          final String className = lostSources.get(file.getName());
-          if (className == null) continue;
-          List<File> classSources = mySourceFiles.get(className);
-          if (classSources == null) {
-            classSources = new ArrayList<File>();
-            mySourceFiles.put(className, classSources);
-          }
-          classSources.add(file);
-          lostSources.remove(file.getName());
+          if (!isSourceForClass(lostSources, file)) continue;
           if (lostSources.isEmpty()) return;
         } else if (file.isDirectory()) {
           final File[] children = file.listFiles();
@@ -78,5 +79,20 @@ public class SourceFileLocator extends FileLocator {
         }
       }
     }
+  }
+
+  private boolean isSourceForClass(Map<String, List<String>> lostSources, File file) {
+    final List<String> classes = lostSources.get(file.getName());
+    if (classes == null) return false;
+    for (String className : classes) {
+      List<File> classSources = mySourceFiles.get(className);
+      if (classSources == null) {
+        classSources = new ArrayList<File>();
+        mySourceFiles.put(className, classSources);
+      }
+      classSources.add(file);
+    }
+    lostSources.remove(file.getName());
+    return true;
   }
 }
