@@ -18,25 +18,18 @@ package com.intellij.rt.coverage.report;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-public class FileLocator {
-  private final List<File> myRoots;
+public abstract class FileLocator {
+  protected final List<File> myRoots;
 
   public FileLocator(List<File> roots) {
     myRoots = roots;
   }
 
-  public List<File> locateClassFile(String fqName) {
-    final int packageIndex = fqName.lastIndexOf('.');
-    if (packageIndex < 0) return Collections.emptyList();
-    final String packageName = fqName.substring(0, packageIndex);
-    final String className = fqName.substring(packageIndex + 1);
-    return locateFile(packageName, className + ".class");
-  }
+  public abstract List<File> locate(String fqName);
 
-  public List<File> locateFile(String packageName, String fileName) {
+  protected List<File> locateFile(String packageName, String fileName) {
     final String path = getPath(packageName, fileName);
     final List<File> result = new ArrayList<File>();
     for (File f : myRoots) {
@@ -47,7 +40,6 @@ public class FileLocator {
     }
     return result;
   }
-
 
   private static String getPath(final String packageName, final String name) {
     final String[] parts = packageName.split("\\.");

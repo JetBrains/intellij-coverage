@@ -20,7 +20,10 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,6 +38,24 @@ public class HTMLCoverageReportTest {
     verifyHTMLDir(runTestAndConvertToHTML("testData\\.inline\\..*", "testData.inline.Test", getSources()));
   }
 
+  @Test
+  public void testFileOutOfPackageStructure() throws Throwable {
+    final File htmlDir = runTestAndConvertToHTML("testData\\..*", "testData.outOfPackageStructure.TestOutOfPackageStructureKt", getSources());
+    verifyHTMLDir(htmlDir);
+    final File sourcesFile = new File(htmlDir, "ns-1" + File.separator + "sources" + File.separator + "source-1.html");
+    Assert.assertTrue(sourcesFile.exists());
+    Assert.assertFalse(readFile(sourcesFile).contains("Source code is not available"));
+  }
+
+  @Test
+  public void testTopLevel() throws Throwable {
+    final File htmlDir = runTestAndConvertToHTML("", "TestTopLevelKt", getSources());
+    verifyHTMLDir(htmlDir);
+    final File sourcesFile = new File(htmlDir, "ns-1" + File.separator + "sources" + File.separator + "source-1.html");
+    Assert.assertTrue(sourcesFile.exists());
+    Assert.assertFalse(readFile(sourcesFile).contains("Source code is not available"));
+  }
+
   public static void verifyHTMLDir(File htmlDir) {
     Assert.assertTrue(htmlDir.exists());
     Assert.assertTrue(htmlDir.isDirectory());
@@ -42,6 +63,16 @@ public class HTMLCoverageReportTest {
     Assert.assertNotNull(children);
     Assert.assertTrue(children.length > 0);
     Assert.assertTrue(new File(htmlDir, "index.html").exists());
+  }
+
+  private static String readFile(File file) throws IOException {
+    final StringBuilder builder = new StringBuilder();
+    final BufferedReader reader = new BufferedReader(new FileReader(file));
+    String line;
+    while ((line = reader.readLine()) != null) {
+      builder.append(line).append("\n");
+    }
+    return builder.toString();
   }
 
   private File runTestAndConvertToHTML(String patterns, String className, List<File> sources) throws Throwable {

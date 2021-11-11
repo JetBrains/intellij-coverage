@@ -61,7 +61,7 @@ public class Reporter {
       projectData.merge(ProjectDataLoader.load(myReports.get(i).getDataFile()));
     }
     if (myOutputRoots != null) {
-      final FileLocator fileLocator = new FileLocator(myOutputRoots);
+      final FileLocator fileLocator = new ClassFileLocator(myOutputRoots);
       myOutputRoots = null;
       myProjectData = filterNonLocatableClasses(projectData, fileLocator);
       filterNonLocatableClasses(projectData, fileLocator);
@@ -77,7 +77,7 @@ public class Reporter {
   private ProjectData filterNonLocatableClasses(ProjectData projectData, FileLocator fileLocator) {
     final ProjectData filteredData = new ProjectData();
     for (Map.Entry<String, ClassData> entry : projectData.getClasses().entrySet()) {
-      if (fileLocator.locateClassFile(entry.getKey()).isEmpty()) continue;
+      if (fileLocator.locate(entry.getKey()).isEmpty()) continue;
       final ClassData classData = filteredData.getOrCreateClassData(entry.getKey());
       classData.setLines((LineData[]) entry.getValue().getLines());
     }

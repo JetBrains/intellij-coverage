@@ -16,7 +16,6 @@
 
 package com.intellij.rt.coverage.report;
 
-import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 import jetbrains.coverage.report.SourceCodeProvider;
 import org.jetbrains.annotations.NotNull;
@@ -29,12 +28,10 @@ import java.io.IOException;
 import java.util.List;
 
 public class DirectorySourceCodeProvider implements SourceCodeProvider {
-  private final ProjectData myProjectData;
   private final FileLocator myFileLocator;
 
   public DirectorySourceCodeProvider(ProjectData projectData, List<File> sources) {
-    myProjectData = projectData;
-    myFileLocator = new FileLocator(sources);
+    myFileLocator = new SourceFileLocator(sources, projectData);
   }
 
   private static CharSequence readText(File file) throws IOException {
@@ -58,14 +55,7 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
   @Nullable
   @Override
   public CharSequence getSourceCode(@NotNull String className) {
-    final ClassData classData = myProjectData.getClassData(className);
-    if (classData == null) return null;
-    final int packageIndex = className.lastIndexOf('.');
-    if (packageIndex < 0) return null;
-    final String packageName = className.substring(0, packageIndex);
-    final String fileName = classData.getSource();
-    if (fileName == null) return null;
-    for (File candidate : myFileLocator.locateFile(packageName, fileName)) {
+    for (File candidate : myFileLocator.locate(className)) {
       try {
         return readText(candidate);
       } catch (IOException ignored) {
