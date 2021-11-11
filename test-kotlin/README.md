@@ -12,6 +12,7 @@ Test configuration is set with comments in source files. The supported settings 
 * `// classes: Class1 Class2 ..` - space-separated list of simple class names witch are interesting for this test, by default includes test source file class (TestKt or Test)
 * `// extra args: -Dflag=true` - space-separated list of VM options
 * `// calculate unloaded: [true|false]` - a flag to include unloaded classes into a coverage report, false by default
+* `// markers: [file]` - relative path to a file with `coverage` markers
 
 See runner.kt for source file processing details.
 

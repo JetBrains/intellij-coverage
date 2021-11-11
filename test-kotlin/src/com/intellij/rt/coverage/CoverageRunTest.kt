@@ -199,6 +199,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testUnloadedInline() = test("unloaded.inline")
 
     @Test
+    fun testUnloadedOuter() = test("unloaded.outer")
+
+    @Test
     fun testUnloadedSingleFile() = test("unloaded.singleFile")
 
     @Test

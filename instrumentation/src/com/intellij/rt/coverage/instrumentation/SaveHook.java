@@ -206,7 +206,7 @@ public class SaveHook implements Runnable {
 
       for (ClassEntry classEntry : matchedClasses) {
         ClassData cd = projectData.getClassData(classEntry.getClassName());
-        if (cd != null) continue;
+        if (cd != null && cd.getLines() != null) continue;
         try {
           ClassReader reader = new ClassReader(classEntry.getClassInputStream());
           if (calculateSource) {

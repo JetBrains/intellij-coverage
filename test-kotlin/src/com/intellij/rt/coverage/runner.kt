@@ -151,13 +151,19 @@ internal fun extractTestTrackingDataFromFile(file: File): Map<Int, Set<String>> 
 internal fun pathToFile(name: String, vararg names: String): File = Paths.get(name, *names).toFile()
 
 internal fun extractTestConfiguration(file: File): TestConfiguration {
-    val coverage = CoverageMatcher()
+    var coverage = CoverageMatcher()
     val classes = StringListMatcher(classesMarkerRegex, 1)
     val extraArgs = StringListMatcher(extraArgumentsMarkerRegex, 1)
     val patterns = StringMatcher(patternsMarkerRegex, 1)
     val calculateUnloaded = FlagMatcher(calculateUnloadedMarkerRegex, 1)
+    val otherFile = StringMatcher(fileWithCoverageMarkersRegex, 1)
 
-    processFile(file, coverage, classes, extraArgs, patterns, calculateUnloaded)
+    processFile(file, coverage, classes, extraArgs, patterns, calculateUnloaded, otherFile)
+    if (otherFile.value !== null) {
+        coverage = CoverageMatcher()
+        val fileWithMarkers = File(file.parentFile, otherFile.value!!)
+        processFile(fileWithMarkers, coverage)
+    }
     return TestConfiguration(
         coverage.result,
         classes.values,
@@ -183,6 +189,7 @@ private val patternsMarkerRegex = Regex("// patterns: (.*)\$")
 private val calculateUnloadedMarkerRegex = Regex("// calculate unloaded: (.*)\$")
 private val extraArgumentsMarkerRegex = Regex("// extra args: (.*)\$")
 private val testTrackingMarkerRegex = Regex("// tests: (.*)\$")
+private val fileWithCoverageMarkersRegex = Regex("// markers: (.*)\$")
 
 /**
  * Collect state from found matches in the lines of a file.
