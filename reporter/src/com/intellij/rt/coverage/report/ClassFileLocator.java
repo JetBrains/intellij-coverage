@@ -28,8 +28,7 @@ public class ClassFileLocator extends FileLocator {
   @Override
   public List<File> locate(String fqName) {
     final int packageIndex = fqName.lastIndexOf('.');
-    if (packageIndex < 0) return Collections.emptyList();
-    final String packageName = fqName.substring(0, packageIndex);
+    final String packageName = packageIndex == -1 ? "" : fqName.substring(0, packageIndex);
     final String className = fqName.substring(packageIndex + 1);
     return locateFile(packageName, className + ".class");
   }
