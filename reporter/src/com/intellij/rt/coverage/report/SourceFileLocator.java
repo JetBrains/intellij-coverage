@@ -69,8 +69,7 @@ public class SourceFileLocator extends FileLocator {
       while (!stack.isEmpty()) {
         final File file = stack.remove(stack.size() - 1);
         if (file.isFile()) {
-          if (!isSourceForClass(lostSources, file)) continue;
-          if (lostSources.isEmpty()) return;
+          checkSourceForClass(lostSources, file);
         } else if (file.isDirectory()) {
           final File[] children = file.listFiles();
           if (children != null) {
@@ -81,9 +80,9 @@ public class SourceFileLocator extends FileLocator {
     }
   }
 
-  private boolean isSourceForClass(Map<String, List<String>> lostSources, File file) {
+  private void checkSourceForClass(Map<String, List<String>> lostSources, File file) {
     final List<String> classes = lostSources.get(file.getName());
-    if (classes == null) return false;
+    if (classes == null) return;
     for (String className : classes) {
       List<File> classSources = mySourceFiles.get(className);
       if (classSources == null) {
@@ -92,7 +91,5 @@ public class SourceFileLocator extends FileLocator {
       }
       classSources.add(file);
     }
-    lostSources.remove(file.getName());
-    return true;
   }
 }

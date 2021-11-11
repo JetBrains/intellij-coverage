@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class DirectorySourceCodeProvider implements SourceCodeProvider {
   private final FileLocator myFileLocator;
@@ -34,7 +35,7 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
     myFileLocator = new SourceFileLocator(sources, projectData);
   }
 
-  private static CharSequence readText(File file) throws IOException {
+  private static CharSequence readText(File file) {
     BufferedReader reader = null;
     try {
       reader = new BufferedReader(new FileReader(file));
@@ -45,9 +46,14 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
         line = reader.readLine();
       }
       return result;
+    } catch (IOException ignored) {
+      return null;
     } finally {
       if (reader != null) {
-        reader.close();
+        try {
+          reader.close();
+        } catch (IOException ignored) {
+        }
       }
     }
   }
@@ -55,12 +61,21 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
   @Nullable
   @Override
   public CharSequence getSourceCode(@NotNull String className) {
-    for (File candidate : myFileLocator.locate(className)) {
-      try {
-        return readText(candidate);
-      } catch (IOException ignored) {
-      }
+    final List<File> candidates = myFileLocator.locate(className);
+    if (candidates.isEmpty()) return null;
+    if (candidates.size() == 1) return readText(candidates.get(0));
+
+    final int packageIndex = className.lastIndexOf('.');
+    final String packageName = packageIndex == -1 ? ".*" : className.substring(0, packageIndex).replace(".", "\\.");
+    final Pattern pattern = Pattern.compile("package[ ]+" + packageName);
+    String lastCandidateText = null;
+    for (File candidate : candidates) {
+      final CharSequence text = readText(candidate);
+      if (text == null) continue;
+      lastCandidateText = text.toString();
+      final boolean matchFound = pattern.matcher(lastCandidateText).find();
+      if (packageIndex != -1 == matchFound) return lastCandidateText;
     }
-    return null;
+    return lastCandidateText;
   }
 }
