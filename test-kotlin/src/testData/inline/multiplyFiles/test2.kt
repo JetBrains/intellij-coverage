@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package testData.custom.inlineMultiplyFiles
+package testData.inline.multiplyFiles
 
-private fun f() {
-    separateC {
-        println(it)
+import kotlin.random.Random
+
+inline fun separateA(f: (Int) -> Unit, gen: () -> Int) {
+    val x = gen()                // coverage: FULL
+    print("Got x = ")            // coverage: FULL
+    f(x)                         // coverage: FULL
+}                                // coverage: FULL
+
+inline fun separateC(f: (x: Int) -> Unit) {
+    separateA(f) {               // coverage: FULL
+        Random.nextInt()         // coverage: FULL
     }
-}
-
-fun main() {
-    f()
-}
+}                                // coverage: FULL

@@ -147,6 +147,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testInlineLambda() = test("inline.lambda")
 
     @Test
+    fun testInlineMultiplyFiles() = test("inline.multiplyFiles")
+
+    @Test
     fun testInlineNoinline() = test("inline.noinline")
 
     @Test
@@ -199,6 +202,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testUnloadedInline() = test("unloaded.inline")
 
     @Test
+    fun testUnloadedMultiFile() = test("unloaded.multiFile")
+
+    @Test
     fun testUnloadedOuter() = test("unloaded.outer")
 
     @Test
@@ -234,18 +240,6 @@ internal abstract class CoverageRunTest : CoverageTest() {
         "custom.IDEA_57695",
         configuration = TestConfiguration(hashMapOf(1 to "PARTIAL", 2 to "FULL"), listOf("TestClass"))
     )
-
-    @Test
-    fun testInlineMultiplyFiles() {
-        val test = getTestFile("custom.inlineMultiplyFiles")
-        test(test.testName, test, extractTestConfiguration(File(test.file.parentFile, "test2.kt")))
-    }
-
-    @Test
-    fun testUnloadedMultiFile() {
-        val test = getTestFile("custom.unloaded.multiFile")
-        test(test.testName, test, extractTestConfiguration(File(test.file.parentFile, "UnusedClass.kt")))
-    }
 
     @Test
     fun testIDEA_281195_JMochit() {

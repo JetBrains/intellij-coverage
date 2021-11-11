@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package testData.custom.unloaded.multiFile
+package testData.unloaded.multiFile
 
 // calculate unloaded: true
 // classes: UnusedClass
+// markers: UnusedClass.kt
 
-class UnusedClass {   // coverage: NONE
-    fun foo() {
-    }
+fun main() {
 }

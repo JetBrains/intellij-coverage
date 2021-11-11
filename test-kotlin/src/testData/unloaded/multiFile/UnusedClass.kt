@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package testData.custom.unloaded.multiFile
+package testData.unloaded.multiFile
 
-// file: UnusedClass.kt
-
-fun main() {
+class UnusedClass {   // coverage: NONE
+    fun foo() {
+    }
 }
