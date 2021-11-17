@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.report;
 
+import com.intellij.rt.coverage.report.data.BinaryReport;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
@@ -76,9 +77,9 @@ public class HTMLCoverageReportTest {
   }
 
   private File runTestAndConvertToHTML(String patterns, String className, List<File> sources) throws Throwable {
-    final Reporter reporter = TestUtils.runTest(patterns, className);
-    final File htmlDir = createHtmlDir(reporter.getReport().getDataFile());
-    reporter.createHTMLReport(htmlDir, sources);
+    final BinaryReport report = TestUtils.runTest(patterns, className);
+    final File htmlDir = createHtmlDir(report.getDataFile());
+    TestUtils.createReporter(report, null, null).createHTMLReport(htmlDir, sources);
     return htmlDir;
   }
 

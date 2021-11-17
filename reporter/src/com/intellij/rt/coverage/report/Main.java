@@ -16,8 +16,11 @@
 
 package com.intellij.rt.coverage.report;
 
+import com.intellij.rt.coverage.report.data.Module;
+
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Main {
@@ -25,7 +28,7 @@ public class Main {
     try {
       final ReporterArgs args = ReporterArgs.from(argsList);
 
-      final Reporter reporter = new Reporter(args.reports, args.outputs);
+      final Reporter reporter = new Reporter(args.modules);
 
       boolean fail = false;
 
@@ -42,7 +45,10 @@ public class Main {
 
       final File htmlDir = args.htmlDir;
       if (htmlDir != null) {
-        final List<File> sources = args.sources;
+        final List<File> sources = new ArrayList<File>();
+        for (Module module : args.modules) {
+          sources.addAll(module.getSources());
+        }
         try {
           reporter.createHTMLReport(htmlDir, sources);
         } catch (IOException e) {
@@ -61,7 +67,7 @@ public class Main {
         System.exit(1);
       }
     } catch (ReporterArgs.ArgParseException e) {
-      System.err.println(e.getMessage());
+      e.printStackTrace(System.err);
 
       for (String arg : argsList) {
         System.err.println(arg);

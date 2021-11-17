@@ -16,21 +16,22 @@ sourceSets {
 }
 
 configurations {
-  implementation.extendsFrom(externalDependancies)
+  implementation.extendsFrom(externalDependencies)
 }
 
 dependencies {
   implementation project(":")
   implementation(project(path: ":instrumentation", configuration: "archives"))
   implementation project(":util")
-  externalDependancies("org.jetbrains.intellij.deps:coverage-report:1.0.12")
+  externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.12")
+  externalDependencies("org.json:json:20210307")
 
   testImplementation("junit:junit:4.13")
   testImplementation(files(project(":tests").sourceSets.test.output))
 }
 
 public getPublishDependencies() {
-  configurations.getByName("externalDependancies").getResolvedConfiguration().getFirstLevelModuleDependencies()
+  configurations.getByName("externalDependencies").getResolvedConfiguration().getFirstLevelModuleDependencies()
 }
 
 jar {

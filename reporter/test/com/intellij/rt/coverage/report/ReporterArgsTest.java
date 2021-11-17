@@ -16,66 +16,59 @@
 
 package com.intellij.rt.coverage.report;
 
+import com.intellij.rt.coverage.report.data.BinaryReport;
+import com.intellij.rt.coverage.report.data.Module;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.Collections;
+import java.io.Writer;
 import java.util.List;
 
 public class ReporterArgsTest {
-  public static File argsToFile(ReporterArgs args) throws IOException {
+  public static File argsToFile(BinaryReport binaryReport, String outputPath, String sourcesPath, String xmlPath, String htmlPath) throws IOException {
+    final JSONObject args = new JSONObject();
+    final JSONObject module = new JSONObject();
+    final JSONObject report = new JSONObject();
+    report.put(ReporterArgs.IC_FILE_TAG, binaryReport.getDataFile().getAbsolutePath());
+    report.put(ReporterArgs.SMAP_FILE_TAG, binaryReport.getSourceMapFile().getAbsolutePath());
+    module.append(ReporterArgs.REPORTS_TAG, report);
+    module.append(ReporterArgs.OUTPUTS_TAG, outputPath);
+    module.append(ReporterArgs.SOURCES_TAG, sourcesPath);
+    args.append(ReporterArgs.MODULES_TAG, module);
+
+    if (htmlPath != null) {
+      args.put(ReporterArgs.HTML_DIR_TAG, htmlPath);
+    }
+    if (xmlPath != null) {
+      args.put(ReporterArgs.XML_FILE_TAG, xmlPath);
+    }
     final File argsFile = File.createTempFile("args", ".txt");
-    argsToFile(args, argsFile);
+    final Writer writer = new FileWriter(argsFile);
+    writer.write(args.toString());
+    writer.close();
     return argsFile;
-  }
-
-  public static void argsToFile(ReporterArgs args, File argsFile) throws FileNotFoundException {
-    final PrintWriter printer = new PrintWriter(argsFile);
-
-    for (BinaryReport report : args.reports) {
-      printer.println(report.getDataFile().getPath());
-      printer.println(report.getSourceMapFile().getPath());
-    }
-    printer.println();
-
-    for (File source : args.sources) {
-      printer.println(source.getPath());
-    }
-    printer.println();
-
-    for (File output : args.outputs) {
-      printer.println(output.getPath());
-    }
-    printer.println();
-
-    printer.println(args.xmlFile != null ? args.xmlFile.getPath() : "");
-    printer.println(args.htmlDir != null ? args.htmlDir.getPath() : "");
-
-    printer.flush();
-    printer.close();
   }
 
   @Test
   public void testArgs() throws Exception {
-    final ReporterArgs tmpArgs = new ReporterArgs(Collections.singletonList(new BinaryReport(new File("test.ic"), new File("test.smap"))),
-        Collections.singletonList(new File("a/")), Collections.singletonList(new File("out")), new File("a.xml"), new File("html/"));
-
-    final ReporterArgs args = ReporterArgs.parse(argsToFile(tmpArgs));
-    final List<BinaryReport> reports = args.reports;
+    final ReporterArgs args = ReporterArgs.parse(argsToFile(new BinaryReport(new File("test.ic"), new File("test.smap")), "out", "a/", "a.xml", "html/"));
+    Assert.assertEquals(1, args.modules.size());
+    final Module module = args.modules.get(0);
+    final List<BinaryReport> reports = module.getReports();
     Assert.assertEquals(1, reports.size());
     final BinaryReport report = reports.get(0);
     Assert.assertEquals("test.ic", report.getDataFile().getName());
     Assert.assertEquals("test.smap", report.getSourceMapFile().getName());
-    final List<File> output = args.outputs;
+    final List<File> output = module.getOutputRoots();
     Assert.assertEquals(1, output.size());
     for (File f : output) {
       Assert.assertTrue(f.getName().startsWith("out"));
     }
-    final List<File> sources = args.sources;
+    final List<File> sources = module.getSources();
     Assert.assertEquals(1, output.size());
     for (File f : sources) {
       Assert.assertTrue(f.getName().startsWith("a"));
@@ -85,20 +78,6 @@ public class ReporterArgsTest {
     Assert.assertNotNull(xmlFile);
     final File htmlDir = args.htmlDir;
     Assert.assertNotNull(htmlDir);
-  }
-
-  @Test(expected = ReporterArgs.ArgParseException.class)
-  public void testAbsentDataFile() throws Exception {
-    final ReporterArgs args = new ReporterArgs(Collections.singletonList(new BinaryReport(new File(""), new File("a.smap"))),
-        Collections.singletonList(new File("a/")), Collections.singletonList(new File("a/")), new File("a.xml"), null);
-    ReporterArgs.parse(argsToFile(args));
-  }
-
-  @Test(expected = ReporterArgs.ArgParseException.class)
-  public void testAbsentOutput() throws Exception {
-    final ReporterArgs args = new ReporterArgs(Collections.singletonList(new BinaryReport(new File("a.ic"), new File("a.smap"))),
-        Collections.singletonList(new File("a/")), Collections.<File>emptyList(), new File("a.xml"), null);
-    ReporterArgs.parse(argsToFile(args));
   }
 
   @Test

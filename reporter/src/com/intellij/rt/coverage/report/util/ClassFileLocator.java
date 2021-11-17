@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.report;
+package com.intellij.rt.coverage.report.util;
 
 import java.io.File;
+import java.util.List;
 
-public class BinaryReport {
-  private final File myDataFile;
-  private final File mySourceMapFile;
-
-  public BinaryReport(File dataFile, File sourceMapFile) {
-    myDataFile = dataFile;
-    mySourceMapFile = sourceMapFile;
+public class ClassFileLocator extends FileLocator {
+  public ClassFileLocator(List<File> roots) {
+    super(roots);
   }
 
-  public File getDataFile() {
-    return myDataFile;
-  }
-
-  public File getSourceMapFile() {
-    return mySourceMapFile;
+  @Override
+  public List<File> locate(String fqName) {
+    final int packageIndex = fqName.lastIndexOf('.');
+    final String packageName = packageIndex == -1 ? "" : fqName.substring(0, packageIndex);
+    final String className = fqName.substring(packageIndex + 1);
+    return locateFile(packageName, className + ".class");
   }
 }

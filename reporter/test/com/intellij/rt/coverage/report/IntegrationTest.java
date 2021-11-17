@@ -16,25 +16,19 @@
 
 package com.intellij.rt.coverage.report;
 
+import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.util.ProcessUtil;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.Collections;
 
 public class IntegrationTest {
 
   @Test
   public void testXML() throws Throwable {
-    final Reporter reporter = TestUtils.runTest(".*", "testData.simple.Main");
+    final BinaryReport report = TestUtils.runTest(".*", "testData.simple.Main");
     final File xmlFile = XMLCoverageReportTest.createXMLFile();
-    final ReporterArgs args = new ReporterArgs(
-        Collections.singletonList(new BinaryReport(reporter.getReport().getDataFile(), reporter.getReport().getSourceMapFile())),
-        Collections.<File>emptyList(),
-        Collections.singletonList(new File(outputPath())),
-        xmlFile,
-        null);
-    final File argsFile = ReporterArgsTest.argsToFile(args);
+    final File argsFile = ReporterArgsTest.argsToFile(report, outputPath(), "test", xmlFile.getAbsolutePath(), null);
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),
@@ -46,15 +40,9 @@ public class IntegrationTest {
 
   @Test
   public void testHTML() throws Throwable {
-    final Reporter reporter = TestUtils.runTest(".*", "testData.simple.Main");
-    final File htmlDir = HTMLCoverageReportTest.createHtmlDir(reporter.getReport().getDataFile());
-    final ReporterArgs args = new ReporterArgs(
-        Collections.singletonList(new BinaryReport(reporter.getReport().getDataFile(), reporter.getReport().getSourceMapFile())),
-        Collections.singletonList(new File("test")),
-        Collections.singletonList(new File(outputPath())),
-        null,
-        htmlDir);
-    final File argsFile = ReporterArgsTest.argsToFile(args);
+    final BinaryReport report = TestUtils.runTest(".*", "testData.simple.Main");
+    final File htmlDir = HTMLCoverageReportTest.createHtmlDir(report.getDataFile());
+    final File argsFile = ReporterArgsTest.argsToFile(report, outputPath(), "test", null, htmlDir.getAbsolutePath());
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),

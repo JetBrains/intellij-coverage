@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.report;
+package com.intellij.rt.coverage.report.util;
 
 import java.io.File;
 import java.util.ArrayList;

@@ -16,23 +16,35 @@
 
 package com.intellij.rt.coverage.report;
 
+import com.intellij.rt.coverage.report.data.BinaryReport;
+import com.intellij.rt.coverage.report.data.Module;
+import com.intellij.rt.coverage.report.util.FileUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class ReporterArgs {
-  public final List<BinaryReport> reports;
-  public final List<File> sources;
-  public final List<File> outputs;
+  static final String XML_FILE_TAG = "xml";
+  static final String HTML_DIR_TAG = "html";
+  static final String MODULES_TAG = "modules";
+  static final String REPORTS_TAG = "reports";
+  static final String IC_FILE_TAG = "ic";
+  static final String SMAP_FILE_TAG = "smap";
+  static final String OUTPUTS_TAG = "output";
+  static final String SOURCES_TAG = "sources";
+
+
+  public final List<Module> modules;
   public final File xmlFile;
   public final File htmlDir;
 
-  ReporterArgs(List<BinaryReport> reports, List<File> sources, List<File> outputs, File xmlFile, File htmlDir) {
-    this.reports = reports;
-    this.sources = sources;
-    this.outputs = outputs;
+  ReporterArgs(List<Module> modules, File xmlFile, File htmlDir) {
+    this.modules = modules;
     this.xmlFile = xmlFile;
     this.htmlDir = htmlDir;
   }
@@ -48,80 +60,80 @@ public class ReporterArgs {
     }
     try {
       return parse(argsFile);
-    } catch (FileNotFoundException e) {
-      throw new ArgParseException(e.getMessage());
+    } catch (IOException e) {
+      throw new ArgParseException(e);
+    } catch (JSONException e) {
+      throw new ArgParseException("Incorrect arguments in file " + argsFile.getAbsolutePath(), e);
     }
   }
 
-  public static ReporterArgs parse(File argsFile) throws FileNotFoundException, ArgParseException {
-    final Scanner scanner = new Scanner(argsFile, "UTF-8");
+  public static ReporterArgs parse(File argsFile) throws IOException, JSONException {
+    final String jsonString = FileUtils.readAll(argsFile);
+    final JSONObject args = new JSONObject(jsonString);
 
-    final List<BinaryReport> binaries = new ArrayList<BinaryReport>();
-    final List<File> sources = new ArrayList<File>();
-    final List<File> outputs = new ArrayList<File>();
-    File xmlFile = null;
-    File htmlFile = null;
+    final List<Module> moduleList = new ArrayList<Module>();
+    final JSONArray modules = args.getJSONArray(MODULES_TAG);
+    for (int moduleId = 0; moduleId < modules.length(); moduleId++) {
+      final JSONObject module = modules.getJSONObject(moduleId);
 
-    String line = scanner.nextLine();
-    while (!line.isEmpty()) {
-      final File dataFile = new File(line);
-      line = scanner.nextLine();
-      if (line.isEmpty()) {
-        throw new ArgParseException("SMAP file is required, but not found for " + dataFile.getAbsolutePath() + " report.");
+      final List<BinaryReport> reportList = new ArrayList<BinaryReport>();
+      if (module.has(REPORTS_TAG)) {
+        final JSONArray reports = module.getJSONArray(REPORTS_TAG);
+        for (int reportId = 0; reportId < reports.length(); reportId++) {
+          final JSONObject report = reports.getJSONObject(reportId);
+          final String icPath = report.getString(IC_FILE_TAG);
+          final String smapPath = report.getString(SMAP_FILE_TAG);
+          reportList.add(new BinaryReport(new File(icPath), new File(smapPath)));
+        }
       }
-      final File smapFile = new File(line);
-      binaries.add(new BinaryReport(dataFile, smapFile));
-      line = scanner.nextLine();
+
+      moduleList.add(new Module(reportList, parsePathList(module, OUTPUTS_TAG), parsePathList(module, SOURCES_TAG)));
     }
 
-    line = scanner.nextLine();
-    while (!line.isEmpty()) {
-      sources.add(new File(line));
-      line = scanner.nextLine();
-    }
+    final File xmlFile = args.has(XML_FILE_TAG) ? new File(args.getString(XML_FILE_TAG)) : null;
+    final File htmlDir = args.has(HTML_DIR_TAG) ? new File(args.getString(HTML_DIR_TAG)) : null;
 
-    line = scanner.nextLine();
-    while (!line.isEmpty()) {
-      outputs.add(new File(line));
-      line = scanner.nextLine();
-    }
+    return new ReporterArgs(moduleList, xmlFile, htmlDir);
+  }
 
-    line = scanner.nextLine();
-    if (!line.isEmpty()) {
-      xmlFile = new File(line);
+  private static List<File> parsePathList(JSONObject module, String tag) {
+    if (!module.has(tag)) return null;
+    final JSONArray array = module.getJSONArray(tag);
+    final List<File> result = new ArrayList<File>();
+    for (int i = 0; i < array.length(); i++) {
+      final String path = array.getString(i);
+      result.add(new File(path));
     }
-
-    line = scanner.nextLine();
-    if (!line.isEmpty()) {
-      htmlFile = new File(line);
-    }
-
-    if (binaries.isEmpty()) {
-      throw new ArgParseException("Empty list of reports.");
-    }
-    if (outputs.isEmpty()) {
-      throw new ArgParseException("Empty list of outputs.");
-    }
-    if (htmlFile != null && sources.isEmpty()) {
-      throw new ArgParseException("Sources list is required for html report.");
-    }
-
-    return new ReporterArgs(binaries, sources, outputs, xmlFile, htmlFile);
+    return result;
   }
 
   public static String getHelpString() {
-    return "All arguments are divided by new line. Absence of an argument is presented as new line.\n" +
-        "Arguments list:" +
-        "1) Reports. Each report consists of data file and smap file (two lines). There may be several reports, list of them must end with new line.\n" +
-        "2) Sources list. Ends with new line. Must be non empty for html report.\n" +
-        "3) Outputs list. Ends with new line. Optional.\n" +
-        "4) XML output file or empty line." +
-        "5) HTML output dir or empty line.";
+    return "Arguments must be passed in the following JSON format:\n" +
+        "{\n" +
+        "  \"modules\": [\n" +
+        "    { \"reports\": [\n" +
+        "        {\"ic\": \"path to ic binary file\", \"smap\": \"path to source map file\"}\n" +
+        "      ] [OPTIONAL, absence means that all classes were not covered],\n" +
+        "      \"output\": [\"outputRoot1\", \"outputRoot2\"],\n" +
+        "      \"sources\": [\"sourceRoot1\", \"sourceRoot2\"]\n" +
+        "    }\n" +
+        "  ],\n" +
+        "  \"xml\": \"path to xml file\" [OPTIONAL],\n" +
+        "  \"html\": \"path to html directory\" [OPTIONAL]\n" +
+        "}";
   }
 
   public static class ArgParseException extends Exception {
     ArgParseException(String message) {
       super(message);
+    }
+
+    ArgParseException(Throwable cause) {
+      super(cause);
+    }
+
+    ArgParseException(String message, Throwable cause) {
+      super(message, cause);
     }
   }
 }

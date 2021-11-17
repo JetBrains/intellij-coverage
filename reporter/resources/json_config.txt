@@ -1,0 +1,21 @@
+{
+  "modules": [
+    { "reports": [
+        {"ic": "icPath", "smap": "smapPath"}
+      ],
+      "output": ["outputPath"],
+      "sources": ["sourcePath"]
+    },
+    { "reports": [
+        {"ic": "icPath1", "smap": "smapPath1"},
+        {"ic": "icPath2", "smap": "smapPath2"}
+      ],
+      "output": ["outputPath1", "outputPath2"]
+    },
+    {
+      "sources": ["sourcePath1", "sourcePath2"]
+    }
+  ],
+  "xml": "path",
+  "html": "directory"
+}

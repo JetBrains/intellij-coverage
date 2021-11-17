@@ -19,6 +19,8 @@ package com.intellij.rt.coverage.report;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.report.data.BinaryReport;
+import com.intellij.rt.coverage.report.util.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -27,7 +29,6 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Scanner;
 
 public class XMLCoverageReportTest {
   private ProjectData createProject() {
@@ -76,9 +77,9 @@ public class XMLCoverageReportTest {
   }
 
   private File runTestAndConvertToXML(String patterns, String className) throws Throwable {
-    final Reporter reporter = TestUtils.runTest(patterns, className);
+    final BinaryReport report = TestUtils.runTest(patterns, className);
     final File xmlFile = createXMLFile();
-    reporter.createXMLReport(xmlFile);
+    TestUtils.createReporter(report, null, null).createXMLReport(xmlFile);
     return xmlFile;
   }
 
@@ -88,26 +89,7 @@ public class XMLCoverageReportTest {
   }
 
   public static void verifyProjectXML(File file, String expectedFileName) throws Throwable {
-    String expectedPath = XMLCoverageReportTest.class.getClassLoader().getResource(expectedFileName).getPath();
-    File expected = new File(expectedPath);
-    Assert.assertEquals(readAll(expected), readAll(file));
-  }
-
-  private static String readAll(File file) throws Throwable {
-    StringBuilder fileContents = new StringBuilder((int) file.length());
-    Scanner scanner = null;
-    try {
-      scanner = new Scanner(file);
-      while (scanner.hasNextLine()) {
-        fileContents
-            .append(scanner.nextLine())
-            .append("\n");
-      }
-      return fileContents.toString();
-    } finally {
-      if (scanner != null) {
-        scanner.close();
-      }
-    }
+    File expected = TestUtils.getResourceFile(expectedFileName);
+    Assert.assertEquals(FileUtils.readAll(expected), FileUtils.readAll(file));
   }
 }

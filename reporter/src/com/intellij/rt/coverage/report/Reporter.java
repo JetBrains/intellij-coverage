@@ -16,72 +16,33 @@
 
 package com.intellij.rt.coverage.report;
 
-import com.intellij.rt.coverage.data.ClassData;
-import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.SaveHook;
-import com.intellij.rt.coverage.util.ProjectDataLoader;
+import com.intellij.rt.coverage.report.data.Module;
 import jetbrains.coverage.report.ReportBuilderFactory;
 import jetbrains.coverage.report.SourceCodeProvider;
 import jetbrains.coverage.report.html.HTMLReportBuilder;
 import jetbrains.coverage.report.idea.IDEACoverageData;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class Reporter {
-  private final List<BinaryReport> myReports;
-  @Nullable
-  private List<File> myOutputRoots;
+  private final List<Module> myModules;
   private ProjectData myProjectData;
 
-  public Reporter(File dataFile, File sourceMapFile) {
-    this(Collections.singletonList(new BinaryReport(dataFile, sourceMapFile)), null);
-  }
-
-  public Reporter(List<BinaryReport> reports, @Nullable List<File> outputRoots) {
-    if (reports.isEmpty()) throw new RuntimeException("Report list is empty");
-    myReports = reports;
-    myOutputRoots = outputRoots;
-  }
-
-  public BinaryReport getReport() {
-    return myReports.get(0);
+  public Reporter(List<Module> modules) {
+    myModules = modules;
   }
 
   private ProjectData getProjectData() throws IOException {
     if (myProjectData != null) return myProjectData;
-    final ProjectData projectData = ProjectDataLoader.load(myReports.get(0).getDataFile());
-    for (int i = 1; i < myReports.size(); i++) {
-      projectData.merge(ProjectDataLoader.load(myReports.get(i).getDataFile()));
-    }
-    if (myOutputRoots != null) {
-      final FileLocator fileLocator = new ClassFileLocator(myOutputRoots);
-      myOutputRoots = null;
-      myProjectData = filterNonLocatableClasses(projectData, fileLocator);
-      filterNonLocatableClasses(projectData, fileLocator);
-    } else {
-      myProjectData = projectData;
-    }
-    for (BinaryReport report : myReports) {
-      SaveHook.loadAndApplySourceMap(myProjectData, report.getSourceMapFile());
+    myProjectData = new ProjectData();
+    for (Module module : myModules) {
+      myProjectData.merge(module.getProjectData());
     }
     return myProjectData;
-  }
-
-  private ProjectData filterNonLocatableClasses(ProjectData projectData, FileLocator fileLocator) {
-    final ProjectData filteredData = new ProjectData();
-    for (Map.Entry<String, ClassData> entry : projectData.getClasses().entrySet()) {
-      if (fileLocator.locate(entry.getKey()).isEmpty()) continue;
-      final ClassData classData = filteredData.getOrCreateClassData(entry.getKey());
-      classData.setLines((LineData[]) entry.getValue().getLines());
-    }
-    return filteredData;
   }
 
   public void createXMLReport(File xmlFile) throws IOException {

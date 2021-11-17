@@ -17,13 +17,14 @@
 package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.report.util.FileLocator;
+import com.intellij.rt.coverage.report.util.FileUtils;
+import com.intellij.rt.coverage.report.util.SourceFileLocator;
 import jetbrains.coverage.report.SourceCodeProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -35,26 +36,11 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
     myFileLocator = new SourceFileLocator(sources, projectData);
   }
 
-  private static CharSequence readText(File file) {
-    BufferedReader reader = null;
+  private static String readText(File file) {
     try {
-      reader = new BufferedReader(new FileReader(file));
-      final StringBuilder result = new StringBuilder();
-      String line = reader.readLine();
-      while (line != null) {
-        result.append(line).append('\n');
-        line = reader.readLine();
-      }
-      return result;
-    } catch (IOException ignored) {
+      return FileUtils.readAll(file);
+    } catch (IOException e) {
       return null;
-    } finally {
-      if (reader != null) {
-        try {
-          reader.close();
-        } catch (IOException ignored) {
-        }
-      }
     }
   }
 
@@ -70,9 +56,9 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
     final Pattern pattern = Pattern.compile("package[ ]+" + packageName);
     String lastCandidateText = null;
     for (File candidate : candidates) {
-      final CharSequence text = readText(candidate);
+      final String text = readText(candidate);
       if (text == null) continue;
-      lastCandidateText = text.toString();
+      lastCandidateText = text;
       final boolean matchFound = pattern.matcher(lastCandidateText).find();
       if (packageIndex != -1 == matchFound) return lastCandidateText;
     }
