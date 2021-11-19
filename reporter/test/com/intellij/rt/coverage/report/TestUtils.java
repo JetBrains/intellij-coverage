@@ -43,8 +43,9 @@ public class TestUtils {
   }
 
   public static Reporter createReporter(BinaryReport report, String output, String source) {
+    final List<BinaryReport> reports = report == null ? Collections.<BinaryReport>emptyList() : Collections.singletonList(report);
     final List<File> outputs = output == null ? null : Collections.singletonList(new File(output));
     final List<File> sources = source == null ? null : Collections.singletonList(new File(source));
-    return new Reporter(Collections.singletonList(new Module(Collections.singletonList(report), outputs, sources)));
+    return new Reporter(Collections.singletonList(new Module(reports, outputs, sources)));
   }
 }

@@ -76,6 +76,14 @@ public class XMLCoverageReportTest {
     verifyProjectXML(runTestAndConvertToXML("testData\\.branches\\..*", "testData.branches.TestKt"), "branches.xml");
   }
 
+  @Test
+  public void integrationTestNoReport() throws Throwable {
+    final File xmlFile = createXMLFile();
+    final String output = "build" + File.separator + "classes" + File.separator + "kotlin" + File.separator + "test";
+    TestUtils.createReporter(null, output, null).createXMLReport(xmlFile);
+    verifyProjectXML(xmlFile, "xmlNoReport.xml");
+  }
+
   private File runTestAndConvertToXML(String patterns, String className) throws Throwable {
     final BinaryReport report = TestUtils.runTest(patterns, className);
     final File xmlFile = createXMLFile();

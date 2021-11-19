@@ -1,0 +1,165 @@
+<?xml version="1.0" ?>
+<report name="Intellij Coverage Report">
+<package name="testData/inline">
+<class name="testData/inline/Test" sourcefilename="test.kt">
+<method name="&lt;clinit&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="main" desc="([Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="testData/inline/TestKt" sourcefilename="test.kt">
+<method name="biz" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+</method>
+<method name="bar" desc="()Ljava/lang/String;">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="inline1" desc="(I)I">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="inline2" desc="()I">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="5" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="5" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+</class>
+<sourcefile name="test.kt">
+<line nr="36" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="39" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="20" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="32" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="43" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="6" covered="0"/>
+<counter type="CLASS" missed="2" covered="0"/>
+</package>
+<package name="testData/outOfPackageStructure">
+<class name="testData/outOfPackageStructure/TestOutOfPackageStructureKt" sourcefilename="testOutOfPackageStructure.kt">
+<method name="main" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="testOutOfPackageStructure.kt">
+<line nr="20" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
+</package>
+<package name="TestTopLevelKt">
+<class name="TestTopLevelKt" sourcefilename="testTopLevel.kt">
+<method name="main" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<sourcefile name="testTopLevel.kt">
+<line nr="18" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+<counter type="CLASS" missed="1" covered="0"/>
+</package>
+<package name="testData/branches">
+<class name="testData/branches/TestKt" sourcefilename="test.kt">
+<method name="main" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="testData/branches/MyBranchedClass" sourcefilename="test.kt">
+<method name="foo" desc="(I)V">
+<counter type="INSTRUCTION" missed="6" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="6" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="7" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<sourcefile name="test.kt">
+<line nr="34" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="21" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="23" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="24" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="25" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="26" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="28" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="29" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="8" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="8" covered="0"/>
+<counter type="METHOD" missed="3" covered="0"/>
+<counter type="CLASS" missed="2" covered="0"/>
+</package>
+<counter type="INSTRUCTION" missed="17" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="17" covered="0"/>
+<counter type="METHOD" missed="11" covered="0"/>
+<counter type="CLASS" missed="6" covered="0"/>
+</report>
+

@@ -84,7 +84,7 @@ public class Module {
     final ProjectData projectData = new ProjectData();
     if (myOutputRoots == null) return projectData;
     SaveHook.appendUnloaded(projectData, new OutputClassFinder(), true);
-    return new ProjectData();
+    return projectData;
   }
 
   public List<File> getSources() {
