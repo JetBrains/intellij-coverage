@@ -339,7 +339,6 @@ public class ClassData implements CoverageData {
       if (lineData.getLineNumber() >= size) continue;
       lineData.setHits(myLineMask[lineData.getLineNumber()]);
     }
-    myLineMask = null;
   }
 
   public void applyBranches() {
@@ -390,6 +389,5 @@ public class ClassData implements CoverageData {
     } catch (Throwable e) {
       ErrorReporter.reportError("Unexpected error during applying branch data to class " + getName(), e);
     }
-    myHitsMask = null;
   }
 }
