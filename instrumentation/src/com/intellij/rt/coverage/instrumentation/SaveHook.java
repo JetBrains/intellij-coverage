@@ -208,7 +208,9 @@ public class SaveHook implements Runnable {
         ClassData cd = projectData.getClassData(classEntry.getClassName());
         if (cd != null && cd.getLines() != null) continue;
         try {
-          ClassReader reader = new ClassReader(classEntry.getClassInputStream());
+          final InputStream classInputStream = classEntry.getClassInputStream();
+          if (classInputStream == null) continue;
+          ClassReader reader = new ClassReader(classInputStream);
           if (calculateSource) {
             cd = projectData.getOrCreateClassData(classEntry.getClassName());
           }
@@ -231,7 +233,7 @@ public class SaveHook implements Runnable {
             classData.setLines(LinesUtil.calcLineArray(maxLine[0], lines));
           }
         } catch (Throwable e) {
-          ErrorReporter.reportError("Failed to process class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
+          ErrorReporter.reportError("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
         }
       }
     }
