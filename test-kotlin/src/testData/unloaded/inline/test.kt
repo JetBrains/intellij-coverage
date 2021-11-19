@@ -26,6 +26,7 @@ object UnusedClass {      // coverage: NONE
     }                     // coverage: FULL
 
     fun boo() {
+        foo()             // coverage: NONE
         println("boo")    // coverage: NONE
     }
 }

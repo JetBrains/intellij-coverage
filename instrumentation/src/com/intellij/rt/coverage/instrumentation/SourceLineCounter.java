@@ -17,6 +17,8 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ClassData;
+import com.intellij.rt.coverage.data.FileMapData;
+import com.intellij.rt.coverage.data.LineMapData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
@@ -45,6 +47,8 @@ public class SourceLineCounter extends ClassVisitor {
   private int myCurrentLine;
   private boolean myInterface;
   private boolean myEnum;
+  private String myClassName;
+  private FileMapData[] myFileMapData;
 
   public SourceLineCounter(final ClassData classData, final boolean excludeLines, final ProjectData projectData) {
     this(classData, excludeLines, projectData, FilterUtils.ignorePrivateConstructorOfUtilClassEnabled());
@@ -82,12 +86,16 @@ public class SourceLineCounter extends ClassVisitor {
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
     myInterface = (access & Opcodes.ACC_INTERFACE) != 0;
     myEnum = (access & Opcodes.ACC_ENUM) != 0;
+    myClassName = ClassNameUtil.convertToFQName(name);
     super.visit(version, access, name, signature, superName, interfaces);
   }
 
   public void visitSource(String sourceFileName, String debug) {
     if (shouldCalculateSource()) {
       myClassData.setSource(sourceFileName);
+    }
+    if (debug != null && myClassName != null) {
+      myFileMapData = JSR45Util.extractLineMapping(debug, myClassName);
     }
     super.visitSource(sourceFileName, debug);
   }
@@ -215,6 +223,12 @@ public class SourceLineCounter extends ClassVisitor {
     };
   }
 
+  @Override
+  public void visitEnd() {
+    super.visitEnd();
+    applyMappings();
+  }
+
   public int getNSourceLines() {
     return myNSourceLines.size();
   }
@@ -246,5 +260,22 @@ public class SourceLineCounter extends ClassVisitor {
 
   private boolean shouldCalculateSource() {
     return myProjectData != null;
+  }
+
+  private void applyMappings() {
+    if (myFileMapData == null || myClassName == null) return;
+    for (FileMapData mapData : myFileMapData) {
+      final boolean isThisClass = myClassName.equals(mapData.getClassName());
+      for (LineMapData lineMapData : mapData.getLines()) {
+        for (int i = lineMapData.getTargetMinLine(); i <= lineMapData.getTargetMaxLine(); i++) {
+          final String signature = myNSourceLines.remove(i);
+          if (signature == null) continue;
+          final int sourceLine = lineMapData.getSourceLineNumber();
+          if (isThisClass && !myNSourceLines.containsKey(sourceLine)) {
+            myNSourceLines.put(sourceLine, signature);
+          }
+        }
+      }
+    }
   }
 }
