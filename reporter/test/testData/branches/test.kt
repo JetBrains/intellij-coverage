@@ -28,6 +28,15 @@ class MyBranchedClass {           // coverage: FULL
             println("GE")         // coverage: NONE
         }
     }
+
+    fun boo(value: Int) {
+        when (value) {
+            2 -> println(1)
+            3 -> println(2)
+            4 -> println(3)
+            else -> println(4)
+        }
+    }
 }
 
 fun main() {

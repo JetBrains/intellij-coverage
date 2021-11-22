@@ -71,7 +71,6 @@ public class XMLCoverageReportTest {
   }
 
   @Test
-  @Ignore("To be fixed")
   public void integrationTestBranches() throws Throwable {
     verifyProjectXML(runTestAndConvertToXML("testData\\.branches\\..*", "testData.branches.TestKt"), "branches.xml");
   }

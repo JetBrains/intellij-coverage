@@ -77,6 +77,10 @@ public class SaveHook implements Runnable {
                 saveDictionary(os, dict, classes);
                 saveData(os, dict, classes);
 
+                CoverageIOUtil.writeINT(os, ProjectDataLoader.REPORT_VERSION);
+                CoverageIOUtil.writeUTF(os, getExtraInfoString());
+                ReportSectionsUtil.saveSections(projectData, os, dict);
+
                 saveSourceMap(classes, mySourceMapFile);
             } catch (IOException e) {
                 ErrorReporter.reportError("Error writing file " + myDataFile.getPath(), e);
@@ -96,6 +100,10 @@ public class SaveHook implements Runnable {
         } finally {
             CoverageIOUtil.FileLock.unlock(lock);
         }
+    }
+
+    private String getExtraInfoString() {
+        return "";
     }
 
     public static void saveSourceMap(Map str_clData_classes, File sourceMapFile) {
