@@ -190,14 +190,14 @@ public class SourceLineCounter extends ClassVisitor {
       public void visitTableSwitchInsn(final int min, final int max, final Label dflt, final Label[] labels) {
         super.visitTableSwitchInsn(min, max, dflt, labels);
         myHasInstructions = true;
-        myTotalBranches += labels.length + 1;
+        myTotalBranches += labels.length;
       }
 
 
       public void visitLookupSwitchInsn(final Label dflt, final int[] keys, final Label[] labels) {
         super.visitLookupSwitchInsn(dflt, keys, labels);
         myHasInstructions = true;
-        myTotalBranches += labels.length + 1;
+        myTotalBranches += labels.length;
       }
 
 

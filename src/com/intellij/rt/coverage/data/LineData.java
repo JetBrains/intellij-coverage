@@ -240,8 +240,6 @@ public class LineData implements CoverageData {
     SwitchData[] switches = myJumpsAndSwitches.getSwitches();
     if (switches != null) {
       for (SwitchData switchData : switches) {
-        total++;
-        if (switchData.getDefaultHits() > 0) covered++;
         for (int hit : switchData.getHits()) {
           total++;
           if (hit > 0) covered++;
