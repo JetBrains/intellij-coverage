@@ -222,7 +222,7 @@ public class SaveHook implements Runnable {
           if (calculateSource) {
             cd = projectData.getOrCreateClassData(classEntry.getClassName());
           }
-          SourceLineCounter slc = new SourceLineCounter(cd, false, calculateSource ? projectData : null);
+          SourceLineCounter slc = new SourceLineCounter(cd, calculateSource ? projectData : null, true);
           reader.accept(slc, 0);
           if (slc.isEnum() || slc.getNSourceLines() > 0) { // ignore classes without executable code
             final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
@@ -238,6 +238,19 @@ public class SaveHook implements Runnable {
                 return true;
               }
             });
+            final TIntObjectHashMap<JumpsAndSwitches> jumpsPerLine = slc.getJumpsPerLine();
+            if (jumpsPerLine != null) {
+              jumpsPerLine.forEachEntry(new TIntObjectProcedure<JumpsAndSwitches>() {
+                public boolean execute(int line, JumpsAndSwitches jumpData) {
+                  final LineData lineData = lines.get(line);
+                  if (lineData != null) {
+                    lineData.setJumpsAndSwitches(jumpData);
+                    lineData.fillArrays();
+                  }
+                  return true;
+                }
+              });
+            }
             classData.setLines(LinesUtil.calcLineArray(maxLine[0], lines));
           }
         } catch (Throwable e) {

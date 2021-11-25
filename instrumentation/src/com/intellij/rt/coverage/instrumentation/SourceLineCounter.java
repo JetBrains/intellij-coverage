@@ -16,10 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation;
 
-import com.intellij.rt.coverage.data.ClassData;
-import com.intellij.rt.coverage.data.FileMapData;
-import com.intellij.rt.coverage.data.LineMapData;
-import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
@@ -42,6 +39,7 @@ public class SourceLineCounter extends ClassVisitor {
   private final ProjectData myProjectData;
 
   private final TIntObjectHashMap<String> myNSourceLines = new TIntObjectHashMap<String>();
+  private final TIntObjectHashMap<JumpsAndSwitches> myJumpsPerLine;
   private final Set<String> myMethodsWithSourceCode = new HashSet<String>();
   private int myTotalBranches = 0;
   private int myCurrentLine;
@@ -50,8 +48,8 @@ public class SourceLineCounter extends ClassVisitor {
   private String myClassName;
   private FileMapData[] myFileMapData;
 
-  public SourceLineCounter(final ClassData classData, final boolean excludeLines, final ProjectData projectData) {
-    this(classData, excludeLines, projectData, FilterUtils.ignorePrivateConstructorOfUtilClassEnabled());
+  public SourceLineCounter(final ClassData classData, final ProjectData projectData, boolean calculateJumpsPerLine) {
+    this(classData, false, projectData, FilterUtils.ignorePrivateConstructorOfUtilClassEnabled(), calculateJumpsPerLine);
   }
 
   /**
@@ -60,9 +58,12 @@ public class SourceLineCounter extends ClassVisitor {
    * @param excludeLines exclude lines for init/clinit methods in case of not null <code>classData</code>
    * @param projectData source data should be collected only if not null
    * @param ignorePrivateConstructorOfUtilClasses a flag to filter out private constructor of util classes
+   * @param calculateJumpsPerLine a flag to save jump data per each line, or just calculate total number of jumps
    */
   public SourceLineCounter(final ClassData classData, final boolean excludeLines,
-                           final ProjectData projectData, final boolean ignorePrivateConstructorOfUtilClasses) {
+                           final ProjectData projectData,
+                           final boolean ignorePrivateConstructorOfUtilClasses,
+                           final boolean calculateJumpsPerLine) {
     super(Opcodes.API_VERSION);
     ClassVisitor classVisitor = new ClassVisitor(Opcodes.API_VERSION) {};
     if (ignorePrivateConstructorOfUtilClasses) {
@@ -81,6 +82,11 @@ public class SourceLineCounter extends ClassVisitor {
     myProjectData = projectData;
     myClassData = classData;
     myExcludeLines = excludeLines;
+    if (calculateJumpsPerLine) {
+      myJumpsPerLine = new TIntObjectHashMap<JumpsAndSwitches>();
+    } else {
+      myJumpsPerLine = null;
+    }
   }
 
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
@@ -180,6 +186,10 @@ public class SourceLineCounter extends ClassVisitor {
         myHasInstructions = true;
         if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR) {
           myTotalBranches++;
+          if (myJumpsPerLine != null) {
+            final JumpsAndSwitches jumpData = getOrCreateJumps();
+            jumpData.addJump(jumpData.jumpsCount());
+          }
         }
       }
 
@@ -199,6 +209,14 @@ public class SourceLineCounter extends ClassVisitor {
         super.visitTableSwitchInsn(min, max, dflt, labels);
         myHasInstructions = true;
         myTotalBranches++;
+        if (myJumpsPerLine != null) {
+          final JumpsAndSwitches jumpData = getOrCreateJumps();
+          int[] keys = new int[max - min + 1];
+          for (int i = min; i <= max; i++) {
+            keys[i - min] = i;
+          }
+          jumpData.addSwitch(jumpData.switchesCount(), keys);
+        }
       }
 
 
@@ -206,6 +224,10 @@ public class SourceLineCounter extends ClassVisitor {
         super.visitLookupSwitchInsn(dflt, keys, labels);
         myHasInstructions = true;
         myTotalBranches++;
+        if (myJumpsPerLine != null) {
+          final JumpsAndSwitches jumpData = getOrCreateJumps();
+          jumpData.addSwitch(jumpData.switchesCount(), keys);
+        }
       }
 
 
@@ -220,6 +242,15 @@ public class SourceLineCounter extends ClassVisitor {
         myHasInstructions = true;
       }
 
+      private JumpsAndSwitches getOrCreateJumps() {
+        if (myJumpsPerLine == null) return null;
+        JumpsAndSwitches jumpData = myJumpsPerLine.get(myCurrentLine);
+        if (jumpData == null) {
+          jumpData = new JumpsAndSwitches();
+          myJumpsPerLine.put(myCurrentLine, jumpData);
+        }
+        return jumpData;
+      }
     };
   }
 
@@ -235,6 +266,10 @@ public class SourceLineCounter extends ClassVisitor {
 
   public TIntObjectHashMap<String> getSourceLines() {
     return myNSourceLines;
+  }
+
+  public TIntObjectHashMap<JumpsAndSwitches> getJumpsPerLine() {
+    return myJumpsPerLine;
   }
 
 

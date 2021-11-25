@@ -72,7 +72,7 @@ public class XMLCoverageReportTest {
 
   @Test
   public void integrationTestBranches() throws Throwable {
-    verifyProjectXML(runTestAndConvertToXML("testData\\.branches\\..*", "testData.branches.TestKt"), "branches.xml");
+    verifyProjectXML(runTestAndConvertToXML("testData\\.branches\\..*", "testData.branches.TestKt", true), "branches.xml");
   }
 
   @Test
@@ -84,7 +84,11 @@ public class XMLCoverageReportTest {
   }
 
   private File runTestAndConvertToXML(String patterns, String className) throws Throwable {
-    final BinaryReport report = TestUtils.runTest(patterns, className);
+    return runTestAndConvertToXML(patterns, className, false);
+  }
+
+  private File runTestAndConvertToXML(String patterns, String className, boolean calcUnloaded) throws Throwable {
+    final BinaryReport report = TestUtils.runTest(patterns, className, calcUnloaded);
     final File xmlFile = createXMLFile();
     TestUtils.createReporter(report, null, null).createXMLReport(xmlFile);
     return xmlFile;
