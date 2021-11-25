@@ -24,9 +24,14 @@ import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import java.io.*;
 
 public abstract class ReportSection {
-  public abstract void load(ProjectData projectData, DataInputStream in, TIntObjectHashMap<ClassData> dict) throws IOException;
   public abstract int getId();
+
+  public abstract int getVersion();
+
   public abstract boolean isEngaged(ProjectData projectData);
+
+  public abstract void load(ProjectData projectData, DataInputStream in, TIntObjectHashMap<ClassData> dict, int version) throws IOException;
+
   protected abstract void saveInternal(ProjectData projectData, DataOutput out, TObjectIntHashMap<String> dict) throws IOException;
 
   public final void save(ProjectData projectData, DataOutputStream out, TObjectIntHashMap<String> dict) throws IOException {
@@ -34,6 +39,7 @@ public abstract class ReportSection {
     saveInternal(projectData, new DataOutputStream(tmpOut), dict);
     CoverageIOUtil.writeINT(out, getId());
     CoverageIOUtil.writeINT(out, tmpOut.size());
+    CoverageIOUtil.writeINT(out, getVersion());
     tmpOut.writeTo(out);
   }
 }

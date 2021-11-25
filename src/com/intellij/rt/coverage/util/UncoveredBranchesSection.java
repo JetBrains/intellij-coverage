@@ -34,12 +34,17 @@ public class UncoveredBranchesSection extends ReportSection {
   }
 
   @Override
+  public int getVersion() {
+    return 0;
+  }
+
+  @Override
   public boolean isEngaged(ProjectData projectData) {
     return true;
   }
 
   @Override
-  public void load(ProjectData projectData, DataInputStream in, TIntObjectHashMap<ClassData> dict) throws IOException {
+  public void load(ProjectData projectData, DataInputStream in, TIntObjectHashMap<ClassData> dict, int version) throws IOException {
     int classId = CoverageIOUtil.readINT(in);
     while (classId != -1) {
       final ClassData classData = dict.get(classId);

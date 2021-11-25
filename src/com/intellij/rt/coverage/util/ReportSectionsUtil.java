@@ -44,12 +44,21 @@ public class ReportSectionsUtil {
     for (int i = 0; i < numberOfSections; i++) {
       final int sectionId = CoverageIOUtil.readINT(in);
       final int size = CoverageIOUtil.readINT(in);
+      final int version = CoverageIOUtil.readINT(in);
       final ReportSection section = sections.get(sectionId);
+
       if (section != null) {
-        section.load(projectData, in, dict);
+        if (version <= section.getVersion()) {
+          section.load(projectData, in, dict, version);
+          continue;
+        } else {
+          ErrorReporter.logInfo("Section version " + version + " is greater than agent maximum support version "
+              + section.getVersion() + "\n" + "Please try to update coverage agent.");
+        }
       } else {
-        in.skipBytes(size);
+        ErrorReporter.logInfo("Unknown section id " + sectionId + ". Please try to update coverage agent.");
       }
+      in.skipBytes(size);
     }
   }
 

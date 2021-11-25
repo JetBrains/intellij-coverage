@@ -141,6 +141,11 @@ public class ProjectDataLoader {
       // old format, no extra info
       return;
     }
+    if (version > REPORT_VERSION) {
+      ErrorReporter.logInfo("Report version " + version + " is greater than agent maximum support version "
+          + REPORT_VERSION + "\n" + "Please try to update coverage agent.");
+      return;
+    }
     final String infoString = CoverageIOUtil.readUTFFast(in);
     ReportSectionsUtil.loadSections(projectData, in, dict);
   }
