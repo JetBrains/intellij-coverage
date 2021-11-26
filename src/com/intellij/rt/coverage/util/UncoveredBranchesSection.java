@@ -62,7 +62,7 @@ public class UncoveredBranchesSection extends ReportSection {
           final int keysLength = CoverageIOUtil.readINT(in);
           final int[] keys = new int[keysLength];
           for (int k = 0; k < keysLength; k++) {
-            keys[k] = CoverageIOUtil.readINT(in);
+            keys[k] = k;
           }
           line.addSwitch(switchId, keys);
         }
@@ -113,11 +113,7 @@ public class UncoveredBranchesSection extends ReportSection {
       CoverageIOUtil.writeINT(out, lineData.jumpsCount());
       CoverageIOUtil.writeINT(out, lineData.switchesCount());
       for (int i = 0; i < lineData.switchesCount(); i++) {
-        final int[] keys = lineData.getSwitchData(i).getKeys();
-        CoverageIOUtil.writeINT(out, keys.length);
-        for (int key : keys) {
-          CoverageIOUtil.writeINT(out, key);
-        }
+        CoverageIOUtil.writeINT(out, lineData.getSwitchData(i).getHits().length);
       }
     }
   }
