@@ -231,8 +231,9 @@ public class LineData implements CoverageData {
     JumpData[] jumps = myJumpsAndSwitches.getJumps();
     if (jumps != null) {
       for (JumpData jump : jumps) {
-        total++;
-        if (jump.getFalseHits() > 0 && jump.getTrueHits() > 0) covered++;
+        total += 2;
+        if (jump.getFalseHits() > 0) covered++;
+        if (jump.getTrueHits() > 0) covered++;
       }
     }
 
