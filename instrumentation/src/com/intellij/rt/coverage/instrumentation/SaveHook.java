@@ -102,6 +102,11 @@ public class SaveHook implements Runnable {
         }
     }
 
+    /**
+     * This line may contain some useful configuration for sections parsing.
+     * This field is string type to be extended easily.If a new agent version relies on this line data,
+     * it must be extended such that it is possible to parse it and use for further extensions.
+     */
     private String getExtraInfoString() {
         return "";
     }
