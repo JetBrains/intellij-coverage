@@ -52,11 +52,11 @@ public class ReportSectionsUtil {
           section.load(projectData, in, dict, version);
           continue;
         } else {
-          ErrorReporter.logInfo("Section version " + version + " is greater than agent maximum support version "
+          ErrorReporter.reportError("Section version " + version + " is greater than agent maximum support version "
               + section.getVersion() + "\n" + "Please try to update coverage agent.");
         }
       } else {
-        ErrorReporter.logInfo("Unknown section id " + sectionId + ". Please try to update coverage agent.");
+        ErrorReporter.reportError("Unknown section id " + sectionId + ". Please try to update coverage agent.");
       }
       in.skipBytes(size);
     }

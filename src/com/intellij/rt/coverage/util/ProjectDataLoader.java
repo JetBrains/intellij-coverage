@@ -142,7 +142,7 @@ public class ProjectDataLoader {
       return;
     }
     if (version > REPORT_VERSION) {
-      ErrorReporter.logInfo("Report version " + version + " is greater than agent maximum support version "
+      ErrorReporter.reportError("Report version " + version + " is greater than agent maximum support version "
           + REPORT_VERSION + "\n" + "Please try to update coverage agent.");
       return;
     }
