@@ -27,6 +27,10 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.IOException;
 
+/**
+ * This section saves info about jumps and switches that are not saved in the main report part as line's hits counter is 0.
+ * The section contains all the classes that have uncovered lines and lists jumps and switches count for such lines.
+ */
 public class UncoveredBranchesSection extends ReportSection {
   @Override
   public int getId() {
@@ -114,6 +118,7 @@ public class UncoveredBranchesSection extends ReportSection {
       CoverageIOUtil.writeINT(out, lineData.switchesCount());
       for (int i = 0; i < lineData.switchesCount(); i++) {
         CoverageIOUtil.writeINT(out, lineData.getSwitchData(i).getHits().length);
+        // keys are not saved
       }
     }
   }
