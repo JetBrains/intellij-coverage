@@ -44,7 +44,7 @@ public class UncoveredBranchesSection extends ReportSection {
 
   @Override
   public boolean isEngaged(ProjectData projectData) {
-    return true;
+    return !projectData.isSampling();
   }
 
   @Override

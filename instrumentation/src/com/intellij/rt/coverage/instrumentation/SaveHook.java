@@ -58,7 +58,7 @@ public class SaveHook implements Runnable {
             projectData.applyLinesMask();
             projectData.applyBranchData();
             if (myAppendUnloaded) {
-                appendUnloaded(projectData, myClassFinder, mySourceMapFile != null);
+                appendUnloaded(projectData, myClassFinder, mySourceMapFile != null, projectData.isSampling());
             }
             projectData.checkLineMappings();
             checkLineSignatures(projectData);
@@ -214,7 +214,7 @@ public class SaveHook implements Runnable {
    *
    * Classes are searched using <code>classFinder</code>.
    */
-    public static void appendUnloaded(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource) {
+    public static void appendUnloaded(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean isSampling) {
       Collection<ClassEntry> matchedClasses = classFinder.findMatchedClasses();
 
       for (ClassEntry classEntry : matchedClasses) {
@@ -227,7 +227,7 @@ public class SaveHook implements Runnable {
           if (calculateSource) {
             cd = projectData.getOrCreateClassData(classEntry.getClassName());
           }
-          SourceLineCounter slc = new SourceLineCounter(cd, calculateSource ? projectData : null, true);
+          SourceLineCounter slc = new SourceLineCounter(cd, calculateSource ? projectData : null, !isSampling);
           reader.accept(slc, 0);
           if (slc.isEnum() || slc.getNSourceLines() > 0) { // ignore classes without executable code
             final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
