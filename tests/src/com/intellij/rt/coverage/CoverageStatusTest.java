@@ -224,7 +224,7 @@ public class CoverageStatusTest extends TestCase {
     return runCoverage(testDataPath, coverageDataFile, patterns, classToRun, sampling, EMPTY, false, false);
   }
 
-  static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
+  public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
                                  String classToRun, final boolean sampling, String[] extraArgs, boolean calcUnloaded, boolean testTracking) throws IOException, InterruptedException {
     String coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent");
 

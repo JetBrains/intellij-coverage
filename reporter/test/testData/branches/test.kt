@@ -16,16 +16,44 @@
 
 package testData.branches
 
-// classes: MyBranchedClass
-
-class MyBranchedClass {           // coverage: FULL
+class MyBranchedClass {           
     fun foo(value: Int) {
-        if (value < 0) {          // coverage: PARTIAL
-            println("LE")         // coverage: FULL
-        } else if (value == 0) {  // coverage: NONE
-            println("EQ")         // coverage: NONE
+        if (value < 0) {          
+            println("LE")         
+        } else if (value == 0) {  
+            println("EQ")         
         } else {
-            println("GE")         // coverage: NONE
+            println("GE")         
+        }
+    }
+
+    fun boo(value: Int) {
+        when (value) {
+            2 -> println(1)
+            3 -> println(2)
+            4 -> println(3)
+            else -> println(4)
+        }
+    }
+}
+
+class MyBranchedUnloadedClass {
+    fun foo(value: Int) {
+        if (value < 0) {
+            println("LE")
+        } else if (value == 0) {
+            println("EQ")
+        } else {
+            println("GE")
+        }
+    }
+
+    fun boo(value: Int) {
+        when (value) {
+            2 -> println(1)
+            3 -> println(2)
+            4 -> println(3)
+            else -> println(4)
         }
     }
 }

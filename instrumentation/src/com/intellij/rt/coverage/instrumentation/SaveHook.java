@@ -77,6 +77,10 @@ public class SaveHook implements Runnable {
                 saveDictionary(os, dict, classes);
                 saveData(os, dict, classes);
 
+                CoverageIOUtil.writeINT(os, ProjectDataLoader.REPORT_VERSION);
+                CoverageIOUtil.writeUTF(os, getExtraInfoString());
+                ReportSectionsUtil.saveSections(projectData, os, dict);
+
                 saveSourceMap(classes, mySourceMapFile);
             } catch (IOException e) {
                 ErrorReporter.reportError("Error writing file " + myDataFile.getPath(), e);
@@ -96,6 +100,15 @@ public class SaveHook implements Runnable {
         } finally {
             CoverageIOUtil.FileLock.unlock(lock);
         }
+    }
+
+    /**
+     * This line may contain some useful configuration for sections parsing.
+     * This field is string type to be extended easily.If a new agent version relies on this line data,
+     * it must be extended such that it is possible to parse it and use for further extensions.
+     */
+    private String getExtraInfoString() {
+        return "";
     }
 
     public static void saveSourceMap(Map str_clData_classes, File sourceMapFile) {
@@ -214,7 +227,7 @@ public class SaveHook implements Runnable {
           if (calculateSource) {
             cd = projectData.getOrCreateClassData(classEntry.getClassName());
           }
-          SourceLineCounter slc = new SourceLineCounter(cd, false, calculateSource ? projectData : null);
+          SourceLineCounter slc = new SourceLineCounter(cd, calculateSource ? projectData : null, true);
           reader.accept(slc, 0);
           if (slc.isEnum() || slc.getNSourceLines() > 0) { // ignore classes without executable code
             final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
@@ -230,6 +243,19 @@ public class SaveHook implements Runnable {
                 return true;
               }
             });
+            final TIntObjectHashMap<JumpsAndSwitches> jumpsPerLine = slc.getJumpsPerLine();
+            if (jumpsPerLine != null) {
+              jumpsPerLine.forEachEntry(new TIntObjectProcedure<JumpsAndSwitches>() {
+                public boolean execute(int line, JumpsAndSwitches jumpData) {
+                  final LineData lineData = lines.get(line);
+                  if (lineData != null) {
+                    lineData.setJumpsAndSwitches(jumpData);
+                    lineData.fillArrays();
+                  }
+                  return true;
+                }
+              });
+            }
             classData.setLines(LinesUtil.calcLineArray(maxLine[0], lines));
           }
         } catch (Throwable e) {

@@ -29,10 +29,15 @@ import java.util.List;
 public class TestUtils {
   @NotNull
   public static BinaryReport runTest(String patterns, String className) throws IOException, InterruptedException {
+    return runTest(patterns, className, false);
+  }
+
+  @NotNull
+  public static BinaryReport runTest(String patterns, String className, boolean calcUnloaded) throws IOException, InterruptedException {
     final File icFile = File.createTempFile("report_tmp", ".ic");
     final File sourceMapFile = File.createTempFile("report_tmp", ".sm");
     patterns = "true " + sourceMapFile.getAbsolutePath() + " " + patterns;
-    CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), icFile, patterns, className, false);
+    CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), icFile, patterns, className, false, new String[0], calcUnloaded, false);
     return new BinaryReport(icFile, sourceMapFile);
   }
 

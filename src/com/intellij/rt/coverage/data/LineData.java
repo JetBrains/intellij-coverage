@@ -54,6 +54,10 @@ public class LineData implements CoverageData {
     return myJumpsAndSwitches;
   }
 
+  public void setJumpsAndSwitches(JumpsAndSwitches jumpsAndSwitches) {
+    myJumpsAndSwitches = jumpsAndSwitches;
+  }
+
   public int getStatus() {
     if (myStatus != -1) return myStatus;
     if (myHits == 0) {

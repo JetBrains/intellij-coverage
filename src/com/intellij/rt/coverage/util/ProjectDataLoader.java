@@ -28,6 +28,7 @@ import java.io.*;
  * @since 05-May-2009
  */
 public class ProjectDataLoader {
+  public static final int REPORT_VERSION = 1;
 
   public static ProjectData loadLocked(final File sessionDataFile) {
     CoverageIOUtil.FileLock lock = null;
@@ -101,6 +102,7 @@ public class ProjectDataLoader {
         }
         classInfo.setLines(com.intellij.rt.coverage.util.LinesUtil.calcLineArray(maxLine, lines));
       }
+      loadExtraInfo(projectInfo, in, dict);
     } catch (Exception e) {
       ErrorReporter.reportError("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath(), e);
       return projectInfo;
@@ -129,5 +131,22 @@ public class ProjectDataLoader {
         return type;
       }
     });
+  }
+
+  private static void loadExtraInfo(ProjectData projectData, DataInputStream in, TIntObjectHashMap<ClassData> dict) throws IOException {
+    final int version;
+    try {
+      version = CoverageIOUtil.readINT(in);
+    } catch (EOFException e) {
+      // old format, no extra info
+      return;
+    }
+    if (version > REPORT_VERSION) {
+      ErrorReporter.reportError("Report version " + version + " is greater than agent maximum support version "
+          + REPORT_VERSION + "\n" + "Please try to update coverage agent.");
+      return;
+    }
+    final String infoString = CoverageIOUtil.readUTFFast(in);
+    ReportSectionsUtil.loadSections(projectData, in, dict);
   }
 }
