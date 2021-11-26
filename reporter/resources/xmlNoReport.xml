@@ -123,7 +123,7 @@
 <class name="testData/branches/MyBranchedClass" sourcefilename="test.kt">
 <method name="foo" desc="(I)V">
 <counter type="INSTRUCTION" missed="6" covered="0"/>
-<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
 <counter type="LINE" missed="6" covered="0"/>
 </method>
 <method name="&lt;init&gt;" desc="()V">
@@ -137,14 +137,14 @@
 <counter type="LINE" missed="6" covered="0"/>
 </method>
 <counter type="INSTRUCTION" missed="13" covered="0"/>
-<counter type="BRANCH" missed="5" covered="0"/>
+<counter type="BRANCH" missed="7" covered="0"/>
 <counter type="LINE" missed="13" covered="0"/>
 <counter type="METHOD" missed="3" covered="0"/>
 </class>
 <class name="testData/branches/MyBranchedUnloadedClass" sourcefilename="test.kt">
 <method name="foo" desc="(I)V">
 <counter type="INSTRUCTION" missed="6" covered="0"/>
-<counter type="BRANCH" missed="2" covered="0"/>
+<counter type="BRANCH" missed="4" covered="0"/>
 <counter type="LINE" missed="6" covered="0"/>
 </method>
 <method name="&lt;init&gt;" desc="()V">
@@ -158,16 +158,16 @@
 <counter type="LINE" missed="6" covered="0"/>
 </method>
 <counter type="INSTRUCTION" missed="13" covered="0"/>
-<counter type="BRANCH" missed="5" covered="0"/>
+<counter type="BRANCH" missed="7" covered="0"/>
 <counter type="LINE" missed="13" covered="0"/>
 <counter type="METHOD" missed="3" covered="0"/>
 </class>
 <sourcefile name="test.kt">
 <line nr="62" mi="1" ci="0" mb="0" cb="0"/>
 <line nr="19" mi="1" ci="0" mb="0" cb="0"/>
-<line nr="21" mi="1" ci="0" mb="1" cb="0"/>
+<line nr="21" mi="1" ci="0" mb="2" cb="0"/>
 <line nr="22" mi="1" ci="0" mb="0" cb="0"/>
-<line nr="23" mi="1" ci="0" mb="1" cb="0"/>
+<line nr="23" mi="1" ci="0" mb="2" cb="0"/>
 <line nr="24" mi="1" ci="0" mb="0" cb="0"/>
 <line nr="26" mi="1" ci="0" mb="0" cb="0"/>
 <line nr="27" mi="1" ci="0" mb="0" cb="0"/>
@@ -178,9 +178,9 @@
 <line nr="35" mi="1" ci="0" mb="0" cb="0"/>
 <line nr="36" mi="1" ci="0" mb="0" cb="0"/>
 <line nr="40" mi="1" ci="0" mb="0" cb="0"/>
-<line nr="42" mi="1" ci="0" mb="1" cb="0"/>
+<line nr="42" mi="1" ci="0" mb="2" cb="0"/>
 <line nr="43" mi="1" ci="0" mb="0" cb="0"/>
-<line nr="44" mi="1" ci="0" mb="1" cb="0"/>
+<line nr="44" mi="1" ci="0" mb="2" cb="0"/>
 <line nr="45" mi="1" ci="0" mb="0" cb="0"/>
 <line nr="47" mi="1" ci="0" mb="0" cb="0"/>
 <line nr="48" mi="1" ci="0" mb="0" cb="0"/>
@@ -191,17 +191,17 @@
 <line nr="56" mi="1" ci="0" mb="0" cb="0"/>
 <line nr="57" mi="1" ci="0" mb="0" cb="0"/>
 <counter type="INSTRUCTION" missed="27" covered="0"/>
-<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="BRANCH" missed="14" covered="0"/>
 <counter type="LINE" missed="27" covered="0"/>
 </sourcefile>
 <counter type="INSTRUCTION" missed="27" covered="0"/>
-<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="BRANCH" missed="14" covered="0"/>
 <counter type="LINE" missed="27" covered="0"/>
 <counter type="METHOD" missed="7" covered="0"/>
 <counter type="CLASS" missed="3" covered="0"/>
 </package>
 <counter type="INSTRUCTION" missed="35" covered="0"/>
-<counter type="BRANCH" missed="10" covered="0"/>
+<counter type="BRANCH" missed="14" covered="0"/>
 <counter type="LINE" missed="35" covered="0"/>
 <counter type="METHOD" missed="15" covered="0"/>
 <counter type="CLASS" missed="7" covered="0"/>
