@@ -29,7 +29,6 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   private boolean myStoreCoroutinesSuspendedVisited = false;
   private boolean myLoadCoroutinesSuspendedVisited = false;
   private boolean myLoadStateLabelVisited = false;
-  private boolean myStoreStateLabelVisited = false;
   private boolean mySuspendCallVisited = false;
   private int myCoroutinesSuspendedIndex = -1;
   private int myLine = -1;
@@ -76,8 +75,9 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
         && name.equals("getCOROUTINE_SUSPENDED")
         && descriptor.equals("()Ljava/lang/Object;");
     boolean suspendCallVisited = descriptor.endsWith("Lkotlin/coroutines/Continuation;)Ljava/lang/Object;")
-        || owner.startsWith("kotlin/jvm/functions/Function") && myStoreStateLabelVisited
-        && name.equals("invoke") && opcode == Opcodes.INVOKEINTERFACE;
+        || owner.startsWith("kotlin/jvm/functions/Function")
+        && name.equals("invoke") && opcode == Opcodes.INVOKEINTERFACE
+        && descriptor.endsWith(")Ljava/lang/Object;");
     if (getCoroutinesSuspendedVisited || suspendCallVisited) {
       myGetCoroutinesSuspendedVisited |= getCoroutinesSuspendedVisited;
       mySuspendCallVisited |= suspendCallVisited;
@@ -121,7 +121,6 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
         && descriptor.equals("I")
         && Type.getObjectType(owner).getClassName().startsWith(myContext.getClassName());
     myLoadStateLabelVisited = labelVisited && opcode == Opcodes.GETFIELD;
-    myStoreStateLabelVisited = labelVisited && opcode == Opcodes.PUTFIELD;
   }
 
   /**
