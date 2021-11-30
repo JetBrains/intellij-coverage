@@ -41,6 +41,10 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testCoroutinesAsync() = test("coroutines.async")
 
     @Test
+    @Ignore("Unloaded classes should be processed with coroutines filters")
+    fun testCoroutinesCrossinline() = test("coroutines.crossinline")
+
+    @Test
     @Ignore("To be fixed")
     fun testCoroutinesFix1() = test("coroutines.fix1")
 
