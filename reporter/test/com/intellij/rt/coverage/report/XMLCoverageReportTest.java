@@ -78,7 +78,7 @@ public class XMLCoverageReportTest {
   @Test
   public void integrationTestNoReport() throws Throwable {
     final File xmlFile = createXMLFile();
-    final String output = "build" + File.separator + "classes" + File.separator + "kotlin" + File.separator + "test";
+    final String output = "build" + File.separator + "classes" + File.separator + "kotlin" + File.separator + "test" + File.separator + "testData" + File.separator + "noReport";
     TestUtils.createReporter(null, output, null).createXMLReport(xmlFile);
     verifyProjectXML(xmlFile, "xmlNoReport.xml");
   }
