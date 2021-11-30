@@ -235,9 +235,19 @@ public class XMLCoverageReport {
     newLine();
   }
 
+  private static boolean shouldIncludeClass(ClassData classData) {
+    final Object[] lines = classData.getLines();
+    if (lines == null) return false;
+    for (Object line : lines) {
+      if (line != null) return true;
+    }
+    return false;
+  }
+
   private static HashMap<String, List<ClassData>> mapClassesToPackages(ProjectData project) {
     HashMap<String, List<ClassData>> packages = new HashMap<String, List<ClassData>>();
     for (ClassData classData : project.getClasses().values()) {
+      if (!shouldIncludeClass(classData)) continue;
       String className = classData.getName();
       int indexOfName = className.lastIndexOf('.');
       String packageName = indexOfName < 0 ? className : className.substring(0, indexOfName);
