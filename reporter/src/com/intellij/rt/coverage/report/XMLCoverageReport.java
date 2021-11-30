@@ -201,8 +201,8 @@ public class XMLCoverageReport {
     myOut.writeAttribute("nr", Integer.toString(lineData.getLineNumber()));
 
     final Counter counter = getLineCounter(lineData);
-    myOut.writeAttribute("mi", Integer.toString(1 - counter.coveredLines));
-    myOut.writeAttribute("ci", Integer.toString(counter.coveredLines));
+    myOut.writeAttribute("mi", Integer.toString(counter.totalInstructions - counter.coveredInstructions));
+    myOut.writeAttribute("ci", Integer.toString(counter.coveredInstructions));
     myOut.writeAttribute("mb", Integer.toString(counter.totalBranches - counter.coveredBranches));
     myOut.writeAttribute("cb", Integer.toString(counter.coveredBranches));
     newLine();
@@ -213,14 +213,19 @@ public class XMLCoverageReport {
     final Counter counter = new Counter();
     counter.totalLines = 1;
     counter.coveredLines = lineData.getHits() > 0 ? 1 : 0;
+
     final BranchData branchData = lineData.getBranchData();
     counter.totalBranches = branchData == null ? 0 : branchData.getTotalBranches();
     counter.coveredBranches = branchData == null ? 0 : branchData.getCoveredBranches();
+
+    final BranchData instructionsData = lineData.getInstructionsData();
+    counter.totalInstructions = instructionsData.getTotalBranches();
+    counter.coveredInstructions = instructionsData.getCoveredBranches();
     return counter;
   }
 
   private void writeCounter(Counter counter, int mask) throws XMLStreamException {
-    if ((mask & INSTRUCTION_MASK) != 0) writeCounter(INSTRUCTION_COUNTER, counter.totalLines, counter.coveredLines);
+    if ((mask & INSTRUCTION_MASK) != 0) writeCounter(INSTRUCTION_COUNTER, counter.totalInstructions, counter.coveredInstructions);
     if ((mask & BRANCH_MASK) != 0) writeCounter(BRANCH_COUNTER, counter.totalBranches, counter.coveredBranches);
     if ((mask & LINE_MASK) != 0) writeCounter(LINE_COUNTER, counter.totalLines, counter.coveredLines);
     if ((mask & METHOD_MASK) != 0) writeCounter(METHOD_COUNTER, counter.totalMethods, counter.coveredMethods);
@@ -277,6 +282,9 @@ public class XMLCoverageReport {
     public int totalLines;
     public int coveredLines;
 
+    public int totalInstructions;
+    public int coveredInstructions;
+
     public int coveredBranches;
     public int totalBranches;
 
@@ -289,6 +297,8 @@ public class XMLCoverageReport {
       coveredLines += other.coveredLines;
       totalBranches += other.totalBranches;
       coveredBranches += other.coveredBranches;
+      totalInstructions += other.totalInstructions;
+      coveredInstructions += other.coveredInstructions;
     }
   }
 }

@@ -27,6 +27,7 @@ public class LineData implements CoverageData {
 
   private int myId = -1;
   private int myHits = 0;
+  private int myInstructions = 0;
 
   private byte myStatus = -1;
   private String myUniqueTestName = null;
@@ -114,6 +115,7 @@ public class LineData implements CoverageData {
   public void merge(final CoverageData data) {
     LineData lineData = (LineData)data;
     myHits += lineData.myHits;
+    myInstructions = Math.max(myInstructions, lineData.myInstructions);
     if (myJumpsAndSwitches != null || lineData.myJumpsAndSwitches != null) {
       getOrCreateJumpsAndSwitches().merge(lineData.getOrCreateJumpsAndSwitches());
     }
@@ -254,6 +256,38 @@ public class LineData implements CoverageData {
     return new BranchData(total, covered);
   }
 
+  public BranchData getInstructionsData() {
+    int total = 0;
+    int covered = 0;
+
+    total += myInstructions;
+    if (myHits > 0) covered += myInstructions;
+    if (myJumpsAndSwitches == null) return new BranchData(total, covered);;
+
+    final JumpData[] jumps = myJumpsAndSwitches.getJumps();
+    if (jumps != null) {
+      for (JumpData jump : jumps) {
+        total += jump.getInstructions(true) + jump.getInstructions(false);
+        if (jump.getTrueHits() > 0) covered += jump.getInstructions(true);
+        if (jump.getFalseHits() > 0) covered += jump.getInstructions(false);
+      }
+    }
+
+    final SwitchData[] switches = myJumpsAndSwitches.getSwitches();
+    if (switches != null) {
+      for (SwitchData switchData : switches) {
+        total += switchData.getInstructions(-1);
+        if (switchData.getDefaultHits() > 0) covered += switchData.getInstructions(-1);
+        for (int key  = 0; key < switchData.getKeys().length; key++) {
+          total += switchData.getInstructions(key);
+          if (switchData.getHits()[key] > 0) covered += switchData.getInstructions(key);
+        }
+      }
+    }
+
+    return new BranchData(total, covered);
+  }
+
   public void setHits(final int hits) {
     myHits = hits;
   }
@@ -289,5 +323,13 @@ public class LineData implements CoverageData {
 
   public void setId(int id) {
     myId = id;
+  }
+
+  public void addInstructions(int instructions) {
+    myInstructions += instructions;
+  }
+
+  public int getInstructions() {
+    return myInstructions;
   }
 }
