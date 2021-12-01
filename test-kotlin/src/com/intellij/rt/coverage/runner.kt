@@ -45,7 +45,7 @@ internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage:
 }
 
 internal fun assertEqualsLines(project: ProjectData, expectedLines: Map<Int, String>, classNames: List<String>) {
-    val actualCoverage = coverageLines(project, classNames)
+    val actualCoverage = coverageLines(project, classNames).associate { it.lineNumber to it.status }.statusToString()
     logCoverageDiff(expectedLines, actualCoverage)
     Assert.assertEquals(expectedLines, actualCoverage)
 }
@@ -55,9 +55,14 @@ internal fun assertEqualsTestTracking(coverageDataFile: File, expected: Map<Int,
     Assert.assertEquals(expected, actual)
 }
 
+internal fun assertEqualsExtendedInfo(project: ProjectData, expected: Map<Int, String>, classNames: List<String>) {
+    val actual = extendedLineInfo(project, classNames)
+    Assert.assertEquals(expected.map { it.toString() }.joinToString("\n"), actual.map { it.toString() }.joinToString("\n"))
+}
+
 internal const val all = "ALL CLASSES"
 
-private fun coverageLines(project: ProjectData, classNames: List<String>): Map<Int, String> {
+private fun coverageLines(project: ProjectData, classNames: List<String>): List<LineData> {
     val allData = ClassData("")
     if (classNames.contains(all)) {
         project.classes.values.filter { it.name.startsWith(TEST_PACKAGE) }.forEach { allData.merge(it) }
@@ -66,9 +71,15 @@ private fun coverageLines(project: ProjectData, classNames: List<String>): Map<I
             .map { project.getClassData(it) }
             .forEach { allData.merge(it) }
     }
-    val lines = allData.getLinesData().associateBy({ it.lineNumber }, { it.status.toByte() })
-    return statusToString(lines)
+    return allData.getLinesData()
 }
+
+private fun extendedLineInfo(project: ProjectData, classNames: List<String>) = coverageLines(project, classNames)
+        .associate { line ->
+            val branches = line.branchData
+            val instructions = line.instructionsData
+            line.lineNumber to "${instructions.coveredBranches}/${instructions.totalBranches} ${branches?.coveredBranches ?: 0}/${branches?.totalBranches ?: 0}"
+        }
 
 internal fun testTrackingLines(coverageDataFile: File, classNames: List<String>): Map<Int, Set<String>> {
     val result = hashMapOf<Int, MutableSet<String>>()
@@ -132,8 +143,8 @@ private fun compareCoverage(expected: List<Pair<Int, String>>,
     while (j < actual.size) unexpectedLine(j++)
 }
 
-private fun statusToString(lines: Map<Int, Byte>) = lines.mapValues {
-    when (it.value.toInt()) {
+private fun Map<Int, Int>.statusToString() = mapValues {
+    when (it.value) {
         0 -> "NONE"
         1 -> "PARTIAL"
         else -> "FULL"
@@ -147,6 +158,18 @@ internal fun extractTestTrackingDataFromFile(file: File): Map<Int, Set<String>> 
         processFile(file, callback)
         callback.result
     }
+
+internal fun extractExtendedInfoFromFile(file: File): Map<Int, String> = ExtendedInfoMatcher().let { matcher ->
+    val otherFile = StringMatcher(fileWithCoverageMarkersRegex, 1)
+    processFile(file, otherFile)
+    if (otherFile.value !== null) {
+        val fileWithMarkers = File(file.parentFile, otherFile.value!!)
+        processFile(fileWithMarkers, matcher)
+    } else {
+        processFile(file, matcher)
+    }
+    matcher.result
+}
 
 internal fun pathToFile(name: String, vararg names: String): File = Paths.get(name, *names).toFile()
 
@@ -190,21 +213,27 @@ private val calculateUnloadedMarkerRegex = Regex("// calculate unloaded: (.*)\$"
 private val extraArgumentsMarkerRegex = Regex("// extra args: (.*)\$")
 private val testTrackingMarkerRegex = Regex("// tests: (.*)\$")
 private val fileWithCoverageMarkersRegex = Regex("// markers: (.*)\$")
+private val extendedInfoRegex = Regex("// stats: ([0-9]+)/([0-9]+)(\\s+([0-9]+)/([0-9]+))?")
 
 /**
  * Collect state from found matches in the lines of a file.
  */
-abstract class Matcher(private val regex: Regex, private val group: Int) {
-    abstract fun onMatchFound(line: Int, match: String)
+abstract class Matcher(private val regex: Regex) {
+    abstract fun onMatchFound(line: Int, match: MatchResult)
     fun match(line: Int, s: String) {
         val match = regex.find(s)
         if (match != null) {
-            onMatchFound(line, match.groupValues[group])
+            onMatchFound(line, match)
         }
     }
 }
 
-class StringMatcher(regex: Regex, group: Int) : Matcher(regex, group) {
+abstract class SingleGroupMatcher(regex: Regex, private val group: Int) : Matcher(regex) {
+    abstract fun onMatchFound(line: Int, match: String)
+    override fun onMatchFound(line: Int, match: MatchResult) = onMatchFound(line, match.groupValues[group])
+}
+
+class StringMatcher(regex: Regex, group: Int) : SingleGroupMatcher(regex, group) {
     var value: String? = null
         private set
 
@@ -213,14 +242,14 @@ class StringMatcher(regex: Regex, group: Int) : Matcher(regex, group) {
     }
 }
 
-class StringListMatcher(regex: Regex, group: Int) : Matcher(regex, group) {
+class StringListMatcher(regex: Regex, group: Int) : SingleGroupMatcher(regex, group) {
     val values = mutableListOf<String>()
     override fun onMatchFound(line: Int, match: String) {
         values.addAll(match.split(' '))
     }
 }
 
-class FlagMatcher(regex: Regex, group: Int) : Matcher(regex, group) {
+class FlagMatcher(regex: Regex, group: Int) : SingleGroupMatcher(regex, group) {
     var value = false
         private set
 
@@ -230,16 +259,28 @@ class FlagMatcher(regex: Regex, group: Int) : Matcher(regex, group) {
     }
 }
 
-class CoverageMatcher : Matcher(coverageMarkerRegex, 1) {
+class CoverageMatcher : SingleGroupMatcher(coverageMarkerRegex, 1) {
     val result = linkedMapOf<Int, String>()
     override fun onMatchFound(line: Int, match: String) {
         result[line] = match
     }
 }
 
-class TestTrackingMatcher : Matcher(testTrackingMarkerRegex, 1) {
+class TestTrackingMatcher : SingleGroupMatcher(testTrackingMarkerRegex, 1) {
     val result = linkedMapOf<Int, Set<String>>()
     override fun onMatchFound(line: Int, match: String) {
         result[line] = match.split(' ').toSet()
+    }
+}
+
+class ExtendedInfoMatcher : Matcher(extendedInfoRegex) {
+    val result = linkedMapOf<Int, String>()
+    override fun onMatchFound(line: Int, match: MatchResult) {
+        val coveredInstructions = match.groupValues[1]
+        val totalInstructions = match.groupValues[2]
+        val hasBranches = match.groupValues[3].isNotEmpty()
+        val coveredBranches = if (hasBranches) match.groupValues[4] else 0
+        val totalBranches = if (hasBranches) match.groupValues[5] else 0
+        result[line] = "$coveredInstructions/$totalInstructions $coveredBranches/$totalBranches"
     }
 }

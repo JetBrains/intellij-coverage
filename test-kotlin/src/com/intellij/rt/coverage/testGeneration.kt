@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage
 
+import com.intellij.rt.coverage.caseTests.InstructionsBranchesTest
 import java.io.File
 import kotlin.reflect.KClass
 
@@ -49,7 +50,7 @@ private fun listTestNames(name: String, root: File, ignoredTests: List<String>, 
  *
  * @param ignoredTests list of test names that should be ignored, for example "custom" tests
  */
-fun generateTests(testDataRoot: File, ignoredTests: List<String>): String {
+private fun generateTests(testDataRoot: File, ignoredTests: List<String>, ignoreCondition: ((TestFile) -> Boolean)? = null): String {
     require(testDataRoot.isDirectory)
     val testNames = mutableListOf<String>()
     listTestNames("", testDataRoot, ignoredTests, testNames)
@@ -60,17 +61,14 @@ fun generateTests(testDataRoot: File, ignoredTests: List<String>): String {
             println("Error in $s: ${e.message}")
             null
         }
-    }.joinToString("\n") { test ->
-        var ignore = ""
-        val ignored = object : Matcher(Regex("// ignore: (.*)\$"), 1) {
-            override fun onMatchFound(line: Int, match: String) {
-                ignore = "    @Ignore(\"$match\")\n"
-            }
-        }
+    }
+    .let { tests -> ignoreCondition?.let { tests.filter(it) } ?: tests }
+    .joinToString("\n") { test ->
+        val ignored = IgnoreTestMatcher()
         processFile(test.file, ignored)
 
         val capitalized = test.testName.split('.').joinToString("") { it.capitalize() }
-        "    @Test\n$ignore    fun test$capitalized() = test(\"${test.testName}\")\n"
+        "    @Test\n${ignored.ignore}    fun test$capitalized() = test(\"${test.testName}\")\n"
     }
 }
 
@@ -100,10 +98,33 @@ private fun getTestFile(ktClass: KClass<*>): File {
  * test-kotlin should be the test directory.
  */
 fun main() {
-    val ignoredDirectories = listOf("custom")
-    val tests = generateTests(File("src", TEST_PACKAGE), ignoredDirectories)
+    generateTests(CoverageRunTest::class)
+    generateTests(InstructionsBranchesTest::class) { test ->
+        val include = IncludeInstructionsMatcher()
+        processFile(test.file, include)
+        include.include
+    }
+}
 
-    val testFile = getTestFile(CoverageRunTest::class)
+private fun generateTests(testClass: KClass<*>, ignoreCondition: ((TestFile) -> Boolean)? = null) {
+    val ignoredDirectories = listOf("custom")
     val marker = "    //===GENERATED TESTS==="
+    val tests = generateTests(File("src", TEST_PACKAGE), ignoredDirectories, ignoreCondition)
+    val testFile = getTestFile(testClass)
     replaceGeneratedTests(tests, testFile, marker)
 }
+
+private class IgnoreTestMatcher : SingleGroupMatcher(Regex("// ignore: (.*)\$"), 1) {
+    var ignore = ""
+    override fun onMatchFound(line: Int, match: String) {
+        ignore = "    @Ignore(\"$match\")\n"
+    }
+}
+
+private class IncludeInstructionsMatcher : Matcher(Regex("// instructions & branches")) {
+    var include = false
+    override fun onMatchFound(line: Int, match: MatchResult) {
+        include = true
+    }
+}
+

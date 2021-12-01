@@ -19,6 +19,7 @@ package testData.unloaded.multiFile
 // calculate unloaded: true
 // classes: UnusedClass
 // markers: UnusedClass.kt
+// instructions & branches
 
 fun main() {
 }

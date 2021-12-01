@@ -17,15 +17,16 @@
 package testData.whenMapping
 
 // classes: ALL
+// instructions & branches
 
 enum class F {
     A, B, C
 }
 
 fun f(f: F): Int {
-    return when (f) {           // coverage: PARTIAL as branch 2 not covered
-        F.A, F.B -> 42          // coverage: FULL
-        F.C -> 36               // coverage: NONE
+    return when (f) {           // coverage: PARTIAL // stats: 5/5 1/3
+        F.A, F.B -> 42          // coverage: FULL    // stats: 1/1
+        F.C -> 36               // coverage: NONE    // stats: 0/5
     }
 }
 
@@ -34,16 +35,16 @@ enum class SimpleEnum {
 }
 
 fun simpleF(v: SimpleEnum) =
-    when (v) {                  // coverage: FULL as no branching for else
-        SimpleEnum.Single -> 42 // coverage: FULL
+    when (v) {                  // coverage: FULL // stats: 5/5 1/1
+        SimpleEnum.Single -> 42 // coverage: FULL // stats: 5/5
     }
 
 fun noneF(v: SimpleEnum) =
-    when (v) {                  // coverage: NONE
-        SimpleEnum.Single -> 42 // coverage: NONE
+    when (v) {                  // coverage: NONE // stats: 0/5 0/1
+        SimpleEnum.Single -> 42 // coverage: NONE // stats: 0/5
     }
 
 fun main() {
-    f(F.A)                      // coverage: FULL
-    simpleF(SimpleEnum.Single)  // coverage: FULL
+    f(F.A)                      // coverage: FULL // stats: 3/3
+    simpleF(SimpleEnum.Single)  // coverage: FULL // stats: 3/3
 }

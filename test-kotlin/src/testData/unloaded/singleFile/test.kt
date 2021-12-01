@@ -18,8 +18,9 @@ package testData.unloaded.singleFile
 
 // classes: UnusedClass
 // calculate unloaded: true
+// instructions & branches
 
-class UnusedClass // coverage: NONE
+class UnusedClass // coverage: NONE // stats: 0/2
 
 fun main() {
 

@@ -17,15 +17,16 @@
 package testData.simple.branches
 
 // classes: MyBranchedClass
+// instructions & branches
 
-class MyBranchedClass {           // coverage: FULL
+class MyBranchedClass {           // coverage: FULL // stats: 2/2
     fun foo(value: Int) {
-        if (value < 0) {          // coverage: PARTIAL
-            println("LE")         // coverage: FULL
-        } else if (value == 0) {  // coverage: NONE
-            println("EQ")         // coverage: NONE
+        if (value < 0) {          // coverage: PARTIAL // stats: 1/1 1/2
+            println("LE")         // coverage: FULL    // stats: 7/7
+        } else if (value == 0) {  // coverage: NONE    // stats: 0/1 0/2
+            println("EQ")         // coverage: NONE    // stats: 0/7
         } else {
-            println("GE")         // coverage: NONE
+            println("GE")         // coverage: NONE    // stats: 0/7
         }
     }
 }
