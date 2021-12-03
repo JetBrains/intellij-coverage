@@ -126,7 +126,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     return cw.toByteArray();
   }
 
-  protected abstract ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw);
+  protected abstract ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassVisitor cw);
 
   protected abstract boolean shouldExclude(String className);
 
