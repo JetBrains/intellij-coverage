@@ -30,7 +30,6 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
   private String myName;
   private boolean myHasInstructions;
   private boolean myHasLines;
-  private boolean mySeenLineBefore;
   private int myCurrentLine;
   private boolean mySeenReturn;
 
@@ -47,7 +46,6 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
     myName = name;
     myHasInstructions = false;
     myHasLines = false;
-    mySeenLineBefore = false;
     myCurrentLine = -1;
     myLinesToIgnore = new TIntHashSet();
     myInline = false;
@@ -55,8 +53,12 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
   }
 
   private void addEmptyLineToRemove() {
-    if (myHasLines && !myHasInstructions && !mySeenLineBefore) {
-      myLinesToIgnore.add(myCurrentLine);
+    if (myHasLines && !myHasInstructions) {
+      if (mySeenReturn) {
+        myLinesToIgnore.add(myCurrentLine);
+      } else {
+        myContext.removeLine(myCurrentLine);
+      }
     }
   }
 
@@ -64,8 +66,7 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
   public void visitLineNumber(int line, Label start) {
     addEmptyLineToRemove();
     if (myCurrentLine != line) {
-      mySeenLineBefore = myContext.getLineData(line) != null & !myLinesToIgnore.remove(line);
-      myHasInstructions = false;
+      myHasInstructions = myContext.getLineData(line) != null & !myLinesToIgnore.remove(line);
       myHasLines = true;
       myCurrentLine = line;
       mySeenReturn = false;

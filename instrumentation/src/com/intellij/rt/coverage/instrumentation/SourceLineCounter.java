@@ -21,10 +21,7 @@ import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
-import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.Label;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
+import org.jetbrains.coverage.org.objectweb.asm.*;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -42,7 +39,6 @@ public class SourceLineCounter extends ClassVisitor {
   private final TIntObjectHashMap<JumpsAndSwitches> myJumpsPerLine;
   private final Set<String> myMethodsWithSourceCode = new HashSet<String>();
   private int myTotalBranches = 0;
-  private int myCurrentLine;
   private boolean myInterface;
   private boolean myEnum;
   private String myClassName;
@@ -132,11 +128,13 @@ public class SourceLineCounter extends ClassVisitor {
     }
     return new MethodVisitor(Opcodes.API_VERSION, v) {
       private boolean myHasInstructions;
+      private int myCurrentLine = -1;
 
 
       public void visitLineNumber(final int line, final Label start) {
         super.visitLineNumber(line, start);
-        myHasInstructions = false;
+        removeEmptyLine();
+        myHasInstructions = myNSourceLines.containsKey(line);
         myCurrentLine = line;
         if (!myExcludeLines ||
             myClassData == null ||
@@ -236,10 +234,15 @@ public class SourceLineCounter extends ClassVisitor {
         myHasInstructions = true;
       }
 
+      public void visitEnd() {
+        removeEmptyLine();
+        super.visitEnd();
+      }
 
-      public void visitTryCatchBlock(final Label start, final Label end, final Label handler, final String type) {
-        super.visitTryCatchBlock(start, end, handler, type);
-        myHasInstructions = true;
+      private void removeEmptyLine() {
+        if (myCurrentLine != -1 && !myHasInstructions) {
+          myNSourceLines.remove(myCurrentLine);
+        }
       }
 
       private JumpsAndSwitches getOrCreateJumps() {
