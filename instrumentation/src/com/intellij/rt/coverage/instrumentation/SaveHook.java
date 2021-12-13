@@ -218,14 +218,14 @@ public class SaveHook implements Runnable {
       Collection<ClassEntry> matchedClasses = classFinder.findMatchedClasses();
 
       for (ClassEntry classEntry : matchedClasses) {
-        ClassData cd = projectData.getClassData(classEntry.getClassName());
+        ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
         if (cd != null && cd.getLines() != null) continue;
         try {
           final InputStream classInputStream = classEntry.getClassInputStream();
           if (classInputStream == null) continue;
           ClassReader reader = new ClassReader(classInputStream);
           if (calculateSource) {
-            cd = projectData.getOrCreateClassData(classEntry.getClassName());
+            cd = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
           }
           SourceLineCounter slc = new SourceLineCounter(cd, calculateSource ? projectData : null, !isSampling);
           reader.accept(slc, 0);

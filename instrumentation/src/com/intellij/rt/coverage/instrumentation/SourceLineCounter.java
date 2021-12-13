@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
@@ -105,7 +106,7 @@ public class SourceLineCounter extends ClassVisitor {
   public void visitOuterClass(String outerClassName, String methodName, String methodSig) {
     if (shouldCalculateSource()) {
       final String fqnName = ClassNameUtil.convertToFQName(outerClassName);
-      final ClassData outerClass = myProjectData.getOrCreateClassData(fqnName);
+      final ClassData outerClass = myProjectData.getOrCreateClassData(StringsPool.getFromPool(fqnName));
       if (outerClass.getSource() == null) {
         outerClass.setSource(myClassData.getSource());
       }
@@ -304,6 +305,9 @@ public class SourceLineCounter extends ClassVisitor {
     if (myFileMapData == null || myClassName == null) return;
     for (FileMapData mapData : myFileMapData) {
       final boolean isThisClass = myClassName.equals(mapData.getClassName());
+      if (myProjectData != null) {
+        myProjectData.getOrCreateClassData(StringsPool.getFromPool(mapData.getClassName()));
+      }
       for (LineMapData lineMapData : mapData.getLines()) {
         for (int i = lineMapData.getTargetMinLine(); i <= lineMapData.getTargetMaxLine(); i++) {
           final String signature = myNSourceLines.remove(i);

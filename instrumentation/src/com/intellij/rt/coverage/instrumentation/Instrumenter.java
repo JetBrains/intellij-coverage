@@ -102,7 +102,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   public void visitSource(String source, String debug) {
     super.visitSource(source, debug);
     if (myShouldCalculateSource) {
-      myProjectData.getOrCreateClassData(getClassName()).setSource(source);
+      myProjectData.getOrCreateClassData(StringsPool.getFromPool(getClassName())).setSource(source);
     }
     if (debug != null) {
       myProjectData.addLineMaps(getClassName(), JSR45Util.extractLineMapping(debug, getClassName()));
@@ -112,7 +112,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   public void visitOuterClass(String outerClassName, String methodName, String methodSig) {
     if (myShouldCalculateSource) {
       final String fqnName = ClassNameUtil.convertToFQName(outerClassName);
-      final ClassData outerClass = myProjectData.getOrCreateClassData(fqnName);
+      final ClassData outerClass = myProjectData.getOrCreateClassData(StringsPool.getFromPool(fqnName));
       if (outerClass.getSource() == null) {
         outerClass.setSource(myClassData.getSource());
       }
