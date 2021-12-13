@@ -9,6 +9,7 @@ repositories {
 sourceSets {
     main.java.srcDirs = []
     test.java.srcDirs = [file('src')]
+    jmh.java.srcDirs = [file('jmh')]
 }
 
 targetCompatibility = "1.8"
@@ -27,6 +28,11 @@ dependencies {
 
     testImplementation(fileTree(project(":benchmarks").file("lib")))
 
+    jmhCompile("org.openjdk.jmh:jmh-core:1.32")
+    jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.32")
+    jmhCompile(project(path: ":instrumentation", configuration: "archives"))
+    jmhCompile(project(":"))
+
     testImplementation("net.bytebuddy:byte-buddy:1.11.12")
     testImplementation("net.bytebuddy:byte-buddy-agent:1.11.12")
 
@@ -36,5 +42,25 @@ dependencies {
 test {
     filter {
         excludeTestsMatching("testData.*")
+    }
+}
+
+task runBenchmark(type: JavaExec) {
+    configureBenchmark it as JavaExec
+}
+
+def configureBenchmark(JavaExec benchmark) {
+    benchmark.with {
+        dependsOn "jmhClasses"
+        main = 'org.openjdk.jmh.Main'
+        doFirst {
+            classpath = sourceSets.jmh.runtimeClasspath
+            args = [
+                // fail-on-error
+                '-foe', 'true',
+                // benchmarks
+                'com\\.intellij\\.rt\\.coverage\\.jmh\\.AppendUnloadedBenchmark.*',
+            ]
+        }
     }
 }
