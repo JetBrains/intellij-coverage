@@ -32,7 +32,6 @@
 
 package testData.coroutines.crossinline
 
-// ignore: Unloaded classes should be processed with coroutines filters
 // classes: ALL
 // patterns: testData\.coroutines\.crossinline\..*
 // calculate unloaded: true

@@ -17,6 +17,8 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.*;
+import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
+import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinInlineVisitingFilter;
 import com.intellij.rt.coverage.util.*;
 import com.intellij.rt.coverage.util.classFinder.ClassEntry;
@@ -25,6 +27,9 @@ import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.gnu.trove.TIntObjectProcedure;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
+import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.io.*;
 import java.util.*;
@@ -58,7 +63,12 @@ public class SaveHook implements Runnable {
             projectData.applyLinesMask();
             projectData.applyBranchData();
             if (myAppendUnloaded) {
-                appendUnloaded(projectData, myClassFinder, mySourceMapFile != null, projectData.isSampling());
+              final boolean calculateSource = mySourceMapFile != null;
+              if ("true".equals(System.getProperty("coverage.unloaded.classes.full.analysis", "true"))) {
+                  appendUnloadedFullAnalysis(projectData, myClassFinder, calculateSource, projectData.isSampling());
+                } else {
+                  appendUnloaded(projectData, myClassFinder, calculateSource, projectData.isSampling());
+                }
             }
             projectData.checkLineMappings();
             checkLineSignatures(projectData);
@@ -227,7 +237,7 @@ public class SaveHook implements Runnable {
               cd = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
             }
             SourceLineCounter slc = new SourceLineCounter(cd, calculateSource ? projectData : null, !isSampling);
-            reader.accept(slc, 0);
+            reader.accept(slc, ClassReader.SKIP_FRAMES);
             if (slc.isEnum() || slc.getNSourceLines() > 0) { // ignore classes without executable code
               final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
               final int[] maxLine = new int[]{1};
@@ -263,6 +273,41 @@ public class SaveHook implements Runnable {
         }
       });
     }
+
+  public static final MethodVisitor EMPTY_METHOD_VISITOR = new MethodVisitor(Opcodes.API_VERSION) {};
+  public static final ClassVisitor EMPTY_CLASS_VISITOR = new ClassVisitor(Opcodes.API_VERSION) {
+    @Override
+    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+      return EMPTY_METHOD_VISITOR;
+    }
+  };
+
+  public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean isSampling) {
+    classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
+      public void consume(ClassEntry classEntry) {
+        final ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
+        if (cd != null && cd.getLines() != null) return;
+        try {
+          final InputStream classInputStream = classEntry.getClassInputStream();
+          if (classInputStream == null) return;
+          final Instrumenter instrumenter;
+          if (isSampling) {
+            instrumenter = new SamplingInstrumenter(projectData, EMPTY_CLASS_VISITOR, classEntry.getClassName(), calculateSource);
+          } else {
+            instrumenter = new TracingInstrumenter(projectData, EMPTY_CLASS_VISITOR, classEntry.getClassName(), calculateSource);
+          }
+          ClassVisitor visitor = instrumenter;
+          if (FilterUtils.ignorePrivateConstructorOfUtilClassEnabled()) {
+            visitor = PrivateConstructorOfUtilClassFilter.createWithContext(visitor, instrumenter);
+          }
+          final ClassReader reader = new ClassReader(classInputStream);
+          reader.accept(visitor, ClassReader.SKIP_FRAMES);
+        } catch (Throwable e) {
+          ErrorReporter.reportError("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
+        }
+      }
+    });
+  }
 
     public void setSourceMapFile(File sourceMapFile) {
         mySourceMapFile = sourceMapFile;
