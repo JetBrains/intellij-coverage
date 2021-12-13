@@ -215,53 +215,53 @@ public class SaveHook implements Runnable {
    * Classes are searched using <code>classFinder</code>.
    */
     public static void appendUnloaded(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean isSampling) {
-      Collection<ClassEntry> matchedClasses = classFinder.findMatchedClasses();
-
-      for (ClassEntry classEntry : matchedClasses) {
-        ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
-        if (cd != null && cd.getLines() != null) continue;
-        try {
-          final InputStream classInputStream = classEntry.getClassInputStream();
-          if (classInputStream == null) continue;
-          ClassReader reader = new ClassReader(classInputStream);
-          if (calculateSource) {
-            cd = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
-          }
-          SourceLineCounter slc = new SourceLineCounter(cd, calculateSource ? projectData : null, !isSampling);
-          reader.accept(slc, 0);
-          if (slc.isEnum() || slc.getNSourceLines() > 0) { // ignore classes without executable code
-            final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
-            final int[] maxLine = new int[]{1};
-            final ClassData classData = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
-            slc.getSourceLines().forEachEntry(new TIntObjectProcedure<String>() {
-              public boolean execute(int line, String methodSig) {
-                final LineData ld = new LineData(line, StringsPool.getFromPool(methodSig));
-                lines.put(line, ld);
-                if (line > maxLine[0]) maxLine[0] = line;
-                classData.registerMethodSignature(ld);
-                ld.setStatus(LineCoverage.NONE);
-                return true;
-              }
-            });
-            final TIntObjectHashMap<JumpsAndSwitches> jumpsPerLine = slc.getJumpsPerLine();
-            if (jumpsPerLine != null) {
-              jumpsPerLine.forEachEntry(new TIntObjectProcedure<JumpsAndSwitches>() {
-                public boolean execute(int line, JumpsAndSwitches jumpData) {
-                  final LineData lineData = lines.get(line);
-                  if (lineData != null) {
-                    lineData.setJumpsAndSwitches(jumpData);
-                    lineData.fillArrays();
-                  }
+      classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
+        public void consume(ClassEntry classEntry) {
+          ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
+          if (cd != null && cd.getLines() != null) return;
+          try {
+            final InputStream classInputStream = classEntry.getClassInputStream();
+            if (classInputStream == null) return;
+            ClassReader reader = new ClassReader(classInputStream);
+            if (calculateSource) {
+              cd = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
+            }
+            SourceLineCounter slc = new SourceLineCounter(cd, calculateSource ? projectData : null, !isSampling);
+            reader.accept(slc, 0);
+            if (slc.isEnum() || slc.getNSourceLines() > 0) { // ignore classes without executable code
+              final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
+              final int[] maxLine = new int[]{1};
+              final ClassData classData = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
+              slc.getSourceLines().forEachEntry(new TIntObjectProcedure<String>() {
+                public boolean execute(int line, String methodSig) {
+                  final LineData ld = new LineData(line, StringsPool.getFromPool(methodSig));
+                  lines.put(line, ld);
+                  if (line > maxLine[0]) maxLine[0] = line;
+                  classData.registerMethodSignature(ld);
+                  ld.setStatus(LineCoverage.NONE);
                   return true;
                 }
               });
+              final TIntObjectHashMap<JumpsAndSwitches> jumpsPerLine = slc.getJumpsPerLine();
+              if (jumpsPerLine != null) {
+                jumpsPerLine.forEachEntry(new TIntObjectProcedure<JumpsAndSwitches>() {
+                  public boolean execute(int line, JumpsAndSwitches jumpData) {
+                    final LineData lineData = lines.get(line);
+                    if (lineData != null) {
+                      lineData.setJumpsAndSwitches(jumpData);
+                      lineData.fillArrays();
+                    }
+                    return true;
+                  }
+                });
+              }
+              classData.setLines(LinesUtil.calcLineArray(maxLine[0], lines));
             }
-            classData.setLines(LinesUtil.calcLineArray(maxLine[0], lines));
+          } catch (Throwable e) {
+            ErrorReporter.reportError("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
           }
-        } catch (Throwable e) {
-          ErrorReporter.reportError("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
         }
-      }
+      });
     }
 
     public void setSourceMapFile(File sourceMapFile) {

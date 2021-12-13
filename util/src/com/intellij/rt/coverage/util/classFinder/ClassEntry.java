@@ -16,56 +16,38 @@
 
 package com.intellij.rt.coverage.util.classFinder;
 
-import com.intellij.rt.coverage.util.ClassNameUtil;
-
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
  * @author Pavel.Sher
  */
-public class ClassEntry {
+public abstract class ClassEntry {
   private final String myClassName;
-  private final ClassLoader myClassLoader;
 
-  public ClassEntry(final String className, final ClassLoader classLoader) {
+  public ClassEntry(final String className) {
     myClassName = className;
-    myClassLoader = classLoader;
   }
 
   public String getClassName() {
     return myClassName;
   }
 
-  public InputStream getClassInputStream() {
-    String resourceName = ClassNameUtil.convertToInternalName(myClassName) + ".class";
-    InputStream is = getResourceStream(resourceName);
-    if (is != null) return is;
-    return getResourceStream("/" + resourceName);
-  }
-
-  private InputStream getResourceStream(final String resourceName) {
-    if (myClassLoader == null) {
-      return getClass().getResourceAsStream(resourceName);
-    }
-
-    return myClassLoader.getResourceAsStream(resourceName);
-  }
+  public abstract InputStream getClassInputStream() throws IOException;
 
   public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
     final ClassEntry that = (ClassEntry) o;
-
-    if (myClassLoader != null ? !myClassLoader.equals(that.myClassLoader) : that.myClassLoader != null) return false;
-    if (!myClassName.equals(that.myClassName)) return false;
-
-    return true;
+    return myClassName.equals(that.myClassName);
   }
 
   public int hashCode() {
-    int result = myClassName.hashCode();
-    result = 31 * result + (myClassLoader != null ? myClassLoader.hashCode() : 0);
-    return result;
+    return myClassName.hashCode();
+  }
+
+  public interface Consumer {
+    void consume(ClassEntry classEntry);
   }
 }

@@ -17,9 +17,9 @@
 package com.intellij.rt.coverage.util.classFinder;
 
 import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -29,25 +29,22 @@ import java.util.zip.ZipFile;
  * @author Pavel.Sher
  */
 public class ClassPathEntry {
-  private final ClassLoader myClassLoader;
   private final String myClassPathEntry;
 
   // Used in IntelliJ
   @SuppressWarnings("WeakerAccess")
-  public ClassPathEntry(final String classPathEntry, final ClassLoader classLoader) {
+  public ClassPathEntry(final String classPathEntry) {
     myClassPathEntry = classPathEntry;
-    myClassLoader = classLoader;
   }
 
-  Collection<ClassEntry> getClassesIterator(List<Pattern> includePatterns, List<Pattern> excludePatterns) throws IOException {
+  void iterateMatchedClasses(List<Pattern> includePatterns, List<Pattern> excludePatterns, ClassEntry.Consumer consumer) throws IOException {
     ClassPathEntryProcessor processor = createEntryProcessor(myClassPathEntry);
     if (processor == null) {
 //      System.err.println("Do not know how to process class path entry: " + myClassPathEntry);
-      return Collections.emptyList();
-    }                          
+      return;
+    }
     processor.setFilter(includePatterns, excludePatterns);
-    processor.setClassLoader(myClassLoader);
-    return processor.findClasses(myClassPathEntry);
+    processor.iterateMatchedClasses(myClassPathEntry, consumer);
   }
 
   private static ClassPathEntryProcessor createEntryProcessor(String entry) {
@@ -67,31 +64,13 @@ public class ClassPathEntry {
   private static abstract class AbstractClassPathEntryProcessor implements ClassPathEntryProcessor {
     private List<Pattern> myIncludePatterns;
     private List<Pattern> myExcludePatterns;
-    private ClassLoader myClassLoader;
 
     public void setFilter(final List<Pattern> includePatterns, final List<Pattern> excludePatterns) {
       myIncludePatterns = includePatterns;
       myExcludePatterns = excludePatterns;
     }
 
-    public void setClassLoader(final ClassLoader classLoader) {
-      myClassLoader = classLoader;
-    }
-
-    protected abstract Collection<String> extractClassNames(String classPathEntry) throws IOException;
-
-    public Collection<ClassEntry> findClasses(final String classPathEntry) throws IOException {
-      Set<ClassEntry> includedClasses = new HashSet<ClassEntry>();
-      for (Object o : extractClassNames(classPathEntry)) {
-        final String className = (String) o;
-        if (shouldInclude(className)) {
-          includedClasses.add(new ClassEntry(className, myClassLoader));
-        }
-      }
-      return includedClasses;
-    }
-
-    private boolean shouldInclude(final String className) {
+    protected final boolean shouldInclude(final String className) {
       // matching outer or inner class name depending on pattern
       if (ClassNameUtil.matchesPatterns(className, myExcludePatterns)) return false;
 
@@ -103,33 +82,44 @@ public class ClassPathEntry {
 
   private interface ClassPathEntryProcessor {
     void setFilter(List<Pattern> includePatterns, List<Pattern> excludePatterns);
-    void setClassLoader(ClassLoader classLoader);
 
-    Collection<ClassEntry> findClasses(final String classPathEntry) throws IOException;
+    void iterateMatchedClasses(final String classPathEntry, ClassEntry.Consumer consumer) throws IOException;
   }
 
   private static final String CLASS_FILE_SUFFIX = ".class";
 
   private static class DirectoryEntryProcessor extends AbstractClassPathEntryProcessor {
 
-    protected Collection<String> extractClassNames(final String classPathEntry) {
+    public void iterateMatchedClasses(final String classPathEntry, ClassEntry.Consumer consumer) throws IOException {
       File dir = new File(classPathEntry);
-      List<String> result = new ArrayList<String>(100);
-      String curPath = "";
-      collectClasses(curPath, dir, result);
-      return result;
+      final InputStream[] is = new InputStream[] {null};
+      collectClasses("", dir, consumer, is);
     }
 
-    private static void collectClasses(final String curPath, final File parent, final List<String> result) {
+    private void collectClasses(final String curPath, final File parent, final ClassEntry.Consumer consumer, final InputStream[] is) throws IOException {
       File[] files = parent.listFiles();
       if (files != null) {
         String prefix = curPath.length() == 0 ? "" : curPath + ".";
-        for (File f : files) {
+        for (final File f : files) {
           final String name = f.getName();
           if (name.endsWith(CLASS_FILE_SUFFIX)) {
-            result.add(prefix + removeClassSuffix(name));
+            final String className = prefix + removeClassSuffix(name);
+            if (shouldInclude(className)) {
+              is[0] = null;
+              try {
+                consumer.consume(new ClassEntry(className) {
+                  @Override
+                  public InputStream getClassInputStream() throws IOException {
+                    is[0] = new FileInputStream(f);
+                    return is[0];
+                  }
+                });
+              } finally {
+                CoverageIOUtil.close(is[0]);
+              }
+            }
           } else if (f.isDirectory()) {
-            collectClasses(prefix + name, f, result);
+            collectClasses(prefix + name, f, consumer, is);
           }
         }
       }
@@ -141,21 +131,34 @@ public class ClassPathEntry {
   }
 
   private static class ZipEntryProcessor extends AbstractClassPathEntryProcessor {
-    public Collection<String> extractClassNames(final String classPathEntry) throws IOException {
-      List<String> result = new ArrayList<String>(100);
-      ZipFile zipFile = new ZipFile(new File(classPathEntry));
+    public void iterateMatchedClasses(final String classPathEntry, ClassEntry.Consumer consumer) throws IOException {
+      final ZipFile zipFile = new ZipFile(new File(classPathEntry));
       try {
+        final InputStream[] is = new InputStream[] {null};
         Enumeration<? extends ZipEntry> zenum = zipFile.entries();
         while (zenum.hasMoreElements()) {
           ZipEntry ze = zenum.nextElement();
           if (!ze.isDirectory() && ze.getName().endsWith(CLASS_FILE_SUFFIX)) {
-            result.add(ClassNameUtil.convertToFQName(removeClassSuffix(ze.getName())));
+            final String className = ClassNameUtil.convertToFQName(removeClassSuffix(ze.getName()));
+            if (shouldInclude(className)) {
+              is[0] = null;
+              try {
+                final ZipEntry zipEntry = ze;
+                consumer.consume(new ClassEntry(className) {
+                  public InputStream getClassInputStream() throws IOException {
+                    is[0] = zipFile.getInputStream(zipEntry);
+                    return is[0];
+                  }
+                });
+              } finally {
+                CoverageIOUtil.close(is[0]);
+              }
+            }
           }
         }
       } finally {
         zipFile.close();
       }
-      return result;
     }
   }
 
@@ -165,15 +168,10 @@ public class ClassPathEntry {
 
     final ClassPathEntry that = (ClassPathEntry) o;
 
-    if (myClassLoader != null ? !myClassLoader.equals(that.myClassLoader) : that.myClassLoader != null) return false;
-    if (!myClassPathEntry.equals(that.myClassPathEntry)) return false;
-
-    return true;
+    return myClassPathEntry.equals(that.myClassPathEntry);
   }
 
   public int hashCode() {
-    int result = myClassLoader != null ? myClassLoader.hashCode() : 0;
-    result = 31 * result + myClassPathEntry.hashCode();
-    return result;
+    return myClassPathEntry.hashCode();
   }
 }

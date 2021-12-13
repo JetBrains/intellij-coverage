@@ -108,18 +108,9 @@ public class Module {
 
     @Override
     protected Collection<ClassPathEntry> getClassPathEntries() {
-      final URL[] urls = new URL[myOutputRoots.size()];
-      for (int i = 0; i < myOutputRoots.size(); i++) {
-        try {
-          urls[i] = myOutputRoots.get(i).toURI().toURL();
-        } catch (MalformedURLException e) {
-          throw new RuntimeException(e);
-        }
-      }
-      final URLClassLoader loader = new URLClassLoader(urls);
       final List<ClassPathEntry> entries = new ArrayList<ClassPathEntry>();
       for (File outputRoot : myOutputRoots) {
-        entries.add(new ClassPathEntry(outputRoot.getAbsolutePath(), loader));
+        entries.add(new ClassPathEntry(outputRoot.getAbsolutePath()));
       }
       return entries;
     }

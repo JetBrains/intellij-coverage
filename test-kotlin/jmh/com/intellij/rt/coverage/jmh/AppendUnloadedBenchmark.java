@@ -51,11 +51,12 @@ public class AppendUnloadedBenchmark {
   @Benchmark
   public int unloaded() throws Exception {
     final ProjectData projectData = ProjectData.createProjectData(new File("test.ic"), null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
-    final Collection<ClassEntry> matchedClasses = createClassFinder().findMatchedClasses();
-
-    for (ClassEntry classEntry : matchedClasses) {
-      processClassEntry(projectData, classEntry);
-    }
+    createClassFinder().iterateMatchedClasses(new ClassEntry.Consumer() {
+      @Override
+      public void consume(ClassEntry classEntry) {
+        processClassEntry(projectData, classEntry);
+      }
+    });
     System.out.println(projectData.getClassesNumber());
     return projectData.getClassesNumber();
   }

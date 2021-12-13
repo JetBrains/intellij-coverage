@@ -54,16 +54,14 @@ public class ClassFinder {
     }
   }
 
-  public Collection<ClassEntry> findMatchedClasses() {
-    Set<ClassEntry> classes = new HashSet<ClassEntry>();
+  public void iterateMatchedClasses(ClassEntry.Consumer consumer) {
     for (ClassPathEntry entry : getClassPathEntries()) {
       try {
-        classes.addAll(entry.getClassesIterator(myIncludePatterns, myExcludePatterns));
+        entry.iterateMatchedClasses(myIncludePatterns, myExcludePatterns, consumer);
       } catch (IOException e) {
         ErrorReporter.reportError("Error during iterating classes.", e);
       }
     }
-    return classes;
   }
 
   // Overriden in IntelliJ
@@ -87,7 +85,7 @@ public class ClassFinder {
           if (!"file".equals(url.getProtocol())) continue;
 
           String path = fixPath(url.getPath());
-          result.add(new ClassPathEntry(path, cl));
+          result.add(new ClassPathEntry(path));
         }
       } catch (Exception e) {
         ErrorReporter.reportError("Exception occurred on trying collect ClassPath URLs. One of possible reasons is shutting down " +
@@ -118,7 +116,7 @@ public class ClassFinder {
     String[] entries = classPath.split(System.getProperty("path.separator"));
     Set<ClassPathEntry> result = new HashSet<ClassPathEntry>();
     for (String entry : entries) {
-      result.add(new ClassPathEntry(entry, null));
+      result.add(new ClassPathEntry(entry));
     }
     return result;
   }

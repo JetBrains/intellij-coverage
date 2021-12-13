@@ -282,10 +282,18 @@ public class CoverageIOUtil {
     return new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
   }
 
-  public static void close(DataOutputStream out) {
+  public static void close(OutputStream out) {
     if (out != null) {
       try {
         out.close();
+      } catch (IOException ignored) {}
+    }
+  }
+
+  public static void close(InputStream in) {
+    if (in != null) {
+      try {
+        in.close();
       } catch (IOException ignored) {}
     }
   }

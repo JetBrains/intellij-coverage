@@ -20,8 +20,8 @@ import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
+import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
-import com.intellij.rt.coverage.util.classFinder.ClassEntry;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.gnu.trove.TIntHashSet;
 import org.jetbrains.coverage.gnu.trove.TIntIntHashMap;
@@ -257,8 +257,7 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
     for (ClassLoader loader : classLoaders) {
       InputStream is = null;
       try {
-        final ClassEntry classEntry = new ClassEntry(classData.getName(), loader);
-        is = classEntry.getClassInputStream();
+        is = getClassInputStream(loader, classData.getName());
         if (is == null) continue;
         final ClassReader reader = new ClassReader(is);
 
@@ -295,5 +294,19 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
         return true;
       }
     });
+  }
+
+  private static InputStream getClassInputStream(ClassLoader loader, String className) {
+    final String resourceName = ClassNameUtil.convertToInternalName(className) + ".class";
+    final InputStream is = getResourceStream(loader, resourceName);
+    if (is != null) return is;
+    return getResourceStream(loader, "/" + resourceName);
+  }
+
+  private static InputStream getResourceStream(ClassLoader loader, final String resourceName) {
+    if (loader == null) {
+      return ClassNameUtil.class.getResourceAsStream(resourceName);
+    }
+    return loader.getResourceAsStream(resourceName);
   }
 }
