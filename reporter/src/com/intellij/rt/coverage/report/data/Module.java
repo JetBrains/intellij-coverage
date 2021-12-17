@@ -83,7 +83,8 @@ public class Module {
   private ProjectData collectCoverageInformationFromOutputs() {
     final ProjectData projectData = new ProjectData();
     if (myOutputRoots == null) return projectData;
-    SaveHook.appendUnloaded(projectData, new OutputClassFinder(), true, false);
+    SaveHook.appendUnloadedFullAnalysis(projectData, new OutputClassFinder(), true, false);
+    projectData.checkLineMappings();
     return projectData;
   }
 

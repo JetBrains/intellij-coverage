@@ -19,10 +19,7 @@ package com.intellij.rt.coverage.testDiscovery.instrumentation;
 import com.intellij.rt.coverage.data.ClassMetadata;
 import com.intellij.rt.coverage.data.TestDiscoveryProjectData;
 import com.intellij.rt.coverage.instrumentation.ExtraFieldInstrumenter;
-import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
-import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
+import org.jetbrains.coverage.org.objectweb.asm.*;
 
 import java.util.Collections;
 
@@ -37,8 +34,8 @@ public class TestDiscoveryInstrumenter extends ExtraFieldInstrumenter {
   static final String METHODS_VISITED_CLASS = "[Z";
   private final String[] myMethodNames;
 
-  public TestDiscoveryInstrumenter(ClassWriter classWriter, ClassReader cr, String className) {
-    super(cr, classWriter, className, METHODS_VISITED, METHODS_VISITED_CLASS, false);
+  public TestDiscoveryInstrumenter(ClassVisitor cw, ClassReader cr, String className) {
+    super(cr, cw, className, METHODS_VISITED, METHODS_VISITED_CLASS, false);
     myMethodFilter = new InstrumentedMethodsFilter(className);
     myClassName = className;
     myMethodNames = inspectClass(cr);

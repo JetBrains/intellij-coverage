@@ -21,7 +21,6 @@ import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInner
 import com.intellij.rt.coverage.testDiscovery.instrumentation.TestDiscoveryInstrumenter;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -38,7 +37,7 @@ public class TestDiscoveryTransformer extends AbstractIntellijClassfileTransform
   }
 
   @Override
-  protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
+  protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassVisitor cw) {
     return COUNTERS_IN_INNER_CLASS
         ? new TestDiscoveryInnerClassInstrumenter(cw, cr, className, loader)
         : new TestDiscoveryInstrumenter(cw, cr, className);

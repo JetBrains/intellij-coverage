@@ -58,7 +58,9 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
 
   public void visitEnd() {
     super.visitEnd();
-    myMethodNode.accept(myInstrumenter.createTouchCounter(myWriterMethodVisitor, myBranchData, this, myAccess, myMethodName, myDescriptor, getClassName()));
+    if (myWriterMethodVisitor != SaveHook.EMPTY_METHOD_VISITOR) {
+      myMethodNode.accept(myInstrumenter.createTouchCounter(myWriterMethodVisitor, myBranchData, this, myAccess, myMethodName, myDescriptor, getClassName()));
+    }
   }
 
   public void visitLineNumber(int line, Label start) {

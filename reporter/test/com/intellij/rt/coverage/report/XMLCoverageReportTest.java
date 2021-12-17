@@ -76,7 +76,6 @@ public class XMLCoverageReportTest {
   }
 
   @Test
-  @Ignore("Unloaded classes should be processed with coroutines filters")
   public void integrationTestCrossInline() throws Throwable {
     verifyProjectXML(runTestAndConvertToXML("testData\\.crossinline\\..*", "testData.crossinline.TestKt", true), "crossinline.xml");
   }

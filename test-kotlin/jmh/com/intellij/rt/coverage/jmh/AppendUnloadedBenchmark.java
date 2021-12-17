@@ -16,24 +16,15 @@
 
 package com.intellij.rt.coverage.jmh;
 
-import com.intellij.rt.coverage.data.*;
-import com.intellij.rt.coverage.instrumentation.SourceLineCounter;
-import com.intellij.rt.coverage.util.ErrorReporter;
-import com.intellij.rt.coverage.util.LinesUtil;
-import com.intellij.rt.coverage.util.StringsPool;
-import com.intellij.rt.coverage.util.classFinder.ClassEntry;
+import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.SaveHook;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
-import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
-import org.jetbrains.coverage.gnu.trove.TIntObjectProcedure;
-import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.openjdk.jmh.annotations.*;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -45,67 +36,25 @@ import java.util.regex.Pattern;
 @State(Scope.Benchmark)
 @Fork(1)
 public class AppendUnloadedBenchmark {
-  final boolean isSampling = false;
+  @Param({"false", "true"})
+  boolean isSampling = true;
   final boolean calculateSource = true;
 
   @Benchmark
-  public int unloaded() throws Exception {
+  public int instrumentation() throws Exception {
     final ProjectData projectData = ProjectData.createProjectData(new File("test.ic"), null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
-    createClassFinder().iterateMatchedClasses(new ClassEntry.Consumer() {
-      @Override
-      public void consume(ClassEntry classEntry) {
-        processClassEntry(projectData, classEntry);
-      }
-    });
+    SaveHook.appendUnloadedFullAnalysis(projectData, createClassFinder(), calculateSource, isSampling);
+    projectData.checkLineMappings();
     System.out.println(projectData.getClassesNumber());
     return projectData.getClassesNumber();
   }
 
-  private void processClassEntry(ProjectData projectData, ClassEntry classEntry) {
-    ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
-    if (cd != null && cd.getLines() != null) return;
-    try {
-      final InputStream classInputStream = classEntry.getClassInputStream();
-      if (classInputStream == null) return;
-      ClassReader reader = new ClassReader(classInputStream);
-      classInputStream.close();
-      if (calculateSource) {
-        cd = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
-      }
-      SourceLineCounter slc = new SourceLineCounter(cd, calculateSource ? projectData : null, !isSampling);
-      reader.accept(slc, 0);
-      if (slc.isEnum() || slc.getNSourceLines() > 0) { // ignore classes without executable code
-        final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
-        final int[] maxLine = new int[]{1};
-        final ClassData classData = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
-        slc.getSourceLines().forEachEntry(new TIntObjectProcedure<String>() {
-          public boolean execute(int line, String methodSig) {
-            final LineData ld = new LineData(line, StringsPool.getFromPool(methodSig));
-            lines.put(line, ld);
-            if (line > maxLine[0]) maxLine[0] = line;
-            classData.registerMethodSignature(ld);
-            ld.setStatus(LineCoverage.NONE);
-            return true;
-          }
-        });
-        final TIntObjectHashMap<JumpsAndSwitches> jumpsPerLine = slc.getJumpsPerLine();
-        if (jumpsPerLine != null) {
-          jumpsPerLine.forEachEntry(new TIntObjectProcedure<JumpsAndSwitches>() {
-            public boolean execute(int line, JumpsAndSwitches jumpData) {
-              final LineData lineData = lines.get(line);
-              if (lineData != null) {
-                lineData.setJumpsAndSwitches(jumpData);
-                lineData.fillArrays();
-              }
-              return true;
-            }
-          });
-        }
-        classData.setLines(LinesUtil.calcLineArray(maxLine[0], lines));
-      }
-    } catch (Throwable e) {
-      ErrorReporter.reportError("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
-    }
+  @Benchmark
+  public int unloaded() throws Exception {
+    final ProjectData projectData = ProjectData.createProjectData(new File("test.ic"), null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
+    SaveHook.appendUnloaded(projectData, createClassFinder(), calculateSource, isSampling);
+    System.out.println(projectData.getClassesNumber());
+    return projectData.getClassesNumber();
   }
 
   private ClassFinder createClassFinder() {

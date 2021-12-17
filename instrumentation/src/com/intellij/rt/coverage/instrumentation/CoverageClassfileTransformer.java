@@ -24,7 +24,6 @@ import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -51,7 +50,7 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
   }
 
   @Override
-  protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassWriter cw) {
+  protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassVisitor cw) {
     final Instrumenter instrumenter;
     if (data.isSampling()) {
       if (System.getProperty("idea.new.sampling.coverage") != null) {

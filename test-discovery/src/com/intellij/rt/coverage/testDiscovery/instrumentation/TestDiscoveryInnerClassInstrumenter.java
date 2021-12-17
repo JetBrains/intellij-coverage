@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.testDiscovery.instrumentation;
 
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
+import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
@@ -30,8 +31,8 @@ public class TestDiscoveryInnerClassInstrumenter extends TestDiscoveryInstrument
   private volatile Method myDefineClassMethodRef;
   private final ClassLoader myClassLoader;
 
-  public TestDiscoveryInnerClassInstrumenter(ClassWriter classWriter, ClassReader cr, String className, ClassLoader loader) {
-    super(classWriter, cr, className);
+  public TestDiscoveryInnerClassInstrumenter(ClassVisitor cw, ClassReader cr, String className, ClassLoader loader) {
+    super(cw, cr, className);
     myInternalCounterClassJVMName = myInternalClassName + "$" + myInternalCounterClassName;
     myClassLoader = loader;
   }
