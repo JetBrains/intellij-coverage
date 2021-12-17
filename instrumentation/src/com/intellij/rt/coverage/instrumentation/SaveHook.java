@@ -283,30 +283,34 @@ public class SaveHook implements Runnable {
   };
 
   public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean isSampling) {
+    final boolean ignorePrivateConstructorOfUtilClass = FilterUtils.ignorePrivateConstructorOfUtilClassEnabled();
     classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
       public void consume(ClassEntry classEntry) {
         final ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
         if (cd != null && cd.getLines() != null) return;
         try {
-          final InputStream classInputStream = classEntry.getClassInputStream();
-          if (classInputStream == null) return;
-          final Instrumenter instrumenter;
-          if (isSampling) {
-            instrumenter = new SamplingInstrumenter(projectData, EMPTY_CLASS_VISITOR, classEntry.getClassName(), calculateSource);
-          } else {
-            instrumenter = new TracingInstrumenter(projectData, EMPTY_CLASS_VISITOR, classEntry.getClassName(), calculateSource);
-          }
-          ClassVisitor visitor = instrumenter;
-          if (FilterUtils.ignorePrivateConstructorOfUtilClassEnabled()) {
-            visitor = PrivateConstructorOfUtilClassFilter.createWithContext(visitor, instrumenter);
-          }
-          final ClassReader reader = new ClassReader(classInputStream);
-          reader.accept(visitor, ClassReader.SKIP_FRAMES);
+          final InputStream is = classEntry.getClassInputStream();
+          if (is == null) return;
+          appendUnloadedClass(projectData, classEntry.getClassName(), new ClassReader(is), isSampling, calculateSource, ignorePrivateConstructorOfUtilClass);
         } catch (Throwable e) {
           ErrorReporter.reportError("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
         }
       }
     });
+  }
+
+  public static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean isSampling, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass) {
+    final Instrumenter instrumenter;
+    if (isSampling) {
+      instrumenter = new SamplingInstrumenter(projectData, EMPTY_CLASS_VISITOR, className, calculateSource);
+    } else {
+      instrumenter = new TracingInstrumenter(projectData, EMPTY_CLASS_VISITOR, className, calculateSource);
+    }
+    ClassVisitor visitor = instrumenter;
+    if (ignorePrivateConstructorOfUtilClass) {
+      visitor = PrivateConstructorOfUtilClassFilter.createWithContext(visitor, instrumenter);
+    }
+    reader.accept(visitor, ClassReader.SKIP_FRAMES);
   }
 
     public void setSourceMapFile(File sourceMapFile) {
