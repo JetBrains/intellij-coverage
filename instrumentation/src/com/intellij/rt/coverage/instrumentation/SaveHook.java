@@ -313,6 +313,11 @@ public class SaveHook implements Runnable {
     reader.accept(visitor, ClassReader.SKIP_FRAMES);
     final ClassData classData = projectData.getClassData(className);
     if (classData == null || classData.getLines() == null) return;
+    final LineData[] lines = (LineData[]) classData.getLines();
+    for (LineData line : lines) {
+      if (line == null) continue;
+      classData.registerMethodSignature(line);
+    }
     final Map<String, FileMapData[]> linesMap = projectData.getLinesMap();
     if (linesMap == null) return;
     final FileMapData[] mappings = linesMap.remove(className);
