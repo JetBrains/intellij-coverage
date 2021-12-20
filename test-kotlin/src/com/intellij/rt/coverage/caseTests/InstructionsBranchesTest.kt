@@ -22,6 +22,10 @@ import org.junit.Test
 import java.io.File
 
 internal abstract class InstructionsBranchesTest(override val coverage: Coverage) : CoverageTest() {
+    init {
+        commonExtraArgs.add("-Dcoverage.instructions.enable=true")
+    }
+
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
         val expected = extractExtendedInfoFromFile(testFile)
         assertEqualsExtendedInfo(projectData, expected, configuration.classes)

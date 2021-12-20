@@ -34,7 +34,12 @@ public abstract class AbstractTracingInstrumenter extends Instrumenter {
   protected MethodVisitor createMethodLineEnumerator(MethodVisitor mv, String name, String desc, int access, String signature,
                                                      String[] exceptions) {
     myBranchData.resetMethod();
-    final LineEnumerator enumerator = new LineEnumerator(this, myBranchData, mv, access, name, desc, signature, exceptions);
+    final LineEnumerator enumerator;
+    if (myProjectData.isInstructionsCoverageEnabled()) {
+      enumerator = new InstructionsEnumerator(this, myBranchData, mv, access, name, desc, signature, exceptions);
+    } else {
+      enumerator = new LineEnumerator(this, myBranchData, mv, access, name, desc, signature, exceptions);
+    }
     return chainFilters(name, desc, access, signature, exceptions, enumerator);
   }
 

@@ -50,6 +50,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   private boolean myTraceLines;
   private boolean mySampling;
+  private boolean myCollectInstructions;
 
   /**
    * Test tracking trace storage. Test tracking supports only sequential tests (but code inside one test could be parallel).
@@ -101,6 +102,14 @@ public class ProjectData implements CoverageData, Serializable {
     return myTraceLines;
   }
 
+  public boolean isInstructionsCoverageEnabled() {
+    return myCollectInstructions;
+  }
+
+  public void setInstructionsCoverage(boolean isEnabled) {
+    myCollectInstructions = isEnabled;
+  }
+
   public int getClassesNumber() {
     return myClasses.size();
   }
@@ -124,6 +133,7 @@ public class ProjectData implements CoverageData, Serializable {
     }
     ourProjectData.mySampling = isSampling;
     ourProjectData.myTraceLines = traceLines;
+    ourProjectData.myCollectInstructions = "true".equals(System.getProperty("coverage.instructions.enable", "false"));
     ourProjectData.myDataFile = dataFile;
     ourProjectData.myIncludePatterns = includePatterns;
     ourProjectData.myExcludePatterns = excludePatterns;
