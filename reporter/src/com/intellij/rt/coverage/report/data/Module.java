@@ -84,7 +84,6 @@ public class Module {
     final ProjectData projectData = new ProjectData();
     if (myOutputRoots == null) return projectData;
     SaveHook.appendUnloadedFullAnalysis(projectData, new OutputClassFinder(), true, false);
-    projectData.checkLineMappings();
     return projectData;
   }
 

@@ -62,7 +62,7 @@ public class ProjectData implements CoverageData, Serializable {
   private List<Pattern> myExcludePatterns;
 
   private final ClassesMap myClasses = new ClassesMap();
-  private Map<String, FileMapData[]> myLinesMap;
+  private volatile Map<String, FileMapData[]> myLinesMap;
 
   private static Object ourProjectDataObject;
 
@@ -192,7 +192,11 @@ public class ProjectData implements CoverageData, Serializable {
 
   public void addLineMaps(String className, FileMapData[] fileDatas) {
     if (myLinesMap == null) {
-      myLinesMap = new HashMap<String, FileMapData[]>();
+      synchronized (FileMapData.class) {
+        if (myLinesMap == null) {
+          myLinesMap = new ConcurrentHashMap<String, FileMapData[]>();
+        }
+      }
     }
     myLinesMap.put(className, fileDatas);
   }
