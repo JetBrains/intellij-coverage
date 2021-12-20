@@ -35,7 +35,7 @@ public class InstructionsSection extends ClassListSection {
 
   @Override
   public boolean isEngaged(ProjectData projectData) {
-    return !projectData.isSampling();
+    return !projectData.isSampling() && projectData.isInstructionsCoverageEnabled();
   }
 
   @Override
