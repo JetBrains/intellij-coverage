@@ -62,19 +62,19 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   protected void onNewSwitch(SwitchLabels original, SwitchLabels replacement) {
   }
 
+  public void visitEnd() {
+    super.visitEnd();
+    if (myWriterMethodVisitor != SaveHook.EMPTY_METHOD_VISITOR) {
+      myMethodNode.accept(myInstrumenter.createTouchCounter(myWriterMethodVisitor, myBranchData, this, myAccess, myMethodName, myDescriptor, getClassName()));
+    }
+  }
+
   public void visitLineNumber(int line, Label start) {
     super.visitLineNumber(line, start);
     myCurrentLine = line;
     myHasExecutableLines = true;
     LineData lineData = myInstrumenter.getOrCreateLineData(myCurrentLine, myMethodName, myDescriptor);
     myBranchData.addLine(lineData);
-  }
-
-  public void visitEnd() {
-    super.visitEnd();
-    if (myWriterMethodVisitor != SaveHook.EMPTY_METHOD_VISITOR) {
-      myMethodNode.accept(myInstrumenter.createTouchCounter(myWriterMethodVisitor, myBranchData, this, myAccess, myMethodName, myDescriptor, getClassName()));
-    }
   }
 
   public void visitJumpInsn(final int opcode, final Label label) {
