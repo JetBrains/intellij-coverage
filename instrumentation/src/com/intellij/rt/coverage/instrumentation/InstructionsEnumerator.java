@@ -122,16 +122,19 @@ public class InstructionsEnumerator extends LineEnumerator {
 
   @Override
   public void visitJumpInsn(final int opcode, final Label label) {
+    myInstructionCounter++;
     saveInstructionsToOwner();
     super.visitJumpInsn(opcode, label);
   }
 
   public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
+    myInstructionCounter++;
     saveInstructionsToOwner();
     super.visitLookupSwitchInsn(dflt, keys, labels);
   }
 
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
+    myInstructionCounter++;
     saveInstructionsToOwner();
     super.visitTableSwitchInsn(min, max, dflt, labels);
   }

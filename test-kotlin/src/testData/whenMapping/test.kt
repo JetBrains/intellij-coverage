@@ -24,9 +24,9 @@ enum class F {
 }
 
 fun f(f: F): Int {
-    return when (f) {           // coverage: PARTIAL // stats: 5/5 1/3
-        F.A, F.B -> 42          // coverage: FULL    // stats: 1/1
-        F.C -> 36               // coverage: NONE    // stats: 0/5
+    return when (f) {           // coverage: PARTIAL // stats: 6/6 1/3
+        F.A, F.B -> 42          // coverage: FULL    // stats: 2/2
+        F.C -> 36               // coverage: NONE    // stats: 0/6
     }
 }
 
@@ -35,13 +35,13 @@ enum class SimpleEnum {
 }
 
 fun simpleF(v: SimpleEnum) =
-    when (v) {                  // coverage: FULL // stats: 5/5 1/1
-        SimpleEnum.Single -> 42 // coverage: FULL // stats: 5/5
+    when (v) {                  // coverage: FULL // stats: 6/6 1/1
+        SimpleEnum.Single -> 42 // coverage: FULL // stats: 6/6
     }
 
 fun noneF(v: SimpleEnum) =
-    when (v) {                  // coverage: NONE // stats: 0/5 0/1
-        SimpleEnum.Single -> 42 // coverage: NONE // stats: 0/5
+    when (v) {                  // coverage: NONE // stats: 0/6 0/1
+        SimpleEnum.Single -> 42 // coverage: NONE // stats: 0/6
     }
 
 fun main() {

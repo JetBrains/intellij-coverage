@@ -30,9 +30,9 @@ class User(val actions: Int) {                      // coverage: NONE // stats: 
 
         val actionsThreshold = 4                    // coverage: NONE // stats: 0/2
         val users = listOf(User(5))                 // coverage: NONE // stats: 0/6
-        for (user in users) {                       // coverage: NONE // stats: 0/9 0/2
-            if (user.actions < actionsThreshold) {  // coverage: NONE // stats: 0/3 0/2
-                inactiveUsers.add(user)             // coverage: NONE // stats: 0/4
+        for (user in users) {                       // coverage: NONE // stats: 0/11 0/2
+            if (user.actions < actionsThreshold) {  // coverage: NONE // stats: 0/4 0/2
+                inactiveUsers.add(user)             // coverage: NONE // stats: 0/5
             } else {
                 activeUsers.add(user)               // coverage: NONE // stats: 0/4
             }
