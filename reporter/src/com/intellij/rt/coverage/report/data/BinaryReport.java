@@ -16,13 +16,15 @@
 
 package com.intellij.rt.coverage.report.data;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.File;
 
 public class BinaryReport {
   private final File myDataFile;
   private final File mySourceMapFile;
 
-  public BinaryReport(File dataFile, File sourceMapFile) {
+  public BinaryReport(File dataFile, @Nullable File sourceMapFile) {
     myDataFile = dataFile;
     mySourceMapFile = sourceMapFile;
   }
@@ -31,6 +33,7 @@ public class BinaryReport {
     return myDataFile;
   }
 
+  @Nullable
   public File getSourceMapFile() {
     return mySourceMapFile;
   }

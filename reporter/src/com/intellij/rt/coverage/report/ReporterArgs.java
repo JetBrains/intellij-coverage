@@ -93,8 +93,8 @@ public class ReporterArgs {
     for (int reportId = 0; reportId < reports.length(); reportId++) {
       final JSONObject report = reports.getJSONObject(reportId);
       final String icPath = report.getString(IC_FILE_TAG);
-      final String smapPath = report.getString(SMAP_FILE_TAG);
-      reportList.add(new BinaryReport(new File(icPath), new File(smapPath)));
+      final File smap = report.has(SMAP_FILE_TAG) ? new File(report.getString(SMAP_FILE_TAG)) : null;
+      reportList.add(new BinaryReport(new File(icPath), smap));
     }
 
     final File xmlFile = args.has(XML_FILE_TAG) ? new File(args.getString(XML_FILE_TAG)) : null;
@@ -133,7 +133,7 @@ public class ReporterArgs {
   public static String getHelpString() {
     return "Arguments must be passed in the following JSON format:\n" +
         "{\n" +
-        "  reports: [{ic: \"path\", smap: \"path\"}, ...],\n" +
+        "  reports: [{ic: \"path\", smap: \"path\" [OPTIONAL]}, ...],\n" +
         "  modules: [{output: [\"path1\", \"path2\"], sources: [\"source1\", …]}, {…}],\n" +
         "  xml: \"path\" [OPTIONAL],\n" +
         "  html: \"directory\" [OPTIONAL],\n" +
