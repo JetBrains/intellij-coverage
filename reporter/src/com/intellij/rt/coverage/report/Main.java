@@ -16,19 +16,18 @@
 
 package com.intellij.rt.coverage.report;
 
-import com.intellij.rt.coverage.report.data.Module;
+import com.intellij.rt.coverage.report.data.ProjectReport;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Main {
   public static void main(String[] argsList) {
     try {
       final ReporterArgs args = ReporterArgs.from(argsList);
 
-      final Reporter reporter = new Reporter(args.modules);
+      final ProjectReport projectReport = new ProjectReport(args.reports, args.modules, args.includeClasses, args.excludeClasses);
+      final Reporter reporter = new Reporter(projectReport);
 
       boolean fail = false;
 
@@ -45,12 +44,8 @@ public class Main {
 
       final File htmlDir = args.htmlDir;
       if (htmlDir != null) {
-        final List<File> sources = new ArrayList<File>();
-        for (Module module : args.modules) {
-          sources.addAll(module.getSources());
-        }
         try {
-          reporter.createHTMLReport(htmlDir, sources);
+          reporter.createHTMLReport(htmlDir);
         } catch (IOException e) {
           fail = true;
           System.err.println("HTML generation failed.");

@@ -19,25 +19,23 @@ package com.intellij.rt.coverage.report;
 import com.intellij.rt.coverage.CoverageStatusTest;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.data.Module;
+import com.intellij.rt.coverage.report.data.ProjectReport;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class TestUtils {
   @NotNull
   public static BinaryReport runTest(String patterns, String className) throws IOException, InterruptedException {
-    return runTest(patterns, className, false);
-  }
-
-  @NotNull
-  public static BinaryReport runTest(String patterns, String className, boolean calcUnloaded) throws IOException, InterruptedException {
     final File icFile = File.createTempFile("report_tmp", ".ic");
     final File sourceMapFile = File.createTempFile("report_tmp", ".sm");
     patterns = "true " + sourceMapFile.getAbsolutePath() + " " + patterns;
-    CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), icFile, patterns, className, false, new String[0], calcUnloaded, false);
+    CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), icFile, patterns, className, false);
     return new BinaryReport(icFile, sourceMapFile);
   }
 
@@ -47,10 +45,29 @@ public class TestUtils {
     return new File(expectedPath);
   }
 
-  public static Reporter createReporter(BinaryReport report, String output, String source) {
+  public static Reporter createReporter(BinaryReport report, String patterns) {
+    final String kotlinOutput = "build" + File.separator + "classes" + File.separator + "kotlin" + File.separator + "test";
+    final String javaOutput = "build" + File.separator + "classes" + File.separator + "java" + File.separator + "test";
+    final List<File> output = new ArrayList<File>();
+    output.add(new File(kotlinOutput));
+    output.add(new File(javaOutput));
     final List<BinaryReport> reports = report == null ? Collections.<BinaryReport>emptyList() : Collections.singletonList(report);
-    final List<File> outputs = output == null ? null : Collections.singletonList(new File(output));
-    final List<File> sources = source == null ? null : Collections.singletonList(new File(source));
-    return new Reporter(Collections.singletonList(new Module(reports, outputs, sources)));
+    final List<Pattern> includes = new ArrayList<Pattern>();
+    final List<Pattern> excludes = new ArrayList<Pattern>();
+    boolean isInclude = true;
+    for (String pattern : patterns.split(" ")) {
+      if (pattern.isEmpty()) continue;
+      if (pattern.equals("-exlude")) {
+        isInclude = false;
+        continue;
+      }
+      (isInclude ? includes : excludes).add(Pattern.compile(pattern));
+    }
+    return new Reporter(new ProjectReport(reports, Collections.singletonList(new Module(output, getSources())), includes, excludes));
+  }
+
+  @NotNull
+  private static List<File> getSources() {
+    return Collections.singletonList(new File("test"));
   }
 }

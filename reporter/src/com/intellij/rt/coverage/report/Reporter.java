@@ -16,8 +16,7 @@
 
 package com.intellij.rt.coverage.report;
 
-import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.report.data.Module;
+import com.intellij.rt.coverage.report.data.ProjectReport;
 import jetbrains.coverage.report.ReportBuilderFactory;
 import jetbrains.coverage.report.SourceCodeProvider;
 import jetbrains.coverage.report.html.HTMLReportBuilder;
@@ -26,23 +25,12 @@ import jetbrains.coverage.report.idea.IDEACoverageData;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
 
 public class Reporter {
-  private final List<Module> myModules;
-  private ProjectData myProjectData;
+  private final ProjectReport myProjectReport;
 
-  public Reporter(List<Module> modules) {
-    myModules = modules;
-  }
-
-  private ProjectData getProjectData() throws IOException {
-    if (myProjectData != null) return myProjectData;
-    myProjectData = new ProjectData();
-    for (Module module : myModules) {
-      myProjectData.merge(module.getProjectData());
-    }
-    return myProjectData;
+  public Reporter(ProjectReport projectReport) {
+    myProjectReport = projectReport;
   }
 
   public void createXMLReport(File xmlFile) throws IOException {
@@ -50,7 +38,7 @@ public class Reporter {
     FileOutputStream out = null;
     try {
       out = new FileOutputStream(xmlFile);
-      report.write(out, getProjectData());
+      report.write(out, myProjectReport.getProjectData());
     } finally {
       if (out != null) {
         out.close();
@@ -58,10 +46,10 @@ public class Reporter {
     }
   }
 
-  public void createHTMLReport(File htmlDir, final List<File> sourceDirectories) throws IOException {
+  public void createHTMLReport(File htmlDir) throws IOException {
     final HTMLReportBuilder builder = ReportBuilderFactory.createHTMLReportBuilder();
     builder.setReportDir(htmlDir);
-    final SourceCodeProvider sourceCodeProvider = new DirectorySourceCodeProvider(getProjectData(), sourceDirectories);
-    builder.generateReport(new IDEACoverageData(getProjectData(), sourceCodeProvider));
+    final SourceCodeProvider sourceCodeProvider = new DirectorySourceCodeProvider(myProjectReport.getProjectData(), myProjectReport.getSources());
+    builder.generateReport(new IDEACoverageData(myProjectReport.getProjectData(), sourceCodeProvider));
   }
 }

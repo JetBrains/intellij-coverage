@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class ReporterArgs {
   static final String XML_FILE_TAG = "xml";
@@ -37,16 +38,25 @@ public class ReporterArgs {
   static final String SMAP_FILE_TAG = "smap";
   static final String OUTPUTS_TAG = "output";
   static final String SOURCES_TAG = "sources";
+  static final String INCLUDE_TAG = "include";
+  static final String EXCLUDE_TAG = "exclude";
+  static final String CLASSES_TAG = "classes";
 
 
+  public final List<BinaryReport> reports;
   public final List<Module> modules;
   public final File xmlFile;
   public final File htmlDir;
+  public final List<Pattern> includeClasses;
+  public final List<Pattern> excludeClasses;
 
-  ReporterArgs(List<Module> modules, File xmlFile, File htmlDir) {
+  ReporterArgs(List<BinaryReport> reportList, List<Module> modules, File xmlFile, File htmlDir, List<Pattern> includeClassPatterns, List<Pattern> excludeClassPatterns) {
+    this.reports = reportList;
     this.modules = modules;
     this.xmlFile = xmlFile;
     this.htmlDir = htmlDir;
+    this.includeClasses = includeClassPatterns;
+    this.excludeClasses = excludeClassPatterns;
   }
 
   public static ReporterArgs from(String[] args) throws ArgParseException {
@@ -75,31 +85,44 @@ public class ReporterArgs {
     final JSONArray modules = args.getJSONArray(MODULES_TAG);
     for (int moduleId = 0; moduleId < modules.length(); moduleId++) {
       final JSONObject module = modules.getJSONObject(moduleId);
+      moduleList.add(new Module(parsePathList(module, OUTPUTS_TAG), parsePathList(module, SOURCES_TAG)));
+    }
 
-      final List<BinaryReport> reportList = new ArrayList<BinaryReport>();
-      if (module.has(REPORTS_TAG)) {
-        final JSONArray reports = module.getJSONArray(REPORTS_TAG);
-        for (int reportId = 0; reportId < reports.length(); reportId++) {
-          final JSONObject report = reports.getJSONObject(reportId);
-          final String icPath = report.getString(IC_FILE_TAG);
-          final String smapPath = report.getString(SMAP_FILE_TAG);
-          reportList.add(new BinaryReport(new File(icPath), new File(smapPath)));
-        }
-      }
-
-      moduleList.add(new Module(reportList, parsePathList(module, OUTPUTS_TAG), parsePathList(module, SOURCES_TAG)));
+    final List<BinaryReport> reportList = new ArrayList<BinaryReport>();
+    final JSONArray reports = args.getJSONArray(REPORTS_TAG);
+    for (int reportId = 0; reportId < reports.length(); reportId++) {
+      final JSONObject report = reports.getJSONObject(reportId);
+      final String icPath = report.getString(IC_FILE_TAG);
+      final String smapPath = report.getString(SMAP_FILE_TAG);
+      reportList.add(new BinaryReport(new File(icPath), new File(smapPath)));
     }
 
     final File xmlFile = args.has(XML_FILE_TAG) ? new File(args.getString(XML_FILE_TAG)) : null;
     final File htmlDir = args.has(HTML_DIR_TAG) ? new File(args.getString(HTML_DIR_TAG)) : null;
 
-    return new ReporterArgs(moduleList, xmlFile, htmlDir);
+    final List<Pattern> includeClassPatterns = parsePatterns(args, INCLUDE_TAG, CLASSES_TAG);
+    final List<Pattern> excludeClassPatterns = parsePatterns(args, EXCLUDE_TAG, CLASSES_TAG);
+
+    return new ReporterArgs(reportList, moduleList, xmlFile, htmlDir, includeClassPatterns, excludeClassPatterns);
+  }
+
+  private static List<Pattern> parsePatterns(JSONObject args, String groupTag, String sectionTag) {
+    final List<Pattern> patterns = new ArrayList<Pattern>();
+    if (!args.has(groupTag)) return patterns;
+    final JSONObject group = args.getJSONObject(groupTag);
+    if (!group.has(sectionTag)) return patterns;
+    final JSONArray arrayPatterns = group.getJSONArray(sectionTag);
+    for (int i = 0; i < arrayPatterns.length(); i++) {
+      final String pattern = arrayPatterns.getString(i);
+      patterns.add(Pattern.compile(pattern));
+    }
+    return patterns;
   }
 
   private static List<File> parsePathList(JSONObject module, String tag) {
-    if (!module.has(tag)) return null;
-    final JSONArray array = module.getJSONArray(tag);
     final List<File> result = new ArrayList<File>();
+    if (!module.has(tag)) return result;
+    final JSONArray array = module.getJSONArray(tag);
     for (int i = 0; i < array.length(); i++) {
       final String path = array.getString(i);
       result.add(new File(path));
@@ -110,16 +133,16 @@ public class ReporterArgs {
   public static String getHelpString() {
     return "Arguments must be passed in the following JSON format:\n" +
         "{\n" +
-        "  \"modules\": [\n" +
-        "    { \"reports\": [\n" +
-        "        {\"ic\": \"path to ic binary file\", \"smap\": \"path to source map file\"}\n" +
-        "      ] [OPTIONAL, absence means that all classes were not covered],\n" +
-        "      \"output\": [\"outputRoot1\", \"outputRoot2\"],\n" +
-        "      \"sources\": [\"sourceRoot1\", \"sourceRoot2\"]\n" +
-        "    }\n" +
-        "  ],\n" +
-        "  \"xml\": \"path to xml file\" [OPTIONAL],\n" +
-        "  \"html\": \"path to html directory\" [OPTIONAL]\n" +
+        "  reports: [{ic: \"path\", smap: \"path\"}, ...],\n" +
+        "  modules: [{output: [\"path1\", \"path2\"], sources: [\"source1\", …]}, {…}],\n" +
+        "  xml: \"path\" [OPTIONAL],\n" +
+        "  html: \"directory\" [OPTIONAL],\n" +
+        "  include: {\n" +
+        "        classes: [\"regex1\", \"regex2\"] [OPTIONAL]\n" +
+        "   } [OPTIONAL],\n" +
+        "  exclude: {\n" +
+        "        classes: [\"regex1\", \"regex2\"] [OPTIONAL]\n" +
+        "   } [OPTIONAL],\n" +
         "}";
   }
 

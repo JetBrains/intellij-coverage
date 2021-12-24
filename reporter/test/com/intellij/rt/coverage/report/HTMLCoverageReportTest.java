@@ -25,23 +25,21 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 
 public class HTMLCoverageReportTest {
   @Test
   public void testSimple() throws Throwable {
-    verifyHTMLDir(runTestAndConvertToHTML(".*", "testData.simple.Main", getSources()));
+    verifyHTMLDir(runTestAndConvertToHTML(".*", "testData.simple.Main"));
   }
 
   @Test
   public void testInline() throws Throwable {
-    verifyHTMLDir(runTestAndConvertToHTML("testData\\.inline\\..*", "testData.inline.Test", getSources()));
+    verifyHTMLDir(runTestAndConvertToHTML("testData\\.inline\\..*", "testData.inline.Test"));
   }
 
   @Test
   public void testFileOutOfPackageStructure() throws Throwable {
-    final File htmlDir = runTestAndConvertToHTML("testData\\..*", "testData.outOfPackageStructure.TestOutOfPackageStructureKt", getSources());
+    final File htmlDir = runTestAndConvertToHTML("testData\\..*", "testData.outOfPackageStructure.TestOutOfPackageStructureKt");
     verifyHTMLDir(htmlDir);
     final File sourcesFile = new File(htmlDir, "ns-1" + File.separator + "sources" + File.separator + "source-1.html");
     Assert.assertTrue(sourcesFile.exists());
@@ -50,7 +48,7 @@ public class HTMLCoverageReportTest {
 
   @Test
   public void testTopLevel() throws Throwable {
-    final File htmlDir = runTestAndConvertToHTML("", "TestTopLevelKt", getSources());
+    final File htmlDir = runTestAndConvertToHTML("", "TestTopLevelKt");
     verifyHTMLDir(htmlDir);
     final File sourcesFile = new File(htmlDir, "ns-1" + File.separator + "sources" + File.separator + "source-1.html");
     Assert.assertTrue(sourcesFile.exists());
@@ -76,10 +74,10 @@ public class HTMLCoverageReportTest {
     return builder.toString();
   }
 
-  private File runTestAndConvertToHTML(String patterns, String className, List<File> sources) throws Throwable {
+  private File runTestAndConvertToHTML(String patterns, String className) throws Throwable {
     final BinaryReport report = TestUtils.runTest(patterns, className);
     final File htmlDir = createHtmlDir(report.getDataFile());
-    TestUtils.createReporter(report, null, null).createHTMLReport(htmlDir, sources);
+    TestUtils.createReporter(report, patterns).createHTMLReport(htmlDir);
     return htmlDir;
   }
 
@@ -89,10 +87,5 @@ public class HTMLCoverageReportTest {
     final File htmlDir = new File(icFile.getParentFile(), dirName);
     htmlDir.mkdir();
     return htmlDir;
-  }
-
-  @NotNull
-  private List<File> getSources() {
-    return Collections.singletonList(new File("test"));
   }
 }

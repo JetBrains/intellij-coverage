@@ -43,20 +43,15 @@ public class JsonConfigTest {
     Assert.assertEquals(3, modules.length());
     final JSONObject module1 = modules.getJSONObject(0);
 
-    Assert.assertEquals(1, module1.getJSONArray("reports").length());
-    Assert.assertEquals("icPath", module1.getJSONArray("reports").getJSONObject(0).getString("ic"));
-    Assert.assertEquals("smapPath", module1.getJSONArray("reports").getJSONObject(0).getString("smap"));
+    Assert.assertEquals(1, args.getJSONArray("reports").length());
+    Assert.assertEquals("icPath", args.getJSONArray("reports").getJSONObject(0).getString("ic"));
+    Assert.assertEquals("smapPath", args.getJSONArray("reports").getJSONObject(0).getString("smap"));
     Assert.assertEquals(1, module1.getJSONArray("output").length());
     Assert.assertEquals("outputPath", module1.getJSONArray("output").getString(0));
     Assert.assertEquals(1, module1.getJSONArray("sources").length());
     Assert.assertEquals("sourcePath", module1.getJSONArray("sources").getString(0));
 
     final JSONObject module2 = modules.getJSONObject(1);
-    Assert.assertEquals(2, module2.getJSONArray("reports").length());
-    Assert.assertEquals("icPath1", module2.getJSONArray("reports").getJSONObject(0).getString("ic"));
-    Assert.assertEquals("smapPath1", module2.getJSONArray("reports").getJSONObject(0).getString("smap"));
-    Assert.assertEquals("icPath2", module2.getJSONArray("reports").getJSONObject(1).getString("ic"));
-    Assert.assertEquals("smapPath2", module2.getJSONArray("reports").getJSONObject(1).getString("smap"));
     Assert.assertEquals(2, module2.getJSONArray("output").length());
     Assert.assertEquals("outputPath1", module2.getJSONArray("output").getString(0));
     Assert.assertEquals("outputPath2", module2.getJSONArray("output").getString(1));
@@ -72,30 +67,24 @@ public class JsonConfigTest {
     Assert.assertEquals("directory", args.htmlDir.getPath());
 
     final Module module1 = args.modules.get(0);
-    Assert.assertEquals(1, module1.getReports().size());
-    Assert.assertEquals("icPath", module1.getReports().get(0).getDataFile().getPath());
-    Assert.assertEquals("smapPath", module1.getReports().get(0).getSourceMapFile().getPath());
+    Assert.assertEquals(1, args.reports.size());
+    Assert.assertEquals("icPath", args.reports.get(0).getDataFile().getPath());
+    Assert.assertEquals("smapPath", args.reports.get(0).getSourceMapFile().getPath());
     Assert.assertEquals(1, module1.getOutputRoots().size());
     Assert.assertEquals("outputPath", module1.getOutputRoots().get(0).getPath());
     Assert.assertEquals(1, module1.getSources().size());
     Assert.assertEquals("sourcePath", module1.getSources().get(0).getPath());
 
     final Module module2 = args.modules.get(1);
-    Assert.assertEquals(2, module2.getReports().size());
-    Assert.assertEquals("icPath1", module2.getReports().get(0).getDataFile().getPath());
-    Assert.assertEquals("smapPath1", module2.getReports().get(0).getSourceMapFile().getPath());
-    Assert.assertEquals("icPath2", module2.getReports().get(1).getDataFile().getPath());
-    Assert.assertEquals("smapPath2", module2.getReports().get(1).getSourceMapFile().getPath());
     Assert.assertEquals(2, module2.getOutputRoots().size());
     Assert.assertEquals("outputPath1", module2.getOutputRoots().get(0).getPath());
     Assert.assertEquals("outputPath2", module2.getOutputRoots().get(1).getPath());
     Assert.assertEquals(0, module2.getSources().size());
 
     final Module module3 = args.modules.get(2);
-    Assert.assertEquals(0, module3.getReports().size());
     Assert.assertEquals(2, module3.getSources().size());
     Assert.assertEquals("sourcePath1", module3.getSources().get(0).getPath());
     Assert.assertEquals("sourcePath2", module3.getSources().get(1).getPath());
-    Assert.assertNull(module3.getOutputRoots());
+    Assert.assertEquals(0, module3.getOutputRoots().size());
   }
 }

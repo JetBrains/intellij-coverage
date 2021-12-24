@@ -23,7 +23,6 @@ import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.util.FileUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -62,7 +61,7 @@ public class XMLCoverageReportTest {
 
   @Test
   public void integrationTestVerifyXML() throws Throwable {
-    verifyProjectXML(runTestAndConvertToXML(".*", "testData.simple.Main"), "xmlIntegrationTest.xml");
+    verifyProjectXML(runTestAndConvertToXML("testData.simple.*", "testData.simple.Main"), "xmlIntegrationTest.xml");
   }
 
   @Test
@@ -72,30 +71,25 @@ public class XMLCoverageReportTest {
 
   @Test
   public void integrationTestBranches() throws Throwable {
-    verifyProjectXML(runTestAndConvertToXML("testData\\.branches\\..*", "testData.branches.TestKt", true), "branches.xml");
+    verifyProjectXML(runTestAndConvertToXML("testData\\.branches\\..*", "testData.branches.TestKt"), "branches.xml");
   }
 
   @Test
   public void integrationTestCrossInline() throws Throwable {
-    verifyProjectXML(runTestAndConvertToXML("testData\\.crossinline\\..*", "testData.crossinline.TestKt", true), "crossinline.xml");
+    verifyProjectXML(runTestAndConvertToXML("testData\\.crossinline\\..*", "testData.crossinline.TestKt"), "crossinline.xml");
   }
 
   @Test
   public void integrationTestNoReport() throws Throwable {
     final File xmlFile = createXMLFile();
-    final String output = "build" + File.separator + "classes" + File.separator + "kotlin" + File.separator + "test" + File.separator + "testData" + File.separator + "noReport";
-    TestUtils.createReporter(null, output, null).createXMLReport(xmlFile);
+    TestUtils.createReporter(null, "testData.noReport.*").createXMLReport(xmlFile);
     verifyProjectXML(xmlFile, "xmlNoReport.xml");
   }
 
   private File runTestAndConvertToXML(String patterns, String className) throws Throwable {
-    return runTestAndConvertToXML(patterns, className, false);
-  }
-
-  private File runTestAndConvertToXML(String patterns, String className, boolean calcUnloaded) throws Throwable {
-    final BinaryReport report = TestUtils.runTest(patterns, className, calcUnloaded);
+    final BinaryReport report = TestUtils.runTest(patterns, className);
     final File xmlFile = createXMLFile();
-    TestUtils.createReporter(report, null, null).createXMLReport(xmlFile);
+    TestUtils.createReporter(report, patterns).createXMLReport(xmlFile);
     return xmlFile;
   }
 

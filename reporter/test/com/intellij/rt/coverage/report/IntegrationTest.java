@@ -26,9 +26,9 @@ public class IntegrationTest {
 
   @Test
   public void testXML() throws Throwable {
-    final BinaryReport report = TestUtils.runTest(".*", "testData.simple.Main");
+    final BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
     final File xmlFile = XMLCoverageReportTest.createXMLFile();
-    final File argsFile = ReporterArgsTest.argsToFile(report, outputPath(), "test", xmlFile.getAbsolutePath(), null);
+    final File argsFile = ReporterArgsTest.argsToFile(report, outputPath(), "test", xmlFile.getAbsolutePath(), null, "testData.simple.*");
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),
@@ -40,9 +40,9 @@ public class IntegrationTest {
 
   @Test
   public void testHTML() throws Throwable {
-    final BinaryReport report = TestUtils.runTest(".*", "testData.simple.Main");
+    final BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
     final File htmlDir = HTMLCoverageReportTest.createHtmlDir(report.getDataFile());
-    final File argsFile = ReporterArgsTest.argsToFile(report, outputPath(), "test", null, htmlDir.getAbsolutePath());
+    final File argsFile = ReporterArgsTest.argsToFile(report, outputPath(), "test", null, htmlDir.getAbsolutePath(), "testData.simple.*");
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),

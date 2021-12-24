@@ -27,15 +27,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class ReporterArgsTest {
-  public static File argsToFile(BinaryReport binaryReport, String outputPath, String sourcesPath, String xmlPath, String htmlPath) throws IOException {
+  public static File argsToFile(BinaryReport binaryReport, String outputPath, String sourcesPath, String xmlPath, String htmlPath, String include) throws IOException {
     final JSONObject args = new JSONObject();
     final JSONObject module = new JSONObject();
     final JSONObject report = new JSONObject();
     report.put(ReporterArgs.IC_FILE_TAG, binaryReport.getDataFile().getAbsolutePath());
     report.put(ReporterArgs.SMAP_FILE_TAG, binaryReport.getSourceMapFile().getAbsolutePath());
-    module.append(ReporterArgs.REPORTS_TAG, report);
+    args.append(ReporterArgs.REPORTS_TAG, report);
     module.append(ReporterArgs.OUTPUTS_TAG, outputPath);
     module.append(ReporterArgs.SOURCES_TAG, sourcesPath);
     args.append(ReporterArgs.MODULES_TAG, module);
@@ -46,6 +47,11 @@ public class ReporterArgsTest {
     if (xmlPath != null) {
       args.put(ReporterArgs.XML_FILE_TAG, xmlPath);
     }
+    if (include != null) {
+      final JSONObject includes = new JSONObject();
+      includes.append(ReporterArgs.CLASSES_TAG, include);
+      args.put(ReporterArgs.INCLUDE_TAG, includes);
+    }
     final File argsFile = File.createTempFile("args", ".txt");
     final Writer writer = new FileWriter(argsFile);
     writer.write(args.toString());
@@ -55,10 +61,10 @@ public class ReporterArgsTest {
 
   @Test
   public void testArgs() throws Exception {
-    final ReporterArgs args = ReporterArgs.parse(argsToFile(new BinaryReport(new File("test.ic"), new File("test.smap")), "out", "a/", "a.xml", "html/"));
+    final ReporterArgs args = ReporterArgs.parse(argsToFile(new BinaryReport(new File("test.ic"), new File("test.smap")), "out", "a/", "a.xml", "html/", ".*"));
     Assert.assertEquals(1, args.modules.size());
     final Module module = args.modules.get(0);
-    final List<BinaryReport> reports = module.getReports();
+    final List<BinaryReport> reports = args.reports;
     Assert.assertEquals(1, reports.size());
     final BinaryReport report = reports.get(0);
     Assert.assertEquals("test.ic", report.getDataFile().getName());
@@ -78,6 +84,9 @@ public class ReporterArgsTest {
     Assert.assertNotNull(xmlFile);
     final File htmlDir = args.htmlDir;
     Assert.assertNotNull(htmlDir);
+
+    final List<Pattern> includes = args.includeClasses;
+    Assert.assertEquals(1, includes.size());
   }
 
   @Test
