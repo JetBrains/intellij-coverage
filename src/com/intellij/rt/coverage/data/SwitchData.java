@@ -20,7 +20,6 @@ import com.intellij.rt.coverage.util.CoverageIOUtil;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 
 public class SwitchData implements CoverageData {
   private int[] myKeys;
@@ -28,7 +27,6 @@ public class SwitchData implements CoverageData {
   private int myDefaultHits;
   private int[] myHits;
 
-  private int myDefaultId = -1;
   private int[] myIds;
 
   public SwitchData(final int[] keys) {
@@ -94,19 +92,19 @@ public class SwitchData implements CoverageData {
   }
 
   public int getId(int index) {
-    if (index == -1) return myDefaultId;
     if (myIds == null) return 0;
+    if (index == -1) return myIds[myIds.length - 1];
     if (index < 0 || index >= myIds.length) return 0;
     return myIds[index];
   }
 
   public void setId(int id, int index) {
-    if (index == -1) {
-      myDefaultId = id;
-      return;
-    }
     if (myIds == null) {
-      myIds = new int[myKeys.length];
+      myIds = new int[myKeys.length + 1];
+    }
+    if (index == -1) {
+      myIds[myIds.length - 1] = id;
+      return;
     }
     if (index < 0 || index >= myIds.length) return;
     myIds[index] = id;
