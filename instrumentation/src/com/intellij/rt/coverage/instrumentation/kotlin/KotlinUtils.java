@@ -35,6 +35,7 @@ import java.util.List;
 
 public class KotlinUtils {
   private static final String KOTLIN_CLASS_LABEL = "IS_KOTLIN";
+  public static final String SEALED_CLASS_LABEL = "IS_SEALED_CLASS";
   public static final String KOTLIN_METADATA = "Lkotlin/Metadata;";
 
   public static boolean isKotlinClass(MethodFilteringVisitor context) {
@@ -43,6 +44,12 @@ public class KotlinUtils {
     boolean isKotlin = context.getAnnotations().contains(KOTLIN_METADATA);
     context.addProperty(KOTLIN_CLASS_LABEL, isKotlin);
     return isKotlin;
+  }
+
+  public static boolean isSealedClass(MethodFilteringVisitor context) {
+    final Object currentProperty = context.getProperty(SEALED_CLASS_LABEL);
+    if (currentProperty instanceof Boolean) return (Boolean) currentProperty;
+    return false;
   }
 
   private static final boolean ourKotlinEnabled = !"false".equals(System.getProperty("coverage.kotlin.enable", "true"));

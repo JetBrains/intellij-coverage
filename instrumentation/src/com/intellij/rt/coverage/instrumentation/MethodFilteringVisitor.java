@@ -36,6 +36,7 @@ public class MethodFilteringVisitor extends ClassVisitor {
   private final String myClassName;
   private boolean myEnum = false;
   private boolean myHasInterfaces = false;
+  private boolean myIsAbstract = false;
   private final List<String> myAnnotations = new ArrayList<String>();
   private HashMap<String, Object> myProperties;
 
@@ -48,6 +49,7 @@ public class MethodFilteringVisitor extends ClassVisitor {
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
     myEnum = (access & Opcodes.ACC_ENUM) != 0;
     myHasInterfaces = interfaces != null && interfaces.length > 0;
+    myIsAbstract = (access & Opcodes.ACC_ABSTRACT) != 0;
     super.visit(version, access, name, signature, superName, interfaces);
   }
 
@@ -82,6 +84,10 @@ public class MethodFilteringVisitor extends ClassVisitor {
     return myEnum;
   }
 
+  public boolean isAbstract() {
+    return myIsAbstract;
+  }
+
   public boolean hasInterfaces() {
     return myHasInterfaces;
   }
@@ -91,18 +97,14 @@ public class MethodFilteringVisitor extends ClassVisitor {
   }
 
   public Object getProperty(String key) {
-    createProperties();
+    if (myProperties == null) return null;
     return myProperties.get(key);
   }
 
   public void addProperty(String key, Object value) {
-    createProperties();
-    myProperties.put(key, value);
-  }
-
-  private void createProperties() {
     if (myProperties == null) {
       myProperties = new HashMap<String, Object>();
     }
+    myProperties.put(key, value);
   }
 }
