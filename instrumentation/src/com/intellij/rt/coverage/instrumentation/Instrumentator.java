@@ -66,7 +66,7 @@ public class Instrumentator {
           + "1) data file to save coverage result\n"
           + "2) a flag to enable tracking per test coverage\n"
           + "3) a flag to calculate coverage for unloaded classes\n"
-          + "4) a flag to use data file as initial coverage\n"
+          + "4) a flag to use data file as initial coverage, also use it if several parallel processes are to write into one file\n"
           + "5) a flag to run coverage in sampling mode or in tracing mode otherwise\n");
       System.exit(1);
     }
@@ -74,7 +74,7 @@ public class Instrumentator {
     final File dataFile = args.length > 0 ? new File(args[0]) : null;
     final boolean traceLines = args.length > 0 && Boolean.parseBoolean(args[1]);
     final boolean calcUnloaded = args.length > 0 && Boolean.parseBoolean(args[2]);
-    final boolean mergeData = args.length > 0 && Boolean.parseBoolean(args[3]) && dataFile.isFile();
+    final boolean mergeData = args.length > 0 && Boolean.parseBoolean(args[3]);
     final boolean sampling = args.length == 0 || Boolean.parseBoolean(args[4]);
     if (dataFile != null) {
       ErrorReporter.setBasePath(dataFile.getParent());
