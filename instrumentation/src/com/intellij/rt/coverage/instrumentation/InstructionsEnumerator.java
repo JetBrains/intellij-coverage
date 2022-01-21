@@ -55,13 +55,13 @@ public class InstructionsEnumerator extends LineEnumerator {
         for (int index = 0; index < lineData.jumpsCount(); index++) {
           final JumpData jumpData = lineData.getJumpData(index);
           if (jumpData.getId(true) == jumpId) {
-            jumpData.addInstructions(true, myInstructionCounter);
+            myBranchData.addInstructions(jumpId, myInstructionCounter);
             applied = true;
             break;
           }
 
           if (jumpData.getId(false) == jumpId) {
-            jumpData.addInstructions(false, myInstructionCounter);
+            myBranchData.addInstructions(jumpId, myInstructionCounter);
             applied = true;
             break;
           }
@@ -73,7 +73,7 @@ public class InstructionsEnumerator extends LineEnumerator {
           final SwitchData switchData = lineData.getSwitchData(index);
           for (int i = -1; i < switchData.getKeys().length; i++) {
             if (switchData.getId(i) == switchId) {
-              switchData.addInstructions(i, myInstructionCounter);
+              myBranchData.addInstructions(switchId, myInstructionCounter);
               applied = true;
               break loop;
             }
@@ -81,7 +81,7 @@ public class InstructionsEnumerator extends LineEnumerator {
         }
       }
       if (!applied) {
-        lineData.addInstructions(myInstructionCounter);
+        myBranchData.addInstructions(lineData.getId(), myInstructionCounter);
       }
     }
     myLastLabel = null;

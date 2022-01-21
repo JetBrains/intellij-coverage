@@ -33,37 +33,31 @@
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="1"/>
 </method>
-<method name="&lt;init&gt;" desc="()V">
-<counter type="INSTRUCTION" missed="0" covered="8"/>
+<counter type="INSTRUCTION" missed="0" covered="7"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="1"/>
-</method>
-<counter type="INSTRUCTION" missed="0" covered="15"/>
-<counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="0" covered="2"/>
-<counter type="METHOD" missed="0" covered="2"/>
+<counter type="METHOD" missed="0" covered="1"/>
 </class>
 <sourcefile name="test.kt">
 <line nr="20" mi="0" ci="5" mb="0" cb="0"/>
 <line nr="24" mi="0" ci="9" mb="0" cb="0"/>
 <line nr="28" mi="1" ci="0" mb="0" cb="0"/>
 <line nr="32" mi="1" ci="0" mb="0" cb="0"/>
-<line nr="36" mi="0" ci="8" mb="0" cb="0"/>
 <line nr="39" mi="0" ci="7" mb="0" cb="0"/>
-<counter type="INSTRUCTION" missed="2" covered="29"/>
+<counter type="INSTRUCTION" missed="2" covered="21"/>
 <counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="2" covered="4"/>
+<counter type="LINE" missed="2" covered="3"/>
 </sourcefile>
-<counter type="INSTRUCTION" missed="2" covered="29"/>
+<counter type="INSTRUCTION" missed="2" covered="21"/>
 <counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="2" covered="4"/>
-<counter type="METHOD" missed="2" covered="4"/>
+<counter type="LINE" missed="2" covered="3"/>
+<counter type="METHOD" missed="2" covered="3"/>
 <counter type="CLASS" missed="0" covered="2"/>
 </package>
-<counter type="INSTRUCTION" missed="2" covered="29"/>
+<counter type="INSTRUCTION" missed="2" covered="21"/>
 <counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="2" covered="4"/>
-<counter type="METHOD" missed="2" covered="4"/>
+<counter type="LINE" missed="2" covered="3"/>
+<counter type="METHOD" missed="2" covered="3"/>
 <counter type="CLASS" missed="0" covered="2"/>
 </report>
 

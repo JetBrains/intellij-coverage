@@ -28,9 +28,6 @@ public class JumpData implements CoverageData {
   private int myTrueId = -1;
   private int myFalseId = -1;
 
-  private int myTrueInstructions = 0;
-  private int myFalseInstructions = 0;
-
   public void touchTrueHit() {
     myTrueHits++;
   }
@@ -56,8 +53,6 @@ public class JumpData implements CoverageData {
     final JumpData jumpData = (JumpData)data;
     myTrueHits += jumpData.myTrueHits;
     myFalseHits += jumpData.myFalseHits;
-    myTrueInstructions = Math.max(myTrueInstructions, jumpData.myTrueInstructions);
-    myFalseInstructions = Math.max(myFalseInstructions, jumpData.myFalseInstructions);
   }
 
   public void setTrueHits(final int trueHits) {
@@ -78,17 +73,5 @@ public class JumpData implements CoverageData {
     } else {
       myFalseId = id;
     }
-  }
-
-  public void addInstructions(boolean type, int instructions) {
-    if (type) {
-      myTrueInstructions += instructions;
-    } else {
-      myFalseInstructions += instructions;
-    }
-  }
-
-  public int getInstructions(boolean type) {
-    return type ? myTrueInstructions : myFalseInstructions;
   }
 }

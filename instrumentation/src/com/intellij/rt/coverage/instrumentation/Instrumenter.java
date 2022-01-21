@@ -128,6 +128,10 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
     return myLines.get(line);
   }
 
+  public ProjectData getProjectData() {
+    return myProjectData;
+  }
+
   public void removeLine(final int line) {
     myLines.remove(line);
   }

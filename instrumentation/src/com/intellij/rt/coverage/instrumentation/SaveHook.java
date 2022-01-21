@@ -17,6 +17,8 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.*;
+import com.intellij.rt.coverage.data.instructions.ClassInstructions;
+import com.intellij.rt.coverage.data.instructions.LineInstructions;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinInlineVisitingFilter;
@@ -326,20 +328,32 @@ public class SaveHook implements Runnable {
     if (linesMap == null) return;
     final FileMapData[] mappings = linesMap.remove(className);
     if (mappings == null) return;
-    applyMappings(classData, mappings);
+    applyMappings(projectData, classData, mappings);
   }
 
-  private static void applyMappings(ClassData classData, FileMapData[] mappings) {
+  private static void applyMappings(ProjectData projectData, ClassData classData, FileMapData[] mappings) {
     final LineData[] lines = (LineData[]) classData.getLines();
+    final ClassInstructions classInstructions = projectData.isInstructionsCoverageEnabled() ? projectData.getInstructions().get(classData.getName()) : null;
+    final LineInstructions[] instructions = classInstructions == null ? null : classInstructions.getlines();
     for (FileMapData mapData : mappings) {
       final boolean isThisClass = classData.getName().equals(mapData.getClassName());
       for (LineMapData lineMapData : mapData.getLines()) {
+        final int sourceLineNumber = lineMapData.getSourceLineNumber();
         for (int i = lineMapData.getTargetMinLine(); i <= lineMapData.getTargetMaxLine() && i < lines.length; i++) {
           final LineData previous = lines[i];
           lines[i] = null;
-          final int sourceLineNumber = lineMapData.getSourceLineNumber();
           if (isThisClass && sourceLineNumber < lines.length && lines[sourceLineNumber] == null) {
             lines[sourceLineNumber] = previous;
+          }
+          if (instructions != null && i < instructions.length) {
+            final LineInstructions lineInstructions = instructions[i];
+            instructions[i] = null;
+            if (isThisClass && lineInstructions != null && sourceLineNumber < instructions.length) {
+              if (instructions[sourceLineNumber] == null) {
+                instructions[sourceLineNumber] = new LineInstructions();
+              }
+              instructions[sourceLineNumber].merge(lineInstructions);
+            }
           }
         }
       }

@@ -19,6 +19,7 @@ package com.intellij.rt.coverage
 import com.intellij.rt.coverage.data.ClassData
 import com.intellij.rt.coverage.data.LineData
 import com.intellij.rt.coverage.data.ProjectData
+import com.intellij.rt.coverage.data.instructions.LineInstructions
 import com.intellij.rt.coverage.util.TestTrackingIOUtil
 import org.junit.Assert
 import java.io.File
@@ -64,22 +65,29 @@ internal const val all = "ALL CLASSES"
 
 private fun coverageLines(project: ProjectData, classNames: List<String>): List<LineData> {
     val allData = ClassData("")
-    if (classNames.contains(all)) {
-        project.classes.values.filter { it.name.startsWith(TEST_PACKAGE) }.forEach { allData.merge(it) }
-    } else {
-        classNames
-            .map { project.getClassData(it) }
-            .forEach { allData.merge(it) }
-    }
+    getClasses(classNames, project).forEach { allData.merge(it) }
     return allData.getLinesData()
 }
 
 private fun extendedLineInfo(project: ProjectData, classNames: List<String>) = coverageLines(project, classNames)
-        .associate { line ->
-            val branches = line.branchData
-            val instructions = line.instructionsData
-            line.lineNumber to "${instructions.coveredBranches}/${instructions.totalBranches} ${branches?.coveredBranches ?: 0}/${branches?.totalBranches ?: 0}"
+        .run {
+            val instructionsMap = hashMapOf<Int, LineInstructions>()
+            getClasses(classNames, project).forEach { classData ->
+                val classInstructions = project.instructions[classData.name]!!
+                classData.lines.filterIsInstance<LineData>().forEach { instructionsMap.getOrPut(it.lineNumber) { LineInstructions()}.merge(classInstructions.getlines()[it.lineNumber]) }
+            }
+            associate { line ->
+                val branches = line.branchData
+                val instructions = instructionsMap[line.lineNumber]!!.getInstructionsData(line)
+                line.lineNumber to "${instructions.coveredBranches}/${instructions.totalBranches} ${branches?.coveredBranches ?: 0}/${branches?.totalBranches ?: 0}"
+            }
         }
+
+private fun getClasses(classNames: List<String>, project: ProjectData) = if (classNames.contains(all)) {
+    project.classes.values.filter { it.name.startsWith(TEST_PACKAGE) }
+} else {
+    classNames.map { project.getClassData(it) }
+}
 
 internal fun testTrackingLines(coverageDataFile: File, classNames: List<String>): Map<Int, Set<String>> {
     val result = hashMapOf<Int, MutableSet<String>>()

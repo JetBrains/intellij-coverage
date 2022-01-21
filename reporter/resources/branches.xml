@@ -66,7 +66,6 @@
 <line nr="33" mi="8" ci="0" mb="0" cb="0"/>
 <line nr="34" mi="8" ci="0" mb="0" cb="0"/>
 <line nr="35" mi="7" ci="0" mb="0" cb="0"/>
-<line nr="62" mi="0" ci="5" mb="0" cb="0"/>
 <line nr="40" mi="2" ci="0" mb="0" cb="0"/>
 <line nr="42" mi="2" ci="0" mb="2" cb="0"/>
 <line nr="43" mi="8" ci="0" mb="0" cb="0"/>
@@ -78,6 +77,7 @@
 <line nr="54" mi="8" ci="0" mb="0" cb="0"/>
 <line nr="55" mi="8" ci="0" mb="0" cb="0"/>
 <line nr="56" mi="7" ci="0" mb="0" cb="0"/>
+<line nr="62" mi="0" ci="5" mb="0" cb="0"/>
 <counter type="INSTRUCTION" missed="112" covered="17"/>
 <counter type="BRANCH" missed="13" covered="1"/>
 <counter type="LINE" missed="19" covered="4"/>

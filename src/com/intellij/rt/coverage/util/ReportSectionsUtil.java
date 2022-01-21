@@ -33,17 +33,17 @@ public class ReportSectionsUtil {
   public static final int UNCOVERED_BRANCHES_SECTION_ID = 1;
   public static final int INSTRUCTIONS_SECTION_ID = 2;
 
-  private static Map<Integer, ReportSection> getSections() {
+  private static Map<Integer, ReportSection> getSections(ProjectData projectData) {
     final Map<Integer, ReportSection> result = new LinkedHashMap<Integer, ReportSection>();
     result.put(UNCOVERED_BRANCHES_SECTION_ID, new UncoveredBranchesSection());
-    result.put(INSTRUCTIONS_SECTION_ID, new InstructionsSection());
+    result.put(INSTRUCTIONS_SECTION_ID, new InstructionsSection(projectData));
     return result;
   }
 
   public static void loadSections(ProjectData projectData, DataInputStream in, TIntObjectHashMap<ClassData> dict) throws IOException {
     final int numberOfSections = CoverageIOUtil.readINT(in);
 
-    final Map<Integer, ReportSection> sections = getSections();
+    final Map<Integer, ReportSection> sections = getSections(projectData);
     for (int i = 0; i < numberOfSections; i++) {
       final int sectionId = CoverageIOUtil.readINT(in);
       final int size = CoverageIOUtil.readINT(in);
@@ -75,7 +75,7 @@ public class ReportSectionsUtil {
 
   private static List<ReportSection> getEngagedSections(final ProjectData projectData) {
     final List<ReportSection> engagedSections = new ArrayList<ReportSection>();
-    for (ReportSection section : getSections().values()) {
+    for (ReportSection section : getSections(projectData).values()) {
       if (section.isEngaged(projectData)) {
         engagedSections.add(section);
       }

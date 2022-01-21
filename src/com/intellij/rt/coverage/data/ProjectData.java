@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.data;
 
+import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.util.*;
 
 import java.io.*;
@@ -64,6 +65,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   private final ClassesMap myClasses = new ClassesMap();
   private volatile Map<String, FileMapData[]> myLinesMap;
+  private Map<String, ClassInstructions> myInstructions;
 
   private static Object ourProjectDataObject;
 
@@ -118,6 +120,20 @@ public class ProjectData implements CoverageData, Serializable {
     return myLinesMap;
   }
 
+  public Map<String, ClassInstructions> getInstructions() {
+    Map<String, ClassInstructions> instructions = myInstructions;
+    if (instructions == null) {
+      synchronized (this) {
+        instructions = myInstructions;
+        if (instructions == null) {
+          instructions = new ConcurrentHashMap<String, ClassInstructions>();
+          myInstructions = instructions;
+        }
+      }
+    }
+    return instructions;
+  }
+
   public static ProjectData createProjectData(final File dataFile,
                                               final ProjectData initialData,
                                               boolean traceLines,
@@ -143,15 +159,29 @@ public class ProjectData implements CoverageData, Serializable {
 
   public void merge(final CoverageData data) {
     final ProjectData projectData = (ProjectData)data;
-    for (Object o : projectData.myClasses.names()) {
-      final String key = (String) o;
-      final ClassData mergedData = projectData.myClasses.get(key);
+    for (Map.Entry<String, ClassData> entry : projectData.myClasses.myClasses.entrySet()) {
+      final String key = entry.getKey();
+      final ClassData mergedData = entry.getValue();
       ClassData classData = myClasses.get(key);
       if (classData == null) {
         classData = new ClassData(mergedData.getName());
         myClasses.put(key, classData);
       }
       classData.merge(mergedData);
+    }
+
+    if (isInstructionsCoverageEnabled()) {
+      final Map<String, ClassInstructions> instructions = getInstructions();
+      for (Map.Entry<String, ClassInstructions> entry : projectData.getInstructions().entrySet()) {
+        final String key = entry.getKey();
+        final ClassInstructions mergedInstructions = entry.getValue();
+        ClassInstructions classInstructions = instructions.get(key);
+        if (classInstructions == null) {
+          classInstructions = new ClassInstructions();
+          instructions.put(key, classInstructions);
+        }
+        classInstructions.merge(mergedInstructions);
+      }
     }
   }
 
@@ -182,11 +212,11 @@ public class ProjectData implements CoverageData, Serializable {
             // otherwise `classData` may contain inline generated lines
             classInfo = new ClassData(mappedClassName);
           }
-          classInfo.checkLineMappings(aFileData.getLines(), classData);
+          classInfo.checkLineMappings(aFileData.getLines(), classData, this);
         }
 
         if (mainData != null) {
-          classData.checkLineMappings(mainData.getLines(), classData);
+          classData.checkLineMappings(mainData.getLines(), classData, this);
         }
       }
     }

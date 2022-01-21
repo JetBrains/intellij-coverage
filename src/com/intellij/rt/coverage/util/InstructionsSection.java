@@ -16,13 +16,26 @@
 
 package com.intellij.rt.coverage.util;
 
-import com.intellij.rt.coverage.data.*;
+import com.intellij.rt.coverage.data.ClassData;
+import com.intellij.rt.coverage.data.LineData;
+import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.SwitchData;
+import com.intellij.rt.coverage.data.instructions.ClassInstructions;
+import com.intellij.rt.coverage.data.instructions.JumpInstructions;
+import com.intellij.rt.coverage.data.instructions.LineInstructions;
+import com.intellij.rt.coverage.data.instructions.SwitchInstructions;
 
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.IOException;
 
 public class InstructionsSection extends ClassListSection {
+  final ProjectData myProjectData;
+
+  public InstructionsSection(ProjectData projectData) {
+    myProjectData = projectData;
+  }
+
   @Override
   public int getId() {
     return ReportSectionsUtil.INSTRUCTIONS_SECTION_ID;
@@ -41,41 +54,52 @@ public class InstructionsSection extends ClassListSection {
   @Override
   protected void loadClass(DataInputStream in, ClassData classData, int version) throws IOException {
     final LineData[] lines = (LineData[]) classData.getLines();
+    final LineInstructions[] instructions = new LineInstructions[lines.length];
     for (LineData lineData : lines) {
       if (lineData == null) continue;
-      lineData.addInstructions(CoverageIOUtil.readINT(in));
+      final LineInstructions lineInstructions = new LineInstructions();
+      instructions[lineData.getLineNumber()] = lineInstructions;
+      lineInstructions.setInstructions(CoverageIOUtil.readINT(in));
       for (int i = 0; i < lineData.jumpsCount(); i++) {
-        final JumpData jumpData = lineData.getJumpData(i);
-        jumpData.addInstructions(true, CoverageIOUtil.readINT(in));
-        jumpData.addInstructions(false, CoverageIOUtil.readINT(in));
+        final JumpInstructions jump = new JumpInstructions();
+        lineInstructions.addJump(jump);
+        jump.setInstructions(true, CoverageIOUtil.readINT(in));
+        jump.setInstructions(false, CoverageIOUtil.readINT(in));
       }
       for (int i = 0; i < lineData.switchesCount(); i++) {
         final SwitchData switchData = lineData.getSwitchData(i);
-        for (int key = -1; key < switchData.getKeys().length; key++) {
-          switchData.addInstructions(key, CoverageIOUtil.readINT(in));
+        final int size = switchData.getKeys().length;
+        final SwitchInstructions switchInstructions = new SwitchInstructions(size);
+        lineInstructions.addSwitch(switchInstructions);
+        for (int key = -1; key < size; key++) {
+          switchInstructions.setInstructions(key, CoverageIOUtil.readINT(in));
         }
       }
     }
+    myProjectData.getInstructions().put(classData.getName(), new ClassInstructions(instructions));
   }
 
   @Override
   protected void saveClass(ClassData classData, DataOutput out, int index) throws IOException {
+    final ClassInstructions classInstructions = myProjectData.getInstructions().get(classData.getName());
     final LineData[] lines = (LineData[]) classData.getLines();
     if (lines == null) return;
     CoverageIOUtil.writeINT(out, index);
-
-    for (LineData lineData : lines) {
+    final LineInstructions[] lineInstructions = classInstructions.getlines();
+    for (int line = 0; line < lines.length; line++) {
+      final LineData lineData = lines[line];
       if (lineData == null) continue;
-      CoverageIOUtil.writeINT(out, lineData.getInstructions());
+      final LineInstructions lineInstruction = lineInstructions[line];
+      CoverageIOUtil.writeINT(out, lineInstruction.getInstructions());
       for (int i = 0; i < lineData.jumpsCount(); i++) {
-        final JumpData jumpData = lineData.getJumpData(i);
-        CoverageIOUtil.writeINT(out, jumpData.getInstructions(true));
-        CoverageIOUtil.writeINT(out, jumpData.getInstructions(false));
+        final JumpInstructions jumpInstructions = lineInstruction.getJumps().get(i);
+        CoverageIOUtil.writeINT(out, jumpInstructions.getInstructions(true));
+        CoverageIOUtil.writeINT(out, jumpInstructions.getInstructions(false));
       }
       for (int i = 0; i < lineData.switchesCount(); i++) {
-        final SwitchData switchData = lineData.getSwitchData(i);
-        for (int key = -1; key < switchData.getKeys().length; key++) {
-          CoverageIOUtil.writeINT(out, switchData.getInstructions(key));
+        final SwitchInstructions switchInstructions = lineInstruction.getSwitches().get(i);
+        for (int key = -1; key < switchInstructions.size(); key++) {
+          CoverageIOUtil.writeINT(out, switchInstructions.getInstructions(key));
         }
       }
     }

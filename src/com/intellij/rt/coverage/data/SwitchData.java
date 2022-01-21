@@ -29,15 +29,12 @@ public class SwitchData implements CoverageData {
 
   private int[] myIds;
 
-  private int myDefaultInstructions = 0;
-  private int[] myInstructions;
-
   public SwitchData(final int[] keys) {
 
     myKeys = keys;
 
     myHits = new int[keys.length];
-    myInstructions = new int[keys.length];
+
   }
 
   public void touch(final int key) {
@@ -69,11 +66,6 @@ public class SwitchData implements CoverageData {
   public void merge(final CoverageData data) {
     SwitchData switchData = (SwitchData)data;
     myDefaultHits += switchData.myDefaultHits;
-    for (int i = Math.min(myHits.length, switchData.myHits.length) - 1; i >= -1; i--) {
-      if (getInstructions(i) < switchData.getInstructions(i)) {
-        addInstructions(i,switchData.getInstructions(i) - getInstructions(i));
-      }
-    }
     for (int i = Math.min(myHits.length, switchData.myHits.length) - 1; i >= 0; i--) {
       myHits[i] += switchData.myHits[i];
     }
@@ -83,11 +75,6 @@ public class SwitchData implements CoverageData {
       System.arraycopy(old, 0, myHits, 0, old.length);
       System.arraycopy(switchData.myHits, old.length, myHits, old.length, myHits.length - old.length);
       myKeys = switchData.myKeys;
-
-      old = myInstructions;
-      myInstructions = new int[switchData.myInstructions.length];
-      System.arraycopy(old, 0, myInstructions, 0, old.length);
-      System.arraycopy(switchData.myInstructions, old.length, myInstructions, old.length, myInstructions.length - old.length);
     }
   }
 
@@ -121,20 +108,5 @@ public class SwitchData implements CoverageData {
     }
     if (index < 0 || index >= myIds.length) return;
     myIds[index] = id;
-  }
-
-  public void addInstructions(int key, int instructions) {
-    if (key == -1) {
-      myDefaultInstructions += instructions;
-    } else {
-      if (key < 0 || key >= myKeys.length) return;
-      myInstructions[key] += instructions;
-    }
-  }
-
-  public int getInstructions(int key) {
-    if (key == -1) return myDefaultInstructions;
-    if (key < 0 || key >= myKeys.length) return 0;
-    return myInstructions[key];
   }
 }

@@ -35,7 +35,7 @@ public class TestUtils {
     final File icFile = File.createTempFile("report_tmp", ".ic");
     final File sourceMapFile = File.createTempFile("report_tmp", ".sm");
     patterns = "true " + sourceMapFile.getAbsolutePath() + " " + patterns;
-    CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), icFile, patterns, className, false, new String[]{"-Dcoverage.instructions.enable=true"}, false, false);
+    CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), icFile, patterns, className, false, new String[]{"-Dcoverage.instructions.enable=true", "-Dcoverage.ignore.private.constructor.util.class=true"}, false, false);
     return new BinaryReport(icFile, sourceMapFile);
   }
 

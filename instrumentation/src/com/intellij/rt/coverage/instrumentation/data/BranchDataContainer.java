@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.JumpData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.SwitchData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import org.jetbrains.coverage.gnu.trove.TIntArrayList;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 
 import java.util.ArrayList;
@@ -38,8 +39,13 @@ public class BranchDataContainer {
   private Map<Label, Jump> myJumps;
   private Map<Label, Switch> mySwitches;
 
+  private TIntArrayList myInstructions;
+
   public BranchDataContainer(Instrumenter context) {
     myContext = context;
+    if (myContext.getProjectData().isInstructionsCoverageEnabled()) {
+      myInstructions = new TIntArrayList();
+    }
   }
 
   public int getSize() {
@@ -68,18 +74,16 @@ public class BranchDataContainer {
   }
 
   public void addLine(LineData lineData) {
-    int id = lineData.getId();
-    if (id == -1) {
-      id = myNextId++;
-      lineData.setId(id);
+    if (lineData.getId() == -1) {
+      lineData.setId(getNextId());
     }
   }
 
   public void addJump(LineData lineData, int index, Label trueLabel, Label falseLabel) {
     int line = lineData.getLineNumber();
     // jump type is inverted as jump occurs if value is true
-    Jump trueJump = new Jump(myNextId++, index, line, false);
-    Jump falseJump = new Jump(myNextId++, index, line, true);
+    Jump trueJump = new Jump(getNextId(), index, line, false);
+    Jump falseJump = new Jump(getNextId(), index, line, true);
     myLastTrueJump = trueLabel;
     myLastFalseJump = falseLabel;
 
@@ -129,16 +133,33 @@ public class BranchDataContainer {
     lineData.removeSwitch(lineData.switchesCount() - 1);
   }
 
+  public TIntArrayList getInstructions() {
+    return myInstructions;
+  }
+
+  public void addInstructions(int id, int instructions) {
+    myInstructions.set(id, myInstructions.get(id) + instructions);
+  }
+
+  private int getNextId() {
+    if (myInstructions != null) {
+      while (myInstructions.size() <= myNextId) {
+        myInstructions.add(0);
+      }
+    }
+    return myNextId++;
+  }
+
   private List<Switch> rememberSwitchLabels(final int line, final Label dflt, final Label[] labels, int switchIndex) {
     List<Switch> result = new ArrayList<Switch>();
     if (mySwitches == null) mySwitches = new HashMap<Label, Switch>();
 
-    Switch aSwitch = new Switch(myNextId++, switchIndex, line, -1);
+    Switch aSwitch = new Switch(getNextId(), switchIndex, line, -1);
     result.add(aSwitch);
     mySwitches.put(dflt, aSwitch);
 
     for (int i = labels.length - 1; i >= 0; i--) {
-      aSwitch = new Switch(myNextId++, switchIndex, line, i);
+      aSwitch = new Switch(getNextId(), switchIndex, line, i);
       result.add(aSwitch);
       mySwitches.put(labels[i], aSwitch);
     }
