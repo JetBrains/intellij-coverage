@@ -67,7 +67,7 @@ public class ProjectReport {
   private ProjectData collectCoverageInformationFromOutputs() {
     final ProjectData projectData = new ProjectData();
     projectData.setInstructionsCoverage(true);
-    SaveHook.appendUnloadedFullAnalysis(projectData, new OutputClassFinder(), true, false);
+    SaveHook.appendUnloadedFullAnalysis(projectData, new OutputClassFinder(), true, false, true);
     return projectData;
   }
 

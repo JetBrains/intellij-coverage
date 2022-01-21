@@ -64,7 +64,7 @@ public class SourceLineCounter extends ClassVisitor {
     super(Opcodes.API_VERSION);
     ClassVisitor classVisitor = new ClassVisitor(Opcodes.API_VERSION) {};
     if (ignorePrivateConstructorOfUtilClasses) {
-      classVisitor = new PrivateConstructorOfUtilClassFilter(classVisitor) {
+      classVisitor = new PrivateConstructorOfUtilClassFilter(classVisitor, null) {
         @Override
         protected void removeLine(int line) {
           String methodSignature = myNSourceLines.remove(line);

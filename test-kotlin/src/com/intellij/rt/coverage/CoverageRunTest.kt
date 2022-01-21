@@ -200,6 +200,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testReturnTest() = test("returnTest")
 
     @Test
+    fun testSealed() = test("sealed")
+
+    @Test
     fun testSealedClassConstructor() = test("sealedClassConstructor")
 
     @Test

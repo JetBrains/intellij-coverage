@@ -169,14 +169,20 @@ public class ProjectData implements CoverageData, Serializable {
             mainData = aFileData;
             continue;
           }
+          final ClassData classInfo;
           if ((myExcludePatterns == null || !ClassNameUtil.matchesPatterns(mappedClassName, myExcludePatterns))
               && (myIncludePatterns == null || myIncludePatterns.isEmpty() || ClassNameUtil.matchesPatterns(mappedClassName, myIncludePatterns))) {
-            final ClassData classInfo = getOrCreateClassData(mappedClassName);
+            classInfo = getOrCreateClassData(mappedClassName);
             if (classInfo.getSource() == null || classInfo.getSource().length() == 0) {
               classInfo.setSource(aFileData.getFileName());
             }
-            classInfo.checkLineMappings(aFileData.getLines(), classData);
+          } else {
+            // `classData` SMAP may not contain mapping to itself,
+            // so it's better to make sure we fairly apply this mapping
+            // otherwise `classData` may contain inline generated lines
+            classInfo = new ClassData(mappedClassName);
           }
+          classInfo.checkLineMappings(aFileData.getLines(), classData);
         }
 
         if (mainData != null) {

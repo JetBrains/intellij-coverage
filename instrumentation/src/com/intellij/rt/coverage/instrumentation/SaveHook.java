@@ -284,6 +284,10 @@ public class SaveHook implements Runnable {
 
   public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean isSampling) {
     final boolean ignorePrivateConstructorOfUtilClass = FilterUtils.ignorePrivateConstructorOfUtilClassEnabled();
+    appendUnloadedFullAnalysis(projectData, classFinder, calculateSource, isSampling, ignorePrivateConstructorOfUtilClass);
+  }
+
+  public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean isSampling, final boolean ignorePrivateConstructorOfUtilClass) {
     classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
       public void consume(ClassEntry classEntry) {
         final ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
