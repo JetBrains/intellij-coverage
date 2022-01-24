@@ -75,15 +75,15 @@ public class BranchDataContainer {
 
   public void addLine(LineData lineData) {
     if (lineData.getId() == -1) {
-      lineData.setId(getNextId());
+      lineData.setId(incrementId());
     }
   }
 
   public void addJump(LineData lineData, int index, Label trueLabel, Label falseLabel) {
     int line = lineData.getLineNumber();
     // jump type is inverted as jump occurs if value is true
-    Jump trueJump = new Jump(getNextId(), index, line, false);
-    Jump falseJump = new Jump(getNextId(), index, line, true);
+    Jump trueJump = new Jump(incrementId(), index, line, false);
+    Jump falseJump = new Jump(incrementId(), index, line, true);
     myLastTrueJump = trueLabel;
     myLastFalseJump = falseLabel;
 
@@ -141,7 +141,7 @@ public class BranchDataContainer {
     myInstructions.set(id, myInstructions.get(id) + instructions);
   }
 
-  private int getNextId() {
+  private int incrementId() {
     if (myInstructions != null) {
       while (myInstructions.size() <= myNextId) {
         myInstructions.add(0);
@@ -154,12 +154,12 @@ public class BranchDataContainer {
     List<Switch> result = new ArrayList<Switch>();
     if (mySwitches == null) mySwitches = new HashMap<Label, Switch>();
 
-    Switch aSwitch = new Switch(getNextId(), switchIndex, line, -1);
+    Switch aSwitch = new Switch(incrementId(), switchIndex, line, -1);
     result.add(aSwitch);
     mySwitches.put(dflt, aSwitch);
 
     for (int i = labels.length - 1; i >= 0; i--) {
-      aSwitch = new Switch(getNextId(), switchIndex, line, i);
+      aSwitch = new Switch(incrementId(), switchIndex, line, i);
       result.add(aSwitch);
       mySwitches.put(labels[i], aSwitch);
     }
