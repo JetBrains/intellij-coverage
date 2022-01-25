@@ -268,6 +268,27 @@ public class ClassData implements CoverageData {
     }
   }
 
+  public void checkLineMappingsUnloaded(FileMapData[] mappings) {
+    final LineData[] lines = myLinesArray;
+    for (FileMapData mapData : mappings) {
+      final boolean isThisClass = myClassName.equals(mapData.getClassName());
+      for (LineMapData lineMapData : mapData.getLines()) {
+        final int sourceLineNumber = lineMapData.getSourceLineNumber();
+        for (int i = lineMapData.getTargetMinLine(); i <= lineMapData.getTargetMaxLine() && i < lines.length; i++) {
+          final LineData previous = lines[i];
+          lines[i] = null;
+          if (isThisClass && previous != null && sourceLineNumber < lines.length) {
+            if (lines[sourceLineNumber] == null) {
+              lines[sourceLineNumber] = previous;
+            } else {
+              lines[sourceLineNumber].merge(previous);
+            }
+          }
+        }
+      }
+    }
+  }
+
   private void copyCurrentLineData(LineData[] result) {
     System.arraycopy(myLinesArray, 0, result, 0, myLinesArray.length);
   }

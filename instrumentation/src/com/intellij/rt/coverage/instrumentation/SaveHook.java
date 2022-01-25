@@ -326,24 +326,7 @@ public class SaveHook implements Runnable {
     if (linesMap == null) return;
     final FileMapData[] mappings = linesMap.remove(className);
     if (mappings == null) return;
-    applyMappings(classData, mappings);
-  }
-
-  private static void applyMappings(ClassData classData, FileMapData[] mappings) {
-    final LineData[] lines = (LineData[]) classData.getLines();
-    for (FileMapData mapData : mappings) {
-      final boolean isThisClass = classData.getName().equals(mapData.getClassName());
-      for (LineMapData lineMapData : mapData.getLines()) {
-        for (int i = lineMapData.getTargetMinLine(); i <= lineMapData.getTargetMaxLine() && i < lines.length; i++) {
-          final LineData previous = lines[i];
-          lines[i] = null;
-          final int sourceLineNumber = lineMapData.getSourceLineNumber();
-          if (isThisClass && sourceLineNumber < lines.length && lines[sourceLineNumber] == null) {
-            lines[sourceLineNumber] = previous;
-          }
-        }
-      }
-    }
+    classData.checkLineMappingsUnloaded(mappings);
   }
 
     public void setSourceMapFile(File sourceMapFile) {
