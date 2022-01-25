@@ -18,6 +18,8 @@ package testData.utilClass.kotlin
 
 // classes: ALL
 // extra args: -Dcoverage.ignore.private.constructor.util.class=true
+// patterns: testData.utilClass.kotlin.*
+// calculate unloaded: true
 
 object Util {        // should be ignored
     val x = foo2()                                // coverage: FULL
@@ -32,8 +34,8 @@ object Util {        // should be ignored
     }
 }
 
-
-object UnusedObject { // should be ignored
+// this line is not ignored as it is the only line in class
+object UnusedObject { // coverage: NONE
     fun boo() {
     }
 }

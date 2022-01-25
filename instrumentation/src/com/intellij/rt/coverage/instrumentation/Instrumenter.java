@@ -131,4 +131,8 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   public void removeLine(final int line) {
     myLines.remove(line);
   }
+
+  public int linesCount() {
+    return myLines.size();
+  }
 }

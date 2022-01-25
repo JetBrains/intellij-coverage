@@ -80,6 +80,7 @@ public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
         && myConstructorLines != null
         && !isSealedClassConstructor()) {
       for (int line : myConstructorLines) {
+        if (myIsKotlinObject && myIsKotlinClass && myInstrumenter.linesCount() <= 1) continue;
         removeLine(line);
       }
     }

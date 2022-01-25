@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2021 JetBrains s.r.o.
+ * Copyright 2000-2022 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,34 +14,37 @@
  * limitations under the License.
  */
 
-package testData.utilClass.java;
+package testData.`object`
 
 // classes: ALL
+// patterns: testData.object.*
 // extra args: -Dcoverage.ignore.private.constructor.util.class=true
-// patterns: testData.utilClass.java.*
 // calculate unloaded: true
 
-public class Test {
-  private Test() {                // should be ignored
-  }
+object EmptyObjectDeclaration // coverage: FULL
 
-  public static void help1() {
-    System.out.println("I'm help 1"); // coverage: FULL
-  }
-
-  private static void help2() {
-    System.out.println("I'm help 2"); // coverage: NONE
-  }
-
-  public static void main(String[] args) {
-    help1();                          // coverage: FULL
-  }
-
-  public static class UnusedJavaTest {
-    private UnusedJavaTest() {    // should be ignored
+object ObjectDeclarationWithConstructor {
+    init { // coverage: FULL
     }
+}
 
-    public static void help() {
+object ObjectDeclarationWithField {
+    val x: Int = 42 // coverage: FULL
+}
+
+object UnusedEmptyObjectDeclaration // coverage: NONE
+
+object UnusedObjectDeclarationWithConstructor {
+    init { // coverage: NONE
     }
-  }
+}
+
+object UnusedObjectDeclarationWithField {
+    val x: Int = 42 // coverage: NONE
+}
+
+fun main() {
+    EmptyObjectDeclaration // coverage: FULL
+    ObjectDeclarationWithConstructor // coverage: FULL
+    ObjectDeclarationWithField // coverage: FULL
 }

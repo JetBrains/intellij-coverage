@@ -184,6 +184,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testNullability() = test("nullability")
 
     @Test
+    fun testObject() = test("object")
+
+    @Test
     fun testPropertiesConstructor() = test("properties.constructor")
 
     @Test
