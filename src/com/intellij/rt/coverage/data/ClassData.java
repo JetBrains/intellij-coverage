@@ -17,8 +17,6 @@
 package com.intellij.rt.coverage.data;
 
 
-import com.intellij.rt.coverage.data.instructions.ClassInstructions;
-import com.intellij.rt.coverage.data.instructions.LineInstructions;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.DictionaryLookup;
 import com.intellij.rt.coverage.util.ErrorReporter;
@@ -237,7 +235,7 @@ public class ClassData implements CoverageData {
     return max;
   }
 
-  public void checkLineMappings(LineMapData[] linesMap, ClassData classData, ProjectData projectData) {
+  public void checkLineMappings(LineMapData[] linesMap, ClassData classData) {
     if (linesMap != null) {
       LineData[] result;
       try {
@@ -261,9 +259,6 @@ public class ClassData implements CoverageData {
             }
           }
         }
-        if (projectData.isInstructionsCoverageEnabled()) {
-          updateInstructions(linesMap, classData, projectData, maxMappedSourceLineNumber);
-        }
       }
       catch (Throwable e) {
         ErrorReporter.reportError("Error creating line mappings for " + classData.getName(), e);
@@ -273,34 +268,25 @@ public class ClassData implements CoverageData {
     }
   }
 
-  private void updateInstructions(LineMapData[] linesMap, ClassData classData, ProjectData projectData, int maxMappedSourceLineNumber) {
-    final ClassInstructions old = projectData.getInstructions().get(getName());
-    final LineInstructions[] lineInstructions;
-    if (classData == this || old == null || old.getlines().length == 0) {
-      lineInstructions = new LineInstructions[1 + maxMappedSourceLineNumber];
-    } else {
-      int size = Math.max(1 + maxMappedSourceLineNumber, old.getlines().length);
-      lineInstructions = new LineInstructions[size];
-      System.arraycopy(old.getlines(), 0, lineInstructions, 0, old.getlines().length);
-    }
-    final LineInstructions[] otherLines = projectData.getInstructions().get(classData.getName()).getlines();
-    for (final LineMapData mapData : linesMap) {
-      if (mapData == null) continue;
-      int sourceLineNumber = mapData.getSourceLineNumber();
-      if (lineInstructions[sourceLineNumber] == null
-          && mapData.getTargetMinLine() < otherLines.length
-          && otherLines[mapData.getTargetMinLine()] != null) {
-        lineInstructions[sourceLineNumber] = new LineInstructions();
-      }
-      for (int i = mapData.getTargetMinLine(); i <= mapData.getTargetMaxLine(); i++) {
-        if (i < 0 || i >= otherLines.length) continue;
-        if (lineInstructions[sourceLineNumber] != null && otherLines[i] != null) {
-          lineInstructions[sourceLineNumber].merge(otherLines[i]);
+  public void checkLineMappingsUnloaded(FileMapData[] mappings) {
+    final LineData[] lines = myLinesArray;
+    for (FileMapData mapData : mappings) {
+      final boolean isThisClass = myClassName.equals(mapData.getClassName());
+      for (LineMapData lineMapData : mapData.getLines()) {
+        final int sourceLineNumber = lineMapData.getSourceLineNumber();
+        for (int i = lineMapData.getTargetMinLine(); i <= lineMapData.getTargetMaxLine() && i < lines.length; i++) {
+          final LineData previous = lines[i];
+          lines[i] = null;
+          if (isThisClass && previous != null && sourceLineNumber < lines.length) {
+            if (lines[sourceLineNumber] == null) {
+              lines[sourceLineNumber] = previous;
+            } else {
+              lines[sourceLineNumber].merge(previous);
+            }
+          }
         }
-        otherLines[i] = null;
       }
     }
-    projectData.getInstructions().put(getName(), new ClassInstructions(lineInstructions));
   }
 
   private void copyCurrentLineData(LineData[] result) {

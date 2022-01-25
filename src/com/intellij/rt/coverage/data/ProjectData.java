@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.data.instructions.ClassInstructions;
+import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.util.*;
 
 import java.io.*;
@@ -170,19 +171,7 @@ public class ProjectData implements CoverageData, Serializable {
       classData.merge(mergedData);
     }
 
-    if (isInstructionsCoverageEnabled()) {
-      final Map<String, ClassInstructions> instructions = getInstructions();
-      for (Map.Entry<String, ClassInstructions> entry : projectData.getInstructions().entrySet()) {
-        final String key = entry.getKey();
-        final ClassInstructions mergedInstructions = entry.getValue();
-        ClassInstructions classInstructions = instructions.get(key);
-        if (classInstructions == null) {
-          classInstructions = new ClassInstructions();
-          instructions.put(key, classInstructions);
-        }
-        classInstructions.merge(mergedInstructions);
-      }
-    }
+    InstructionsUtil.merge(projectData, this);
   }
 
   public void checkLineMappings() {
@@ -212,11 +201,13 @@ public class ProjectData implements CoverageData, Serializable {
             // otherwise `classData` may contain inline generated lines
             classInfo = new ClassData(mappedClassName);
           }
-          classInfo.checkLineMappings(aFileData.getLines(), classData, this);
+          classInfo.checkLineMappings(aFileData.getLines(), classData);
+          InstructionsUtil.applyInstructionsSMAP(this, aFileData.getLines(), classData.getName(), classInfo.getName());
         }
 
         if (mainData != null) {
-          classData.checkLineMappings(mainData.getLines(), classData, this);
+          classData.checkLineMappings(mainData.getLines(), classData);
+          InstructionsUtil.applyInstructionsSMAP(this, mainData.getLines(), classData.getName(), classData.getName());
         }
       }
     }
