@@ -19,9 +19,6 @@ package com.intellij.rt.coverage.util;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
-import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
-import org.jetbrains.coverage.gnu.trove.TObjectIntProcedure;
 
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -31,7 +28,7 @@ import java.io.IOException;
  * This section saves info about jumps and switches that are not saved in the main report part as line's hits counter is 0.
  * The section contains all the classes that have uncovered lines and lists jumps and switches count for such lines.
  */
-public class UncoveredBranchesSection extends ReportSection {
+public class UncoveredBranchesSection extends ClassListSection {
   @Override
   public int getId() {
     return ReportSectionsUtil.UNCOVERED_BRANCHES_SECTION_ID;
@@ -48,59 +45,32 @@ public class UncoveredBranchesSection extends ReportSection {
   }
 
   @Override
-  public void load(ProjectData projectData, DataInputStream in, TIntObjectHashMap<ClassData> dict, int version) throws IOException {
-    int classId = CoverageIOUtil.readINT(in);
-    while (classId != -1) {
-      final ClassData classData = dict.get(classId);
-      for (Object object : classData.getLines()) {
-        final LineData line = (LineData) object;
-        if (line == null || line.getHits() > 0) continue;
+  protected void loadClass(DataInputStream in, ClassData classData, int version) throws IOException {
+    for (Object object : classData.getLines()) {
+      final LineData line = (LineData) object;
+      if (line == null || line.getHits() > 0) continue;
 
-        final int jumpsNumber = CoverageIOUtil.readINT(in);
-        for (int jumpId = 0; jumpId < jumpsNumber; jumpId++) {
-          line.addJump(jumpId);
-        }
-
-        final int switchesNumber = CoverageIOUtil.readINT(in);
-        for (int switchId = 0; switchId < switchesNumber; switchId++) {
-          final int keysLength = CoverageIOUtil.readINT(in);
-          final int[] keys = new int[keysLength];
-          for (int k = 0; k < keysLength; k++) {
-            keys[k] = k;
-          }
-          line.addSwitch(switchId, keys);
-        }
-
-        line.fillArrays();
+      final int jumpsNumber = CoverageIOUtil.readINT(in);
+      for (int jumpId = 0; jumpId < jumpsNumber; jumpId++) {
+        line.addJump(jumpId);
       }
-      classId = CoverageIOUtil.readINT(in);
+
+      final int switchesNumber = CoverageIOUtil.readINT(in);
+      for (int switchId = 0; switchId < switchesNumber; switchId++) {
+        final int keysLength = CoverageIOUtil.readINT(in);
+        final int[] keys = new int[keysLength];
+        for (int k = 0; k < keysLength; k++) {
+          keys[k] = k;
+        }
+        line.addSwitch(switchId, keys);
+      }
+
+      line.fillArrays();
     }
   }
 
   @Override
-  protected void saveInternal(final ProjectData projectData, final DataOutput out, TObjectIntHashMap<String> dict) throws IOException {
-    try {
-      dict.forEachEntry(new TObjectIntProcedure<String>() {
-        public boolean execute(String className, int index) {
-          try {
-            saveClass(projectData.getClassData(className), out, index);
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
-          return true;
-        }
-      });
-    } catch (RuntimeException e) {
-      if (e.getCause() instanceof IOException) {
-        throw (IOException) e.getCause();
-      } else {
-        throw e;
-      }
-    }
-    CoverageIOUtil.writeINT(out, -1);
-  }
-
-  private void saveClass(ClassData classData, DataOutput out, int index) throws IOException {
+  protected void saveClass(ClassData classData, DataOutput out, int index) throws IOException {
     int line = 0;
     final LineData[] lines = (LineData[]) classData.getLines();
     if (lines == null) return;

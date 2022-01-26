@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
@@ -34,11 +35,25 @@ public abstract class AbstractTracingInstrumenter extends Instrumenter {
   protected MethodVisitor createMethodLineEnumerator(MethodVisitor mv, String name, String desc, int access, String signature,
                                                      String[] exceptions) {
     myBranchData.resetMethod();
-    final LineEnumerator enumerator = new LineEnumerator(this, myBranchData, mv, access, name, desc, signature, exceptions);
+    final LineEnumerator enumerator;
+    if (myProjectData.isInstructionsCoverageEnabled()) {
+      enumerator = new InstructionsEnumerator(this, myBranchData, mv, access, name, desc, signature, exceptions);
+    } else {
+      enumerator = new LineEnumerator(this, myBranchData, mv, access, name, desc, signature, exceptions);
+    }
     return chainFilters(name, desc, access, signature, exceptions, enumerator);
   }
 
   public abstract MethodVisitor createTouchCounter(MethodVisitor methodVisitor, BranchDataContainer branchData, LineEnumerator enumerator, int access, String name, String desc, String className);
+
+  @Override
+  public void visitEnd() {
+    super.visitEnd();
+    if (myProjectData.isInstructionsCoverageEnabled()) {
+      final ClassInstructions classInstructions = new ClassInstructions(myClassData, myBranchData.getInstructions());
+      myProjectData.getInstructions().put(myClassData.getName(), classInstructions);
+    }
+  }
 
   private MethodVisitor chainFilters(String name, String desc, int access, String signature, String[] exceptions,
                                      LineEnumerator enumerator) {

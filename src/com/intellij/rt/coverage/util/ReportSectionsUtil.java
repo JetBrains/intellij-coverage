@@ -20,27 +20,30 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
-import org.jetbrains.coverage.gnu.trove.TObjectProcedure;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ReportSectionsUtil {
   public static final int UNCOVERED_BRANCHES_SECTION_ID = 1;
+  public static final int INSTRUCTIONS_SECTION_ID = 2;
 
-  private static TIntObjectHashMap<ReportSection> getSections() {
-    final TIntObjectHashMap<ReportSection> result = new TIntObjectHashMap<ReportSection>();
+  private static Map<Integer, ReportSection> getSections(ProjectData projectData) {
+    final Map<Integer, ReportSection> result = new LinkedHashMap<Integer, ReportSection>();
     result.put(UNCOVERED_BRANCHES_SECTION_ID, new UncoveredBranchesSection());
+    result.put(INSTRUCTIONS_SECTION_ID, new InstructionsSection(projectData));
     return result;
   }
 
   public static void loadSections(ProjectData projectData, DataInputStream in, TIntObjectHashMap<ClassData> dict) throws IOException {
     final int numberOfSections = CoverageIOUtil.readINT(in);
 
-    final TIntObjectHashMap<ReportSection> sections = getSections();
+    final Map<Integer, ReportSection> sections = getSections(projectData);
     for (int i = 0; i < numberOfSections; i++) {
       final int sectionId = CoverageIOUtil.readINT(in);
       final int size = CoverageIOUtil.readINT(in);
@@ -72,14 +75,11 @@ public class ReportSectionsUtil {
 
   private static List<ReportSection> getEngagedSections(final ProjectData projectData) {
     final List<ReportSection> engagedSections = new ArrayList<ReportSection>();
-    getSections().forEachValue(new TObjectProcedure<ReportSection>() {
-      public boolean execute(ReportSection section) {
-        if (section.isEngaged(projectData)) {
-          engagedSections.add(section);
-        }
-        return true;
+    for (ReportSection section : getSections(projectData).values()) {
+      if (section.isEngaged(projectData)) {
+        engagedSections.add(section);
       }
-    });
+    }
     return engagedSections;
   }
 }

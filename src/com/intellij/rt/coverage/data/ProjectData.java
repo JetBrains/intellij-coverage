@@ -16,6 +16,8 @@
 
 package com.intellij.rt.coverage.data;
 
+import com.intellij.rt.coverage.data.instructions.ClassInstructions;
+import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.util.*;
 
 import java.io.*;
@@ -50,6 +52,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   private boolean myTraceLines;
   private boolean mySampling;
+  private boolean myCollectInstructions;
 
   /**
    * Test tracking trace storage. Test tracking supports only sequential tests (but code inside one test could be parallel).
@@ -63,6 +66,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   private final ClassesMap myClasses = new ClassesMap();
   private volatile Map<String, FileMapData[]> myLinesMap;
+  private Map<String, ClassInstructions> myInstructions;
 
   private static Object ourProjectDataObject;
 
@@ -101,12 +105,34 @@ public class ProjectData implements CoverageData, Serializable {
     return myTraceLines;
   }
 
+  public boolean isInstructionsCoverageEnabled() {
+    return myCollectInstructions;
+  }
+
+  public void setInstructionsCoverage(boolean isEnabled) {
+    myCollectInstructions = isEnabled;
+  }
+
   public int getClassesNumber() {
     return myClasses.size();
   }
 
   public Map<String, FileMapData[]> getLinesMap() {
     return myLinesMap;
+  }
+
+  public Map<String, ClassInstructions> getInstructions() {
+    Map<String, ClassInstructions> instructions = myInstructions;
+    if (instructions == null) {
+      synchronized (this) {
+        instructions = myInstructions;
+        if (instructions == null) {
+          instructions = new ConcurrentHashMap<String, ClassInstructions>();
+          myInstructions = instructions;
+        }
+      }
+    }
+    return instructions;
   }
 
   public static ProjectData createProjectData(final File dataFile,
@@ -124,6 +150,7 @@ public class ProjectData implements CoverageData, Serializable {
     }
     ourProjectData.mySampling = isSampling;
     ourProjectData.myTraceLines = traceLines;
+    ourProjectData.myCollectInstructions = "true".equals(System.getProperty("coverage.instructions.enable", "false"));
     ourProjectData.myDataFile = dataFile;
     ourProjectData.myIncludePatterns = includePatterns;
     ourProjectData.myExcludePatterns = excludePatterns;
@@ -133,9 +160,9 @@ public class ProjectData implements CoverageData, Serializable {
 
   public void merge(final CoverageData data) {
     final ProjectData projectData = (ProjectData)data;
-    for (Object o : projectData.myClasses.names()) {
-      final String key = (String) o;
-      final ClassData mergedData = projectData.myClasses.get(key);
+    for (Map.Entry<String, ClassData> entry : projectData.myClasses.myClasses.entrySet()) {
+      final String key = entry.getKey();
+      final ClassData mergedData = entry.getValue();
       ClassData classData = myClasses.get(key);
       if (classData == null) {
         classData = new ClassData(mergedData.getName());
@@ -143,6 +170,8 @@ public class ProjectData implements CoverageData, Serializable {
       }
       classData.merge(mergedData);
     }
+
+    InstructionsUtil.merge(projectData, this);
   }
 
   public void checkLineMappings() {
@@ -173,10 +202,12 @@ public class ProjectData implements CoverageData, Serializable {
             classInfo = new ClassData(mappedClassName);
           }
           classInfo.checkLineMappings(aFileData.getLines(), classData);
+          InstructionsUtil.applyInstructionsSMAP(this, aFileData.getLines(), classData.getName(), classInfo.getName());
         }
 
         if (mainData != null) {
           classData.checkLineMappings(mainData.getLines(), classData);
+          InstructionsUtil.applyInstructionsSMAP(this, mainData.getLines(), classData.getName(), classData.getName());
         }
       }
     }

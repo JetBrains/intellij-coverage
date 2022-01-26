@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.*;
+import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinInlineVisitingFilter;
@@ -327,6 +328,7 @@ public class SaveHook implements Runnable {
     final FileMapData[] mappings = linesMap.remove(className);
     if (mappings == null) return;
     classData.checkLineMappingsUnloaded(mappings);
+    InstructionsUtil.applyInstructionsSMAPUnloaded(projectData, classData.getName(), mappings);
   }
 
     public void setSourceMapFile(File sourceMapFile) {

@@ -30,12 +30,12 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   private final String myDescriptor;
   private final MethodNode myMethodNode;
 
-  private int myCurrentLine;
+  protected int myCurrentLine;
 
   private boolean myHasExecutableLines = false;
 
   private final MethodVisitor myWriterMethodVisitor;
-  private final BranchDataContainer myBranchData;
+  protected final BranchDataContainer myBranchData;
 
   public LineEnumerator(AbstractTracingInstrumenter instrumenter,
                         BranchDataContainer branchData,
@@ -54,6 +54,12 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     myMethodName = name;
     myDescriptor = desc;
     myBranchData = branchData;
+  }
+
+  protected void onNewJump(Label originalLabel, Label trueLabel, Label falseLabel) {
+  }
+
+  protected void onNewSwitch(SwitchLabels original, SwitchLabels replacement) {
   }
 
   public void visitEnd() {
@@ -84,6 +90,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
         Label trueLabel = new Label();
         Label falseLabel = new Label();
         myBranchData.addJump(lineData, currentJump, trueLabel, falseLabel);
+        onNewJump(label, trueLabel, falseLabel);
 
         jumpInstrumented = true;
         super.visitJumpInsn(opcode, trueLabel);
@@ -99,7 +106,9 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     }
   }
 
-  /** Insert new labels before switch in order to let every branch have it's own label without fallthrough. */
+  /**
+   * Insert new labels before switch in order to let every branch have its own label without fallthrough.
+   */
   private SwitchLabels replaceLabels(SwitchLabels original) {
     Label beforeSwitchLabel = new Label();
     Label newDefaultLabel = new Label();
@@ -131,9 +140,11 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     SwitchLabels switchLabels = new SwitchLabels(dflt, labels);
     final LineData lineData = myInstrumenter.getLineData(myCurrentLine);
     if (lineData != null) {
-      switchLabels = replaceLabels(switchLabels);
+      final SwitchLabels replacement = replaceLabels(switchLabels);
       int switchIndex = lineData.switchesCount();
-      myBranchData.addLookupSwitch(lineData, switchIndex, switchLabels.getDefault(), keys, switchLabels.getLabels());
+      myBranchData.addLookupSwitch(lineData, switchIndex, replacement.getDefault(), keys, replacement.getLabels());
+      onNewSwitch(switchLabels, replacement);
+      switchLabels = replacement;
     }
     super.visitLookupSwitchInsn(switchLabels.getDefault(), keys, switchLabels.getLabels());
   }
@@ -146,9 +157,11 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     SwitchLabels switchLabels = new SwitchLabels(dflt, labels);
     final LineData lineData = myInstrumenter.getLineData(myCurrentLine);
     if (lineData != null) {
-      switchLabels = replaceLabels(switchLabels);
+      final SwitchLabels replacement = replaceLabels(switchLabels);
       int switchIndex = lineData.switchesCount();
-      myBranchData.addTableSwitch(lineData, switchIndex, min, max, switchLabels.getDefault(), switchLabels.getLabels());
+      myBranchData.addTableSwitch(lineData, switchIndex, min, max, replacement.getDefault(), replacement.getLabels());
+      onNewSwitch(switchLabels, replacement);
+      switchLabels = replacement;
     }
     super.visitTableSwitchInsn(min, max, switchLabels.getDefault(), switchLabels.getLabels());
   }
@@ -181,7 +194,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     return myBranchData;
   }
 
-  private static class SwitchLabels {
+  protected static class SwitchLabels {
     private final Label myDefault;
     private final Label[] myLabels;
 
