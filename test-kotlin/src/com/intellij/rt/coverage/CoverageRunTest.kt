@@ -180,7 +180,6 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testJavaSwitch() = test("javaSwitch")
 
     @Test
-    @Ignore("Not implemented")
     fun testLateinit() = test("lateinit")
 
     @Test

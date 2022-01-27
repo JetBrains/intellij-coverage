@@ -17,7 +17,6 @@
 package testData.lateinit
 
 // classes: A
-// ignore: Not implemented
 
 class A {                   // coverage: FULL
     lateinit var y: String  // coverage: FULL

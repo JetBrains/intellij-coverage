@@ -17,10 +17,7 @@
 package com.intellij.rt.coverage.instrumentation.kotlin;
 
 import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
-import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinCoroutinesEnumeratingFilter;
-import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
-import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinWhenMappingExceptionFilter;
-import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
+import com.intellij.rt.coverage.instrumentation.filters.enumerating.*;
 import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticAccessMethodFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticConstructorOfSealedClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
@@ -75,6 +72,7 @@ public class KotlinUtils {
     result.add(new KotlinWhenMappingExceptionFilter());
     result.add(new KotlinDefaultArgsBranchFilter());
     result.add(new KotlinCoroutinesEnumeratingFilter());
+    result.add(new KotlinLateinitFilter());
     return result;
   }
 }
