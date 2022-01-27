@@ -16,6 +16,7 @@
 
 package testData.defaultArgs.args32
 
+fun emptyFunction() = Unit // coverage: NONE
 
 fun functionWithSoManyParams(
     x00: Int, x01: Int, x02: Int, x03: Int, x04: Int, x05: Int, x06: Int, x07: Int, x08: Int, x09: Int,
@@ -24,7 +25,7 @@ fun functionWithSoManyParams(
     x30: Int, x31: Int,
     a: Long = 1                       // coverage: FULL
 ) {
-}
+} // coverage: FULL
 
 
 fun test() {

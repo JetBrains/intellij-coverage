@@ -34,10 +34,9 @@ object Util {        // should be ignored
     }
 }
 
-// this line is not ignored as it is the only line in class
-object UnusedObject { // coverage: NONE
+object UnusedObject {
     fun boo() {
-    }
+    } // coverage: NONE
 }
 
 class SimpleClassWithDefaultConstructor {         // coverage: NONE

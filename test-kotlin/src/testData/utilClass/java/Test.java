@@ -42,6 +42,6 @@ public class Test {
     }
 
     public static void help() {
-    }
+    } // coverage: NONE
   }
 }

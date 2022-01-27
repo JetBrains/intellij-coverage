@@ -37,4 +37,4 @@ class MyClass {             // coverage: FULL
     }
 }
 
-fun testF() {}
+fun testF() {} // coverage: FULL

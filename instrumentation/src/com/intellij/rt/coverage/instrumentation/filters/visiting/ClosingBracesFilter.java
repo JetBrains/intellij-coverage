@@ -38,6 +38,7 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
    * the inlined code as only NOP instructions stay there.
    */
   private TIntHashSet myLinesToIgnore;
+  private TIntHashSet myMethodLines;
   private boolean myInline;
 
   @Override
@@ -48,16 +49,15 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
     myHasLines = false;
     myCurrentLine = -1;
     myLinesToIgnore = new TIntHashSet();
+    myMethodLines = new TIntHashSet();
     myInline = false;
     mySeenReturn = false;
   }
 
   private void addEmptyLineToRemove() {
     if (myHasLines && !myHasInstructions) {
-      if (mySeenReturn) {
+      if (mySeenReturn || !removeLineIfNotSingleInMethod(myCurrentLine)) {
         myLinesToIgnore.add(myCurrentLine);
-      } else {
-        myContext.removeLine(myCurrentLine);
       }
     }
   }
@@ -70,6 +70,7 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
       myHasLines = true;
       myCurrentLine = line;
       mySeenReturn = false;
+      myMethodLines.add(line);
     }
     super.visitLineNumber(line, start);
   }
@@ -86,12 +87,31 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
     if (!myInline) {
       myLinesToIgnore.forEach(new TIntProcedure() {
         public boolean execute(int line) {
-          myContext.removeLine(line);
+          removeLineIfNotSingleInMethod(line);
           return true;
         }
       });
     }
     super.visitEnd();
+  }
+
+  private boolean removeLineIfNotSingleInMethod(final int line) {
+    if (myContext.getLineData(line) == null) return true;
+    myMethodLines.forEach(new TIntProcedure() {
+      public boolean execute(int lineNumber) {
+        if (line == lineNumber) return true;
+        if (myContext.getLineData(lineNumber) == null) {
+          myMethodLines.remove(lineNumber);
+          return true;
+        }
+        return false;
+      }
+    });
+    if (myMethodLines.size() > 1) {
+      myContext.removeLine(line);
+      return true;
+    }
+    return false;
   }
 
   @Override

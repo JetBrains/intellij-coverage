@@ -17,7 +17,7 @@
 package testData.unloaded.outer
 
 // classes: ALL
-// patterns: testData.unloaded.outer.*
+// patterns: testData.unloaded.outer.* -exclude testData.unloaded.outer.TestKt
 // calculate unloaded: true
 // markers: FileWalkerTest42.java
 fun main() {

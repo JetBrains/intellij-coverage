@@ -17,6 +17,8 @@
 package testData.unloaded.multiFile
 
 class UnusedClass {   // coverage: NONE // stats: 0/2
+    fun emptyFunction() = Unit // coverage: NONE // stats: 0/0
+
     fun foo() {
-    }
+    }                 // coverage: NONE // stats: 0/0
 }

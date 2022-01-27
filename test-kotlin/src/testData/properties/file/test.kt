@@ -27,4 +27,4 @@ private val z              // invisible as property is private
 
 
 fun main() {
-}
+} // coverage: FULL
