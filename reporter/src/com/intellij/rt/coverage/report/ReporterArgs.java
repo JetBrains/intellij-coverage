@@ -134,7 +134,7 @@ public class ReporterArgs {
     return "Arguments must be passed in the following JSON format:\n" +
         "{\n" +
         "  reports: [{ic: \"path\", smap: \"path\" [OPTIONAL]}, ...],\n" +
-        "  modules: [{output: [\"path1\", \"path2\"], sources: [\"source1\", …]}, {…}],\n" +
+        "  modules: [{output: [\"path1\", \"path2\"], sources: [\"source1\", ...]}, {...}],\n" +
         "  xml: \"path\" [OPTIONAL],\n" +
         "  html: \"directory\" [OPTIONAL],\n" +
         "  include: {\n" +
