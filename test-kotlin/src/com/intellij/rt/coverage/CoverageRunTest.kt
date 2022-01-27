@@ -102,6 +102,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testDefaultInterfaceMemberRemoveOnlyDefaultInterfaceMember() = test("defaultInterfaceMember.removeOnlyDefaultInterfaceMember")
 
     @Test
+    fun testDeprecated() = test("deprecated")
+
+    @Test
     fun testEnum_Java() = test("enum_.java")
 
     @Test

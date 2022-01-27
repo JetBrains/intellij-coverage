@@ -24,10 +24,7 @@ import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumerat
 import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticAccessMethodFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticConstructorOfSealedClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
-import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinCoroutinesVisitingFilter;
-import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinImplementerDefaultInterfaceMemberFilter;
-import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinInlineVisitingFilter;
-import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
+import com.intellij.rt.coverage.instrumentation.filters.visiting.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,6 +65,7 @@ public class KotlinUtils {
     result.add(new KotlinImplementerDefaultInterfaceMemberFilter());
     result.add(new KotlinCoroutinesVisitingFilter());
     result.add(new KotlinInlineVisitingFilter());
+    result.add(new DeprecatedMethodFilter());
     return result;
   }
 
