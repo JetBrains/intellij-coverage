@@ -24,6 +24,7 @@ import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.data.instructions.JumpInstructions;
 import com.intellij.rt.coverage.data.instructions.LineInstructions;
 import com.intellij.rt.coverage.data.instructions.SwitchInstructions;
+import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -49,6 +50,12 @@ public class InstructionsSection extends ClassListSection {
   @Override
   public boolean isEngaged(ProjectData projectData) {
     return !projectData.isSampling() && projectData.isInstructionsCoverageEnabled();
+  }
+
+  @Override
+  public void load(ProjectData projectData, DataInputStream in, TIntObjectHashMap<ClassData> dict, int version) throws IOException {
+    projectData.setInstructionsCoverage(true);
+    super.load(projectData, in, dict, version);
   }
 
   @Override
