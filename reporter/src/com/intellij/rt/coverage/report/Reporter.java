@@ -47,7 +47,7 @@ public class Reporter {
   }
 
   public void createHTMLReport(File htmlDir) throws IOException {
-    final HTMLReportBuilder builder = ReportBuilderFactory.createHTMLReportBuilder();
+    final HTMLReportBuilder builder = ReportBuilderFactory.createHTMLReportBuilderForKover();
     builder.setReportDir(htmlDir);
     final SourceCodeProvider sourceCodeProvider = new DirectorySourceCodeProvider(myProjectReport.getProjectData(), myProjectReport.getSources());
     builder.generateReport(new IDEACoverageData(myProjectReport.getProjectData(), sourceCodeProvider));
