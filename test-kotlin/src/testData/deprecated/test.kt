@@ -16,6 +16,10 @@
 
 package testData.deprecated
 
+// classes: ALL
+// patterns: testData.deprecated.*
+// calculate unloaded: true
+
 @Deprecated("", level = DeprecationLevel.WARNING)
 fun deprecatedFunction1() {
     println() // coverage: NONE
@@ -38,6 +42,29 @@ fun deprecatedFunctionWithDefaultArgs(
     println()
 }
 
+@Deprecated("", level = DeprecationLevel.HIDDEN)
+fun deprecatedFunctionWithAnonymousClass() {
+    functionWithLambda {
+        // this line should be ignored
+        it + 42 // coverage: NONE
+    }
+
+    // this line should be ignored
+    object : Foo { // coverage: NONE
+        override fun foo() {
+            // this line should be ignored
+            println() // coverage: NONE
+        }
+    }
+}
+
+fun functionWithLambda(lambda: (Int) -> Int) {
+    print(lambda(5)) // coverage: NONE
+}
+
+interface Foo {
+    fun foo()
+}
 
 fun main() {
 } // coverage: FULL
