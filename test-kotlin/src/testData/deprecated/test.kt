@@ -31,6 +31,13 @@ fun deprecatedFunction3() {
     println()
 }
 
+@Deprecated("", level = DeprecationLevel.HIDDEN)
+fun deprecatedFunctionWithDefaultArgs(
+        x: Int = 42
+) {
+    println()
+}
+
 
 fun main() {
 } // coverage: FULL

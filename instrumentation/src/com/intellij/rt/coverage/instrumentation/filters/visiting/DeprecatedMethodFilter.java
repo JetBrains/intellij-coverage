@@ -17,19 +17,40 @@
 package com.intellij.rt.coverage.instrumentation.filters.visiting;
 
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import org.jetbrains.coverage.gnu.trove.TIntHashSet;
 import org.jetbrains.coverage.gnu.trove.TIntProcedure;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
+import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+import java.util.HashSet;
+
 public class DeprecatedMethodFilter extends MethodVisitingFilter {
+  private static final String DEPRECATED_METHODS = "DEPRECATED_METHODS_SET";
   private boolean myShouldIgnoreMethod = false;
   private TIntHashSet myMethodLines;
+  private String myName;
 
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
     return KotlinUtils.isKotlinClass(context);
+  }
+
+  @Override
+  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
+    super.initFilter(methodVisitor, context, name, desc);
+    myName = name;
+    if (name.endsWith(KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX)) {
+      final Object property = myContext.getProperty(DEPRECATED_METHODS);
+      if (property != null) {
+        //noinspection unchecked
+        final HashSet<String> deprecatedMethods = (HashSet<String>) property;
+        final String originalName = name.substring(0, name.length() - KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX.length());
+        myShouldIgnoreMethod |= deprecatedMethods.contains(originalName);
+      }
+    }
   }
 
   @Override
@@ -58,6 +79,16 @@ public class DeprecatedMethodFilter extends MethodVisitingFilter {
   @Override
   public void visitEnd() {
     super.visitEnd();
+    if (myShouldIgnoreMethod) {
+      Object property = myContext.getProperty(DEPRECATED_METHODS);
+      if (property == null) {
+        property = new HashSet<String>();
+        myContext.addProperty(DEPRECATED_METHODS, property);
+      }
+      //noinspection unchecked
+      final HashSet<String> deprecatedMethods = (HashSet<String>) property;
+      deprecatedMethods.add(myName);
+    }
     if (!myShouldIgnoreMethod || myMethodLines == null) return;
     myMethodLines.forEach(new TIntProcedure() {
       public boolean execute(int line) {
