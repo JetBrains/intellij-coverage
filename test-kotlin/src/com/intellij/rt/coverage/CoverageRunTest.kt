@@ -75,6 +75,10 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testDefaultArgsArgs32() = test("defaultArgs.args32")
 
     @Test
+    @Ignore("To be fixed")
+    fun testDefaultArgsConstructor() = test("defaultArgs.constructor")
+
+    @Test
     fun testDefaultArgsCovered() = test("defaultArgs.covered")
 
     @Test
