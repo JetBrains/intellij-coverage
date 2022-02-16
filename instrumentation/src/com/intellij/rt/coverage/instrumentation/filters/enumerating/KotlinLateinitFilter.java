@@ -29,11 +29,19 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * Lateinit property extra branch should be ignored.
  * <p>
  * Lateinit property access generates such sequence of code inside class:
- *
+ * in Kotlin <= 1.4
  * <ol>
  *   <li>GETFIELD</li>
- *   <li>DUP</li>
  *   <li>IFNONNULL</li>
+ *   <li>LCD name</li>
+ *   <li>INVOKESTATIC kotlin/jvm/internal/Intrinsics.throwUninitializedPropertyAccessException (Ljava/lang/String;)V</li>
+ * </ol>
+ *
+ * or
+ * in Kotlin > 1.4
+ * <ol>
+ *   <li>GETFIELD</li>
+ *   <li>IFNULL</li>
  *   <li>LCD name</li>
  *   <li>INVOKESTATIC kotlin/jvm/internal/Intrinsics.throwUninitializedPropertyAccessException (Ljava/lang/String;)V</li>
  * </ol>
@@ -64,20 +72,10 @@ public class KotlinLateinitFilter extends LineEnumeratorFilter {
   }
 
   @Override
-  public void visitInsn(int opcode) {
-    super.visitInsn(opcode);
-    if (myState == 1 && opcode == Opcodes.DUP) {
-      myState = 2;
-      return;
-    }
-    myState = 0;
-  }
-
-  @Override
   public void visitJumpInsn(int opcode, Label label) {
     super.visitJumpInsn(opcode, label);
-    if (myState == 2 && opcode == Opcodes.IFNONNULL) {
-      myState = 3;
+    if (myState == 1 && (opcode == Opcodes.IFNONNULL || opcode == Opcodes.IFNULL)) {
+      myState = 2;
       return;
     }
     myState = 0;
@@ -86,8 +84,8 @@ public class KotlinLateinitFilter extends LineEnumeratorFilter {
   @Override
   public void visitLdcInsn(Object value) {
     super.visitLdcInsn(value);
-    if (myState == 3 && value instanceof String) {
-      myState = 4;
+    if (myState == 2 && value instanceof String) {
+      myState = 3;
       return;
     }
     myState = 0;
@@ -96,7 +94,7 @@ public class KotlinLateinitFilter extends LineEnumeratorFilter {
   @Override
   public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
     super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
-    if (myState == 4
+    if (myState == 3
         && opcode == Opcodes.INVOKESTATIC
         && "kotlin/jvm/internal/Intrinsics".equals(owner)
         && "throwUninitializedPropertyAccessException".equals(name)
