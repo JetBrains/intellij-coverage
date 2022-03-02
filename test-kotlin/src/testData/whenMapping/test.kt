@@ -20,7 +20,7 @@ package testData.whenMapping
 // instructions & branches
 
 enum class F {
-    A, B, C
+    A, B, C // coverage: FULL // stats: 20/20
 }
 
 fun f(f: F): Int {
@@ -31,17 +31,17 @@ fun f(f: F): Int {
 }
 
 enum class SimpleEnum {
-    Single
+    Single // coverage: FULL // stats: 8/8
 }
 
 fun simpleF(v: SimpleEnum) =
-    when (v) {                  // coverage: FULL // stats: 6/6 1/1
-        SimpleEnum.Single -> 42 // coverage: FULL // stats: 6/6
+    when (v) {                  // coverage: FULL // stats: 5/5
+        SimpleEnum.Single -> 42 // coverage: FULL // stats: 8/8 2/2
     }
 
 fun noneF(v: SimpleEnum) =
-    when (v) {                  // coverage: NONE // stats: 0/6 0/1
-        SimpleEnum.Single -> 42 // coverage: NONE // stats: 0/6
+    when (v) {                  // coverage: NONE // stats: 0/5
+        SimpleEnum.Single -> 42 // coverage: NONE // stats: 0/8 0/2
     }
 
 fun main() {

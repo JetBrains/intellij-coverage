@@ -16,7 +16,7 @@
 
 package testData.funInterface
 
-// classes: TestKt TestKt$test$1
+// classes: TestKt
 
 fun interface Foo {
     fun foo()

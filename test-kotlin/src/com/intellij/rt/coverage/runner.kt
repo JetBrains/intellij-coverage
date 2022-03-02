@@ -86,7 +86,8 @@ private fun extendedLineInfo(project: ProjectData, classNames: List<String>) = c
 private fun getClasses(classNames: List<String>, project: ProjectData) = if (classNames.contains(all)) {
     project.classes.values.filter { it.name.startsWith(TEST_PACKAGE) }
 } else {
-    classNames.map { project.getClassData(it) }
+    classNames.map { name -> project.getClassData(name)
+        .also { checkNotNull(it) {"Class $name has not been found in the coverage report!"} } }
 }
 
 internal fun testTrackingLines(coverageDataFile: File, classNames: List<String>): Map<Int, Set<String>> {

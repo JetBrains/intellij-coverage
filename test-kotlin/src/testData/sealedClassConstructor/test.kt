@@ -18,22 +18,22 @@ package testData.sealedClassConstructor
 
 // classes: ALL
 
-sealed class SealedClass                      // synthetic constructor is ignored
-()                                                               // coverage: FULL
+sealed class SealedClass                      // coverage: FULL
+()
 
-sealed class SealedClassWithArgs              // synthetic constructor is ignored
-(private val x: Int)                                             // coverage: FULL
+sealed class SealedClassWithArgs              // coverage: FULL
+(private val x: Int)                          // coverage: FULL
 
 data class Derived(private val x: Int) : SealedClass()           // coverage: FULL
 
 data class Derived2(private val x: Int) : SealedClassWithArgs(x) // coverage: FULL
 
-class ClassWithPrivateDefaultConstructor
+class ClassWithPrivateDefaultConstructor                         // coverage: FULL
 private constructor(val x: Int) {                                // coverage: FULL
     constructor(x: String) : this(x.toInt())                     // coverage: FULL
 }
 
-fun main(args: Array<String>) {
+fun main() {
     Derived(5)                                                   // coverage: FULL
     Derived2(10)                                                 // coverage: FULL
     ClassWithPrivateDefaultConstructor("42").x                   // coverage: FULL

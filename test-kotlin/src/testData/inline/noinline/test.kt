@@ -28,13 +28,13 @@ private inline fun foo(
 
 fun test() {
     foo(                   // coverage: FULL
-        {                  // coverage: FULL
+        {
             41             // coverage: FULL
         },
         {
             42             // coverage: FULL
         },
-        {                  // coverage: FULL
+        {
             43             // coverage: FULL
         }
     )

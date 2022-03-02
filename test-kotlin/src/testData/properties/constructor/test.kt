@@ -20,8 +20,8 @@ package testData.properties.constructor
 
 
 class A(                // coverage: FULL
-    private val x: Int, // invisible as property is private
-    val y: String       // coverage: NONE as getter is not covered
+    private val x: Int, // coverage: FULL
+    val y: String       // coverage: FULL
 )
 
 

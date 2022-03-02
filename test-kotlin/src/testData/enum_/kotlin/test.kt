@@ -23,15 +23,15 @@ package testData.enum_.kotlin
 // so there are no lines presented. Kotlin 1.5 performs the same as Java.
 
 enum class MyEnum {
-    A,
-    B,
-    C;
+    A, // coverage: FULL
+    B, // coverage: FULL
+    C; // coverage: FULL
 }
 
 enum class MyUnloadedEnum {
-    A,
-    B,
-    C;
+    A, // coverage: NONE
+    B, // coverage: NONE
+    C; // coverage: NONE
 }
 
 fun main() {

@@ -19,7 +19,7 @@ package testData.dataClass
 // classes: A
 
 data class A(                  // coverage: FULL
-    private val x: Int,
+    private val x: Int,        // coverage: FULL
     val z: Int                 // coverage: FULL
 ) {
     fun foo() {

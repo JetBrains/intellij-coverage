@@ -21,12 +21,12 @@ package testData.simple.branches
 
 class MyBranchedClass {           // coverage: FULL // stats: 2/2
     fun foo(value: Int) {
-        if (value < 0) {          // coverage: PARTIAL // stats: 2/2 1/2
-            println("LE")         // coverage: FULL    // stats: 8/8
-        } else if (value == 0) {  // coverage: NONE    // stats: 0/2 0/2
-            println("EQ")         // coverage: NONE    // stats: 0/8
+        if (value < 0) {          // coverage: PARTIAL // stats: 3/3 1/2
+            println("LE")         // coverage: FULL    // stats: 3/3
+        } else if (value == 0) {  // coverage: NONE    // stats: 0/3 0/2
+            println("EQ")         // coverage: NONE    // stats: 0/4
         } else {
-            println("GE")         // coverage: NONE    // stats: 0/7
+            println("GE")         // coverage: NONE    // stats: 0/2
         }
     }
 }

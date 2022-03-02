@@ -47,7 +47,7 @@ class SimpleClassWithDefaultConstructor {         // coverage: NONE
     }
 }
 
-fun main(args: Array<String>) {
+fun main() {
     Util.foo1()                                   // coverage: FULL
     SimpleClassWithDefaultConstructor.staticFoo() // coverage: FULL
 }

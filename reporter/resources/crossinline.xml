@@ -19,7 +19,7 @@
 <counter type="LINE" missed="0" covered="1"/>
 </method>
 <method name="call" desc="(Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
-<counter type="INSTRUCTION" missed="0" covered="7"/>
+<counter type="INSTRUCTION" missed="0" covered="8"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="1"/>
 </method>
@@ -28,28 +28,28 @@
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="2"/>
 </method>
-<counter type="INSTRUCTION" missed="0" covered="38"/>
+<counter type="INSTRUCTION" missed="0" covered="39"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="4"/>
 <counter type="METHOD" missed="0" covered="3"/>
 </class>
 <sourcefile name="test.kt">
-<line nr="20" mi="0" ci="7" mb="0" cb="0"/>
+<line nr="20" mi="0" ci="8" mb="0" cb="0"/>
 <line nr="24" mi="0" ci="27" mb="0" cb="0"/>
 <line nr="25" mi="0" ci="15" mb="0" cb="0"/>
 <line nr="27" mi="0" ci="2" mb="0" cb="0"/>
 <line nr="30" mi="0" ci="2" mb="0" cb="0"/>
-<counter type="INSTRUCTION" missed="0" covered="53"/>
+<counter type="INSTRUCTION" missed="0" covered="54"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="5"/>
 </sourcefile>
-<counter type="INSTRUCTION" missed="0" covered="53"/>
+<counter type="INSTRUCTION" missed="0" covered="54"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="5"/>
 <counter type="METHOD" missed="0" covered="4"/>
 <counter type="CLASS" missed="0" covered="2"/>
 </package>
-<counter type="INSTRUCTION" missed="0" covered="53"/>
+<counter type="INSTRUCTION" missed="0" covered="54"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="5"/>
 <counter type="METHOD" missed="0" covered="4"/>
