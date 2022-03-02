@@ -63,6 +63,7 @@ public class KotlinUtils {
     result.add(new KotlinCoroutinesVisitingFilter());
     result.add(new KotlinInlineVisitingFilter());
     result.add(new DeprecatedMethodFilter());
+    result.add(new KotlinDefaultArgsLineFilter());
     return result;
   }
 

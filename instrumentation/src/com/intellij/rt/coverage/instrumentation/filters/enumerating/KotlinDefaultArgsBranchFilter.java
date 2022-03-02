@@ -46,6 +46,10 @@ public class KotlinDefaultArgsBranchFilter extends LineEnumeratorFilter {
 
   @Override
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
+    return isApplicable(context, access, name);
+  }
+
+  public static boolean isApplicable(Instrumenter context, int access, String name) {
     return (access & Opcodes.ACC_SYNTHETIC) != 0
         && KotlinUtils.isKotlinClass(context)
         && name.endsWith(DEFAULT_ARGS_SUFFIX);
@@ -69,16 +73,22 @@ public class KotlinDefaultArgsBranchFilter extends LineEnumeratorFilter {
   @Override
   public void visitCode() {
     super.visitCode();
-    Type[] parameters = Type.getType(myContext.getDescriptor()).getArgumentTypes();
-    int sourceCount = sourceParametersCount(parameters.length);
-    int size = 0;
+    int[] range = getMaskIndexRange(myContext.getDescriptor());
+    myMinMaskIndex = range[0];
+    myMaxMaskIndex = range[1];
+  }
+
+  public static int[] getMaskIndexRange(String desc) {
+    final Type[] parameters = Type.getType(desc).getArgumentTypes();
+    final int sourceCount = sourceParametersCount(parameters.length);
+    int size = 0, minIndex = -1;
     for (int i = 0; i < parameters.length - 2; i++) {
       size += parameters[i].getSize();
       if (i == sourceCount - 1) {
-        myMinMaskIndex = size;
+        minIndex = size;
       }
     }
-    myMaxMaskIndex = size;
+    return new int[]{minIndex, size};
   }
 
   @Override
