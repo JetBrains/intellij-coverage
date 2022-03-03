@@ -29,7 +29,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * Lateinit property extra branch should be ignored.
  * <p>
  * Lateinit property access generates such sequence of code inside class:
- * in Kotlin <= 1.4
+ * in Kotlin version less or equal than 1.4
  * <ol>
  *   <li>GETFIELD</li>
  *   <li>IFNONNULL</li>
@@ -38,7 +38,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * </ol>
  *
  * or
- * in Kotlin > 1.4
+ * in Kotlin version greater than 1.4
  * <ol>
  *   <li>GETFIELD</li>
  *   <li>IFNULL</li>
