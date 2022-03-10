@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class KotlinUtils {
+  public static final String KOTLIN_DEFAULT_CONSTRUCTOR_MARKER = "Lkotlin/jvm/internal/DefaultConstructorMarker;";
   private static final String KOTLIN_CLASS_LABEL = "IS_KOTLIN";
   public static final String SEALED_CLASS_LABEL = "IS_SEALED_CLASS";
   public static final String KOTLIN_METADATA = "Lkotlin/Metadata;";

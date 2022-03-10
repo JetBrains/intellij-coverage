@@ -32,7 +32,7 @@ public class KotlinSyntheticConstructorOfSealedClassFilter implements MethodSign
   private static boolean isSealedConstructor(int access, String name, String desc, MethodFilteringVisitor context) {
     return (access & Opcodes.ACC_SYNTHETIC) != 0
         && name.equals("<init>")
-        && desc.endsWith("Lkotlin/jvm/internal/DefaultConstructorMarker;)V")
+        && desc.endsWith(KotlinUtils.KOTLIN_DEFAULT_CONSTRUCTOR_MARKER + ")V")
         && context.isAbstract();
   }
 }

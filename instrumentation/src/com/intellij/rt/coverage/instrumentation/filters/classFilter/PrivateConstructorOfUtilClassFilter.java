@@ -26,7 +26,7 @@ import java.util.List;
 public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
   private static final String CONSTRUCTOR = "<init>";
   private static final String CONSTRUCTOR_DESCRIPTOR = "()V";
-  private static final String KOTLIN_OBJECT_CONSTRUCTOR_DESCRIPTOR = "(Lkotlin/jvm/internal/DefaultConstructorMarker;)V";
+  private static final String KOTLIN_OBJECT_CONSTRUCTOR_DESCRIPTOR = "(" + KotlinUtils.KOTLIN_DEFAULT_CONSTRUCTOR_MARKER + ")V";
 
   private final Instrumenter myInstrumenter;
   private boolean myIsAbstractClass;

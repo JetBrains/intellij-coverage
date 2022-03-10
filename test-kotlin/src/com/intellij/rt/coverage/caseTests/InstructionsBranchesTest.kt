@@ -34,6 +34,9 @@ internal abstract class InstructionsBranchesTest(override val coverage: Coverage
     //===GENERATED TESTS===
 
     @Test
+    fun testDefaultArgsConstructor() = test("defaultArgs.constructor")
+
+    @Test
     fun testSimpleBranches() = test("simple.branches")
 
     @Test

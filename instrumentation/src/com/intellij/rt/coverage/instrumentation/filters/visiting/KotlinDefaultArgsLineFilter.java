@@ -47,14 +47,18 @@ public class KotlinDefaultArgsLineFilter extends MethodVisitingFilter {
 
 
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
-    return KotlinDefaultArgsBranchFilter.isApplicable(context, access, name);
+    return KotlinDefaultArgsBranchFilter.isApplicable(context, access, name, desc);
   }
 
   @Override
   public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
     super.initFilter(methodVisitor, context, name, desc);
-    myName = name.substring(0, name.length() - KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX.length());
-    final int[] range = KotlinDefaultArgsBranchFilter.getMaskIndexRange(desc);
+    if ("<init>".equals(name)) {
+      myName = name;
+    } else {
+      myName = name.substring(0, name.length() - KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX.length());
+    }
+    final int[] range = KotlinDefaultArgsBranchFilter.getMaskIndexRange(name, desc);
     myMinMaskIndex = range[0];
     myMaxMaskIndex = range[1];
   }

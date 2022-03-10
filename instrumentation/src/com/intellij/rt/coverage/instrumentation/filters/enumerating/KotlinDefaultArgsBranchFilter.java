@@ -46,14 +46,20 @@ public class KotlinDefaultArgsBranchFilter extends LineEnumeratorFilter {
 
   @Override
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
-    return isApplicable(context, access, name);
+    return isApplicable(context, access, name, desc);
   }
 
-  public static boolean isApplicable(Instrumenter context, int access, String name) {
+  public static boolean isApplicable(Instrumenter context, int access, String name, String desc) {
     return (access & Opcodes.ACC_SYNTHETIC) != 0
         && KotlinUtils.isKotlinClass(context)
-        && name.endsWith(DEFAULT_ARGS_SUFFIX);
+        && (name.endsWith(DEFAULT_ARGS_SUFFIX) || isConstructorWithDefaultArgs(name, desc));
   }
+
+  private static boolean isConstructorWithDefaultArgs(String name, String desc) {
+    return "<init>".equals(name) && desc != null
+        && desc.endsWith("I" + KotlinUtils.KOTLIN_DEFAULT_CONSTRUCTOR_MARKER + ")V");
+  }
+
 
 
   /**
@@ -73,12 +79,12 @@ public class KotlinDefaultArgsBranchFilter extends LineEnumeratorFilter {
   @Override
   public void visitCode() {
     super.visitCode();
-    int[] range = getMaskIndexRange(myContext.getDescriptor());
+    int[] range = getMaskIndexRange(myContext.getMethodName(), myContext.getDescriptor());
     myMinMaskIndex = range[0];
     myMaxMaskIndex = range[1];
   }
 
-  public static int[] getMaskIndexRange(String desc) {
+  public static int[] getMaskIndexRange(String name, String desc) {
     final Type[] parameters = Type.getType(desc).getArgumentTypes();
     final int sourceCount = sourceParametersCount(parameters.length);
     int size = 0, minIndex = -1;
@@ -87,6 +93,11 @@ public class KotlinDefaultArgsBranchFilter extends LineEnumeratorFilter {
       if (i == sourceCount - 1) {
         minIndex = size;
       }
+    }
+    if ("<init>".equals(name)) {
+      // shift as this parameter is at 0 position
+      minIndex++;
+      size++;
     }
     return new int[]{minIndex, size};
   }

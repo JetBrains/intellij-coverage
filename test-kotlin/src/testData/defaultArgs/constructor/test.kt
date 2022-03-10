@@ -17,9 +17,9 @@
 package testData.defaultArgs.constructor
 
 // classes: Example
-// ignore: To be fixed
+// instructions & branches
 
-class Example(name: String = "foo") // coverage: FULL
+class Example(name: String = "foo") // coverage: FULL // stats: 11/11
 
 fun main() {
     Example()
