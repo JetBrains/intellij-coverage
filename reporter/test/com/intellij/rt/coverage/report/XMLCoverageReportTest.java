@@ -80,6 +80,11 @@ public class XMLCoverageReportTest {
   }
 
   @Test
+  public void integrationDefaultArgs() throws Throwable {
+    verifyProjectXML(runTestAndConvertToXML("testData\\.defaultArgs\\..*", "testData.defaultArgs.TestKt"), "defaultArgs.xml");
+  }
+
+  @Test
   public void integrationTestNoReport() throws Throwable {
     final File xmlFile = createXMLFile();
     TestUtils.createReporter(null, "testData.noReport.*").createXMLReport(xmlFile);

@@ -84,6 +84,25 @@ public class KotlinDefaultArgsBranchFilter extends LineEnumeratorFilter {
     myMaxMaskIndex = range[1];
   }
 
+  public static String getOriginalNameAndDesc(String name, String desc) {
+    final Type type = Type.getType(desc);
+    final Type[] parameters = type.getArgumentTypes();
+    final StringBuilder builder = new StringBuilder();
+    if ("<init>".equals(name)) {
+      builder.append(name);
+    } else if (name.endsWith(DEFAULT_ARGS_SUFFIX)) {
+      builder.append(name, 0, name.length() - DEFAULT_ARGS_SUFFIX.length());
+    }
+    final int sourceCount = sourceParametersCount(parameters.length);
+    builder.append('(');
+    for (int i = 0; i < sourceCount; i++) {
+      builder.append(parameters[i].getDescriptor());
+    }
+    builder.append(')');
+    builder.append(type.getReturnType().getDescriptor());
+    return builder.toString();
+  }
+
   public static int[] getMaskIndexRange(String name, String desc) {
     final Type[] parameters = Type.getType(desc).getArgumentTypes();
     final int sourceCount = sourceParametersCount(parameters.length);

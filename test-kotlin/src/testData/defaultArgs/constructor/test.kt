@@ -16,12 +16,34 @@
 
 package testData.defaultArgs.constructor
 
-// classes: Example
+// classes: Example1 Example2 Example3 Example4 OverloadExample1 OverloadExample2 OverloadExample3 OverloadExample4
 // instructions & branches
+// calculate unloaded: true
 
-class Example(name: String = "foo") // coverage: FULL // stats: 11/11
+class Example1(name: String = "foo") // coverage: FULL // stats: 11/11
+class Example2(name: String = "foo") // coverage: FULL // stats: 11/11
+class Example3(name: String = "foo") // coverage: FULL // stats: 11/11
+class Example4(name: String = "foo") // coverage: NONE // stats: 0/11
+
+class OverloadExample1 @JvmOverloads constructor(name: String = "foo") // coverage: FULL // stats: 11/11
+class OverloadExample2 @JvmOverloads constructor(name: String = "foo") // coverage: FULL // stats: 11/11
+class OverloadExample3 @JvmOverloads constructor(name: String = "foo") // coverage: FULL // stats: 11/11
+class OverloadExample4 @JvmOverloads constructor(name: String = "foo") // coverage: NONE // stats: 0/11
+
+
 
 fun main() {
-    Example()
-    Example("boo")
+    Example1()
+    Example1("boo")
+
+    Example2()
+
+    Example3("boo")
+
+    OverloadExample1()
+    OverloadExample1("boo")
+
+    OverloadExample2()
+
+    OverloadExample3("boo")
 }

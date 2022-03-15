@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.visiting;
 
+import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
@@ -34,6 +35,7 @@ public class KotlinDefaultArgsLineFilter extends MethodVisitingFilter {
   private int myState = 0;
   private boolean myHasInstructions = false;
   private String myName;
+  private String myNameDesc;
 
   /**
    * Index of first mask variable.
@@ -53,11 +55,8 @@ public class KotlinDefaultArgsLineFilter extends MethodVisitingFilter {
   @Override
   public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
     super.initFilter(methodVisitor, context, name, desc);
-    if ("<init>".equals(name)) {
-      myName = name;
-    } else {
-      myName = name.substring(0, name.length() - KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX.length());
-    }
+    myNameDesc = KotlinDefaultArgsBranchFilter.getOriginalNameAndDesc(name, desc);
+    myName = myNameDesc.substring(0, myNameDesc.indexOf('('));
     final int[] range = KotlinDefaultArgsBranchFilter.getMaskIndexRange(name, desc);
     myMinMaskIndex = range[0];
     myMaxMaskIndex = range[1];
@@ -71,6 +70,12 @@ public class KotlinDefaultArgsLineFilter extends MethodVisitingFilter {
     }
     myCurrentLine = line;
     super.visitLineNumber(line, start);
+
+    // replace method signature, so that generated methods are invisible
+    final LineData lineData = myContext.getLineData(line);
+    if (lineData != null) {
+      lineData.setMethodSignature(myNameDesc);
+    }
   }
 
   @Override
