@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.enumerating;
 
+import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
@@ -56,7 +57,7 @@ public class KotlinDefaultArgsBranchFilter extends LineEnumeratorFilter {
   }
 
   private static boolean isConstructorWithDefaultArgs(String name, String desc) {
-    return "<init>".equals(name) && desc != null
+    return InstrumentationUtils.CONSTRUCTOR.equals(name) && desc != null
         && desc.endsWith("I" + KotlinUtils.KOTLIN_DEFAULT_CONSTRUCTOR_MARKER + ")V");
   }
 
@@ -88,7 +89,7 @@ public class KotlinDefaultArgsBranchFilter extends LineEnumeratorFilter {
     final Type type = Type.getType(desc);
     final Type[] parameters = type.getArgumentTypes();
     final StringBuilder builder = new StringBuilder();
-    if ("<init>".equals(name)) {
+    if (InstrumentationUtils.CONSTRUCTOR.equals(name)) {
       builder.append(name);
     } else if (name.endsWith(DEFAULT_ARGS_SUFFIX)) {
       builder.append(name, 0, name.length() - DEFAULT_ARGS_SUFFIX.length());
@@ -113,7 +114,7 @@ public class KotlinDefaultArgsBranchFilter extends LineEnumeratorFilter {
         minIndex = size;
       }
     }
-    if ("<init>".equals(name)) {
+    if (InstrumentationUtils.CONSTRUCTOR.equals(name)) {
       // shift as this parameter is at 0 position
       minIndex++;
       size++;

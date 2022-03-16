@@ -27,7 +27,6 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
   private static final String BRANCH_HITS_FIELD_NAME = "__$branchHits$__";
   private static final String BRANCH_HITS_FIELD_TYPE = "[I";
   private static final String BRANCH_HITS_LOCAL_VARIABLE_NAME = "__$localBranchHits$__";
-  private static final String CLASS_INIT = "<clinit>";
 
   private final ExtraFieldInstrumenter myExtraFieldInstrumenter;
 
@@ -45,7 +44,7 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
                                           final String desc,
                                           final String className) {
     if (!enumerator.hasExecutableLines()) {
-      if (myExtraFieldInstrumenter.isInterface() && CLASS_INIT.equals(name)) {
+      if (myExtraFieldInstrumenter.isInterface() && InstrumentationUtils.CLASS_INIT.equals(name)) {
         return myExtraFieldInstrumenter.createMethodVisitor(this, mv, mv, name);
       }
       return mv;

@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.classFilter;
 
+import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.*;
@@ -24,8 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
-  private static final String CONSTRUCTOR = "<init>";
-  private static final String CONSTRUCTOR_DESCRIPTOR = "()V";
   private static final String KOTLIN_OBJECT_CONSTRUCTOR_DESCRIPTOR = "(" + KotlinUtils.KOTLIN_DEFAULT_CONSTRUCTOR_MARKER + ")V";
 
   private final Instrumenter myInstrumenter;
@@ -133,8 +132,8 @@ public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
       if (myALoadVisited
           && opcode == Opcodes.INVOKESPECIAL
           && owner != null && (owner.equals(mySuperName) || owner.equals(myName))
-          && CONSTRUCTOR.equals(name)
-          && CONSTRUCTOR_DESCRIPTOR.equals(descriptor)) {
+          && InstrumentationUtils.CONSTRUCTOR.equals(name)
+          && InstrumentationUtils.CONSTRUCTOR_DESCRIPTOR.equals(descriptor)) {
         myInvokeSpecialVisited = true;
         return;
       }
@@ -212,11 +211,11 @@ public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
   }
 
   private static boolean isPrivateDefaultConstructor(int access, String name, String descriptor) {
-    return (access & Opcodes.ACC_PRIVATE) != 0 && CONSTRUCTOR.equals(name) && CONSTRUCTOR_DESCRIPTOR.equals(descriptor);
+    return (access & Opcodes.ACC_PRIVATE) != 0 && InstrumentationUtils.CONSTRUCTOR.equals(name) && InstrumentationUtils.CONSTRUCTOR_DESCRIPTOR.equals(descriptor);
   }
 
   private static boolean isKotlinObjectSyntheticConstructor(int access, String name, String descriptor) {
-    return (access & (Opcodes.ACC_PUBLIC | Opcodes.ACC_SYNTHETIC)) != 0 && CONSTRUCTOR.equals(name) && KOTLIN_OBJECT_CONSTRUCTOR_DESCRIPTOR.equals(descriptor);
+    return (access & (Opcodes.ACC_PUBLIC | Opcodes.ACC_SYNTHETIC)) != 0 && InstrumentationUtils.CONSTRUCTOR.equals(name) && KOTLIN_OBJECT_CONSTRUCTOR_DESCRIPTOR.equals(descriptor);
   }
 
   private void addLine(int line) {

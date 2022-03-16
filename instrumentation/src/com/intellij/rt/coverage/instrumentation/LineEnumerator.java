@@ -83,7 +83,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
       return;
     }
     boolean jumpInstrumented = false;
-    if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR && !myMethodName.equals("<clinit>")) {
+    if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR && !InstrumentationUtils.CLASS_INIT.equals(myMethodName)) {
       final LineData lineData = myInstrumenter.getLineData(myCurrentLine);
       if (lineData != null) {
         int currentJump = lineData.jumpsCount();

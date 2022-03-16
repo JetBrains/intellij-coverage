@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.signature;
 
+import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
@@ -31,7 +32,7 @@ public class KotlinSyntheticConstructorOfSealedClassFilter implements MethodSign
 
   private static boolean isSealedConstructor(int access, String name, String desc, MethodFilteringVisitor context) {
     return (access & Opcodes.ACC_SYNTHETIC) != 0
-        && name.equals("<init>")
+        && InstrumentationUtils.CONSTRUCTOR.equals(name)
         && desc.endsWith(KotlinUtils.KOTLIN_DEFAULT_CONSTRUCTOR_MARKER + ")V")
         && context.isAbstract();
   }

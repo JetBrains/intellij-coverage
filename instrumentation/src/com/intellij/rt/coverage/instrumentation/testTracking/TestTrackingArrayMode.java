@@ -56,7 +56,6 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
   private static final String TRACE_MASK_FIELD_NAME = "__$traceMask$__";
   private static final String TRACE_MASK_FIELD_TYPE = "[Z";
   private static final String TRACE_MASK_LOCAL_VARIABLE_NAME = "__$traceMaskLocal$__";
-  private static final String CLASS_INIT = "<clinit>";
 
   private final ExtraFieldInstrumenter myExtraTraceMaskFieldInstrumenter;
 
@@ -67,7 +66,7 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
 
   protected MethodVisitor createMethodTransformer(final MethodVisitor mv, LineEnumerator enumerator, final int access, String name, final String desc) {
     if (!enumerator.hasExecutableLines()) {
-      if (myExtraClassDataFieldInstrumenter.isInterface() && CLASS_INIT.equals(name)) {
+      if (myExtraClassDataFieldInstrumenter.isInterface() && InstrumentationUtils.CLASS_INIT.equals(name)) {
         final MethodVisitor mv1 = myExtraClassDataFieldInstrumenter.createMethodVisitor(this, mv, mv, name);
         return myExtraTraceMaskFieldInstrumenter.createMethodVisitor(this, mv, mv1, name);
       }
@@ -88,8 +87,8 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
           mv.visitJumpInsn(Opcodes.IFNE, skip);
 
           // call register
-          mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraClassDataFieldInstrumenter.getInternalClassName(), TestTrackingClassDataInstrumenter.CLASS_DATA_FIELD_NAME, TestTrackingClassDataInstrumenter.CLASS_DATA_FIELD_TYPE);
-          mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "registerClassForTrace", "(Ljava/lang/Object;)Z", false);
+          mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraClassDataFieldInstrumenter.getInternalClassName(), TestTrackingClassDataInstrumenter.CLASS_DATA_FIELD_NAME, InstrumentationUtils.OBJECT_TYPE);
+          mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "registerClassForTrace", "(" + InstrumentationUtils.OBJECT_TYPE + ")Z", false);
 
           // if register is successful set array[0] = true
           // it may be unsuccessful if no test is running now

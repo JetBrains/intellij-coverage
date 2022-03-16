@@ -20,6 +20,11 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class InstrumentationUtils {
+  public static final String OBJECT_TYPE = "Ljava/lang/Object;";
+  public static final String CLASS_INIT = "<clinit>";
+  public static final String CONSTRUCTOR = "<init>";
+  public static final String CONSTRUCTOR_DESCRIPTOR = "()V";
+
   public static void pushInt(MethodVisitor mv, int value) {
     if (value <= Short.MAX_VALUE) {
       mv.visitIntInsn(Opcodes.SIPUSH, value);

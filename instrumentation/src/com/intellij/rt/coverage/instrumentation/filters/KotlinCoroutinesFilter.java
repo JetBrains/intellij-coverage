@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters;
 
+import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.*;
@@ -56,7 +57,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
    */
   public static boolean isApplicable(Instrumenter context, String name, String desc) {
     return KotlinUtils.isKotlinClass(context)
-        && (name.equals("invokeSuspend") || desc.endsWith("Lkotlin/coroutines/Continuation;)Ljava/lang/Object;"));
+        && (name.equals("invokeSuspend") || desc.endsWith("Lkotlin/coroutines/Continuation;)" + InstrumentationUtils.OBJECT_TYPE));
   }
 
   @Override
@@ -73,11 +74,11 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
     boolean getCoroutinesSuspendedVisited = opcode == Opcodes.INVOKESTATIC
         && owner.equals("kotlin/coroutines/intrinsics/IntrinsicsKt")
         && name.equals("getCOROUTINE_SUSPENDED")
-        && descriptor.equals("()Ljava/lang/Object;");
-    boolean suspendCallVisited = descriptor.endsWith("Lkotlin/coroutines/Continuation;)Ljava/lang/Object;")
+        && descriptor.equals("()" + InstrumentationUtils.OBJECT_TYPE);
+    boolean suspendCallVisited = descriptor.endsWith("Lkotlin/coroutines/Continuation;)" + InstrumentationUtils.OBJECT_TYPE)
         || owner.startsWith("kotlin/jvm/functions/Function")
         && name.equals("invoke") && opcode == Opcodes.INVOKEINTERFACE
-        && descriptor.endsWith(")Ljava/lang/Object;");
+        && descriptor.endsWith(")" + InstrumentationUtils.OBJECT_TYPE);
     if (getCoroutinesSuspendedVisited || suspendCallVisited) {
       myGetCoroutinesSuspendedVisited |= getCoroutinesSuspendedVisited;
       mySuspendCallVisited |= suspendCallVisited;

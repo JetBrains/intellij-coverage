@@ -140,7 +140,7 @@ public class SourceLineCounter extends ClassVisitor {
         if (!myExcludeLines ||
             myClassData == null ||
             myClassData.getStatus(name + desc) != null ||
-            (!name.equals("<init>") && !name.equals("<clinit>"))) {
+            (!InstrumentationUtils.CONSTRUCTOR.equals(name) && !InstrumentationUtils.CLASS_INIT.equals(name))) {
           myNSourceLines.put(line, name + desc);
           myMethodsWithSourceCode.add(name + desc);
         }

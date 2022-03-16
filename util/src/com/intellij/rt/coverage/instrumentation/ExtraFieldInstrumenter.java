@@ -43,7 +43,6 @@ import org.jetbrains.coverage.org.objectweb.asm.*;
  */
 public abstract class ExtraFieldInstrumenter extends ClassVisitor {
   protected static final int ADDED_CODE_STACK_SIZE = 6;
-  private static final String CLASS_INIT = "<clinit>";
   private static final int INTERFACE_FIELD_ACCESS = Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL | Opcodes.ACC_SYNTHETIC;
   private static final int CLASS_FIELD_ACCESS = Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_TRANSIENT | Opcodes.ACC_SYNTHETIC;
 
@@ -87,7 +86,7 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
                                            MethodVisitor newMv,
                                            final String name) {
     if (mv == null) return null;
-    if (CLASS_INIT.equals(name)) {
+    if (InstrumentationUtils.CLASS_INIT.equals(name)) {
       if (myInterface && (myJava8AndAbove || myShouldCoverClinit)) {
         newMv = new MethodVisitor(Opcodes.API_VERSION, newMv) {
           @Override
@@ -161,7 +160,7 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
   }
 
   private void generateExplicitClinitForInterfaces(ClassVisitor cv) {
-    MethodVisitor mv = cv.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC, CLASS_INIT, "()V", null, null);
+    MethodVisitor mv = cv.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC, InstrumentationUtils.CLASS_INIT, InstrumentationUtils.CONSTRUCTOR_DESCRIPTOR, null, null);
     initField(mv);
     mv.visitInsn(Opcodes.RETURN);
     mv.visitMaxs(ADDED_CODE_STACK_SIZE, 0);
