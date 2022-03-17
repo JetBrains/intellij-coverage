@@ -17,10 +17,10 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
+import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
@@ -53,14 +53,14 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
   protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassVisitor cw) {
     final Instrumenter instrumenter;
     if (data.isSampling()) {
-      if (System.getProperty("idea.new.sampling.coverage") != null) {
+      if (OptionsUtil.NEW_SAMPLING_ENABLED) {
         //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
         instrumenter = new NewSamplingInstrumenter(data, cw, cr, className, shouldCalculateSource);
       } else {
         instrumenter = new SamplingInstrumenter(data, cw, className, shouldCalculateSource);
       }
     } else {
-      if (System.getProperty("idea.new.tracing.coverage") != null) {
+      if (OptionsUtil.NEW_TRACING_ENABLED) {
         if (data.isTestTracking()) {
           instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldCalculateSource);
         } else {
@@ -71,7 +71,7 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
       }
     }
     ClassVisitor result = instrumenter;
-    if (FilterUtils.ignorePrivateConstructorOfUtilClassEnabled()) {
+    if (OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS) {
       result = PrivateConstructorOfUtilClassFilter.createWithContext(result, instrumenter);
     }
     return result;

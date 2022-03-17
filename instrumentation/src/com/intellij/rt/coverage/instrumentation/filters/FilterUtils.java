@@ -27,12 +27,6 @@ import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import java.util.List;
 
 public class FilterUtils {
-  private static final boolean ourIgnorePrivateConstructorOfUtilClass =
-      "true".equals(System.getProperty("coverage.ignore.private.constructor.util.class", "false"));
-
-  public static boolean ignorePrivateConstructorOfUtilClassEnabled() {
-    return ourIgnorePrivateConstructorOfUtilClass;
-  }
 
   public static List<MethodSignatureFilter> createSignatureFilters() {
     List<MethodSignatureFilter> result = KotlinUtils.createSignatureFilters();

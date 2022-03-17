@@ -150,7 +150,7 @@ public class ProjectData implements CoverageData, Serializable {
     }
     ourProjectData.mySampling = isSampling;
     ourProjectData.myTraceLines = traceLines;
-    ourProjectData.myCollectInstructions = "true".equals(System.getProperty("coverage.instructions.enable", "false"));
+    ourProjectData.myCollectInstructions = OptionsUtil.INSTRUCTIONS_COVERAGE_ENABLED;
     ourProjectData.myDataFile = dataFile;
     ourProjectData.myIncludePatterns = includePatterns;
     ourProjectData.myExcludePatterns = excludePatterns;
@@ -534,7 +534,7 @@ public class ProjectData implements CoverageData, Serializable {
     }
 
     private static Map<String, ClassData> createClassesMap() {
-      if ("true".equals(System.getProperty("idea.coverage.thread-safe.enabled", "true"))) {
+      if (OptionsUtil.THREAD_SAFE_STORAGE) {
         return new ConcurrentHashMap<String, ClassData>(DEFAULT_CAPACITY);
       }
       return new HashMap<String, ClassData>(DEFAULT_CAPACITY);

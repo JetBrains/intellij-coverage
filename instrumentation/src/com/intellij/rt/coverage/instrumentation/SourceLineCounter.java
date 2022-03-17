@@ -17,9 +17,9 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.*;
-import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.*;
@@ -46,7 +46,7 @@ public class SourceLineCounter extends ClassVisitor {
   private FileMapData[] myFileMapData;
 
   public SourceLineCounter(final ClassData classData, final ProjectData projectData, boolean calculateJumpsPerLine) {
-    this(classData, false, projectData, FilterUtils.ignorePrivateConstructorOfUtilClassEnabled(), calculateJumpsPerLine);
+    this(classData, false, projectData, OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS, calculateJumpsPerLine);
   }
 
   /**

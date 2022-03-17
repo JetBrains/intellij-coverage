@@ -22,6 +22,7 @@ import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingArrayMo
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingClassDataMode;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
 import com.intellij.rt.coverage.util.ErrorReporter;
+import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 
 import java.io.*;
@@ -135,8 +136,7 @@ public class Instrumentator {
   }
 
   private void checkLogLevel() {
-    final String logLevel = System.getProperty("idea.coverage.log.level");
-    if ("error".equals(logLevel)) {
+    if ("error".equals(OptionsUtil.LOG_LEVEL)) {
       ErrorReporter.setLogLevel(ErrorReporter.ERROR);
     } else {
       ErrorReporter.setLogLevel(ErrorReporter.INFO);
@@ -161,8 +161,7 @@ public class Instrumentator {
 
   private TestTrackingMode createTestTrackingMode(boolean traceLines) {
     if (!traceLines) return new NoTestTrackingMode();
-    if (System.getProperty("idea.new.tracing.coverage") != null &&
-        "true".equals(System.getProperty("idea.new.test.tracking.coverage", "true"))) {
+    if (OptionsUtil.NEW_TRACING_ENABLED && OptionsUtil.NEW_TEST_TRACKING_ENABLED) {
       return new TestTrackingArrayMode();
     }
     return new TestTrackingClassDataMode();

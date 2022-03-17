@@ -31,9 +31,8 @@ public class StringsPool {
   private final static String EMPTY = "";
 
   static {
-    boolean useConcurrentMap = "true".equals(System.getProperty("idea.coverage.thread-safe.enabled", "true"));
     int initialCapacity = 30000;
-    if (useConcurrentMap) {
+    if (OptionsUtil.THREAD_SAFE_STORAGE) {
       myConcurrentReusableStrings = new ConcurrentHashMap<Long, String>(initialCapacity);
       myReusableStrings = null;
     } else {

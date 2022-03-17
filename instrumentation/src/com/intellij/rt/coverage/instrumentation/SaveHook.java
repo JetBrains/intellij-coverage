@@ -65,7 +65,7 @@ public class SaveHook implements Runnable {
             projectData.applyBranchData();
             if (myAppendUnloaded) {
               final boolean calculateSource = mySourceMapFile != null;
-              if ("true".equals(System.getProperty("coverage.unloaded.classes.full.analysis", "true"))) {
+              if (OptionsUtil.UNLOADED_CLASSES_FULL_ANALYSIS) {
                   appendUnloadedFullAnalysis(projectData, myClassFinder, calculateSource, projectData.isSampling());
                 } else {
                   appendUnloaded(projectData, myClassFinder, calculateSource, projectData.isSampling());
@@ -284,8 +284,7 @@ public class SaveHook implements Runnable {
   };
 
   public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean isSampling) {
-    final boolean ignorePrivateConstructorOfUtilClass = FilterUtils.ignorePrivateConstructorOfUtilClassEnabled();
-    appendUnloadedFullAnalysis(projectData, classFinder, calculateSource, isSampling, ignorePrivateConstructorOfUtilClass);
+    appendUnloadedFullAnalysis(projectData, classFinder, calculateSource, isSampling, OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS);
   }
 
   public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean isSampling, final boolean ignorePrivateConstructorOfUtilClass) {
