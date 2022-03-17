@@ -47,6 +47,9 @@ ext.test_discovery_jar_name = 'intellij-test-discovery-agent'
 ext.coverage_jar_name = 'intellij-coverage-agent'
 ext.reporter_jar_name = 'intellij-coverage-reporter'
 
+// use this option to test with JDK11
+ext.release = "false" == project["test.configuration"]
+
 allprojects {
   version calcVersion()
 
@@ -55,15 +58,18 @@ allprojects {
   }
 
   apply plugin: 'java'
-  sourceCompatibility = 1.5
-  targetCompatibility = 1.5
+  sourceCompatibility = project.release ? 1.5 : 1.6
+  targetCompatibility = project.release ? 1.5 : 1.6
 
   configurations {
     testArtifacts.extendsFrom testRuntime
   }
 
   dependencies {
-    runtime files(Jvm.current().toolsJar)
+    def current = Jvm.current()
+    if (current != null && current.toolsJar != null) {
+      runtime files(current.toolsJar)
+    }
   }
 
   sourceSets {

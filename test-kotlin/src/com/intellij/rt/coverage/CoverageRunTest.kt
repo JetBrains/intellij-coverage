@@ -273,6 +273,17 @@ internal abstract class CoverageRunTest : CoverageTest() {
         configuration.extraArgs.add("-javaagent:$jmochitAgent")
         test(test.testName, test, configuration)
     }
+
+    @Test
+    fun testReflection() {
+        if (coverage == Coverage.NEW_SAMPLING || coverage == Coverage.NEW_TRACING) {
+            Assert.assertThrows(RuntimeException::class.java) {
+                test("custom.reflection")
+            }
+        } else {
+            test("custom.reflection")
+        }
+    }
 }
 
 internal abstract class CoverageVerifyResultsTest(override val coverage: Coverage) : CoverageRunTest() {
@@ -287,6 +298,8 @@ internal abstract class AbstractSamplingCoverageTest(coverage: Coverage) : Cover
 }
 
 internal class SamplingCoverageTest : AbstractSamplingCoverageTest(Coverage.SAMPLING)
-internal class NewSamplingCoverageTest : AbstractSamplingCoverageTest(Coverage.NEW_SAMPLING)
 internal class TracingCoverageTest : CoverageVerifyResultsTest(Coverage.TRACING)
+internal class NewSamplingCoverageTest : AbstractSamplingCoverageTest(Coverage.NEW_SAMPLING)
 internal class NewTracingCoverageTest : CoverageVerifyResultsTest(Coverage.NEW_TRACING)
+internal class CondySamplingCoverageTest : AbstractSamplingCoverageTest(Coverage.CONDY_SAMPLING)
+internal class CondyTracingCoverageTest : CoverageVerifyResultsTest(Coverage.CONDY_TRACING)

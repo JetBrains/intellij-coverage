@@ -26,7 +26,7 @@ import java.io.File
 import java.nio.file.Paths
 
 internal enum class Coverage {
-    SAMPLING, NEW_SAMPLING, TRACING, NEW_TRACING
+    SAMPLING, NEW_SAMPLING, TRACING, NEW_TRACING, CONDY_SAMPLING, CONDY_TRACING
 }
 
 internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false, testTracking: Boolean = false,
@@ -34,10 +34,18 @@ internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage:
                     mainClass: String = getTestFile(testName).mainClass): ProjectData {
     val classPath = System.getProperty("java.class.path")
     when (coverage) {
-        Coverage.NEW_SAMPLING -> extraArgs.add("-Didea.new.sampling.coverage=true")
-        Coverage.NEW_TRACING -> extraArgs.add("-Didea.new.tracing.coverage=true")
+        Coverage.CONDY_SAMPLING -> extraArgs.add("-Didea.new.sampling.coverage=true")
+        Coverage.CONDY_TRACING -> extraArgs.add("-Didea.new.tracing.coverage=true")
+        Coverage.NEW_SAMPLING -> {
+            extraArgs.add("-Didea.new.sampling.coverage=true")
+            extraArgs.add("-Dcoverage.condy.enable=false")
+        }
+        Coverage.NEW_TRACING -> {
+            extraArgs.add("-Didea.new.tracing.coverage=true")
+            extraArgs.add("-Dcoverage.condy.enable=false")
+        }
     }
-    val sampling = coverage == Coverage.SAMPLING || coverage == Coverage.NEW_SAMPLING
+    val sampling = coverage == Coverage.SAMPLING || coverage == Coverage.NEW_SAMPLING || coverage == Coverage.CONDY_SAMPLING
     return CoverageStatusTest.runCoverage(classPath, coverageDataFile, patterns, mainClass,
             sampling, extraArgs.toTypedArray(), calcUnloaded, testTracking)
             .also {

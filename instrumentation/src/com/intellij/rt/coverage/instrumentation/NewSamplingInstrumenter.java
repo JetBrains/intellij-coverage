@@ -48,17 +48,7 @@ public class NewSamplingInstrumenter extends Instrumenter {
         final String signature,
         final String[] exceptions
     ) {
-        final MethodVisitor visitor = new LocalVariableInserter(mv, access, desc, LINE_HITS_LOCAL_VARIABLE_NAME, LINE_HITS_FIELD_TYPE) {
-            public void visitLineNumber(final int line, final Label start) {
-                getOrCreateLineData(line, name, desc);
-
-                mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
-                InstrumentationUtils.pushInt(mv, line);
-
-                InstrumentationUtils.incrementIntArrayByIndex(mv);
-                super.visitLineNumber(line, start);
-            }
-
+        final MethodVisitor visitor = new ArraySamplingMethodVisitor(mv, access, name, desc, this) {
             public void visitCode() {
                 mv.visitFieldInsn(Opcodes.GETSTATIC, myClassNameType, LINE_HITS_FIELD_NAME, LINE_HITS_FIELD_TYPE);
                 mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
@@ -95,6 +85,28 @@ public class NewSamplingInstrumenter extends Instrumenter {
 
             //save line array
             mv.visitFieldInsn(Opcodes.PUTSTATIC, myClassNameType, LINE_HITS_FIELD_NAME, LINE_HITS_FIELD_TYPE);
+        }
+    }
+
+    public static class ArraySamplingMethodVisitor extends LocalVariableInserter {
+        private final String myName;
+        private final String myDesc;
+        private final Instrumenter myInstrumenter;
+        public ArraySamplingMethodVisitor(MethodVisitor methodVisitor, int access, String name, String descriptor, Instrumenter instrumenter) {
+            super(methodVisitor, access, descriptor, LINE_HITS_LOCAL_VARIABLE_NAME, LINE_HITS_FIELD_TYPE);
+            myName = name;
+            myDesc = descriptor;
+            myInstrumenter = instrumenter;
+        }
+
+        public void visitLineNumber(final int line, final Label start) {
+            myInstrumenter.getOrCreateLineData(line, myName, myDesc);
+
+            mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+            InstrumentationUtils.pushInt(mv, line);
+
+            InstrumentationUtils.incrementIntArrayByIndex(mv);
+            super.visitLineNumber(line, start);
         }
     }
 }

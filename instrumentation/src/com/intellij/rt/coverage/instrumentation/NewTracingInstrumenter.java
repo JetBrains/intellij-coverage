@@ -49,37 +49,7 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
       }
       return mv;
     }
-    final MethodVisitor visitor = new LocalVariableInserter(mv, access, desc, BRANCH_HITS_LOCAL_VARIABLE_NAME, BRANCH_HITS_FIELD_TYPE) {
-      public void visitLineNumber(final int line, final Label start) {
-        LineData lineData = getLineData(line);
-        if (lineData != null) {
-          incrementHitById(lineData.getId());
-        }
-        super.visitLineNumber(line, start);
-      }
-
-      @Override
-      public void visitLabel(Label label) {
-        super.visitLabel(label);
-
-        Jump jump = myBranchData.getJump(label);
-        if (jump != null) {
-          incrementHitById(jump.getId());
-        }
-
-        Switch aSwitch = myBranchData.getSwitch(label);
-        if (aSwitch != null) {
-          incrementHitById(aSwitch.getId());
-        }
-      }
-
-      private void incrementHitById(int id) {
-        if (id == -1) return;
-        mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
-        InstrumentationUtils.pushInt(mv, id);
-        InstrumentationUtils.incrementIntArrayByIndex(mv);
-      }
-
+    final MethodVisitor visitor = new ArrayTracingMethodVisitor(mv, access, desc, enumerator) {
       public void visitCode() {
         mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraFieldInstrumenter.getInternalClassName(), BRANCH_HITS_FIELD_NAME, BRANCH_HITS_FIELD_TYPE);
         mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
@@ -115,6 +85,44 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
 
       //save hits array
       mv.visitFieldInsn(Opcodes.PUTSTATIC, myExtraFieldInstrumenter.getInternalClassName(), BRANCH_HITS_FIELD_NAME, BRANCH_HITS_FIELD_TYPE);
+    }
+  }
+
+  public static class ArrayTracingMethodVisitor extends LocalVariableInserter {
+    private final LineEnumerator myEnumerator;
+    public ArrayTracingMethodVisitor(MethodVisitor methodVisitor, int access, String descriptor, LineEnumerator enumerator) {
+      super(methodVisitor, access, descriptor, BRANCH_HITS_LOCAL_VARIABLE_NAME, BRANCH_HITS_FIELD_TYPE);
+      myEnumerator = enumerator;
+    }
+
+    public void visitLineNumber(final int line, final Label start) {
+      final LineData lineData = myEnumerator.getInstrumenter().getLineData(line);
+      if (lineData != null) {
+        incrementHitById(lineData.getId());
+      }
+      super.visitLineNumber(line, start);
+    }
+
+    @Override
+    public void visitLabel(Label label) {
+      super.visitLabel(label);
+
+      final Jump jump = myEnumerator.getBranchData().getJump(label);
+      if (jump != null) {
+        incrementHitById(jump.getId());
+      }
+
+      final Switch aSwitch = myEnumerator.getBranchData().getSwitch(label);
+      if (aSwitch != null) {
+        incrementHitById(aSwitch.getId());
+      }
+    }
+
+    private void incrementHitById(int id) {
+      if (id == -1) return;
+      mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+      InstrumentationUtils.pushInt(mv, id);
+      InstrumentationUtils.incrementIntArrayByIndex(mv);
     }
   }
 }

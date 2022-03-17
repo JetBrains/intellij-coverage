@@ -14,7 +14,7 @@ task coverageAgentJar(type: Jar) {
       "Can-Retransform-Classes" : "true"
   )
   from(sourceSets.main.output)
-  from(["util", ""].collect({ project(":$it").sourceSets.main.output }))
+  from(["util", "", "java7utils"].collect({ project(":$it").sourceSets.main.output }))
   with repackLibs
 }
 

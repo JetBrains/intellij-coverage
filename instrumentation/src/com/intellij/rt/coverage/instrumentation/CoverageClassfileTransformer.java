@@ -24,6 +24,7 @@ import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -54,8 +55,12 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
     final Instrumenter instrumenter;
     if (data.isSampling()) {
       if (OptionsUtil.NEW_SAMPLING_ENABLED) {
-        //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
-        instrumenter = new NewSamplingInstrumenter(data, cw, cr, className, shouldCalculateSource);
+        if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
+          instrumenter = new CondySamplingInstrumenter(data, cw, cr, className, shouldCalculateSource);
+        } else {
+          //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
+          instrumenter = new NewSamplingInstrumenter(data, cw, cr, className, shouldCalculateSource);
+        }
       } else {
         instrumenter = new SamplingInstrumenter(data, cw, className, shouldCalculateSource);
       }
@@ -64,7 +69,11 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
         if (data.isTestTracking()) {
           instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldCalculateSource);
         } else {
-          instrumenter = new NewTracingInstrumenter(data, cw, cr, className, shouldCalculateSource);
+          if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
+            instrumenter = new CondyTracingInstrumenter(data, cw, cr, className, shouldCalculateSource);
+          } else {
+            instrumenter = new NewTracingInstrumenter(data, cw, cr, className, shouldCalculateSource);
+          }
         }
       } else {
         instrumenter = new TracingInstrumenter(data, cw, className, shouldCalculateSource);

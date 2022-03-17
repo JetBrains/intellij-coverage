@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation;
 
+import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -49,5 +50,9 @@ public class InstrumentationUtils {
 
     //stack: array, index, incremented value: store value in array[index]
     mv.visitInsn(Opcodes.IASTORE);
+  }
+
+  public static int getBytecodeVersion(ClassReader cr) {
+    return cr.readInt(4) & 0xFFFF;
   }
 }

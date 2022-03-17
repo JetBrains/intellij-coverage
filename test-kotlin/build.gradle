@@ -12,8 +12,14 @@ sourceSets {
     jmh.java.srcDirs = [file('jmh')]
 }
 
-targetCompatibility = "1.8"
-sourceCompatibility = "1.8"
+String testJdkVersion = test.javaVersion >= JavaVersion.VERSION_11 ? 11 : 1.8
+sourceCompatibility = testJdkVersion
+targetCompatibility = testJdkVersion
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = testJdkVersion
+    }
+}
 
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -40,8 +46,11 @@ dependencies {
 }
 
 test {
-    filter {
-        excludeTestsMatching("testData.*")
+    exclude("testData/**")
+    if (javaVersion < JavaVersion.VERSION_11) {
+        print("Condy tests require JDK11")
+        exclude("com/intellij/rt/coverage/Condy**")
+        exclude("com/intellij/rt/coverage/caseTests/Condy**")
     }
 }
 
