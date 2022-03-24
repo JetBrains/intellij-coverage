@@ -75,6 +75,7 @@ public class KotlinUtils {
     result.add(new KotlinDefaultArgsBranchFilter());
     result.add(new KotlinCoroutinesEnumeratingFilter());
     result.add(new KotlinLateinitFilter());
+    result.add(new KotlinOpenMemberWithDefaultArgsFilter());
     return result;
   }
 }

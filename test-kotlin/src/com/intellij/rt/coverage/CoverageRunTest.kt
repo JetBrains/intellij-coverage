@@ -87,6 +87,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testDefaultArgsInline() = test("defaultArgs.inline")
 
     @Test
+    fun testDefaultArgsOpenMethod() = test("defaultArgs.openMethod")
+
+    @Test
     fun testDefaultArgsSeveralArguments() = test("defaultArgs.severalArguments")
 
     @Test
@@ -184,6 +187,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
 
     @Test
     fun testLateinit() = test("lateinit")
+
+    @Test
+    fun testMethodReference() = test("methodReference")
 
     @Test
     fun testNullability() = test("nullability")
