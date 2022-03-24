@@ -33,7 +33,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * <li>NEW java/lang/UnsupportedOperationException</li>
  * <li>DUP</li>
  * <li>LCD "Super calls with default arguments not supported in this target, function: func"</li>
- * <li>INVOKESPECIAL java/lang/UnsupportedOperationException.<init> (Ljava/lang/String;)V</li>
+ * <li>INVOKESPECIAL java/lang/UnsupportedOperationException.init (Ljava/lang/String;)V</li>
  * <li>ATHROW</li>
  * </ol>
  */
