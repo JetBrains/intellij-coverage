@@ -17,9 +17,10 @@
 package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.CoverageStatusTest;
+import com.intellij.rt.coverage.aggregate.Aggregator;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.data.Module;
-import com.intellij.rt.coverage.report.data.ProjectReport;
+import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -46,11 +47,7 @@ public class TestUtils {
   }
 
   public static Reporter createReporter(BinaryReport report, String patterns) {
-    final String kotlinOutput = "build" + File.separator + "classes" + File.separator + "kotlin" + File.separator + "test";
-    final String javaOutput = "build" + File.separator + "classes" + File.separator + "java" + File.separator + "test";
-    final List<File> output = new ArrayList<File>();
-    output.add(new File(kotlinOutput));
-    output.add(new File(javaOutput));
+    final List<Module> modules = getModules();
     final List<BinaryReport> reports = report == null ? Collections.<BinaryReport>emptyList() : Collections.singletonList(report);
     final List<Pattern> includes = new ArrayList<Pattern>();
     final List<Pattern> excludes = new ArrayList<Pattern>();
@@ -63,7 +60,16 @@ public class TestUtils {
       }
       (isInclude ? includes : excludes).add(Pattern.compile(pattern));
     }
-    return new Reporter(new ProjectReport(reports, Collections.singletonList(new Module(output, getSources())), includes, excludes));
+    return new Reporter(new Aggregator(reports, modules, new ClassFilter.PatternFilter(includes, excludes)));
+  }
+
+  public static List<Module> getModules() {
+    final String kotlinOutput = "build" + File.separator + "classes" + File.separator + "kotlin" + File.separator + "test";
+    final String javaOutput = "build" + File.separator + "classes" + File.separator + "java" + File.separator + "test";
+    final List<File> output = new ArrayList<File>();
+    output.add(new File(kotlinOutput));
+    output.add(new File(javaOutput));
+    return Collections.singletonList(new Module(output, getSources()));
   }
 
   @NotNull

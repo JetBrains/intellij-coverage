@@ -171,7 +171,7 @@ public class ProjectData implements CoverageData, Serializable {
       classData.merge(mergedData);
     }
 
-    InstructionsUtil.merge(projectData, this);
+    InstructionsUtil.merge(projectData, this, null);
   }
 
   public void checkLineMappings() {
@@ -291,6 +291,10 @@ public class ProjectData implements CoverageData, Serializable {
   /** @noinspection UnusedDeclaration*/
   public Map<String, ClassData> getClasses() {
     return myClasses.asMap();
+  }
+
+  public Collection<ClassData> getClassesCollection() {
+    return myClasses.myClasses.values();
   }
 
 

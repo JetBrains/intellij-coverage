@@ -267,9 +267,16 @@ public class XMLCoverageReport {
     return false;
   }
 
-  private static HashMap<String, List<ClassData>> mapClassesToPackages(ProjectData project) {
+  public static HashMap<String, List<ClassData>> mapClassesToPackages(ProjectData project) {
     HashMap<String, List<ClassData>> packages = new HashMap<String, List<ClassData>>();
-    for (ClassData classData : project.getClasses().values()) {
+    final List<ClassData> classes = new ArrayList<ClassData>(project.getClassesCollection());
+    Collections.sort(classes, new Comparator<ClassData>() {
+      @Override
+      public int compare(ClassData o1, ClassData o2) {
+        return o1.getName().compareTo(o2.getName());
+      }
+    });
+    for (ClassData classData : classes) {
       if (!shouldIncludeClass(classData)) continue;
       String className = classData.getName();
       int indexOfName = className.lastIndexOf('.');

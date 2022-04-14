@@ -16,10 +16,7 @@
 
 package com.intellij.rt.coverage.report.util;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 public class FileUtils {
   public static String readAll(File file) throws IOException {
@@ -37,6 +34,21 @@ public class FileUtils {
       if (reader != null) {
         try {
           reader.close();
+        } catch (IOException ignored) {
+        }
+      }
+    }
+  }
+
+  public static void write(File file, String data) throws IOException {
+    BufferedWriter writer = null;
+    try {
+      writer = new BufferedWriter(new FileWriter(file));
+      writer.write(data);
+    } finally {
+      if (writer != null) {
+        try {
+          writer.close();
         } catch (IOException ignored) {
         }
       }

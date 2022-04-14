@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2021 JetBrains s.r.o.
+ * Copyright 2000-2022 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,33 +14,39 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.report.data;
+package com.intellij.rt.coverage.aggregate;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.instrumentation.SaveHook;
+import com.intellij.rt.coverage.report.data.BinaryReport;
+import com.intellij.rt.coverage.report.data.Module;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
+import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import com.intellij.rt.coverage.util.classFinder.ClassPathEntry;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 
-public class ProjectReport {
+public class Aggregator {
   private final List<BinaryReport> myReports;
   private final List<Module> myModules;
-  private final List<Pattern> myIncludeClassPatterns;
-  private final List<Pattern> myExcludeClassPatterns;
+  private final List<Request> myRequests;
   private ProjectData myProjectData;
 
-  public ProjectReport(List<BinaryReport> reports, List<Module> modules, List<Pattern> includeClassPatterns, List<Pattern> excludeClassPatterns) {
+  public Aggregator(List<BinaryReport> reports, List<Module> modules, List<Request> requests) {
     myReports = reports;
     myModules = modules;
-    myIncludeClassPatterns = includeClassPatterns;
-    myExcludeClassPatterns = excludeClassPatterns;
+    myRequests = requests;
+  }
+
+  public Aggregator(List<BinaryReport> reports, List<Module> modules, ClassFilter.PatternFilter filter) {
+    this(reports, modules, Collections.singletonList(new Request(filter, null)));
   }
 
   public ProjectData getProjectData() {
@@ -49,7 +55,7 @@ public class ProjectReport {
     for (BinaryReport report : myReports) {
       final ProjectData data = ProjectDataLoader.load(report.getDataFile());
 
-      for (ClassData classData : data.getClasses().values()) {
+      for (ClassData classData : data.getClassesCollection()) {
         final ClassData collectedClassData = projectData.getClassData(classData.getName());
         if (collectedClassData == null) {
           // projectData contains all classes already filtered by outputs and filters
@@ -64,11 +70,23 @@ public class ProjectReport {
     return projectData;
   }
 
-  private ProjectData collectCoverageInformationFromOutputs() {
-    final ProjectData projectData = new ProjectData();
-    projectData.setInstructionsCoverage(true);
-    SaveHook.appendUnloadedFullAnalysis(projectData, new OutputClassFinder(), true, false, true);
-    return projectData;
+  public void processRequests() {
+    final ProjectData projectData = getProjectData();
+
+    for (Request request : myRequests) {
+      if (request.outputFile == null) continue;
+      final ProjectData requestProjectData = new ProjectData();
+      requestProjectData.setInstructionsCoverage(true);
+
+      for (ClassData classData : projectData.getClassesCollection()) {
+        if (request.classFilter.shouldInclude(classData.getName())) {
+          final ClassData newClassData = requestProjectData.getOrCreateClassData(classData.getName());
+          newClassData.merge(classData);
+        }
+      }
+      InstructionsUtil.merge(projectData, requestProjectData, request.classFilter);
+      SaveHook.save(requestProjectData, request.outputFile, null);
+    }
   }
 
   public List<File> getSources() {
@@ -79,9 +97,25 @@ public class ProjectReport {
     return sources;
   }
 
+  private ProjectData collectCoverageInformationFromOutputs() {
+    final ProjectData projectData = new ProjectData();
+    projectData.setInstructionsCoverage(true);
+    SaveHook.appendUnloadedFullAnalysis(projectData, createClassFinder(), true, false, true);
+    return projectData;
+  }
+
+  private OutputClassFinder createClassFinder() {
+    final List<ClassFilter.PatternFilter> filters = new ArrayList<ClassFilter.PatternFilter>();
+    for (Request request : myRequests) {
+      filters.add(request.classFilter);
+    }
+    return new OutputClassFinder(new GroupPatternFilter(filters));
+  }
+
   private class OutputClassFinder extends ClassFinder {
-    public OutputClassFinder() {
-      super(myIncludeClassPatterns, myExcludeClassPatterns);
+
+    public OutputClassFinder(ClassFilter filter) {
+      super(filter);
     }
 
     @Override
@@ -95,6 +129,16 @@ public class ProjectReport {
         }
       }
       return entries;
+    }
+  }
+
+  public static class Request {
+    public final ClassFilter.PatternFilter classFilter;
+    public final File outputFile;
+
+    public Request(ClassFilter.PatternFilter classFilter, File outputFile) {
+      this.classFilter = classFilter;
+      this.outputFile = outputFile;
     }
   }
 }

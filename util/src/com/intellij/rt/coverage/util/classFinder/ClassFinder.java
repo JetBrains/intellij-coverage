@@ -30,13 +30,15 @@ import java.util.regex.Pattern;
  * @author pavel.sher
  */
 public class ClassFinder {
-  private final List<Pattern> myIncludePatterns;
-  private final List<Pattern> myExcludePatterns;
+  private final ClassFilter myFilter;
   private final Set<ClassLoader> myClassloaders;
 
   public ClassFinder(List<Pattern> includePatterns, List<Pattern> excludePatterns) {
-    myIncludePatterns = includePatterns;
-    myExcludePatterns = excludePatterns;
+    this(new ClassFilter.PatternFilter(includePatterns, excludePatterns));
+  }
+
+  public ClassFinder(ClassFilter filter) {
+    myFilter = filter;
     myClassloaders = new HashSet<ClassLoader>();
   }
 
@@ -57,7 +59,7 @@ public class ClassFinder {
   public void iterateMatchedClasses(ClassEntry.Consumer consumer) {
     for (ClassPathEntry entry : getClassPathEntries()) {
       try {
-        entry.iterateMatchedClasses(myIncludePatterns, myExcludePatterns, consumer);
+        entry.iterateMatchedClasses(myFilter, consumer);
       } catch (IOException e) {
         ErrorReporter.reportError("Error during iterating classes.", e);
       }

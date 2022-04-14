@@ -38,9 +38,9 @@ public class ReporterArgs {
   static final String SMAP_FILE_TAG = "smap";
   static final String OUTPUTS_TAG = "output";
   static final String SOURCES_TAG = "sources";
-  static final String INCLUDE_TAG = "include";
-  static final String EXCLUDE_TAG = "exclude";
-  static final String CLASSES_TAG = "classes";
+  public static final String INCLUDE_TAG = "include";
+  public static final String EXCLUDE_TAG = "exclude";
+  public static final String CLASSES_TAG = "classes";
 
 
   public final List<BinaryReport> reports;
@@ -59,7 +59,7 @@ public class ReporterArgs {
     this.excludeClasses = excludeClassPatterns;
   }
 
-  public static ReporterArgs from(String[] args) throws ArgParseException {
+  public static File getArgsFile(String[] args) throws ArgParseException {
     if (args.length != 1) {
       throw new ArgParseException("Single file name argument expected, but " + args.length + " arguments found.");
     }
@@ -68,6 +68,11 @@ public class ReporterArgs {
     if (!(argsFile.exists() && argsFile.isFile())) {
       throw new ArgParseException("Expected file with arguments, but " + fileName + " is not a file.");
     }
+    return argsFile;
+  }
+
+  public static ReporterArgs from(String[] args) throws ArgParseException {
+    final File argsFile = getArgsFile(args);
     try {
       return parse(argsFile);
     } catch (IOException e) {
@@ -81,21 +86,8 @@ public class ReporterArgs {
     final String jsonString = FileUtils.readAll(argsFile);
     final JSONObject args = new JSONObject(jsonString);
 
-    final List<Module> moduleList = new ArrayList<Module>();
-    final JSONArray modules = args.getJSONArray(MODULES_TAG);
-    for (int moduleId = 0; moduleId < modules.length(); moduleId++) {
-      final JSONObject module = modules.getJSONObject(moduleId);
-      moduleList.add(new Module(parsePathList(module, OUTPUTS_TAG), parsePathList(module, SOURCES_TAG)));
-    }
-
-    final List<BinaryReport> reportList = new ArrayList<BinaryReport>();
-    final JSONArray reports = args.getJSONArray(REPORTS_TAG);
-    for (int reportId = 0; reportId < reports.length(); reportId++) {
-      final JSONObject report = reports.getJSONObject(reportId);
-      final String icPath = report.getString(IC_FILE_TAG);
-      final File smap = report.has(SMAP_FILE_TAG) ? new File(report.getString(SMAP_FILE_TAG)) : null;
-      reportList.add(new BinaryReport(new File(icPath), smap));
-    }
+    final List<Module> moduleList = parseModules(args);
+    final List<BinaryReport> reportList = parseReports(args);
 
     final File xmlFile = args.has(XML_FILE_TAG) ? new File(args.getString(XML_FILE_TAG)) : null;
     final File htmlDir = args.has(HTML_DIR_TAG) ? new File(args.getString(HTML_DIR_TAG)) : null;
@@ -106,7 +98,29 @@ public class ReporterArgs {
     return new ReporterArgs(reportList, moduleList, xmlFile, htmlDir, includeClassPatterns, excludeClassPatterns);
   }
 
-  private static List<Pattern> parsePatterns(JSONObject args, String groupTag, String sectionTag) {
+  public static List<BinaryReport> parseReports(JSONObject args) {
+    final List<BinaryReport> reportList = new ArrayList<BinaryReport>();
+    final JSONArray reports = args.getJSONArray(REPORTS_TAG);
+    for (int reportId = 0; reportId < reports.length(); reportId++) {
+      final JSONObject report = reports.getJSONObject(reportId);
+      final String icPath = report.getString(IC_FILE_TAG);
+      final File smap = report.has(SMAP_FILE_TAG) ? new File(report.getString(SMAP_FILE_TAG)) : null;
+      reportList.add(new BinaryReport(new File(icPath), smap));
+    }
+    return reportList;
+  }
+
+  public static List<Module> parseModules(JSONObject args) {
+    final List<Module> moduleList = new ArrayList<Module>();
+    final JSONArray modules = args.getJSONArray(MODULES_TAG);
+    for (int moduleId = 0; moduleId < modules.length(); moduleId++) {
+      final JSONObject module = modules.getJSONObject(moduleId);
+      moduleList.add(new Module(parsePathList(module, OUTPUTS_TAG), parsePathList(module, SOURCES_TAG)));
+    }
+    return moduleList;
+  }
+
+  public static List<Pattern> parsePatterns(JSONObject args, String groupTag, String sectionTag) {
     final List<Pattern> patterns = new ArrayList<Pattern>();
     if (!args.has(groupTag)) return patterns;
     final JSONObject group = args.getJSONObject(groupTag);
@@ -146,17 +160,4 @@ public class ReporterArgs {
         "}";
   }
 
-  public static class ArgParseException extends Exception {
-    ArgParseException(String message) {
-      super(message);
-    }
-
-    ArgParseException(Throwable cause) {
-      super(cause);
-    }
-
-    ArgParseException(String message, Throwable cause) {
-      super(message, cause);
-    }
-  }
 }

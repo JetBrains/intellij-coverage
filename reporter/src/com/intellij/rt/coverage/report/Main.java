@@ -16,7 +16,8 @@
 
 package com.intellij.rt.coverage.report;
 
-import com.intellij.rt.coverage.report.data.ProjectReport;
+import com.intellij.rt.coverage.aggregate.Aggregator;
+import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +27,8 @@ public class Main {
     try {
       final ReporterArgs args = ReporterArgs.from(argsList);
 
-      final ProjectReport projectReport = new ProjectReport(args.reports, args.modules, args.includeClasses, args.excludeClasses);
-      final Reporter reporter = new Reporter(projectReport);
+      final Aggregator aggregator = new Aggregator(args.reports, args.modules, new ClassFilter.PatternFilter(args.includeClasses, args.excludeClasses));
+      final Reporter reporter = new Reporter(aggregator);
 
       boolean fail = false;
 
@@ -61,7 +62,7 @@ public class Main {
       if (fail) {
         System.exit(1);
       }
-    } catch (ReporterArgs.ArgParseException e) {
+    } catch (ArgParseException e) {
       e.printStackTrace(System.err);
 
       for (String arg : argsList) {

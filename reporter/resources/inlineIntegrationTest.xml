@@ -1,6 +1,17 @@
 <?xml version="1.0" ?>
 <report name="Intellij Coverage Report">
 <package name="testData/inline">
+<class name="testData/inline/Test" sourcefilename="test.kt">
+<method name="main" desc="([Ljava/lang/String;)V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
 <class name="testData/inline/TestKt" sourcefilename="test.kt">
 <method name="biz" desc="()Ljava/lang/String;">
 <counter type="INSTRUCTION" missed="0" covered="6"/>
@@ -26,17 +37,6 @@
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="2" covered="2"/>
 <counter type="METHOD" missed="2" covered="2"/>
-</class>
-<class name="testData/inline/Test" sourcefilename="test.kt">
-<method name="main" desc="([Ljava/lang/String;)V">
-<counter type="INSTRUCTION" missed="0" covered="2"/>
-<counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="0" covered="1"/>
-</method>
-<counter type="INSTRUCTION" missed="0" covered="2"/>
-<counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="0" covered="1"/>
-<counter type="METHOD" missed="0" covered="1"/>
 </class>
 <sourcefile name="test.kt">
 <line nr="20" mi="0" ci="4" mb="0" cb="0"/>

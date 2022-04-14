@@ -21,7 +21,6 @@ import com.intellij.rt.coverage.util.CoverageIOUtil;
 
 import java.io.*;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -37,13 +36,13 @@ public class ClassPathEntry {
     myClassPathEntry = classPathEntry;
   }
 
-  void iterateMatchedClasses(List<Pattern> includePatterns, List<Pattern> excludePatterns, ClassEntry.Consumer consumer) throws IOException {
+  void iterateMatchedClasses(ClassFilter filter, ClassEntry.Consumer consumer) throws IOException {
     ClassPathEntryProcessor processor = createEntryProcessor(myClassPathEntry);
     if (processor == null) {
 //      System.err.println("Do not know how to process class path entry: " + myClassPathEntry);
       return;
     }
-    processor.setFilter(includePatterns, excludePatterns);
+    processor.setFilter(filter);
     processor.iterateMatchedClasses(myClassPathEntry, consumer);
   }
 
@@ -62,26 +61,18 @@ public class ClassPathEntry {
   private final static ZipEntryProcessor myZipProcessor = new ZipEntryProcessor();
 
   private static abstract class AbstractClassPathEntryProcessor implements ClassPathEntryProcessor {
-    private List<Pattern> myIncludePatterns;
-    private List<Pattern> myExcludePatterns;
+    private ClassFilter myFilter;
 
-    public void setFilter(final List<Pattern> includePatterns, final List<Pattern> excludePatterns) {
-      myIncludePatterns = includePatterns;
-      myExcludePatterns = excludePatterns;
+    public void setFilter(ClassFilter filter) {
+      myFilter = filter;
     }
-
     protected final boolean shouldInclude(final String className) {
-      // matching outer or inner class name depending on pattern
-      if (ClassNameUtil.matchesPatterns(className, myExcludePatterns)) return false;
-
-      String outerClassName = ClassNameUtil.getOuterClassName(className);
-      if (ClassNameUtil.matchesPatterns(outerClassName, myIncludePatterns)) return true;
-      return myIncludePatterns.isEmpty();
+      return myFilter.shouldInclude(className);
     }
   }
 
   private interface ClassPathEntryProcessor {
-    void setFilter(List<Pattern> includePatterns, List<Pattern> excludePatterns);
+    void setFilter(ClassFilter filter);
 
     void iterateMatchedClasses(final String classPathEntry, ClassEntry.Consumer consumer) throws IOException;
   }

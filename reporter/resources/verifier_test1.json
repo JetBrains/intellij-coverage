@@ -1,0 +1,56 @@
+[
+  {
+    "bounds": {"2": {"min": {"all": 0.090909}}},
+    "id": 1
+  },
+  {
+    "bounds": {
+      "1": {"min": {
+        "testData.branches.TestKt": 5,
+        "testData.noReport.branches.MyBranchedUnloadedClass": 0,
+        "testData.crossinline.TestKt$main$3": 0,
+        "testData.simple.Main": 0,
+        "testData.branches.MyBranchedClass": 0,
+        "testData.crossinline.TestKt$main$$inlined$run$1": 0,
+        "testData.crossinline.TestKt$run$2": 0,
+        "testData.defaultArgs.Example": 0,
+        "testData.inline.TestKt": 0,
+        "testData.noReport.branches.TestKt": 0,
+        "testData.defaultArgs.TestKt": 0,
+        "testData.inline.Test": 2,
+        "testData.branches.MyBranchedUnloadedClass": 0,
+        "testData.noReport.branches.MyBranchedClass": 0,
+        "testData.outOfPackageStructure.TestOutOfPackageStructureKt": 0,
+        "testData.crossinline.TestKt": 0
+      }},
+      "2": {"max": {
+        "testData.noReport.branches.MyBranchedUnloadedClass": 1,
+        "testData.branches.MyBranchedUnloadedClass": 1,
+        "testData.noReport.branches.MyBranchedClass": 1
+      }}
+    },
+    "id": 2
+  },
+  {
+    "bounds": {
+      "1": {
+        "min": {
+          "testData.inline": 2,
+          "testData.defaultArgs": 6,
+          "testData.outOfPackageStructure": 1,
+          "testData.simple": 5,
+          "testData.crossinline": 5
+        },
+        "max": {
+          "testData.noReport.branches": 23,
+          "testData.branches": 19
+        }
+      },
+      "2": {"min": {
+        "testData.noReport.branches": 0,
+        "testData.branches": 0.071429
+      }}
+    },
+    "id": 3
+  }
+]

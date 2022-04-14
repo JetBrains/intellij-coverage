@@ -20,15 +20,17 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineMapData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 
 import java.util.Map;
 
 public class InstructionsUtil {
-  public static void merge(ProjectData source, ProjectData target) {
+  public static void merge(ProjectData source, ProjectData target, ClassFilter classFilter) {
     if (!target.isInstructionsCoverageEnabled()) return;
     final Map<String, ClassInstructions> instructions = target.getInstructions();
     for (Map.Entry<String, ClassInstructions> entry : source.getInstructions().entrySet()) {
       final String key = entry.getKey();
+      if (classFilter != null && !classFilter.shouldInclude(key)) continue;
       final ClassInstructions mergedInstructions = entry.getValue();
       ClassInstructions classInstructions = instructions.get(key);
       if (classInstructions == null) {

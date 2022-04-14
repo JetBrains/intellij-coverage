@@ -39,7 +39,7 @@ public class SourceFileLocator extends FileLocator {
 
   private void locateProjectSourceFiles(ProjectData projectData) {
     final Map<String, List<String>> lostSources = new HashMap<String, List<String>>();
-    for (ClassData classData : projectData.getClasses().values()) {
+    for (ClassData classData : projectData.getClassesCollection()) {
       if (classData == null) continue;
       final String className = classData.getName();
       final String fileName = classData.getSource();

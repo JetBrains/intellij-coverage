@@ -79,31 +79,7 @@ public class SaveHook implements Runnable {
                 projectData.merge(load);
             }
 
-            DataOutputStream os = null;
-            try {
-                os = CoverageIOUtil.openFile(myDataFile);
-                final TObjectIntHashMap<String> dict = new TObjectIntHashMap<String>();
-                final Map<String, ClassData> classes = new HashMap<String, ClassData>(projectData.getClasses());
-                CoverageIOUtil.writeINT(os, classes.size());
-                saveDictionary(os, dict, classes);
-                saveData(os, dict, classes);
-
-                CoverageIOUtil.writeINT(os, ProjectDataLoader.REPORT_VERSION);
-                CoverageIOUtil.writeUTF(os, getExtraInfoString());
-                ReportSectionsUtil.saveSections(projectData, os, dict);
-
-                saveSourceMap(classes, mySourceMapFile);
-            } catch (IOException e) {
-                ErrorReporter.reportError("Error writing file " + myDataFile.getPath(), e);
-            } finally {
-                try {
-                    if (os != null) {
-                        os.close();
-                    }
-                } catch (IOException e) {
-                    ErrorReporter.reportError("Error writing file " + myDataFile.getPath(), e);
-                }
-            }
+            save(projectData, myDataFile, mySourceMapFile);
         } catch (OutOfMemoryError e) {
             ErrorReporter.reportError("Out of memory error occurred, try to increase memory available for the JVM, or make include / exclude patterns more specific", e);
         } catch (Throwable e) {
@@ -113,12 +89,34 @@ public class SaveHook implements Runnable {
         }
     }
 
+    public static void save(ProjectData projectData, File dataFile, File sourceMapFile) {
+        DataOutputStream os = null;
+        try {
+            os = CoverageIOUtil.openFile(dataFile);
+            final TObjectIntHashMap<String> dict = new TObjectIntHashMap<String>();
+            final Map<String, ClassData> classes = new HashMap<String, ClassData>(projectData.getClasses());
+            CoverageIOUtil.writeINT(os, classes.size());
+            saveDictionary(os, dict, classes);
+            saveData(os, dict, classes);
+
+            CoverageIOUtil.writeINT(os, ProjectDataLoader.REPORT_VERSION);
+            CoverageIOUtil.writeUTF(os, getExtraInfoString());
+            ReportSectionsUtil.saveSections(projectData, os, dict);
+
+            saveSourceMap(classes, sourceMapFile);
+        } catch (IOException e) {
+            ErrorReporter.reportError("Error writing file " + dataFile.getPath(), e);
+        } finally {
+            CoverageIOUtil.close(os);
+        }
+    }
+
     /**
      * This line may contain some useful configuration for sections parsing.
      * This field is string type to be extended easily.If a new agent version relies on this line data,
      * it must be extended such that it is possible to parse it and use for further extensions.
      */
-    private String getExtraInfoString() {
+    private static String getExtraInfoString() {
         return "";
     }
 
@@ -216,7 +214,7 @@ public class SaveHook implements Runnable {
             CoverageIOUtil.writeUTF(out, value != null ? value : "");
           }
         } finally {
-            if (out != null) CoverageIOUtil.close(out);
+            CoverageIOUtil.close(out);
         }
     }
 

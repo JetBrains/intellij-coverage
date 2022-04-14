@@ -22,17 +22,6 @@
 <counter type="LINE" missed="8" covered="3"/>
 <counter type="METHOD" missed="1" covered="2"/>
 </class>
-<class name="testData/branches/TestKt" sourcefilename="test.kt">
-<method name="main" desc="()V">
-<counter type="INSTRUCTION" missed="0" covered="5"/>
-<counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="0" covered="1"/>
-</method>
-<counter type="INSTRUCTION" missed="0" covered="5"/>
-<counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="0" covered="1"/>
-<counter type="METHOD" missed="0" covered="1"/>
-</class>
 <class name="testData/branches/MyBranchedUnloadedClass" sourcefilename="test.kt">
 <method name="foo" desc="(I)V">
 <counter type="INSTRUCTION" missed="15" covered="0"/>
@@ -53,6 +42,17 @@
 <counter type="BRANCH" missed="7" covered="0"/>
 <counter type="LINE" missed="11" covered="0"/>
 <counter type="METHOD" missed="3" covered="0"/>
+</class>
+<class name="testData/branches/TestKt" sourcefilename="test.kt">
+<method name="main" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="5"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
 </class>
 <sourcefile name="test.kt">
 <line nr="19" mi="0" ci="2" mb="0" cb="0"/>

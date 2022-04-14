@@ -16,7 +16,7 @@
 
 package com.intellij.rt.coverage.report;
 
-import com.intellij.rt.coverage.report.data.ProjectReport;
+import com.intellij.rt.coverage.aggregate.Aggregator;
 import jetbrains.coverage.report.ReportBuilderFactory;
 import jetbrains.coverage.report.SourceCodeProvider;
 import jetbrains.coverage.report.html.HTMLReportBuilder;
@@ -27,10 +27,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class Reporter {
-  private final ProjectReport myProjectReport;
+  private final Aggregator myAggregator;
 
-  public Reporter(ProjectReport projectReport) {
-    myProjectReport = projectReport;
+  public Reporter(Aggregator aggregator) {
+    myAggregator = aggregator;
   }
 
   public void createXMLReport(File xmlFile) throws IOException {
@@ -38,7 +38,7 @@ public class Reporter {
     FileOutputStream out = null;
     try {
       out = new FileOutputStream(xmlFile);
-      report.write(out, myProjectReport.getProjectData());
+      report.write(out, myAggregator.getProjectData());
     } finally {
       if (out != null) {
         out.close();
@@ -49,7 +49,7 @@ public class Reporter {
   public void createHTMLReport(File htmlDir) throws IOException {
     final HTMLReportBuilder builder = ReportBuilderFactory.createHTMLReportBuilderForKover();
     builder.setReportDir(htmlDir);
-    final SourceCodeProvider sourceCodeProvider = new DirectorySourceCodeProvider(myProjectReport.getProjectData(), myProjectReport.getSources());
-    builder.generateReport(new IDEACoverageData(myProjectReport.getProjectData(), sourceCodeProvider));
+    final SourceCodeProvider sourceCodeProvider = new DirectorySourceCodeProvider(myAggregator.getProjectData(), myAggregator.getSources());
+    builder.generateReport(new IDEACoverageData(myAggregator.getProjectData(), sourceCodeProvider));
   }
 }
