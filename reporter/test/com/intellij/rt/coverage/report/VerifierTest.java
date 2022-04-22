@@ -26,10 +26,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class VerifierTest {
@@ -95,6 +92,10 @@ public class VerifierTest {
     final File outputFile = File.createTempFile("result", "json");
     verifier.processRules(outputFile);
     final File expected = TestUtils.getResourceFile(expectedFileName);
-    Assert.assertEquals(FileUtils.readAll(expected), FileUtils.readAll(outputFile));
+
+    // compare as a set of strings to avoid  errors with order
+    final Set<String> expectedSet = new HashSet<String>(Arrays.asList(FileUtils.readAll(expected).split("\n")));
+    final Set<String> actualSet = new HashSet<String>(Arrays.asList(FileUtils.readAll(outputFile).split("\n")));
+    Assert.assertEquals(expectedSet, actualSet);
   }
 }
