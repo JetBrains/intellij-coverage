@@ -87,10 +87,8 @@ public class Verifier {
   }
 
   private static void saveViolations(List<RuleViolation> violations, File outputFile) throws IOException {
-    final JSONArray jsonViolations = new JSONArray(violations.size());
+    final JSONObject jsonViolations = new JSONObject();
     for (RuleViolation ruleViolation : violations) {
-      final JSONObject jsonRuleViolation = new JSONObject();
-      jsonRuleViolation.put(VerifierArgs.ID_TAG, ruleViolation.id);
 
       final JSONObject jsonBoundsViolation = new JSONObject();
       for (BoundViolation boundViolation : ruleViolation.violations) {
@@ -98,7 +96,7 @@ public class Verifier {
         if (!boundViolation.minViolations.isEmpty()) {
           final JSONObject jsonMin = new JSONObject();
           for (Violation violation : boundViolation.minViolations) {
-            jsonMin.put(violation.targetName, violation.targetValue);
+            jsonMin.put(violation.targetName, violation.targetValue.toString());
           }
           jsonBoundViolation.put(VerifierArgs.MIN_TAG, jsonMin);
         }
@@ -106,15 +104,14 @@ public class Verifier {
         if (!boundViolation.maxViolations.isEmpty()) {
           final JSONObject jsonMax = new JSONObject();
           for (Violation violation : boundViolation.maxViolations) {
-            jsonMax.put(violation.targetName, violation.targetValue);
+            jsonMax.put(violation.targetName, violation.targetValue.toString());
           }
           jsonBoundViolation.put(VerifierArgs.MAX_TAG, jsonMax);
         }
         jsonBoundsViolation.put(Integer.toString(boundViolation.id), jsonBoundViolation);
       }
 
-      jsonRuleViolation.put(VerifierArgs.BOUNDS_TAG, jsonBoundsViolation);
-      jsonViolations.put(jsonRuleViolation);
+      jsonViolations.put(Integer.toString(ruleViolation.id), jsonBoundsViolation);
     }
     FileUtils.write(outputFile, jsonViolations.toString(2));
   }

@@ -66,6 +66,15 @@ public class VerifierTest {
     runVerifier(rules, "verifier_test2.json");
   }
 
+  @Test
+  public void test3() throws IOException, InterruptedException {
+    final List<Verifier.Rule> rules = new ArrayList<Verifier.Rule>();
+    final Verifier.Bound bound1_1 = new Verifier.Bound(1, Verifier.Counter.LINE, Verifier.ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
+    rules.add(createRule(Verifier.Target.PACKAGE, bound1_1));
+
+    runVerifier(rules, "verifier_test3.json");
+  }
+
   private File getFile() throws IOException {
     return File.createTempFile("report", "ic");
   }
@@ -78,24 +87,29 @@ public class VerifierTest {
 
   public static void runVerifier(List<Verifier.Rule> rules, String expectedFileName) throws IOException, InterruptedException {
     final List<Aggregator.Request> requests = new ArrayList<Aggregator.Request>();
+    final List<Pattern> patterns = new ArrayList<Pattern>();
+    patterns.add(Pattern.compile("testData\\..*"));
+    patterns.add(Pattern.compile("[^.]*"));
     for (Verifier.Rule rule : rules) {
       final Aggregator.Request request = new Aggregator.Request(
-          new ClassFilter.PatternFilter(
-              Collections.singletonList(Pattern.compile("testData\\..*")),
-              Collections.<Pattern>emptyList()),
+          new ClassFilter.PatternFilter(patterns, Collections.<Pattern>emptyList()),
           rule.reportFile);
       requests.add(request);
     }
-    AggregatorTest.runAggregator(requests, "testData.branches.TestKt", "testData.inline.Test", "testData.simple.Main");
+    AggregatorTest.runAggregator(requests, "testData.branches.TestKt", "testData.inline.Test", "testData.simple.Main", "TestTopLevelKt");
 
     final Verifier verifier = new Verifier(rules);
     final File outputFile = File.createTempFile("result", "json");
     verifier.processRules(outputFile);
     final File expected = TestUtils.getResourceFile(expectedFileName);
 
+    final String expectedString = FileUtils.readAll(expected);
+    final String actualString = FileUtils.readAll(outputFile);
+//    Assert.assertEquals(expectedString, actualString);
+
     // compare as a set of strings to avoid  errors with order
-    final Set<String> expectedSet = new HashSet<String>(Arrays.asList(FileUtils.readAll(expected).split("\n")));
-    final Set<String> actualSet = new HashSet<String>(Arrays.asList(FileUtils.readAll(outputFile).split("\n")));
+    final Set<String> expectedSet = new HashSet<String>(Arrays.asList(expectedString.split("\n")));
+    final Set<String> actualSet = new HashSet<String>(Arrays.asList(actualString.split("\n")));
     Assert.assertEquals(expectedSet, actualSet);
   }
 }

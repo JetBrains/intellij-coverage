@@ -27,7 +27,7 @@ public class PackageTargetProcessor implements TargetProcessor {
 
   @Override
   public void process(ProjectData projectData, Consumer consumer) {
-    final Map<String, List<ClassData>> classesToPackages = XMLCoverageReport.mapClassesToPackages(projectData);
+    final Map<String, List<ClassData>> classesToPackages = XMLCoverageReport.mapClassesToPackages(projectData, false);
 
     for (Map.Entry<String, List<ClassData>> packageEntry : classesToPackages.entrySet()) {
       final Verifier.CollectedCoverage packageCoverage = new Verifier.CollectedCoverage();

@@ -1,0 +1,10 @@
+{"1": {"1": {"min": {
+  "testData.inline": "3",
+  "testData.defaultArgs": "0",
+  "testData.outOfPackageStructure": "0",
+  "testData.simple": "6",
+  "testData.crossinline": "0",
+  "root": "1",
+  "testData.noReport.branches": "0",
+  "testData.branches": "4"
+}}}}

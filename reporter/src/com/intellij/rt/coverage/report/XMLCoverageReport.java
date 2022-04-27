@@ -84,7 +84,7 @@ public class XMLCoverageReport {
     myOut.writeAttribute("name", "Intellij Coverage Report");
     newLine();
 
-    HashMap<String, List<ClassData>> packages = mapClassesToPackages(project);
+    final HashMap<String, List<ClassData>> packages = mapClassesToPackages(project, true);
 
     final Counter counter = new Counter();
     for (Map.Entry<String, List<ClassData>> packageEntry : packages.entrySet()) {
@@ -267,7 +267,7 @@ public class XMLCoverageReport {
     return false;
   }
 
-  public static HashMap<String, List<ClassData>> mapClassesToPackages(ProjectData project) {
+  public static HashMap<String, List<ClassData>> mapClassesToPackages(ProjectData project, boolean useClassNameIfEmpty) {
     HashMap<String, List<ClassData>> packages = new HashMap<String, List<ClassData>>();
     final List<ClassData> classes = new ArrayList<ClassData>(project.getClassesCollection());
     Collections.sort(classes, new Comparator<ClassData>() {
@@ -280,7 +280,7 @@ public class XMLCoverageReport {
       if (!shouldIncludeClass(classData)) continue;
       String className = classData.getName();
       int indexOfName = className.lastIndexOf('.');
-      String packageName = indexOfName < 0 ? className : className.substring(0, indexOfName);
+      String packageName = indexOfName < 0 ? (useClassNameIfEmpty ? className : "") : className.substring(0, indexOfName);
       List<ClassData> packageClasses = packages.get(packageName);
       if (!packages.containsKey(packageName)) {
         packageClasses = new ArrayList<ClassData>();
