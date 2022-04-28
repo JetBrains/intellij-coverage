@@ -29,12 +29,12 @@
   "3": {
     "1": {
       "min": {
+        "": "0",
         "testData.inline": "2",
         "testData.defaultArgs": "6",
         "testData.outOfPackageStructure": "1",
         "testData.simple": "5",
-        "testData.crossinline": "5",
-        "root": "0"
+        "testData.crossinline": "5"
       },
       "max": {
         "testData.noReport.branches": "23",

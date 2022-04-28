@@ -35,8 +35,7 @@ public class PackageTargetProcessor implements TargetProcessor {
         final Verifier.CollectedCoverage coverage = ProjectTargetProcessor.collectClassCoverage(projectData, classData);
         packageCoverage.add(coverage);
       }
-      String packageName = packageEntry.getKey();
-      if (packageName.equals("")) packageName = "root";
+      final String packageName = packageEntry.getKey();
       consumer.consume(packageName, packageCoverage);
     }
   }
