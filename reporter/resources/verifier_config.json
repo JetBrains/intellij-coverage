@@ -1,5 +1,5 @@
 {
-  "resultFile": "~/projects/verify.json",
+  "resultFile": "verify.json",
   "rules": [
     {
       "id": 1,

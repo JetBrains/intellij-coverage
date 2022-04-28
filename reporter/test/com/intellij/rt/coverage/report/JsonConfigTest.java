@@ -162,6 +162,6 @@ public class JsonConfigTest {
     Assert.assertEquals(BigDecimal.valueOf(0.111111), bound2.max);
     Assert.assertEquals(BigDecimal.valueOf(0.000001), bound2.min);
 
-    Assert.assertEquals("~/projects/verify.json", args.resultFile.getPath());
+    Assert.assertEquals("verify.json", args.resultFile.getPath());
   }
 }
