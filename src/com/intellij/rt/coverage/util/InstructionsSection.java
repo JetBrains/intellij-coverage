@@ -29,6 +29,7 @@ import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.List;
 
 public class InstructionsSection extends ClassListSection {
   final ProjectData myProjectData;
@@ -96,17 +97,19 @@ public class InstructionsSection extends ClassListSection {
     for (int line = 0; line < lines.length; line++) {
       final LineData lineData = lines[line];
       if (lineData == null) continue;
-      final LineInstructions lineInstruction = lineInstructions[line];
-      CoverageIOUtil.writeINT(out, lineInstruction.getInstructions());
+      final LineInstructions lineInstruction = line >= lineInstructions.length ? null : lineInstructions[line];
+      CoverageIOUtil.writeINT(out, lineInstruction == null ? 0 : lineInstruction.getInstructions());
+      final List<JumpInstructions> jumps = lineInstruction == null ? null : lineInstruction.getJumps();
       for (int i = 0; i < lineData.jumpsCount(); i++) {
-        final JumpInstructions jumpInstructions = lineInstruction.getJumps().get(i);
-        CoverageIOUtil.writeINT(out, jumpInstructions.getInstructions(true));
-        CoverageIOUtil.writeINT(out, jumpInstructions.getInstructions(false));
+        final JumpInstructions jumpInstructions = jumps == null || i >= jumps.size() ? null : jumps.get(i);
+        CoverageIOUtil.writeINT(out, jumpInstructions == null ? 0 : jumpInstructions.getInstructions(true));
+        CoverageIOUtil.writeINT(out, jumpInstructions == null ? 0 : jumpInstructions.getInstructions(false));
       }
+      final List<SwitchInstructions> switches = lineInstruction == null ? null : lineInstruction.getSwitches();
       for (int i = 0; i < lineData.switchesCount(); i++) {
-        final SwitchInstructions switchInstructions = lineInstruction.getSwitches().get(i);
-        for (int key = -1; key < switchInstructions.size(); key++) {
-          CoverageIOUtil.writeINT(out, switchInstructions.getInstructions(key));
+        final SwitchInstructions switchInstructions = switches == null || i >= switches.size() ? null : switches.get(i);
+        for (int key = -1; key < lineData.getSwitchData(i).getKeys().length; key++) {
+          CoverageIOUtil.writeINT(out, switchInstructions == null ? 0 : switchInstructions.getInstructions(key));
         }
       }
     }

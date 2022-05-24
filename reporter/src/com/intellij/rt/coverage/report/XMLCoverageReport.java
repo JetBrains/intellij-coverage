@@ -199,6 +199,7 @@ public class XMLCoverageReport {
     final LineInstructions[] instructions = classInstructions == null ? null : classInstructions.getlines();
     for (LineData lineData : lines) {
       if (lineData == null) continue;
+      if (instructions != null && lineData.getLineNumber() >= instructions.length) break;
       final LineInstructions lineInstructions = instructions == null ? null : instructions[lineData.getLineNumber()];
       final Counter lineCounter = getLineCounter(lineInstructions, lineData);
       lineCounters.put(lineData, lineCounter);

@@ -58,7 +58,9 @@ public class ProjectTargetProcessor implements TargetProcessor {
         coverage.branchCounter.missed += branchData.getTotalBranches() - branchData.getCoveredBranches();
       }
 
-      final LineInstructions lineInstructions = instructions == null ? null : instructions[lineData.getLineNumber()];
+      final LineInstructions lineInstructions = instructions == null || lineData.getLineNumber() >= instructions.length
+          ? null
+          : instructions[lineData.getLineNumber()];
       if (lineInstructions != null) {
         final BranchData instructionsData = lineInstructions.getInstructionsData(lineData);
         coverage.instructionCounter.covered = instructionsData.getCoveredBranches();
