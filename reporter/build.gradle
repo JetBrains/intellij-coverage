@@ -23,7 +23,7 @@ dependencies {
   implementation project(":")
   implementation(project(path: ":instrumentation", configuration: "archives"))
   implementation project(":util")
-  externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.15")
+  externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.16")
   externalDependencies("org.json:json:20210307")
 
   testImplementation("junit:junit:4.13")
