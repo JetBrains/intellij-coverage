@@ -43,7 +43,7 @@ public class AppendUnloadedBenchmark {
   @Benchmark
   public int instrumentation() throws Exception {
     final ProjectData projectData = ProjectData.createProjectData(new File("test.ic"), null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
-    SaveHook.appendUnloadedFullAnalysis(projectData, createClassFinder(), calculateSource, isSampling);
+    SaveHook.appendUnloadedFullAnalysis(projectData, createClassFinder(), calculateSource, isSampling, false);
     System.out.println(projectData.getClassesNumber());
     return projectData.getClassesNumber();
   }

@@ -66,7 +66,7 @@ public class SaveHook implements Runnable {
             if (myAppendUnloaded) {
               final boolean calculateSource = mySourceMapFile != null;
               if (OptionsUtil.UNLOADED_CLASSES_FULL_ANALYSIS) {
-                  appendUnloadedFullAnalysis(projectData, myClassFinder, calculateSource, projectData.isSampling());
+                  appendUnloadedFullAnalysis(projectData, myClassFinder, calculateSource, projectData.isSampling(), OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS, false);
                 } else {
                   appendUnloaded(projectData, myClassFinder, calculateSource, projectData.isSampling());
                 }
@@ -281,11 +281,15 @@ public class SaveHook implements Runnable {
     }
   };
 
-  public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean isSampling) {
-    appendUnloadedFullAnalysis(projectData, classFinder, calculateSource, isSampling, OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS);
+  public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean isSampling, final boolean ignorePrivateConstructorOfUtilClass) {
+    appendUnloadedFullAnalysis(projectData, classFinder, calculateSource, isSampling, ignorePrivateConstructorOfUtilClass, true);
   }
 
-  public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean isSampling, final boolean ignorePrivateConstructorOfUtilClass) {
+
+  public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder,
+                                                final boolean calculateSource, final boolean isSampling,
+                                                final boolean ignorePrivateConstructorOfUtilClass,
+                                                final boolean checkLineMappings) {
     classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
       public void consume(ClassEntry classEntry) {
         final ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
@@ -293,7 +297,7 @@ public class SaveHook implements Runnable {
         try {
           final InputStream is = classEntry.getClassInputStream();
           if (is == null) return;
-          appendUnloadedClass(projectData, classEntry.getClassName(), new ClassReader(is), isSampling, calculateSource, ignorePrivateConstructorOfUtilClass);
+          appendUnloadedClass(projectData, classEntry.getClassName(), new ClassReader(is), isSampling, calculateSource, ignorePrivateConstructorOfUtilClass, checkLineMappings);
         } catch (Throwable e) {
           ErrorReporter.reportError("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
         }
@@ -302,6 +306,10 @@ public class SaveHook implements Runnable {
   }
 
   public static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean isSampling, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass) {
+    appendUnloadedClass(projectData, className, reader, isSampling, calculateSource, ignorePrivateConstructorOfUtilClass, true);
+  }
+
+  private static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean isSampling, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass, boolean checkLineMappings) {
     final Instrumenter instrumenter;
     if (isSampling) {
       instrumenter = new SamplingInstrumenter(projectData, EMPTY_CLASS_VISITOR, className, calculateSource);
@@ -320,6 +328,7 @@ public class SaveHook implements Runnable {
       if (line == null) continue;
       classData.registerMethodSignature(line);
     }
+    if (!checkLineMappings) return;
     final Map<String, FileMapData[]> linesMap = projectData.getLinesMap();
     if (linesMap == null) return;
     final FileMapData[] mappings = linesMap.remove(className);

@@ -175,6 +175,10 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public void checkLineMappings() {
+    checkLineMappings(true);
+  }
+
+  public void checkLineMappings(boolean createNewClasses) {
     if (myLinesMap != null) {
       for (Map.Entry<String, FileMapData[]> entry : myLinesMap.entrySet()) {
         final String className = entry.getKey();
@@ -189,7 +193,8 @@ public class ProjectData implements CoverageData, Serializable {
             continue;
           }
           final ClassData classInfo;
-          if ((myExcludePatterns == null || !ClassNameUtil.matchesPatterns(mappedClassName, myExcludePatterns))
+          if (createNewClasses
+              && (myExcludePatterns == null || !ClassNameUtil.matchesPatterns(mappedClassName, myExcludePatterns))
               && (myIncludePatterns == null || myIncludePatterns.isEmpty() || ClassNameUtil.matchesPatterns(mappedClassName, myIncludePatterns))) {
             classInfo = getOrCreateClassData(mappedClassName);
             if (classInfo.getSource() == null || classInfo.getSource().length() == 0) {

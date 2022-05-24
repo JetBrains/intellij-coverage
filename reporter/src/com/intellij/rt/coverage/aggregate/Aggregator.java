@@ -100,7 +100,8 @@ public class Aggregator {
   private ProjectData collectCoverageInformationFromOutputs() {
     final ProjectData projectData = new ProjectData();
     projectData.setInstructionsCoverage(true);
-    SaveHook.appendUnloadedFullAnalysis(projectData, createClassFinder(), true, false, true);
+    SaveHook.appendUnloadedFullAnalysis(projectData, createClassFinder(), true, false, true, false);
+    projectData.checkLineMappings(false);
     return projectData;
   }
 
