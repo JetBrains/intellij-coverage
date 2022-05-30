@@ -35,12 +35,22 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public class Instrumentator {
+  public static boolean ourIsInitialized = false;
+
   public static void premain(String argsString, Instrumentation instrumentation) throws Exception {
     new Instrumentator().performPremain(argsString, instrumentation);
   }
 
   public void performPremain(String argsString, Instrumentation instrumentation) throws Exception {
     checkLogLevel();
+
+    synchronized (Instrumentator.class) {
+      if (ourIsInitialized) {
+        ErrorReporter.reportError("Coverage agent has been applied twice, ignore the second one.");
+        return;
+      }
+      ourIsInitialized = true;
+    }
 
     String[] args;
     if (argsString != null) {
