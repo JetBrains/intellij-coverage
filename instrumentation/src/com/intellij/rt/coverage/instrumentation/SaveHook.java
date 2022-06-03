@@ -239,7 +239,7 @@ public class SaveHook implements Runnable {
             reader.accept(slc, ClassReader.SKIP_FRAMES);
             if (slc.isEnum() || slc.getNSourceLines() > 0) { // ignore classes without executable code
               final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
-              final int[] maxLine = new int[]{1};
+              final int[] maxLine = new int[]{-1};
               final ClassData classData = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
               slc.getSourceLines().forEachEntry(new TIntObjectProcedure<String>() {
                 public boolean execute(int line, String methodSig) {

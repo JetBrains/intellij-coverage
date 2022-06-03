@@ -27,7 +27,7 @@ public class LinesUtil {
   private final static LineData[] EMPTY_LINES = new LineData[0];
 
   public static LineData[] calcLineArray(final int maxLineNumber, final TIntObjectHashMap lines) {
-    if (lines.isEmpty()) return EMPTY_LINES;
+    if (maxLineNumber == -1) return EMPTY_LINES;
     final LineData[] linesArray = new LineData[maxLineNumber + 1];
     for(int line = 1; line <= maxLineNumber; line++) {
       final LineData lineData = (LineData) lines.get(line);

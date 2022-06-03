@@ -33,7 +33,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   private final boolean myShouldCalculateSource;
 
   protected TIntObjectHashMap<LineData> myLines = new TIntObjectHashMap<LineData>(4, 0.99f);
-  protected int myMaxLineNumber;
+  protected int myMaxLineNumber = -1;
 
   protected ClassData myClassData;
   protected boolean myProcess;

@@ -58,7 +58,7 @@ public class ProjectDataLoader {
         final ClassData classInfo = dict.get(CoverageIOUtil.readINT(in));
         final int methCount = CoverageIOUtil.readINT(in);
         final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
-        int maxLine = 1;
+        int maxLine = -1;
         for (int m = 0; m < methCount; m++) {
           final String methodSig = expand(in, dict);
           final int lineCount = CoverageIOUtil.readINT(in);
