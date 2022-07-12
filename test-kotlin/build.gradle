@@ -25,6 +25,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     testImplementation('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0')
     testImplementation("org.jetbrains.kotlin:kotlin-reflect:1.7.0-RC2")
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
 
     testImplementation(files(project(":tests").sourceSets.test.output))
     testImplementation(project(path: ":instrumentation", configuration: "archives"))

@@ -76,6 +76,7 @@ public class KotlinUtils {
     result.add(new KotlinCoroutinesEnumeratingFilter());
     result.add(new KotlinLateinitFilter());
     result.add(new KotlinOpenMemberWithDefaultArgsFilter());
+    result.add(new KotlinUnsafeCastFilter());
     return result;
   }
 }

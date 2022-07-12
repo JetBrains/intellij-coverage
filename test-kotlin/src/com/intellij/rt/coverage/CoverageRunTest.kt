@@ -229,6 +229,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testSimpleIfelse() = test("simple.ifelse")
 
     @Test
+    fun testTypeCast() = test("typeCast")
+
+    @Test
     fun testUnloadedCycle() = test("unloaded.cycle")
 
     @Test
