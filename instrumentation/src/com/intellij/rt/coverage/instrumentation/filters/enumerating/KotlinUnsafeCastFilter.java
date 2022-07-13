@@ -31,7 +31,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  *   <li>POP (optional)</li>
  *   <li>NEW java/lang/NullPointerException</li>
  *   <li>DUP</li>
- *   <li>LDC</li>
+ *   <li>LDC null cannot be cast to non-null type ...</li>
  *   <li>INVOKESPECIAL java/lang/NullPointerException.init (Ljava/lang/String;)V</li>
  *   <li>ATHROW</li>
  * </ol>
@@ -87,7 +87,7 @@ public class KotlinUnsafeCastFilter extends LineEnumeratorFilter {
   @Override
   public void visitLdcInsn(Object value) {
     super.visitLdcInsn(value);
-    if (myState == 3) {
+    if (myState == 3 && value instanceof String && ((String)value).startsWith("null cannot be cast to non-null type ")) {
       myState++;
     } else {
       myState = 0;
@@ -105,5 +105,11 @@ public class KotlinUnsafeCastFilter extends LineEnumeratorFilter {
     } else {
       myState = 0;
     }
+  }
+
+  @Override
+  public void visitLineNumber(int line, Label start) {
+    super.visitLineNumber(line, start);
+    myState = 0;
   }
 }

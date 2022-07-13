@@ -16,6 +16,7 @@
 
 package testData.typeCast
 
+import kotlin.random.Random
 import kotlin.test.assertIs
 
 
@@ -41,4 +42,14 @@ fun main() {
     A.getInstance("B") as B         // coverage: FULL
     assertIs<B>(A.getInstance("B")) // coverage: FULL
     f("Hi") // coverage: FULL
+
+    val result: String? = if (Random(2).nextBoolean()) "hello" else null // coverage: PARTIAL
+    if (result == null) { // coverage: PARTIAL
+        throw NullPointerException("") // coverage: NONE
+    }
+
+    val result2: String? = if (Random(2).nextBoolean()) "hello" else null // coverage: PARTIAL
+    if (result2 == null) { // coverage: PARTIAL
+        throw NullPointerException("null cannot be cast to non-null type kotlin.String") // coverage: NONE
+    }
 }
