@@ -66,6 +66,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testCoroutinesSmallBody() = test("coroutines.smallBody")
 
     @Test
+    fun testCoroutinesSuspendLambda() = test("coroutines.suspendLambda")
+
+    @Test
     fun testCoroutinesTailSuspendCall() = test("coroutines.tailSuspendCall")
 
     @Test
