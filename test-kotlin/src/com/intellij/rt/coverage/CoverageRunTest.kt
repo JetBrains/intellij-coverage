@@ -114,6 +114,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testDeprecated() = test("deprecated")
 
     @Test
+    fun testDeserializeLambda() = test("deserializeLambda")
+
+    @Test
     fun testEnum_Java() = test("enum_.java")
 
     @Test
