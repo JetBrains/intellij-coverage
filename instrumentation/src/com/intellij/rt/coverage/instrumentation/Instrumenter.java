@@ -37,6 +37,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
 
   protected ClassData myClassData;
   protected boolean myProcess;
+  private boolean myIgnoreSection;
 
   public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
     super(classVisitor, className);
@@ -138,5 +139,16 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
 
   public int linesCount() {
     return myLines.size();
+  }
+
+  public boolean isIgnoreSection() {
+    return myIgnoreSection;
+  }
+
+  /**
+   * Set ignore flag. All the lines are ignored when this flag is enabled.
+   */
+  public void setIgnoreSection(boolean ignore) {
+    myIgnoreSection = ignore;
   }
 }

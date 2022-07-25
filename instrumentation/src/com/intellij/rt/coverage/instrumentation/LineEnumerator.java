@@ -71,6 +71,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
 
   public void visitLineNumber(int line, Label start) {
     super.visitLineNumber(line, start);
+    if (myInstrumenter.isIgnoreSection()) return;
     myCurrentLine = line;
     myHasExecutableLines = true;
     LineData lineData = myInstrumenter.getOrCreateLineData(myCurrentLine, myMethodName, myDescriptor);
@@ -78,7 +79,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   }
 
   public void visitJumpInsn(final int opcode, final Label label) {
-    if (!myHasExecutableLines) {
+    if (!myHasExecutableLines || myInstrumenter.isIgnoreSection()) {
       super.visitJumpInsn(opcode, label);
       return;
     }
@@ -133,7 +134,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   }
 
   public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-    if (!myHasExecutableLines) {
+    if (!myHasExecutableLines || myInstrumenter.isIgnoreSection()) {
       super.visitLookupSwitchInsn(dflt, keys, labels);
       return;
     }
@@ -150,7 +151,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   }
 
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
-    if (!myHasExecutableLines) {
+    if (!myHasExecutableLines || myInstrumenter.isIgnoreSection()) {
       super.visitTableSwitchInsn(min, max, dflt, labels);
       return;
     }

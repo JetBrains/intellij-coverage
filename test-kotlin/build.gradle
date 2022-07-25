@@ -45,6 +45,9 @@ dependencies {
     testImplementation("net.bytebuddy:byte-buddy-agent:1.11.12")
 
     testImplementation("org.jmockit:jmockit:1.49")
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
 }
 
 test {

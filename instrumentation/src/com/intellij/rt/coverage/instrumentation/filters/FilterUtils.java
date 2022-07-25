@@ -22,6 +22,7 @@ import com.intellij.rt.coverage.instrumentation.filters.signature.DeserializeLam
 import com.intellij.rt.coverage.instrumentation.filters.signature.EnumMethodsFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.ClosingBracesFilter;
+import com.intellij.rt.coverage.instrumentation.filters.visiting.LombokFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 
@@ -39,6 +40,7 @@ public class FilterUtils {
   public static List<MethodVisitingFilter> createVisitingFilters() {
     List<MethodVisitingFilter> result = KotlinUtils.createVisitingFilters();
     result.add(new ClosingBracesFilter());
+    result.add(new LombokFilter());
     return result;
   }
 

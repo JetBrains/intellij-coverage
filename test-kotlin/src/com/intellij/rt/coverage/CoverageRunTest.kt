@@ -198,6 +198,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testLateinit() = test("lateinit")
 
     @Test
+    fun testLombok() = test("lombok")
+
+    @Test
     fun testMethodReference() = test("methodReference")
 
     @Test

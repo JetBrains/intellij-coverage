@@ -19,10 +19,7 @@ package com.intellij.rt.coverage.instrumentation.filters.visiting;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
-import org.jetbrains.coverage.gnu.trove.TIntHashSet;
-import org.jetbrains.coverage.gnu.trove.TIntProcedure;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -30,8 +27,6 @@ import java.util.HashSet;
 
 public class DeprecatedMethodFilter extends MethodVisitingFilter {
   private static final String DEPRECATED_METHODS = "DEPRECATED_METHODS_SET";
-  private boolean myShouldIgnoreMethod = false;
-  private TIntHashSet myMethodLines;
   private String myName;
 
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
@@ -48,18 +43,11 @@ public class DeprecatedMethodFilter extends MethodVisitingFilter {
         //noinspection unchecked
         final HashSet<String> deprecatedMethods = (HashSet<String>) property;
         final String originalName = name.substring(0, name.length() - KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX.length());
-        myShouldIgnoreMethod |= deprecatedMethods.contains(originalName);
+        if (deprecatedMethods.contains(originalName)) {
+          myContext.setIgnoreSection(true);
+        }
       }
     }
-  }
-
-  @Override
-  public void visitLineNumber(int line, Label start) {
-    if (myShouldIgnoreMethod && myContext.getLineData(line) == null) {
-      if (myMethodLines == null) myMethodLines = new TIntHashSet();
-      myMethodLines.add(line);
-    }
-    super.visitLineNumber(line, start);
   }
 
   @Override
@@ -71,7 +59,17 @@ public class DeprecatedMethodFilter extends MethodVisitingFilter {
       public void visitEnum(String name, String descriptor, String value) {
         super.visitEnum(name, descriptor, value);
         if (!"Lkotlin/DeprecationLevel;".equals(descriptor)) return;
-        myShouldIgnoreMethod |= "ERROR".equals(value) || "HIDDEN".equals(value);
+        if ("ERROR".equals(value) || "HIDDEN".equals(value)) {
+          myContext.setIgnoreSection(true);
+          Object property = myContext.getProperty(DEPRECATED_METHODS);
+          if (property == null) {
+            property = new HashSet<String>();
+            myContext.addProperty(DEPRECATED_METHODS, property);
+          }
+          //noinspection unchecked
+          final HashSet<String> deprecatedMethods = (HashSet<String>) property;
+          deprecatedMethods.add(myName);
+        }
       }
     };
   }
@@ -79,22 +77,6 @@ public class DeprecatedMethodFilter extends MethodVisitingFilter {
   @Override
   public void visitEnd() {
     super.visitEnd();
-    if (myShouldIgnoreMethod) {
-      Object property = myContext.getProperty(DEPRECATED_METHODS);
-      if (property == null) {
-        property = new HashSet<String>();
-        myContext.addProperty(DEPRECATED_METHODS, property);
-      }
-      //noinspection unchecked
-      final HashSet<String> deprecatedMethods = (HashSet<String>) property;
-      deprecatedMethods.add(myName);
-    }
-    if (!myShouldIgnoreMethod || myMethodLines == null) return;
-    myMethodLines.forEach(new TIntProcedure() {
-      public boolean execute(int line) {
-        myContext.removeLine(line);
-        return true;
-      }
-    });
+    myContext.setIgnoreSection(false);
   }
 }
