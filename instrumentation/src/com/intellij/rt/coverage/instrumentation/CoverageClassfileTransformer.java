@@ -20,13 +20,22 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
+import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.security.CodeSource;
+import java.security.ProtectionDomain;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class CoverageClassfileTransformer extends AbstractIntellijClassfileTransformer {
@@ -36,18 +45,31 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
   private final List<Pattern> includePatterns;
   private final ClassFinder cf;
   private final TestTrackingMode testTrackingMode;
+  private final Set<String> targetScope;
 
   public CoverageClassfileTransformer(ProjectData data, boolean shouldCalculateSource, List<Pattern> excludePatterns, List<Pattern> includePatterns, ClassFinder cf) {
-    this(data, shouldCalculateSource, excludePatterns, includePatterns, cf, null);
+    this(data, shouldCalculateSource, excludePatterns, includePatterns, cf, null, Collections.<String>emptyList());
   }
 
-  public CoverageClassfileTransformer(ProjectData data, boolean shouldCalculateSource, List<Pattern> excludePatterns, List<Pattern> includePatterns, ClassFinder cf, TestTrackingMode testTrackingMode) {
+  public CoverageClassfileTransformer(ProjectData data, boolean shouldCalculateSource,
+                                      List<Pattern> excludePatterns, List<Pattern> includePatterns,
+                                      ClassFinder cf, TestTrackingMode testTrackingMode,
+                                      List<String> targetScope) {
     this.data = data;
     this.shouldCalculateSource = shouldCalculateSource;
     this.excludePatterns = excludePatterns;
     this.includePatterns = includePatterns;
     this.cf = cf;
     this.testTrackingMode = testTrackingMode;
+    this.targetScope = targetScope.isEmpty() ? null : new HashSet<String>();
+    for (String path : targetScope) {
+      try {
+        final String canonicalPath = new File(path).getCanonicalPath();
+        this.targetScope.add(canonicalPath);
+      } catch (IOException e) {
+        ErrorReporter.reportError("Error while processing target scope element " + path, e);
+      }
+    }
   }
 
   @Override
@@ -103,6 +125,33 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
   @Override
   protected void visitClassLoader(ClassLoader classLoader) {
     cf.addClassLoader(classLoader);
+  }
+
+  @Override
+  protected boolean isInTargetScope(String className, ProtectionDomain protectionDomain) {
+    if (targetScope == null) return true;
+
+    if (protectionDomain == null) return findClassFileOnDisk(className);
+    final CodeSource codeSource = protectionDomain.getCodeSource();
+    if (codeSource == null) return findClassFileOnDisk(className);
+    final URL location = codeSource.getLocation();
+    if (location == null) return findClassFileOnDisk(className);
+    final String path = location.getPath();
+    if (path == null) return findClassFileOnDisk(className);
+    try {
+      final String canonicalPath = new File(path).getCanonicalPath();
+      return targetScope.contains(canonicalPath);
+    } catch (IOException e) {
+      return findClassFileOnDisk(className);
+    }
+  }
+
+  private boolean findClassFileOnDisk(String className) {
+    final String filePath = className.replace('.', File.separatorChar) + ".class";
+    for (String path : targetScope) {
+      if (new File(path, filePath).exists()) return true;
+    }
+    return false;
   }
 
   @Override

@@ -100,34 +100,23 @@ public class Instrumentator {
       sourceMapFile = null;
     }
 
-    final List<Pattern> includePatterns = new ArrayList<Pattern>();
     ErrorReporter.logInfo("---- IntelliJ IDEA coverage runner ---- ");
     ErrorReporter.logInfo(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
-    final String excludes = "-exclude";
-    ErrorReporter.logInfo("include patterns:");
-    for (; i < args.length; i++) {
-      if (excludes.equals(args[i])) break;
-      try {
-        includePatterns.add(Pattern.compile(args[i]));
-        ErrorReporter.logInfo(args[i]);
-      } catch (PatternSyntaxException ex) {
-        ErrorReporter.reportError("Problem occurred with include pattern " + args[i] +
-            ". This may cause no tests run and no coverage collected", ex);
-        System.exit(1);
-      }
-    }
-    ErrorReporter.logInfo("exclude patterns:");
-    i++;
+
+    final List<Pattern> includePatterns = new ArrayList<Pattern>();
+    i = readPatterns(includePatterns, i, args, "include");
+
     final List<Pattern> excludePatterns = new ArrayList<Pattern>();
-    for (; i < args.length; i++) {
-      try {
-        final Pattern pattern = Pattern.compile(args[i]);
-        excludePatterns.add(pattern);
-        ErrorReporter.logInfo(pattern.pattern());
-      } catch (PatternSyntaxException ex) {
-        ErrorReporter.reportError("Problem occurred with exclude pattern " + args[i] +
-            ". This may cause no tests run and no coverage collected", ex);
-        System.exit(1);
+    if (i < args.length && "-exclude".equals(args[i])) {
+      i++;
+      i = readPatterns(excludePatterns, i, args, "exclude");
+    }
+
+    final List<String> targetScope = new ArrayList<String>();
+    if (i < args.length && "-includeByOutputDir".equals(args[i])) {
+      i++;
+      for (; i < args.length; i++) {
+        targetScope.add(args[i]);
       }
     }
 
@@ -141,8 +130,24 @@ public class Instrumentator {
     }
 
     final boolean shouldCalculateSource = sourceMapFile != null;
-    final CoverageClassfileTransformer transformer = new CoverageClassfileTransformer(data, shouldCalculateSource, excludePatterns, includePatterns, cf, testTrackingMode);
+    final CoverageClassfileTransformer transformer = new CoverageClassfileTransformer(data, shouldCalculateSource, excludePatterns, includePatterns, cf, testTrackingMode, targetScope);
     addTransformer(instrumentation, transformer);
+  }
+
+  private int readPatterns(final List<Pattern> patterns, int i, final String[] args, final String name) {
+    ErrorReporter.logInfo(name + " patterns:");
+    for (; i < args.length; i++) {
+      if (args[i].startsWith("-")) break;
+      try {
+        patterns.add(Pattern.compile(args[i]));
+        ErrorReporter.logInfo(args[i]);
+      } catch (PatternSyntaxException ex) {
+        ErrorReporter.reportError("Problem occurred with " + name + " pattern " + args[i] +
+            ". This may cause no tests run and no coverage collected", ex);
+        System.exit(1);
+      }
+    }
+    return i;
   }
 
   private void checkLogLevel() {
