@@ -57,14 +57,14 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
   public final byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) {
     long s = System.nanoTime();
     try {
-      return transformInner(loader, className, classFileBuffer, protectionDomain);
+      return transformInner(loader, className, classFileBuffer);
     } finally {
       ourClassCount++;
       ourTime += System.nanoTime() - s;
     }
   }
 
-  private byte[] transformInner(ClassLoader loader, String className, byte[] classFileBuffer, ProtectionDomain protectionDomain) {
+  private byte[] transformInner(ClassLoader loader, String className, byte[] classFileBuffer) {
     if (isStopped()) {
       return null;
     }
@@ -92,7 +92,6 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
       }
 
       if (shouldExclude(className)) return null;
-      if (!isInTargetScope(className, protectionDomain)) return null;
 
       visitClassLoader(loader);
 
@@ -137,10 +136,6 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
 
   protected void visitClassLoader(ClassLoader classLoader) {
 
-  }
-
-  protected boolean isInTargetScope(String className, final ProtectionDomain protectionDomain) {
-    return true;
   }
 
   protected boolean isStopped() {

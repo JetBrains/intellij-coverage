@@ -305,16 +305,6 @@ internal abstract class CoverageRunTest : CoverageTest() {
             test("custom.reflection")
         }
     }
-
-    @Test
-    fun testIncludeByOutputDirFiltering() {
-        val test = getTestFile("custom.IDEA_299123")
-        val c = extractTestConfiguration(test.file)
-
-        val javaOutputDir = pathToFile("build", "classes", "java", "test").canonicalPath
-        val configuration = c.copy(patterns = "-includeByOutputDir $javaOutputDir")
-        test(test.testName, test, configuration)
-    }
 }
 
 internal abstract class CoverageVerifyResultsTest(override val coverage: Coverage) : CoverageRunTest() {
