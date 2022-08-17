@@ -112,7 +112,7 @@ public class VerifierTest {
 
     final String expectedString = FileUtils.readAll(expected);
     final String actualString = FileUtils.readAll(outputFile);
-    Assert.assertEquals(expectedString, actualString);
+//    Assert.assertEquals(expectedString, actualString);
 
     // compare as a set of strings to avoid  errors with order
     final Set<String> expectedSet = new HashSet<String>(Arrays.asList(expectedString.split("\n")));
