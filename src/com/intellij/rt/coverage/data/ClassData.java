@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.util.ArrayUtil;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.DictionaryLookup;
 import com.intellij.rt.coverage.util.ErrorReporter;
+import org.jetbrains.coverage.gnu.trove.TIntHashSet;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -38,6 +39,12 @@ public class ClassData implements CoverageData {
   private volatile int[] myHitsMask;
   /** Storage for test tracking data. */
   private volatile boolean[] myTraceMask;
+
+  /**
+   * Set of lines that were ignored during instrumentation.
+   * Storing this lines helps to correctly merge when a class has inline functions.
+   */
+  private TIntHashSet myIgnoredLines;
 
   public ClassData(final String name) {
     myClassName = name;
@@ -109,6 +116,7 @@ public class ClassData implements CoverageData {
       if (mergedData == null) continue;
       LineData lineData = myLinesArray[i];
       if (lineData == null) {
+        if (isIgnoredLine(i)) continue;
         lineData = new LineData(mergedData.getLineNumber(), mergedData.getMethodSignature());
         registerMethodSignature(lineData);
         myLinesArray[i] = lineData;
@@ -253,7 +261,7 @@ public class ClassData implements CoverageData {
       for (final LineMapData mapData : linesMap) {
         if (mapData == null) continue;
         final int sourceLineNumber = mapData.getSourceLineNumber();
-        if (ArrayUtil.safeLoad(sourceLines, sourceLineNumber) == null) {
+        if (!sourceClassData.isIgnoredLine(sourceLineNumber) && ArrayUtil.safeLoad(sourceLines, sourceLineNumber) == null) {
           final LineData targetLineData = ArrayUtil.safeLoad(targetLines, mapData.getTargetMinLine());
           if (targetLineData != null) {
             final LineData source = new LineData(mapData.getSourceLineNumber(), targetLineData.getMethodSignature());
@@ -415,5 +423,15 @@ public class ClassData implements CoverageData {
     } catch (Throwable e) {
       ErrorReporter.reportError("Unexpected error during applying branch data to class " + getName(), e);
     }
+  }
+
+  public void setIgnoredLines(TIntHashSet ignoredLines) {
+    if (ignoredLines != null && !ignoredLines.isEmpty()) {
+      myIgnoredLines = ignoredLines;
+    }
+  }
+
+  public boolean isIgnoredLine(final int line) {
+    return myIgnoredLines != null && myIgnoredLines.contains(line);
   }
 }

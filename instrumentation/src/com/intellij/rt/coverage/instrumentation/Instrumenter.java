@@ -23,8 +23,10 @@ import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.StringsPool;
+import org.jetbrains.coverage.gnu.trove.TIntHashSet;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -33,6 +35,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   private final boolean myShouldCalculateSource;
 
   protected TIntObjectHashMap<LineData> myLines = new TIntObjectHashMap<LineData>(4, 0.99f);
+  private TIntHashSet myIgnoredLines;
   protected int myMaxLineNumber = -1;
 
   protected ClassData myClassData;
@@ -61,7 +64,15 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
     if (mv == null) return null;
     if (!shouldInstrumentMethod(access, name, desc, signature, exceptions)) return mv;
     myProcess = true;
-    return chainFilters(mv, access, name, desc, signature, exceptions);
+    final MethodVisitor filters = chainFilters(mv, access, name, desc, signature, exceptions);
+    return new MethodVisitor(Opcodes.API_VERSION, filters) {
+      @Override
+      public void visitLineNumber(int line, Label start) {
+        if (isIgnoreSection()) onIgnoredLine(line);
+        super.visitLineNumber(line, start);
+      }
+    };
+
   }
 
   private MethodVisitor chainFilters(MethodVisitor root, int access, String name,
@@ -82,6 +93,8 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
     if (myProcess) {
       initLineData();
       myLines = null;
+      myClassData.setIgnoredLines(myIgnoredLines);
+      myIgnoredLines = null;
     }
     super.visitEnd();
   }
@@ -95,6 +108,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
     if (lineData == null) {
       lineData = new LineData(line, StringsPool.getFromPool(name + desc));
       myLines.put(line, lineData);
+      if (myIgnoredLines != null) myIgnoredLines.remove(line);
     }
     if (line > myMaxLineNumber) myMaxLineNumber = line;
     return lineData;
@@ -135,6 +149,14 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
 
   public void removeLine(final int line) {
     myLines.remove(line);
+    onIgnoredLine(line);
+  }
+
+  private void onIgnoredLine(final int line) {
+    if (myIgnoredLines == null) {
+      myIgnoredLines = new TIntHashSet();
+    }
+    myIgnoredLines.add(line);
   }
 
   public int linesCount() {

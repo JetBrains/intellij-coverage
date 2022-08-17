@@ -75,7 +75,7 @@ public class ClassInstructions {
     return myLines;
   }
 
-  public void merge(ClassInstructions other) {
+  public void merge(ClassInstructions other, ClassData classData) {
     if (myLines.length < other.myLines.length) {
       final LineInstructions[] old = myLines;
       myLines = new LineInstructions[other.myLines.length];
@@ -85,6 +85,7 @@ public class ClassInstructions {
     for (int i = 0; i < other.myLines.length; i++) {
       if (other.myLines[i] == null) continue;
       if (myLines[i] == null) {
+        if (classData.isIgnoredLine(i)) continue;
         myLines[i] = new LineInstructions();
       }
       myLines[i].merge(other.myLines[i]);

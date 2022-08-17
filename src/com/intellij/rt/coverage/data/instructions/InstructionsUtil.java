@@ -32,13 +32,15 @@ public class InstructionsUtil {
     for (Map.Entry<String, ClassInstructions> entry : source.getInstructions().entrySet()) {
       final String className = entry.getKey();
       if (classFilter != null && !classFilter.shouldInclude(className)) continue;
+      final ClassData classData = target.getClassData(className);
+      if (classData == null) continue;
       final ClassInstructions mergedInstructions = entry.getValue();
       ClassInstructions classInstructions = instructions.get(className);
       if (classInstructions == null) {
         classInstructions = new ClassInstructions();
         instructions.put(className, classInstructions);
       }
-      classInstructions.merge(mergedInstructions);
+      classInstructions.merge(mergedInstructions, classData);
     }
   }
 
@@ -52,7 +54,7 @@ public class InstructionsUtil {
     for (final LineMapData mapData : linesMap) {
       if (mapData == null) continue;
       final int sourceLineNumber = mapData.getSourceLineNumber();
-      if (ArrayUtil.safeLoad(sourceLines, sourceLineNumber) == null) {
+      if (!sourceClass.isIgnoredLine(sourceLineNumber) && ArrayUtil.safeLoad(sourceLines, sourceLineNumber) == null) {
         if (ArrayUtil.safeLoad(targetLines, mapData.getTargetMinLine()) != null) {
           ArrayUtil.safeStore(sourceLines, sourceLineNumber, new LineInstructions());
         }
