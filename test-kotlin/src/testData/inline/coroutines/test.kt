@@ -37,7 +37,7 @@ suspend fun foo1(flag: Boolean) {
 suspend inline fun ctxOuter() {
     ctx()                                                // coverage: FULL
     println("Done")                                      // coverage: FULL
-}                                                        // coverage: FULL
+}
 
 suspend inline fun ctx() {
     println(coroutineContext[Job])                       // coverage: FULL
@@ -45,13 +45,13 @@ suspend inline fun ctx() {
         println(kotlin.coroutines.coroutineContext[Job]) // coverage: FULL
     }
     println(coroutineContext[Job])                       // coverage: FULL
-}                                                        // coverage: FULL
+}
 
 suspend inline fun foo(crossinline block: suspend () -> Unit) {
     yield()                                              // coverage: FULL
     block()                                              // coverage: FULL
     println("Aha!")                                      // coverage: FULL
-}                                                        // coverage: FULL
+}
 
 fun test() = runBlocking {                               // coverage: FULL
     foo1(true)                                           // coverage: FULL

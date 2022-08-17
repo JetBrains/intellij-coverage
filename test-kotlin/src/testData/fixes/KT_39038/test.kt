@@ -19,7 +19,7 @@ package testData.fixes.KT_39038
 inline fun <reified T> get(key: String): String = when (T::class) { // coverage: FULL
     String::class -> "String"                                       // coverage: PARTIAL
     else -> "no"                                                    // coverage: NONE
-}                                                                   // coverage: FULL
+}
 
 fun main() {
     assert(get<String>("String") == "String")                       // coverage: PARTIAL

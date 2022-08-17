@@ -33,7 +33,7 @@
         "testData.defaultArgs": "6",
         "testData.outOfPackageStructure": "1",
         "testData.simple": "5",
-        "testData.crossinline": "5"
+        "testData.crossinline": "4"
       },
       "max": {
         "testData.noReport.branches": "23",

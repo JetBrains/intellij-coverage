@@ -17,7 +17,7 @@
 package testData.lombok;
 
 // classes: ALL
-// patterns: testData.lombok.*
+// patterns: testData.lombok.* -excludeAnnotations .*Generated.*
 // calculate unloaded: true
 
 import lombok.*;

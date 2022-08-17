@@ -54,8 +54,8 @@ internal class LineSignatureTest : CoverageTest() {
 
     private fun test_IDEA_275520(projectData: ProjectData, classes: Map<String, Map<String, IntRange>> = hashMapOf(
             "$TEST_PACKAGE.custom.IDEA_275520.Test2Kt" to hashMapOf(
-                    "simpleInline(I)V" to 20..21,
-                    "nestedInlines(I)V" to 24..29,
+                    "simpleInline(I)V" to 20..20,
+                    "nestedInlines(I)V" to 24..28,
                     "oneLineInline()I" to 31..31,
                     "withLambda(Lkotlin/jvm/functions/Function0;)I" to 34..34,
                     "testWithLambda()V" to 38..38))) {

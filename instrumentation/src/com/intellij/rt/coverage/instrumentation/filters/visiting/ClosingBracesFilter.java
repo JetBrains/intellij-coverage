@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2020 JetBrains s.r.o.
+ * Copyright 2000-2022 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,107 +17,47 @@
 package com.intellij.rt.coverage.instrumentation.filters.visiting;
 
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
-import org.jetbrains.coverage.gnu.trove.TIntHashSet;
-import org.jetbrains.coverage.gnu.trove.TIntProcedure;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 /**
- * Remove } lines from coverage report.
+ * This filter ignores lines which consist of return statement only.
+ * If a method contains only one line, it cannot be ignored.
  */
 public class ClosingBracesFilter extends MethodVisitingFilter {
-  private String myName;
   private boolean myHasInstructions;
-  private boolean myHasLines;
-  private int myCurrentLine;
+  private int myCurrentLine = -1;
   private boolean mySeenReturn;
+  private int myLinesCount = 0;
 
-  /**
-   * Do not ignore return statements in Kotlin inline methods as there is no way to ignore these lines in
-   * the inlined code as only NOP instructions stay there.
-   */
-  private TIntHashSet myLinesToIgnore;
-  private TIntHashSet myMethodLines;
-  private boolean myInline;
-
-  @Override
-  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
-    super.initFilter(methodVisitor, context, name, desc);
-    myName = name;
-    myHasInstructions = false;
-    myHasLines = false;
-    myCurrentLine = -1;
-    myLinesToIgnore = new TIntHashSet();
-    myMethodLines = new TIntHashSet();
-    myInline = false;
-    mySeenReturn = false;
-  }
-
-  private void addEmptyLineToRemove() {
-    if (myHasLines && !myHasInstructions) {
-      if (mySeenReturn || !removeLineIfNotSingleInMethod(myCurrentLine)) {
-        myLinesToIgnore.add(myCurrentLine);
-      }
+  private void tryRemoveLine() {
+    if (myCurrentLine != -1 && mySeenReturn && !myHasInstructions && myLinesCount > 1) {
+      myContext.removeLine(myCurrentLine);
+      myLinesCount--;
+      myCurrentLine = -1;
     }
   }
 
   @Override
   public void visitLineNumber(int line, Label start) {
-    addEmptyLineToRemove();
-    if (myCurrentLine != line) {
-      myHasInstructions = myContext.getLineData(line) != null & !myLinesToIgnore.remove(line);
-      myHasLines = true;
-      myCurrentLine = line;
-      mySeenReturn = false;
-      myMethodLines.add(line);
-    }
+    tryRemoveLine();
+    if (myCurrentLine != line) myLinesCount++;
+    myCurrentLine = myContext.getLineData(line) == null ? line : -1;
+    myHasInstructions = false;
+    mySeenReturn = false;
     super.visitLineNumber(line, start);
   }
 
   @Override
-  public void visitLocalVariable(String name, String descriptor, String signature, Label start, Label end, int index) {
-    super.visitLocalVariable(name, descriptor, signature, start, end, index);
-    myInline |= KotlinInlineVisitingFilter.isInlineMethod(myName, name);
-  }
-
-  @Override
   public void visitEnd() {
-    addEmptyLineToRemove();
-    if (!myInline) {
-      myLinesToIgnore.forEach(new TIntProcedure() {
-        public boolean execute(int line) {
-          removeLineIfNotSingleInMethod(line);
-          return true;
-        }
-      });
-    }
+    tryRemoveLine();
     super.visitEnd();
-  }
-
-  private boolean removeLineIfNotSingleInMethod(final int line) {
-    if (myContext.getLineData(line) == null) return true;
-    myMethodLines.forEach(new TIntProcedure() {
-      public boolean execute(int lineNumber) {
-        if (line == lineNumber) return true;
-        if (myContext.getLineData(lineNumber) == null) {
-          myMethodLines.remove(lineNumber);
-          return true;
-        }
-        return false;
-      }
-    });
-    if (myMethodLines.size() > 1) {
-      myContext.removeLine(line);
-      return true;
-    }
-    return false;
   }
 
   @Override
   public void visitInsn(int opcode) {
     super.visitInsn(opcode);
-    if (!myHasLines) return;
+    if (myCurrentLine == -1) return;
     if (Opcodes.IRETURN <= opcode && opcode <= Opcodes.RETURN) {
       mySeenReturn = true;
       return;
@@ -199,7 +139,7 @@ public class ClosingBracesFilter extends MethodVisitingFilter {
   }
 
   private void setHasInstructions() {
-    myHasInstructions |= !mySeenReturn && myHasLines;
+    myHasInstructions |= !mySeenReturn && myCurrentLine != -1;
   }
 
   @Override
