@@ -32,9 +32,14 @@ inline fun save(message: String, crossinline foo: (String) -> Unit) {
     }
 }                                        // coverage: FULL
 
+inline fun boo() {
+    println("Boo") // coverage: FULL
+}                  // coverage: FULL
+
 fun test() {
     save("Hello") {                      // coverage: FULL
         println("\"$it\" saved")         // coverage: FULL
+        boo()                            // coverage: FULL
     }                                    // coverage: FULL
 }
 

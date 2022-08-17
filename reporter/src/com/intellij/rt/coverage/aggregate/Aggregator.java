@@ -112,7 +112,7 @@ public class Aggregator {
     final ProjectData projectData = new ProjectData();
     projectData.setInstructionsCoverage(true);
     SaveHook.appendUnloadedFullAnalysis(projectData, createClassFinder(), true, false, true, false);
-    projectData.checkLineMappings(false);
+    projectData.dropLineMappings();
     return projectData;
   }
 

@@ -3,7 +3,7 @@
 <package name="testData/crossinline">
 <class name="testData/crossinline/TestKt" sourcefilename="test.kt">
 <method name="main" desc="(Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
-<counter type="INSTRUCTION" missed="0" covered="3"/>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="1"/>
 </method>
@@ -13,11 +13,11 @@
 <counter type="LINE" missed="0" covered="1"/>
 </method>
 <method name="run" desc="(Lkotlin/jvm/functions/Function1;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;">
-<counter type="INSTRUCTION" missed="0" covered="29"/>
+<counter type="INSTRUCTION" missed="0" covered="27"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="2"/>
 </method>
-<counter type="INSTRUCTION" missed="0" covered="40"/>
+<counter type="INSTRUCTION" missed="0" covered="37"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="4"/>
 <counter type="METHOD" missed="0" covered="3"/>
@@ -37,19 +37,19 @@
 <line nr="20" mi="0" ci="8" mb="0" cb="0"/>
 <line nr="24" mi="0" ci="27" mb="0" cb="0"/>
 <line nr="25" mi="0" ci="15" mb="0" cb="0"/>
-<line nr="27" mi="0" ci="2" mb="0" cb="0"/>
-<line nr="30" mi="0" ci="3" mb="0" cb="0"/>
-<counter type="INSTRUCTION" missed="0" covered="55"/>
+<line nr="27" mi="0" ci="0" mb="0" cb="0"/>
+<line nr="30" mi="0" ci="2" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="0" covered="52"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="5"/>
 </sourcefile>
-<counter type="INSTRUCTION" missed="0" covered="55"/>
+<counter type="INSTRUCTION" missed="0" covered="52"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="5"/>
 <counter type="METHOD" missed="0" covered="4"/>
 <counter type="CLASS" missed="0" covered="2"/>
 </package>
-<counter type="INSTRUCTION" missed="0" covered="55"/>
+<counter type="INSTRUCTION" missed="0" covered="52"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="5"/>
 <counter type="METHOD" missed="0" covered="4"/>

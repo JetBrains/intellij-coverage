@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineMapData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.ArrayUtil;
 import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 
 import java.util.Map;
@@ -29,52 +30,69 @@ public class InstructionsUtil {
     if (!target.isInstructionsCoverageEnabled()) return;
     final Map<String, ClassInstructions> instructions = target.getInstructions();
     for (Map.Entry<String, ClassInstructions> entry : source.getInstructions().entrySet()) {
-      final String key = entry.getKey();
-      if (classFilter != null && !classFilter.shouldInclude(key)) continue;
+      final String className = entry.getKey();
+      if (classFilter != null && !classFilter.shouldInclude(className)) continue;
       final ClassInstructions mergedInstructions = entry.getValue();
-      ClassInstructions classInstructions = instructions.get(key);
+      ClassInstructions classInstructions = instructions.get(className);
       if (classInstructions == null) {
         classInstructions = new ClassInstructions();
-        instructions.put(key, classInstructions);
+        instructions.put(className, classInstructions);
       }
       classInstructions.merge(mergedInstructions);
     }
   }
 
-
-  public static void applyInstructionsSMAP(ProjectData projectData, LineMapData[] linesMap, String sourceClass, String targetClass) {
+  public static void applyInstructionsSMAP(ProjectData projectData, LineMapData[] linesMap, ClassData sourceClass, ClassData targetClass) {
     if (!projectData.isInstructionsCoverageEnabled()) return;
-    final int maxMappedSourceLineNumber = ClassData.maxSourceLineNumber(linesMap);
-    final ClassInstructions old = projectData.getInstructions().get(targetClass);
-    final LineInstructions[] lineInstructions;
-    if (sourceClass == targetClass || old == null || old.getlines().length == 0) {
-      lineInstructions = new LineInstructions[1 + maxMappedSourceLineNumber];
-    } else {
-      int size = Math.max(1 + maxMappedSourceLineNumber, old.getlines().length);
-      lineInstructions = new LineInstructions[size];
-      System.arraycopy(old.getlines(), 0, lineInstructions, 0, old.getlines().length);
-    }
-    final LineInstructions[] otherLines = projectData.getInstructions().get(sourceClass).getlines();
+    final ClassInstructions oldInstructions = projectData.getInstructions().get(sourceClass.getName());
+    final LineInstructions[] oldLines = oldInstructions == null ? null : oldInstructions.getlines();
+    if (sourceClass == targetClass && (oldLines == null || oldLines.length == 0)) return;
+    final LineInstructions[] sourceLines = getLinesArray(linesMap, sourceClass, oldLines, targetClass);
+    final LineInstructions[] targetLines = projectData.getInstructions().get(targetClass.getName()).getlines();
     for (final LineMapData mapData : linesMap) {
       if (mapData == null) continue;
-      int sourceLineNumber = mapData.getSourceLineNumber();
-      if (lineInstructions[sourceLineNumber] == null
-          && mapData.getTargetMinLine() < otherLines.length
-          && otherLines[mapData.getTargetMinLine()] != null) {
-        lineInstructions[sourceLineNumber] = new LineInstructions();
-      }
-      for (int i = mapData.getTargetMinLine(); i <= mapData.getTargetMaxLine(); i++) {
-        if (i < 0 || i >= otherLines.length) continue;
-        if (lineInstructions[sourceLineNumber] != null && otherLines[i] != null) {
-          lineInstructions[sourceLineNumber].merge(otherLines[i]);
+      final int sourceLineNumber = mapData.getSourceLineNumber();
+      if (ArrayUtil.safeLoad(sourceLines, sourceLineNumber) == null) {
+        if (ArrayUtil.safeLoad(targetLines, mapData.getTargetMinLine()) != null) {
+          ArrayUtil.safeStore(sourceLines, sourceLineNumber, new LineInstructions());
         }
-        otherLines[i] = null;
+      }
+      for (int targetLineNumber = mapData.getTargetMinLine(); targetLineNumber <= mapData.getTargetMaxLine(); targetLineNumber++) {
+        final LineInstructions source = ArrayUtil.safeLoad(sourceLines, sourceLineNumber);
+        final LineInstructions target = ArrayUtil.safeLoad(targetLines, targetLineNumber);
+        if (target == null) continue;
+        if (source != null) {
+          source.merge(target);
+        }
+        if (sourceClass != targetClass || sourceLineNumber != targetLineNumber) {
+          targetLines[targetLineNumber] = null;
+        }
       }
     }
-    projectData.getInstructions().put(targetClass, new ClassInstructions(lineInstructions));
+    projectData.getInstructions().put(sourceClass.getName(), new ClassInstructions(sourceLines));
   }
 
-  public static void applyInstructionsSMAPUnloaded(ProjectData projectData, String className, FileMapData[] mappings) {
+  private static LineInstructions[] getLinesArray(LineMapData[] linesMap,
+                                                  ClassData sourceClass, LineInstructions[] oldLines,
+                                                  ClassData targetClass) {
+    if (targetClass == sourceClass) return oldLines;
+    final int newLength = ClassData.maxSourceLineNumber(linesMap) + 1;
+    if (oldLines == null || oldLines.length == 0) {
+      return new LineInstructions[newLength];
+    } else if (oldLines.length >= newLength) {
+      return oldLines;
+    } else {
+      final LineInstructions[] sourceLines = new LineInstructions[newLength];
+      System.arraycopy(oldLines, 0, sourceLines, 0, oldLines.length);
+      return sourceLines;
+    }
+  }
+
+  /**
+   * Remove all lines that are generated by inline.
+   * Do not touch lines that are mapped to itself.
+   */
+  public static void dropMappedLines(ProjectData projectData, String className, FileMapData[] mappings) {
     if (!projectData.isInstructionsCoverageEnabled()) return;
     final ClassInstructions classInstructions = projectData.getInstructions().get(className);
     final LineInstructions[] instructions = classInstructions.getlines();
@@ -83,15 +101,8 @@ public class InstructionsUtil {
       for (LineMapData lineMapData : mapData.getLines()) {
         final int sourceLineNumber = lineMapData.getSourceLineNumber();
         for (int i = lineMapData.getTargetMinLine(); i <= lineMapData.getTargetMaxLine() && i < instructions.length; i++) {
-          final LineInstructions lineInstructions = instructions[i];
+          if (isThisClass && i == sourceLineNumber) continue;
           instructions[i] = null;
-          if (isThisClass && lineInstructions != null && sourceLineNumber < instructions.length) {
-            if (instructions[sourceLineNumber] == null) {
-              instructions[sourceLineNumber] = lineInstructions;
-            } else {
-              instructions[sourceLineNumber].merge(lineInstructions);
-            }
-          }
         }
       }
     }

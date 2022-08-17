@@ -18,7 +18,6 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
-import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinInlineVisitingFilter;
 import com.intellij.rt.coverage.util.*;
@@ -305,6 +304,7 @@ public class SaveHook implements Runnable {
     });
   }
 
+  @SuppressWarnings("unused") // used in IntelliJ
   public static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean isSampling, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass) {
     appendUnloadedClass(projectData, className, reader, isSampling, calculateSource, ignorePrivateConstructorOfUtilClass, true);
   }
@@ -333,8 +333,8 @@ public class SaveHook implements Runnable {
     if (linesMap == null) return;
     final FileMapData[] mappings = linesMap.remove(className);
     if (mappings == null) return;
-    classData.checkLineMappingsUnloaded(mappings);
-    InstructionsUtil.applyInstructionsSMAPUnloaded(projectData, classData.getName(), mappings);
+    classData.dropMappedLines(mappings);
+    InstructionsUtil.dropMappedLines(projectData, classData.getName(), mappings);
   }
 
     public void setSourceMapFile(File sourceMapFile) {
