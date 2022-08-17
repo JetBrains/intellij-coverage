@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class Aggregator {
   private final List<BinaryReport> myReports;
@@ -110,7 +111,12 @@ public class Aggregator {
   /** Analyse all classes in output roots as if they are unloaded classes. */
   private ProjectData collectCoverageInformationFromOutputs() {
     final ProjectData projectData = new ProjectData();
+    final List<Pattern> excludeAnnotations = new ArrayList<Pattern>();
+    for (Request request : myRequests) {
+      excludeAnnotations.addAll(request.excludeAnnotations);
+    }
     projectData.setInstructionsCoverage(true);
+    projectData.setAnnotationsToIgnore(excludeAnnotations);
     SaveHook.appendUnloadedFullAnalysis(projectData, createClassFinder(), true, false, true, false);
     projectData.dropLineMappings();
     return projectData;
@@ -149,10 +155,12 @@ public class Aggregator {
    */
   public static class Request {
     public final ClassFilter.PatternFilter classFilter;
+    public final List<Pattern> excludeAnnotations;
     public final File outputFile;
 
     public Request(Filters filters, File outputFile) {
       this.classFilter = new ClassFilter.PatternFilter(filters.includeClasses, filters.excludeClasses);
+      this.excludeAnnotations = filters.excludeAnnotations;
       this.outputFile = outputFile;
     }
   }

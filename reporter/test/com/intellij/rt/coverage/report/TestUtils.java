@@ -54,7 +54,8 @@ public class TestUtils {
     final List<BinaryReport> reports = report == null ? Collections.<BinaryReport>emptyList() : Collections.singletonList(report);
     final List<Pattern> includes = new ArrayList<Pattern>();
     final List<Pattern> excludes = new ArrayList<Pattern>();
-    final List<Pattern>[] lists = new List[]{includes, excludes};
+    final List<Pattern> excludeAnnotations = new ArrayList<Pattern>();
+    final List<Pattern>[] lists = new List[]{includes, excludes, excludeAnnotations};
     int state = 0;
     for (String pattern : patterns.split(" ")) {
       if (pattern.isEmpty()) continue;
@@ -62,9 +63,13 @@ public class TestUtils {
         state = 1;
         continue;
       }
+      if (pattern.equals("-excludeAnnotations")) {
+        state = 2;
+        continue;
+      }
       lists[state].add(Pattern.compile(pattern));
     }
-    return new Reporter(new Aggregator(reports, modules, new Aggregator.Request(new Filters(includes, excludes), null)));
+    return new Reporter(new Aggregator(reports, modules, new Aggregator.Request(new Filters(includes, excludes, excludeAnnotations), null)));
   }
 
   public static List<Module> getModules() {

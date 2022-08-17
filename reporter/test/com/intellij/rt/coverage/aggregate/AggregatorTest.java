@@ -51,13 +51,15 @@ public class AggregatorTest {
     final Aggregator.Request request1 = new Aggregator.Request(
         new Filters(
             Collections.singletonList(Pattern.compile("testData\\..*")),
-            Collections.singletonList(Pattern.compile("testData\\.inline"))),
+            Collections.singletonList(Pattern.compile("testData\\.inline")),
+            Collections.<Pattern>emptyList()),
         File.createTempFile("request", "ic")
     );
     final Aggregator.Request request2 = new Aggregator.Request(
         new Filters(
             Collections.singletonList(Pattern.compile(".*inline.*")),
-            Collections.singletonList(Pattern.compile(".*ss.*"))),
+            Collections.singletonList(Pattern.compile(".*ss.*")),
+            Collections.<Pattern>emptyList()),
         File.createTempFile("request", "ic")
     );
     requests.add(request1);

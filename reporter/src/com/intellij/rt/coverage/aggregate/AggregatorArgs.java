@@ -93,6 +93,7 @@ public class AggregatorArgs {
         "      } [OPTIONAL],\n" +
         "      exclude: {\n" +
         "        classes: [\"regex1\", \"regex2\"], [OPTIONAL]\n" +
+        "        annotations: [\"regex1\", \"regex2\"] [OPTIONAL]\n" +
         "      } [OPTIONAL],\n" +
         "    }\n" +
         "  }, ...]\n" +

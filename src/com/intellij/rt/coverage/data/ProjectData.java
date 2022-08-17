@@ -72,6 +72,8 @@ public class ProjectData implements CoverageData, Serializable {
 
   private TestTrackingCallback myTestTrackingCallback;
 
+  private List<Pattern> myAnnotationsToIgnore;
+
   public ClassData getClassData(final String name) {
     return myClasses.get(name);
   }
@@ -133,6 +135,14 @@ public class ProjectData implements CoverageData, Serializable {
       }
     }
     return instructions;
+  }
+
+  public List<Pattern> getAnnotationsToIgnore() {
+    return myAnnotationsToIgnore;
+  }
+
+  public void setAnnotationsToIgnore(List<Pattern> annotations) {
+    myAnnotationsToIgnore = annotations;
   }
 
   public static ProjectData createProjectData(final File dataFile,

@@ -55,6 +55,11 @@ public class XMLTest {
   }
 
   @Test
+  public void testExcludeAnnotation() throws Throwable {
+    verifyProjectXML(runTestAndConvertToXML("testData.excludeAnnotation.* -excludeAnnotations testData.excludeAnnotation.ExcludeFromCoverage", "testData.excludeAnnotation.TestKt"), "xml/excludeAnnotation.xml");
+  }
+
+  @Test
   public void testInline() throws Throwable {
     test("inline");
   }

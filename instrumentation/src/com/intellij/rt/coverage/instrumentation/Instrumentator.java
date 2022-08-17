@@ -111,8 +111,14 @@ public class Instrumentator {
       i = readPatterns(excludePatterns, i + 1, args, "exclude");
     }
 
+    final List<Pattern> annotationsToIgnore = new ArrayList<Pattern>();
+    if (i < args.length && "-excludeAnnotations".equals(args[i])) {
+      i = readPatterns(annotationsToIgnore, i + 1, args, "exclude annotations");
+    }
+
     final TestTrackingMode testTrackingMode = createTestTrackingMode(traceLines);
     final ProjectData data = ProjectData.createProjectData(dataFile, null, traceLines, sampling, includePatterns, excludePatterns, testTrackingMode.createTestTrackingCallback());
+    data.setAnnotationsToIgnore(annotationsToIgnore);
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
     if (dataFile != null) {
       final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf, mergeData);

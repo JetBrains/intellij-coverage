@@ -43,4 +43,11 @@ public class ClassNameUtil {
   public static String convertToInternalName(String className) {
     return className.replace('.', '/');
   }
+
+  public static String convertVMNameToFQN(String className) {
+    if (className.startsWith("L") && className.endsWith(";")) {
+      className = className.substring(1, className.length() - 1);
+    }
+    return convertToFQName(className);
+  }
 }

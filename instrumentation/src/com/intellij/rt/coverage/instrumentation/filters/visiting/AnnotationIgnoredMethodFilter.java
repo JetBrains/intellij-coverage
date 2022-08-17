@@ -17,18 +17,24 @@
 package com.intellij.rt.coverage.instrumentation.filters.visiting;
 
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
 
-public class LombokFilter extends MethodVisitingFilter {
+import java.util.List;
+import java.util.regex.Pattern;
+
+public class AnnotationIgnoredMethodFilter extends MethodVisitingFilter {
 
   @Override
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
-    return true;
+    final List<Pattern> annotations = context.getProjectData().getAnnotationsToIgnore();
+    return annotations != null && !annotations.isEmpty();
   }
 
   @Override
   public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-    if ("Llombok/Generated;".equals(descriptor)) {
+    final String annotationName = ClassNameUtil.convertVMNameToFQN(descriptor);
+    if (ClassNameUtil.matchesPatterns(annotationName, myContext.getProjectData().getAnnotationsToIgnore())) {
       myContext.setIgnoreSection(true);
     }
     return super.visitAnnotation(descriptor, visible);

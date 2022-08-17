@@ -18,11 +18,12 @@ package com.intellij.rt.coverage.instrumentation.filters;
 
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.NotNullAssertionsFilter;
+import com.intellij.rt.coverage.instrumentation.filters.signature.AnnotationIgnoredClassMethodFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.DeserializeLambdaFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.EnumMethodsFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.ClosingBracesFilter;
-import com.intellij.rt.coverage.instrumentation.filters.visiting.LombokFilter;
+import com.intellij.rt.coverage.instrumentation.filters.visiting.AnnotationIgnoredMethodFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 
@@ -34,13 +35,14 @@ public class FilterUtils {
     List<MethodSignatureFilter> result = KotlinUtils.createSignatureFilters();
     result.add(new EnumMethodsFilter());
     result.add(new DeserializeLambdaFilter());
+    result.add(new AnnotationIgnoredClassMethodFilter());
     return result;
   }
 
   public static List<MethodVisitingFilter> createVisitingFilters() {
     List<MethodVisitingFilter> result = KotlinUtils.createVisitingFilters();
     result.add(new ClosingBracesFilter());
-    result.add(new LombokFilter());
+    result.add(new AnnotationIgnoredMethodFilter());
     return result;
   }
 

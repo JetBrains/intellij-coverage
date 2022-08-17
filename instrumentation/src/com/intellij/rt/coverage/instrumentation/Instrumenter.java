@@ -31,7 +31,6 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public abstract class Instrumenter extends MethodFilteringVisitor {
-  protected final ProjectData myProjectData;
   private final boolean myShouldCalculateSource;
 
   protected TIntObjectHashMap<LineData> myLines = new TIntObjectHashMap<LineData>(4, 0.99f);
@@ -43,8 +42,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   private boolean myIgnoreSection;
 
   public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
-    super(classVisitor, className);
-    myProjectData = projectData;
+    super(classVisitor, projectData, className);
     myShouldCalculateSource = shouldCalculateSource;
   }
 
@@ -141,10 +139,6 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
 
   public LineData getLineData(int line) {
     return myLines.get(line);
-  }
-
-  public ProjectData getProjectData() {
-    return myProjectData;
   }
 
   public void removeLine(final int line) {

@@ -99,7 +99,7 @@ public class VerifierTest {
     includes.add(Pattern.compile("[^.]*"));
     for (Verifier.Rule rule : rules) {
       final Aggregator.Request request = new Aggregator.Request(
-          new Filters(includes, Collections.<Pattern>emptyList()),
+          new Filters(includes, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList()),
           rule.reportFile);
       requests.add(request);
     }

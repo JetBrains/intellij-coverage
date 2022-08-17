@@ -153,6 +153,18 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testFunInterface() = test("funInterface")
 
     @Test
+    fun testIgnoreAnnotationFullClass() = test("ignoreAnnotation.fullClass")
+
+    @Test
+    fun testIgnoreAnnotationInline() = test("ignoreAnnotation.inline")
+
+    @Test
+    fun testIgnoreAnnotationInlineUnloaded() = test("ignoreAnnotation.inlineUnloaded")
+
+    @Test
+    fun testIgnoreAnnotationMethod() = test("ignoreAnnotation.method")
+
+    @Test
     fun testImplementationByDelegation() = test("implementationByDelegation")
 
     @Test

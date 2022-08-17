@@ -23,11 +23,13 @@ import java.util.regex.Pattern;
 public class Filters {
   public final List<Pattern> includeClasses;
   public final List<Pattern> excludeClasses;
+  public final List<Pattern> excludeAnnotations;
 
-  public Filters(List<Pattern> includeClasses, List<Pattern> excludeClasses) {
+  public Filters(List<Pattern> includeClasses, List<Pattern> excludeClasses, List<Pattern> excludeAnnotations) {
     this.includeClasses = includeClasses;
     this.excludeClasses = excludeClasses;
+    this.excludeAnnotations = excludeAnnotations;
   }
 
-  public static final Filters EMPTY = new Filters(Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList());
+  public static final Filters EMPTY = new Filters(Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList());
 }

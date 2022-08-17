@@ -42,6 +42,7 @@ public class ReporterArgs {
   public static final String INCLUDE_TAG = "include";
   public static final String EXCLUDE_TAG = "exclude";
   public static final String CLASSES_TAG = "classes";
+  public static final String ANNOTATIONS_TAG = "annotations";
 
 
   public final List<BinaryReport> reports;
@@ -120,7 +121,8 @@ public class ReporterArgs {
   public static Filters parseFilters(JSONObject args) {
     final List<Pattern> includeClasses = parsePatterns(args, INCLUDE_TAG, CLASSES_TAG);
     final List<Pattern> excludeClasses = parsePatterns(args, EXCLUDE_TAG, CLASSES_TAG);
-    return new Filters(includeClasses, excludeClasses);
+    final List<Pattern> excludeAnnotations = parsePatterns(args, EXCLUDE_TAG, ANNOTATIONS_TAG);
+    return new Filters(includeClasses, excludeClasses, excludeAnnotations);
   }
 
   public static List<Pattern> parsePatterns(JSONObject args, String groupTag, String sectionTag) {
@@ -158,7 +160,8 @@ public class ReporterArgs {
         "        classes: [\"regex1\", \"regex2\"] [OPTIONAL]\n" +
         "   } [OPTIONAL],\n" +
         "  exclude: {\n" +
-        "        classes: [\"regex1\", \"regex2\"] [OPTIONAL]\n" +
+        "        classes: [\"regex1\", \"regex2\"], [OPTIONAL]\n" +
+        "        annotations: [\"regex1\", \"regex2\"] [OPTIONAL]\n" +
         "   } [OPTIONAL],\n" +
         "}";
   }
