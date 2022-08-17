@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.instrumentation.SaveHook;
 import com.intellij.rt.coverage.report.data.BinaryReport;
+import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.report.data.Module;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.classFinder.ClassFilter;
@@ -37,6 +38,8 @@ public class Aggregator {
   private final List<BinaryReport> myReports;
   private final List<Module> myModules;
   private final List<Request> myRequests;
+
+  /** This is a merged project data for all requests. */
   private ProjectData myProjectData;
 
   public Aggregator(List<BinaryReport> reports, List<Module> modules, List<Request> requests) {
@@ -45,10 +48,14 @@ public class Aggregator {
     myRequests = requests;
   }
 
-  public Aggregator(List<BinaryReport> reports, List<Module> modules, ClassFilter.PatternFilter filter) {
-    this(reports, modules, Collections.singletonList(new Request(filter, null)));
+  public Aggregator(List<BinaryReport> reports, List<Module> modules, Request request) {
+    this(reports, modules, Collections.singletonList(request));
   }
 
+  /**
+   * Collect a merged project data from all output roots and all binary reports.
+   * Collecting this data once ensures that unloaded classes will not be analysed several times.
+   */
   public ProjectData getProjectData() {
     if (myProjectData != null) return myProjectData;
     final ProjectData projectData = collectCoverageInformationFromOutputs();
@@ -70,6 +77,9 @@ public class Aggregator {
     return projectData;
   }
 
+  /**
+   * Processing request is selecting required classes from a global project data.
+   */
   public void processRequests() {
     final ProjectData projectData = getProjectData();
 
@@ -97,6 +107,7 @@ public class Aggregator {
     return sources;
   }
 
+  /** Analyse all classes in output roots as if they are unloaded classes. */
   private ProjectData collectCoverageInformationFromOutputs() {
     final ProjectData projectData = new ProjectData();
     projectData.setInstructionsCoverage(true);
@@ -133,12 +144,15 @@ public class Aggregator {
     }
   }
 
+  /**
+   * A request to collect all classes that match filter to a specified binary report file.
+   */
   public static class Request {
     public final ClassFilter.PatternFilter classFilter;
     public final File outputFile;
 
-    public Request(ClassFilter.PatternFilter classFilter, File outputFile) {
-      this.classFilter = classFilter;
+    public Request(Filters filters, File outputFile) {
+      this.classFilter = new ClassFilter.PatternFilter(filters.includeClasses, filters.excludeClasses);
       this.outputFile = outputFile;
     }
   }

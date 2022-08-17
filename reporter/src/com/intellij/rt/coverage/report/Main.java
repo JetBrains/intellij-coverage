@@ -27,7 +27,7 @@ public class Main {
     try {
       final ReporterArgs args = ReporterArgs.from(argsList);
 
-      final Aggregator aggregator = new Aggregator(args.reports, args.modules, new ClassFilter.PatternFilter(args.includeClasses, args.excludeClasses));
+      final Aggregator aggregator = new Aggregator(args.reports, args.modules, new Aggregator.Request(args.filters, null));
       final Reporter reporter = new Reporter(aggregator);
 
       boolean fail = false;

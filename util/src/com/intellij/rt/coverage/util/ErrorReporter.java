@@ -43,9 +43,7 @@ public class ErrorReporter {
     } catch (IOException e) {
       System.err.println("Failed to write to error log file: " + e.toString());
     } finally {
-      if (os != null) {
-        os.close();
-      }
+      CoverageIOUtil.close(os);
     }
   }
 
@@ -63,9 +61,7 @@ public class ErrorReporter {
       System.err.println("Failed to write to error log file: " + e.toString());
       System.err.println("Initial stack trace: " + t.toString());
     } finally {
-      if (os != null) {
-        os.close();
-      }
+      CoverageIOUtil.close(os);
     }
   }
 

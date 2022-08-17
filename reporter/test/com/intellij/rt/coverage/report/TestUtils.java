@@ -19,8 +19,8 @@ package com.intellij.rt.coverage.report;
 import com.intellij.rt.coverage.CoverageStatusTest;
 import com.intellij.rt.coverage.aggregate.Aggregator;
 import com.intellij.rt.coverage.report.data.BinaryReport;
+import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.report.data.Module;
-import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -31,6 +31,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class TestUtils {
+  public static final String JAVA_OUTPUT = join("build", "classes", "java", "test");
+  public static final String KOTLIN_OUTPUT = join("build", "classes", "kotlin", "test");
+
   @NotNull
   public static BinaryReport runTest(String patterns, String className) throws IOException, InterruptedException {
     final File icFile = File.createTempFile("report_tmp", ".ic");
@@ -51,29 +54,36 @@ public class TestUtils {
     final List<BinaryReport> reports = report == null ? Collections.<BinaryReport>emptyList() : Collections.singletonList(report);
     final List<Pattern> includes = new ArrayList<Pattern>();
     final List<Pattern> excludes = new ArrayList<Pattern>();
-    boolean isInclude = true;
+    final List<Pattern>[] lists = new List[]{includes, excludes};
+    int state = 0;
     for (String pattern : patterns.split(" ")) {
       if (pattern.isEmpty()) continue;
-      if (pattern.equals("-exlude")) {
-        isInclude = false;
+      if (pattern.equals("-exclude")) {
+        state = 1;
         continue;
       }
-      (isInclude ? includes : excludes).add(Pattern.compile(pattern));
+      lists[state].add(Pattern.compile(pattern));
     }
-    return new Reporter(new Aggregator(reports, modules, new ClassFilter.PatternFilter(includes, excludes)));
+    return new Reporter(new Aggregator(reports, modules, new Aggregator.Request(new Filters(includes, excludes), null)));
   }
 
   public static List<Module> getModules() {
-    final String kotlinOutput = "build" + File.separator + "classes" + File.separator + "kotlin" + File.separator + "test";
-    final String javaOutput = "build" + File.separator + "classes" + File.separator + "java" + File.separator + "test";
     final List<File> output = new ArrayList<File>();
-    output.add(new File(kotlinOutput));
-    output.add(new File(javaOutput));
+    output.add(new File(KOTLIN_OUTPUT));
+    output.add(new File(JAVA_OUTPUT));
     return Collections.singletonList(new Module(output, getSources()));
   }
 
   @NotNull
   private static List<File> getSources() {
     return Collections.singletonList(new File("test"));
+  }
+
+  public static String join(String first, String... other) {
+    final StringBuilder builder = new StringBuilder(first);
+    for (String path : other) {
+      builder.append(File.separator).append(path);
+    }
+    return builder.toString();
   }
 }

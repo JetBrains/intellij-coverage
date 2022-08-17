@@ -44,6 +44,28 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
     }
   }
 
+  /*
+   * An example when a class may have several source code candidates.
+   * This issue occurs due to Kotlin directory structure,
+   * which states that source file location may not match its package.
+   *
+   * Let's assume class c.Test with source file test.kt and the following files structure:
+   * - source root
+   * | - a
+   *   | - test.kt
+   * | - b
+   *   | - test.kt
+   *
+   * In this case we cannot distinguish a/test.kt and b/test.kt as candidates of source file for c.Test.
+   * In order to find the true source file, we can search for 'package c' line in candidate files.
+   */
+  /**
+   * This method tries to find source code for a class.
+   * If there are several candidates, it checks if a candidate file contains <code>package</code> directive.
+   *
+   * @param className fully qualified class name
+   * @return source code string for the class
+   */
   @Nullable
   @Override
   public CharSequence getSourceCode(@NotNull String className) {
@@ -53,7 +75,7 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
 
     final int packageIndex = className.lastIndexOf('.');
     final String packageName = packageIndex == -1 ? ".*" : className.substring(0, packageIndex).replace(".", "\\.");
-    final Pattern pattern = Pattern.compile("package[ ]+" + packageName);
+    final Pattern pattern = Pattern.compile("package +" + packageName);
     String lastCandidateText = null;
     for (File candidate : candidates) {
       final String text = readText(candidate);

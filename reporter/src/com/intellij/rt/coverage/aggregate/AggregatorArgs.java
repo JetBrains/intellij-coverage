@@ -19,9 +19,9 @@ package com.intellij.rt.coverage.aggregate;
 import com.intellij.rt.coverage.report.ArgParseException;
 import com.intellij.rt.coverage.report.ReporterArgs;
 import com.intellij.rt.coverage.report.data.BinaryReport;
+import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.report.data.Module;
 import com.intellij.rt.coverage.report.util.FileUtils;
-import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class AggregatorArgs {
   static final String RESULTS_TAG = "result";
@@ -70,14 +69,12 @@ public class AggregatorArgs {
     for (int requestId = 0; requestId < requests.length(); requestId++) {
       final JSONObject request = requests.getJSONObject(requestId);
       final File outputFile = new File(request.getString(AGGREGATED_FILE_TAG));
-      List<Pattern> includeClassFilters = new ArrayList<Pattern>();
-      List<Pattern> excludeClassFilters = new ArrayList<Pattern>();
+      Filters filters = Filters.EMPTY;
       if (request.has(FILTERS_TAG)) {
-        final JSONObject filters = request.getJSONObject(FILTERS_TAG);
-        includeClassFilters = ReporterArgs.parsePatterns(filters, ReporterArgs.INCLUDE_TAG, ReporterArgs.CLASSES_TAG);
-        excludeClassFilters = ReporterArgs.parsePatterns(filters, ReporterArgs.EXCLUDE_TAG, ReporterArgs.CLASSES_TAG);
+        final JSONObject filterArgs = request.getJSONObject(FILTERS_TAG);
+        filters = ReporterArgs.parseFilters(filterArgs);
       }
-      requestList.add(new Aggregator.Request(new ClassFilter.PatternFilter(includeClassFilters, excludeClassFilters), outputFile));
+      requestList.add(new Aggregator.Request(filters, outputFile));
     }
 
     return new AggregatorArgs(reportList, moduleList, requestList);
@@ -88,17 +85,17 @@ public class AggregatorArgs {
         "{\n" +
         "  reports: [{ic: \"path\", smap: \"path\" [OPTIONAL]}, ...],\n" +
         "  modules: [{output: [\"path1\", \"path2\"], sources: [\"source1\", ...]}, {...}],\n" +
-        "  result: {\n" +
+        "  result: [{\n" +
         "    aggregatedReportFile: \"path\",\n" +
         "    filters: { [OPTIONAL]\n" +
         "      include: {\n" +
-        "            classes: [\"regex1\", \"regex2\"] [OPTIONAL]\n" +
-        "       } [OPTIONAL],\n" +
+        "        classes: [\"regex1\", \"regex2\"] [OPTIONAL]\n" +
+        "      } [OPTIONAL],\n" +
         "      exclude: {\n" +
-        "            classes: [\"regex1\", \"regex2\"] [OPTIONAL]\n" +
-        "       } [OPTIONAL],\n" +
+        "        classes: [\"regex1\", \"regex2\"], [OPTIONAL]\n" +
+        "      } [OPTIONAL],\n" +
         "    }\n" +
-        "  }\n" +
+        "  }, ...]\n" +
         "}";
   }
 }

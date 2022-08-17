@@ -85,7 +85,7 @@ public class ReporterArgsTest {
     final File htmlDir = args.htmlDir;
     Assert.assertNotNull(htmlDir);
 
-    final List<Pattern> includes = args.includeClasses;
+    final List<Pattern> includes = args.filters.includeClasses;
     Assert.assertEquals(1, includes.size());
   }
 

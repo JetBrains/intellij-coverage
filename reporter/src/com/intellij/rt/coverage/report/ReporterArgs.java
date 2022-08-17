@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.report.data.BinaryReport;
+import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.report.data.Module;
 import com.intellij.rt.coverage.report.util.FileUtils;
 import org.json.JSONArray;
@@ -47,16 +48,14 @@ public class ReporterArgs {
   public final List<Module> modules;
   public final File xmlFile;
   public final File htmlDir;
-  public final List<Pattern> includeClasses;
-  public final List<Pattern> excludeClasses;
+  public final Filters filters;
 
-  ReporterArgs(List<BinaryReport> reportList, List<Module> modules, File xmlFile, File htmlDir, List<Pattern> includeClassPatterns, List<Pattern> excludeClassPatterns) {
+  ReporterArgs(List<BinaryReport> reportList, List<Module> modules, File xmlFile, File htmlDir, Filters filters) {
     this.reports = reportList;
     this.modules = modules;
     this.xmlFile = xmlFile;
     this.htmlDir = htmlDir;
-    this.includeClasses = includeClassPatterns;
-    this.excludeClasses = excludeClassPatterns;
+    this.filters = filters;
   }
 
   public static File getArgsFile(String[] args) throws ArgParseException {
@@ -88,14 +87,12 @@ public class ReporterArgs {
 
     final List<Module> moduleList = parseModules(args);
     final List<BinaryReport> reportList = parseReports(args);
+    final Filters filters = parseFilters(args);
 
     final File xmlFile = args.has(XML_FILE_TAG) ? new File(args.getString(XML_FILE_TAG)) : null;
     final File htmlDir = args.has(HTML_DIR_TAG) ? new File(args.getString(HTML_DIR_TAG)) : null;
 
-    final List<Pattern> includeClassPatterns = parsePatterns(args, INCLUDE_TAG, CLASSES_TAG);
-    final List<Pattern> excludeClassPatterns = parsePatterns(args, EXCLUDE_TAG, CLASSES_TAG);
-
-    return new ReporterArgs(reportList, moduleList, xmlFile, htmlDir, includeClassPatterns, excludeClassPatterns);
+    return new ReporterArgs(reportList, moduleList, xmlFile, htmlDir, filters);
   }
 
   public static List<BinaryReport> parseReports(JSONObject args) {
@@ -118,6 +115,12 @@ public class ReporterArgs {
       moduleList.add(new Module(parsePathList(module, OUTPUTS_TAG), parsePathList(module, SOURCES_TAG)));
     }
     return moduleList;
+  }
+
+  public static Filters parseFilters(JSONObject args) {
+    final List<Pattern> includeClasses = parsePatterns(args, INCLUDE_TAG, CLASSES_TAG);
+    final List<Pattern> excludeClasses = parsePatterns(args, EXCLUDE_TAG, CLASSES_TAG);
+    return new Filters(includeClasses, excludeClasses);
   }
 
   public static List<Pattern> parsePatterns(JSONObject args, String groupTag, String sectionTag) {

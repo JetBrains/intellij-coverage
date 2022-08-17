@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.gnu.trove.TIntHashSet;
@@ -279,12 +280,7 @@ public class KotlinInlineVisitingFilter extends MethodVisitingFilter {
         break;
       } catch (Throwable ignored) {
       } finally {
-        if (is != null) {
-          try {
-            is.close();
-          } catch (IOException ignored) {
-          }
-        }
+        CoverageIOUtil.close(is);
       }
     }
     linesWithIncorrectSignatures.forEach(new TIntProcedure() {

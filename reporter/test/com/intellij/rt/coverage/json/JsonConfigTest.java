@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2021 JetBrains s.r.o.
+ * Copyright 2000-2022 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.report;
+package com.intellij.rt.coverage.json;
 
 import com.intellij.rt.coverage.aggregate.Aggregator;
 import com.intellij.rt.coverage.aggregate.AggregatorArgs;
+import com.intellij.rt.coverage.report.ReporterArgs;
 import com.intellij.rt.coverage.report.data.Module;
 import com.intellij.rt.coverage.report.util.FileUtils;
 import com.intellij.rt.coverage.verify.Verifier;
@@ -36,7 +37,7 @@ import static com.intellij.rt.coverage.report.TestUtils.getResourceFile;
 public class JsonConfigTest {
   @Test
   public void testReadingJsonFromFile() throws IOException {
-    final File jsonFile = getResourceFile("reporter_config.json");
+    final File jsonFile = getResourceFile("json/reporter.json");
     final String json = FileUtils.readAll(jsonFile);
     final JSONObject args = new JSONObject(json);
     Assert.assertNotNull(args);
@@ -65,7 +66,7 @@ public class JsonConfigTest {
 
   @Test
   public void testParsingReporterJsonArgs() throws IOException {
-    final File jsonFile = getResourceFile("reporter_config.json");
+    final File jsonFile = getResourceFile("json/reporter.json");
     final ReporterArgs args = ReporterArgs.parse(jsonFile);
     Assert.assertEquals(3, args.modules.size());
     Assert.assertEquals("path", args.xmlFile.getPath());
@@ -96,7 +97,7 @@ public class JsonConfigTest {
 
   @Test
   public void testParsingAggregatorJsonArgs() throws IOException {
-    final File jsonFile = getResourceFile("aggregator_config.json");
+    final File jsonFile = getResourceFile("json/aggregator.json");
     final AggregatorArgs args = AggregatorArgs.parse(jsonFile);
     Assert.assertEquals(3, args.modules.size());
 
@@ -133,7 +134,7 @@ public class JsonConfigTest {
 
   @Test
   public void testParsingVerifierJsonArgs() throws IOException {
-    final File jsonFile = getResourceFile("verifier_config.json");
+    final File jsonFile = getResourceFile("json/verifier.json");
     final VerifierArgs args = VerifierArgs.parse(jsonFile);
 
     Assert.assertEquals(2, args.rules.size());

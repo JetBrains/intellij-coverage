@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2021 JetBrains s.r.o.
+ * Copyright 2000-2022 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,20 @@
  * limitations under the License.
  */
 
-package testData.inline
+package com.intellij.rt.coverage.report.data;
 
-inline fun inline1(int: Int): Int {
-    return int + 10
-}
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
 
-fun biz(): String {
-    return "biz=${inline1(1)}"
-}
+public class Filters {
+  public final List<Pattern> includeClasses;
+  public final List<Pattern> excludeClasses;
 
-inline fun inline2(): Int {
-    return 2
-}
+  public Filters(List<Pattern> includeClasses, List<Pattern> excludeClasses) {
+    this.includeClasses = includeClasses;
+    this.excludeClasses = excludeClasses;
+  }
 
-fun bar(): String {
-    return "bar"
-}
-
-
-fun main() {
-    println(biz())
+  public static final Filters EMPTY = new Filters(Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList());
 }

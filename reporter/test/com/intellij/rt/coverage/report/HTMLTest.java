@@ -17,16 +17,15 @@
 package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.report.data.BinaryReport;
+import com.intellij.rt.coverage.report.util.FileUtils;
+import com.intellij.rt.coverage.util.ProcessUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 
-public class HTMLCoverageReportTest {
+public class HTMLTest {
   @Test
   public void testSimple() throws Throwable {
     verifyHTMLDir(runTestAndConvertToHTML(".*", "testData.simple.Main"));
@@ -34,25 +33,41 @@ public class HTMLCoverageReportTest {
 
   @Test
   public void testInline() throws Throwable {
-    verifyHTMLDir(runTestAndConvertToHTML("testData\\.inline\\..*", "testData.inline.Test"));
+    verifyHTMLDir(runTestAndConvertToHTML("testData\\.inline\\..*", "testData.inline.TestKt"));
   }
 
   @Test
   public void testFileOutOfPackageStructure() throws Throwable {
-    final File htmlDir = runTestAndConvertToHTML("testData\\..*", "testData.outOfPackageStructure.TestOutOfPackageStructureKt");
+    final File htmlDir = runTestAndConvertToHTML("testData.outOfPackageStructure\\..*", "testData.outOfPackageStructure.TestOutOfPackageStructureKt");
     verifyHTMLDir(htmlDir);
-    final File sourcesFile = new File(htmlDir, "ns-1" + File.separator + "sources" + File.separator + "source-1.html");
+    final File sourcesFile = new File(htmlDir, TestUtils.join("ns-1", "sources", "source-1.html"));
     Assert.assertTrue(sourcesFile.exists());
-    Assert.assertFalse(readFile(sourcesFile).contains("Source code is not available"));
+    Assert.assertFalse(FileUtils.readAll(sourcesFile).contains("Source code is not available"));
+    Assert.assertTrue(FileUtils.readAll(sourcesFile).contains("package testData.outOfPackageStructure"));
   }
 
   @Test
   public void testTopLevel() throws Throwable {
-    final File htmlDir = runTestAndConvertToHTML("", "TestTopLevelKt");
+    final File htmlDir = runTestAndConvertToHTML("-exclude testData.*", "TestTopLevelKt");
     verifyHTMLDir(htmlDir);
-    final File sourcesFile = new File(htmlDir, "ns-1" + File.separator + "sources" + File.separator + "source-1.html");
+    final File sourcesFile = new File(htmlDir, TestUtils.join("ns-1", "sources", "source-1.html"));
     Assert.assertTrue(sourcesFile.exists());
-    Assert.assertFalse(readFile(sourcesFile).contains("Source code is not available"));
+    Assert.assertFalse(FileUtils.readAll(sourcesFile).contains("Source code is not available"));
+    Assert.assertTrue(FileUtils.readAll(sourcesFile).contains("fun main() {"));
+  }
+
+  @Test
+  public void integrationTest() throws Throwable {
+    final BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
+    final File htmlDir = createHtmlDir(report.getDataFile());
+    final File argsFile = ReporterArgsTest.argsToFile(report, TestUtils.JAVA_OUTPUT, "test", null, htmlDir.getAbsolutePath(), "testData.simple.*");
+
+    final String[] commandLine = {
+        "-classpath", System.getProperty("java.class.path"),
+        "com.intellij.rt.coverage.report.Main",
+        argsFile.getAbsolutePath()};
+    ProcessUtil.execJavaProcess(commandLine);
+    verifyHTMLDir(htmlDir);
   }
 
   public static void verifyHTMLDir(File htmlDir) {
@@ -62,16 +77,7 @@ public class HTMLCoverageReportTest {
     Assert.assertNotNull(children);
     Assert.assertTrue(children.length > 0);
     Assert.assertTrue(new File(htmlDir, "index.html").exists());
-  }
-
-  private static String readFile(File file) throws IOException {
-    final StringBuilder builder = new StringBuilder();
-    final BufferedReader reader = new BufferedReader(new FileReader(file));
-    String line;
-    while ((line = reader.readLine()) != null) {
-      builder.append(line).append("\n");
-    }
-    return builder.toString();
+    Assert.assertTrue(new File(htmlDir, "ns-1").exists());
   }
 
   private File runTestAndConvertToHTML(String patterns, String className) throws Throwable {

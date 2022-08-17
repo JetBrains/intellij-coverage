@@ -41,14 +41,9 @@ public abstract class FileLocator {
     return result;
   }
 
-  private static String getPath(final String packageName, final String name) {
-    final String[] parts = packageName.split("\\.");
-    final StringBuilder builder = new StringBuilder();
-    for (String part : parts) {
-      builder.append(part);
-      builder.append(File.separator);
-    }
-    builder.append(name);
-    return builder.toString();
+  private static String getPath(String packageName, final String name) {
+    if (packageName.isEmpty()) return name;
+    packageName = packageName.replace('.', File.separatorChar);
+    return packageName + File.separatorChar + name;
   }
 }

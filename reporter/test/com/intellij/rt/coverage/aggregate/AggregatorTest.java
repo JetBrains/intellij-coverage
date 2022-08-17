@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.report;
+package com.intellij.rt.coverage.aggregate;
 
-import com.intellij.rt.coverage.aggregate.Aggregator;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.report.TestUtils;
 import com.intellij.rt.coverage.report.data.BinaryReport;
+import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
-import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
@@ -49,13 +49,13 @@ public class AggregatorTest {
   private static List<Aggregator.Request> createRequests() throws IOException {
     final List<Aggregator.Request> requests = new ArrayList<Aggregator.Request>();
     final Aggregator.Request request1 = new Aggregator.Request(
-        new ClassFilter.PatternFilter(
+        new Filters(
             Collections.singletonList(Pattern.compile("testData\\..*")),
             Collections.singletonList(Pattern.compile("testData\\.inline"))),
         File.createTempFile("request", "ic")
     );
     final Aggregator.Request request2 = new Aggregator.Request(
-        new ClassFilter.PatternFilter(
+        new Filters(
             Collections.singletonList(Pattern.compile(".*inline.*")),
             Collections.singletonList(Pattern.compile(".*ss.*"))),
         File.createTempFile("request", "ic")

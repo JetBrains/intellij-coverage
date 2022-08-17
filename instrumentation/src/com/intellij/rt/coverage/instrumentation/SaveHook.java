@@ -172,7 +172,7 @@ public class SaveHook implements Runnable {
                 }
             }
             return readNames;
-        } finally { if (in != null) in.close(); }
+        } finally { CoverageIOUtil.close(in); }
     }
 
     private static void saveData(DataOutputStream os, final TObjectIntHashMap<String> dict, Map classes) throws IOException {

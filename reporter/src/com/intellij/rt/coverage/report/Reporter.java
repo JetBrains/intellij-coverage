@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.aggregate.Aggregator;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
 import jetbrains.coverage.report.ReportBuilderFactory;
 import jetbrains.coverage.report.SourceCodeProvider;
 import jetbrains.coverage.report.html.HTMLReportBuilder;
@@ -40,9 +41,7 @@ public class Reporter {
       out = new FileOutputStream(xmlFile);
       report.write(out, myAggregator.getProjectData());
     } finally {
-      if (out != null) {
-        out.close();
-      }
+      CoverageIOUtil.close(out);
     }
   }
 

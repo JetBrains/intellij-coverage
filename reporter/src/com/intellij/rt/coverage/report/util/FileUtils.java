@@ -16,6 +16,8 @@
 
 package com.intellij.rt.coverage.report.util;
 
+import com.intellij.rt.coverage.util.CoverageIOUtil;
+
 import java.io.*;
 
 public class FileUtils {
@@ -31,12 +33,7 @@ public class FileUtils {
       }
       return result.toString();
     } finally {
-      if (reader != null) {
-        try {
-          reader.close();
-        } catch (IOException ignored) {
-        }
-      }
+      CoverageIOUtil.close(reader);
     }
   }
 
@@ -46,12 +43,7 @@ public class FileUtils {
       writer = new BufferedWriter(new FileWriter(file));
       writer.write(data);
     } finally {
-      if (writer != null) {
-        try {
-          writer.close();
-        } catch (IOException ignored) {
-        }
-      }
+      CoverageIOUtil.close(writer);
     }
   }
 }

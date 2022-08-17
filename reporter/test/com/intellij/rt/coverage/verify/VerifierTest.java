@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.report;
+package com.intellij.rt.coverage.verify;
 
 import com.intellij.rt.coverage.aggregate.Aggregator;
+import com.intellij.rt.coverage.aggregate.AggregatorTest;
+import com.intellij.rt.coverage.report.TestUtils;
+import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.report.util.FileUtils;
-import com.intellij.rt.coverage.util.classFinder.ClassFilter;
-import com.intellij.rt.coverage.verify.Verifier;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -45,7 +46,7 @@ public class VerifierTest {
     final Verifier.Bound bound3_2 = new Verifier.Bound(2, Verifier.Counter.BRANCH, Verifier.ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
     rules.add(createRule(Verifier.Target.PACKAGE, bound3_1, bound3_2));
 
-    runVerifier(rules, "verifier_test1.json");
+    runVerifier(rules, "verify/test1.json");
   }
 
   @Test
@@ -63,7 +64,7 @@ public class VerifierTest {
     final Verifier.Bound bound3_2 = new Verifier.Bound(2, Verifier.Counter.INSTRUCTION, Verifier.ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
     rules.add(createRule(Verifier.Target.ALL, bound3_1, bound3_2));
 
-    runVerifier(rules, "verifier_test2.json");
+    runVerifier(rules, "verify/test2.json");
   }
 
   @Test
@@ -72,7 +73,7 @@ public class VerifierTest {
     final Verifier.Bound bound1_1 = new Verifier.Bound(1, Verifier.Counter.LINE, Verifier.ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
     rules.add(createRule(Verifier.Target.PACKAGE, bound1_1));
 
-    runVerifier(rules, "verifier_test3.json");
+    runVerifier(rules, "verify/test3.json");
   }
 
   private File getFile() throws IOException {
@@ -87,16 +88,22 @@ public class VerifierTest {
 
   public static void runVerifier(List<Verifier.Rule> rules, String expectedFileName) throws IOException, InterruptedException {
     final List<Aggregator.Request> requests = new ArrayList<Aggregator.Request>();
-    final List<Pattern> patterns = new ArrayList<Pattern>();
-    patterns.add(Pattern.compile("testData\\..*"));
-    patterns.add(Pattern.compile("[^.]*"));
+    final List<Pattern> includes = new ArrayList<Pattern>();
+    includes.add(Pattern.compile("testData\\.branches\\..*"));
+    includes.add(Pattern.compile("testData\\.crossinline\\..*"));
+    includes.add(Pattern.compile("testData\\.defaultArgs\\..*"));
+    includes.add(Pattern.compile("testData\\.inline\\..*"));
+    includes.add(Pattern.compile("testData\\.noReport\\..*"));
+    includes.add(Pattern.compile("testData\\.simple\\..*"));
+    includes.add(Pattern.compile("testData\\.outOfPackageStructure\\..*"));
+    includes.add(Pattern.compile("[^.]*"));
     for (Verifier.Rule rule : rules) {
       final Aggregator.Request request = new Aggregator.Request(
-          new ClassFilter.PatternFilter(patterns, Collections.<Pattern>emptyList()),
+          new Filters(includes, Collections.<Pattern>emptyList()),
           rule.reportFile);
       requests.add(request);
     }
-    AggregatorTest.runAggregator(requests, "testData.branches.TestKt", "testData.inline.Test", "testData.simple.Main", "TestTopLevelKt");
+    AggregatorTest.runAggregator(requests, "testData.branches.TestKt", "testData.inline.TestKt", "testData.simple.Main", "TestTopLevelKt");
 
     final Verifier verifier = new Verifier(rules);
     final File outputFile = File.createTempFile("result", "json");
@@ -105,7 +112,7 @@ public class VerifierTest {
 
     final String expectedString = FileUtils.readAll(expected);
     final String actualString = FileUtils.readAll(outputFile);
-//    Assert.assertEquals(expectedString, actualString);
+    Assert.assertEquals(expectedString, actualString);
 
     // compare as a set of strings to avoid  errors with order
     final Set<String> expectedSet = new HashSet<String>(Arrays.asList(expectedString.split("\n")));
