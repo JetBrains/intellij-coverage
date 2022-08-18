@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
+import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntHashSet;
@@ -31,6 +32,7 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public abstract class Instrumenter extends MethodFilteringVisitor {
+  protected final ProjectData myProjectData;
   private final boolean myShouldCalculateSource;
 
   protected TIntObjectHashMap<LineData> myLines = new TIntObjectHashMap<LineData>(4, 0.99f);
@@ -42,7 +44,8 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   private boolean myIgnoreSection;
 
   public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
-    super(classVisitor, projectData, className);
+    super(classVisitor, className);
+    myProjectData = projectData;
     myShouldCalculateSource = shouldCalculateSource;
   }
 
@@ -99,16 +102,20 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
 
   protected abstract void initLineData();
 
+  /**
+   * @return already existing or a new line data. May return null inside ignore section.
+   */
   protected LineData getOrCreateLineData(int line, String name, String desc) {
+    if (line > myMaxLineNumber) myMaxLineNumber = line;
+    if (isIgnoreSection() && !KotlinUtils.isKotlinClass(this)) return null;
     //create lines again if class was loaded again by another class loader; may be myLinesArray should be cleared
     if (myLines == null) myLines = new TIntObjectHashMap<LineData>();
+    if (!isIgnoreSection() && myIgnoredLines != null) myIgnoredLines.remove(line);
     LineData lineData = myLines.get(line);
     if (lineData == null) {
       lineData = new LineData(line, StringsPool.getFromPool(name + desc));
       myLines.put(line, lineData);
-      if (myIgnoredLines != null) myIgnoredLines.remove(line);
     }
-    if (line > myMaxLineNumber) myMaxLineNumber = line;
     return lineData;
   }
 
@@ -166,5 +173,9 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
    */
   public void setIgnoreSection(boolean ignore) {
     myIgnoreSection = ignore;
+  }
+
+  public ProjectData getProjectData() {
+    return myProjectData;
   }
 }

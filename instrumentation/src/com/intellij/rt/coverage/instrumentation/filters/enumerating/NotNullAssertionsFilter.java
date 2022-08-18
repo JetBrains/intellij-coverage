@@ -42,17 +42,25 @@ public class NotNullAssertionsFilter extends LineEnumeratorFilter {
   private static final byte ASSERTIONS_DISABLED_STATE = 5;
 
   private byte myState;
+  private boolean myHasLines;
 
   @Override
   public void initFilter(MethodVisitor mv, LineEnumerator context) {
     super.initFilter(mv, context);
     myState = SEEN_NOTHING;
+    myHasLines = false;
+  }
+
+  @Override
+  public void visitLineNumber(int line, Label start) {
+    super.visitLineNumber(line, start);
+    myHasLines = true;
   }
 
   @Override
   public void visitJumpInsn(int opcode, Label label) {
     super.visitJumpInsn(opcode, label);
-    if (!myContext.hasExecutableLines()) return;
+    if (!myHasLines) return;
     if (myState == ASSERTIONS_DISABLED_STATE && opcode == Opcodes.IFNE) {
       myState = SEEN_NOTHING;
       if (myContext.getBranchData().getJump(label) != null) {
@@ -69,7 +77,7 @@ public class NotNullAssertionsFilter extends LineEnumeratorFilter {
   @Override
   public void visitInsn(final int opcode) {
     super.visitInsn(opcode);
-    if (!myContext.hasExecutableLines()) return;
+    if (!myHasLines) return;
 
     if (opcode == Opcodes.DUP) {
       myState = DUP_SEEN;
@@ -84,7 +92,7 @@ public class NotNullAssertionsFilter extends LineEnumeratorFilter {
   @Override
   public void visitFieldInsn(final int opcode, final String owner, final String name, final String desc) {
     super.visitFieldInsn(opcode, owner, name, desc);
-    if (!myContext.hasExecutableLines()) return;
+    if (!myHasLines) return;
     if (opcode == Opcodes.GETSTATIC && name.equals("$assertionsDisabled")) {
       myState = ASSERTIONS_DISABLED_STATE;
     } else {
@@ -94,7 +102,7 @@ public class NotNullAssertionsFilter extends LineEnumeratorFilter {
 
   public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
     super.visitMethodInsn(opcode, owner, name, desc, itf);
-    if (!myContext.hasExecutableLines()) return;
+    if (!myHasLines) return;
     if (myState == PARAM_CONST_SEEN &&
         opcode == Opcodes.INVOKESTATIC &&
         name.startsWith("$$$reportNull$$$") &&
@@ -153,7 +161,7 @@ public class NotNullAssertionsFilter extends LineEnumeratorFilter {
   }
 
   private void setSeenNothingState() {
-    if (myContext.hasExecutableLines()) {
+    if (myHasLines) {
       myState = SEEN_NOTHING;
     }
   }

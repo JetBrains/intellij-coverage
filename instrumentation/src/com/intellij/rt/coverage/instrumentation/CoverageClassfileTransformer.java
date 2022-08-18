@@ -56,7 +56,7 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
     if (data.isSampling()) {
       if (OptionsUtil.NEW_SAMPLING_ENABLED) {
         if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
-          instrumenter = new CondySamplingInstrumenter(data, cw, cr, className, shouldCalculateSource);
+          instrumenter = new CondySamplingInstrumenter(data, cw, className, shouldCalculateSource);
         } else {
           //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
           instrumenter = new NewSamplingInstrumenter(data, cw, cr, className, shouldCalculateSource);
@@ -70,7 +70,7 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
           instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldCalculateSource);
         } else {
           if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
-            instrumenter = new CondyTracingInstrumenter(data, cw, cr, className, shouldCalculateSource);
+            instrumenter = new CondyTracingInstrumenter(data, cw, className, shouldCalculateSource);
           } else {
             instrumenter = new NewTracingInstrumenter(data, cw, cr, className, shouldCalculateSource);
           }

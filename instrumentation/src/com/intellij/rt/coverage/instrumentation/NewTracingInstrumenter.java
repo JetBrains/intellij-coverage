@@ -43,7 +43,7 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
                                           final String name,
                                           final String desc,
                                           final String className) {
-    if (!enumerator.hasExecutableLines()) {
+    if (enumerator.hasNoLines()) {
       if (myExtraFieldInstrumenter.isInterface() && InstrumentationUtils.CLASS_INIT.equals(name)) {
         return myExtraFieldInstrumenter.createMethodVisitor(this, mv, mv, name);
       }

@@ -37,12 +37,10 @@ public class SamplingInstrumenter extends Instrumenter {
     return new LocalVariableInserter(mv, access, desc, CLASS_DATA_LOCAL_VARIABLE_NAME, InstrumentationUtils.OBJECT_TYPE) {
 
       public void visitLineNumber(final int line, final Label start) {
-        if (!isIgnoreSection()) {
-          getOrCreateLineData(line, name, desc);
-          mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
-          InstrumentationUtils.pushInt(mv, line);
-          mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchLine", "(" + InstrumentationUtils.OBJECT_TYPE + "I)V", false);
-        }
+        getOrCreateLineData(line, name, desc);
+        mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+        InstrumentationUtils.pushInt(mv, line);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "touchLine", "(" + InstrumentationUtils.OBJECT_TYPE + "I)V", false);
         super.visitLineNumber(line, start);
       }
 

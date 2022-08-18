@@ -100,16 +100,14 @@ public class NewSamplingInstrumenter extends Instrumenter {
         }
 
         public void visitLineNumber(final int line, final Label start) {
-          if (!myInstrumenter.isIgnoreSection()) {
             myInstrumenter.getOrCreateLineData(line, myName, myDesc);
 
             mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
             InstrumentationUtils.pushInt(mv, line);
 
             InstrumentationUtils.incrementIntArrayByIndex(mv);
-          }
 
-          super.visitLineNumber(line, start);
+            super.visitLineNumber(line, start);
         }
     }
 }

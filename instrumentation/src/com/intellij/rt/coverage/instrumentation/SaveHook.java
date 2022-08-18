@@ -71,6 +71,7 @@ public class SaveHook implements Runnable {
                 }
             }
             projectData.checkLineMappings();
+            dropIgnoredLines(projectData);
             checkLineSignatures(projectData);
             lock = CoverageIOUtil.FileLock.lock(myDataFile);
             if (myMergeFile) {
@@ -323,6 +324,7 @@ public class SaveHook implements Runnable {
     reader.accept(visitor, ClassReader.SKIP_FRAMES);
     final ClassData classData = projectData.getClassData(className);
     if (classData == null || classData.getLines() == null) return;
+    classData.dropIgnoredLines();
     final LineData[] lines = (LineData[]) classData.getLines();
     for (LineData line : lines) {
       if (line == null) continue;
@@ -358,6 +360,12 @@ public class SaveHook implements Runnable {
         final ClassData classData = projectData.getClassData(className);
         if (classData == null) continue;
         KotlinInlineVisitingFilter.checkLineSignatures(classData, myClassFinder);
+      }
+    }
+
+    private void dropIgnoredLines(ProjectData projectData) {
+      for (final ClassData classData : projectData.getClassesCollection()) {
+        classData.dropIgnoredLines();
       }
     }
 }

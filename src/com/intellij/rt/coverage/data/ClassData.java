@@ -17,11 +17,9 @@
 package com.intellij.rt.coverage.data;
 
 
-import com.intellij.rt.coverage.util.CoverageIOUtil;
-import com.intellij.rt.coverage.util.DictionaryLookup;
-import com.intellij.rt.coverage.util.ErrorReporter;
-import com.intellij.rt.coverage.util.LineMapper;
+import com.intellij.rt.coverage.util.*;
 import org.jetbrains.coverage.gnu.trove.TIntHashSet;
+import org.jetbrains.coverage.gnu.trove.TIntProcedure;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -372,6 +370,16 @@ public class ClassData implements CoverageData {
     } catch (Throwable e) {
       ErrorReporter.reportError("Unexpected error during applying branch data to class " + getName(), e);
     }
+  }
+
+  public void dropIgnoredLines() {
+    if (myIgnoredLines == null) return;
+    myIgnoredLines.forEach(new TIntProcedure() {
+      public boolean execute(int line) {
+        ArrayUtil.safeStore(myLinesArray, line, null);
+        return true;
+      }
+    });
   }
 
   public void setIgnoredLines(TIntHashSet ignoredLines) {

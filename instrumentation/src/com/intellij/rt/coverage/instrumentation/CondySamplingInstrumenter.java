@@ -30,7 +30,6 @@ public class CondySamplingInstrumenter extends Instrumenter {
 
     public CondySamplingInstrumenter(final ProjectData projectData,
                                      final ClassVisitor classVisitor,
-                                     final ClassReader cr,
                                      final String className,
                                      final boolean shouldCalculateSource) {
         super(projectData, classVisitor, className, shouldCalculateSource);

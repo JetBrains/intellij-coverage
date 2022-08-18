@@ -164,6 +164,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testIgnoreAnnotationInlineUnloaded() = test("ignoreAnnotation.inlineUnloaded")
 
     @Test
+    fun testIgnoreAnnotationInlined() = test("ignoreAnnotation.inlined")
+
+    @Test
     fun testIgnoreAnnotationMethod() = test("ignoreAnnotation.method")
 
     @Test

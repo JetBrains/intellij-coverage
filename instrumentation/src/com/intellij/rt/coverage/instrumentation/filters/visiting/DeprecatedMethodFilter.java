@@ -28,6 +28,7 @@ import java.util.HashSet;
 public class DeprecatedMethodFilter extends MethodVisitingFilter {
   private static final String DEPRECATED_METHODS = "DEPRECATED_METHODS_SET";
   private String myName;
+  private boolean mySetIgnoreByMe;
 
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
     return KotlinUtils.isKotlinClass(context);
@@ -45,6 +46,7 @@ public class DeprecatedMethodFilter extends MethodVisitingFilter {
         final String originalName = name.substring(0, name.length() - KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX.length());
         if (deprecatedMethods.contains(originalName)) {
           myContext.setIgnoreSection(true);
+          mySetIgnoreByMe = true;
         }
       }
     }
@@ -61,6 +63,7 @@ public class DeprecatedMethodFilter extends MethodVisitingFilter {
         if (!"Lkotlin/DeprecationLevel;".equals(descriptor)) return;
         if ("ERROR".equals(value) || "HIDDEN".equals(value)) {
           myContext.setIgnoreSection(true);
+          mySetIgnoreByMe = true;
           Object property = myContext.getProperty(DEPRECATED_METHODS);
           if (property == null) {
             property = new HashSet<String>();
@@ -77,6 +80,8 @@ public class DeprecatedMethodFilter extends MethodVisitingFilter {
   @Override
   public void visitEnd() {
     super.visitEnd();
-    myContext.setIgnoreSection(false);
+    if (mySetIgnoreByMe) {
+      myContext.setIgnoreSection(false);
+    }
   }
 }

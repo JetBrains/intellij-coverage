@@ -28,7 +28,7 @@ public class CondyTracingInstrumenter extends AbstractTracingInstrumenter {
   private final ConstantDynamic condy = new ConstantDynamic(BRANCH_HITS_FIELD_NAME, InstrumentationUtils.OBJECT_TYPE, handle, getClassName());
 
 
-  public CondyTracingInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource) {
+  public CondyTracingInstrumenter(ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
     super(projectData, classVisitor, className, shouldCalculateSource);
   }
 
@@ -40,7 +40,7 @@ public class CondyTracingInstrumenter extends AbstractTracingInstrumenter {
                                           final String name,
                                           final String desc,
                                           final String className) {
-    if (!enumerator.hasExecutableLines()) return mv;
+    if (enumerator.hasNoLines()) return mv;
     return new NewTracingInstrumenter.ArrayTracingMethodVisitor(mv, access, desc, enumerator) {
       public void visitCode() {
         mv.visitLdcInsn(condy);

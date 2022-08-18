@@ -79,7 +79,7 @@ class TestTrackingClassDataInstrumenter extends NewTracingInstrumenter {
   }
 
   protected MethodVisitor createMethodTransformer(final MethodVisitor mv, LineEnumerator enumerator, final int access, String name, final String desc) {
-    if (!enumerator.hasExecutableLines()) {
+    if (enumerator.hasNoLines()) {
       if (myExtraClassDataFieldInstrumenter.isInterface() && InstrumentationUtils.CLASS_INIT.equals(name)) {
         return myExtraClassDataFieldInstrumenter.createMethodVisitor(this, mv, mv, name);
       }

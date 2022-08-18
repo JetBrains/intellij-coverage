@@ -19,11 +19,13 @@ package com.intellij.rt.coverage.instrumentation.filters.visiting;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class AnnotationIgnoredMethodFilter extends MethodVisitingFilter {
+  private boolean mySetIgnoreByMe;
 
   @Override
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
@@ -32,10 +34,25 @@ public class AnnotationIgnoredMethodFilter extends MethodVisitingFilter {
   }
 
   @Override
+  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
+    super.initFilter(methodVisitor, context, name, desc);
+    final List<Pattern> annotations = context.getProjectData().getAnnotationsToIgnore();
+    for (String annotation : context.getAnnotations()) {
+      final String annotationName = ClassNameUtil.convertVMNameToFQN(annotation);
+      if (ClassNameUtil.matchesPatterns(annotationName, annotations)) {
+        myContext.setIgnoreSection(true);
+        mySetIgnoreByMe = true;
+        break;
+      }
+    }
+  }
+
+  @Override
   public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
     final String annotationName = ClassNameUtil.convertVMNameToFQN(descriptor);
     if (ClassNameUtil.matchesPatterns(annotationName, myContext.getProjectData().getAnnotationsToIgnore())) {
       myContext.setIgnoreSection(true);
+      mySetIgnoreByMe = true;
     }
     return super.visitAnnotation(descriptor, visible);
   }
@@ -43,6 +60,8 @@ public class AnnotationIgnoredMethodFilter extends MethodVisitingFilter {
   @Override
   public void visitEnd() {
     super.visitEnd();
-    myContext.setIgnoreSection(false);
+    if (mySetIgnoreByMe) {
+      myContext.setIgnoreSection(false);
+    }
   }
 }
