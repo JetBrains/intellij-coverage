@@ -46,6 +46,14 @@ public class ClassData implements CoverageData {
    */
   private TIntHashSet myIgnoredLines;
 
+  /**
+   * This flag shows whether the bytecode this class
+   * has been fully analysed in Instrumenter.
+   * Alternatively, a class can be created during lines mapping. In this case,
+   * this case may have incomplete lines and should be treated as unloaded.
+   */
+  private boolean myFullyAnalysed = false;
+
   public ClassData(final String name) {
     myClassName = name;
   }
@@ -230,8 +238,17 @@ public class ClassData implements CoverageData {
     if (myLinesArray == null) {
       myLinesArray = lines;
     } else {
-      mergeLines(lines);
+      if (isFullyAnalysed()) {
+        mergeLines(lines);
+      } else {
+        final LineData[] incompleteData = myLinesArray;
+        myLinesArray = null;
+        myStatus = null;
+        mergeLines(lines);
+        mergeLines(incompleteData);
+      }
     }
+    setFullyAnalysed(true);
   }
 
   public static int maxSourceLineNumber(LineMapData[] linesMap) {
@@ -329,6 +346,14 @@ public class ClassData implements CoverageData {
 
   public String getSource() {
     return mySource;
+  }
+
+  public boolean isFullyAnalysed() {
+    return myFullyAnalysed;
+  }
+
+  public void setFullyAnalysed(boolean value) {
+    myFullyAnalysed = value;
   }
 
   public synchronized void createHitsMask(int size) {

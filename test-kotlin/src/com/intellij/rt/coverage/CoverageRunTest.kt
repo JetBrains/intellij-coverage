@@ -23,6 +23,8 @@ import org.junit.Test
 import testData.custom.threadSafe.data.THREAD_SAFE_DATA_EXPECTED_HITS
 import testData.custom.threadSafe.structure.THREAD_SAFE_STRUCTURE_CLASSES
 import java.io.File
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 /**
  * Tests between ===GENERATED TESTS=== marker are generated automatically by testGeneration.kt code.
@@ -315,6 +317,16 @@ internal abstract class CoverageRunTest : CoverageTest() {
             }
         } else {
             test("custom.reflection")
+        }
+    }
+
+    @Test
+    fun testIDEA_299956() {
+        val testName = "custom.IDEA_299956"
+        test(testName) { projectData, config, file ->
+            verifyResults(projectData, config, file)
+            assertTrue { projectData.getClassData("testData.$testName.TestKt").isFullyAnalysed }
+            assertFalse { projectData.getClassData("testData.$testName.UnusedClass").isFullyAnalysed }
         }
     }
 }

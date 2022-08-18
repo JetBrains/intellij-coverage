@@ -32,11 +32,13 @@ import java.util.Map;
 public class ReportSectionsUtil {
   public static final int UNCOVERED_BRANCHES_SECTION_ID = 1;
   public static final int INSTRUCTIONS_SECTION_ID = 2;
+  public static final int PARTLY_ANALYSED_CLASSES_SECTION_ID = 3;
 
   private static Map<Integer, ReportSection> getSections(ProjectData projectData) {
     final Map<Integer, ReportSection> result = new LinkedHashMap<Integer, ReportSection>();
     result.put(UNCOVERED_BRANCHES_SECTION_ID, new UncoveredBranchesSection());
     result.put(INSTRUCTIONS_SECTION_ID, new InstructionsSection(projectData));
+    result.put(PARTLY_ANALYSED_CLASSES_SECTION_ID, new PartlyAnalysedClassesSection());
     return result;
   }
 
