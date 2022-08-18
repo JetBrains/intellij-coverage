@@ -17,10 +17,10 @@
 package com.intellij.rt.coverage.data;
 
 
-import com.intellij.rt.coverage.util.ArrayUtil;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.DictionaryLookup;
 import com.intellij.rt.coverage.util.ErrorReporter;
+import com.intellij.rt.coverage.util.LineMapper;
 import org.jetbrains.coverage.gnu.trove.TIntHashSet;
 
 import java.io.DataOutputStream;
@@ -67,13 +67,12 @@ public class ClassData implements CoverageData {
     final Map<String, List<LineData>> sigLines = prepareSignaturesMap(dictionaryLookup, true);
     final Set<String> sigs = sigLines.keySet();
     CoverageIOUtil.writeINT(os, sigs.size());
-    for (Object sig1 : sigs) {
-      final String sig = (String) sig1;
-      CoverageIOUtil.writeUTF(os, sig);
-      final List<LineData> lines = sigLines.get(sig);
+    for (String sig1 : sigs) {
+      CoverageIOUtil.writeUTF(os, sig1);
+      final List<LineData> lines = sigLines.get(sig1);
       CoverageIOUtil.writeINT(os, lines.size());
-      for (Object line : lines) {
-        ((LineData) line).save(os);
+      for (LineData line : lines) {
+        line.save(os);
       }
     }
   }
@@ -167,7 +166,6 @@ public class ClassData implements CoverageData {
     return myLinesArray[line];
   }
 
-  /** @noinspection UnusedDeclaration*/
   public Object[] getLines() {
     return myLinesArray;
   }
@@ -177,7 +175,6 @@ public class ClassData implements CoverageData {
     return myLinesArray[line] != null;
   }
 
-  /** @noinspection UnusedDeclaration*/
   public Collection<String> getMethodSigs() {
     initStatusMap();
     return myStatus.keySet();
@@ -251,16 +248,6 @@ public class ClassData implements CoverageData {
     setFullyAnalysed(true);
   }
 
-  public static int maxSourceLineNumber(LineMapData[] linesMap) {
-    int max = 0;
-    for (final LineMapData mapData : linesMap) {
-      if (mapData != null) {
-        max = Math.max(max, mapData.getSourceLineNumber());
-      }
-    }
-    return max;
-  }
-
   /**
    * Apply line mappings: move hits from original line in bytecode to the mapped line.
    *
@@ -270,74 +257,11 @@ public class ClassData implements CoverageData {
    *                        at the end of this method all mapped lines in this class are set to null
    */
   public static void checkLineMappings(LineMapData[] linesMap, ClassData sourceClassData, ClassData targetClassData) {
-    if (linesMap == null) return;
-    if (sourceClassData == targetClassData && sourceClassData.myLinesArray == null) return;
-    final LineData[] sourceLines = getSourceLinesArray(linesMap, sourceClassData, targetClassData);
-    try {
-      final LineData[] targetLines = targetClassData.myLinesArray;
-      for (final LineMapData mapData : linesMap) {
-        if (mapData == null) continue;
-        final int sourceLineNumber = mapData.getSourceLineNumber();
-        if (!sourceClassData.isIgnoredLine(sourceLineNumber) && ArrayUtil.safeLoad(sourceLines, sourceLineNumber) == null) {
-          final LineData targetLineData = ArrayUtil.safeLoad(targetLines, mapData.getTargetMinLine());
-          if (targetLineData != null) {
-            final LineData source = new LineData(mapData.getSourceLineNumber(), targetLineData.getMethodSignature());
-            ArrayUtil.safeStore(sourceLines, sourceLineNumber, source);
-          }
-        }
-        for (int targetLineNumber = mapData.getTargetMinLine(); targetLineNumber <= mapData.getTargetMaxLine(); targetLineNumber++) {
-          final LineData source = ArrayUtil.safeLoad(sourceLines, sourceLineNumber);
-          final LineData target = ArrayUtil.safeLoad(targetLines, targetLineNumber);
-          if (target == null) continue;
-          if (source != null) {
-            source.merge(target);
-          }
-          if (sourceClassData != targetClassData || targetLineNumber != sourceLineNumber) {
-            targetLines[targetLineNumber] = null;
-          }
-        }
-      }
-    } catch (Throwable e) {
-      ErrorReporter.reportError("Error creating line mappings for " + targetClassData.getName(), e);
-      return;
-    }
-    sourceClassData.myLinesArray = sourceLines;
+    sourceClassData.myLinesArray = new BasicLineMapper().mapLines(linesMap, sourceClassData, targetClassData);
   }
 
-  /**
-   * Return lines array of <code>sourceClassData</code> if it fits mapping, or enlarge it.
-   */
-  private static LineData[] getSourceLinesArray(LineMapData[] linesMap, ClassData sourceClassData, ClassData targetClassData) {
-    final int maxMappedSourceLineNumber = maxSourceLineNumber(linesMap);
-    if (targetClassData == sourceClassData) {
-      return sourceClassData.myLinesArray;
-    } else if (sourceClassData.myLinesArray == null) {
-      return new LineData[1 + maxMappedSourceLineNumber];
-    } else if (sourceClassData.myLinesArray.length >= 1 + maxMappedSourceLineNumber) {
-      return sourceClassData.myLinesArray;
-    } else {
-      final LineData[] sourceLines = new LineData[1 + maxMappedSourceLineNumber];
-      System.arraycopy(sourceClassData.myLinesArray, 0, sourceLines, 0, sourceClassData.myLinesArray.length);
-      return sourceLines;
-    }
-  }
-
-  /**
-   * Remove all lines that are generated by inline.
-   * Do not touch lines that are mapped to itself.
-   */
   public void dropMappedLines(FileMapData[] mappings) {
-    final LineData[] lines = myLinesArray;
-    for (FileMapData mapData : mappings) {
-      final boolean isThisClass = myClassName.equals(mapData.getClassName());
-      for (LineMapData lineMapData : mapData.getLines()) {
-        final int sourceLineNumber = lineMapData.getSourceLineNumber();
-        for (int i = lineMapData.getTargetMinLine(); i <= lineMapData.getTargetMaxLine() && i < lines.length; i++) {
-          if (isThisClass && i == sourceLineNumber) continue;
-          lines[i] = null;
-        }
-      }
-    }
+    LineMapper.dropMappedLines(mappings, myLinesArray, myClassName);
   }
 
   public void setSource(String source) {
@@ -458,5 +382,23 @@ public class ClassData implements CoverageData {
 
   public boolean isIgnoredLine(final int line) {
     return myIgnoredLines != null && myIgnoredLines.contains(line);
+  }
+
+  private static class BasicLineMapper extends LineMapper<LineData> {
+
+    @Override
+    protected LineData createNewLine(LineData targetLine, LineMapData mapData) {
+      return new LineData(mapData.getSourceLineNumber(), targetLine.getMethodSignature());
+    }
+
+    @Override
+    protected LineData[] createArray(int size) {
+      return new LineData[size];
+    }
+
+    @Override
+    protected LineData[] getLines(ClassData classData) {
+      return classData.myLinesArray;
+    }
   }
 }

@@ -16,15 +16,12 @@
 
 package com.intellij.rt.coverage.data.instructions;
 
-import com.intellij.rt.coverage.data.BranchData;
-import com.intellij.rt.coverage.data.JumpData;
-import com.intellij.rt.coverage.data.LineData;
-import com.intellij.rt.coverage.data.SwitchData;
+import com.intellij.rt.coverage.data.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LineInstructions {
+public class LineInstructions implements CoverageData {
   private int myInstructions;
   private List<JumpInstructions> myJumps;
   private List<SwitchInstructions> mySwitches;
@@ -59,7 +56,8 @@ public class LineInstructions {
     return mySwitches;
   }
 
-  public void merge(LineInstructions other) {
+  public void merge(CoverageData coverageData) {
+    final LineInstructions other = (LineInstructions) coverageData;
     myInstructions = Math.max(myInstructions, other.myInstructions);
 
     if (other.myJumps != null) {
