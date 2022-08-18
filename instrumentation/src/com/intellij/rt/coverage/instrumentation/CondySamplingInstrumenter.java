@@ -22,41 +22,41 @@ import com.intellij.rt.coverage.util.LinesUtil;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
 public class CondySamplingInstrumenter extends Instrumenter {
-    private static final String LINE_HITS_CONST_NAME = "__$lineHits$__";
-    private static final String LINE_HITS_CONST_TYPE = "[I";
+  private static final String LINE_HITS_CONST_NAME = "__$lineHits$__";
+  private static final String LINE_HITS_CONST_TYPE = "[I";
 
-    private final Handle handle = new Handle(Opcodes.H_INVOKESTATIC, "com/intellij/rt/coverage/util/CondyUtils", "getLineMask", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I", false);
-    private final ConstantDynamic condy = new ConstantDynamic(LINE_HITS_CONST_NAME, InstrumentationUtils.OBJECT_TYPE, handle, getClassName());
+  private final Handle handle = new Handle(Opcodes.H_INVOKESTATIC, "com/intellij/rt/coverage/util/CondyUtils", "getLineMask", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I", false);
+  private final ConstantDynamic condy = new ConstantDynamic(LINE_HITS_CONST_NAME, InstrumentationUtils.OBJECT_TYPE, handle, getClassName());
 
-    public CondySamplingInstrumenter(final ProjectData projectData,
-                                     final ClassVisitor classVisitor,
-                                     final String className,
-                                     final boolean shouldCalculateSource) {
-        super(projectData, classVisitor, className, shouldCalculateSource);
-    }
+  public CondySamplingInstrumenter(final ProjectData projectData,
+                                   final ClassVisitor classVisitor,
+                                   final String className,
+                                   final boolean shouldCalculateSource) {
+    super(projectData, classVisitor, className, shouldCalculateSource);
+  }
 
-    public MethodVisitor createMethodLineEnumerator(
-        final MethodVisitor mv,
-        final String name,
-        final String desc,
-        final int access,
-        final String signature,
-        final String[] exceptions
-    ) {
-        return new NewSamplingInstrumenter.ArraySamplingMethodVisitor(mv, access, name, desc, this) {
-            public void visitCode() {
-                mv.visitLdcInsn(condy);
-                mv.visitTypeInsn(Opcodes.CHECKCAST, LINE_HITS_CONST_TYPE);
-                mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
-                super.visitCode();
-            }
-        };
-    }
+  public MethodVisitor createMethodLineEnumerator(
+      final MethodVisitor mv,
+      final String name,
+      final String desc,
+      final int access,
+      final String signature,
+      final String[] exceptions
+  ) {
+    return new NewSamplingInstrumenter.ArraySamplingMethodVisitor(mv, access, name, desc, this) {
+      public void visitCode() {
+        mv.visitLdcInsn(condy);
+        mv.visitTypeInsn(Opcodes.CHECKCAST, LINE_HITS_CONST_TYPE);
+        mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
+        super.visitCode();
+      }
+    };
+  }
 
-    @Override
-    protected void initLineData() {
-        final LineData[] lines = LinesUtil.calcLineArray(myMaxLineNumber, myLines);
-        myClassData.initLineMask(lines);
-        myClassData.setLines(lines);
-    }
+  @Override
+  protected void initLineData() {
+    final LineData[] lines = LinesUtil.calcLineArray(myMaxLineNumber, myLines);
+    myClassData.initLineMask(lines);
+    myClassData.setLines(lines);
+  }
 }

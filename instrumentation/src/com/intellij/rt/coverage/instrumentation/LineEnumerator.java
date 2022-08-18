@@ -174,10 +174,6 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     return myInstrumenter.getClassName();
   }
 
-  public MethodVisitor getWV() {
-    return myWriterMethodVisitor;
-  }
-
   public String getMethodName() {
     return myMethodName;
   }

@@ -90,6 +90,7 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
 
   public static class ArrayTracingMethodVisitor extends LocalVariableInserter {
     private final LineEnumerator myEnumerator;
+
     public ArrayTracingMethodVisitor(MethodVisitor methodVisitor, int access, String descriptor, LineEnumerator enumerator) {
       super(methodVisitor, access, descriptor, BRANCH_HITS_LOCAL_VARIABLE_NAME, BRANCH_HITS_FIELD_TYPE);
       myEnumerator = enumerator;
