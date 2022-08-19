@@ -290,7 +290,7 @@ public class SaveHook implements Runnable {
     classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
       public void consume(ClassEntry classEntry) {
         final ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
-        if (cd != null && cd.getLines() != null) return;
+        if (cd != null && cd.getLines() != null && cd.isFullyAnalysed()) return;
         try {
           final InputStream is = classEntry.getClassInputStream();
           if (is == null) return;
