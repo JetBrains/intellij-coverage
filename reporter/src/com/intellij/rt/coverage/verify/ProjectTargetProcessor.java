@@ -23,6 +23,9 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.data.instructions.LineInstructions;
 
+/**
+ * Calculates coverage summary for the whole project.
+ */
 public class ProjectTargetProcessor implements TargetProcessor {
 
   @Override
@@ -35,6 +38,9 @@ public class ProjectTargetProcessor implements TargetProcessor {
   }
 
 
+  /**
+   * Sum up coverage statistics for a single class.
+   */
   public static Verifier.CollectedCoverage collectClassCoverage(ProjectData projectData, ClassData classData) {
     final ClassInstructions classInstructions = projectData.isInstructionsCoverageEnabled()
         ? projectData.getInstructions().get(classData.getName())

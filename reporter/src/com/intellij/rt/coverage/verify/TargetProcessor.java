@@ -18,10 +18,23 @@ package com.intellij.rt.coverage.verify;
 
 import com.intellij.rt.coverage.data.ProjectData;
 
+/**
+ * This class is calculating coverage summary with the target granularity.
+ */
 public interface TargetProcessor {
   void process(ProjectData projectData, Consumer consumer);
 
+  /**
+   * The processor is passing the coverage result of a single element.
+   * For example, class target processor is passing coverage summary for each class.
+   */
   interface Consumer {
+    /**
+     * A callback with coverage calculated for single element with target type.
+     *
+     * @param name     element name, for example class name
+     * @param coverage coverage summary for the element
+     */
     void consume(String name, Verifier.CollectedCoverage coverage);
   }
 }

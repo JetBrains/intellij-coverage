@@ -23,6 +23,9 @@ import com.intellij.rt.coverage.report.XMLCoverageReport;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Calculates coverage summary for each package.
+ */
 public class PackageTargetProcessor implements TargetProcessor {
 
   @Override

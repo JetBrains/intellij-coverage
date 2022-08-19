@@ -19,7 +19,6 @@ package com.intellij.rt.coverage.verify;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.report.util.FileUtils;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -38,7 +37,10 @@ public class Verifier {
     myRules = rules;
   }
 
-
+  /**
+   * Check all rules and save a report on failed rules.
+   * @param outputFile file to save violations
+   */
   public void processRules(File outputFile) throws IOException {
     final List<RuleViolation> violations = new ArrayList<RuleViolation>();
     for (Rule rule : myRules) {
@@ -215,7 +217,9 @@ public class Verifier {
   }
 
   public static class Violation {
+    /** Violated element name. */
     public final String targetName;
+    /** Violated element actual value. */
     public final BigDecimal targetValue;
 
     public Violation(String targetName, BigDecimal targetValue) {
@@ -244,6 +248,9 @@ public class Verifier {
     }
   }
 
+  /**
+   * Line, instructions, and branch statistics.
+   */
   public static class CollectedCoverage {
     public final CollectedCoverage.Counter lineCounter = new Counter();
     public final CollectedCoverage.Counter instructionCounter = new Counter();

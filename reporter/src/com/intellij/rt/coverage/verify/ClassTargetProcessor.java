@@ -19,6 +19,9 @@ package com.intellij.rt.coverage.verify;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 
+/**
+ * Calculates coverage summary for each class.
+ */
 public class ClassTargetProcessor implements TargetProcessor {
 
   @Override
