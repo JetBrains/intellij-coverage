@@ -105,6 +105,9 @@ public class ClassData implements CoverageData {
     if (mySource == null && classData.mySource != null) {
       mySource = classData.mySource;
     }
+    if (!isFullyAnalysed() && classData.isFullyAnalysed()) {
+      setFullyAnalysed(true);
+    }
   }
 
   private void mergeLines(LineData[] dLines) {
