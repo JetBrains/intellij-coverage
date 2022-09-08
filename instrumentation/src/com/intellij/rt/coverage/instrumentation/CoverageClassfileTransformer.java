@@ -17,9 +17,11 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
-import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.instrumentation.filters.classSignature.ClassSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
+import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
@@ -30,6 +32,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class CoverageClassfileTransformer extends AbstractIntellijClassfileTransformer {
+  private static final List<ClassSignatureFilter> ourFilters = FilterUtils.createClassSignatureFilters();
+
   private final ProjectData data;
   private final boolean shouldCalculateSource;
   private final List<Pattern> excludePatterns;
@@ -52,8 +56,23 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
 
   @Override
   protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassVisitor cw) {
+    return createInstrumenter(data, className, cr, cw, testTrackingMode, data.isSampling(),
+        shouldCalculateSource, OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS);
+  }
+
+  /**
+   * Create instrumenter for class or return null if class should be ignored.
+   */
+  static ClassVisitor createInstrumenter(ProjectData data, String className,
+                                         ClassReader cr, ClassVisitor cw, TestTrackingMode testTrackingMode,
+                                         boolean isSampling,
+                                         boolean shouldCalculateSource,
+                                         boolean shouldIgnorePrivateConstructorOfUtilCLass) {
+    for (ClassSignatureFilter filter : ourFilters) {
+      if (filter.shouldFilter(cr)) return null;
+    }
     final Instrumenter instrumenter;
-    if (data.isSampling()) {
+    if (isSampling) {
       if (OptionsUtil.NEW_SAMPLING_ENABLED) {
         if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
           instrumenter = new CondySamplingInstrumenter(data, cw, className, shouldCalculateSource);
@@ -66,7 +85,7 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
       }
     } else {
       if (OptionsUtil.NEW_TRACING_ENABLED) {
-        if (data.isTestTracking()) {
+        if (data.isTestTracking() && testTrackingMode != null) {
           instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldCalculateSource);
         } else {
           if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
@@ -80,7 +99,7 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
       }
     }
     ClassVisitor result = instrumenter;
-    if (OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS) {
+    if (shouldIgnorePrivateConstructorOfUtilCLass) {
       result = PrivateConstructorOfUtilClassFilter.createWithContext(result, instrumenter);
     }
     return result;

@@ -17,6 +17,8 @@
 package com.intellij.rt.coverage.instrumentation.kotlin;
 
 import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
+import com.intellij.rt.coverage.instrumentation.filters.classSignature.ClassSignatureFilter;
+import com.intellij.rt.coverage.instrumentation.filters.classSignature.KotlinFunctionOrPropertyReferenceFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.*;
 import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticAccessMethodFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticConstructorOfSealedClassFilter;
@@ -54,6 +56,13 @@ public class KotlinUtils {
     List<MethodSignatureFilter> result = new ArrayList<MethodSignatureFilter>();
     result.add(new KotlinSyntheticConstructorOfSealedClassFilter());
     result.add(new KotlinSyntheticAccessMethodFilter());
+    return result;
+  }
+
+  public static List<ClassSignatureFilter> createClassSignatureFilters() {
+    if (!ourKotlinEnabled) return Collections.emptyList();
+    List<ClassSignatureFilter> result = new ArrayList<ClassSignatureFilter>();
+    result.add(new KotlinFunctionOrPropertyReferenceFilter());
     return result;
   }
 

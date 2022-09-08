@@ -18,7 +18,6 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
-import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinInlineVisitingFilter;
 import com.intellij.rt.coverage.util.*;
 import com.intellij.rt.coverage.util.classFinder.ClassEntry;
@@ -308,16 +307,10 @@ public class SaveHook implements Runnable {
   }
 
   private static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean isSampling, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass, boolean checkLineMappings) {
-    final Instrumenter instrumenter;
-    if (isSampling) {
-      instrumenter = new SamplingInstrumenter(projectData, EMPTY_CLASS_VISITOR, className, calculateSource);
-    } else {
-      instrumenter = new TracingInstrumenter(projectData, EMPTY_CLASS_VISITOR, className, calculateSource);
-    }
-    ClassVisitor visitor = instrumenter;
-    if (ignorePrivateConstructorOfUtilClass) {
-      visitor = PrivateConstructorOfUtilClassFilter.createWithContext(visitor, instrumenter);
-    }
+    final ClassVisitor visitor = CoverageClassfileTransformer.createInstrumenter(
+        projectData, className, reader, EMPTY_CLASS_VISITOR,
+        null, isSampling, calculateSource, ignorePrivateConstructorOfUtilClass);
+    if (visitor == null) return;
     reader.accept(visitor, ClassReader.SKIP_FRAMES);
     final ClassData classData = projectData.getClassData(className);
     if (classData == null || classData.getLines() == null) return;

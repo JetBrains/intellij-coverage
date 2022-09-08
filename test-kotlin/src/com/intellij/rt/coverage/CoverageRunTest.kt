@@ -23,8 +23,7 @@ import org.junit.Test
 import testData.custom.threadSafe.data.THREAD_SAFE_DATA_EXPECTED_HITS
 import testData.custom.threadSafe.structure.THREAD_SAFE_STRUCTURE_CLASSES
 import java.io.File
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 /**
  * Tests between ===GENERATED TESTS=== marker are generated automatically by testGeneration.kt code.
@@ -218,9 +217,6 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testLombok() = test("lombok")
 
     @Test
-    fun testMethodReference() = test("methodReference")
-
-    @Test
     fun testNullability() = test("nullability")
 
     @Test
@@ -330,6 +326,17 @@ internal abstract class CoverageRunTest : CoverageTest() {
             verifyResults(projectData, config, file)
             assertTrue { projectData.getClassData("testData.$testName.TestKt").isFullyAnalysed }
             assertFalse { projectData.getClassData("testData.$testName.UnusedClass").isFullyAnalysed }
+        }
+    }
+
+    @Test
+    fun testMethodReference() {
+        val testName = "custom.methodReference"
+        test(testName) { projectData, config, file ->
+            verifyResults(projectData, config, file)
+            assertEquals(2, projectData.classesNumber)
+            assertNotNull(projectData.getClassData("testData.$testName.TestKt"))
+            assertNotNull(projectData.getClassData("testData.$testName.Foo"))
         }
     }
 }

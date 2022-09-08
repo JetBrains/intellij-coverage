@@ -14,19 +14,26 @@
  * limitations under the License.
  */
 
-package testData.methodReference
+package testData.custom.methodReference
 
-// classes: TestKt Foo
+// classes: ALL
+// patterns: testData.custom.methodReference.*
+// calculate unloaded: true
 
-class Foo { // coverage: FULL
+class Foo {         // coverage: FULL
+    var x: Int = 42 // coverage: FULL
+    val y = "Hey"   // coverage: FULL
+
     fun bar() {
         print("hello") // coverage: NONE
     }
 }
 
 fun biz() {
-    val foo = Foo() // coverage: FULL
-    print(foo::bar) // coverage: FULL
+    val foo = Foo()   // coverage: FULL
+    println(foo::bar) // coverage: FULL
+    println(foo::x)   // coverage: FULL
+    println(foo::y)   // coverage: FULL
 }
 
 fun main() = biz() // coverage: FULL

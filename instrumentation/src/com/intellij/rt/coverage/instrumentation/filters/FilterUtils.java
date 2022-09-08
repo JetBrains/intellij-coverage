@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters;
 
+import com.intellij.rt.coverage.instrumentation.filters.classSignature.ClassSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
 import com.intellij.rt.coverage.instrumentation.filters.enumerating.NotNullAssertionsFilter;
 import com.intellij.rt.coverage.instrumentation.filters.signature.DeserializeLambdaFilter;
@@ -35,6 +36,10 @@ public class FilterUtils {
     result.add(new EnumMethodsFilter());
     result.add(new DeserializeLambdaFilter());
     return result;
+  }
+
+  public static List<ClassSignatureFilter> createClassSignatureFilters() {
+    return KotlinUtils.createClassSignatureFilters();
   }
 
   public static List<MethodVisitingFilter> createVisitingFilters() {

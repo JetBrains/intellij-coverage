@@ -168,7 +168,8 @@ private fun Map<Int, Int>.statusToString() = mapValues {
     }
 }
 
-private fun ClassData.getLinesData() = lines.filterIsInstance(LineData::class.java).sortedBy { it.lineNumber }
+private fun ClassData.getLinesData() = (lines ?: Array<LineData?>(0) { null })
+        .filterIsInstance(LineData::class.java).sortedBy { it.lineNumber }
 
 internal fun extractTestTrackingDataFromFile(file: File): Map<Int, Set<String>> =
     TestTrackingMatcher().let { callback ->
