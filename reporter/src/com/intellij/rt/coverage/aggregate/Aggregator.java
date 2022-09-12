@@ -23,6 +23,7 @@ import com.intellij.rt.coverage.instrumentation.SaveHook;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.report.data.Module;
+import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import com.intellij.rt.coverage.util.classFinder.ClassPathEntry;
@@ -60,7 +61,7 @@ public class Aggregator {
     if (myProjectData != null) return myProjectData;
     final ProjectData projectData = collectCoverageInformationFromOutputs();
     for (BinaryReport report : myReports) {
-      final ProjectData data = report.loadData();
+      final ProjectData data = ProjectDataLoader.load(report.getDataFile());
       for (ClassData classData : data.getClassesCollection()) {
         final ClassData collectedClassData = projectData.getClassData(classData.getName());
         if (collectedClassData == null) {

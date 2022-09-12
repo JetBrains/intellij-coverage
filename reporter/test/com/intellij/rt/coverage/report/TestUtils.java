@@ -54,8 +54,8 @@ public class TestUtils {
     return new Reporter(new ReportLoadStrategy.RawReportLoadStrategy(reports, modules, filters));
   }
 
-  public static Reporter createReporter(BinaryReport report, String patterns) throws IOException {
-    final File smapFile = File.createTempFile("report_tmp", ".sm");
+  public static Reporter createReporter(BinaryReport report, String patterns) {
+    final File smapFile = new File(report.getDataFile().getAbsolutePath() + ".sm");
     final BinaryReport aggregatedReport = new BinaryReport(report.getDataFile(), smapFile);
     runAggregator(aggregatedReport, patterns);
 

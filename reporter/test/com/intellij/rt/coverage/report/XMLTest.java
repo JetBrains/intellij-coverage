@@ -95,7 +95,7 @@ public class XMLTest {
     final String patterns = "testData.simple.*";
     final BinaryReport report = TestUtils.runTest(patterns, "testData.simple.Main");
 
-    final File smapFile = File.createTempFile("report_tmp", ".sm");
+    final File smapFile = new File(report.getDataFile().getAbsolutePath() + ".sm");
     final BinaryReport aggregatedReport = new BinaryReport(report.getDataFile(), smapFile);
     TestUtils.runAggregator(aggregatedReport, patterns);
 
