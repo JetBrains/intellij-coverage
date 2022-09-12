@@ -126,9 +126,13 @@ public class JsonConfigTest {
     Assert.assertEquals("sourcePath2", module3.getSources().get(1).getPath());
     Assert.assertEquals(0, module3.getOutputRoots().size());
 
-    Assert.assertEquals(1, args.requests.size());
-    final Aggregator.Request request = args.requests.get(0);
-    Assert.assertEquals("aggregatedPath", request.outputFile.getPath());
+    Assert.assertEquals(2, args.requests.size());
+    final Aggregator.Request request1 = args.requests.get(0);
+    Assert.assertEquals("aggregatedPath", request1.outputFile.getPath());
+
+    final Aggregator.Request request2 = args.requests.get(1);
+    Assert.assertEquals("aggregatedPath", request2.outputFile.getPath());
+    Assert.assertEquals("smapPath", request2.smapFile.getPath());
   }
 
 

@@ -34,6 +34,7 @@ import java.util.List;
 public class AggregatorArgs {
   static final String RESULTS_TAG = "result";
   static final String AGGREGATED_FILE_TAG = "aggregatedReportFile";
+  static final String SMAP_FILE_TAG = "smapFile";
   static final String FILTERS_TAG = "filters";
 
   public final List<BinaryReport> reports;
@@ -69,12 +70,15 @@ public class AggregatorArgs {
     for (int requestId = 0; requestId < requests.length(); requestId++) {
       final JSONObject request = requests.getJSONObject(requestId);
       final File outputFile = new File(request.getString(AGGREGATED_FILE_TAG));
+      final File smapFile = request.has(SMAP_FILE_TAG)
+          ? new File(request.getString(SMAP_FILE_TAG))
+          : null;
       Filters filters = Filters.EMPTY;
       if (request.has(FILTERS_TAG)) {
         final JSONObject filterArgs = request.getJSONObject(FILTERS_TAG);
         filters = ReporterArgs.parseFilters(filterArgs);
       }
-      requestList.add(new Aggregator.Request(filters, outputFile));
+      requestList.add(new Aggregator.Request(filters, outputFile, smapFile));
     }
 
     return new AggregatorArgs(reportList, moduleList, requestList);
@@ -87,6 +91,7 @@ public class AggregatorArgs {
         "  modules: [{output: [\"path1\", \"path2\"], sources: [\"source1\", ...]}, {...}],\n" +
         "  result: [{\n" +
         "    aggregatedReportFile: \"path\",\n" +
+        "    smapFile: \"path\", [OPTIONAL]\n" +
         "    filters: { [OPTIONAL]\n" +
         "      include: {\n" +
         "        classes: [\"regex1\", \"regex2\"] [OPTIONAL]\n" +

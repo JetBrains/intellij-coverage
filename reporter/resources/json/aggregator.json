@@ -45,6 +45,10 @@
         }
       },
       "aggregatedReportFile": "aggregatedPath"
+    },
+    {
+      "aggregatedReportFile": "aggregatedPath",
+      "smapFile": "smapPath"
     }
   ]
 }

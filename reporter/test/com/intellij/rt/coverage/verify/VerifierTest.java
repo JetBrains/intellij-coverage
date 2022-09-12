@@ -100,7 +100,7 @@ public class VerifierTest {
     for (Verifier.Rule rule : rules) {
       final Aggregator.Request request = new Aggregator.Request(
           new Filters(includes, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList()),
-          rule.reportFile);
+          rule.reportFile, null);
       requests.add(request);
     }
     AggregatorTest.runAggregator(requests, "testData.branches.TestKt", "testData.inline.TestKt", "testData.simple.Main", "TestTopLevelKt");

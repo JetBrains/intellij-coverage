@@ -23,7 +23,6 @@ import com.intellij.rt.coverage.instrumentation.SaveHook;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.report.data.Module;
-import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import com.intellij.rt.coverage.util.classFinder.ClassPathEntry;
@@ -61,8 +60,7 @@ public class Aggregator {
     if (myProjectData != null) return myProjectData;
     final ProjectData projectData = collectCoverageInformationFromOutputs();
     for (BinaryReport report : myReports) {
-      final ProjectData data = ProjectDataLoader.load(report.getDataFile());
-
+      final ProjectData data = report.loadData();
       for (ClassData classData : data.getClassesCollection()) {
         final ClassData collectedClassData = projectData.getClassData(classData.getName());
         if (collectedClassData == null) {
@@ -96,7 +94,7 @@ public class Aggregator {
         }
       }
       InstructionsUtil.merge(projectData, requestProjectData, request.classFilter);
-      SaveHook.save(requestProjectData, request.outputFile, null);
+      SaveHook.save(requestProjectData, request.outputFile, request.smapFile);
     }
   }
 
@@ -157,11 +155,13 @@ public class Aggregator {
     public final ClassFilter.PatternFilter classFilter;
     public final List<Pattern> excludeAnnotations;
     public final File outputFile;
+    public final File smapFile;
 
-    public Request(Filters filters, File outputFile) {
+    public Request(Filters filters, File outputFile, File smapFile) {
       this.classFilter = new ClassFilter.PatternFilter(filters.includeClasses, filters.excludeClasses);
       this.excludeAnnotations = filters.excludeAnnotations;
       this.outputFile = outputFile;
+      this.smapFile = smapFile;
     }
   }
 }

@@ -16,9 +16,14 @@
 
 package com.intellij.rt.coverage.report.data;
 
+import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.SaveHook;
+import com.intellij.rt.coverage.util.ErrorReporter;
+import com.intellij.rt.coverage.util.ProjectDataLoader;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.IOException;
 
 public class BinaryReport {
   private final File myDataFile;
@@ -36,5 +41,17 @@ public class BinaryReport {
   @Nullable
   public File getSourceMapFile() {
     return mySourceMapFile;
+  }
+
+  public ProjectData loadData() {
+    final ProjectData data = ProjectDataLoader.load(myDataFile);
+    if (mySourceMapFile != null) {
+      try {
+        SaveHook.loadAndApplySourceMap(data, mySourceMapFile);
+      } catch (IOException e) {
+        ErrorReporter.reportError("Error in processing source map file", e);
+      }
+    }
+    return data;
   }
 }

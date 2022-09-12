@@ -69,7 +69,7 @@ public class TestUtils {
       }
       lists[state].add(Pattern.compile(pattern));
     }
-    return new Reporter(new Aggregator(reports, modules, new Aggregator.Request(new Filters(includes, excludes, excludeAnnotations), null)));
+    return new Reporter(new Aggregator(reports, modules, new Aggregator.Request(new Filters(includes, excludes, excludeAnnotations), null, null)));
   }
 
   public static List<Module> getModules() {
