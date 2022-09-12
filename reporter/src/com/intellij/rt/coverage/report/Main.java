@@ -16,8 +16,6 @@
 
 package com.intellij.rt.coverage.report;
 
-import com.intellij.rt.coverage.aggregate.Aggregator;
-import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +24,16 @@ public class Main {
   public static void main(String[] argsList) {
     try {
       final ReporterArgs args = ReporterArgs.from(argsList);
+      final ReportLoadStrategy loadStrategy;
+      if (ReporterArgs.RAW_FORMAT.equals(args.format)) {
+        loadStrategy = new ReportLoadStrategy.RawReportLoadStrategy(args.reports, args.modules, args.filters);
+      } else if (ReporterArgs.AGGREGATED_BINARY_FILE_FORMAT.equals(args.format)) {
+        loadStrategy = new ReportLoadStrategy.AggregatedReportLoadStrategy(args.reports, args.modules);
+      } else {
+        throw new ArgParseException("Unexpected reporter request format: " + args.format);
+      }
 
-      final Aggregator aggregator = new Aggregator(args.reports, args.modules, new Aggregator.Request(args.filters, null, null));
-      final Reporter reporter = new Reporter(aggregator);
+      final Reporter reporter = new Reporter(loadStrategy);
 
       boolean fail = false;
 

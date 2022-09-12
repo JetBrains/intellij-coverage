@@ -28,10 +28,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class Reporter {
-  private final Aggregator myAggregator;
+  private final ReportLoadStrategy myLoad;
 
-  public Reporter(Aggregator aggregator) {
-    myAggregator = aggregator;
+  public Reporter(ReportLoadStrategy loadStrategy) {
+    myLoad = loadStrategy;
   }
 
   public void createXMLReport(File xmlFile) throws IOException {
@@ -39,7 +39,7 @@ public class Reporter {
     FileOutputStream out = null;
     try {
       out = new FileOutputStream(xmlFile);
-      report.write(out, myAggregator.getProjectData());
+      report.write(out, myLoad.getProjectData());
     } finally {
       CoverageIOUtil.close(out);
     }
@@ -48,7 +48,7 @@ public class Reporter {
   public void createHTMLReport(File htmlDir) throws IOException {
     final HTMLReportBuilder builder = ReportBuilderFactory.createHTMLReportBuilderForKover();
     builder.setReportDir(htmlDir);
-    final SourceCodeProvider sourceCodeProvider = new DirectorySourceCodeProvider(myAggregator.getProjectData(), myAggregator.getSources());
-    builder.generateReport(new IDEACoverageData(myAggregator.getProjectData(), sourceCodeProvider));
+    final SourceCodeProvider sourceCodeProvider = new DirectorySourceCodeProvider(myLoad.getProjectData(), myLoad.getSources());
+    builder.generateReport(new IDEACoverageData(myLoad.getProjectData(), sourceCodeProvider));
   }
 }

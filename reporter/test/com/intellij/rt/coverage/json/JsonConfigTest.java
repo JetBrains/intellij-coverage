@@ -92,6 +92,8 @@ public class JsonConfigTest {
     Assert.assertEquals("sourcePath1", module3.getSources().get(0).getPath());
     Assert.assertEquals("sourcePath2", module3.getSources().get(1).getPath());
     Assert.assertEquals(0, module3.getOutputRoots().size());
+
+    Assert.assertEquals("kover-agg", args.format);
   }
 
 

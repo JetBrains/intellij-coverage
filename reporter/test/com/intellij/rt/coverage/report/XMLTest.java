@@ -67,7 +67,7 @@ public class XMLTest {
   @Test
   public void testNoReport() throws Throwable {
     final File xmlFile = createXMLFile();
-    TestUtils.createReporter(null, "testData.noReport.*").createXMLReport(xmlFile);
+    TestUtils.createRawReporter(null, "testData.noReport.*").createXMLReport(xmlFile);
     verifyProjectXML(xmlFile, "xml/noReport.xml");
   }
 
@@ -80,7 +80,27 @@ public class XMLTest {
   public void integrationTest() throws Throwable {
     final BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
     final File xmlFile = createXMLFile();
-    final File argsFile = ReporterArgsTest.argsToFile(report, TestUtils.JAVA_OUTPUT, "test", xmlFile.getAbsolutePath(), null, "testData.simple.*");
+    final File argsFile = ReporterArgsTest.argsToFile(report, TestUtils.JAVA_OUTPUT, "test", xmlFile.getAbsolutePath(), null, "testData.simple.*", "raw");
+
+    final String[] commandLine = {
+        "-classpath", System.getProperty("java.class.path"),
+        "com.intellij.rt.coverage.report.Main",
+        argsFile.getAbsolutePath()};
+    ProcessUtil.execJavaProcess(commandLine);
+    XMLTest.verifyProjectXML(xmlFile, "xml/simple.xml");
+  }
+
+  @Test
+  public void integrationWithAggregatorTest() throws Throwable {
+    final String patterns = "testData.simple.*";
+    final BinaryReport report = TestUtils.runTest(patterns, "testData.simple.Main");
+
+    final File smapFile = File.createTempFile("report_tmp", ".sm");
+    final BinaryReport aggregatedReport = new BinaryReport(report.getDataFile(), smapFile);
+    TestUtils.runAggregator(aggregatedReport, patterns);
+
+    final File xmlFile = createXMLFile();
+    final File argsFile = ReporterArgsTest.argsToFile(aggregatedReport, TestUtils.JAVA_OUTPUT, "test", xmlFile.getAbsolutePath(), null, patterns, "kover-agg");
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),

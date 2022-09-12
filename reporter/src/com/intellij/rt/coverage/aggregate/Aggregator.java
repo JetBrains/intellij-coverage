@@ -98,14 +98,6 @@ public class Aggregator {
     }
   }
 
-  public List<File> getSources() {
-    final List<File> sources = new ArrayList<File>();
-    for (Module module : myModules) {
-      sources.addAll(module.getSources());
-    }
-    return sources;
-  }
-
   /** Analyse all classes in output roots as if they are unloaded classes. */
   private ProjectData collectCoverageInformationFromOutputs() {
     final ProjectData projectData = new ProjectData();

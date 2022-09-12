@@ -60,7 +60,7 @@ public class HTMLTest {
   public void integrationTest() throws Throwable {
     final BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
     final File htmlDir = createHtmlDir(report.getDataFile());
-    final File argsFile = ReporterArgsTest.argsToFile(report, TestUtils.JAVA_OUTPUT, "test", null, htmlDir.getAbsolutePath(), "testData.simple.*");
+    final File argsFile = ReporterArgsTest.argsToFile(report, TestUtils.JAVA_OUTPUT, "test", null, htmlDir.getAbsolutePath(), "testData.simple.*", "raw");
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),
@@ -83,7 +83,7 @@ public class HTMLTest {
   private File runTestAndConvertToHTML(String patterns, String className) throws Throwable {
     final BinaryReport report = TestUtils.runTest(patterns, className);
     final File htmlDir = createHtmlDir(report.getDataFile());
-    TestUtils.createReporter(report, patterns).createHTMLReport(htmlDir);
+    TestUtils.createRawReporter(report, patterns).createHTMLReport(htmlDir);
     return htmlDir;
   }
 

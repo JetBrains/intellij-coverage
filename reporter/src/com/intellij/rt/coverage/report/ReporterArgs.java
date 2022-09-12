@@ -31,6 +31,17 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class ReporterArgs {
+  static final String FORMAT_TAG = "format";
+  /**
+   * Default reporter format. Collects merged coverage report from scratch via aggregator.
+   */
+  static final String RAW_FORMAT = "raw";
+  /**
+   * This format assumes that a single report file is passed, which is a result of previous
+   * aggregator request.
+   */
+  static final String AGGREGATED_BINARY_FILE_FORMAT = "kover-agg";
+
   static final String XML_FILE_TAG = "xml";
   static final String HTML_DIR_TAG = "html";
   static final String MODULES_TAG = "modules";
@@ -45,13 +56,15 @@ public class ReporterArgs {
   public static final String ANNOTATIONS_TAG = "annotations";
 
 
+  public final String format;
   public final List<BinaryReport> reports;
   public final List<Module> modules;
   public final File xmlFile;
   public final File htmlDir;
   public final Filters filters;
 
-  ReporterArgs(List<BinaryReport> reportList, List<Module> modules, File xmlFile, File htmlDir, Filters filters) {
+  ReporterArgs(String format, List<BinaryReport> reportList, List<Module> modules, File xmlFile, File htmlDir, Filters filters) {
+    this.format = format;
     this.reports = reportList;
     this.modules = modules;
     this.xmlFile = xmlFile;
@@ -86,6 +99,9 @@ public class ReporterArgs {
     final String jsonString = FileUtils.readAll(argsFile);
     final JSONObject args = new JSONObject(jsonString);
 
+    final String format = args.has(FORMAT_TAG)
+        ? args.getString(FORMAT_TAG)
+        : RAW_FORMAT;
     final List<Module> moduleList = parseModules(args);
     final List<BinaryReport> reportList = parseReports(args);
     final Filters filters = parseFilters(args);
@@ -93,7 +109,7 @@ public class ReporterArgs {
     final File xmlFile = args.has(XML_FILE_TAG) ? new File(args.getString(XML_FILE_TAG)) : null;
     final File htmlDir = args.has(HTML_DIR_TAG) ? new File(args.getString(HTML_DIR_TAG)) : null;
 
-    return new ReporterArgs(reportList, moduleList, xmlFile, htmlDir, filters);
+    return new ReporterArgs(format, reportList, moduleList, xmlFile, htmlDir, filters);
   }
 
   public static List<BinaryReport> parseReports(JSONObject args) {
@@ -152,6 +168,7 @@ public class ReporterArgs {
   public static String getHelpString() {
     return "Arguments must be passed in the following JSON format:\n" +
         "{\n" +
+        "  format: \"name\" [OPTIONAL],\n" +
         "  reports: [{ic: \"path\", smap: \"path\" [OPTIONAL]}, ...],\n" +
         "  modules: [{output: [\"path1\", \"path2\"], sources: [\"source1\", ...]}, {...}],\n" +
         "  xml: \"path\" [OPTIONAL],\n" +

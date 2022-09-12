@@ -1,7 +1,8 @@
 {
+  "format": "kover-agg",
   "reports": [
         {"ic": "icPath", "smap": "smapPath"}
-      ],
+  ],
   "modules": [
     {
       "output": ["outputPath"],

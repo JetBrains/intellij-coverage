@@ -30,12 +30,16 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class ReporterArgsTest {
-  public static File argsToFile(BinaryReport binaryReport, String outputPath, String sourcesPath, String xmlPath, String htmlPath, String include) throws IOException {
+  public static File argsToFile(BinaryReport binaryReport, String outputPath, String sourcesPath, String xmlPath, String htmlPath, String include, String format) throws IOException {
     final JSONObject args = new JSONObject();
     final JSONObject module = new JSONObject();
     final JSONObject report = new JSONObject();
+    args.put(ReporterArgs.FORMAT_TAG, format);
     report.put(ReporterArgs.IC_FILE_TAG, binaryReport.getDataFile().getAbsolutePath());
-    report.put(ReporterArgs.SMAP_FILE_TAG, binaryReport.getSourceMapFile().getAbsolutePath());
+    final File smapFile = binaryReport.getSourceMapFile();
+    if (smapFile != null) {
+      report.put(ReporterArgs.SMAP_FILE_TAG, smapFile.getAbsolutePath());
+    }
     args.append(ReporterArgs.REPORTS_TAG, report);
     module.append(ReporterArgs.OUTPUTS_TAG, outputPath);
     module.append(ReporterArgs.SOURCES_TAG, sourcesPath);
@@ -61,7 +65,8 @@ public class ReporterArgsTest {
 
   @Test
   public void testArgs() throws Exception {
-    final ReporterArgs args = ReporterArgs.parse(argsToFile(new BinaryReport(new File("test.ic"), new File("test.smap")), "out", "a/", "a.xml", "html/", ".*"));
+    final ReporterArgs args = ReporterArgs.parse(argsToFile(new BinaryReport(new File("test.ic"), new File("test.smap")), "out", "a/", "a.xml", "html/", ".*", "raw"));
+    Assert.assertEquals("raw", args.format);
     Assert.assertEquals(1, args.modules.size());
     final Module module = args.modules.get(0);
     final List<BinaryReport> reports = args.reports;

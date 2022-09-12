@@ -37,10 +37,8 @@ public class TestUtils {
   @NotNull
   public static BinaryReport runTest(String patterns, String className) throws IOException, InterruptedException {
     final File icFile = File.createTempFile("report_tmp", ".ic");
-    final File sourceMapFile = File.createTempFile("report_tmp", ".sm");
-    patterns = "true " + sourceMapFile.getAbsolutePath() + " " + patterns;
     CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), icFile, patterns, className, false, new String[]{"-Dcoverage.instructions.enable=true", "-Dcoverage.ignore.private.constructor.util.class=true"}, false, false);
-    return new BinaryReport(icFile, sourceMapFile);
+    return new BinaryReport(icFile, null);
   }
 
   @NotNull
@@ -49,9 +47,31 @@ public class TestUtils {
     return new File(expectedPath);
   }
 
-  public static Reporter createReporter(BinaryReport report, String patterns) {
+  public static Reporter createRawReporter(BinaryReport report, String patterns) {
     final List<Module> modules = getModules();
     final List<BinaryReport> reports = report == null ? Collections.<BinaryReport>emptyList() : Collections.singletonList(report);
+    final Filters filters = getFilters(patterns);
+    return new Reporter(new ReportLoadStrategy.RawReportLoadStrategy(reports, modules, filters));
+  }
+
+  public static Reporter createReporter(BinaryReport report, String patterns) throws IOException {
+    final File smapFile = File.createTempFile("report_tmp", ".sm");
+    final BinaryReport aggregatedReport = new BinaryReport(report.getDataFile(), smapFile);
+    runAggregator(aggregatedReport, patterns);
+
+    final List<BinaryReport> reports = Collections.singletonList(aggregatedReport);
+    final List<Module> modules = getModules();
+    return new Reporter(new ReportLoadStrategy.AggregatedReportLoadStrategy(reports, modules));
+  }
+
+  public static void runAggregator(BinaryReport report, String patterns) {
+    final Filters filters = getFilters(patterns);
+    final Aggregator.Request request = new Aggregator.Request(filters, report.getDataFile(), report.getSourceMapFile());
+    new Aggregator(Collections.singletonList(report), getModules(), request).processRequests();
+  }
+
+  @NotNull
+  private static Filters getFilters(String patterns) {
     final List<Pattern> includes = new ArrayList<Pattern>();
     final List<Pattern> excludes = new ArrayList<Pattern>();
     final List<Pattern> excludeAnnotations = new ArrayList<Pattern>();
@@ -69,7 +89,7 @@ public class TestUtils {
       }
       lists[state].add(Pattern.compile(pattern));
     }
-    return new Reporter(new Aggregator(reports, modules, new Aggregator.Request(new Filters(includes, excludes, excludeAnnotations), null, null)));
+    return new Filters(includes, excludes, excludeAnnotations);
   }
 
   public static List<Module> getModules() {
