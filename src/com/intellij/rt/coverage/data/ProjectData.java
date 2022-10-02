@@ -165,6 +165,7 @@ public class ProjectData implements CoverageData, Serializable {
     ourProjectData.myIncludePatterns = includePatterns;
     ourProjectData.myExcludePatterns = excludePatterns;
     ourProjectData.myTestTrackingCallback = testTrackingCallback;
+    ourStopped = false;
     return ourProjectData;
   }
 
