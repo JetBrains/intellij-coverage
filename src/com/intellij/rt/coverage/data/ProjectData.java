@@ -45,7 +45,7 @@ public class ProjectData implements CoverageData, Serializable {
   private static final MethodCaller REGISTER_CLASS_FOR_TRACE_METHOD = new MethodCaller("registerClassForTrace", new Class[]{Object.class});
   private static final MethodCaller TRACE_LINE_METHOD = new MethodCaller("traceLine", new Class[]{Object.class, int.class});
 
-  private static boolean ourStopped = false;
+  private boolean myStopped;
 
   public static ProjectData ourProjectData;
   private File myDataFile;
@@ -92,11 +92,11 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public void stop() {
-    ourStopped = true;
+    myStopped = true;
   }
 
   public boolean isStopped() {
-    return ourStopped;
+    return myStopped;
   }
 
   public boolean isSampling() {
@@ -158,6 +158,7 @@ public class ProjectData implements CoverageData, Serializable {
       if (parentDir != null && !parentDir.exists()) parentDir.mkdirs();
       dataFile.createNewFile();
     }
+    ourProjectData.myStopped = false;
     ourProjectData.mySampling = isSampling;
     ourProjectData.myTraceLines = traceLines;
     ourProjectData.myCollectInstructions = OptionsUtil.INSTRUCTIONS_COVERAGE_ENABLED;
