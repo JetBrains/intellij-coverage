@@ -172,7 +172,9 @@ public class LineData implements CoverageData {
 
   public SwitchData addSwitch(final int switchNumber, final int min, final int max) {
     int[] keys = new int[max - min + 1];
-    for (int i = min; i <= max; i++) {
+    // Check that i in [min, max]
+    // as there could be an overflow if max == Int.MAX_VALUE
+    for (int i = min; min <= i && i <= max; i++) {
       keys[i - min] = i;
     }
     return addSwitch(switchNumber, keys);

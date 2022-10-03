@@ -151,6 +151,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testFixesKT_39038() = test("fixes.KT_39038")
 
     @Test
+    fun testFixesIntMaxSwitch() = test("fixes.intMaxSwitch")
+
+    @Test
     fun testFunInterface() = test("funInterface")
 
     @Test
