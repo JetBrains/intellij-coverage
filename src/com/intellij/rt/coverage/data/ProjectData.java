@@ -45,14 +45,13 @@ public class ProjectData implements CoverageData, Serializable {
   private static final MethodCaller REGISTER_CLASS_FOR_TRACE_METHOD = new MethodCaller("registerClassForTrace", new Class[]{Object.class});
   private static final MethodCaller TRACE_LINE_METHOD = new MethodCaller("traceLine", new Class[]{Object.class, int.class});
 
-  private static boolean ourStopped = false;
-
   public static ProjectData ourProjectData;
   private File myDataFile;
 
   private boolean myTraceLines;
   private boolean mySampling;
   private boolean myCollectInstructions;
+  private boolean ourStopped = false;
 
   /**
    * Test tracking trace storage. Test tracking supports only sequential tests (but code inside one test could be parallel).
@@ -165,7 +164,6 @@ public class ProjectData implements CoverageData, Serializable {
     ourProjectData.myIncludePatterns = includePatterns;
     ourProjectData.myExcludePatterns = excludePatterns;
     ourProjectData.myTestTrackingCallback = testTrackingCallback;
-    ourStopped = false;
     return ourProjectData;
   }
 
