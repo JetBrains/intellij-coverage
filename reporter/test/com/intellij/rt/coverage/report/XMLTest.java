@@ -80,7 +80,7 @@ public class XMLTest {
   public void integrationTest() throws Throwable {
     final BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
     final File xmlFile = createXMLFile();
-    final File argsFile = ReporterArgsTest.argsToFile(report, TestUtils.JAVA_OUTPUT, "test", xmlFile.getAbsolutePath(), null, "testData.simple.*", "raw");
+    final File argsFile = ReporterArgsTest.argsToFile(report, TestUtils.JAVA_OUTPUT, "test", xmlFile.getAbsolutePath(), null, "testData.simple.*", "raw", null);
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),
@@ -100,7 +100,7 @@ public class XMLTest {
     TestUtils.runAggregator(aggregatedReport, patterns);
 
     final File xmlFile = createXMLFile();
-    final File argsFile = ReporterArgsTest.argsToFile(aggregatedReport, TestUtils.JAVA_OUTPUT, "test", xmlFile.getAbsolutePath(), null, patterns, "kover-agg");
+    final File argsFile = ReporterArgsTest.argsToFile(aggregatedReport, TestUtils.JAVA_OUTPUT, "test", xmlFile.getAbsolutePath(), null, patterns, "kover-agg", null);
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),

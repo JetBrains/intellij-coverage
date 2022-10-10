@@ -42,6 +42,8 @@ public class JsonConfigTest {
     final JSONObject args = new JSONObject(json);
     Assert.assertNotNull(args);
 
+    Assert.assertEquals("kover-agg", args.getString("format"));
+    Assert.assertEquals("TITLE", args.getString("title"));
     Assert.assertEquals("path", args.getString("xml"));
     Assert.assertEquals("directory", args.getString("html"));
 
@@ -69,6 +71,8 @@ public class JsonConfigTest {
     final File jsonFile = getResourceFile("json/reporter.json");
     final ReporterArgs args = ReporterArgs.parse(jsonFile);
     Assert.assertEquals(3, args.modules.size());
+    Assert.assertEquals("kover-agg", args.format);
+    Assert.assertEquals("TITLE", args.title);
     Assert.assertEquals("path", args.xmlFile.getPath());
     Assert.assertEquals("directory", args.htmlDir.getPath());
 

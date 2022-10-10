@@ -16,12 +16,12 @@
 
 package com.intellij.rt.coverage.report;
 
-import com.intellij.rt.coverage.aggregate.Aggregator;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import jetbrains.coverage.report.ReportBuilderFactory;
 import jetbrains.coverage.report.SourceCodeProvider;
 import jetbrains.coverage.report.html.HTMLReportBuilder;
 import jetbrains.coverage.report.idea.IDEACoverageData;
+import jetbrains.coverage.report.impl.html.HTMLReportBuilderImpl;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,9 +45,12 @@ public class Reporter {
     }
   }
 
-  public void createHTMLReport(File htmlDir) throws IOException {
+  public void createHTMLReport(File htmlDir, String title) throws IOException {
     final HTMLReportBuilder builder = ReportBuilderFactory.createHTMLReportBuilderForKover();
     builder.setReportDir(htmlDir);
+    if (builder instanceof HTMLReportBuilderImpl) {
+      ((HTMLReportBuilderImpl) builder).setReportTitle(title);
+    }
     final SourceCodeProvider sourceCodeProvider = new DirectorySourceCodeProvider(myLoad.getProjectData(), myLoad.getSources());
     builder.generateReport(new IDEACoverageData(myLoad.getProjectData(), sourceCodeProvider));
   }

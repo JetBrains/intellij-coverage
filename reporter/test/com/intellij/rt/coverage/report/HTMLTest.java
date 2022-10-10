@@ -24,8 +24,11 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
 
 public class HTMLTest {
+  private static final String DEFAULT_TITLE = "TITLE";
+
   @Test
   public void testSimple() throws Throwable {
     verifyHTMLDir(runTestAndConvertToHTML(".*", "testData.simple.Main"));
@@ -60,7 +63,7 @@ public class HTMLTest {
   public void integrationTest() throws Throwable {
     final BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
     final File htmlDir = createHtmlDir(report.getDataFile());
-    final File argsFile = ReporterArgsTest.argsToFile(report, TestUtils.JAVA_OUTPUT, "test", null, htmlDir.getAbsolutePath(), "testData.simple.*", "raw");
+    final File argsFile = ReporterArgsTest.argsToFile(report, TestUtils.JAVA_OUTPUT, "test", null, htmlDir.getAbsolutePath(), "testData.simple.*", "raw", DEFAULT_TITLE);
 
     final String[] commandLine = {
         "-classpath", System.getProperty("java.class.path"),
@@ -70,20 +73,26 @@ public class HTMLTest {
     verifyHTMLDir(htmlDir);
   }
 
-  public static void verifyHTMLDir(File htmlDir) {
+  public static void verifyHTMLDir(File htmlDir) throws IOException {
     Assert.assertTrue(htmlDir.exists());
     Assert.assertTrue(htmlDir.isDirectory());
     final File[] children = htmlDir.listFiles();
     Assert.assertNotNull(children);
     Assert.assertTrue(children.length > 0);
-    Assert.assertTrue(new File(htmlDir, "index.html").exists());
+    final File indexFile = new File(htmlDir, "index.html");
+    Assert.assertTrue(indexFile.exists());
+    final String content = FileUtils.readAll(indexFile);
+    Assert.assertTrue(content.contains("<title>" + DEFAULT_TITLE + " Coverage Report > Summary</title>"));
+    Assert.assertTrue(content.contains("<h1>" + DEFAULT_TITLE + ": Overall Coverage Summary </h1>"));
+    Assert.assertTrue(content.contains("Current scope: " + DEFAULT_TITLE + "<span class=\"separator\">|</span>    all classes"));
+
     Assert.assertTrue(new File(htmlDir, "ns-1").exists());
   }
 
   private File runTestAndConvertToHTML(String patterns, String className) throws Throwable {
     final BinaryReport report = TestUtils.runTest(patterns, className);
     final File htmlDir = createHtmlDir(report.getDataFile());
-    TestUtils.createRawReporter(report, patterns).createHTMLReport(htmlDir);
+    TestUtils.createRawReporter(report, patterns).createHTMLReport(htmlDir, DEFAULT_TITLE);
     return htmlDir;
   }
 

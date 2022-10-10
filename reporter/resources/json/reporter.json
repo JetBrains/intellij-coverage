@@ -1,5 +1,6 @@
 {
   "format": "kover-agg",
+  "title": "TITLE",
   "reports": [
         {"ic": "icPath", "smap": "smapPath"}
   ],

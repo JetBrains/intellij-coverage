@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class ReporterArgsTest {
-  public static File argsToFile(BinaryReport binaryReport, String outputPath, String sourcesPath, String xmlPath, String htmlPath, String include, String format) throws IOException {
+  public static File argsToFile(BinaryReport binaryReport, String outputPath, String sourcesPath, String xmlPath, String htmlPath, String include, String format, String title) throws IOException {
     final JSONObject args = new JSONObject();
     final JSONObject module = new JSONObject();
     final JSONObject report = new JSONObject();
@@ -45,6 +45,9 @@ public class ReporterArgsTest {
     module.append(ReporterArgs.SOURCES_TAG, sourcesPath);
     args.append(ReporterArgs.MODULES_TAG, module);
 
+    if (title != null) {
+      args.put(ReporterArgs.TITLE_TAG, title);
+    }
     if (htmlPath != null) {
       args.put(ReporterArgs.HTML_DIR_TAG, htmlPath);
     }
@@ -65,8 +68,9 @@ public class ReporterArgsTest {
 
   @Test
   public void testArgs() throws Exception {
-    final ReporterArgs args = ReporterArgs.parse(argsToFile(new BinaryReport(new File("test.ic"), new File("test.smap")), "out", "a/", "a.xml", "html/", ".*", "raw"));
+    final ReporterArgs args = ReporterArgs.parse(argsToFile(new BinaryReport(new File("test.ic"), new File("test.smap")), "out", "a/", "a.xml", "html/", ".*", "raw", "title"));
     Assert.assertEquals("raw", args.format);
+    Assert.assertEquals("title", args.title);
     Assert.assertEquals(1, args.modules.size());
     final Module module = args.modules.get(0);
     final List<BinaryReport> reports = args.reports;

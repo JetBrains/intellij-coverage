@@ -44,6 +44,7 @@ public class ReporterArgs {
 
   static final String XML_FILE_TAG = "xml";
   static final String HTML_DIR_TAG = "html";
+  public static final String TITLE_TAG = "title";
   static final String MODULES_TAG = "modules";
   static final String REPORTS_TAG = "reports";
   static final String IC_FILE_TAG = "ic";
@@ -57,14 +58,19 @@ public class ReporterArgs {
 
 
   public final String format;
+  public final String title;
   public final List<BinaryReport> reports;
   public final List<Module> modules;
   public final File xmlFile;
   public final File htmlDir;
   public final Filters filters;
 
-  ReporterArgs(String format, List<BinaryReport> reportList, List<Module> modules, File xmlFile, File htmlDir, Filters filters) {
+  ReporterArgs(String format, String title,
+               List<BinaryReport> reportList, List<Module> modules,
+               File xmlFile, File htmlDir,
+               Filters filters) {
     this.format = format;
+    this.title = title;
     this.reports = reportList;
     this.modules = modules;
     this.xmlFile = xmlFile;
@@ -102,6 +108,7 @@ public class ReporterArgs {
     final String format = args.has(FORMAT_TAG)
         ? args.getString(FORMAT_TAG)
         : RAW_FORMAT;
+    final String title = args.has(TITLE_TAG) ? args.getString(TITLE_TAG) : "";
     final List<Module> moduleList = parseModules(args);
     final List<BinaryReport> reportList = parseReports(args);
     final Filters filters = parseFilters(args);
@@ -109,7 +116,7 @@ public class ReporterArgs {
     final File xmlFile = args.has(XML_FILE_TAG) ? new File(args.getString(XML_FILE_TAG)) : null;
     final File htmlDir = args.has(HTML_DIR_TAG) ? new File(args.getString(HTML_DIR_TAG)) : null;
 
-    return new ReporterArgs(format, reportList, moduleList, xmlFile, htmlDir, filters);
+    return new ReporterArgs(format, title, reportList, moduleList, xmlFile, htmlDir, filters);
   }
 
   public static List<BinaryReport> parseReports(JSONObject args) {

@@ -51,7 +51,7 @@ public class Main {
       final File htmlDir = args.htmlDir;
       if (htmlDir != null) {
         try {
-          reporter.createHTMLReport(htmlDir);
+          reporter.createHTMLReport(htmlDir, args.title);
         } catch (IOException e) {
           fail = true;
           System.err.println("HTML generation failed.");
