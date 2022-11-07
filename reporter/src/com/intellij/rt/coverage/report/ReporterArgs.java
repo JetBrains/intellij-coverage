@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -49,7 +50,7 @@ public class ReporterArgs {
   static final String REPORTS_TAG = "reports";
   static final String IC_FILE_TAG = "ic";
   static final String SMAP_FILE_TAG = "smap";
-  static final String OUTPUTS_TAG = "output";
+  public static final String OUTPUTS_TAG = "output";
   static final String SOURCES_TAG = "sources";
   public static final String INCLUDE_TAG = "include";
   public static final String EXCLUDE_TAG = "exclude";
@@ -124,12 +125,17 @@ public class ReporterArgs {
     final JSONArray reports = args.getJSONArray(REPORTS_TAG);
     for (int reportId = 0; reportId < reports.length(); reportId++) {
       final JSONObject report = reports.getJSONObject(reportId);
-      final String icPath = report.getString(IC_FILE_TAG);
-      final File smap = report.has(SMAP_FILE_TAG) ? new File(report.getString(SMAP_FILE_TAG)) : null;
-      reportList.add(new BinaryReport(new File(icPath), smap));
+      reportList.add(parseBinaryReport(report));
     }
     return reportList;
   }
+
+  public static BinaryReport parseBinaryReport(JSONObject object) {
+    final String icPath = object.getString(IC_FILE_TAG);
+    final File smap = object.has(SMAP_FILE_TAG) ? new File(object.getString(SMAP_FILE_TAG)) : null;
+    return new BinaryReport(new File(icPath), smap);
+  }
+
 
   public static List<Module> parseModules(JSONObject args) {
     final List<Module> moduleList = new ArrayList<Module>();
@@ -150,9 +156,9 @@ public class ReporterArgs {
 
   public static List<Pattern> parsePatterns(JSONObject args, String groupTag, String sectionTag) {
     final List<Pattern> patterns = new ArrayList<Pattern>();
-    if (!args.has(groupTag)) return patterns;
+    if (!args.has(groupTag)) return Collections.emptyList();
     final JSONObject group = args.getJSONObject(groupTag);
-    if (!group.has(sectionTag)) return patterns;
+    if (!group.has(sectionTag)) return Collections.emptyList();
     final JSONArray arrayPatterns = group.getJSONArray(sectionTag);
     for (int i = 0; i < arrayPatterns.length(); i++) {
       final String pattern = arrayPatterns.getString(i);
@@ -161,10 +167,10 @@ public class ReporterArgs {
     return patterns;
   }
 
-  private static List<File> parsePathList(JSONObject module, String tag) {
+  public static List<File> parsePathList(JSONObject object, String tag) {
     final List<File> result = new ArrayList<File>();
-    if (!module.has(tag)) return result;
-    final JSONArray array = module.getJSONArray(tag);
+    if (!object.has(tag)) return Collections.emptyList();
+    final JSONArray array = object.getJSONArray(tag);
     for (int i = 0; i < array.length(); i++) {
       final String path = array.getString(i);
       result.add(new File(path));

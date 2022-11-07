@@ -16,23 +16,21 @@
 
 package com.intellij.rt.coverage.aggregate;
 
-import com.intellij.rt.coverage.data.ClassData;
-import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.instrumentation.SaveHook;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.report.data.Module;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
+import com.intellij.rt.coverage.util.RawHitsReport;
 import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import com.intellij.rt.coverage.util.classFinder.ClassPathEntry;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.io.IOException;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class Aggregator {
@@ -59,22 +57,93 @@ public class Aggregator {
    */
   public ProjectData getProjectData() {
     if (myProjectData != null) return myProjectData;
-    final ProjectData projectData = collectCoverageInformationFromOutputs();
+    boolean hasRawHitsReport = false;
     for (BinaryReport report : myReports) {
-      final ProjectData data = ProjectDataLoader.load(report.getDataFile());
-      for (ClassData classData : data.getClassesCollection()) {
-        final ClassData collectedClassData = projectData.getClassData(classData.getName());
-        if (collectedClassData == null) {
-          // projectData contains all classes already filtered by outputs and filters
-          // so this class must be filtered
-          continue;
-        }
-        collectedClassData.merge(classData);
-      }
+      hasRawHitsReport |= report.isRawHitsReport();
+    }
+    // Note that instructions collection is done only inside this method
+    // to ensure that instructions count in inline methods
+    // correspond to method definition, not method call
+    final ProjectData projectData = collectCoverageInformationFromOutputs();
+    final ProjectData projectDataCopy = hasRawHitsReport ? copyProjectData(projectData) : null;
+    projectData.dropLineMappings();
 
+    for (BinaryReport report : myReports) {
+      if (report.isRawHitsReport()) {
+        try {
+          RawHitsReport.load(report.getDataFile(), projectDataCopy);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      } else {
+        final ProjectData data = ProjectDataLoader.load(report.getDataFile());
+        mergeHits(projectData, data);
+      }
+    }
+    if (projectDataCopy != null) {
+      projectDataCopy.checkLineMappings();
+      mergeHits(projectData, projectDataCopy);
     }
     myProjectData = projectData;
     return projectData;
+  }
+
+  private static ProjectData copyProjectData(ProjectData projectData) {
+    final ProjectData projectDataCopy = ProjectData.createProjectData(false);
+    for (ClassData classData : projectData.getClassesCollection()) {
+      final ClassData classCopy = projectDataCopy.getOrCreateClassData(classData.getName());
+      final LineData[] lines = (LineData[]) classData.getLines();
+      if (lines == null) continue;
+      final LineData[] linesCopy = new LineData[lines.length];
+      classCopy.setLines(linesCopy);
+      for (LineData lineData : lines) {
+        if (lineData == null) continue;
+        final LineData lineCopy = new LineData(lineData.getLineNumber(), lineData.getMethodSignature());
+        lineCopy.setId(lineData.getId());
+        linesCopy[lineCopy.getLineNumber()] = lineCopy;
+
+        final JumpData[] jumps = lineData.getJumps();
+        if (jumps != null) {
+          for (int i = 0; i < jumps.length; i++) {
+            final JumpData jump = jumps[i];
+            final JumpData jumpCopy = lineCopy.addJump(i);
+            jumpCopy.setId(jump.getId(true), true);
+            jumpCopy.setId(jump.getId(false), false);
+          }
+        }
+
+        final SwitchData[] switches = lineData.getSwitches();
+        if (switches != null) {
+          for (int i = 0; i < switches.length; i++) {
+            final SwitchData aSwitch = switches[i];
+            final SwitchData switchCopy = lineCopy.addSwitch(i, aSwitch.getKeys());
+            for (int key = -1; key < aSwitch.getKeys().length; key++) {
+              switchCopy.setId(aSwitch.getId(key), key);
+            }
+          }
+        }
+        lineCopy.fillArrays();
+      }
+    }
+    final Map<String, FileMapData[]> mappings = projectData.getLinesMap();
+    if (mappings != null) {
+      for (Map.Entry<String, FileMapData[]> entry : mappings.entrySet()) {
+        projectDataCopy.addLineMaps(entry.getKey(), entry.getValue());
+      }
+    }
+    return projectDataCopy;
+  }
+
+  private static void mergeHits(ProjectData dst, ProjectData src) {
+    for (ClassData srcClass : src.getClassesCollection()) {
+      final ClassData dstClass = dst.getClassData(srcClass.getName());
+      if (dstClass == null) {
+        // dst ProjectData contains all classes already filtered by outputs and filters
+        // so this class must be filtered
+        continue;
+      }
+      dstClass.merge(srcClass);
+    }
   }
 
   /**
@@ -99,7 +168,6 @@ public class Aggregator {
     }
   }
 
-  /** Analyse all classes in output roots as if they are unloaded classes. */
   private ProjectData collectCoverageInformationFromOutputs() {
     final ProjectData projectData = new ProjectData();
     final List<Pattern> excludeAnnotations = new ArrayList<Pattern>();
@@ -109,7 +177,6 @@ public class Aggregator {
     projectData.setInstructionsCoverage(true);
     projectData.setAnnotationsToIgnore(excludeAnnotations);
     SaveHook.appendUnloadedFullAnalysis(projectData, createClassFinder(), true, false, true, false);
-    projectData.dropLineMappings();
     return projectData;
   }
 

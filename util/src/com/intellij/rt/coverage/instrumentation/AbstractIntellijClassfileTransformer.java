@@ -73,9 +73,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
       if (className == null) {
         return null;
       }
-      if (className.endsWith(".class")) {
-        className = className.substring(0, className.length() - 6);
-      }
+      className = ClassNameUtil.removeClassSuffix(className);
       className = ClassNameUtil.convertToFQName(className);
 
       //do not instrument itself

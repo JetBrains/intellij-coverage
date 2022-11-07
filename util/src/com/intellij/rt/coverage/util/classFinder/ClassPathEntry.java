@@ -77,8 +77,6 @@ public class ClassPathEntry {
     void iterateMatchedClasses(final String classPathEntry, ClassEntry.Consumer consumer) throws IOException;
   }
 
-  private static final String CLASS_FILE_SUFFIX = ".class";
-
   private static class DirectoryEntryProcessor extends AbstractClassPathEntryProcessor {
 
     public void iterateMatchedClasses(final String classPathEntry, ClassEntry.Consumer consumer) throws IOException {
@@ -93,8 +91,8 @@ public class ClassPathEntry {
         String prefix = curPath.length() == 0 ? "" : curPath + ".";
         for (final File f : files) {
           final String name = f.getName();
-          if (name.endsWith(CLASS_FILE_SUFFIX)) {
-            final String className = prefix + removeClassSuffix(name);
+          if (name.endsWith(ClassNameUtil.CLASS_FILE_SUFFIX)) {
+            final String className = prefix + ClassNameUtil.removeClassSuffix(name);
             if (shouldInclude(className)) {
               is[0] = null;
               try {
@@ -117,10 +115,6 @@ public class ClassPathEntry {
     }
   }
 
-  private static String removeClassSuffix(final String name) {
-    return name.substring(0, name.length() - CLASS_FILE_SUFFIX.length());
-  }
-
   private static class ZipEntryProcessor extends AbstractClassPathEntryProcessor {
     public void iterateMatchedClasses(final String classPathEntry, ClassEntry.Consumer consumer) throws IOException {
       final ZipFile zipFile = new ZipFile(new File(classPathEntry));
@@ -129,8 +123,8 @@ public class ClassPathEntry {
         Enumeration<? extends ZipEntry> zenum = zipFile.entries();
         while (zenum.hasMoreElements()) {
           ZipEntry ze = zenum.nextElement();
-          if (!ze.isDirectory() && ze.getName().endsWith(CLASS_FILE_SUFFIX)) {
-            final String className = ClassNameUtil.convertToFQName(removeClassSuffix(ze.getName()));
+          if (!ze.isDirectory() && ze.getName().endsWith(ClassNameUtil.CLASS_FILE_SUFFIX)) {
+            final String className = ClassNameUtil.convertToFQName(ClassNameUtil.removeClassSuffix(ze.getName()));
             if (shouldInclude(className)) {
               is[0] = null;
               try {

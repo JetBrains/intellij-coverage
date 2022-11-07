@@ -1,0 +1,20 @@
+{
+  "output": [
+    "path1",
+    "path2"
+  ],
+  "outputCopy": [
+    "outputPath1",
+    "outputPath2"
+  ],
+  "include": {
+    "classes": [
+      "org\\..*"
+    ]
+  },
+  "exclude": {
+    "classes": [
+      "org\\.pom\\..*"
+    ]
+  }
+}

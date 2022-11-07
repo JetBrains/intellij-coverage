@@ -18,6 +18,8 @@ package com.intellij.rt.coverage.json;
 
 import com.intellij.rt.coverage.aggregate.Aggregator;
 import com.intellij.rt.coverage.aggregate.AggregatorArgs;
+import com.intellij.rt.coverage.instrument.InstrumentatorArgs;
+import com.intellij.rt.coverage.report.ArgParseException;
 import com.intellij.rt.coverage.report.ReporterArgs;
 import com.intellij.rt.coverage.report.data.Module;
 import com.intellij.rt.coverage.report.util.FileUtils;
@@ -79,7 +81,9 @@ public class JsonConfigTest {
     final Module module1 = args.modules.get(0);
     Assert.assertEquals(1, args.reports.size());
     Assert.assertEquals("icPath", args.reports.get(0).getDataFile().getPath());
-    Assert.assertEquals("smapPath", args.reports.get(0).getSourceMapFile().getPath());
+    final File sourceMapFile = args.reports.get(0).getSourceMapFile();
+    Assert.assertNotNull(sourceMapFile);
+    Assert.assertEquals("smapPath", sourceMapFile.getPath());
     Assert.assertEquals(1, module1.getOutputRoots().size());
     Assert.assertEquals("outputPath", module1.getOutputRoots().get(0).getPath());
     Assert.assertEquals(1, module1.getSources().size());
@@ -109,7 +113,9 @@ public class JsonConfigTest {
 
     Assert.assertEquals(2, args.reports.size());
     Assert.assertEquals("ic_path1", args.reports.get(0).getDataFile().getPath());
-    Assert.assertEquals("smap_path1", args.reports.get(0).getSourceMapFile().getPath());
+    final File sourceMapFile = args.reports.get(0).getSourceMapFile();
+    Assert.assertNotNull(sourceMapFile);
+    Assert.assertEquals("smap_path1", sourceMapFile.getPath());
     Assert.assertEquals("ic_path2", args.reports.get(1).getDataFile().getPath());
     Assert.assertNull(args.reports.get(1).getSourceMapFile());
 
@@ -174,5 +180,19 @@ public class JsonConfigTest {
     Assert.assertEquals(BigDecimal.valueOf(0.000001), bound2.min);
 
     Assert.assertEquals("verify.json", args.resultFile.getPath());
+  }
+
+  @Test
+  public void testParsingInstrumentatorJsonArgs() throws IOException, ArgParseException {
+    final File jsonFile = getResourceFile("json/instrumentator.json");
+    final InstrumentatorArgs args = InstrumentatorArgs.parse(jsonFile);
+
+    Assert.assertEquals(2, args.roots.size());
+    Assert.assertEquals("path1", args.roots.get(0).getPath());
+    Assert.assertEquals("path2", args.roots.get(1).getPath());
+
+    Assert.assertEquals(2, args.outputRoots.size());
+    Assert.assertEquals("outputPath1", args.outputRoots.get(0).getPath());
+    Assert.assertEquals("outputPath2", args.outputRoots.get(1).getPath());
   }
 }

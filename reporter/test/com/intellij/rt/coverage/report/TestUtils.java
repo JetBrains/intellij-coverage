@@ -37,7 +37,7 @@ public class TestUtils {
   @NotNull
   public static BinaryReport runTest(String patterns, String className) throws IOException, InterruptedException {
     final File icFile = File.createTempFile("report_tmp", ".ic");
-    CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), icFile, patterns, className, false, new String[]{"-Dcoverage.instructions.enable=true", "-Dcoverage.ignore.private.constructor.util.class=true"}, false, false);
+    CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), icFile, patterns, className, false, new String[]{"-Dcoverage.ignore.private.constructor.util.class=true"}, false, false);
     return new BinaryReport(icFile, null);
   }
 

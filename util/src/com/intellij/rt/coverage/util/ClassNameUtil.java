@@ -23,6 +23,8 @@ import java.util.regex.Pattern;
  * @author Pavel.Sher
  */
 public class ClassNameUtil {
+  public static final String CLASS_FILE_SUFFIX = ".class";
+
   public static String getOuterClassName(String className) {
     int idx = className.indexOf('$');
     if (idx == -1) return className;
@@ -49,5 +51,12 @@ public class ClassNameUtil {
       className = className.substring(1, className.length() - 1);
     }
     return convertToFQName(className);
+  }
+
+  public static String removeClassSuffix(final String name) {
+    if (name.endsWith(CLASS_FILE_SUFFIX)) {
+      return name.substring(0, name.length() - CLASS_FILE_SUFFIX.length());
+    }
+    return name;
   }
 }

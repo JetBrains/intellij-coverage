@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.SaveHook;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
+import com.intellij.rt.coverage.util.RawHitsReport;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -28,6 +29,7 @@ import java.io.IOException;
 public class BinaryReport {
   private final File myDataFile;
   private final File mySourceMapFile;
+  private byte myIsRawReport = 2;
 
   public BinaryReport(File dataFile, @Nullable File sourceMapFile) {
     myDataFile = dataFile;
@@ -36,6 +38,20 @@ public class BinaryReport {
 
   public File getDataFile() {
     return myDataFile;
+  }
+
+  public boolean isRawHitsReport() {
+    if (myIsRawReport <= 1) {
+      return myIsRawReport == 1;
+    }
+    boolean isRaw = false;
+    try {
+      isRaw = RawHitsReport.isRawHitsFile(myDataFile);
+    } catch (IOException e) {
+      ErrorReporter.reportError("Failed to check raw report file", e);
+    }
+    myIsRawReport = isRaw ? (byte) 1 : (byte) 0;
+    return isRaw;
   }
 
   @Nullable

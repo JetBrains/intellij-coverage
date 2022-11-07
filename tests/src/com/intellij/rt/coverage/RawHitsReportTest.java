@@ -52,8 +52,8 @@ public class RawHitsReportTest {
     }
   }
 
-  private static ProjectData createProject() throws IOException {
-    final ProjectData projectData = ProjectData.createProjectData(null, null, false, true, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
+  private static ProjectData createProject() {
+    final ProjectData projectData = ProjectData.createProjectData(true);
     final ClassData classData = projectData.getOrCreateClassData("A");
     classData.setLines(new LineData[]{
         new LineData(0, "a()"),

@@ -163,6 +163,12 @@ public class ProjectData implements CoverageData, Serializable {
     return ourProjectData;
   }
 
+  public static ProjectData createProjectData(boolean isSampling) {
+    final ProjectData projectData = new ProjectData();
+    projectData.mySampling = isSampling;
+    return projectData;
+  }
+
   public void merge(final CoverageData data) {
     final ProjectData projectData = (ProjectData)data;
     for (Map.Entry<String, ClassData> entry : projectData.myClasses.myClasses.entrySet()) {

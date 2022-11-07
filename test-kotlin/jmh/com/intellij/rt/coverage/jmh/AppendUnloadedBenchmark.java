@@ -41,18 +41,18 @@ public class AppendUnloadedBenchmark {
   final boolean calculateSource = true;
 
   @Benchmark
-  public int instrumentation() throws Exception {
+  public int instrumentation() {
     final ClassFinder classFinder = createClassFinder();
-    final ProjectData projectData = ProjectData.createProjectData(null, null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
+    final ProjectData projectData = ProjectData.createProjectData(isSampling);
     SaveHook.appendUnloadedFullAnalysis(projectData, classFinder, calculateSource, isSampling, false);
     System.out.println(projectData.getClassesNumber());
     return projectData.getClassesNumber();
   }
 
   @Benchmark
-  public int unloaded() throws Exception {
+  public int unloaded() {
     final ClassFinder classFinder = createClassFinder();
-    final ProjectData projectData = ProjectData.createProjectData(null, null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
+    final ProjectData projectData = ProjectData.createProjectData(isSampling);
     SaveHook.appendUnloaded(projectData, classFinder, calculateSource, isSampling);
     System.out.println(projectData.getClassesNumber());
     return projectData.getClassesNumber();
