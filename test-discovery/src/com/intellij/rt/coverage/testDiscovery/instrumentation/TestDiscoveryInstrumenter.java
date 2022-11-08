@@ -75,7 +75,7 @@ public class TestDiscoveryInstrumenter extends ExtraFieldInstrumenter {
       return mv;
     }
     if ("<clinit>".equals(name)) {
-      return createMethodVisitor(mv, mv, name);
+      return createMethodVisitor(mv, name);
     }
 
     InstrumentedMethodsFilter.Decision decision = myMethodFilter.shouldVisitMethod(access, name, desc, signature, exceptions, myInstrumentConstructors);
@@ -94,7 +94,7 @@ public class TestDiscoveryInstrumenter extends ExtraFieldInstrumenter {
         super.visitCode();
       }
     };
-    return createMethodVisitor(mv, newMv, name);
+    return createMethodVisitor(newMv, name);
   }
 
   @Override

@@ -18,49 +18,59 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.util.LinesUtil;
-import org.jetbrains.coverage.org.objectweb.asm.*;
+import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Label;
+import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class NewSamplingInstrumenter extends Instrumenter {
-  private static final String LINE_HITS_FIELD_NAME = "__$lineHits$__";
   private static final String LINE_HITS_FIELD_TYPE = "[I";
   private static final String LINE_HITS_LOCAL_VARIABLE_NAME = "__$localLineHits$__";
 
-  private final String myClassNameType;
-  private final ExtraFieldInstrumenter myExtraFieldInstrumenter;
+  private final CoverageDataAccess myDataAccess;
 
   public NewSamplingInstrumenter(final ProjectData projectData,
                                  final ClassVisitor classVisitor,
-                                 final ClassReader cr,
                                  final String className,
-                                 final boolean shouldCalculateSource) {
+                                 final boolean shouldCalculateSource,
+                                 final CoverageDataAccess dataAccess) {
     super(projectData, classVisitor, className, shouldCalculateSource);
-    myExtraFieldInstrumenter = new ExtraFieldSamplingInstrumenter(cr, className);
-    myClassNameType = ClassNameUtil.convertToInternalName(className);
+    myDataAccess = dataAccess;
   }
 
   public MethodVisitor createMethodLineEnumerator(
-      final MethodVisitor mv,
+      MethodVisitor mv,
       final String name,
       final String desc,
       final int access,
       final String signature,
       final String[] exceptions
   ) {
-    final MethodVisitor visitor = new ArraySamplingMethodVisitor(mv, access, name, desc, this) {
+    mv = new LocalVariableInserter(mv, access, desc, LINE_HITS_LOCAL_VARIABLE_NAME, LINE_HITS_FIELD_TYPE) {
+
+      public void visitLineNumber(final int line, final Label start) {
+        getOrCreateLineData(line, name, desc);
+
+        mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+        InstrumentationUtils.pushInt(mv, line);
+        InstrumentationUtils.incrementIntArrayByIndex(mv);
+
+        super.visitLineNumber(line, start);
+      }
+
       public void visitCode() {
-        mv.visitFieldInsn(Opcodes.GETSTATIC, myClassNameType, LINE_HITS_FIELD_NAME, LINE_HITS_FIELD_TYPE);
-        mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
+        myDataAccess.onMethodStart(mv, getOrCreateLocalVariableIndex());
         super.visitCode();
       }
     };
-    return myExtraFieldInstrumenter.createMethodVisitor(this, mv, visitor, name);
+    return myDataAccess.createMethodVisitor(mv, name, true);
   }
 
   @Override
   public void visitEnd() {
-    myExtraFieldInstrumenter.generateMembers(this);
+    myDataAccess.onClassEnd(this);
     super.visitEnd();
   }
 
@@ -69,46 +79,5 @@ public class NewSamplingInstrumenter extends Instrumenter {
     final LineData[] lines = LinesUtil.calcLineArray(myMaxLineNumber, myLines);
     myClassData.initLineMask(lines);
     myClassData.setLines(lines);
-  }
-
-  private class ExtraFieldSamplingInstrumenter extends ExtraFieldInstrumenter {
-
-    public ExtraFieldSamplingInstrumenter(ClassReader cr, String className) {
-      super(cr, null, className, LINE_HITS_FIELD_NAME, LINE_HITS_FIELD_TYPE, true);
-    }
-
-    public void initField(MethodVisitor mv) {
-      mv.visitLdcInsn(getClassName());
-
-      //get line array
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "getLineMask", "(Ljava/lang/String;)[I", false);
-
-      //save line array
-      mv.visitFieldInsn(Opcodes.PUTSTATIC, myClassNameType, LINE_HITS_FIELD_NAME, LINE_HITS_FIELD_TYPE);
-    }
-  }
-
-  public static class ArraySamplingMethodVisitor extends LocalVariableInserter {
-    private final String myName;
-    private final String myDesc;
-    private final Instrumenter myInstrumenter;
-
-    public ArraySamplingMethodVisitor(MethodVisitor methodVisitor, int access, String name, String descriptor, Instrumenter instrumenter) {
-      super(methodVisitor, access, descriptor, LINE_HITS_LOCAL_VARIABLE_NAME, LINE_HITS_FIELD_TYPE);
-      myName = name;
-      myDesc = descriptor;
-      myInstrumenter = instrumenter;
-    }
-
-    public void visitLineNumber(final int line, final Label start) {
-      myInstrumenter.getOrCreateLineData(line, myName, myDesc);
-
-      mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
-      InstrumentationUtils.pushInt(mv, line);
-
-      InstrumentationUtils.incrementIntArrayByIndex(mv);
-
-      super.visitLineNumber(line, start);
-    }
   }
 }

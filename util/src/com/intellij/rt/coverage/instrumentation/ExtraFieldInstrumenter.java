@@ -78,17 +78,13 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
 
   /**
    * Create method visitor that ensures field initialization.
-   * @param mv method visitor without instrumentation
-   * @param newMv instrumenting method visitor
+   * @param mv instrumenting method visitor
    */
-  public MethodVisitor createMethodVisitor(final ClassVisitor cv,
-                                           final MethodVisitor mv,
-                                           MethodVisitor newMv,
+  public MethodVisitor createMethodVisitor(MethodVisitor mv,
                                            final String name) {
-    if (mv == null) return null;
     if (InstrumentationUtils.CLASS_INIT.equals(name)) {
       if (myInterface && (myJava8AndAbove || myShouldCoverClinit)) {
-        newMv = new MethodVisitor(Opcodes.API_VERSION, newMv) {
+        mv = new MethodVisitor(Opcodes.API_VERSION, mv) {
           @Override
           public void visitCode() {
             initField(mv);
@@ -98,13 +94,13 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
         };
       }
       if (!myShouldCoverClinit) {
-        return newMv;
+        return mv;
       }
     }
 
-    if (myInterface) return newMv;
+    if (myInterface) return mv;
 
-    return new MethodVisitor(Opcodes.API_VERSION, newMv) {
+    return new MethodVisitor(Opcodes.API_VERSION, mv) {
       @Override
       public void visitCode() {
         super.visitFieldInsn(Opcodes.GETSTATIC, myInternalClassName, myFieldName, myFieldType);
@@ -118,12 +114,6 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
         super.visitCode();
       }
     };
-  }
-
-  protected MethodVisitor createMethodVisitor(final MethodVisitor mv,
-                                              MethodVisitor newMv,
-                                              final String name) {
-    return createMethodVisitor(this, mv, newMv, name);
   }
 
   /**

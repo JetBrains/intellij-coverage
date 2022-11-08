@@ -17,6 +17,10 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.dataAccess.CondyCoverageDataAccess;
+import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
+import com.intellij.rt.coverage.instrumentation.dataAccess.FieldCoverageDataAccess;
+import com.intellij.rt.coverage.instrumentation.dataAccess.NameCoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classSignature.ClassSignatureFilter;
@@ -71,31 +75,33 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
     for (ClassSignatureFilter filter : ourFilters) {
       if (filter.shouldFilter(cr)) return null;
     }
+    final CoverageDataAccess dataAccess;
+    if (isSampling && OptionsUtil.NEW_SAMPLING_ENABLED || !isSampling && OptionsUtil.NEW_TRACING_ENABLED) {
+      if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
+        dataAccess = new CondyCoverageDataAccess(className, isSampling);
+      } else {
+        dataAccess = new FieldCoverageDataAccess(cr, className, isSampling);
+      }
+    } else {
+      dataAccess = new NameCoverageDataAccess(className);
+    }
     final Instrumenter instrumenter;
     if (isSampling) {
       if (OptionsUtil.NEW_SAMPLING_ENABLED) {
-        if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
-          instrumenter = new CondySamplingInstrumenter(data, cw, className, shouldCalculateSource);
-        } else {
-          //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
-          instrumenter = new NewSamplingInstrumenter(data, cw, cr, className, shouldCalculateSource);
-        }
+        instrumenter = new NewSamplingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
       } else {
-        instrumenter = new SamplingInstrumenter(data, cw, className, shouldCalculateSource);
+        //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
+        instrumenter = new SamplingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
       }
     } else {
       if (OptionsUtil.NEW_TRACING_ENABLED) {
         if (data.isTestTracking() && testTrackingMode != null) {
-          instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldCalculateSource);
+          instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldCalculateSource, dataAccess);
         } else {
-          if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
-            instrumenter = new CondyTracingInstrumenter(data, cw, className, shouldCalculateSource);
-          } else {
-            instrumenter = new NewTracingInstrumenter(data, cw, cr, className, shouldCalculateSource);
-          }
+          instrumenter = new NewTracingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
         }
       } else {
-        instrumenter = new TracingInstrumenter(data, cw, className, shouldCalculateSource);
+        instrumenter = new TracingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
       }
     }
     ClassVisitor result = instrumenter;

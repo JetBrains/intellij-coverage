@@ -20,30 +20,38 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.instrumentation.data.Jump;
 import com.intellij.rt.coverage.instrumentation.data.Switch;
+import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class TracingInstrumenter extends AbstractTracingInstrumenter {
-  public TracingInstrumenter(ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
+  private final CoverageDataAccess myDataAccess;
+
+  public TracingInstrumenter(ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
     super(projectData, classVisitor, className, shouldCalculateSource);
+    myDataAccess = dataAccess;
   }
 
   public MethodVisitor createTouchCounter(MethodVisitor methodVisitor, BranchDataContainer branchData, LineEnumerator enumerator, int access, String name, String desc, String className) {
     if (enumerator.hasNoLines()) return methodVisitor;
-    return new TouchCounter(methodVisitor, branchData, access, desc, className);
+    return new TouchCounter(methodVisitor, branchData, access, desc);
   }
 
-  private static class TouchCounter extends LocalVariableInserter {
+  @Override
+  public void visitEnd() {
+    myDataAccess.onClassEnd(this);
+    super.visitEnd();
+  }
+
+  private class TouchCounter extends LocalVariableInserter {
     public static final String CLASS_DATA_LOCAL_VARIABLE_NAME = "__$class__data$__";
     private final BranchDataContainer myBranchData;
-    private final String myClassName;
 
-    public TouchCounter(MethodVisitor methodVisitor, BranchDataContainer branchData, int access, String desc, String className) {
+    public TouchCounter(MethodVisitor methodVisitor, BranchDataContainer branchData, int access, String desc) {
       super(methodVisitor, access, desc, CLASS_DATA_LOCAL_VARIABLE_NAME, InstrumentationUtils.OBJECT_TYPE);
       myBranchData = branchData;
-      myClassName = className;
     }
 
 
@@ -79,9 +87,7 @@ public class TracingInstrumenter extends AbstractTracingInstrumenter {
     }
 
     public void visitCode() {
-      mv.visitLdcInsn(myClassName);
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)" + InstrumentationUtils.OBJECT_TYPE, false);
-      mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
+      myDataAccess.onMethodStart(mv, getOrCreateLocalVariableIndex());
       super.visitCode();
     }
   }

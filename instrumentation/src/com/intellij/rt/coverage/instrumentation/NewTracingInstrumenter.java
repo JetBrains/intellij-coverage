@@ -21,18 +21,18 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.instrumentation.data.Jump;
 import com.intellij.rt.coverage.instrumentation.data.Switch;
+import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
 public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
-  private static final String BRANCH_HITS_FIELD_NAME = "__$branchHits$__";
   private static final String BRANCH_HITS_FIELD_TYPE = "[I";
   private static final String BRANCH_HITS_LOCAL_VARIABLE_NAME = "__$localBranchHits$__";
 
-  private final ExtraFieldInstrumenter myExtraFieldInstrumenter;
+  private final CoverageDataAccess myDataAccess;
 
-  public NewTracingInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource) {
+  public NewTracingInstrumenter(ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
     super(projectData, classVisitor, className, shouldCalculateSource);
-    myExtraFieldInstrumenter = new ExtraFieldTracingInstrumenter(cr, className);
+    myDataAccess = dataAccess;
   }
 
   @Override
@@ -44,24 +44,20 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
                                           final String desc,
                                           final String className) {
     if (enumerator.hasNoLines()) {
-      if (myExtraFieldInstrumenter.isInterface() && InstrumentationUtils.CLASS_INIT.equals(name)) {
-        return myExtraFieldInstrumenter.createMethodVisitor(this, mv, mv, name);
-      }
-      return mv;
+      return myDataAccess.createMethodVisitor(mv, name, false);
     }
     final MethodVisitor visitor = new ArrayTracingMethodVisitor(mv, access, desc, enumerator) {
       public void visitCode() {
-        mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraFieldInstrumenter.getInternalClassName(), BRANCH_HITS_FIELD_NAME, BRANCH_HITS_FIELD_TYPE);
-        mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
+        myDataAccess.onMethodStart(mv, getOrCreateLocalVariableIndex());
         super.visitCode();
       }
     };
-    return myExtraFieldInstrumenter.createMethodVisitor(this, mv, visitor, name);
+    return myDataAccess.createMethodVisitor(visitor, name, true);
   }
 
   @Override
   public void visitEnd() {
-    myExtraFieldInstrumenter.generateMembers(this);
+    myDataAccess.onClassEnd(this);
     super.visitEnd();
   }
 
@@ -69,23 +65,6 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
   protected void initLineData() {
     myClassData.createHitsMask(myBranchData.getSize());
     super.initLineData();
-  }
-
-  private class ExtraFieldTracingInstrumenter extends ExtraFieldInstrumenter {
-
-    public ExtraFieldTracingInstrumenter(ClassReader cr, String className) {
-      super(cr, null, className, BRANCH_HITS_FIELD_NAME, BRANCH_HITS_FIELD_TYPE, true);
-    }
-
-    public void initField(MethodVisitor mv) {
-      mv.visitLdcInsn(getClassName());
-
-      //get hits array
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "getHitsMask", "(Ljava/lang/String;)[I", false);
-
-      //save hits array
-      mv.visitFieldInsn(Opcodes.PUTSTATIC, myExtraFieldInstrumenter.getInternalClassName(), BRANCH_HITS_FIELD_NAME, BRANCH_HITS_FIELD_TYPE);
-    }
   }
 
   public static class ArrayTracingMethodVisitor extends LocalVariableInserter {

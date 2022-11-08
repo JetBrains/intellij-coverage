@@ -16,7 +16,6 @@
 
 package com.intellij.rt.coverage.instrumentation;
 
-import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
 import com.intellij.rt.coverage.util.StringsPool;

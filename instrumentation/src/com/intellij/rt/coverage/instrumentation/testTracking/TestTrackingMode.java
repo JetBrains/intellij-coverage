@@ -18,11 +18,12 @@ package com.intellij.rt.coverage.instrumentation.testTracking;
 
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 
 public interface TestTrackingMode {
   TestTrackingCallback createTestTrackingCallback();
-  Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource);
+  Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess);
 }

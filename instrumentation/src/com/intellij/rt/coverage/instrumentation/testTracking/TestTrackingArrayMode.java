@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.*;
+import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
@@ -47,8 +48,8 @@ public class TestTrackingArrayMode implements TestTrackingMode {
     };
   }
 
-  public Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource) {
-    return new TestTrackingArrayInstrumenter(projectData, classVisitor, cr, className, shouldCalculateSource);
+  public Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
+    return new TestTrackingArrayInstrumenter(projectData, classVisitor, cr, className, shouldCalculateSource, dataAccess);
   }
 }
 
@@ -59,16 +60,16 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
 
   private final ExtraFieldInstrumenter myExtraTraceMaskFieldInstrumenter;
 
-  public TestTrackingArrayInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource) {
-    super(projectData, classVisitor, cr, className, shouldCalculateSource);
+  public TestTrackingArrayInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
+    super(projectData, classVisitor, cr, className, shouldCalculateSource, dataAccess);
     myExtraTraceMaskFieldInstrumenter = new ExtraTraceMaskFieldTestTrackingInstrumenter(cr, className);
   }
 
   protected MethodVisitor createMethodTransformer(final MethodVisitor mv, LineEnumerator enumerator, final int access, String name, final String desc) {
     if (enumerator.hasNoLines()) {
       if (myExtraClassDataFieldInstrumenter.isInterface() && InstrumentationUtils.CLASS_INIT.equals(name)) {
-        final MethodVisitor mv1 = myExtraClassDataFieldInstrumenter.createMethodVisitor(this, mv, mv, name);
-        return myExtraTraceMaskFieldInstrumenter.createMethodVisitor(this, mv, mv1, name);
+        final MethodVisitor mv1 = myExtraClassDataFieldInstrumenter.createMethodVisitor(mv, name);
+        return myExtraTraceMaskFieldInstrumenter.createMethodVisitor(mv1, name);
       }
       return mv;
     }
@@ -114,8 +115,8 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
         super.visitCode();
       }
     };
-    final MethodVisitor mv1 = myExtraClassDataFieldInstrumenter.createMethodVisitor(this, mv, visitor, name);
-    return myExtraTraceMaskFieldInstrumenter.createMethodVisitor(this, mv, mv1, name);
+    final MethodVisitor mv1 = myExtraClassDataFieldInstrumenter.createMethodVisitor(visitor, name);
+    return myExtraTraceMaskFieldInstrumenter.createMethodVisitor(mv1, name);
   }
 
   @Override

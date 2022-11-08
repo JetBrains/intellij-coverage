@@ -18,23 +18,27 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.util.LinesUtil;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
 public class SamplingInstrumenter extends Instrumenter {
   private static final String CLASS_DATA_LOCAL_VARIABLE_NAME = "__class__data__";
 
-  public SamplingInstrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
+  private final CoverageDataAccess myDataAccess;
+
+  public SamplingInstrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
     super(projectData, classVisitor, className, shouldCalculateSource);
+    myDataAccess = dataAccess;
   }
 
-  protected MethodVisitor createMethodLineEnumerator(final MethodVisitor mv,
+  protected MethodVisitor createMethodLineEnumerator(MethodVisitor mv,
                                                      final String name,
                                                      final String desc,
                                                      final int access,
                                                      final String signature,
                                                      final String[] exceptions) {
-    return new LocalVariableInserter(mv, access, desc, CLASS_DATA_LOCAL_VARIABLE_NAME, InstrumentationUtils.OBJECT_TYPE) {
+    mv = new LocalVariableInserter(mv, access, desc, CLASS_DATA_LOCAL_VARIABLE_NAME, InstrumentationUtils.OBJECT_TYPE) {
 
       public void visitLineNumber(final int line, final Label start) {
         getOrCreateLineData(line, name, desc);
@@ -45,12 +49,17 @@ public class SamplingInstrumenter extends Instrumenter {
       }
 
       public void visitCode() {
-        mv.visitLdcInsn(getClassName());
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)" + InstrumentationUtils.OBJECT_TYPE, false);
-        mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
+        myDataAccess.onMethodStart(mv, getOrCreateLocalVariableIndex());
         super.visitCode();
       }
     };
+    return myDataAccess.createMethodVisitor(mv, name, true);
+  }
+
+  @Override
+  public void visitEnd() {
+    myDataAccess.onClassEnd(this);
+    super.visitEnd();
   }
 
   protected void initLineData() {
