@@ -19,23 +19,23 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
+import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
 import com.intellij.rt.coverage.util.LinesUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
-public class NewSamplingInstrumenter extends Instrumenter {
-  private static final String LINE_HITS_FIELD_TYPE = "[I";
+public class SamplingInstrumenter extends Instrumenter {
   private static final String LINE_HITS_LOCAL_VARIABLE_NAME = "__$localLineHits$__";
 
   private final CoverageDataAccess myDataAccess;
 
-  public NewSamplingInstrumenter(final ProjectData projectData,
-                                 final ClassVisitor classVisitor,
-                                 final String className,
-                                 final boolean shouldCalculateSource,
-                                 final CoverageDataAccess dataAccess) {
+  public SamplingInstrumenter(final ProjectData projectData,
+                              final ClassVisitor classVisitor,
+                              final String className,
+                              final boolean shouldCalculateSource,
+                              final CoverageDataAccess dataAccess) {
     super(projectData, classVisitor, className, shouldCalculateSource);
     myDataAccess = dataAccess;
   }
@@ -48,7 +48,7 @@ public class NewSamplingInstrumenter extends Instrumenter {
       final String signature,
       final String[] exceptions
   ) {
-    mv = new LocalVariableInserter(mv, access, desc, LINE_HITS_LOCAL_VARIABLE_NAME, LINE_HITS_FIELD_TYPE) {
+    mv = new LocalVariableInserter(mv, access, desc, LINE_HITS_LOCAL_VARIABLE_NAME, DataAccessUtil.HITS_ARRAY_TYPE) {
 
       public void visitLineNumber(final int line, final Label start) {
         getOrCreateLineData(line, name, desc);

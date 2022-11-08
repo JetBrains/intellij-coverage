@@ -22,15 +22,15 @@ import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.instrumentation.data.Jump;
 import com.intellij.rt.coverage.instrumentation.data.Switch;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
+import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
-public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
-  private static final String BRANCH_HITS_FIELD_TYPE = "[I";
+public class TracingInstrumenter extends AbstractTracingInstrumenter {
   private static final String BRANCH_HITS_LOCAL_VARIABLE_NAME = "__$localBranchHits$__";
 
   private final CoverageDataAccess myDataAccess;
 
-  public NewTracingInstrumenter(ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
+  public TracingInstrumenter(ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
     super(projectData, classVisitor, className, shouldCalculateSource);
     myDataAccess = dataAccess;
   }
@@ -71,7 +71,7 @@ public class NewTracingInstrumenter extends AbstractTracingInstrumenter {
     private final LineEnumerator myEnumerator;
 
     public ArrayTracingMethodVisitor(MethodVisitor methodVisitor, int access, String descriptor, LineEnumerator enumerator) {
-      super(methodVisitor, access, descriptor, BRANCH_HITS_LOCAL_VARIABLE_NAME, BRANCH_HITS_FIELD_TYPE);
+      super(methodVisitor, access, descriptor, BRANCH_HITS_LOCAL_VARIABLE_NAME, DataAccessUtil.HITS_ARRAY_TYPE);
       myEnumerator = enumerator;
     }
 

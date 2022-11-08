@@ -23,22 +23,19 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class CondyCoverageDataAccess extends CoverageDataAccess {
-  private final ConstantDynamic condy;
+  private final ConstantDynamic myCondy;
+  private final CoverageDataAccess.DataType myType;
 
-  public CondyCoverageDataAccess(String className) {
-    final Handle handle = new Handle(Opcodes.H_INVOKESTATIC, "com/intellij/rt/coverage/util/CondyUtils", "getHitsMask",
-        "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I", false);
-    condy = new ConstantDynamic(HITS_NAME, InstrumentationUtils.OBJECT_TYPE, handle, className);
+  public CondyCoverageDataAccess(String className, CoverageDataAccess.DataType type) {
+    final Handle handle = new Handle(Opcodes.H_INVOKESTATIC, type.initOwner, type.initName, type.initDesc, false);
+    myCondy = new ConstantDynamic(type.name, InstrumentationUtils.OBJECT_TYPE, handle, className);
+    myType = type;
   }
 
   @Override
   public void onMethodStart(MethodVisitor mv, int localVariable) {
-    mv.visitLdcInsn(condy);
-    mv.visitTypeInsn(Opcodes.CHECKCAST, HITS_TYPE);
+    mv.visitLdcInsn(myCondy);
+    mv.visitTypeInsn(Opcodes.CHECKCAST, myType.desc);
     mv.visitVarInsn(Opcodes.ASTORE, localVariable);
   }
-
-
-  private static final String HITS_NAME = "__$hits$__";
-  private static final String HITS_TYPE = "[I";
 }

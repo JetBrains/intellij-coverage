@@ -22,6 +22,7 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.*;
 import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
+import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
@@ -56,15 +57,14 @@ public class TestTrackingClassDataMode implements TestTrackingMode {
   }
 }
 
-class TestTrackingClassDataInstrumenter extends NewTracingInstrumenter {
-  protected static final String CLASS_DATA_FIELD_NAME = "__$classData$__";
-  private static final String CLASS_DATA_LOCAL_VARIABLE_NAME = "__$classDataLocal$__";
+class TestTrackingClassDataInstrumenter extends TracingInstrumenter {
+  protected static final String CLASS_DATA_LOCAL_VARIABLE_NAME = "__$classDataLocal$__";
 
-  protected final ExtraFieldInstrumenter myExtraClassDataFieldInstrumenter;
+  protected final CoverageDataAccess myDataAccess;
 
   public TestTrackingClassDataInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
     super(projectData, classVisitor, className, shouldCalculateSource, dataAccess);
-    myExtraClassDataFieldInstrumenter = new ExtraClassDataFieldTestTrackingInstrumenter(cr, className);
+    myDataAccess = DataAccessUtil.createTestTrackingDataAccess(className, cr, false);
   }
 
   @Override
@@ -81,10 +81,7 @@ class TestTrackingClassDataInstrumenter extends NewTracingInstrumenter {
 
   protected MethodVisitor createMethodTransformer(final MethodVisitor mv, LineEnumerator enumerator, final int access, String name, final String desc) {
     if (enumerator.hasNoLines()) {
-      if (myExtraClassDataFieldInstrumenter.isInterface() && InstrumentationUtils.CLASS_INIT.equals(name)) {
-        return myExtraClassDataFieldInstrumenter.createMethodVisitor(mv, name);
-      }
-      return mv;
+      return myDataAccess.createMethodVisitor(mv, name, false);
     }
     final MethodVisitor visitor = new LocalVariableInserter(mv, access, desc, CLASS_DATA_LOCAL_VARIABLE_NAME, InstrumentationUtils.OBJECT_TYPE) {
       public void visitLineNumber(final int line, final Label start) {
@@ -98,35 +95,17 @@ class TestTrackingClassDataInstrumenter extends NewTracingInstrumenter {
       }
 
       public void visitCode() {
-        mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraClassDataFieldInstrumenter.getInternalClassName(), CLASS_DATA_FIELD_NAME, InstrumentationUtils.OBJECT_TYPE);
-        mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
+        myDataAccess.onMethodStart(mv, getOrCreateLocalVariableIndex());
         super.visitCode();
       }
     };
-    return myExtraClassDataFieldInstrumenter.createMethodVisitor(visitor, name);
+    return myDataAccess.createMethodVisitor(visitor, name, true);
   }
 
   @Override
   public void visitEnd() {
-    myExtraClassDataFieldInstrumenter.generateMembers(this);
+    myDataAccess.onClassEnd(this);
     super.visitEnd();
-  }
-
-  private class ExtraClassDataFieldTestTrackingInstrumenter extends ExtraFieldInstrumenter {
-
-    public ExtraClassDataFieldTestTrackingInstrumenter(ClassReader cr, String className) {
-      super(cr, null, className, CLASS_DATA_FIELD_NAME, InstrumentationUtils.OBJECT_TYPE, true);
-    }
-
-    public void initField(MethodVisitor mv) {
-      mv.visitLdcInsn(getClassName());
-
-      //get ClassData
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)" + InstrumentationUtils.OBJECT_TYPE, false);
-
-      //save ClassData
-      mv.visitFieldInsn(Opcodes.PUTSTATIC, myExtraClassDataFieldInstrumenter.getInternalClassName(), CLASS_DATA_FIELD_NAME, InstrumentationUtils.OBJECT_TYPE);
-    }
   }
 }
 

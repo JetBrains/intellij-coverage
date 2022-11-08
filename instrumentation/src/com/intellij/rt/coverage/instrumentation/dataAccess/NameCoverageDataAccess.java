@@ -16,22 +16,22 @@
 
 package com.intellij.rt.coverage.instrumentation.dataAccess;
 
-import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class NameCoverageDataAccess extends CoverageDataAccess {
   private final String myClassName;
+  private final CoverageDataAccess.DataType myType;
 
-  public NameCoverageDataAccess(String className) {
+  public NameCoverageDataAccess(String className, DataType type) {
     myClassName = className;
+    myType = type;
   }
 
   @Override
   public void onMethodStart(MethodVisitor mv, int localVariable) {
     mv.visitLdcInsn(myClassName);
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "getHitsMask", "(Ljava/lang/String;)[I", false);
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, myType.initOwner, myType.initName, myType.initDesc, false);
     mv.visitVarInsn(Opcodes.ASTORE, localVariable);
   }
 }

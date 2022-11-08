@@ -30,6 +30,7 @@ internal abstract class AbstractTestTrackingTest(override val coverage: Coverage
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
         val expected = extractTestTrackingDataFromFile(testFile)
         assertEqualsTestTracking(myDataFile, expected, configuration.classes)
+        assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
     }
 
     @Test
@@ -44,10 +45,11 @@ internal abstract class AbstractTestTrackingTest(override val coverage: Coverage
         test(
             test.testName,
             configuration = extractTestConfiguration(test.file).copy(extraArgs = mutableListOf("-Dthreads=1"))
-        ) { _, config, _ ->
-            val lines = testTrackingLines(myDataFile, config.classes)
+        ) { projectData, configuration, _ ->
+            val lines = testTrackingLines(myDataFile, configuration.classes)
             Assert.assertEquals(5, lines.size)
             lines.values.forEach { Assert.assertEquals(CALLS_PER_LINE, it.size) }
+            assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
         }
     }
 
@@ -57,14 +59,18 @@ internal abstract class AbstractTestTrackingTest(override val coverage: Coverage
         test(
             test.testName,
             configuration = extractTestConfiguration(test.file).copy(extraArgs = mutableListOf("-Dthreads=2"))
-        ) { _, config, _ -> testTrackingLines(myDataFile, config.classes) }
+        ) { projectData, configuration, _ ->
+            testTrackingLines(myDataFile, configuration.classes)
+            assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
+        }
     }
 
     @Test
-    fun testSequentialTests() = test("custom.testTracking.sequentialTests") { _, config, _ ->
-        val lines = testTrackingLines(myDataFile, config.classes)
+    fun testSequentialTests() = test("custom.testTracking.sequentialTests") { projectData, configuration, _ ->
+        val lines = testTrackingLines(myDataFile, configuration.classes)
         Assert.assertEquals(5, lines.size)
         lines.values.forEach { Assert.assertEquals(TESTS, it.size) }
+        assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
     }
 }
 

@@ -21,6 +21,8 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.*;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
+import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
+import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
@@ -54,26 +56,22 @@ public class TestTrackingArrayMode implements TestTrackingMode {
 }
 
 class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
-  private static final String TRACE_MASK_FIELD_NAME = "__$traceMask$__";
-  private static final String TRACE_MASK_FIELD_TYPE = "[Z";
   private static final String TRACE_MASK_LOCAL_VARIABLE_NAME = "__$traceMaskLocal$__";
 
-  private final ExtraFieldInstrumenter myExtraTraceMaskFieldInstrumenter;
+  private final CoverageDataAccess myArrayDataAccess;
+  private final String myInternalClassName;
 
   public TestTrackingArrayInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
     super(projectData, classVisitor, cr, className, shouldCalculateSource, dataAccess);
-    myExtraTraceMaskFieldInstrumenter = new ExtraTraceMaskFieldTestTrackingInstrumenter(cr, className);
+    myInternalClassName = ClassNameUtil.convertToInternalName(className);
+    myArrayDataAccess = DataAccessUtil.createTestTrackingDataAccess(className, cr, true);
   }
 
   protected MethodVisitor createMethodTransformer(final MethodVisitor mv, LineEnumerator enumerator, final int access, String name, final String desc) {
     if (enumerator.hasNoLines()) {
-      if (myExtraClassDataFieldInstrumenter.isInterface() && InstrumentationUtils.CLASS_INIT.equals(name)) {
-        final MethodVisitor mv1 = myExtraClassDataFieldInstrumenter.createMethodVisitor(mv, name);
-        return myExtraTraceMaskFieldInstrumenter.createMethodVisitor(mv1, name);
-      }
-      return mv;
+      return myArrayDataAccess.createMethodVisitor(super.myDataAccess.createMethodVisitor(mv, name, false), name, false);
     }
-    final MethodVisitor visitor = new LocalVariableInserter(mv, access, desc, TRACE_MASK_LOCAL_VARIABLE_NAME, TRACE_MASK_FIELD_TYPE) {
+    final MethodVisitor visitor = new LocalVariableInserter(mv, access, desc, TRACE_MASK_LOCAL_VARIABLE_NAME, DataAccessUtil.TEST_MASK_ARRAY_TYPE) {
       public void visitLineNumber(final int line, final Label start) {
         LineData lineData = getLineData(line);
         if (lineData != null) {
@@ -88,7 +86,7 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
           mv.visitJumpInsn(Opcodes.IFNE, skip);
 
           // call register
-          mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraClassDataFieldInstrumenter.getInternalClassName(), TestTrackingClassDataInstrumenter.CLASS_DATA_FIELD_NAME, InstrumentationUtils.OBJECT_TYPE);
+          mv.visitFieldInsn(Opcodes.GETSTATIC, myInternalClassName, DataAccessUtil.CLASS_DATA_NAME, InstrumentationUtils.OBJECT_TYPE);
           mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "registerClassForTrace", "(" + InstrumentationUtils.OBJECT_TYPE + ")Z", false);
 
           // if register is successful set array[0] = true
@@ -110,18 +108,16 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
       }
 
       public void visitCode() {
-        mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraTraceMaskFieldInstrumenter.getInternalClassName(), TRACE_MASK_FIELD_NAME, TRACE_MASK_FIELD_TYPE);
-        mv.visitVarInsn(Opcodes.ASTORE, getOrCreateLocalVariableIndex());
+        myArrayDataAccess.onMethodStart(mv, getOrCreateLocalVariableIndex());
         super.visitCode();
       }
     };
-    final MethodVisitor mv1 = myExtraClassDataFieldInstrumenter.createMethodVisitor(visitor, name);
-    return myExtraTraceMaskFieldInstrumenter.createMethodVisitor(mv1, name);
+    return myArrayDataAccess.createMethodVisitor(super.myDataAccess.createMethodVisitor(visitor, name, true), name, true);
   }
 
   @Override
   public void visitEnd() {
-    myExtraTraceMaskFieldInstrumenter.generateMembers(this);
+    myArrayDataAccess.onClassEnd(this);
     super.visitEnd();
   }
 
@@ -129,22 +125,5 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
   protected void initLineData() {
     myClassData.createTraceMask(myMaxLineNumber + 1);
     super.initLineData();
-  }
-
-  private class ExtraTraceMaskFieldTestTrackingInstrumenter extends ExtraFieldInstrumenter {
-
-    public ExtraTraceMaskFieldTestTrackingInstrumenter(ClassReader cr, String className) {
-      super(cr, null, className, TRACE_MASK_FIELD_NAME, TRACE_MASK_FIELD_TYPE, true);
-    }
-
-    public void initField(MethodVisitor mv) {
-      mv.visitLdcInsn(getClassName());
-
-      //get trace mask array
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "getTraceMask", "(Ljava/lang/String;)[Z", false);
-
-      //save trace mask array
-      mv.visitFieldInsn(Opcodes.PUTSTATIC, myExtraTraceMaskFieldInstrumenter.getInternalClassName(), TRACE_MASK_FIELD_NAME, TRACE_MASK_FIELD_TYPE);
-    }
   }
 }

@@ -17,12 +17,12 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.testTracking.NoTestTrackingMode;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingArrayMode;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingClassDataMode;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.OptionsUtil;
+import com.intellij.rt.coverage.util.TestTrackingCallback;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 
 import java.io.*;
@@ -117,7 +117,8 @@ public class Instrumentator {
     }
 
     final TestTrackingMode testTrackingMode = createTestTrackingMode(traceLines);
-    final ProjectData data = ProjectData.createProjectData(dataFile, null, traceLines, sampling, includePatterns, excludePatterns, testTrackingMode.createTestTrackingCallback());
+    final TestTrackingCallback callback = testTrackingMode == null ? null : testTrackingMode.createTestTrackingCallback();
+    final ProjectData data = ProjectData.createProjectData(dataFile, null, traceLines, sampling, includePatterns, excludePatterns, callback);
     data.setAnnotationsToIgnore(annotationsToIgnore);
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
     if (dataFile != null) {
@@ -172,7 +173,7 @@ public class Instrumentator {
   }
 
   private TestTrackingMode createTestTrackingMode(boolean traceLines) {
-    if (!traceLines) return new NoTestTrackingMode();
+    if (!traceLines) return null;
     if (OptionsUtil.NEW_TRACING_ENABLED && OptionsUtil.NEW_TEST_TRACKING_ENABLED) {
       return new TestTrackingArrayMode();
     }

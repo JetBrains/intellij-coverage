@@ -38,4 +38,20 @@ public abstract class CoverageDataAccess {
   public MethodVisitor createMethodVisitor(MethodVisitor mv, String name, boolean hasLines) {
     return mv;
   }
+
+  public static class DataType {
+    public final String name;
+    public final String desc;
+    public final String initOwner;
+    public final String initName;
+    public final String initDesc;
+
+    public DataType(String name, String desc, String initOwner, String initName, String initDesc) {
+      this.name = name;
+      this.desc = desc;
+      this.initOwner = initOwner;
+      this.initName = initName;
+      this.initDesc = initDesc;
+    }
+  }
 }

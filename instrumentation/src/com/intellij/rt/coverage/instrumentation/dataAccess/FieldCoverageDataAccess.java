@@ -16,7 +16,6 @@
 
 package com.intellij.rt.coverage.instrumentation.dataAccess;
 
-import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.ExtraFieldInstrumenter;
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
@@ -26,24 +25,26 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class FieldCoverageDataAccess extends CoverageDataAccess {
   private final ExtraFieldInstrumenter myExtraFieldInstrumenter;
+  private final CoverageDataAccess.DataType myType;
 
-  public FieldCoverageDataAccess(ClassReader cr, final String className) {
-    myExtraFieldInstrumenter = new ExtraFieldInstrumenter(cr, null, className, HITS_NAME, HITS_TYPE, true) {
+  public FieldCoverageDataAccess(ClassReader cr, final String className, final CoverageDataAccess.DataType type) {
+    myExtraFieldInstrumenter = new ExtraFieldInstrumenter(cr, null, className, type.name, type.desc, true) {
 
       public void initField(MethodVisitor mv) {
         //get hits array
         mv.visitLdcInsn(className);
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "getHitsMask", "(Ljava/lang/String;)[I", false);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, type.initOwner, type.initName, type.initDesc, false);
 
         //save hits array
-        mv.visitFieldInsn(Opcodes.PUTSTATIC, getInternalClassName(), HITS_NAME, HITS_TYPE);
+        mv.visitFieldInsn(Opcodes.PUTSTATIC, getInternalClassName(), type.name, type.desc);
       }
     };
+    myType = type;
   }
 
   @Override
   public void onMethodStart(MethodVisitor mv, int localVariable) {
-    mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraFieldInstrumenter.getInternalClassName(), HITS_NAME, HITS_TYPE);
+    mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraFieldInstrumenter.getInternalClassName(), myType.name, myType.desc);
     mv.visitVarInsn(Opcodes.ASTORE, localVariable);
   }
 
@@ -59,7 +60,4 @@ public class FieldCoverageDataAccess extends CoverageDataAccess {
     }
     return mv;
   }
-
-  private static final String HITS_NAME = "__$hits$__";
-  private static final String HITS_TYPE = "[I";
 }

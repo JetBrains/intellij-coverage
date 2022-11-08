@@ -229,7 +229,7 @@ private val classesMarkerRegex = Regex("// classes: (.*)\$")
 private val patternsMarkerRegex = Regex("// patterns: (.*)\$")
 private val calculateUnloadedMarkerRegex = Regex("// calculate unloaded: (.*)\$")
 private val extraArgumentsMarkerRegex = Regex("// extra args: (.*)\$")
-private val testTrackingMarkerRegex = Regex("// tests: (.*)\$")
+private val testTrackingMarkerRegex = Regex("// tests: ([^/]*)")
 private val fileWithCoverageMarkersRegex = Regex("// markers: (.*)\$")
 private val extendedInfoRegex = Regex("// stats: ([0-9]+)/([0-9]+)(\\s+([0-9]+)/([0-9]+))?")
 
@@ -287,7 +287,7 @@ class CoverageMatcher : SingleGroupMatcher(coverageMarkerRegex, 1) {
 class TestTrackingMatcher : SingleGroupMatcher(testTrackingMarkerRegex, 1) {
     val result = linkedMapOf<Int, Set<String>>()
     override fun onMatchFound(line: Int, match: String) {
-        result[line] = match.split(' ').toSet()
+        result[line] = match.trim().split(' ').toSet()
     }
 }
 

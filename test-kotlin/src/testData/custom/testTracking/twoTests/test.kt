@@ -20,13 +20,13 @@ import testData.custom.testTracking.runTestTracking
 
 // classes: MyClass
 
-class MyClass {
+class MyClass { // coverage: FULL
     fun test1(): Int {
-        return 42     // tests: OneTest
+        return 42     // tests: OneTest // coverage: FULL
     }
 
     fun test2(): Int {
-        return 42     // tests: OneTest TwoTest
+        return 42     // tests: OneTest TwoTest // coverage: FULL
     }
 }
 

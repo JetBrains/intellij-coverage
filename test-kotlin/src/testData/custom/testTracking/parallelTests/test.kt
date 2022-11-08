@@ -31,33 +31,33 @@ private fun doWork(limit: Int = Random.nextInt(1, 7)): Int {
     return result
 }
 
-private class Class0 {
+private class Class0 { // coverage: FULL
     fun foo() {
-        doWork()                           // tests: Test1 Test2 Test3...
+        doWork()       // coverage: FULL                    // tests: Test1 Test2 Test3...
     }
 }
 
-private class Class1 {
+private class Class1 { // coverage: FULL
     fun foo() {
-        doWork()                           // tests: Test1 Test2 Test3...
+        doWork()       // coverage: FULL                    // tests: Test1 Test2 Test3...
     }
 }
 
-private class Class2 {
+private class Class2 { // coverage: FULL
     fun foo() {
-        doWork()                           // tests: Test1 Test2 Test3...
+        doWork()       // coverage: FULL                    // tests: Test1 Test2 Test3...
     }
 }
 
-private class Class3 {
+private class Class3 { // coverage: FULL
     fun foo() {
-        doWork()                           // tests: Test1 Test2 Test3...
+        doWork()       // coverage: FULL                    // tests: Test1 Test2 Test3...
     }
 }
 
-private class Class4 {
+private class Class4 { // coverage: FULL
     fun foo() {
-        doWork()                           // tests: Test1 Test2 Test3...
+        doWork()       // coverage: FULL                    // tests: Test1 Test2 Test3...
     }
 }
 

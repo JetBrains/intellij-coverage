@@ -17,10 +17,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.dataAccess.CondyCoverageDataAccess;
-import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
-import com.intellij.rt.coverage.instrumentation.dataAccess.FieldCoverageDataAccess;
-import com.intellij.rt.coverage.instrumentation.dataAccess.NameCoverageDataAccess;
+import com.intellij.rt.coverage.instrumentation.dataAccess.*;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classSignature.ClassSignatureFilter;
@@ -30,7 +27,6 @@ import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -75,16 +71,16 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
     for (ClassSignatureFilter filter : ourFilters) {
       if (filter.shouldFilter(cr)) return null;
     }
-    final CoverageDataAccess dataAccess = createDataAccess(className, cr, isSampling);
+    final CoverageDataAccess dataAccess = DataAccessUtil.createDataAccess(className, cr, isSampling);
     final Instrumenter instrumenter;
     if (isSampling) {
       //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
-      instrumenter = new NewSamplingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
+      instrumenter = new SamplingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
     } else {
-      if (data.isTestTracking() && testTrackingMode != null) {
+      if (testTrackingMode != null) {
         instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldCalculateSource, dataAccess);
       } else {
-        instrumenter = new NewTracingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
+        instrumenter = new TracingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
       }
     }
     ClassVisitor result = instrumenter;
@@ -92,18 +88,6 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
       result = PrivateConstructorOfUtilClassFilter.createWithContext(result, instrumenter);
     }
     return result;
-  }
-
-  private static CoverageDataAccess createDataAccess(String className, ClassReader cr, boolean isSampling) {
-    if (isSampling && OptionsUtil.NEW_SAMPLING_ENABLED || !isSampling && OptionsUtil.NEW_TRACING_ENABLED) {
-      if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
-        return new CondyCoverageDataAccess(className);
-      } else {
-        return new FieldCoverageDataAccess(cr, className);
-      }
-    } else {
-      return new NameCoverageDataAccess(className);
-    }
   }
 
   @Override
