@@ -29,8 +29,6 @@ public class ClassData implements CoverageData {
   private final String myClassName;
   private LineData[] myLinesArray;
   private Map<String, Integer> myStatus;
-  /** Storage for line hits in sampling mode. */
-  private int[] myLineMask;
   private String mySource;
 
   /** Storage for line and branch hits in new tracing mode. */
@@ -133,31 +131,6 @@ public class ClassData implements CoverageData {
     }
   }
 
-  public void touchLine(int line) {
-    myLineMask[line]++;
-  }
-
-  public void touch(int line) {
-    final LineData lineData = getLineData(line);
-    if (lineData != null) {
-      lineData.touch();
-    }
-  }
-
-  public void touch(int line, int jump, boolean hit) {
-    final LineData lineData = getLineData(line);
-    if (lineData != null) {
-      lineData.touchBranch(jump, hit);
-    }
-  }
-
-  public void touch(int line, int switchNumber, int key) {
-    final LineData lineData = getLineData(line);
-    if (lineData != null) {
-      lineData.touchBranch(switchNumber, key);
-    }
-  }
-
   public void registerMethodSignature(LineData lineData) {
     initStatusMap();
     myStatus.put(lineData.getMethodSignature(), null);
@@ -205,31 +178,6 @@ public class ClassData implements CoverageData {
 
   public String toString() {
     return myClassName;
-  }
-
-  public void initLineMask(LineData[] lines) {
-    if (myLineMask == null) {
-      myLineMask = new int[myLinesArray != null ? Math.max(lines.length, myLinesArray.length) : lines.length];
-      if (myLinesArray != null) {
-        for (int i = 0; i < myLinesArray.length; i++) {
-          final LineData data = myLinesArray[i];
-          if (data != null) {
-            myLineMask[i] = data.getHits();
-          }
-        }
-      }
-    } else {
-      if (myLineMask.length < lines.length) {
-        int[] lineMask = new int[lines.length];
-        System.arraycopy(myLineMask, 0, lineMask, 0, myLineMask.length);
-        myLineMask = lineMask;
-      }
-      for (int i = 0; i < lines.length; i++) {
-        if (lines[i] != null) {
-          myLineMask[i] += lines[i].getHits();
-        }
-      }
-    }
   }
 
   public void setLines(LineData[] lines) {
@@ -285,7 +233,7 @@ public class ClassData implements CoverageData {
     if (myHitsMask != null && myHitsMask.length >= size) return;
     int[] newMask = new int[size];
     if (myHitsMask != null) {
-      System.arraycopy(newMask, 0, myHitsMask, 0, myHitsMask.length);
+      System.arraycopy(myHitsMask, 0, newMask, 0, myHitsMask.length);
     }
     myHitsMask = newMask;
   }
@@ -297,10 +245,6 @@ public class ClassData implements CoverageData {
       System.arraycopy(newMask, 0, myTraceMask, 0, myTraceMask.length);
     }
     myTraceMask = newMask;
-  }
-
-  public int[] getLineMask() {
-    return myLineMask;
   }
 
   public int[] getHitsMask() {
@@ -316,12 +260,12 @@ public class ClassData implements CoverageData {
   }
 
   public void applyLinesMask() {
-    if (myLineMask == null) return;
-    final int size = myLineMask.length;
-    for (LineData lineData : myLinesArray) {
+    if (myHitsMask == null) return;
+    final int size = Math.min(myHitsMask.length, myLinesArray.length);
+    for (int i = 0; i < size; i++) {
+      final LineData lineData = myLinesArray[i];
       if (lineData == null) continue;
-      if (lineData.getLineNumber() >= size) continue;
-      lineData.setHits(myLineMask[lineData.getLineNumber()]);
+      lineData.setHits(lineData.getHits() + myHitsMask[i]);
     }
   }
 
@@ -332,7 +276,7 @@ public class ClassData implements CoverageData {
         if (lineData == null) continue;
         int lineId = lineData.getId();
         if (lineId != -1) {
-          lineData.setHits(myHitsMask[lineId]);
+          lineData.setHits(lineData.getHits() + myHitsMask[lineId]);
         }
 
         JumpData[] jumps = lineData.getJumps();

@@ -146,18 +146,6 @@ public class LineData implements CoverageData {
     return getOrCreateJumpsAndSwitches().getJumpData(jump);
   }
 
-  public void touchBranch(final int jump, final boolean hit) {
-    final JumpData jumpData = getJumpData(jump);
-    if (jumpData != null) {
-      if (hit) {
-        jumpData.touchTrueHit();
-      }
-      else {
-        jumpData.touchFalseHit();
-      }
-    }
-  }
-
   public SwitchData addSwitch(final int switchNumber, final int[] keys) {
     return getOrCreateJumpsAndSwitches().addSwitch(switchNumber, keys);
   }
@@ -178,13 +166,6 @@ public class LineData implements CoverageData {
       keys[i - min] = i;
     }
     return addSwitch(switchNumber, keys);
-  }
-
-  public void touchBranch(final int switchNumber, final int key) {
-    final SwitchData switchData = getSwitchData(switchNumber);
-    if (switchData != null) {
-      switchData.touch(key);
-    }
   }
 
   public int getLineNumber() {
@@ -271,6 +252,7 @@ public class LineData implements CoverageData {
     }
   }
 
+  @SuppressWarnings("unused") // Used in IntelliJ
   public boolean isCoveredByOneTest() {
     return myUniqueTestName != null && myUniqueTestName.length() > 0;
   }

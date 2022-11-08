@@ -27,15 +27,13 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 public class FieldCoverageDataAccess extends CoverageDataAccess {
   private final ExtraFieldInstrumenter myExtraFieldInstrumenter;
 
-  public FieldCoverageDataAccess(ClassReader cr, final String className, final boolean isSampling) {
+  public FieldCoverageDataAccess(ClassReader cr, final String className) {
     myExtraFieldInstrumenter = new ExtraFieldInstrumenter(cr, null, className, HITS_NAME, HITS_TYPE, true) {
 
       public void initField(MethodVisitor mv) {
-        mv.visitLdcInsn(className);
-
         //get hits array
-        final String getHitsMaskMethod = isSampling ? "getLineMask" : "getHitsMask";
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, getHitsMaskMethod, "(Ljava/lang/String;)[I", false);
+        mv.visitLdcInsn(className);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "getHitsMask", "(Ljava/lang/String;)[I", false);
 
         //save hits array
         mv.visitFieldInsn(Opcodes.PUTSTATIC, getInternalClassName(), HITS_NAME, HITS_TYPE);

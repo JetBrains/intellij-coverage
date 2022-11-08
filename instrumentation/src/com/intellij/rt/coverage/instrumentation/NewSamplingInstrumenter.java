@@ -77,7 +77,7 @@ public class NewSamplingInstrumenter extends Instrumenter {
   @Override
   protected void initLineData() {
     final LineData[] lines = LinesUtil.calcLineArray(myMaxLineNumber, myLines);
-    myClassData.initLineMask(lines);
     myClassData.setLines(lines);
+    myClassData.createHitsMask(myMaxLineNumber + 1);
   }
 }

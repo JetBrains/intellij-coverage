@@ -75,33 +75,16 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
     for (ClassSignatureFilter filter : ourFilters) {
       if (filter.shouldFilter(cr)) return null;
     }
-    final CoverageDataAccess dataAccess;
-    if (isSampling && OptionsUtil.NEW_SAMPLING_ENABLED || !isSampling && OptionsUtil.NEW_TRACING_ENABLED) {
-      if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
-        dataAccess = new CondyCoverageDataAccess(className, isSampling);
-      } else {
-        dataAccess = new FieldCoverageDataAccess(cr, className, isSampling);
-      }
-    } else {
-      dataAccess = new NameCoverageDataAccess(className);
-    }
+    final CoverageDataAccess dataAccess = createDataAccess(className, cr, isSampling);
     final Instrumenter instrumenter;
     if (isSampling) {
-      if (OptionsUtil.NEW_SAMPLING_ENABLED) {
-        instrumenter = new NewSamplingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
-      } else {
-        //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
-        instrumenter = new SamplingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
-      }
+      //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
+      instrumenter = new NewSamplingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
     } else {
-      if (OptionsUtil.NEW_TRACING_ENABLED) {
-        if (data.isTestTracking() && testTrackingMode != null) {
-          instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldCalculateSource, dataAccess);
-        } else {
-          instrumenter = new NewTracingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
-        }
+      if (data.isTestTracking() && testTrackingMode != null) {
+        instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldCalculateSource, dataAccess);
       } else {
-        instrumenter = new TracingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
+        instrumenter = new NewTracingInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
       }
     }
     ClassVisitor result = instrumenter;
@@ -109,6 +92,18 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
       result = PrivateConstructorOfUtilClassFilter.createWithContext(result, instrumenter);
     }
     return result;
+  }
+
+  private static CoverageDataAccess createDataAccess(String className, ClassReader cr, boolean isSampling) {
+    if (isSampling && OptionsUtil.NEW_SAMPLING_ENABLED || !isSampling && OptionsUtil.NEW_TRACING_ENABLED) {
+      if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
+        return new CondyCoverageDataAccess(className);
+      } else {
+        return new FieldCoverageDataAccess(cr, className);
+      }
+    } else {
+      return new NameCoverageDataAccess(className);
+    }
   }
 
   @Override

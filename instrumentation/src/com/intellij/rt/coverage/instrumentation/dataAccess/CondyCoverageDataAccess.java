@@ -25,9 +25,8 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 public class CondyCoverageDataAccess extends CoverageDataAccess {
   private final ConstantDynamic condy;
 
-  public CondyCoverageDataAccess(String className, boolean isSampling) {
-    final String getHitsMaskMethod = isSampling ? "getLineMask" : "getHitsMask";
-    final Handle handle = new Handle(Opcodes.H_INVOKESTATIC, "com/intellij/rt/coverage/util/CondyUtils", getHitsMaskMethod,
+  public CondyCoverageDataAccess(String className) {
+    final Handle handle = new Handle(Opcodes.H_INVOKESTATIC, "com/intellij/rt/coverage/util/CondyUtils", "getHitsMask",
         "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I", false);
     condy = new ConstantDynamic(HITS_NAME, InstrumentationUtils.OBJECT_TYPE, handle, className);
   }

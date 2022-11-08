@@ -31,7 +31,7 @@ public class NameCoverageDataAccess extends CoverageDataAccess {
   @Override
   public void onMethodStart(MethodVisitor mv, int localVariable) {
     mv.visitLdcInsn(myClassName);
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "loadClassData", "(Ljava/lang/String;)" + InstrumentationUtils.OBJECT_TYPE, false);
+    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "getHitsMask", "(Ljava/lang/String;)[I", false);
     mv.visitVarInsn(Opcodes.ASTORE, localVariable);
   }
 }

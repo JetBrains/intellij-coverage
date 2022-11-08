@@ -31,16 +31,9 @@ import java.util.regex.Pattern;
 public class ProjectData implements CoverageData, Serializable {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/ProjectData";
 
-  // ClassData methods
-  private static final MethodCaller TOUCH_LINE_METHOD = new MethodCaller("touchLine", new Class[] {int.class});
-  private static final MethodCaller GET_LINE_MASK_METHOD = new MethodCaller("getLineMask", new Class[0]);
-  private static final MethodCaller GET_HITS_MASK_METHOD = new MethodCaller("getHitsMask", new Class[0]);
-  private static final MethodCaller GET_TRACE_MASK_METHOD = new MethodCaller("getTraceMask", new Class[0]);
-  private static final MethodCaller TOUCH_SWITCH_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, int.class});
-  private static final MethodCaller TOUCH_JUMP_METHOD = new MethodCaller("touch", new Class[] {int.class, int.class, boolean.class});
-  private static final MethodCaller TOUCH_METHOD = new MethodCaller("touch", new Class[] {int.class});
-
   // ProjectData methods
+  private static final MethodCaller GET_HITS_MASK_METHOD = new MethodCaller("getHitsMask", new Class[]{String.class});
+  private static final MethodCaller GET_TRACE_MASK_METHOD = new MethodCaller("getTraceMask", new Class[]{String.class});
   private static final MethodCaller GET_CLASS_DATA_METHOD = new MethodCaller("getClassData", new Class[]{String.class});
   private static final MethodCaller REGISTER_CLASS_FOR_TRACE_METHOD = new MethodCaller("registerClassForTrace", new Class[]{Object.class});
   private static final MethodCaller TRACE_LINE_METHOD = new MethodCaller("traceLine", new Class[]{Object.class, int.class});
@@ -293,7 +286,7 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
 
-  public void testStarted(final String name) {
+  public void testStarted(final String ignoredName) {
     if (myTraceLines) myTrace.compareAndSet(null, new ConcurrentHashMap<Object, boolean[]>());
   }
   //---------------------------------------------------------- //
@@ -336,48 +329,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   // -------------------------------------------------------------------------------------------------- //
 
-  public static void touchLine(Object classData, int line) {
-    if (ourProjectData != null) {
-      ((ClassData) classData).touchLine(line);
-      return;
-    }
-    touch(TOUCH_LINE_METHOD,
-          classData,
-          new Object[]{line});
-  }
-
-  public static void touchSwitch(Object classData, int line, int switchNumber, int key) {
-    if (ourProjectData != null) {
-      ((ClassData) classData).touch(line, switchNumber, key);
-      return;
-    }
-    touch(TOUCH_SWITCH_METHOD,
-          classData,
-          new Object[]{line, switchNumber, key});
-  }
-
-  public static void touchJump(Object classData, int line, int jump, boolean hit) {
-    if (ourProjectData != null) {
-      ((ClassData) classData).touch(line, jump, hit);
-      return;
-    }
-    touch(TOUCH_JUMP_METHOD,
-          classData,
-          new Object[]{line, jump, hit});
-  }
-
-  public static void trace(Object classData, int line) {
-    traceLine(classData, line);
-    if (ourProjectData != null) {
-      ((ClassData) classData).touch(line);
-      return;
-    }
-
-    touch(TOUCH_METHOD,
-          classData,
-          new Object[]{line});
-  }
-
+  @SuppressWarnings("unused")
   public static void traceLine(Object classData, int line) {
     if (ourProjectData != null) {
       final Map<Object, boolean[]> traces = ourProjectData.myTrace.get();
@@ -400,6 +352,7 @@ public class ProjectData implements CoverageData, Serializable {
   /**
    * Returns true if a test is running now, then the class has been registered.
    */
+  @SuppressWarnings("unused")
   public static boolean registerClassForTrace(Object classData) {
     if (ourProjectData != null) {
       final Map<Object, boolean[]> traces = ourProjectData.myTrace.get();
@@ -424,60 +377,41 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
 
-  private static Object touch(final MethodCaller methodCaller, Object classData, final Object[] paramValues) {
-    try {
-      return methodCaller.invoke(classData, paramValues);
-    } catch (Exception e) {
-      ErrorReporter.reportError("Error in project data collection: " + methodCaller.myMethodName, e);
-      return null;
-    }
-  }
-
-  public static int[] getLineMask(String className) {
-    if (ourProjectData != null) {
-      return ourProjectData.getClassData(className).getLineMask();
-    }
-    try {
-      final Object classData = getClassDataObject(className);
-      return (int[]) touch(GET_LINE_MASK_METHOD, classData, new Object[0]);
-    } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data loading: " + className, e);
-      return null;
-    }
-  }
-
   public static int[] getHitsMask(String className) {
     if (ourProjectData != null) {
       return ourProjectData.getClassData(className).getHitsMask();
     }
     try {
-      final Object classData = getClassDataObject(className);
-      return (int[]) touch(GET_HITS_MASK_METHOD, classData, new Object[0]);
+      final Object projectData = getProjectDataObject();
+      return (int[]) GET_HITS_MASK_METHOD.invoke(projectData, new Object[]{className});
     } catch (Exception e) {
       ErrorReporter.reportError("Error in class data access: " + className, e);
       return null;
     }
   }
 
+  @SuppressWarnings("unused")
   public static boolean[] getTraceMask(String className) {
     if (ourProjectData != null) {
       return ourProjectData.getClassData(className).getTraceMask();
     }
     try {
-      final Object classData = getClassDataObject(className);
-      return (boolean[]) touch(GET_TRACE_MASK_METHOD, classData, new Object[0]);
+      final Object projectData = getProjectDataObject();
+      return (boolean[]) GET_TRACE_MASK_METHOD.invoke(projectData, new Object[]{className});
     } catch (Exception e) {
       ErrorReporter.reportError("Error in class data access: " + className, e);
       return null;
     }
   }
 
+  @SuppressWarnings("unused")
   public static Object loadClassData(String className) {
     if (ourProjectData != null) {
       return ourProjectData.getClassData(className);
     }
     try {
-      return getClassDataObject(className);
+      final Object projectData = getProjectDataObject();
+      return GET_CLASS_DATA_METHOD.invoke(projectData, new Object[]{className});
     } catch (Exception e) {
       ErrorReporter.reportError("Error in class data loading: " + className, e);
       return null;
@@ -490,11 +424,6 @@ public class ProjectData implements CoverageData, Serializable {
       ourProjectDataObject = projectDataClass.getDeclaredField("ourProjectData").get(null);
     }
     return ourProjectDataObject;
-  }
-
-  private static Object getClassDataObject(String className) throws Exception {
-    final Object projectDataObject = getProjectDataObject();
-    return GET_CLASS_DATA_METHOD.invoke(projectDataObject, new Object[]{className});
   }
 
   // ----------------------------------------------------------------------------------------------- //
