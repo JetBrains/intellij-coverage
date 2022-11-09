@@ -42,26 +42,35 @@ public class AppendUnloadedBenchmark {
 
   @Benchmark
   public int instrumentation() throws Exception {
-    final ProjectData projectData = ProjectData.createProjectData(new File("test.ic"), null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
-    SaveHook.appendUnloadedFullAnalysis(projectData, createClassFinder(), calculateSource, isSampling, false);
+    final ClassFinder classFinder = createClassFinder();
+    final File dataFile = new File("test.ic");
+    final ProjectData projectData = ProjectData.createProjectData(dataFile, null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
+    SaveHook.appendUnloadedFullAnalysis(projectData, classFinder, calculateSource, isSampling, false);
     System.out.println(projectData.getClassesNumber());
+    assert dataFile.delete();
     return projectData.getClassesNumber();
   }
 
   @Benchmark
   public int unloaded() throws Exception {
-    final ProjectData projectData = ProjectData.createProjectData(new File("test.ic"), null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
-    SaveHook.appendUnloaded(projectData, createClassFinder(), calculateSource, isSampling);
+    final ClassFinder classFinder = createClassFinder();
+    final File dataFile = new File("test.ic");
+    final ProjectData projectData = ProjectData.createProjectData(dataFile, null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
+    SaveHook.appendUnloaded(projectData, classFinder, calculateSource, isSampling);
     System.out.println(projectData.getClassesNumber());
+    assert dataFile.delete();
     return projectData.getClassesNumber();
   }
 
   private ClassFinder createClassFinder() {
     final String absolutePath = "<Directory with output roots>";
-    final Pattern includePattern = Pattern.compile("com\\..*");
-    final ClassFinder finder = new ClassFinder(Collections.singletonList(includePattern), Collections.<Pattern>emptyList());
     final File dir = new File(absolutePath);
     final File[] files = dir.listFiles();
+    if (!dir.exists() || files == null) {
+      throw new IllegalArgumentException("Please set directory with output roots in com.intellij.rt.coverage.jmh.AppendUnloadedBenchmark.createClassFinder");
+    }
+    final Pattern includePattern = Pattern.compile("com\\..*");
+    final ClassFinder finder = new ClassFinder(Collections.singletonList(includePattern), Collections.<Pattern>emptyList());
     for (File child : files) {
       try {
         final URL url = child.toURI().toURL();

@@ -28,9 +28,9 @@ repositories {
 }
 
 dependencies {
-    jmhCompile "org.openjdk.jmh:jmh-core:$jmhVersion"
+    jmhImplementation "org.openjdk.jmh:jmh-core:$jmhVersion"
     jmhAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
-    jmhCompile 'org.joda:joda-convert:1.2'
-    jmhCompile 'junit:junit:4.12'
-    jmhCompile fileTree('lib')
+    jmhImplementation 'org.joda:joda-convert:1.2'
+    jmhImplementation 'junit:junit:4.13.1'
+    jmhImplementation fileTree('lib')
 }

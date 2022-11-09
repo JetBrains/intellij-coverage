@@ -21,7 +21,7 @@ import java.nio.file.Files
 
 repositories {
   mavenCentral()
-  maven { url = 'https://jetbrains.bintray.com/intellij-third-party-dependencies' }
+  maven { url "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies" }
 }
 
 
@@ -33,6 +33,8 @@ ext {
   benchmarkProfilers = []
   benchmarkExtraAgentArgs = ""
   benchmarkExtraArgs = []
+  baselineName = baselineVersion
+  headName = "Head"
 }
 
 configurations {
@@ -41,22 +43,17 @@ configurations {
 }
 
 // benchmark without agent
-task noAgentBenchmark(type: JavaExec) {
+task noAgentBenchmark(group: 'benchmarks', type: JavaExec) {
   configureBenchmark it as JavaExec
 }
 
 // benchmark with baseline version of agent
-task baselineBenchmark(type: JavaExec) {
+task baselineBenchmark(group: 'benchmarks', type: JavaExec) {
   configureBenchmark it as JavaExec, configurations.baseline
 }
 
 // benchmark with current version of agent
-task headBenchmark(type: JavaExec, dependsOn: jar) {
-  configureBenchmark it as JavaExec, configurations.head
-}
-
-// benchmark with current version of agent, new instrumentation
-task newInstrumentationBenchmark(type: JavaExec, dependsOn: jar) {
+task headBenchmark(group: 'benchmarks', type: JavaExec) {
   configureBenchmark it as JavaExec, configurations.head
 }
 
@@ -90,6 +87,7 @@ def configureBenchmark(JavaExec benchmark, Configuration agent = null) {
       }
       benchmarkReport(benchmark).createNewFile()
       Files.deleteIfExists(file('td.ijtc').toPath())
+      Files.deleteIfExists(file('coverage.ic').toPath())
     }
   }
 }
@@ -98,30 +96,30 @@ def benchmarkReport(Task benchmark) {
   file("$benchmark.temporaryDir/${benchmark.name}.json")
 }
 
-task benchmark(group: 'verification', dependsOn: [noAgentBenchmark, baselineBenchmark, headBenchmark]) {
+task benchmark(group: 'benchmarks', dependsOn: [noAgentBenchmark, baselineBenchmark, headBenchmark]) {
   doLast {
     def secondaryMetrics = [
         'trace.file.size',
         '·gc.alloc.rate',
         '·gc.count', '·gc.time'
     ]
+    def noAgentReport = ResourceGroovyMethods.getText(benchmarkReport(noAgentBenchmark), 'UTF-8')
     def baselineReport = ResourceGroovyMethods.getText(benchmarkReport(baselineBenchmark), 'UTF-8')
+    def headReport = ResourceGroovyMethods.getText(benchmarkReport(headBenchmark), 'UTF-8')
     project.logger.quiet """Benchmark score:
-    No agent vs $baselineVersion:
-    ${
-      ReportReader.readScore(
-          ResourceGroovyMethods.getText(benchmarkReport(noAgentBenchmark), 'UTF-8'),
-          baselineReport,
-          secondaryMetrics
-      )
-    }
-    $baselineVersion vs $version:
-    ${
-      ReportReader.readScore(
-          baselineReport,
-          ResourceGroovyMethods.getText(benchmarkReport(headBenchmark), 'UTF-8'),
-          secondaryMetrics
-      )
-    }"""
+    No agent vs $baselineName:
+
+    ${ReportReader.readScore(noAgentReport, baselineReport, secondaryMetrics)}
+
+
+    No agent vs $headName:
+
+    ${ReportReader.readScore(noAgentReport, headReport, secondaryMetrics)}
+
+
+    $baselineName vs $headName:
+
+    ${ReportReader.readScore(baselineReport, headReport, secondaryMetrics)}
+    """
   }
 }

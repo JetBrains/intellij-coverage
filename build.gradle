@@ -68,7 +68,7 @@ allprojects {
   dependencies {
     def current = Jvm.current()
     if (current != null && current.toolsJar != null) {
-      runtime files(current.toolsJar)
+      runtimeOnly files(current.toolsJar)
     }
   }
 

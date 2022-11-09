@@ -33,7 +33,6 @@ public interface ClassFilter {
       myExcludePatterns = excludePatterns;
     }
 
-    @Override
     public boolean shouldInclude(String className) {
       if (ClassNameUtil.matchesPatterns(className, myExcludePatterns)) return false;
       final String outerClassName = ClassNameUtil.getOuterClassName(className);

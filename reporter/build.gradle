@@ -1,5 +1,4 @@
 plugins {
-  id 'java'
   id 'org.jetbrains.kotlin.jvm' version '1.6.0'
 }
 
@@ -22,11 +21,10 @@ configurations {
 dependencies {
   implementation project(":")
   implementation(project(path: ":instrumentation", configuration: "archives"))
-  implementation project(":util")
   externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.18")
   externalDependencies("org.json:json:20210307")
 
-  testImplementation("junit:junit:4.13")
+  testImplementation('junit:junit:4.13.2')
   testImplementation(files(project(":tests").sourceSets.test.output))
 }
 

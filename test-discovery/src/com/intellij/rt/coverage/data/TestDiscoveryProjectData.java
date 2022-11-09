@@ -294,7 +294,6 @@ public class TestDiscoveryProjectData {
       registerShutdownHook.setAccessible(true);
       // assume we're only one hackers
       registerShutdownHook.invoke(javaLangAccess, 9, true, new Runnable() {
-        @Override
         public void run() {
           TestDiscoveryProjectData.logTestInfo();
         }

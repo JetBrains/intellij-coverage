@@ -224,7 +224,6 @@ public class SocketWriterTestDiscoveryIntegrationTest {
 
           }
 
-          @Override
           public void processAffectedFile(int[] chunks) {
 
           }

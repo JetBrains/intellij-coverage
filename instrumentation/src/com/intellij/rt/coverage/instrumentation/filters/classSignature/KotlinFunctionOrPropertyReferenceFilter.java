@@ -24,7 +24,6 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * Line numbers in this class are uncovered when a reference is not called.
  */
 public class KotlinFunctionOrPropertyReferenceFilter implements ClassSignatureFilter {
-  @Override
   public boolean shouldFilter(ClassReader cr) {
     final String superClass = cr.getSuperName();
     final int access = cr.getAccess();

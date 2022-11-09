@@ -1,11 +1,7 @@
 plugins {
-    id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.6.10'
 }
 
-repositories {
-    mavenCentral()
-}
 sourceSets {
     main.java.srcDirs = []
     test.java.srcDirs = [file('src')]
@@ -29,25 +25,21 @@ dependencies {
 
     testImplementation(files(project(":tests").sourceSets.test.output))
     testImplementation(project(path: ":instrumentation", configuration: "archives"))
-    testImplementation(project(":instrumentation"))
-    testImplementation(library_project_asm_all)
+    testImplementation(fileTree(project(":benchmarks").file("lib")))
 
     testImplementation('junit:junit:4.13.2')
 
-    testImplementation(fileTree(project(":benchmarks").file("lib")))
-
-    jmhCompile("org.openjdk.jmh:jmh-core:1.32")
+    jmhImplementation("org.openjdk.jmh:jmh-core:1.32")
     jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.32")
-    jmhCompile(project(path: ":instrumentation", configuration: "archives"))
-    jmhCompile(project(":"))
+    jmhImplementation(project(path: ":instrumentation", configuration: "archives"))
+    jmhImplementation(project(":"))
 
     testImplementation("net.bytebuddy:byte-buddy:1.11.12")
     testImplementation("net.bytebuddy:byte-buddy-agent:1.11.12")
 
     testImplementation("org.jmockit:jmockit:1.49")
-
-    testCompileOnly 'org.projectlombok:lombok:1.18.24'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
+    testCompileOnly('org.projectlombok:lombok:1.18.24')
+    testAnnotationProcessor('org.projectlombok:lombok:1.18.24')
 }
 
 test {
@@ -59,7 +51,7 @@ test {
     }
 }
 
-task runBenchmark(type: JavaExec) {
+task runBenchmark(group: 'benchmarks', type: JavaExec) {
     configureBenchmark it as JavaExec
 }
 

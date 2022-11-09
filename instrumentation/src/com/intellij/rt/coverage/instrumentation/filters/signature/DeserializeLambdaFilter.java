@@ -20,7 +20,6 @@ import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class DeserializeLambdaFilter implements MethodSignatureFilter {
-  @Override
   public boolean shouldFilter(int access, String name, String desc, String signature, String[] exceptions, MethodFilteringVisitor context) {
 
     return (access & Opcodes.ACC_STATIC) != 0

@@ -128,7 +128,6 @@ public abstract class SimpleDecodingTestDiscoveryProtocolReader implements
 
       }
 
-      @Override
       public void processAffectedFile(int[] chunks) {
         SimpleDecodingTestDiscoveryProtocolReader.this
             .processAffectedFile(enumerator.get(testClassId), enumerator.get(testMethodId), decodeFile(chunks));

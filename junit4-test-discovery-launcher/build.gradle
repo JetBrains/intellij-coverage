@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-apply plugin: 'java'
-
 sourceSets {
   main.java.srcDirs = [file('src')]
   test.java.srcDirs = []
 }
 
 dependencies {
-  compile 'junit:junit:4.12'
+  compile 'junit:junit:4.13.1'
 }
