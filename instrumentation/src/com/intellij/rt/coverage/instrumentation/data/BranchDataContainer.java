@@ -96,15 +96,9 @@ public class BranchDataContainer {
     jumpData.setId(falseJump.getId(), falseJump.getType());
   }
 
-  public void addLookupSwitch(LineData lineData, int index, Label dflt, int[] keys, Label[] labels) {
+  public void addSwitch(LineData lineData, int index, Label dflt, int[] keys, Label[] labels) {
     List<Switch> switches = rememberSwitchLabels(lineData.getLineNumber(), dflt, labels, index);
     SwitchData switchData = lineData.addSwitch(index, keys);
-    setSwitchIds(switchData, switches);
-  }
-
-  public void addTableSwitch(LineData lineData, int index, int min, int max, Label dflt, Label[] labels) {
-    List<Switch> switches = rememberSwitchLabels(lineData.getLineNumber(), dflt, labels, index);
-    SwitchData switchData = lineData.addSwitch(index, min, max);
     setSwitchIds(switchData, switches);
   }
 

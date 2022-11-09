@@ -70,11 +70,11 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   }
 
   public void visitLineNumber(int line, Label start) {
-    super.visitLineNumber(line, start);
     myCurrentLine = line;
     myHasExecutableLines = true;
     final LineData lineData = myInstrumenter.getOrCreateLineData(myCurrentLine, myMethodName, myDescriptor);
     if (lineData != null) myBranchData.addLine(lineData);
+    super.visitLineNumber(line, start);
   }
 
   public void visitJumpInsn(final int opcode, final Label label) {
@@ -109,7 +109,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
   /**
    * Insert new labels before switch in order to let every branch have its own label without fallthrough.
    */
-  private SwitchLabels replaceLabels(SwitchLabels original) {
+  private SwitchLabels replaceLabels(SwitchLabels original, LineData lineData, int[] keys) {
     Label beforeSwitchLabel = new Label();
     Label newDefaultLabel = new Label();
     Label[] newLabels = new Label[original.getLabels().length];
@@ -118,6 +118,10 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
     }
 
     super.visitJumpInsn(Opcodes.GOTO, beforeSwitchLabel);
+
+    final SwitchLabels replacement = new SwitchLabels(newDefaultLabel, newLabels);
+    myBranchData.addSwitch(lineData, lineData.switchesCount(), newDefaultLabel, keys, newLabels);
+    onNewSwitch(original, replacement);
 
     for (int i = 0; i < newLabels.length; i++) {
       super.visitLabel(newLabels[i]);
@@ -129,7 +133,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
 
     super.visitLabel(beforeSwitchLabel);
 
-    return new SwitchLabels(newDefaultLabel, newLabels);
+    return replacement;
   }
 
   public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
@@ -137,15 +141,7 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
       super.visitLookupSwitchInsn(dflt, keys, labels);
       return;
     }
-    SwitchLabels switchLabels = new SwitchLabels(dflt, labels);
-    final LineData lineData = myInstrumenter.getLineData(myCurrentLine);
-    if (lineData != null) {
-      final SwitchLabels replacement = replaceLabels(switchLabels);
-      int switchIndex = lineData.switchesCount();
-      myBranchData.addLookupSwitch(lineData, switchIndex, replacement.getDefault(), keys, replacement.getLabels());
-      onNewSwitch(switchLabels, replacement);
-      switchLabels = replacement;
-    }
+    final SwitchLabels switchLabels = visitSwitch(dflt, labels, keys);
     super.visitLookupSwitchInsn(switchLabels.getDefault(), keys, switchLabels.getLabels());
   }
 
@@ -154,16 +150,27 @@ public class LineEnumerator extends MethodVisitor implements Opcodes {
       super.visitTableSwitchInsn(min, max, dflt, labels);
       return;
     }
+    final SwitchLabels switchLabels = visitSwitch(dflt, labels, asLookupKyes(min, max));
+    super.visitTableSwitchInsn(min, max, switchLabels.getDefault(), switchLabels.getLabels());
+  }
+
+  private SwitchLabels visitSwitch(Label dflt, Label[] labels, int[] keys) {
     SwitchLabels switchLabels = new SwitchLabels(dflt, labels);
     final LineData lineData = myInstrumenter.getLineData(myCurrentLine);
     if (lineData != null) {
-      final SwitchLabels replacement = replaceLabels(switchLabels);
-      int switchIndex = lineData.switchesCount();
-      myBranchData.addTableSwitch(lineData, switchIndex, min, max, replacement.getDefault(), replacement.getLabels());
-      onNewSwitch(switchLabels, replacement);
-      switchLabels = replacement;
+      switchLabels = replaceLabels(switchLabels, lineData, keys);
     }
-    super.visitTableSwitchInsn(min, max, switchLabels.getDefault(), switchLabels.getLabels());
+    return switchLabels;
+  }
+
+  private static int[] asLookupKyes(int min, int max) {
+    int[] keys = new int[max - min + 1];
+    // Check that i in [min, max]
+    // as there could be an overflow if max == Int.MAX_VALUE
+    for (int i = min; min <= i && i <= max; i++) {
+      keys[i - min] = i;
+    }
+    return keys;
   }
 
   public boolean hasNoLines() {

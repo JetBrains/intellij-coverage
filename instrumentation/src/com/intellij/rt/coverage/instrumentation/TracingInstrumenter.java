@@ -46,7 +46,7 @@ public class TracingInstrumenter extends AbstractTracingInstrumenter {
     if (enumerator.hasNoLines()) {
       return myDataAccess.createMethodVisitor(mv, name, false);
     }
-    final MethodVisitor visitor = new ArrayTracingMethodVisitor(mv, access, desc, enumerator) {
+    final MethodVisitor visitor = new ArrayTracingMethodVisitor(mv, access, desc, branchData) {
       public void visitCode() {
         myDataAccess.onMethodStart(mv, getOrCreateLocalVariableIndex());
         super.visitCode();
@@ -67,16 +67,16 @@ public class TracingInstrumenter extends AbstractTracingInstrumenter {
     super.initLineData();
   }
 
-  public static class ArrayTracingMethodVisitor extends LocalVariableInserter {
-    private final LineEnumerator myEnumerator;
+  public class ArrayTracingMethodVisitor extends LocalVariableInserter {
+    private final BranchDataContainer myBranchData;
 
-    public ArrayTracingMethodVisitor(MethodVisitor methodVisitor, int access, String descriptor, LineEnumerator enumerator) {
+    public ArrayTracingMethodVisitor(MethodVisitor methodVisitor, int access, String descriptor, BranchDataContainer branchData) {
       super(methodVisitor, access, descriptor, BRANCH_HITS_LOCAL_VARIABLE_NAME, DataAccessUtil.HITS_ARRAY_TYPE);
-      myEnumerator = enumerator;
+      myBranchData = branchData;
     }
 
     public void visitLineNumber(final int line, final Label start) {
-      final LineData lineData = myEnumerator.getInstrumenter().getLineData(line);
+      final LineData lineData = getLineData(line);
       if (lineData != null) {
         incrementHitById(lineData.getId());
       }
@@ -87,12 +87,12 @@ public class TracingInstrumenter extends AbstractTracingInstrumenter {
     public void visitLabel(Label label) {
       super.visitLabel(label);
 
-      final Jump jump = myEnumerator.getBranchData().getJump(label);
+      final Jump jump = myBranchData.getJump(label);
       if (jump != null) {
         incrementHitById(jump.getId());
       }
 
-      final Switch aSwitch = myEnumerator.getBranchData().getSwitch(label);
+      final Switch aSwitch = myBranchData.getSwitch(label);
       if (aSwitch != null) {
         incrementHitById(aSwitch.getId());
       }
