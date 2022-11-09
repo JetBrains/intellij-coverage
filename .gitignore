@@ -1,11 +1,6 @@
 dist
 out
-.idea/workspace.xml
 *.class
 build
 .gradle
-dist
-.idea/modules.xml
-.idea/modules
-.idea/libraries
-.idea/shelf
+.idea/
