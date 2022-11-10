@@ -65,7 +65,7 @@ internal abstract class AbstractTestTrackingTest(override val coverage: Coverage
         }
     }
 
-    @Test
+    @Test(timeout = 20000)
     fun testSequentialTests() = test("custom.testTracking.sequentialTests") { projectData, configuration, _ ->
         val lines = testTrackingLines(myDataFile, configuration.classes)
         Assert.assertEquals(5, lines.size)

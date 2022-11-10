@@ -26,7 +26,8 @@ import java.io.File
 import java.nio.file.Paths
 
 internal enum class Coverage {
-    SAMPLING, NEW_SAMPLING, TRACING, NEW_TRACING, CONDY_SAMPLING, CONDY_TRACING
+    SAMPLING, NEW_SAMPLING, TRACING, NEW_TRACING, CONDY_SAMPLING, CONDY_TRACING;
+    fun isSampling() = this == SAMPLING || this == NEW_SAMPLING || this == CONDY_SAMPLING
 }
 
 internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false, testTracking: Boolean = false,
@@ -44,13 +45,15 @@ internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage:
             extraArgs.add("-Didea.new.tracing.coverage=true")
             extraArgs.add("-Dcoverage.condy.enable=false")
         }
+        else -> {}
     }
-    val sampling = coverage == Coverage.SAMPLING || coverage == Coverage.NEW_SAMPLING || coverage == Coverage.CONDY_SAMPLING
     return CoverageStatusTest.runCoverage(classPath, coverageDataFile, patterns, mainClass,
-            sampling, extraArgs.toTypedArray(), calcUnloaded, testTracking)
-            .also {
-                logFile(coverageDataFile)?.readText()?.also { log-> throw RuntimeException(log) }
-            }
+            coverage.isSampling(), extraArgs.toTypedArray(), calcUnloaded, testTracking)
+            .also { assertEmptyLogFile(coverageDataFile) }
+}
+
+internal fun assertEmptyLogFile(coverageDataFile: File) {
+    logFile(coverageDataFile)?.readText()?.also { log -> throw RuntimeException(log) }
 }
 
 internal fun assertEqualsLines(project: ProjectData, expectedLines: Map<Int, String>, classNames: List<String>) {

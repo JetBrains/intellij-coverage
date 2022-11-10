@@ -47,7 +47,7 @@ public class ProjectDataLoader {
       return projectInfo;
     }
     try {
-      in = new DataInputStream(new BufferedInputStream(new FileInputStream(sessionDataFile)));
+      in = CoverageIOUtil.openReadFile(sessionDataFile);
       final TIntObjectHashMap<ClassData> dict = new TIntObjectHashMap<ClassData>(1000, 0.99f);
       final int classCount = CoverageIOUtil.readINT(in);
       for (int c = 0; c < classCount; c++) {
@@ -105,15 +105,9 @@ public class ProjectDataLoader {
       loadExtraInfo(projectInfo, in, dict);
     } catch (Exception e) {
       ErrorReporter.reportError("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath(), e);
-      return projectInfo;
     }
     finally {
-      try {
-        in.close();
-      }
-      catch (IOException e) {
-        ErrorReporter.reportError("Failed to close file: " + sessionDataFile.getAbsolutePath(), e);
-      }
+      CoverageIOUtil.close(in);
     }
     return projectInfo;
   }

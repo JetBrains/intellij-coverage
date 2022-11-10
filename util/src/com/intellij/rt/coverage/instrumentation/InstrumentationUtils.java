@@ -26,14 +26,6 @@ public class InstrumentationUtils {
   public static final String CONSTRUCTOR = "<init>";
   public static final String CONSTRUCTOR_DESCRIPTOR = "()V";
 
-  public static void pushInt(MethodVisitor mv, int value) {
-    if (value <= Short.MAX_VALUE) {
-      mv.visitIntInsn(Opcodes.SIPUSH, value);
-    } else {
-      mv.visitLdcInsn(value);
-    }
-  }
-
   /**
    * Util method for int array instrumentation.
    * Stack must be: array, index.
@@ -54,5 +46,35 @@ public class InstrumentationUtils {
 
   public static int getBytecodeVersion(ClassReader cr) {
     return cr.readInt(4) & 0xFFFF;
+  }
+
+  public static void pushInt(MethodVisitor mv, int value) {
+    if (value >= -1 && value <= 5) {
+      mv.visitInsn(Opcodes.ICONST_0 + value);
+    } else if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
+      mv.visitIntInsn(Opcodes.BIPUSH, value);
+    } else if (value >= Short.MIN_VALUE && value <= Short.MAX_VALUE) {
+      mv.visitIntInsn(Opcodes.SIPUSH, value);
+    } else {
+      mv.visitLdcInsn(value);
+    }
+  }
+
+  /**
+   * Push value on stack.
+   * @param o value to push must be primitive or String
+   */
+  public static void push(MethodVisitor mv, Object o) {
+    if (o == null) {
+      mv.visitInsn(Opcodes.ACONST_NULL);
+    } else if (o instanceof Integer) {
+      pushInt(mv, (Integer) o);
+    } else if (o instanceof Boolean) {
+      pushInt(mv, ((Boolean) o) ? 1 : 0);
+    } else if (o instanceof Double || o instanceof Float || o instanceof Long || o instanceof String) {
+      mv.visitLdcInsn(o);
+    } else {
+      throw new IllegalArgumentException("Cannot push element of type " + o.getClass());
+    }
   }
 }

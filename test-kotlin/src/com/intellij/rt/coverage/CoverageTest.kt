@@ -113,7 +113,7 @@ internal abstract class CoverageTest {
 
 /**
  * Find test source file by [testName].
- * Only test.kt of Test.java files could be main class to run.
+ * Only test.kt or Test.java files could be main class to run.
  *
  * @param testName test package name without [TEST_PACKAGE]
  */
@@ -130,4 +130,4 @@ internal fun getTestFile(testName: String): TestFile {
     error("No Test.java or test.kt file found!")
 }
 
-private fun getFQN(testName: String, className: String) = "$TEST_PACKAGE.$testName.$className"
+internal fun getFQN(testName: String, className: String) = "$TEST_PACKAGE.$testName.$className"

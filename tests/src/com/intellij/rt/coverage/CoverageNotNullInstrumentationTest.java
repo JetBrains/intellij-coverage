@@ -54,8 +54,7 @@ public class CoverageNotNullInstrumentationTest {
   }
 
   private byte[] doTransform(String name, byte[] bytes, ClassLoader loader, final ProjectData data) {
-    ClassFinder finder = new ClassFinder(Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList());
-    return new CoverageClassfileTransformer(data, false, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), finder)
+    return new CoverageClassfileTransformer(data, false, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList())
         .instrument(bytes, name, loader, true);
   }
 

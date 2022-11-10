@@ -25,26 +25,26 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class FieldCoverageDataAccess extends CoverageDataAccess {
   private final ExtraFieldInstrumenter myExtraFieldInstrumenter;
-  private final CoverageDataAccess.DataType myType;
+  private final Init myInit;
 
-  public FieldCoverageDataAccess(ClassReader cr, final String className, final CoverageDataAccess.DataType type) {
-    myExtraFieldInstrumenter = new ExtraFieldInstrumenter(cr, null, className, type.name, type.desc, true) {
+  public FieldCoverageDataAccess(ClassReader cr, final String className, final Init init) {
+    myExtraFieldInstrumenter = new ExtraFieldInstrumenter(cr, null, className, init.name, init.desc, true) {
 
       public void initField(MethodVisitor mv) {
         //get hits array
-        mv.visitLdcInsn(className);
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, type.initOwner, type.initName, type.initDesc, false);
+        init.loadParams(mv);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC, init.initOwner, init.initName, init.initDesc, false);
 
         //save hits array
-        mv.visitFieldInsn(Opcodes.PUTSTATIC, getInternalClassName(), type.name, type.desc);
+        mv.visitFieldInsn(Opcodes.PUTSTATIC, getInternalClassName(), init.name, init.desc);
       }
     };
-    myType = type;
+    myInit = init;
   }
 
   @Override
   public void onMethodStart(MethodVisitor mv, int localVariable) {
-    mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraFieldInstrumenter.getInternalClassName(), myType.name, myType.desc);
+    mv.visitFieldInsn(Opcodes.GETSTATIC, myExtraFieldInstrumenter.getInternalClassName(), myInit.name, myInit.desc);
     mv.visitVarInsn(Opcodes.ASTORE, localVariable);
   }
 

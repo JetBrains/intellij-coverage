@@ -25,6 +25,7 @@ dependencies {
 
     testImplementation(files(project(":tests").sourceSets.test.output))
     testImplementation(project(path: ":instrumentation", configuration: "archives"))
+    testImplementation(project(":instrumentation"))
     testImplementation(fileTree(project(":benchmarks").file("lib")))
 
     testImplementation('junit:junit:4.13.2')

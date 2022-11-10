@@ -18,6 +18,7 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
+import com.intellij.rt.coverage.instrumentation.dataAccess.EmptyCoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinInlineVisitingFilter;
 import com.intellij.rt.coverage.util.*;
 import com.intellij.rt.coverage.util.classFinder.ClassEntry;
@@ -91,7 +92,7 @@ public class SaveHook implements Runnable {
   public static void save(ProjectData projectData, File dataFile, File sourceMapFile) {
     DataOutputStream os = null;
     try {
-      os = CoverageIOUtil.openFile(dataFile);
+      os = CoverageIOUtil.openWriteFile(dataFile);
       final TObjectIntHashMap<String> dict = new TObjectIntHashMap<String>();
       final Map<String, ClassData> classes = new HashMap<String, ClassData>(projectData.getClasses());
       CoverageIOUtil.writeINT(os, classes.size());
@@ -201,7 +202,7 @@ public class SaveHook implements Runnable {
 
     DataOutputStream out = null;
     try {
-      out = CoverageIOUtil.openFile(sourceMapFile);
+      out = CoverageIOUtil.openWriteFile(sourceMapFile);
       CoverageIOUtil.writeINT(out, sources.size());
       for (Map.Entry<String, String> entry : sources.entrySet()) {
         CoverageIOUtil.writeUTF(out, entry.getKey());
@@ -309,7 +310,7 @@ public class SaveHook implements Runnable {
   private static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean isSampling, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass, boolean checkLineMappings) {
     final ClassVisitor visitor = CoverageClassfileTransformer.createInstrumenter(
         projectData, className, reader, EMPTY_CLASS_VISITOR,
-        null, isSampling, calculateSource, ignorePrivateConstructorOfUtilClass);
+        null, isSampling, calculateSource, ignorePrivateConstructorOfUtilClass, EmptyCoverageDataAccess.INSTANCE);
     if (visitor == null) return;
     reader.accept(visitor, ClassReader.SKIP_FRAMES);
     final ClassData classData = projectData.getClassData(className);

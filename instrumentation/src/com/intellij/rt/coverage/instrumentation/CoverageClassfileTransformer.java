@@ -27,6 +27,7 @@ import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -41,8 +42,8 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
   private final ClassFinder cf;
   private final TestTrackingMode testTrackingMode;
 
-  public CoverageClassfileTransformer(ProjectData data, boolean shouldCalculateSource, List<Pattern> excludePatterns, List<Pattern> includePatterns, ClassFinder cf) {
-    this(data, shouldCalculateSource, excludePatterns, includePatterns, cf, null);
+  public CoverageClassfileTransformer(ProjectData data, boolean shouldCalculateSource, List<Pattern> excludePatterns, List<Pattern> includePatterns) {
+    this(data, shouldCalculateSource, excludePatterns, includePatterns, null, null);
   }
 
   public CoverageClassfileTransformer(ProjectData data, boolean shouldCalculateSource, List<Pattern> excludePatterns, List<Pattern> includePatterns, ClassFinder cf, TestTrackingMode testTrackingMode) {
@@ -57,7 +58,7 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
   @Override
   protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassVisitor cw) {
     return createInstrumenter(data, className, cr, cw, testTrackingMode, data.isSampling(),
-        shouldCalculateSource, OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS);
+        shouldCalculateSource, OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS, createDataAccess(className, cr, data.isSampling()));
   }
 
   /**
@@ -67,11 +68,11 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
                                          ClassReader cr, ClassVisitor cw, TestTrackingMode testTrackingMode,
                                          boolean isSampling,
                                          boolean shouldCalculateSource,
-                                         boolean shouldIgnorePrivateConstructorOfUtilCLass) {
+                                         boolean shouldIgnorePrivateConstructorOfUtilCLass,
+                                         CoverageDataAccess dataAccess) {
     for (ClassSignatureFilter filter : ourFilters) {
       if (filter.shouldFilter(cr)) return null;
     }
-    final CoverageDataAccess dataAccess = DataAccessUtil.createDataAccess(className, cr, isSampling);
     final Instrumenter instrumenter;
     if (isSampling) {
       //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
@@ -90,6 +91,28 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
     return result;
   }
 
+  private CoverageDataAccess createDataAccess(String className, ClassReader cr, boolean isSampling) {
+    if (isSampling && OptionsUtil.NEW_SAMPLING_ENABLED || !isSampling && OptionsUtil.NEW_TRACING_ENABLED) {
+      if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
+        return new CondyCoverageDataAccess(createCondyInit(className, cr, isSampling));
+      } else {
+        return new FieldCoverageDataAccess(cr, className, createInit(className, cr, isSampling));
+      }
+    } else {
+      return new NameCoverageDataAccess(createInit(className, cr, isSampling));
+    }
+  }
+
+  protected CoverageDataAccess.Init createInit(String className, ClassReader cr, boolean isSampling) {
+    return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, ProjectData.PROJECT_DATA_OWNER,
+        "getHitsMask", "(Ljava/lang/String;)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className});
+  }
+
+  protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr, boolean isSampling) {
+    return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, "com/intellij/rt/coverage/util/CondyUtils",
+        "getHitsMask", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className});
+  }
+
   @Override
   protected boolean shouldExclude(String className) {
     return ClassNameUtil.matchesPatterns(className, excludePatterns);
@@ -106,7 +129,9 @@ public class CoverageClassfileTransformer extends AbstractIntellijClassfileTrans
 
   @Override
   protected void visitClassLoader(ClassLoader classLoader) {
-    cf.addClassLoader(classLoader);
+    if (cf != null) {
+      cf.addClassLoader(classLoader);
+    }
   }
 
   @Override

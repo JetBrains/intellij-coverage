@@ -19,6 +19,9 @@ sourceSets {
   test.java.srcDirs = [file('src')]
 }
 
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
 dependencies {
   testImplementation rootProject
   testImplementation project(path: ':instrumentation', configuration: 'archives')

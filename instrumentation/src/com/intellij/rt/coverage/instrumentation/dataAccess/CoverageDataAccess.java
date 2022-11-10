@@ -16,9 +16,14 @@
 
 package com.intellij.rt.coverage.instrumentation.dataAccess;
 
+import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 
+/**
+ * This class encapsulates access to coverage data in runtime,
+ * so that different strategies could be implemented.
+ */
 public abstract class CoverageDataAccess {
   /**
    * This method should access coverage data and store it to a local variable.
@@ -39,19 +44,31 @@ public abstract class CoverageDataAccess {
     return mv;
   }
 
-  public static class DataType {
+  /**
+   * The init information about a method which should be invoked to get coverage data
+   * with its signature and parameter values.
+   */
+  public static class Init {
     public final String name;
     public final String desc;
     public final String initOwner;
     public final String initName;
     public final String initDesc;
+    public final Object[] params;
 
-    public DataType(String name, String desc, String initOwner, String initName, String initDesc) {
+    public Init(String name, String desc, String initOwner, String initName, String initDesc, Object[] params) {
       this.name = name;
       this.desc = desc;
       this.initOwner = initOwner;
       this.initName = initName;
       this.initDesc = initDesc;
+      this.params = params;
+    }
+
+    public void loadParams(MethodVisitor mv) {
+      for (Object param : params) {
+        InstrumentationUtils.push(mv, param);
+      }
     }
   }
 }

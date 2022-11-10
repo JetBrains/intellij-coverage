@@ -24,18 +24,18 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class CondyCoverageDataAccess extends CoverageDataAccess {
   private final ConstantDynamic myCondy;
-  private final CoverageDataAccess.DataType myType;
+  private final Init myInit;
 
-  public CondyCoverageDataAccess(String className, CoverageDataAccess.DataType type) {
-    final Handle handle = new Handle(Opcodes.H_INVOKESTATIC, type.initOwner, type.initName, type.initDesc, false);
-    myCondy = new ConstantDynamic(type.name, InstrumentationUtils.OBJECT_TYPE, handle, className);
-    myType = type;
+  public CondyCoverageDataAccess(Init init) {
+    final Handle handle = new Handle(Opcodes.H_INVOKESTATIC, init.initOwner, init.initName, init.initDesc, false);
+    myCondy = new ConstantDynamic(init.name, InstrumentationUtils.OBJECT_TYPE, handle, init.params);
+    myInit = init;
   }
 
   @Override
   public void onMethodStart(MethodVisitor mv, int localVariable) {
     mv.visitLdcInsn(myCondy);
-    mv.visitTypeInsn(Opcodes.CHECKCAST, myType.desc);
+    mv.visitTypeInsn(Opcodes.CHECKCAST, myInit.desc);
     mv.visitVarInsn(Opcodes.ASTORE, localVariable);
   }
 }

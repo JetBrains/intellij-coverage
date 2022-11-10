@@ -43,22 +43,18 @@ public class AppendUnloadedBenchmark {
   @Benchmark
   public int instrumentation() throws Exception {
     final ClassFinder classFinder = createClassFinder();
-    final File dataFile = new File("test.ic");
-    final ProjectData projectData = ProjectData.createProjectData(dataFile, null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
+    final ProjectData projectData = ProjectData.createProjectData(null, null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
     SaveHook.appendUnloadedFullAnalysis(projectData, classFinder, calculateSource, isSampling, false);
     System.out.println(projectData.getClassesNumber());
-    assert dataFile.delete();
     return projectData.getClassesNumber();
   }
 
   @Benchmark
   public int unloaded() throws Exception {
     final ClassFinder classFinder = createClassFinder();
-    final File dataFile = new File("test.ic");
-    final ProjectData projectData = ProjectData.createProjectData(dataFile, null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
+    final ProjectData projectData = ProjectData.createProjectData(null, null, false, isSampling, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(), null);
     SaveHook.appendUnloaded(projectData, classFinder, calculateSource, isSampling);
     System.out.println(projectData.getClassesNumber());
-    assert dataFile.delete();
     return projectData.getClassesNumber();
   }
 

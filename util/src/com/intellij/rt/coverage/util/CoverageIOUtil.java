@@ -278,8 +278,12 @@ public class CoverageIOUtil {
     return methodSignature;
   }
 
-  public static DataOutputStream openFile(File file) throws FileNotFoundException {
+  public static DataOutputStream openWriteFile(File file) throws FileNotFoundException {
     return new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file)));
+  }
+
+  public static DataInputStream openReadFile(File file) throws FileNotFoundException {
+    return new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
   }
 
   public static void close(Closeable out) {

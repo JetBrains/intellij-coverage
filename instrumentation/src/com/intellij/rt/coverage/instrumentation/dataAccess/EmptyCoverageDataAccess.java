@@ -17,19 +17,15 @@
 package com.intellij.rt.coverage.instrumentation.dataAccess;
 
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
-public class NameCoverageDataAccess extends CoverageDataAccess {
-  private final Init myInit;
-
-  public NameCoverageDataAccess(Init init) {
-    myInit = init;
-  }
-
+/**
+ * This data access may be used for class analysis without actual transform and further usage.
+ *
+ * @see com.intellij.rt.coverage.instrumentation.SaveHook#appendUnloadedFullAnalysis
+ */
+public class EmptyCoverageDataAccess extends CoverageDataAccess {
+  public static final EmptyCoverageDataAccess INSTANCE = new EmptyCoverageDataAccess();
   @Override
   public void onMethodStart(MethodVisitor mv, int localVariable) {
-    myInit.loadParams(mv);
-    mv.visitMethodInsn(Opcodes.INVOKESTATIC, myInit.initOwner, myInit.initName, myInit.initDesc, false);
-    mv.visitVarInsn(Opcodes.ASTORE, localVariable);
   }
 }
