@@ -70,7 +70,7 @@ public class Instrumentator {
       return;
     }
 
-    if (0 < args.length && args.length < 5) {
+    if (args.length < 5) {
       ErrorReporter.logError("At least 5 arguments expected but " + args.length + " found.\n"
           + '\'' + argsString + "'\n"
           + "Expected arguments are:\n"
@@ -78,20 +78,18 @@ public class Instrumentator {
           + "2) a flag to enable tracking per test coverage\n"
           + "3) a flag to calculate coverage for unloaded classes\n"
           + "4) a flag to use data file as initial coverage, also use it if several parallel processes are to write into one file\n"
-          + "5) a flag to run coverage in sampling mode or in tracing mode otherwise\n");
+          + "5) a flag to run line coverage or branch coverage otherwise\n");
       System.exit(1);
     }
 
-    final File dataFile = args.length > 0 ? new File(args[0]) : null;
-    final boolean traceLines = args.length > 0 && Boolean.parseBoolean(args[1]);
-    final boolean calcUnloaded = args.length > 0 && Boolean.parseBoolean(args[2]);
-    final boolean mergeData = args.length > 0 && Boolean.parseBoolean(args[3]);
-    final boolean sampling = args.length == 0 || Boolean.parseBoolean(args[4]);
-    if (dataFile != null) {
-      ErrorReporter.setBasePath(dataFile.getParent());
-    }
-    int i = 5;
+    final File dataFile = new File(args[0]);
+    final boolean testTracking = Boolean.parseBoolean(args[1]);
+    final boolean calcUnloaded = Boolean.parseBoolean(args[2]);
+    final boolean mergeData = Boolean.parseBoolean(args[3]);
+    final boolean branchCoverage = !Boolean.parseBoolean(args[4]);
+    ErrorReporter.setBasePath(dataFile.getParent());
 
+    int i = 5;
     final File sourceMapFile;
     if (args.length > 5 && Boolean.parseBoolean(args[5])) {
       sourceMapFile = new File(args[6]);
@@ -101,7 +99,7 @@ public class Instrumentator {
     }
 
     ErrorReporter.logInfo("---- IntelliJ IDEA coverage runner ---- ");
-    ErrorReporter.logInfo(sampling ? "sampling ..." : ("tracing " + (traceLines ? "and tracking per test coverage ..." : "...")));
+    ErrorReporter.logInfo(branchCoverage ? ("Branch coverage " + (testTracking ? "with tracking per test coverage ..." : "...")) : "Line coverage ...");
 
     final List<Pattern> includePatterns = new ArrayList<Pattern>();
     i = readPatterns(includePatterns, i, args, "include");
@@ -113,22 +111,21 @@ public class Instrumentator {
 
     final List<Pattern> annotationsToIgnore = new ArrayList<Pattern>();
     if (i < args.length && "-excludeAnnotations".equals(args[i])) {
-      i = readPatterns(annotationsToIgnore, i + 1, args, "exclude annotations");
+      readPatterns(annotationsToIgnore, i + 1, args, "exclude annotations");
     }
 
-    final TestTrackingMode testTrackingMode = createTestTrackingMode(traceLines);
+    final TestTrackingMode testTrackingMode = createTestTrackingMode(testTracking);
     final TestTrackingCallback callback = testTrackingMode == null ? null : testTrackingMode.createTestTrackingCallback();
-    final ProjectData data = ProjectData.createProjectData(dataFile, null, traceLines, sampling, includePatterns, excludePatterns, callback);
+    final ProjectData data = ProjectData.createProjectData(dataFile, null, testTracking, branchCoverage, includePatterns, excludePatterns, callback);
     data.setAnnotationsToIgnore(annotationsToIgnore);
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
-    if (dataFile != null) {
-      final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf, mergeData);
-      hook.setSourceMapFile(sourceMapFile);
-      Runtime.getRuntime().addShutdownHook(new Thread(hook));
-    }
+
+    final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf, mergeData);
+    hook.setSourceMapFile(sourceMapFile);
+    Runtime.getRuntime().addShutdownHook(new Thread(hook));
 
     final boolean shouldCalculateSource = sourceMapFile != null;
-    final CoverageClassfileTransformer transformer = new CoverageClassfileTransformer(data, shouldCalculateSource, excludePatterns, includePatterns, cf, testTrackingMode);
+    final CoverageTransformer transformer = new CoverageTransformer(data, shouldCalculateSource, excludePatterns, includePatterns, cf, testTrackingMode);
     addTransformer(instrumentation, transformer);
   }
 
@@ -160,7 +157,7 @@ public class Instrumentator {
    * Add transformer with re-transformation enabled when possible.
    * Reflection is used for 1.5 compatibility.
    */
-  private void addTransformer(Instrumentation instrumentation, CoverageClassfileTransformer transformer) {
+  private void addTransformer(Instrumentation instrumentation, CoverageTransformer transformer) {
     try {
       final Method method = Instrumentation.class.getMethod("addTransformer", ClassFileTransformer.class, boolean.class);
       method.invoke(instrumentation, transformer, true);
@@ -174,7 +171,7 @@ public class Instrumentator {
 
   private TestTrackingMode createTestTrackingMode(boolean traceLines) {
     if (!traceLines) return null;
-    if (OptionsUtil.NEW_TRACING_ENABLED && OptionsUtil.NEW_TEST_TRACKING_ENABLED) {
+    if (OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED && OptionsUtil.NEW_TEST_TRACKING_ENABLED) {
       return new TestTrackingArrayMode();
     }
     return new TestTrackingClassDataMode();
@@ -196,7 +193,7 @@ public class Instrumentator {
 
   private static String[] tokenize(String argumentString) {
     List<String> tokenizedArgs = new ArrayList<String>();
-    StringBuffer currentArg = new StringBuffer();
+    StringBuilder currentArg = new StringBuilder();
     for (int i = 0; i < argumentString.length(); i++) {
       char c = argumentString.charAt(i);
       switch (c) {
@@ -208,7 +205,7 @@ public class Instrumentator {
           if (arg.length() > 0) {
             tokenizedArgs.add(arg);
           }
-          currentArg = new StringBuffer();
+          currentArg = new StringBuilder();
           break;
         case '\"':
           for (i++; i < argumentString.length(); i++) {

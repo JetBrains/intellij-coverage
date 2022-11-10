@@ -17,7 +17,7 @@
 package com.intellij.rt.coverage.instrument;
 
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.CoverageClassfileTransformer;
+import com.intellij.rt.coverage.instrumentation.CoverageTransformer;
 import com.intellij.rt.coverage.instrumentation.offline.OfflineCoverageTransformer;
 import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.util.ClassNameUtil;
@@ -54,14 +54,14 @@ public class Instrumentator {
 
   private class InstrumentationVisitor extends DirectoryVisitor {
     private final File myOutput;
-    private final CoverageClassfileTransformer myTransformer;
+    private final CoverageTransformer myTransformer;
 
     private InstrumentationVisitor(File root, File output) {
       super(root);
       myOutput = output;
-      final ProjectData projectData = ProjectData.createProjectData(false);
+      final ProjectData projectData = ProjectData.createProjectData(true);
       projectData.setAnnotationsToIgnore(myFilters.excludeAnnotations);
-      OptionsUtil.NEW_TRACING_ENABLED = true;
+      OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = true;
       OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS = true;
       myTransformer = new OfflineCoverageTransformer(projectData, false, myFilters.excludeClasses, myFilters.includeClasses);
     }

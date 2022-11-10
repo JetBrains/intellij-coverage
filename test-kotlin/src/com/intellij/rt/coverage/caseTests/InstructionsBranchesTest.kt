@@ -57,5 +57,5 @@ internal abstract class InstructionsBranchesTest(override val coverage: Coverage
     //===GENERATED TESTS===
 }
 
-internal class NewTracingInstructionsBranchesTest : InstructionsBranchesTest(Coverage.NEW_TRACING)
-internal class CondyTracingInstructionsBranchesTest : InstructionsBranchesTest(Coverage.CONDY_TRACING)
+internal class NewInstructionsTest : InstructionsBranchesTest(Coverage.NEW_BRANCH)
+internal class CondyInstructionsTest : InstructionsBranchesTest(Coverage.CONDY_BRANCH)

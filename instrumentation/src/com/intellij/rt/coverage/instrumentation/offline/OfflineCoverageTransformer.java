@@ -17,7 +17,7 @@
 package com.intellij.rt.coverage.instrumentation.offline;
 
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.CoverageClassfileTransformer;
+import com.intellij.rt.coverage.instrumentation.CoverageTransformer;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
@@ -35,28 +35,28 @@ import java.util.regex.Pattern;
  *
  * @see ProjectData#getOrCreateHitsMask
  */
-public class OfflineCoverageTransformer extends CoverageClassfileTransformer {
+public class OfflineCoverageTransformer extends CoverageTransformer {
   public OfflineCoverageTransformer(ProjectData data, boolean shouldCalculateSource, List<Pattern> excludePatterns, List<Pattern> includePatterns) {
     super(data, shouldCalculateSource, excludePatterns, includePatterns);
   }
 
   @Override
-  protected CoverageDataAccess.Init createInit(String className, ClassReader cr, boolean isSampling) {
-    final int length = getRequiredArrayLength(cr, isSampling);
+  protected CoverageDataAccess.Init createInit(String className, ClassReader cr, boolean branchCoverage) {
+    final int length = getRequiredArrayLength(cr, branchCoverage);
     return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, ProjectData.PROJECT_DATA_OWNER,
         "getOrCreateHitsMask", "(Ljava/lang/String;I)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className, length});
   }
 
   @Override
-  protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr, boolean isSampling) {
-    final int length = getRequiredArrayLength(cr, isSampling);
+  protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr, boolean branchCoverage) {
+    final int length = getRequiredArrayLength(cr, branchCoverage);
     return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, "com/intellij/rt/coverage/util/CondyUtils",
         "getOrCreateHitsMask", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;I)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className, length});
   }
 
-  private static int getRequiredArrayLength(ClassReader cr, boolean isSampling) {
+  private static int getRequiredArrayLength(ClassReader cr, boolean branchCoverage) {
     final ClassLengthAnalyser analyser = analyseClassLength(cr);
-    return isSampling ? analyser.getMaxLine() + 1 : analyser.getHits();
+    return branchCoverage ? analyser.getHits() : analyser.getMaxLine() + 1;
   }
 
   private static ClassLengthAnalyser analyseClassLength(ClassReader cr) {

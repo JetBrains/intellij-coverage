@@ -20,8 +20,7 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.JumpData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.CoverageClassfileTransformer;
-import com.intellij.rt.coverage.util.classFinder.ClassFinder;
+import com.intellij.rt.coverage.instrumentation.CoverageTransformer;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
@@ -54,7 +53,7 @@ public class CoverageNotNullInstrumentationTest {
   }
 
   private byte[] doTransform(String name, byte[] bytes, ClassLoader loader, final ProjectData data) {
-    return new CoverageClassfileTransformer(data, false, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList())
+    return new CoverageTransformer(data, false, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList())
         .instrument(bytes, name, loader, true);
   }
 

@@ -31,9 +31,13 @@ public class ClassData implements CoverageData {
   private Map<String, Integer> myStatus;
   private String mySource;
 
-  /** Storage for line and branch hits in new tracing mode. */
+  /**
+   * Storage for line and branch hits.
+   */
   private volatile int[] myHitsMask;
-  /** Storage for test tracking data. */
+  /**
+   * Storage for test tracking data.
+   */
   private volatile boolean[] myTraceMask;
 
   /**

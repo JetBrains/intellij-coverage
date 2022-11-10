@@ -134,10 +134,10 @@ public class CoverageStatusTest extends TestCase {
     for (int line = 32004; line < 34004; line++) {
       expectedBuilder.append(line).append(":FULL\n");
     }
-    doTest("longClass", expectedBuilder.toString(), true);
+    doTest("longClass", expectedBuilder.toString(), false);
   }
 
-  public void testLongClassTracing() throws Exception {
+  public void testLongClassBranchCoverage() throws Exception {
     StringBuilder expectedBuilder = new StringBuilder("1:NONE\n" +
         "3:FULL\n");
     for (int line = 32004; line < 34004; line++) {
@@ -149,7 +149,7 @@ public class CoverageStatusTest extends TestCase {
   public void testNotNullAssertionsAreIgnored() throws Exception {
     final String testDataPath = getTestPath("notNull");
     myDataFile = new File(testDataPath + File.separator + "Test.ic");
-    final ProjectData projectInfo = runCoverage(testDataPath, myDataFile, "WithNotNulls.*", "WithNotNulls", false);
+    final ProjectData projectInfo = runCoverage(testDataPath, myDataFile, "WithNotNulls.*", "WithNotNulls", true);
     final ClassData classInfo = projectInfo.getClassData("WithNotNulls");
     assertNotNull(classInfo);
     final LineData line = classInfo.getLineData(6);
@@ -186,13 +186,13 @@ public class CoverageStatusTest extends TestCase {
   }
 
   private void doTest(final String className, String expected) throws Exception {
-    doTest(className, expected, false);
+    doTest(className, expected, true);
   }
 
-  private void doTest(final String className, String expected, boolean sampling) throws Exception {
+  private void doTest(final String className, String expected, boolean branchCoverage) throws Exception {
     final String testDataPath = prepareForAgentRun(className);
 
-    final ProjectData projectInfo = runCoverage(testDataPath, myDataFile, "Test(\\$.*)*", "Test", sampling);
+    final ProjectData projectInfo = runCoverage(testDataPath, myDataFile, "Test(\\$.*)*", "Test", branchCoverage);
 
     final StringBuilder buf = new StringBuilder();
 
@@ -220,18 +220,18 @@ public class CoverageStatusTest extends TestCase {
   }
 
   public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
-                                 String classToRun, final boolean sampling) throws IOException, InterruptedException {
-    return runCoverage(testDataPath, coverageDataFile, patterns, classToRun, sampling, EMPTY, false, false);
+                                        String classToRun, final boolean branchCoverage) throws IOException, InterruptedException {
+    return runCoverage(testDataPath, coverageDataFile, patterns, classToRun, branchCoverage, EMPTY, false, false);
   }
 
   public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
-                                 String classToRun, final boolean sampling, String[] extraArgs, boolean calcUnloaded, boolean testTracking) throws IOException, InterruptedException {
+                                        String classToRun, final boolean branchCoverage, String[] extraArgs, boolean calcUnloaded, boolean testTracking) throws IOException, InterruptedException {
     String coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent");
 
     String[] commandLine = {
 //        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
         "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" "
-            + testTracking + " " + calcUnloaded + " false " + sampling + " " + patterns,
+            + testTracking + " " + calcUnloaded + " false " + !branchCoverage + " " + patterns,
         "-classpath", testDataPath, classToRun};
     if (extraArgs.length > 0) {
       String[] args = new String[extraArgs.length + commandLine.length];

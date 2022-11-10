@@ -17,13 +17,13 @@
 package com.intellij.rt.coverage.instrumentation.kotlin;
 
 import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
-import com.intellij.rt.coverage.instrumentation.filters.classSignature.ClassSignatureFilter;
-import com.intellij.rt.coverage.instrumentation.filters.classSignature.KotlinFunctionOrPropertyReferenceFilter;
-import com.intellij.rt.coverage.instrumentation.filters.enumerating.*;
-import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticAccessMethodFilter;
-import com.intellij.rt.coverage.instrumentation.filters.signature.KotlinSyntheticConstructorOfSealedClassFilter;
-import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
-import com.intellij.rt.coverage.instrumentation.filters.visiting.*;
+import com.intellij.rt.coverage.instrumentation.filters.branches.*;
+import com.intellij.rt.coverage.instrumentation.filters.classes.ClassFilter;
+import com.intellij.rt.coverage.instrumentation.filters.classes.KotlinFunctionOrPropertyReferenceFilter;
+import com.intellij.rt.coverage.instrumentation.filters.lines.*;
+import com.intellij.rt.coverage.instrumentation.filters.methods.KotlinSyntheticAccessMethodFilter;
+import com.intellij.rt.coverage.instrumentation.filters.methods.KotlinSyntheticConstructorOfSealedClassFilter;
+import com.intellij.rt.coverage.instrumentation.filters.methods.MethodFilter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,38 +51,38 @@ public class KotlinUtils {
 
   private static final boolean ourKotlinEnabled = !"false".equals(System.getProperty("coverage.kotlin.enable", "true"));
 
-  public static List<MethodSignatureFilter> createSignatureFilters() {
+  public static List<MethodFilter> createMethodFilters() {
     if (!ourKotlinEnabled) return Collections.emptyList();
-    List<MethodSignatureFilter> result = new ArrayList<MethodSignatureFilter>();
+    List<MethodFilter> result = new ArrayList<MethodFilter>();
     result.add(new KotlinSyntheticConstructorOfSealedClassFilter());
     result.add(new KotlinSyntheticAccessMethodFilter());
     return result;
   }
 
-  public static List<ClassSignatureFilter> createClassSignatureFilters() {
+  public static List<ClassFilter> createClassFilters() {
     if (!ourKotlinEnabled) return Collections.emptyList();
-    List<ClassSignatureFilter> result = new ArrayList<ClassSignatureFilter>();
+    List<ClassFilter> result = new ArrayList<ClassFilter>();
     result.add(new KotlinFunctionOrPropertyReferenceFilter());
     return result;
   }
 
-  public static List<MethodVisitingFilter> createVisitingFilters() {
+  public static List<LinesFilter> createLineFilters() {
     if (!ourKotlinEnabled) return Collections.emptyList();
-    List<MethodVisitingFilter> result = new ArrayList<MethodVisitingFilter>();
+    List<LinesFilter> result = new ArrayList<LinesFilter>();
     result.add(new KotlinImplementerDefaultInterfaceMemberFilter());
-    result.add(new KotlinCoroutinesVisitingFilter());
-    result.add(new KotlinInlineVisitingFilter());
+    result.add(new KotlinCoroutinesLinesFilter());
+    result.add(new KotlinInlineFilter());
     result.add(new DeprecatedMethodFilter());
     result.add(new KotlinDefaultArgsLineFilter());
     return result;
   }
 
-  public static List<LineEnumeratorFilter> createLineEnumeratorFilters() {
+  public static List<BranchesFilter> createBranchFilters() {
     if (!ourKotlinEnabled) return Collections.emptyList();
-    List<LineEnumeratorFilter> result = new ArrayList<LineEnumeratorFilter>();
+    List<BranchesFilter> result = new ArrayList<BranchesFilter>();
     result.add(new KotlinWhenMappingExceptionFilter());
     result.add(new KotlinDefaultArgsBranchFilter());
-    result.add(new KotlinCoroutinesEnumeratingFilter());
+    result.add(new KotlinCoroutinesBranchesFilter());
     result.add(new KotlinLateinitFilter());
     result.add(new KotlinOpenMemberWithDefaultArgsFilter());
     result.add(new KotlinUnsafeCastFilter());

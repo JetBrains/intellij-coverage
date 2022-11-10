@@ -93,7 +93,7 @@ internal abstract class OfflineInstrumentationTest(override val coverage: Covera
         check(patterns == null) { "Offline coverage tests cannot have patterns" }
         check(!calculateUnloaded) { "Offline coverage tests cannot collect unloaded classes" }
         check(extraArgs.isEmpty()) { "Offline coverage tests cannot add extra args" }
-        val expected = if (coverage.isSampling()) coverageData.mapValues { (_, v) -> if (v == "PARTIAL") "FULL" else v } else coverageData
+        val expected = if (!coverage.isBranchCoverage()) coverageData.mapValues { (_, v) -> if (v == "PARTIAL") "FULL" else v } else coverageData
         return copy(classes = fullClassNames, coverageData = expected)
     }
 
@@ -109,10 +109,10 @@ internal abstract class OfflineInstrumentationTest(override val coverage: Covera
         val projectData = createProjectData(includes, excludes)
         val cf = ClassFinder(includes, excludes)
         cf.addClassLoader(URLClassLoader(arrayOf(outputRoot.toURI().toURL())))
-        SaveHook.appendUnloadedFullAnalysis(projectData, cf, false, coverage.isSampling(), false, false)
+        SaveHook.appendUnloadedFullAnalysis(projectData, cf, false, coverage.isBranchCoverage(), false, false)
 
         RawHitsReport.load(myDataFile, projectData)
-        projectData.checkLineMappings()
+        projectData.applyLineMappings()
 
         assertEqualsLines(projectData, config.coverageData, config.classes)
     }
@@ -143,8 +143,8 @@ internal abstract class OfflineInstrumentationTest(override val coverage: Covera
     }
 
     private fun createProjectData(includes: List<Pattern>, excludes: List<Pattern>): ProjectData =
-            ProjectData.createProjectData(null, null, false, coverage.isSampling(), includes, excludes, null)
+            ProjectData.createProjectData(null, null, false, coverage.isBranchCoverage(), includes, excludes, null)
 }
 
-internal class OfflineInstrumentationSamplingTest : OfflineInstrumentationTest(Coverage.SAMPLING)
-internal class OfflineInstrumentationTracingTest : OfflineInstrumentationTest(Coverage.TRACING)
+internal class OfflineLinesInstrumentationTest : OfflineInstrumentationTest(Coverage.LINE)
+internal class OfflineBranchesInstrumentationTest : OfflineInstrumentationTest(Coverage.BRANCH)

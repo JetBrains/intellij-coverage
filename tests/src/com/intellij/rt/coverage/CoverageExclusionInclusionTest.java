@@ -23,7 +23,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 
 public class CoverageExclusionInclusionTest extends TestCase {
@@ -71,7 +72,7 @@ public class CoverageExclusionInclusionTest extends TestCase {
       }
     });
 
-    final ProjectData projectInfo = CoverageStatusTest.runCoverage(testDataPath.getAbsolutePath(), myDataFile, inclusionFilter, "Test", true);
+    final ProjectData projectInfo = CoverageStatusTest.runCoverage(testDataPath.getAbsolutePath(), myDataFile, inclusionFilter, "Test", false);
     assertEquals(new HashSet<String>(Arrays.asList(expectedClasses)), projectInfo.getClasses().keySet());
   }
 

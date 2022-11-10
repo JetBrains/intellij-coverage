@@ -19,7 +19,10 @@ package com.intellij.rt.coverage.instrumentation.testTracking;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.*;
+import com.intellij.rt.coverage.instrumentation.BranchesEnumerator;
+import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
+import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.LocalVariableInserter;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
 import com.intellij.rt.coverage.util.ClassNameUtil;
@@ -67,7 +70,7 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
     myArrayDataAccess = DataAccessUtil.createTestTrackingDataAccess(className, cr, true);
   }
 
-  protected MethodVisitor createMethodTransformer(final MethodVisitor mv, LineEnumerator enumerator, final int access, String name, final String desc) {
+  protected MethodVisitor createMethodTransformer(final MethodVisitor mv, BranchesEnumerator enumerator, final int access, String name, final String desc) {
     if (enumerator.hasNoLines()) {
       return myArrayDataAccess.createMethodVisitor(super.myDataAccess.createMethodVisitor(mv, name, false), name, false);
     }

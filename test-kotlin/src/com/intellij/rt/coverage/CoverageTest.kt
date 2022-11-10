@@ -91,7 +91,7 @@ internal abstract class CoverageTest {
 
     /**
      * Substitute test configuration before calling of a verification method.
-     * For example, sampling test replaces PARTIAL covered lines with FULL.
+     * For example, line coverage test replaces PARTIAL covered lines with FULL.
      */
     internal open fun preprocessConfiguration(configuration: TestConfiguration): TestConfiguration = configuration
 

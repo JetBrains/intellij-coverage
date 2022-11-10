@@ -16,41 +16,41 @@
 
 package com.intellij.rt.coverage.instrumentation.filters;
 
-import com.intellij.rt.coverage.instrumentation.filters.classSignature.ClassSignatureFilter;
-import com.intellij.rt.coverage.instrumentation.filters.enumerating.LineEnumeratorFilter;
-import com.intellij.rt.coverage.instrumentation.filters.enumerating.NotNullAssertionsFilter;
-import com.intellij.rt.coverage.instrumentation.filters.signature.DeserializeLambdaFilter;
-import com.intellij.rt.coverage.instrumentation.filters.signature.EnumMethodsFilter;
-import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
-import com.intellij.rt.coverage.instrumentation.filters.visiting.ClosingBracesFilter;
-import com.intellij.rt.coverage.instrumentation.filters.visiting.AnnotationIgnoredMethodFilter;
-import com.intellij.rt.coverage.instrumentation.filters.visiting.MethodVisitingFilter;
+import com.intellij.rt.coverage.instrumentation.filters.branches.BranchesFilter;
+import com.intellij.rt.coverage.instrumentation.filters.branches.NotNullAssertionsFilter;
+import com.intellij.rt.coverage.instrumentation.filters.classes.ClassFilter;
+import com.intellij.rt.coverage.instrumentation.filters.lines.AnnotationIgnoredMethodFilter;
+import com.intellij.rt.coverage.instrumentation.filters.lines.ClosingBracesFilter;
+import com.intellij.rt.coverage.instrumentation.filters.lines.LinesFilter;
+import com.intellij.rt.coverage.instrumentation.filters.methods.DeserializeLambdaFilter;
+import com.intellij.rt.coverage.instrumentation.filters.methods.EnumMethodsFilter;
+import com.intellij.rt.coverage.instrumentation.filters.methods.MethodFilter;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 
 import java.util.List;
 
 public class FilterUtils {
 
-  public static List<MethodSignatureFilter> createSignatureFilters() {
-    List<MethodSignatureFilter> result = KotlinUtils.createSignatureFilters();
+  public static List<MethodFilter> createMethodFilters() {
+    List<MethodFilter> result = KotlinUtils.createMethodFilters();
     result.add(new EnumMethodsFilter());
     result.add(new DeserializeLambdaFilter());
     return result;
   }
 
-  public static List<ClassSignatureFilter> createClassSignatureFilters() {
-    return KotlinUtils.createClassSignatureFilters();
+  public static List<ClassFilter> createClassFilters() {
+    return KotlinUtils.createClassFilters();
   }
 
-  public static List<MethodVisitingFilter> createVisitingFilters() {
-    List<MethodVisitingFilter> result = KotlinUtils.createVisitingFilters();
+  public static List<LinesFilter> createLineFilters() {
+    List<LinesFilter> result = KotlinUtils.createLineFilters();
     result.add(new ClosingBracesFilter());
     result.add(new AnnotationIgnoredMethodFilter());
     return result;
   }
 
-  public static List<LineEnumeratorFilter> createLineEnumeratorFilters() {
-    List<LineEnumeratorFilter> result = KotlinUtils.createLineEnumeratorFilters();
+  public static List<BranchesFilter> createBranchFilters() {
+    List<BranchesFilter> result = KotlinUtils.createBranchFilters();
     result.add(new NotNullAssertionsFilter());
     return result;
   }

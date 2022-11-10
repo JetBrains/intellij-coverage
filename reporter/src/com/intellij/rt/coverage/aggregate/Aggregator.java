@@ -81,7 +81,7 @@ public class Aggregator {
       }
     }
     if (projectDataCopy != null) {
-      projectDataCopy.checkLineMappings();
+      projectDataCopy.applyLineMappings();
       mergeHits(projectData, projectDataCopy);
     }
     myProjectData = projectData;
@@ -89,7 +89,7 @@ public class Aggregator {
   }
 
   private static ProjectData copyProjectData(ProjectData projectData) {
-    final ProjectData projectDataCopy = ProjectData.createProjectData(false);
+    final ProjectData projectDataCopy = ProjectData.createProjectData(true);
     for (ClassData classData : projectData.getClassesCollection()) {
       final ClassData classCopy = projectDataCopy.getOrCreateClassData(classData.getName());
       final LineData[] lines = (LineData[]) classData.getLines();
@@ -176,7 +176,7 @@ public class Aggregator {
     }
     projectData.setInstructionsCoverage(true);
     projectData.setAnnotationsToIgnore(excludeAnnotations);
-    SaveHook.appendUnloadedFullAnalysis(projectData, createClassFinder(), true, false, true, false);
+    SaveHook.appendUnloadedFullAnalysis(projectData, createClassFinder(), true, true, true, false);
     return projectData;
   }
 

@@ -26,10 +26,10 @@ import org.junit.Test
 internal class NewInstrumentationTest {
 
     @Test
-    fun testNewSamplingCoverageJoda() = testCoverageJoda(Coverage.SAMPLING, Coverage.NEW_SAMPLING)
+    fun testNewLineCoverageJoda() = testCoverageJoda(Coverage.LINE, Coverage.NEW_LINE)
 
     @Test
-    fun testNewTracingCoverageJoda() = testCoverageJoda(Coverage.TRACING, Coverage.NEW_TRACING)
+    fun testNewBranchCoverageJoda() = testCoverageJoda(Coverage.BRANCH, Coverage.NEW_BRANCH)
 
     private fun testCoverageJoda(before: Coverage, after: Coverage) {
         val exclude = listOf( // exclude non deterministic classes from coverage

@@ -17,7 +17,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
-import com.intellij.rt.coverage.instrumentation.filters.signature.MethodSignatureFilter;
+import com.intellij.rt.coverage.instrumentation.filters.methods.MethodFilter;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
@@ -31,7 +31,7 @@ import java.util.List;
  * This visitor defines methods that should be visited.
  */
 public class MethodFilteringVisitor extends ClassVisitor {
-  private static final List<MethodSignatureFilter> ourSignatureFilters = FilterUtils.createSignatureFilters();
+  private static final List<MethodFilter> ourMethodFilters = FilterUtils.createMethodFilters();
 
   private final String myClassName;
   private boolean myEnum = false;
@@ -62,7 +62,7 @@ public class MethodFilteringVisitor extends ClassVisitor {
     if ((access & Opcodes.ACC_BRIDGE) != 0) return false; //try to skip bridge methods
     if ((access & Opcodes.ACC_ABSTRACT) != 0)
       return false; //skip abstracts; do not include interfaces without non-abstract methods in result
-    for (MethodSignatureFilter filter : ourSignatureFilters) {
+    for (MethodFilter filter : ourMethodFilters) {
       if (filter.shouldFilter(access, name, desc, signature, exceptions, this)) {
         return false;
       }

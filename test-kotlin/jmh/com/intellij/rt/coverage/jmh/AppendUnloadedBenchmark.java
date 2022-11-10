@@ -37,14 +37,14 @@ import java.util.regex.Pattern;
 @Fork(1)
 public class AppendUnloadedBenchmark {
   @Param({"false", "true"})
-  boolean isSampling = true;
+  boolean branchCoverage = true;
   final boolean calculateSource = true;
 
   @Benchmark
   public int instrumentation() {
     final ClassFinder classFinder = createClassFinder();
-    final ProjectData projectData = ProjectData.createProjectData(isSampling);
-    SaveHook.appendUnloadedFullAnalysis(projectData, classFinder, calculateSource, isSampling, false);
+    final ProjectData projectData = ProjectData.createProjectData(branchCoverage);
+    SaveHook.appendUnloadedFullAnalysis(projectData, classFinder, calculateSource, branchCoverage, false);
     System.out.println(projectData.getClassesNumber());
     return projectData.getClassesNumber();
   }
@@ -52,8 +52,8 @@ public class AppendUnloadedBenchmark {
   @Benchmark
   public int unloaded() {
     final ClassFinder classFinder = createClassFinder();
-    final ProjectData projectData = ProjectData.createProjectData(isSampling);
-    SaveHook.appendUnloaded(projectData, classFinder, calculateSource, isSampling);
+    final ProjectData projectData = ProjectData.createProjectData(branchCoverage);
+    SaveHook.appendUnloaded(projectData, classFinder, calculateSource, branchCoverage);
     System.out.println(projectData.getClassesNumber());
     return projectData.getClassesNumber();
   }
@@ -79,8 +79,9 @@ public class AppendUnloadedBenchmark {
     return finder;
   }
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) {
     AppendUnloadedBenchmark b = new AppendUnloadedBenchmark();
     b.unloaded();
+    b.instrumentation();
   }
 }

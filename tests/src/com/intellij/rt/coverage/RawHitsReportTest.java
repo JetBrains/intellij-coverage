@@ -24,10 +24,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Collections;
-import java.util.regex.Pattern;
 
 public class RawHitsReportTest {
   @Test
@@ -53,7 +50,7 @@ public class RawHitsReportTest {
   }
 
   private static ProjectData createProject() {
-    final ProjectData projectData = ProjectData.createProjectData(true);
+    final ProjectData projectData = ProjectData.createProjectData(false);
     final ClassData classData = projectData.getOrCreateClassData("A");
     classData.setLines(new LineData[]{
         new LineData(0, "a()"),

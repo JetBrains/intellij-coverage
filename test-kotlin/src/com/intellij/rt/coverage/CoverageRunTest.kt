@@ -97,7 +97,7 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testDefaultArgsSeveralArguments() = test("defaultArgs.severalArguments")
 
     @Test
-    fun testDefaultArgsTracing() = test("defaultArgs.tracing")
+    fun testDefaultArgsSimple() = test("defaultArgs.simple")
 
     @Test
     fun testDefaultArgsUncovered() = test("defaultArgs.uncovered")
@@ -313,7 +313,7 @@ internal abstract class CoverageRunTest : CoverageTest() {
 
     @Test
     fun testReflection() {
-        if (coverage == Coverage.NEW_SAMPLING || coverage == Coverage.NEW_TRACING) {
+        if (coverage == Coverage.NEW_LINE || coverage == Coverage.NEW_BRANCH) {
             Assert.assertThrows(RuntimeException::class.java) {
                 test("custom.reflection")
             }
@@ -350,14 +350,14 @@ internal abstract class CoverageVerifyResultsTest(override val coverage: Coverag
     }
 }
 
-internal abstract class AbstractSamplingCoverageTest(coverage: Coverage) : CoverageVerifyResultsTest(coverage) {
+internal abstract class AbstractLineCoverageTest(coverage: Coverage) : CoverageVerifyResultsTest(coverage) {
     override fun preprocessConfiguration(configuration: TestConfiguration) =
-        configuration.copy(coverageData = configuration.coverageData.mapValues { (_, v) -> if (v == "PARTIAL") "FULL" else v })
+            configuration.copy(coverageData = configuration.coverageData.mapValues { (_, v) -> if (v == "PARTIAL") "FULL" else v })
 }
 
-internal class SamplingCoverageTest : AbstractSamplingCoverageTest(Coverage.SAMPLING)
-internal class TracingCoverageTest : CoverageVerifyResultsTest(Coverage.TRACING)
-internal class NewSamplingCoverageTest : AbstractSamplingCoverageTest(Coverage.NEW_SAMPLING)
-internal class NewTracingCoverageTest : CoverageVerifyResultsTest(Coverage.NEW_TRACING)
-internal class CondySamplingCoverageTest : AbstractSamplingCoverageTest(Coverage.CONDY_SAMPLING)
-internal class CondyTracingCoverageTest : CoverageVerifyResultsTest(Coverage.CONDY_TRACING)
+internal class LineCoverageTest : AbstractLineCoverageTest(Coverage.LINE)
+internal class BranchCoverageTest : CoverageVerifyResultsTest(Coverage.BRANCH)
+internal class NewLineCoverageTest : AbstractLineCoverageTest(Coverage.NEW_LINE)
+internal class NewBranchCoverageTest : CoverageVerifyResultsTest(Coverage.NEW_BRANCH)
+internal class CondyLineCoverageTest : AbstractLineCoverageTest(Coverage.CONDY_LINE)
+internal class CondyBranchCoverageTest : CoverageVerifyResultsTest(Coverage.CONDY_BRANCH)

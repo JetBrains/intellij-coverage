@@ -20,7 +20,9 @@ import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.util.*;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -45,7 +47,7 @@ public class ProjectData implements CoverageData, Serializable {
   private File myDataFile;
 
   private boolean myTraceLines;
-  private boolean mySampling;
+  private boolean myBranchCoverage = true;
   private boolean myCollectInstructions;
 
   /**
@@ -93,8 +95,8 @@ public class ProjectData implements CoverageData, Serializable {
     return myStopped;
   }
 
-  public boolean isSampling() {
-    return mySampling;
+  public boolean isBranchCoverage() {
+    return myBranchCoverage;
   }
 
   public boolean isTestTracking() {
@@ -142,7 +144,7 @@ public class ProjectData implements CoverageData, Serializable {
   public static ProjectData createProjectData(final File dataFile,
                                               final ProjectData initialData,
                                               boolean traceLines,
-                                              boolean isSampling,
+                                              boolean branchCoverage,
                                               List<Pattern> includePatterns,
                                               List<Pattern> excludePatterns,
                                               final TestTrackingCallback testTrackingCallback) throws IOException {
@@ -153,7 +155,7 @@ public class ProjectData implements CoverageData, Serializable {
       dataFile.createNewFile();
     }
     ourProjectData.myStopped = false;
-    ourProjectData.mySampling = isSampling;
+    ourProjectData.myBranchCoverage = branchCoverage;
     ourProjectData.myTraceLines = traceLines;
     ourProjectData.myCollectInstructions = OptionsUtil.INSTRUCTIONS_COVERAGE_ENABLED;
     ourProjectData.myDataFile = dataFile;
@@ -163,9 +165,9 @@ public class ProjectData implements CoverageData, Serializable {
     return ourProjectData;
   }
 
-  public static ProjectData createProjectData(boolean isSampling) {
+  public static ProjectData createProjectData(boolean branchCoverage) {
     final ProjectData projectData = new ProjectData();
-    projectData.mySampling = isSampling;
+    projectData.myBranchCoverage = branchCoverage;
     return projectData;
   }
 
@@ -203,7 +205,7 @@ public class ProjectData implements CoverageData, Serializable {
   /**
    * Apply line mappings: move hits from original line in bytecode to the mapped line.
    */
-  public void checkLineMappings() {
+  public void applyLineMappings() {
     if (myLinesMap != null) {
       for (Map.Entry<String, FileMapData[]> entry : myLinesMap.entrySet()) {
         final String className = entry.getKey();
@@ -242,17 +244,15 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
 
-  public void applyLinesMask() {
-    if (!mySampling) return;
-    for (ClassData data : myClasses.myClasses.values()) {
-      data.applyLinesMask();
-    }
-  }
-
-  public void applyBranchData() {
-    if (mySampling) return;
-    for (ClassData data : myClasses.myClasses.values()) {
-      data.applyBranches();
+  public void applyHits() {
+    if (myBranchCoverage) {
+      for (ClassData data : myClasses.myClasses.values()) {
+        data.applyBranches();
+      }
+    } else {
+      for (ClassData data : myClasses.myClasses.values()) {
+        data.applyLinesMask();
+      }
     }
   }
 
@@ -351,7 +351,7 @@ public class ProjectData implements CoverageData, Serializable {
       final Object projectData = getProjectDataObject();
       TRACE_LINE_METHOD.invoke(projectData, new Object[]{classData, line});
     } catch (Exception e) {
-      ErrorReporter.reportError("Error tracing class " + classData.toString(), e);
+      ErrorReporter.reportError("Error during test tracking in class " + classData.toString(), e);
     }
   }
 
@@ -378,7 +378,7 @@ public class ProjectData implements CoverageData, Serializable {
       final Object projectData = getProjectDataObject();
       return (Boolean) REGISTER_CLASS_FOR_TRACE_METHOD.invoke(projectData, new Object[]{classData});
     } catch (Exception e) {
-      ErrorReporter.reportError("Error tracing class " + classData.toString(), e);
+      ErrorReporter.reportError("Error during test tracking in class " + classData.toString(), e);
       return false;
     }
   }

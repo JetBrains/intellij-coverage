@@ -74,9 +74,9 @@ internal abstract class AbstractTestTrackingTest(override val coverage: Coverage
     }
 }
 
-internal class TestTrackingTracingTest : AbstractTestTrackingTest(Coverage.TRACING)
-internal class TestTrackingNewTracingTest : AbstractTestTrackingTest(Coverage.NEW_TRACING)
-internal class ClassDataTestTrackingNewTracingTest : AbstractTestTrackingTest(Coverage.NEW_TRACING) {
+internal class TestTrackingTest : AbstractTestTrackingTest(Coverage.BRANCH)
+internal class NewTestTrackingTest : AbstractTestTrackingTest(Coverage.NEW_BRANCH)
+internal class ClassDataTestTrackingTest : AbstractTestTrackingTest(Coverage.NEW_BRANCH) {
     init {
         commonExtraArgs.add("-Didea.new.test.tracking.coverage=false")
     }
@@ -98,9 +98,9 @@ internal abstract class TestTrackingVerifyInstrumentationTest(override val cover
     fun testCoroutinesInline() = test("coroutines.inline")
 }
 
-internal class TestTrackingTracingCoverageTest : TestTrackingVerifyInstrumentationTest(Coverage.TRACING)
-internal class TestTrackingNewTracingCoverageTest : TestTrackingVerifyInstrumentationTest(Coverage.NEW_TRACING)
-internal class ClassDataTestTrackingNewTracingCoverageTest : TestTrackingVerifyInstrumentationTest(Coverage.NEW_TRACING) {
+internal class TestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.BRANCH)
+internal class NewTestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.NEW_BRANCH)
+internal class ClassDataTestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.NEW_BRANCH) {
     init {
         commonExtraArgs.add("-Didea.new.test.tracking.coverage=false")
     }

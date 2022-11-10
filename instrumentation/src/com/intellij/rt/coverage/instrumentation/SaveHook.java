@@ -19,7 +19,7 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.instrumentation.dataAccess.EmptyCoverageDataAccess;
-import com.intellij.rt.coverage.instrumentation.filters.visiting.KotlinInlineVisitingFilter;
+import com.intellij.rt.coverage.instrumentation.filters.lines.KotlinInlineFilter;
 import com.intellij.rt.coverage.util.*;
 import com.intellij.rt.coverage.util.classFinder.ClassEntry;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
@@ -60,17 +60,16 @@ public class SaveHook implements Runnable {
     projectData.stop();
     CoverageIOUtil.FileLock lock = null;
     try {
-      projectData.applyLinesMask();
-      projectData.applyBranchData();
+      projectData.applyHits();
       if (myAppendUnloaded) {
         final boolean calculateSource = mySourceMapFile != null;
         if (OptionsUtil.UNLOADED_CLASSES_FULL_ANALYSIS) {
-          appendUnloadedFullAnalysis(projectData, myClassFinder, calculateSource, projectData.isSampling(), OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS, false);
+          appendUnloadedFullAnalysis(projectData, myClassFinder, calculateSource, projectData.isBranchCoverage(), OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS, false);
         } else {
-          appendUnloaded(projectData, myClassFinder, calculateSource, projectData.isSampling());
+          appendUnloaded(projectData, myClassFinder, calculateSource, projectData.isBranchCoverage());
         }
       }
-      projectData.checkLineMappings();
+      projectData.applyLineMappings();
       dropIgnoredLines(projectData);
       checkLineSignatures(projectData);
       lock = CoverageIOUtil.FileLock.lock(myDataFile);
@@ -219,7 +218,7 @@ public class SaveHook implements Runnable {
    * <p>
    * Classes are searched using <code>classFinder</code>.
    */
-  public static void appendUnloaded(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean isSampling) {
+  public static void appendUnloaded(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean branchCoverage) {
     classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
       public void consume(ClassEntry classEntry) {
         ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
@@ -231,7 +230,7 @@ public class SaveHook implements Runnable {
           if (calculateSource) {
             cd = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
           }
-          SourceLineCounter slc = new SourceLineCounter(cd, calculateSource ? projectData : null, !isSampling);
+          SourceLineCounter slc = new SourceLineCounter(cd, calculateSource ? projectData : null, branchCoverage);
           reader.accept(slc, ClassReader.SKIP_FRAMES);
           if (slc.isEnum() || slc.getNSourceLines() > 0) { // ignore classes without executable code
             final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
@@ -278,13 +277,13 @@ public class SaveHook implements Runnable {
     }
   };
 
-  public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean isSampling, final boolean ignorePrivateConstructorOfUtilClass) {
-    appendUnloadedFullAnalysis(projectData, classFinder, calculateSource, isSampling, ignorePrivateConstructorOfUtilClass, true);
+  public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean branchCoverage, final boolean ignorePrivateConstructorOfUtilClass) {
+    appendUnloadedFullAnalysis(projectData, classFinder, calculateSource, branchCoverage, ignorePrivateConstructorOfUtilClass, true);
   }
 
 
   public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder,
-                                                final boolean calculateSource, final boolean isSampling,
+                                                final boolean calculateSource, final boolean branchCoverage,
                                                 final boolean ignorePrivateConstructorOfUtilClass,
                                                 final boolean checkLineMappings) {
     classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
@@ -294,7 +293,7 @@ public class SaveHook implements Runnable {
         try {
           final InputStream is = classEntry.getClassInputStream();
           if (is == null) return;
-          appendUnloadedClass(projectData, classEntry.getClassName(), new ClassReader(is), isSampling, calculateSource, ignorePrivateConstructorOfUtilClass, checkLineMappings);
+          appendUnloadedClass(projectData, classEntry.getClassName(), new ClassReader(is), branchCoverage, calculateSource, ignorePrivateConstructorOfUtilClass, checkLineMappings);
         } catch (Throwable e) {
           ErrorReporter.reportError("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
         }
@@ -303,14 +302,14 @@ public class SaveHook implements Runnable {
   }
 
   @SuppressWarnings("unused") // used in IntelliJ
-  public static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean isSampling, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass) {
-    appendUnloadedClass(projectData, className, reader, isSampling, calculateSource, ignorePrivateConstructorOfUtilClass, true);
+  public static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean branchCoverage, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass) {
+    appendUnloadedClass(projectData, className, reader, branchCoverage, calculateSource, ignorePrivateConstructorOfUtilClass, true);
   }
 
-  private static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean isSampling, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass, boolean checkLineMappings) {
-    final ClassVisitor visitor = CoverageClassfileTransformer.createInstrumenter(
+  private static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean branchCoverage, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass, boolean checkLineMappings) {
+    final ClassVisitor visitor = CoverageTransformer.createInstrumenter(
         projectData, className, reader, EMPTY_CLASS_VISITOR,
-        null, isSampling, calculateSource, ignorePrivateConstructorOfUtilClass, EmptyCoverageDataAccess.INSTANCE);
+        null, branchCoverage, calculateSource, ignorePrivateConstructorOfUtilClass, EmptyCoverageDataAccess.INSTANCE);
     if (visitor == null) return;
     reader.accept(visitor, ClassReader.SKIP_FRAMES);
     final ClassData classData = projectData.getClassData(className);
@@ -335,7 +334,7 @@ public class SaveHook implements Runnable {
   }
 
   private void checkLineSignatures(ProjectData projectData) {
-    if (!KotlinInlineVisitingFilter.shouldCheckLineSignatures()) return;
+    if (!KotlinInlineFilter.shouldCheckLineSignatures()) return;
     final Map<String, FileMapData[]> linesMap = projectData.getLinesMap();
     if (linesMap == null) return;
     final Set<String> classes = new HashSet<String>();
@@ -350,7 +349,7 @@ public class SaveHook implements Runnable {
     for (String className : classes) {
       final ClassData classData = projectData.getClassData(className);
       if (classData == null) continue;
-      KotlinInlineVisitingFilter.checkLineSignatures(classData, myClassFinder);
+      KotlinInlineFilter.checkLineSignatures(classData, myClassFinder);
     }
   }
 

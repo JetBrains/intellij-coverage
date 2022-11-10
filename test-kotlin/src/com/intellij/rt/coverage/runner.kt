@@ -27,8 +27,9 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 internal enum class Coverage {
-    SAMPLING, NEW_SAMPLING, TRACING, NEW_TRACING, CONDY_SAMPLING, CONDY_TRACING;
-    fun isSampling() = this == SAMPLING || this == NEW_SAMPLING || this == CONDY_SAMPLING
+    LINE, NEW_LINE, BRANCH, NEW_BRANCH, CONDY_LINE, CONDY_BRANCH;
+
+    fun isBranchCoverage() = name.endsWith("BRANCH")
 }
 
 /**
@@ -44,20 +45,22 @@ internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage:
                     mainClass: String = getTestFile(testName).mainClass): ProjectData {
     val classPath = System.getProperty("java.class.path")
     when (coverage) {
-        Coverage.CONDY_SAMPLING -> extraArgs.add("-Didea.new.sampling.coverage=true")
-        Coverage.CONDY_TRACING -> extraArgs.add("-Didea.new.tracing.coverage=true")
-        Coverage.NEW_SAMPLING -> {
+        Coverage.CONDY_LINE -> extraArgs.add("-Didea.new.sampling.coverage=true")
+        Coverage.CONDY_BRANCH -> extraArgs.add("-Didea.new.tracing.coverage=true")
+        Coverage.NEW_LINE -> {
             extraArgs.add("-Didea.new.sampling.coverage=true")
             extraArgs.add("-Dcoverage.condy.enable=false")
         }
-        Coverage.NEW_TRACING -> {
+
+        Coverage.NEW_BRANCH -> {
             extraArgs.add("-Didea.new.tracing.coverage=true")
             extraArgs.add("-Dcoverage.condy.enable=false")
         }
+
         else -> {}
     }
     return CoverageStatusTest.runCoverage(classPath, coverageDataFile, patterns, mainClass,
-            coverage.isSampling(), extraArgs.toTypedArray(), calcUnloaded, testTracking)
+            coverage.isBranchCoverage(), extraArgs.toTypedArray(), calcUnloaded, testTracking)
             .also { assertEmptyLogFile(coverageDataFile) }
 }
 

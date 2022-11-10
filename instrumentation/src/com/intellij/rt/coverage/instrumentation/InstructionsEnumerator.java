@@ -30,7 +30,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import java.util.HashMap;
 import java.util.Map;
 
-public class InstructionsEnumerator extends LineEnumerator {
+public class InstructionsEnumerator extends BranchesEnumerator {
   private final Map<Label, Jump> myOriginalLabelToJump = new HashMap<Label, Jump>();
   private final Map<Label, Switch> myOriginalLabelToSwitch = new HashMap<Label, Switch>();
   private Jump myLastJump;
@@ -38,7 +38,7 @@ public class InstructionsEnumerator extends LineEnumerator {
   private int myInstructionCounter;
 
 
-  public InstructionsEnumerator(AbstractTracingInstrumenter instrumenter, BranchDataContainer branchData, MethodVisitor mv, int access, String name, String desc, String signature, String[] exceptions) {
+  public InstructionsEnumerator(AbstractBranchesInstrumenter instrumenter, BranchDataContainer branchData, MethodVisitor mv, int access, String name, String desc, String signature, String[] exceptions) {
     super(instrumenter, branchData, mv, access, name, desc, signature, exceptions);
   }
 

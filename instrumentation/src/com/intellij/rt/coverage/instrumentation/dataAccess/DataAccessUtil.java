@@ -29,7 +29,7 @@ public class DataAccessUtil {
 
 
   public static CoverageDataAccess createTestTrackingDataAccess(String className, ClassReader cr, boolean isArray) {
-    if (OptionsUtil.NEW_TRACING_ENABLED) {
+    if (OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED) {
       return new FieldCoverageDataAccess(cr, className, isArray ? createTestTrackingArrayInit(className) : createTestTrackingInit(className));
     } else {
       return new NameCoverageDataAccess(createTestTrackingInit(className));

@@ -87,10 +87,10 @@ public class RawHitsReport {
         for (int i = 0; i < length; i++) {
           hits[i] = CoverageIOUtil.readINT(is);
         }
-        if (data.isSampling()) {
-          classData.applyLinesMask();
-        } else {
+        if (data.isBranchCoverage()) {
           classData.applyBranches();
+        } else {
+          classData.applyLinesMask();
         }
       }
     } finally {

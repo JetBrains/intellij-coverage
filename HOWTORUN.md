@@ -63,7 +63,7 @@ java -cp project.jar -javaagent:agent.jar=config.args -Didea.new.tracing.coverag
 After that you will see output:
 ```
 ---- IntelliJ IDEA coverage runner ---- 
-tracing ...
+branch coverage ...
 include patterns:
 exclude patterns:
 root1 = -0.87+1.30i and root2 = -0.87-1.30i

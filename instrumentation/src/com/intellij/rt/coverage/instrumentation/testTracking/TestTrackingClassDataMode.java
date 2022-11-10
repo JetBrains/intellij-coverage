@@ -57,7 +57,7 @@ public class TestTrackingClassDataMode implements TestTrackingMode {
   }
 }
 
-class TestTrackingClassDataInstrumenter extends TracingInstrumenter {
+class TestTrackingClassDataInstrumenter extends BranchesInstrumenter {
   protected static final String CLASS_DATA_LOCAL_VARIABLE_NAME = "__$classDataLocal$__";
 
   protected final CoverageDataAccess myDataAccess;
@@ -70,7 +70,7 @@ class TestTrackingClassDataInstrumenter extends TracingInstrumenter {
   @Override
   public MethodVisitor createTouchCounter(MethodVisitor mv,
                                           final BranchDataContainer branchData,
-                                          final LineEnumerator enumerator,
+                                          final BranchesEnumerator enumerator,
                                           final int access,
                                           final String name,
                                           final String desc,
@@ -79,7 +79,7 @@ class TestTrackingClassDataInstrumenter extends TracingInstrumenter {
     return createMethodTransformer(mv, enumerator, access, name, desc);
   }
 
-  protected MethodVisitor createMethodTransformer(final MethodVisitor mv, LineEnumerator enumerator, final int access, String name, final String desc) {
+  protected MethodVisitor createMethodTransformer(final MethodVisitor mv, BranchesEnumerator enumerator, final int access, String name, final String desc) {
     if (enumerator.hasNoLines()) {
       return myDataAccess.createMethodVisitor(mv, name, false);
     }

@@ -51,7 +51,7 @@ internal class ParallelProcessTest : CoverageTest() {
         }
     }
 
-    override val coverage get() = Coverage.NEW_TRACING
+    override val coverage get() = Coverage.NEW_BRANCH
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
         assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
     }
