@@ -79,7 +79,7 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
         LineData lineData = getLineData(line);
         if (lineData != null) {
           // load trace mask array
-          mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+          mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
 
           // check if register method should be called. array[0] == false => register has not been called
           mv.visitInsn(Opcodes.DUP);
@@ -95,7 +95,7 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
           // if register is successful set array[0] = true
           // it may be unsuccessful if no test is running now
           mv.visitJumpInsn(Opcodes.IFEQ, skip);
-          mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+          mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
           mv.visitInsn(Opcodes.ICONST_0);
           mv.visitInsn(Opcodes.ICONST_1);
           mv.visitInsn(Opcodes.BASTORE);
@@ -111,7 +111,7 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
       }
 
       public void visitCode() {
-        myArrayDataAccess.onMethodStart(mv, getOrCreateLocalVariableIndex());
+        myArrayDataAccess.onMethodStart(mv, getLVIndex());
         super.visitCode();
       }
     };

@@ -16,8 +16,8 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
-import com.intellij.rt.coverage.instrumentation.BranchesEnumerator;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinCoroutinesFilter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
@@ -25,8 +25,8 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 public class KotlinCoroutinesBranchesFilter extends BranchesFilter {
 
   @Override
-  public void initFilter(MethodVisitor mv, BranchesEnumerator context) {
-    super.initFilter(new InternalFilter(mv, context.getInstrumenter()), context);
+  public void initFilter(MethodVisitor mv, Instrumenter context, BranchDataContainer branchData) {
+    super.initFilter(new InternalFilter(mv, context), context, branchData);
   }
 
   public boolean isApplicable(Instrumenter context, int access, String name,
@@ -41,11 +41,11 @@ public class KotlinCoroutinesBranchesFilter extends BranchesFilter {
     }
 
     protected void onIgnoredJump() {
-      KotlinCoroutinesBranchesFilter.this.myContext.getBranchData().removeLastJump();
+      myBranchData.removeLastJump();
     }
 
     protected void onIgnoredSwitch(Label dflt, Label... labels) {
-      KotlinCoroutinesBranchesFilter.this.myContext.getBranchData().removeLastSwitch(dflt, labels);
+      myBranchData.removeLastSwitch(dflt, labels);
     }
   }
 }

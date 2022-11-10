@@ -16,8 +16,8 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
-import com.intellij.rt.coverage.instrumentation.BranchesEnumerator;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
@@ -55,8 +55,8 @@ public class KotlinLateinitFilter extends BranchesFilter {
   }
 
   @Override
-  public void initFilter(MethodVisitor mv, BranchesEnumerator context) {
-    super.initFilter(mv, context);
+  public void initFilter(MethodVisitor mv, Instrumenter context, BranchDataContainer branchData) {
+    super.initFilter(mv, context, branchData);
     myState = 0;
     myInternalClassName = ClassNameUtil.convertToInternalName(context.getClassName());
   }
@@ -99,7 +99,7 @@ public class KotlinLateinitFilter extends BranchesFilter {
         && "kotlin/jvm/internal/Intrinsics".equals(owner)
         && "throwUninitializedPropertyAccessException".equals(name)
         && "(Ljava/lang/String;)V".equals(descriptor)) {
-      myContext.getBranchData().removeLastJump();
+      myBranchData.removeLastJump();
     }
     myState = 0;
   }

@@ -18,20 +18,24 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.instrumentation.data.Jump;
 import com.intellij.rt.coverage.instrumentation.data.Switch;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
+import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
+import com.intellij.rt.coverage.instrumentation.filters.branches.BranchesFilter;
+import com.intellij.rt.coverage.util.LinesUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
-public class BranchesInstrumenter extends AbstractBranchesInstrumenter {
-  private static final String BRANCH_HITS_LOCAL_VARIABLE_NAME = "__$localBranchHits$__";
+public class BranchesInstrumenter extends Instrumenter {
 
   private final CoverageDataAccess myDataAccess;
+  private final BranchDataContainer myBranchData = new BranchDataContainer(this);
 
   public BranchesInstrumenter(ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
     super(projectData, classVisitor, className, shouldCalculateSource);
@@ -39,19 +43,25 @@ public class BranchesInstrumenter extends AbstractBranchesInstrumenter {
   }
 
   @Override
-  public MethodVisitor createTouchCounter(final MethodVisitor mv,
-                                          final BranchDataContainer branchData,
-                                          final BranchesEnumerator enumerator,
-                                          final int access,
-                                          final String name,
-                                          final String desc,
-                                          final String className) {
+  protected MethodVisitor createMethodLineEnumerator(MethodVisitor mv, String name, String desc, int access, String signature,
+                                                     String[] exceptions) {
+    myBranchData.resetMethod();
+    if (myProjectData.isInstructionsCoverageEnabled()) {
+      mv = new InstructionsEnumerator(this, myBranchData, mv, access, name, desc, signature, exceptions);
+    } else {
+      mv = new BranchesEnumerator(this, myBranchData, mv, access, name, desc, signature, exceptions);
+    }
+    return chainFilters(name, desc, access, signature, exceptions, mv);
+  }
+
+  public MethodVisitor createInstrumentingVisitor(MethodVisitor mv, BranchesEnumerator enumerator,
+                                                  int access, String name, String desc) {
     if (enumerator.hasNoLines()) {
       return myDataAccess.createMethodVisitor(mv, name, false);
     }
-    final MethodVisitor visitor = new ArrayBranchesMethodVisitor(mv, access, desc, branchData) {
+    final MethodVisitor visitor = new HitsVisitor(mv, access, desc) {
       public void visitCode() {
-        myDataAccess.onMethodStart(mv, getOrCreateLocalVariableIndex());
+        myDataAccess.onMethodStart(mv, getLVIndex());
         super.visitCode();
       }
     };
@@ -62,20 +72,33 @@ public class BranchesInstrumenter extends AbstractBranchesInstrumenter {
   public void visitEnd() {
     myDataAccess.onClassEnd(this);
     super.visitEnd();
+    if (myProjectData.isInstructionsCoverageEnabled()) {
+      final ClassInstructions classInstructions = new ClassInstructions(myClassData, myBranchData.getInstructions());
+      myProjectData.getInstructions().put(myClassData.getName(), classInstructions);
+    }
   }
 
   @Override
   protected void initLineData() {
     myClassData.createHitsMask(myBranchData.getSize());
-    super.initLineData();
+    myClassData.setLines(LinesUtil.calcLineArray(myMaxLineNumber, myLines));
   }
 
-  public class ArrayBranchesMethodVisitor extends LocalVariableInserter {
-    private final BranchDataContainer myBranchData;
+  private MethodVisitor chainFilters(String name, String desc, int access, String signature, String[] exceptions,
+                                     MethodVisitor root) {
+    for (BranchesFilter filter : FilterUtils.createBranchFilters()) {
+      if (filter.isApplicable(this, access, name, desc, signature, exceptions)) {
+        filter.initFilter(root, this, myBranchData);
+        root = filter;
+      }
+    }
+    return root;
+  }
 
-    public ArrayBranchesMethodVisitor(MethodVisitor methodVisitor, int access, String descriptor, BranchDataContainer branchData) {
-      super(methodVisitor, access, descriptor, BRANCH_HITS_LOCAL_VARIABLE_NAME, DataAccessUtil.HITS_ARRAY_TYPE);
-      myBranchData = branchData;
+  public class HitsVisitor extends LocalVariableInserter {
+
+    public HitsVisitor(MethodVisitor methodVisitor, int access, String descriptor) {
+      super(methodVisitor, access, descriptor, "__$localHits$__", DataAccessUtil.HITS_ARRAY_TYPE);
     }
 
     public void visitLineNumber(final int line, final Label start) {
@@ -103,7 +126,7 @@ public class BranchesInstrumenter extends AbstractBranchesInstrumenter {
 
     private void incrementHitById(int id) {
       if (id == -1) return;
-      mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+      mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
       InstrumentationUtils.pushInt(mv, id);
       InstrumentationUtils.incrementIntArrayByIndex(mv);
     }

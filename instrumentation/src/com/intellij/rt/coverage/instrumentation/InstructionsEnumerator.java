@@ -38,12 +38,12 @@ public class InstructionsEnumerator extends BranchesEnumerator {
   private int myInstructionCounter;
 
 
-  public InstructionsEnumerator(AbstractBranchesInstrumenter instrumenter, BranchDataContainer branchData, MethodVisitor mv, int access, String name, String desc, String signature, String[] exceptions) {
+  public InstructionsEnumerator(BranchesInstrumenter instrumenter, BranchDataContainer branchData, MethodVisitor mv, int access, String name, String desc, String signature, String[] exceptions) {
     super(instrumenter, branchData, mv, access, name, desc, signature, exceptions);
   }
 
   private void saveInstructionsToOwner() {
-    final LineData lineData = myBranchData.getContext().getLineData(myCurrentLine);
+    final LineData lineData = getInstrumenter().getLineData(myCurrentLine);
     if (myInstructionCounter > 0 && lineData != null) {
       final Jump jump = myLastJump != null ? myLastJump : (myLastLabel == null ? null : myOriginalLabelToJump.get(myLastLabel));
       final Switch aSwitch = myLastLabel == null ? null : myOriginalLabelToSwitch.get(myLastLabel);

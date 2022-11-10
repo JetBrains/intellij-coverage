@@ -44,9 +44,13 @@ public class KotlinDefaultArgsBranchFilter extends BranchesFilter {
 
   private boolean myIgnoreNextIf = false;
   private boolean myAndVisited = false;
+  private String myName;
+  private String myDesc;
 
   @Override
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
+    myName = name;
+    myDesc = desc;
     return isApplicable(context, access, name, desc);
   }
 
@@ -79,7 +83,7 @@ public class KotlinDefaultArgsBranchFilter extends BranchesFilter {
   @Override
   public void visitCode() {
     super.visitCode();
-    int[] range = getMaskIndexRange(myContext.getMethodName(), myContext.getDescriptor());
+    int[] range = getMaskIndexRange(myName, myDesc);
     myMinMaskIndex = range[0];
     myMaxMaskIndex = range[1];
   }
@@ -138,7 +142,7 @@ public class KotlinDefaultArgsBranchFilter extends BranchesFilter {
     super.visitJumpInsn(opcode, label);
     if (opcode == Opcodes.IFEQ && myIgnoreNextIf) {
       if (myAndVisited) {
-        myContext.getBranchData().removeLastJump();
+        myBranchData.removeLastJump();
       }
       myIgnoreNextIf = false;
       myAndVisited = false;

@@ -24,27 +24,19 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import org.jetbrains.coverage.org.objectweb.asm.tree.MethodNode;
 
 public class BranchesEnumerator extends MethodVisitor implements Opcodes {
-  private final AbstractBranchesInstrumenter myInstrumenter;
+  private final BranchesInstrumenter myInstrumenter;
+  private final MethodNode myMethodNode;
+  private final MethodVisitor myWriterMethodVisitor;
+  protected final BranchDataContainer myBranchData;
   private final int myAccess;
   private final String myMethodName;
   private final String myDescriptor;
-  private final MethodNode myMethodNode;
 
   protected int myCurrentLine;
-
   private boolean myHasExecutableLines = false;
 
-  private final MethodVisitor myWriterMethodVisitor;
-  protected final BranchDataContainer myBranchData;
-
-  public BranchesEnumerator(AbstractBranchesInstrumenter instrumenter,
-                            BranchDataContainer branchData,
-                            final MethodVisitor mv,
-                            final int access,
-                            final String name,
-                            final String desc,
-                            final String signature,
-                            final String[] exceptions) {
+  public BranchesEnumerator(BranchesInstrumenter instrumenter, BranchDataContainer branchData, MethodVisitor mv,
+                            int access, String name, String desc, String signature, String[] exceptions) {
     super(Opcodes.API_VERSION, new SaveLabelsMethodNode(access, name, desc, signature, exceptions));
 
     myMethodNode = (MethodNode) super.mv;
@@ -65,7 +57,7 @@ public class BranchesEnumerator extends MethodVisitor implements Opcodes {
   public void visitEnd() {
     super.visitEnd();
     if (myWriterMethodVisitor != UnloadedUtil.EMPTY_METHOD_VISITOR) {
-      myMethodNode.accept(myInstrumenter.createTouchCounter(myWriterMethodVisitor, myBranchData, this, myAccess, myMethodName, myDescriptor, getClassName()));
+      myMethodNode.accept(myInstrumenter.createInstrumentingVisitor(myWriterMethodVisitor, this, myAccess, myMethodName, myDescriptor));
     }
   }
 
@@ -150,7 +142,7 @@ public class BranchesEnumerator extends MethodVisitor implements Opcodes {
       super.visitTableSwitchInsn(min, max, dflt, labels);
       return;
     }
-    final SwitchLabels switchLabels = visitSwitch(dflt, labels, asLookupKyes(min, max));
+    final SwitchLabels switchLabels = visitSwitch(dflt, labels, asLookupKeys(min, max));
     super.visitTableSwitchInsn(min, max, switchLabels.getDefault(), switchLabels.getLabels());
   }
 
@@ -163,7 +155,7 @@ public class BranchesEnumerator extends MethodVisitor implements Opcodes {
     return switchLabels;
   }
 
-  private static int[] asLookupKyes(int min, int max) {
+  private static int[] asLookupKeys(int min, int max) {
     int[] keys = new int[max - min + 1];
     // Check that i in [min, max]
     // as there could be an overflow if max == Int.MAX_VALUE
@@ -177,24 +169,8 @@ public class BranchesEnumerator extends MethodVisitor implements Opcodes {
     return !myHasExecutableLines;
   }
 
-  public String getClassName() {
-    return myInstrumenter.getClassName();
-  }
-
-  public String getMethodName() {
-    return myMethodName;
-  }
-
-  public String getDescriptor() {
-    return myDescriptor;
-  }
-
-  public Instrumenter getInstrumenter() {
+  protected Instrumenter getInstrumenter() {
     return myInstrumenter;
-  }
-
-  public BranchDataContainer getBranchData() {
-    return myBranchData;
   }
 
   protected static class SwitchLabels {

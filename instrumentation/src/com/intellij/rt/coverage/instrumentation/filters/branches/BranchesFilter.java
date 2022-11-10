@@ -16,13 +16,14 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
-import com.intellij.rt.coverage.instrumentation.BranchesEnumerator;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public abstract class BranchesFilter extends MethodVisitor {
-  protected BranchesEnumerator myContext;
+  protected Instrumenter myContext;
+  protected BranchDataContainer myBranchData;
 
   public BranchesFilter() {
     super(Opcodes.API_VERSION);
@@ -31,8 +32,9 @@ public abstract class BranchesFilter extends MethodVisitor {
   public abstract boolean isApplicable(Instrumenter context, int access, String name,
                                        String desc, String signature, String[] exceptions);
 
-  public void initFilter(MethodVisitor mv, BranchesEnumerator context) {
+  public void initFilter(MethodVisitor mv, Instrumenter context, BranchDataContainer branchData) {
     this.mv = mv;
     myContext = context;
+    myBranchData = branchData;
   }
 }

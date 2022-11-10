@@ -53,7 +53,7 @@ public class KotlinWhenMappingExceptionFilter extends BranchesFilter {
   @Override
   public void visitJumpInsn(int opcode, Label label) {
     if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR) {
-      final LineData lineData = myContext.getInstrumenter().getLineData(myCurrentLine);
+      final LineData lineData = myContext.getLineData(myCurrentLine);
       if (lineData != null) {
         if (myJumpLabels == null) myJumpLabels = new HashMap<Label, PositionData>();
         myJumpLabels.put(label, new PositionData(myCurrentLine, lineData.jumpsCount()));
@@ -64,7 +64,7 @@ public class KotlinWhenMappingExceptionFilter extends BranchesFilter {
 
   @Override
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-    final LineData lineData = myContext.getInstrumenter().getLineData(myCurrentLine);
+    final LineData lineData = myContext.getLineData(myCurrentLine);
     if (lineData != null) {
       if (mySwitchLabels == null) mySwitchLabels = new HashMap<Label, PositionData>();
       mySwitchLabels.put(dflt, new PositionData(myCurrentLine, lineData.switchesCount()));
@@ -78,7 +78,7 @@ public class KotlinWhenMappingExceptionFilter extends BranchesFilter {
     if (opcode == Opcodes.NEW && type.equals("kotlin/NoWhenBranchMatchedException")) {
       final PositionData jumpPosition = myJumpLabels == null ? null : myJumpLabels.get(myCurrentLabel);
       if (jumpPosition != null) {
-        final LineData lineData = myContext.getInstrumenter().getLineData(jumpPosition.myLine);
+        final LineData lineData = myContext.getLineData(jumpPosition.myLine);
         if (lineData != null && jumpPosition.myIndex < lineData.jumpsCount()) {
           final JumpData jumpData = lineData.getJumpData(jumpPosition.myIndex);
           if (jumpData != null) {
@@ -88,7 +88,7 @@ public class KotlinWhenMappingExceptionFilter extends BranchesFilter {
       }
       final PositionData switchPosition = mySwitchLabels == null ? null : mySwitchLabels.get(myCurrentLabel);
       if (switchPosition != null) {
-        final LineData lineData = myContext.getInstrumenter().getLineData(switchPosition.myLine);
+        final LineData lineData = myContext.getLineData(switchPosition.myLine);
         if (lineData != null && switchPosition.myIndex < lineData.switchesCount()) {
           final SwitchData switchData = lineData.getSwitchData(switchPosition.myIndex);
           if (switchData != null) {

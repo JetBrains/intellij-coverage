@@ -16,11 +16,9 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
-import com.intellij.rt.coverage.instrumentation.BranchesEnumerator;
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 /**
@@ -44,11 +42,6 @@ public class KotlinOpenMemberWithDefaultArgsFilter extends BranchesFilter {
   @Override
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
     return KotlinDefaultArgsBranchFilter.isApplicable(context, access, name, desc);
-  }
-
-  @Override
-  public void initFilter(MethodVisitor mv, BranchesEnumerator context) {
-    super.initFilter(mv, context);
   }
 
   @Override
@@ -99,7 +92,7 @@ public class KotlinOpenMemberWithDefaultArgsFilter extends BranchesFilter {
       return;
     }
     if (myState == 7 && opcode == Opcodes.ATHROW) {
-      myContext.getBranchData().removeLastJump();
+      myBranchData.removeLastJump();
     }
     myState = 0;
   }

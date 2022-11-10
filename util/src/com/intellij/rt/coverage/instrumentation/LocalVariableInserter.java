@@ -24,7 +24,7 @@ import org.jetbrains.coverage.org.objectweb.asm.commons.LocalVariablesSorter;
 
 /**
  * This method visitor inserts a variable into a method.
- * Use {@link LocalVariableInserter#getOrCreateLocalVariableIndex()} to clarify inserted variable index.
+ * Use {@link LocalVariableInserter#getLVIndex()} to clarify inserted variable index.
  */
 public class LocalVariableInserter extends LocalVariablesSorter {
   private final String myVariableName;
@@ -49,12 +49,12 @@ public class LocalVariableInserter extends LocalVariablesSorter {
 
   public void visitMaxs(int maxStack, int maxLocals) {
     if (myStartLabel != null && myEndLabel != null) {
-      mv.visitLocalVariable(myVariableName, myVariableType, null, myStartLabel, myEndLabel, getOrCreateLocalVariableIndex());
+      mv.visitLocalVariable(myVariableName, myVariableType, null, myStartLabel, myEndLabel, getLVIndex());
     }
     super.visitMaxs(maxStack, maxLocals);
   }
 
-  public int getOrCreateLocalVariableIndex() {
+  public int getLVIndex() {
     if (myVariableIndex == -1) {
       myVariableIndex = newLocal(Type.getType(myVariableType));
     }

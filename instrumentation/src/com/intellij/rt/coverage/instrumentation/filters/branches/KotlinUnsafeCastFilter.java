@@ -16,9 +16,9 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
-import com.intellij.rt.coverage.instrumentation.BranchesEnumerator;
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
@@ -45,8 +45,8 @@ public class KotlinUnsafeCastFilter extends BranchesFilter {
   }
 
   @Override
-  public void initFilter(MethodVisitor mv, BranchesEnumerator context) {
-    super.initFilter(mv, context);
+  public void initFilter(MethodVisitor mv, Instrumenter context, BranchDataContainer branchData) {
+    super.initFilter(mv, context, branchData);
     myState = 0;
   }
 
@@ -57,7 +57,7 @@ public class KotlinUnsafeCastFilter extends BranchesFilter {
     if (myState == 2 && opcode == Opcodes.DUP) {
       myState++;
     } else if (myState == 5 && opcode == Opcodes.ATHROW) {
-      myContext.getBranchData().removeLastJump();
+      myBranchData.removeLastJump();
       myState = 0;
     } else {
       myState = 0;

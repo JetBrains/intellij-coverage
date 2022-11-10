@@ -16,8 +16,8 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
-import com.intellij.rt.coverage.instrumentation.BranchesEnumerator;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
@@ -45,8 +45,8 @@ public class NotNullAssertionsFilter extends BranchesFilter {
   private boolean myHasLines;
 
   @Override
-  public void initFilter(MethodVisitor mv, BranchesEnumerator context) {
-    super.initFilter(mv, context);
+  public void initFilter(MethodVisitor mv, Instrumenter context, BranchDataContainer branchData) {
+    super.initFilter(mv, context, branchData);
     myState = SEEN_NOTHING;
     myHasLines = false;
   }
@@ -63,8 +63,8 @@ public class NotNullAssertionsFilter extends BranchesFilter {
     if (!myHasLines) return;
     if (myState == ASSERTIONS_DISABLED_STATE && opcode == Opcodes.IFNE) {
       myState = SEEN_NOTHING;
-      if (myContext.getBranchData().getJump(label) != null) {
-        myContext.getBranchData().removeLastJump();
+      if (myBranchData.getJump(label) != null) {
+        myBranchData.removeLastJump();
       }
     }
     if (myState == DUP_SEEN && opcode == Opcodes.IFNONNULL) {
@@ -107,7 +107,7 @@ public class NotNullAssertionsFilter extends BranchesFilter {
         opcode == Opcodes.INVOKESTATIC &&
         name.startsWith("$$$reportNull$$$") &&
         ClassNameUtil.convertToFQName(owner).equals(myContext.getClassName())) {
-      myContext.getBranchData().removeLastJump();
+      myBranchData.removeLastJump();
     }
     myState = SEEN_NOTHING;
   }

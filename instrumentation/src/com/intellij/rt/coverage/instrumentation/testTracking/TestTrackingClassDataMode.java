@@ -20,7 +20,6 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.*;
-import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
@@ -68,14 +67,12 @@ class TestTrackingClassDataInstrumenter extends BranchesInstrumenter {
   }
 
   @Override
-  public MethodVisitor createTouchCounter(MethodVisitor mv,
-                                          final BranchDataContainer branchData,
-                                          final BranchesEnumerator enumerator,
-                                          final int access,
-                                          final String name,
-                                          final String desc,
-                                          final String className) {
-    mv = super.createTouchCounter(mv, branchData, enumerator, access, name, desc, className);
+  public MethodVisitor createInstrumentingVisitor(MethodVisitor mv,
+                                                  final BranchesEnumerator enumerator,
+                                                  final int access,
+                                                  final String name,
+                                                  final String desc) {
+    mv = super.createInstrumentingVisitor(mv, enumerator, access, name, desc);
     return createMethodTransformer(mv, enumerator, access, name, desc);
   }
 
@@ -87,7 +84,7 @@ class TestTrackingClassDataInstrumenter extends BranchesInstrumenter {
       public void visitLineNumber(final int line, final Label start) {
         final LineData lineData = getLineData(line);
         if (lineData != null) {
-          mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+          mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
           InstrumentationUtils.pushInt(mv, line);
           mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "traceLine", "(" + InstrumentationUtils.OBJECT_TYPE + "I)V", false);
         }
@@ -95,7 +92,7 @@ class TestTrackingClassDataInstrumenter extends BranchesInstrumenter {
       }
 
       public void visitCode() {
-        myDataAccess.onMethodStart(mv, getOrCreateLocalVariableIndex());
+        myDataAccess.onMethodStart(mv, getLVIndex());
         super.visitCode();
       }
     };

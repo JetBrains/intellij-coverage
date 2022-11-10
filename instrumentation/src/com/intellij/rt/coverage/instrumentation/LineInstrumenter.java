@@ -27,7 +27,6 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class LineInstrumenter extends Instrumenter {
-  private static final String LINE_HITS_LOCAL_VARIABLE_NAME = "__$localLineHits$__";
 
   private final CoverageDataAccess myDataAccess;
 
@@ -40,20 +39,14 @@ public class LineInstrumenter extends Instrumenter {
     myDataAccess = dataAccess;
   }
 
-  public MethodVisitor createMethodLineEnumerator(
-      MethodVisitor mv,
-      final String name,
-      final String desc,
-      final int access,
-      final String signature,
-      final String[] exceptions
-  ) {
-    mv = new LocalVariableInserter(mv, access, desc, LINE_HITS_LOCAL_VARIABLE_NAME, DataAccessUtil.HITS_ARRAY_TYPE) {
+  public MethodVisitor createMethodLineEnumerator(MethodVisitor mv, final String name, final String desc,
+                                                  int access, String signature, String[] exceptions) {
+    mv = new LocalVariableInserter(mv, access, desc, "__$localHits$__", DataAccessUtil.HITS_ARRAY_TYPE) {
 
       public void visitLineNumber(final int line, final Label start) {
         getOrCreateLineData(line, name, desc);
 
-        mv.visitVarInsn(Opcodes.ALOAD, getOrCreateLocalVariableIndex());
+        mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
         InstrumentationUtils.pushInt(mv, line);
         InstrumentationUtils.incrementIntArrayByIndex(mv);
 
@@ -61,7 +54,7 @@ public class LineInstrumenter extends Instrumenter {
       }
 
       public void visitCode() {
-        myDataAccess.onMethodStart(mv, getOrCreateLocalVariableIndex());
+        myDataAccess.onMethodStart(mv, getLVIndex());
         super.visitCode();
       }
     };

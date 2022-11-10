@@ -59,10 +59,6 @@ public class BranchDataContainer {
     if (mySwitches != null) mySwitches.clear();
   }
 
-  public Instrumenter getContext() {
-    return myContext;
-  }
-
   public Jump getJump(Label jump) {
     if (myJumps == null) return null;
     return myJumps.get(jump);
