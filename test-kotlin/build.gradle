@@ -5,11 +5,10 @@ plugins {
 sourceSets {
     main.java.srcDirs = []
     test.java.srcDirs = [file('src')]
-    jmh.java.srcDirs = [file('jmh')]
 }
 
 String testJdkVersion = test.javaVersion >= JavaVersion.VERSION_11 ? 11 : 1.8
-sourceCompatibility = testJdkVersion
+sourceCompatibility = 1.8
 targetCompatibility = testJdkVersion
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions {
@@ -30,11 +29,6 @@ dependencies {
 
     testImplementation('junit:junit:4.13.2')
 
-    jmhImplementation("org.openjdk.jmh:jmh-core:1.32")
-    jmhAnnotationProcessor("org.openjdk.jmh:jmh-generator-annprocess:1.32")
-    jmhImplementation(project(path: ":instrumentation", configuration: "archives"))
-    jmhImplementation(project(":"))
-
     testImplementation("net.bytebuddy:byte-buddy:1.11.12")
     testImplementation("net.bytebuddy:byte-buddy-agent:1.11.12")
 
@@ -52,25 +46,5 @@ test {
     }
     if (rootProject.hasProperty("parallel.tests")) {
         maxParallelForks = Math.min(2, Runtime.getRuntime().availableProcessors())
-    }
-}
-
-task runBenchmark(group: 'benchmarks', type: JavaExec) {
-    configureBenchmark it as JavaExec
-}
-
-def configureBenchmark(JavaExec benchmark) {
-    benchmark.with {
-        dependsOn "jmhClasses"
-        main = 'org.openjdk.jmh.Main'
-        doFirst {
-            classpath = sourceSets.jmh.runtimeClasspath
-            args = [
-                // fail-on-error
-                '-foe', 'true',
-                // benchmarks
-                'com\\.intellij\\.rt\\.coverage\\.jmh\\.AppendUnloadedBenchmark.*',
-            ]
-        }
     }
 }

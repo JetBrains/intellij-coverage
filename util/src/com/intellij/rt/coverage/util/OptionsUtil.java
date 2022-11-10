@@ -22,8 +22,6 @@ public class OptionsUtil {
   public static final boolean NEW_TEST_TRACKING_ENABLED = "true".equals(System.getProperty("idea.new.test.tracking.coverage", "true"));
   public static final boolean CONDY_ENABLED = "true".equals(System.getProperty("coverage.condy.enable", "true"));
   public static final boolean INSTRUCTIONS_COVERAGE_ENABLED = "true".equals(System.getProperty("coverage.instructions.enable", "false"));
-
-  public static final boolean UNLOADED_CLASSES_FULL_ANALYSIS = "true".equals(System.getProperty("coverage.unloaded.classes.full.analysis", "true"));
   public static final boolean THREAD_SAFE_STORAGE = "true".equals(System.getProperty("idea.coverage.thread-safe.enabled", "true"));
 
   public static boolean IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS = "true".equals(System.getProperty("coverage.ignore.private.constructor.util.class", "false"));

@@ -16,12 +16,13 @@
 
 package com.intellij.rt.coverage.instrumentation.dataAccess;
 
+import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 
 /**
  * This data access may be used for class analysis without actual transform and further usage.
  *
- * @see com.intellij.rt.coverage.instrumentation.SaveHook#appendUnloadedFullAnalysis
+ * @see UnloadedUtil#appendUnloaded
  */
 public class EmptyCoverageDataAccess extends CoverageDataAccess {
   public static final EmptyCoverageDataAccess INSTANCE = new EmptyCoverageDataAccess();

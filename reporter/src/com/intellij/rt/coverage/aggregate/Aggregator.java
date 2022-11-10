@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.aggregate;
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.instrumentation.SaveHook;
+import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.report.data.Module;
@@ -176,7 +177,7 @@ public class Aggregator {
     }
     projectData.setInstructionsCoverage(true);
     projectData.setAnnotationsToIgnore(excludeAnnotations);
-    SaveHook.appendUnloadedFullAnalysis(projectData, createClassFinder(), true, true, true, false);
+    UnloadedUtil.appendUnloaded(projectData, createClassFinder(), true, true, true);
     return projectData;
   }
 

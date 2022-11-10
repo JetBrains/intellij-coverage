@@ -17,19 +17,10 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.*;
-import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
-import com.intellij.rt.coverage.instrumentation.dataAccess.EmptyCoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.filters.lines.KotlinInlineFilter;
 import com.intellij.rt.coverage.util.*;
-import com.intellij.rt.coverage.util.classFinder.ClassEntry;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
-import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
-import org.jetbrains.coverage.gnu.trove.TIntObjectProcedure;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
-import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
-import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.io.*;
 import java.util.*;
@@ -63,11 +54,7 @@ public class SaveHook implements Runnable {
       projectData.applyHits();
       if (myAppendUnloaded) {
         final boolean calculateSource = mySourceMapFile != null;
-        if (OptionsUtil.UNLOADED_CLASSES_FULL_ANALYSIS) {
-          appendUnloadedFullAnalysis(projectData, myClassFinder, calculateSource, projectData.isBranchCoverage(), OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS, false);
-        } else {
-          appendUnloaded(projectData, myClassFinder, calculateSource, projectData.isBranchCoverage());
-        }
+        UnloadedUtil.appendUnloaded(projectData, myClassFinder, calculateSource, projectData.isBranchCoverage(), OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS);
       }
       projectData.applyLineMappings();
       dropIgnoredLines(projectData);
@@ -213,121 +200,6 @@ public class SaveHook implements Runnable {
     }
   }
 
-  /**
-   * Append classes that had not been loaded during the program run into the <code>projectData</code>.
-   * <p>
-   * Classes are searched using <code>classFinder</code>.
-   */
-  public static void appendUnloaded(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean branchCoverage) {
-    classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
-      public void consume(ClassEntry classEntry) {
-        ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
-        if (cd != null && cd.getLines() != null) return;
-        try {
-          final InputStream classInputStream = classEntry.getClassInputStream();
-          if (classInputStream == null) return;
-          ClassReader reader = new ClassReader(classInputStream);
-          if (calculateSource) {
-            cd = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
-          }
-          SourceLineCounter slc = new SourceLineCounter(cd, calculateSource ? projectData : null, branchCoverage);
-          reader.accept(slc, ClassReader.SKIP_FRAMES);
-          if (slc.isEnum() || slc.getNSourceLines() > 0) { // ignore classes without executable code
-            final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
-            final int[] maxLine = new int[]{-1};
-            final ClassData classData = projectData.getOrCreateClassData(StringsPool.getFromPool(classEntry.getClassName()));
-            slc.getSourceLines().forEachEntry(new TIntObjectProcedure<String>() {
-              public boolean execute(int line, String methodSig) {
-                final LineData ld = new LineData(line, StringsPool.getFromPool(methodSig));
-                lines.put(line, ld);
-                if (line > maxLine[0]) maxLine[0] = line;
-                classData.registerMethodSignature(ld);
-                ld.setStatus(LineCoverage.NONE);
-                return true;
-              }
-            });
-            final TIntObjectHashMap<JumpsAndSwitches> jumpsPerLine = slc.getJumpsPerLine();
-            if (jumpsPerLine != null) {
-              jumpsPerLine.forEachEntry(new TIntObjectProcedure<JumpsAndSwitches>() {
-                public boolean execute(int line, JumpsAndSwitches jumpData) {
-                  final LineData lineData = lines.get(line);
-                  if (lineData != null) {
-                    lineData.setJumpsAndSwitches(jumpData);
-                    lineData.fillArrays();
-                  }
-                  return true;
-                }
-              });
-            }
-            classData.setLines(LinesUtil.calcLineArray(maxLine[0], lines));
-          }
-        } catch (Throwable e) {
-          ErrorReporter.reportError("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
-        }
-      }
-    });
-  }
-
-  public static final MethodVisitor EMPTY_METHOD_VISITOR = new MethodVisitor(Opcodes.API_VERSION) {
-  };
-  public static final ClassVisitor EMPTY_CLASS_VISITOR = new ClassVisitor(Opcodes.API_VERSION) {
-    @Override
-    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-      return EMPTY_METHOD_VISITOR;
-    }
-  };
-
-  public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder, final boolean calculateSource, final boolean branchCoverage, final boolean ignorePrivateConstructorOfUtilClass) {
-    appendUnloadedFullAnalysis(projectData, classFinder, calculateSource, branchCoverage, ignorePrivateConstructorOfUtilClass, true);
-  }
-
-
-  public static void appendUnloadedFullAnalysis(final ProjectData projectData, final ClassFinder classFinder,
-                                                final boolean calculateSource, final boolean branchCoverage,
-                                                final boolean ignorePrivateConstructorOfUtilClass,
-                                                final boolean checkLineMappings) {
-    classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
-      public void consume(ClassEntry classEntry) {
-        final ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
-        if (cd != null && cd.getLines() != null && cd.isFullyAnalysed()) return;
-        try {
-          final InputStream is = classEntry.getClassInputStream();
-          if (is == null) return;
-          appendUnloadedClass(projectData, classEntry.getClassName(), new ClassReader(is), branchCoverage, calculateSource, ignorePrivateConstructorOfUtilClass, checkLineMappings);
-        } catch (Throwable e) {
-          ErrorReporter.reportError("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
-        }
-      }
-    });
-  }
-
-  @SuppressWarnings("unused") // used in IntelliJ
-  public static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean branchCoverage, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass) {
-    appendUnloadedClass(projectData, className, reader, branchCoverage, calculateSource, ignorePrivateConstructorOfUtilClass, true);
-  }
-
-  private static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean branchCoverage, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass, boolean checkLineMappings) {
-    final ClassVisitor visitor = CoverageTransformer.createInstrumenter(
-        projectData, className, reader, EMPTY_CLASS_VISITOR,
-        null, branchCoverage, calculateSource, ignorePrivateConstructorOfUtilClass, EmptyCoverageDataAccess.INSTANCE);
-    if (visitor == null) return;
-    reader.accept(visitor, ClassReader.SKIP_FRAMES);
-    final ClassData classData = projectData.getClassData(className);
-    if (classData == null || classData.getLines() == null) return;
-    classData.dropIgnoredLines();
-    final LineData[] lines = (LineData[]) classData.getLines();
-    for (LineData line : lines) {
-      if (line == null) continue;
-      classData.registerMethodSignature(line);
-    }
-    if (!checkLineMappings) return;
-    final Map<String, FileMapData[]> linesMap = projectData.getLinesMap();
-    if (linesMap == null) return;
-    final FileMapData[] mappings = linesMap.remove(className);
-    if (mappings == null) return;
-    classData.dropMappedLines(mappings);
-    InstructionsUtil.dropMappedLines(projectData, classData.getName(), mappings);
-  }
 
   public void setSourceMapFile(File sourceMapFile) {
     mySourceMapFile = sourceMapFile;

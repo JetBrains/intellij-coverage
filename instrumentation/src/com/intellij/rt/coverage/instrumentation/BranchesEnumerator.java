@@ -64,7 +64,7 @@ public class BranchesEnumerator extends MethodVisitor implements Opcodes {
 
   public void visitEnd() {
     super.visitEnd();
-    if (myWriterMethodVisitor != SaveHook.EMPTY_METHOD_VISITOR) {
+    if (myWriterMethodVisitor != UnloadedUtil.EMPTY_METHOD_VISITOR) {
       myMethodNode.accept(myInstrumenter.createTouchCounter(myWriterMethodVisitor, myBranchData, this, myAccess, myMethodName, myDescriptor, getClassName()));
     }
   }

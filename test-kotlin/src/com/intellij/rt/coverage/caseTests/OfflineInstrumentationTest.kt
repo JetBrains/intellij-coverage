@@ -18,7 +18,7 @@ package com.intellij.rt.coverage.caseTests
 
 import com.intellij.rt.coverage.*
 import com.intellij.rt.coverage.data.ProjectData
-import com.intellij.rt.coverage.instrumentation.SaveHook
+import com.intellij.rt.coverage.instrumentation.UnloadedUtil
 import com.intellij.rt.coverage.instrumentation.offline.OfflineCoverageTransformer
 import com.intellij.rt.coverage.util.ProcessUtil
 import com.intellij.rt.coverage.util.ResourceUtil
@@ -109,7 +109,7 @@ internal abstract class OfflineInstrumentationTest(override val coverage: Covera
         val projectData = createProjectData(includes, excludes)
         val cf = ClassFinder(includes, excludes)
         cf.addClassLoader(URLClassLoader(arrayOf(outputRoot.toURI().toURL())))
-        SaveHook.appendUnloadedFullAnalysis(projectData, cf, false, coverage.isBranchCoverage(), false, false)
+        UnloadedUtil.appendUnloaded(projectData, cf, false, coverage.isBranchCoverage(), false)
 
         RawHitsReport.load(myDataFile, projectData)
         projectData.applyLineMappings()
