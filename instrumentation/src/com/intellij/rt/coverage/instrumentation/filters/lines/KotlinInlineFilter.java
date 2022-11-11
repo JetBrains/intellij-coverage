@@ -137,6 +137,26 @@ public class KotlinInlineFilter extends LinesFilter {
     }
   }
 
+  public static void checkLineSignatures(ProjectData projectData, ClassFinder cf) {
+    if (!shouldCheckLineSignatures()) return;
+    final Map<String, FileMapData[]> linesMap = projectData.getLinesMap();
+    if (linesMap == null) return;
+    final Set<String> classes = new HashSet<String>();
+    for (Map.Entry<String, FileMapData[]> mapData : linesMap.entrySet()) {
+      if (mapData.getValue() == null) continue;
+      for (FileMapData data : mapData.getValue()) {
+        if (data == null) continue;
+        if (mapData.getKey().equals(data.getClassName())) continue;
+        classes.add(data.getClassName());
+      }
+    }
+    for (String className : classes) {
+      final ClassData classData = projectData.getClassData(className);
+      if (classData == null) continue;
+      checkLineSignatures(classData, cf);
+    }
+  }
+
   private boolean isLineMapped(int line, FileMapData[] mappings) {
     for (FileMapData map : mappings) {
       if (map == null) continue;
@@ -195,10 +215,6 @@ public class KotlinInlineFilter extends LinesFilter {
       }
     }
     return result;
-  }
-
-  public static boolean isInlineMethod(String methodName, String variableName) {
-    return variableName.equals(INLINE_FUNCTION_PREFIX + methodName);
   }
 
   private static class InlineRange implements Comparable<InlineRange> {

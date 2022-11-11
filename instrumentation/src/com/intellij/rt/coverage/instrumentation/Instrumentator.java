@@ -120,9 +120,13 @@ public class Instrumentator {
     data.setAnnotationsToIgnore(annotationsToIgnore);
     final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
 
-    final SaveHook hook = new SaveHook(dataFile, calcUnloaded, cf, mergeData);
-    hook.setSourceMapFile(sourceMapFile);
-    Runtime.getRuntime().addShutdownHook(new Thread(hook));
+    final CoverageReport report = new CoverageReport(dataFile, calcUnloaded, cf, mergeData);
+    report.setSourceMapFile(sourceMapFile);
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      public void run() {
+        report.save(data);
+      }
+    }));
 
     final boolean shouldCalculateSource = sourceMapFile != null;
     final CoverageTransformer transformer = new CoverageTransformer(data, shouldCalculateSource, excludePatterns, includePatterns, cf, testTrackingMode);

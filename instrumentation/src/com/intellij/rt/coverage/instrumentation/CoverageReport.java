@@ -16,49 +16,42 @@
 
 package com.intellij.rt.coverage.instrumentation;
 
-import com.intellij.rt.coverage.data.*;
+import com.intellij.rt.coverage.data.ClassData;
+import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.lines.KotlinInlineFilter;
 import com.intellij.rt.coverage.util.*;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 
 import java.io.*;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author anna
  * @since 26-Feb-2010
  */
-public class SaveHook implements Runnable {
+public class CoverageReport {
   private final File myDataFile;
   private File mySourceMapFile;
   private final boolean myAppendUnloaded;
   private final ClassFinder myClassFinder;
   private final boolean myMergeFile;
 
-  public SaveHook(File dataFile, boolean appendUnloaded, ClassFinder classFinder, boolean mergeFile) {
+  public CoverageReport(File dataFile, boolean appendUnloaded, ClassFinder classFinder, boolean mergeFile) {
     myDataFile = dataFile;
     myAppendUnloaded = appendUnloaded;
     myClassFinder = classFinder;
     myMergeFile = mergeFile;
   }
 
-  public void run() {
-    save(ProjectData.getProjectData());
-  }
-
   public void save(ProjectData projectData) {
     projectData.stop();
     CoverageIOUtil.FileLock lock = null;
     try {
-      projectData.applyHits();
-      if (myAppendUnloaded) {
-        final boolean calculateSource = mySourceMapFile != null;
-        UnloadedUtil.appendUnloaded(projectData, myClassFinder, calculateSource, projectData.isBranchCoverage(), OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS);
-      }
-      projectData.applyLineMappings();
-      dropIgnoredLines(projectData);
-      checkLineSignatures(projectData);
+      finalizeCoverage(projectData, myAppendUnloaded, myClassFinder, mySourceMapFile != null);
+
       lock = CoverageIOUtil.FileLock.lock(myDataFile);
       if (myMergeFile) {
         final ProjectData load = ProjectDataLoader.load(myDataFile);
@@ -73,6 +66,16 @@ public class SaveHook implements Runnable {
     } finally {
       CoverageIOUtil.FileLock.unlock(lock);
     }
+  }
+
+  private static void finalizeCoverage(ProjectData projectData, boolean appendUnloaded, ClassFinder cf, boolean calculateSource) {
+    projectData.applyHits();
+    if (appendUnloaded) {
+      UnloadedUtil.appendUnloaded(projectData, cf, calculateSource, projectData.isBranchCoverage(), OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS);
+    }
+    projectData.applyLineMappings();
+    dropIgnoredLines(projectData);
+    KotlinInlineFilter.checkLineSignatures(projectData, cf);
   }
 
   public static void save(ProjectData projectData, File dataFile, File sourceMapFile) {
@@ -205,27 +208,7 @@ public class SaveHook implements Runnable {
     mySourceMapFile = sourceMapFile;
   }
 
-  private void checkLineSignatures(ProjectData projectData) {
-    if (!KotlinInlineFilter.shouldCheckLineSignatures()) return;
-    final Map<String, FileMapData[]> linesMap = projectData.getLinesMap();
-    if (linesMap == null) return;
-    final Set<String> classes = new HashSet<String>();
-    for (Map.Entry<String, FileMapData[]> mapData : linesMap.entrySet()) {
-      if (mapData.getValue() == null) continue;
-      for (FileMapData data : mapData.getValue()) {
-        if (data == null) continue;
-        if (mapData.getKey().equals(data.getClassName())) continue;
-        classes.add(data.getClassName());
-      }
-    }
-    for (String className : classes) {
-      final ClassData classData = projectData.getClassData(className);
-      if (classData == null) continue;
-      KotlinInlineFilter.checkLineSignatures(classData, myClassFinder);
-    }
-  }
-
-  private void dropIgnoredLines(ProjectData projectData) {
+  private static void dropIgnoredLines(ProjectData projectData) {
     for (final ClassData classData : projectData.getClassesCollection()) {
       classData.dropIgnoredLines();
     }

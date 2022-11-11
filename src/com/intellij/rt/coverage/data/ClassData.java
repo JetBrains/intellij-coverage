@@ -162,6 +162,7 @@ public class ClassData implements CoverageData {
     if (myStatus == null) myStatus = new HashMap<String, Integer>();
   }
 
+  @SuppressWarnings("unused")
   public Integer getStatus(String methodSignature) {
     if (myStatus == null) return null;
     Integer methodStatus = myStatus.get(methodSignature);
@@ -280,6 +281,7 @@ public class ClassData implements CoverageData {
       final LineData lineData = myLinesArray[i];
       if (lineData == null) continue;
       lineData.setHits(lineData.getHits() + myHitsMask[i]);
+      myHitsMask[i] = 0;
     }
   }
 
@@ -291,6 +293,7 @@ public class ClassData implements CoverageData {
         int lineId = lineData.getId();
         if (lineId != -1) {
           lineData.setHits(lineData.getHits() + myHitsMask[lineId]);
+          myHitsMask[lineId] = 0;
         }
 
         JumpData[] jumps = lineData.getJumps();
@@ -300,10 +303,12 @@ public class ClassData implements CoverageData {
             int trueId = jumpData.getId(true);
             if (trueId != -1) {
               jumpData.setTrueHits(jumpData.getTrueHits() + myHitsMask[trueId]);
+              myHitsMask[trueId] = 0;
             }
             int falseId = jumpData.getId(false);
             if (falseId != -1) {
               jumpData.setFalseHits(jumpData.getFalseHits() + myHitsMask[falseId]);
+              myHitsMask[falseId] = 0;
             }
           }
         }
@@ -315,16 +320,16 @@ public class ClassData implements CoverageData {
             int defaultId = switchData.getId(-1);
             if (defaultId != -1) {
               switchData.setDefaultHits(switchData.getDefaultHits() + myHitsMask[defaultId]);
+              myHitsMask[defaultId] = 0;
             }
-            int[] keys = switchData.getKeys();
             int[] hits = switchData.getHits();
-
             for (int i = 0; i < hits.length; i++) {
               int caseId = switchData.getId(i);
               if (caseId == -1) continue;
               hits[i] += myHitsMask[caseId];
+              myHitsMask[caseId] = 0;
             }
-            switchData.setKeysAndHits(keys, hits);
+            switchData.setKeysAndHits(switchData.getKeys(), hits);
           }
         }
       }

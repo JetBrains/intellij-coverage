@@ -18,7 +18,7 @@ package com.intellij.rt.coverage.aggregate;
 
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
-import com.intellij.rt.coverage.instrumentation.SaveHook;
+import com.intellij.rt.coverage.instrumentation.CoverageReport;
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.data.Filters;
@@ -165,7 +165,7 @@ public class Aggregator {
         }
       }
       InstructionsUtil.merge(projectData, requestProjectData, request.classFilter);
-      SaveHook.save(requestProjectData, request.outputFile, request.smapFile);
+      CoverageReport.save(requestProjectData, request.outputFile, request.smapFile);
     }
   }
 
