@@ -141,18 +141,9 @@ public class KotlinInlineFilter extends LinesFilter {
     for (FileMapData map : mappings) {
       if (map == null) continue;
       if (map.getClassName().equals(myContext.getClassName())) continue;
-      final LineMapData[] lines = map.getLines();
-      if (lines == null) continue;
-      int low = 0;
-      int high = lines.length - 1;
-      while (low <= high) {
-        final int mid = (low + high) / 2;
-        final LineMapData lineMapData = lines[mid];
-        if (line < lineMapData.getTargetMinLine()) {
-          high = mid - 1;
-        } else if (line > lineMapData.getTargetMaxLine()) {
-          low = mid + 1;
-        } else {
+      for (LineMapData lineMapData : map.getLines()) {
+        if (lineMapData.getMappingStart(0) <= line &&
+            line < lineMapData.getMappingEnd(lineMapData.getCount() - 1)) {
           return true;
         }
       }

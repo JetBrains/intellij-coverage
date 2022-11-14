@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ClassData;
+import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
@@ -125,7 +126,10 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
       myProjectData.getOrCreateClassData(StringsPool.getFromPool(getClassName())).setSource(source);
     }
     if (debug != null) {
-      myProjectData.addLineMaps(getClassName(), JSR45Util.extractLineMapping(debug, getClassName()));
+      final FileMapData[] mapping = JSR45Util.extractLineMapping(debug, getClassName());
+      if (mapping != null) {
+        myProjectData.addLineMaps(getClassName(), mapping);
+      }
     }
   }
 

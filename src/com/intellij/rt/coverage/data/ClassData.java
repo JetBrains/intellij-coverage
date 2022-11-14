@@ -356,8 +356,8 @@ public class ClassData implements CoverageData {
   private static class BasicLineMapper extends LineMapper<LineData> {
 
     @Override
-    protected LineData createNewLine(LineData targetLine, LineMapData mapData) {
-      return new LineData(mapData.getSourceLineNumber(), targetLine.getMethodSignature());
+    protected LineData createNewLine(LineData targetLine, int line) {
+      return new LineData(line, targetLine.getMethodSignature());
     }
 
     @Override

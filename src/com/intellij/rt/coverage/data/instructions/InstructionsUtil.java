@@ -67,7 +67,7 @@ public class InstructionsUtil {
     }
 
     @Override
-    protected LineInstructions createNewLine(LineInstructions targetLine, LineMapData mapData) {
+    protected LineInstructions createNewLine(LineInstructions targetLine, int line) {
       return new LineInstructions();
     }
 

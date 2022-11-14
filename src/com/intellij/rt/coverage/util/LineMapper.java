@@ -22,7 +22,7 @@ import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineMapData;
 
 public abstract class LineMapper<T extends CoverageData> {
-  protected abstract T createNewLine(T targetLine, LineMapData mapData);
+  protected abstract T createNewLine(T targetLine, int line);
 
   protected abstract T[] createArray(int size);
 
@@ -45,24 +45,25 @@ public abstract class LineMapper<T extends CoverageData> {
       final T[] sourceLines = getSourceLinesArray(linesMap, sourceClassData, targetClassData);
       final T[] targetLines = getLines(targetClassData);
       for (final LineMapData mapData : linesMap) {
-        if (mapData == null) continue;
-        final int sourceLineNumber = mapData.getSourceLineNumber();
-        if (!sourceClassData.isIgnoredLine(sourceLineNumber) && ArrayUtil.safeLoad(sourceLines, sourceLineNumber) == null) {
-          final T targetLineData = ArrayUtil.safeLoad(targetLines, mapData.getTargetMinLine());
-          if (targetLineData != null) {
-            final T source = createNewLine(targetLineData, mapData);
-            ArrayUtil.safeStore(sourceLines, sourceLineNumber, source);
+        for (int index = 0; index < mapData.getCount(); index++) {
+          final int sourceLineNumber = mapData.getSourceLine(index);
+          if (!sourceClassData.isIgnoredLine(sourceLineNumber) && ArrayUtil.safeLoad(sourceLines, sourceLineNumber) == null) {
+            final T targetLineData = ArrayUtil.safeLoad(targetLines, mapData.getMappingStart(index));
+            if (targetLineData != null) {
+              final T source = createNewLine(targetLineData, sourceLineNumber);
+              ArrayUtil.safeStore(sourceLines, sourceLineNumber, source);
+            }
           }
-        }
-        for (int targetLineNumber = mapData.getTargetMinLine(); targetLineNumber <= mapData.getTargetMaxLine(); targetLineNumber++) {
-          final T source = ArrayUtil.safeLoad(sourceLines, sourceLineNumber);
-          final T target = ArrayUtil.safeLoad(targetLines, targetLineNumber);
-          if (target == null) continue;
-          if (source != null) {
-            source.merge(target);
-          }
-          if (sourceClassData != targetClassData || targetLineNumber != sourceLineNumber) {
-            targetLines[targetLineNumber] = null;
+          for (int targetLineNumber = mapData.getMappingStart(index); targetLineNumber < mapData.getMappingEnd(index); targetLineNumber++) {
+            final T source = ArrayUtil.safeLoad(sourceLines, sourceLineNumber);
+            final T target = ArrayUtil.safeLoad(targetLines, targetLineNumber);
+            if (target == null) continue;
+            if (source != null) {
+              source.merge(target);
+            }
+            if (sourceClassData != targetClassData || targetLineNumber != sourceLineNumber) {
+              targetLines[targetLineNumber] = null;
+            }
           }
         }
       }
@@ -100,10 +101,12 @@ public abstract class LineMapper<T extends CoverageData> {
     for (FileMapData mapData : mappings) {
       final boolean isThisClass = className.equals(mapData.getClassName());
       for (LineMapData lineMapData : mapData.getLines()) {
-        final int sourceLineNumber = lineMapData.getSourceLineNumber();
-        for (int i = lineMapData.getTargetMinLine(); i <= lineMapData.getTargetMaxLine() && i < lines.length; i++) {
-          if (isThisClass && i == sourceLineNumber) continue;
-          lines[i] = null;
+        for (int index = 0; index < lineMapData.getCount(); index++) {
+          final int sourceLineNumber = lineMapData.getSourceLine(index);
+          for (int i = lineMapData.getMappingStart(index); i < lineMapData.getMappingEnd(index) && i < lines.length; i++) {
+            if (isThisClass && i == sourceLineNumber) continue;
+            lines[i] = null;
+          }
         }
       }
     }
@@ -112,8 +115,8 @@ public abstract class LineMapper<T extends CoverageData> {
   private static int maxSourceLineNumber(LineMapData[] linesMap) {
     int max = 0;
     for (final LineMapData mapData : linesMap) {
-      if (mapData != null) {
-        max = Math.max(max, mapData.getSourceLineNumber());
+      for (int index = 0; index < mapData.getCount(); index++) {
+        max = Math.max(max, mapData.getSourceLine(index));
       }
     }
     return max;

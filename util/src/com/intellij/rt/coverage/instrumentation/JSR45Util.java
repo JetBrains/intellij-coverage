@@ -19,11 +19,11 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineMapData;
 import com.intellij.rt.coverage.util.ClassNameUtil;
-import org.jetbrains.coverage.gnu.trove.THashSet;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
-import org.jetbrains.coverage.gnu.trove.TObjectFunction;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author anna
@@ -36,78 +36,73 @@ public class JSR45Util {
 
   private static final LineMapData[] EMPTY_LINE_MAP = new LineMapData[0];
 
-  private static String checkSMAP(String debug) {
-    return debug.startsWith("SMAP") ? debug.substring(4) : null;
+  private static boolean isSmap(String debug) {
+    return debug.startsWith("SMAP");
   }
 
   public static FileMapData[] extractLineMapping(String debug, String className) {
-    debug = checkSMAP(debug);
-    if (debug != null) {
-      final TIntObjectHashMap<THashSet<LineMapData>> linesMap = new TIntObjectHashMap<THashSet<LineMapData>>();
-      final int fileSectionIdx = debug.indexOf(FILE_SECTION);
-      final int lineInfoIdx = debug.indexOf(LINE_SECTION);
-      final TIntObjectHashMap<FileInfo> fileNames = parseFileNames(debug, fileSectionIdx, lineInfoIdx, className);
-      final int lineInfoStart = lineInfoIdx + LINE_SECTION.length();
-      final int lineInfoEnd = debug.indexOf(SECTION_SEPARATOR, lineInfoStart);
-      final String lineInfo = debug.substring(lineInfoStart, lineInfoEnd);
-      final String[] lines = lineInfo.split("\n");
-      int fileId = 1;
-      for (String line : lines) {
-        //InputStartLine # LineFileID , RepeatCount : OutputStartLine , OutputLineIncrement
-        int startSrcLine;
-        int repeat = 1;
-        int startOutLine;
-        int outLineInc = 1;
+    if (!isSmap(debug)) return null;
+    final TIntObjectHashMap<List<LineMapData>> linesMap = new TIntObjectHashMap<List<LineMapData>>();
+    final int fileSectionIdx = debug.indexOf(FILE_SECTION);
+    final int lineInfoIdx = debug.indexOf(LINE_SECTION);
+    final List<FileInfo> fileNames = parseFileNames(debug, fileSectionIdx, lineInfoIdx, className);
+    final int lineInfoStart = lineInfoIdx + LINE_SECTION.length();
+    final int lineInfoEnd = debug.indexOf(SECTION_SEPARATOR, lineInfoStart);
+    final String lineInfo = debug.substring(lineInfoStart, lineInfoEnd);
+    final String[] lines = lineInfo.split("\n");
+    int fileId = 1;
+    for (String line : lines) {
+      //InputStartLine # LineFileID , RepeatCount : OutputStartLine , OutputLineIncrement
+      int startSrcLine;
+      int repeat = 1;
+      int startOutLine;
+      int outLineInc = 1;
 
-        final int idx = line.indexOf(":");
-        final String srcLine = line.substring(0, idx);
-        final String outLine = line.substring(idx + 1);
+      final int idx = line.indexOf(':');
+      final String srcLine = line.substring(0, idx);
+      final String outLine = line.substring(idx + 1);
 
-        final int srcCommaIdx = srcLine.indexOf(',');
-        final int sharpIdx = srcLine.indexOf("#");
-        if (sharpIdx > -1) {
-          startSrcLine = Integer.parseInt(srcLine.substring(0, sharpIdx));
-          if (srcCommaIdx > -1) {
-            repeat = Integer.parseInt(srcLine.substring(srcCommaIdx + 1));
-            fileId = Integer.parseInt(srcLine.substring(sharpIdx + 1, srcCommaIdx));
-          } else {
-            fileId = Integer.parseInt(srcLine.substring(sharpIdx + 1));
-          }
-        } else if (srcCommaIdx > -1) {
+      final int srcCommaIdx = srcLine.indexOf(',');
+      final int sharpIdx = srcLine.indexOf('#');
+      if (sharpIdx > -1) {
+        startSrcLine = Integer.parseInt(srcLine.substring(0, sharpIdx));
+        if (srcCommaIdx > -1) {
           repeat = Integer.parseInt(srcLine.substring(srcCommaIdx + 1));
-          startSrcLine = Integer.parseInt(srcLine.substring(0, srcCommaIdx));
+          fileId = Integer.parseInt(srcLine.substring(sharpIdx + 1, srcCommaIdx));
         } else {
-          startSrcLine = Integer.parseInt(srcLine);
+          fileId = Integer.parseInt(srcLine.substring(sharpIdx + 1));
         }
-
-        final int outCommaIdx = outLine.indexOf(',');
-        if (outCommaIdx > -1) {
-          outLineInc = Integer.parseInt(outLine.substring(outCommaIdx + 1));
-          startOutLine = Integer.parseInt(outLine.substring(0, outCommaIdx));
-        } else {
-          startOutLine = Integer.parseInt(outLine);
-        }
-
-        THashSet<LineMapData> currentFile = linesMap.get(fileId);
-        if (currentFile == null) {
-          currentFile = new THashSet<LineMapData>();
-          linesMap.put(fileId, currentFile);
-        }
-        for (int r = 0; r < repeat; r++) {
-          currentFile.add(new LineMapData(startSrcLine + r, startOutLine + r * outLineInc, startOutLine + (r + 1) * outLineInc - 1));
-        }
+      } else if (srcCommaIdx > -1) {
+        repeat = Integer.parseInt(srcLine.substring(srcCommaIdx + 1));
+        startSrcLine = Integer.parseInt(srcLine.substring(0, srcCommaIdx));
+      } else {
+        startSrcLine = Integer.parseInt(srcLine);
       }
 
-      final List<FileMapData> result = new ArrayList<FileMapData>();
-      final int[] keys = linesMap.keys();
-      Arrays.sort(keys);
-      for (final int key : keys) {
-        final FileInfo fileInfo = fileNames.get(key);
-        result.add(new FileMapData(fileInfo.myPath, fileInfo.myName, getLinesMapping(linesMap.get(key))));
+      final int outCommaIdx = outLine.indexOf(',');
+      if (outCommaIdx > -1) {
+        outLineInc = Integer.parseInt(outLine.substring(outCommaIdx + 1));
+        startOutLine = Integer.parseInt(outLine.substring(0, outCommaIdx));
+      } else {
+        startOutLine = Integer.parseInt(outLine);
       }
-      return result.toArray(FileMapData.EMPTY_FILE_MAP);
+
+      List<LineMapData> currentFile = linesMap.get(fileId);
+      if (currentFile == null) {
+        currentFile = new ArrayList<LineMapData>();
+        linesMap.put(fileId, currentFile);
+      }
+      currentFile.add(new LineMapData(startSrcLine, repeat, startOutLine, outLineInc));
     }
-    return null;
+
+    final FileMapData[] result = new FileMapData[fileNames.size()];
+    for (int i = 0; i < result.length; i++) {
+      final FileInfo fileInfo = fileNames.get(i);
+      final List<LineMapData> mappings = linesMap.get(fileInfo.myIndex);
+      final LineMapData[] array = mappings == null ? EMPTY_LINE_MAP : mappings.toArray(EMPTY_LINE_MAP);
+      result[i] = new FileMapData(fileInfo.myPath, fileInfo.myName, array);
+    }
+    return result;
   }
 
   private static String[] getFileSectionLines(String debug, int fileSectionIdx, int lineInfoIdx) {
@@ -119,18 +114,18 @@ public class JSR45Util {
     return fileSection.split("\n");
   }
 
-  private static TIntObjectHashMap<FileInfo> parseFileNames(String debug, int fileSectionIdx, int lineInfoIdx, String className) {
+  private static List<FileInfo> parseFileNames(String debug, int fileSectionIdx, int lineInfoIdx, String className) {
     final String defaultPrefix = getClassPackageName(className);
-    final String[] fileNameIdx = getFileSectionLines(debug, fileSectionIdx, lineInfoIdx);
-    final TIntObjectHashMap<FileInfo> result = new TIntObjectHashMap<FileInfo>();
+    final String[] fileLines = getFileSectionLines(debug, fileSectionIdx, lineInfoIdx);
+    final List<FileInfo> result = new ArrayList<FileInfo>();
     boolean generatedPrefix = true;
-    for (int i = 0; i < fileNameIdx.length; i++) {
-      final String fileInfoLine = fileNameIdx[i];
+    for (int i = 0; i < fileLines.length; i++) {
+      final String fileInfoLine = fileLines[i];
       String idAndName = fileInfoLine;
       String path = null;
       if (fileInfoLine.startsWith("+ ")) {
         idAndName = fileInfoLine.substring(2);
-        path = fileNameIdx[++i];
+        path = fileLines[++i];
       }
       int idx = idAndName.indexOf(" ");
       int key = Integer.parseInt(idAndName.substring(0, idx));
@@ -141,17 +136,15 @@ public class JSR45Util {
       final String pathWithDots = ClassNameUtil.convertToFQName(lastDot < 0
           ? path
           : path.substring(0, lastDot) + "_" + path.substring(lastDot + 1));
-      
       generatedPrefix &= !pathWithDots.startsWith(defaultPrefix);
-      result.put(key, new FileInfo(fileName, pathWithDots));
+      result.add(new FileInfo(fileName, pathWithDots, key));
     }
 
     if (generatedPrefix) {
-      result.transformValues(new TObjectFunction<FileInfo, FileInfo>() {
-        public FileInfo execute(FileInfo selfValue) {
-          return new FileInfo(selfValue.myName, defaultPrefix + selfValue.myPath);
-        }
-      });
+      for (int i = 0; i < result.size(); i++) {
+        final FileInfo fileInfo = result.get(i);
+        result.set(i, new FileInfo(fileInfo.myName, defaultPrefix + fileInfo.myPath, fileInfo.myIndex));
+      }
     }
     return result;
   }
@@ -166,8 +159,7 @@ public class JSR45Util {
       final int endIndex = start.lastIndexOf('/');
       if (endIndex > -1) {
         fileName = start.substring(0, endIndex) + rest;
-      }
-      else {
+      } else {
         fileName = rest.startsWith("/") ? rest.substring(1) : rest;
       }
     }
@@ -183,68 +175,48 @@ public class JSR45Util {
     return generatePrefix;
   }
 
-  private static LineMapData[] getLinesMapping(THashSet<LineMapData> linesMap) {
-    final LineMapData[] result = linesMap.toArray(EMPTY_LINE_MAP);
-    Arrays.sort(result, new Comparator<LineMapData>() {
-      public int compare(LineMapData o1, LineMapData o2) {
-        int compareMin = o1.getTargetMinLine() - o2.getTargetMinLine();
-        if (compareMin == 0) {
-          int compareMax = o1.getTargetMaxLine() - o2.getTargetMaxLine();
-          if (compareMax == 0) {
-            return o1.getSourceLineNumber() - o2.getSourceLineNumber();
-          }
-          return compareMax;
-        }
-        return compareMin;
-      }
-    });
-    return result;
-  }
-
   /**
    * @param debug SourceDebugExtension of .class-file
    * @return list of paths to source files .class-file was generated from, empty list if none are found
    */
   public static List<String> parseSourcePaths(String debug) {
-    debug = checkSMAP(debug);
-    if (debug != null) {
-      String[] fileNameIdx = getFileSectionLines(debug, debug.indexOf(FILE_SECTION), debug.indexOf(LINE_SECTION));
-      List<String> paths = new ArrayList<String>();
-      for (int i = 0; i < fileNameIdx.length; i++) {
-        String fileName = fileNameIdx[i];
-        String idAndName = fileName;
-        String path = null;
-        if (fileName.startsWith("+ ")) {
-          idAndName = fileName.substring(2);
-          path = fileNameIdx[++i];
-        }
-        int idx = idAndName.indexOf(" ");
-        String currentClassName = idAndName.substring(idx + 1);
-        if (path == null) {
-          path = currentClassName;
-        }
-        else {
-          path = processRelative(path);
-          int lastSlashIdx = path.lastIndexOf("/");
-          if (lastSlashIdx > 0) {
-            path = path.substring(0, ++lastSlashIdx) + currentClassName;
-          }
-        }
-        paths.add(path);
+    if (!isSmap(debug)) return Collections.emptyList();
+    String[] fileNameIdx = getFileSectionLines(debug, debug.indexOf(FILE_SECTION), debug.indexOf(LINE_SECTION));
+    List<String> paths = new ArrayList<String>();
+    for (int i = 0; i < fileNameIdx.length; i++) {
+      String fileName = fileNameIdx[i];
+      String idAndName = fileName;
+      String path = null;
+      if (fileName.startsWith("+ ")) {
+        idAndName = fileName.substring(2);
+        path = fileNameIdx[++i];
       }
-      return paths;
+      int idx = idAndName.indexOf(" ");
+      String currentClassName = idAndName.substring(idx + 1);
+      if (path == null) {
+        path = currentClassName;
+      } else {
+        path = processRelative(path);
+        int lastSlashIdx = path.lastIndexOf("/");
+        if (lastSlashIdx > 0) {
+          path = path.substring(0, ++lastSlashIdx) + currentClassName;
+        }
+      }
+      paths.add(path);
     }
-    return Collections.emptyList();
+    return paths;
   }
 
 
   private static class FileInfo {
     private final String myName;
     private final String myPath;
+    private final int myIndex;
 
-    public FileInfo(String name, String path) {
+    public FileInfo(String name, String path, int index) {
       myName = name;
       myPath = path;
+      myIndex = index;
     }
   }
 }

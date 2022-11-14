@@ -146,11 +146,8 @@ public class SMAPParsingTest extends TestCase {
   public void testJspSMAPKotlinInline() {
     final FileMapData[] expected = new FileMapData[]{new FileMapData("testData.inline.SimpleInlineKt", "simpleInline.kt",
         new LineMapData[]{
-            new LineMapData(1, 1, 1),
-            new LineMapData(2, 2, 2),
-            new LineMapData(3, 3, 3),
-            new LineMapData(4, 4, 4),
-            new LineMapData(3, 5, 5)
+            new LineMapData(1, 4, 1, 1),
+            new LineMapData(3, 1, 5, 1),
         })};
     final FileMapData[] datas = JSR45Util.extractLineMapping(KOTLIN_SMAP_WITH_INLINE2, "testData.inline.SimpleInlineKt");
     testJspSmapData(expected, datas);
@@ -159,20 +156,14 @@ public class SMAPParsingTest extends TestCase {
   public void testJspSMAP() {
     final FileMapData[] expected = new FileMapData[]{new FileMapData("org.apache.jsp.Hello_jsp", "hello.jsp",
         new LineMapData[]{
-            new LineMapData(1, 59, 59),
-            new LineMapData(2, 60, 60),
-            new LineMapData(3, 61, 61),
-            new LineMapData(4, 62, 62),
-            new LineMapData(5, 63, 63),
-            new LineMapData(6, 70, 70),
-            new LineMapData(7, 71, 71),
-            new LineMapData(8, 72, 72),
+            new LineMapData(1, 5, 59, 1),
+            new LineMapData(6, 3, 70, 1),
         }),
         new FileMapData("org.apache.jsp.greeting_jsp", "greeting.jsp",
             new LineMapData[]{
-                new LineMapData(1, 64, 64),
-                new LineMapData(2, 65, 65),
-                new LineMapData(3, 66, 69)})};
+                new LineMapData(1, 2, 64, 1),
+                new LineMapData(3, 1, 66, 4),
+            })};
 
     final FileMapData[] datas = JSR45Util.extractLineMapping(JSP_SMAP, "org.apache.jsp.Hello_jsp");
     testJspSmapData(expected, datas);

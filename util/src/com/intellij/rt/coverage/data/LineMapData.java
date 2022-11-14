@@ -17,33 +17,55 @@
 package com.intellij.rt.coverage.data;
 
 /**
+ * For each source line <code>x</code> in <code>[mySourceStart, myCount]</code>, lines
+ * <p>
+ * <code>[myMappedStart + (x - mySourceStart) * myIncrement, myMappedStart + (x - mySourceStart + 1) * myIncrement)</code>
+ * <p>
+ * are mapped to line <code>x</code>.
+ * <p>
+ *
  * @author anna
  * @since 2/9/11
  */
 public class LineMapData {
-  private final int mySourceLineNumber;
-  private final int myTargetMinLine;
-  private final int myTargetMaxLine;
+  private final int mySourceStart;
+  private final int myCount;
+  private final int myMappedStart;
+  private final int myIncrement;
 
-  public LineMapData(int sourceLineNumber, int targetMinLine, int targetMaxLine) {
-    mySourceLineNumber = sourceLineNumber;
-    myTargetMinLine = targetMinLine;
-    myTargetMaxLine = targetMaxLine;
+  public LineMapData(int sourceStart, int count, int mappedStart, int increment) {
+    mySourceStart = sourceStart;
+    myCount = count;
+    myMappedStart = mappedStart;
+    myIncrement = increment;
   }
 
-  public int getTargetMinLine() {
-    return myTargetMinLine;
+  public int getCount() {
+    return myCount;
   }
 
-  public int getTargetMaxLine() {
-    return myTargetMaxLine;
+  public int getSourceLine(int index) {
+    checkIndex(index);
+    return mySourceStart + index;
   }
 
-  public int getSourceLineNumber() {
-    return mySourceLineNumber;
+  public int getMappingStart(int index) {
+    checkIndex(index);
+    return myMappedStart + index * myIncrement;
+  }
+
+  public int getMappingEnd(int index) {
+    checkIndex(index);
+    return myMappedStart + (index + 1) * myIncrement;
   }
 
   public String toString() {
-    return "src: " + mySourceLineNumber + ", min: " + myTargetMinLine + ", max: " + myTargetMaxLine;
+    return "map [" + myMappedStart + "; " + myMappedStart + myCount * myIncrement + ") to [" + mySourceStart + "; " + mySourceStart + myCount + ")";
+  }
+
+  private void checkIndex(int index) {
+    if (index < 0 || index >= myCount) {
+      throw new IllegalArgumentException("Invalid index " + index + " in mapping " + this);
+    }
   }
 }
