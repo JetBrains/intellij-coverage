@@ -274,18 +274,7 @@ public class ClassData implements CoverageData {
     myTraceMask = traceMask;
   }
 
-  public void applyLinesMask() {
-    if (myHitsMask == null) return;
-    final int size = Math.min(myHitsMask.length, myLinesArray.length);
-    for (int i = 0; i < size; i++) {
-      final LineData lineData = myLinesArray[i];
-      if (lineData == null) continue;
-      lineData.setHits(lineData.getHits() + myHitsMask[i]);
-      myHitsMask[i] = 0;
-    }
-  }
-
-  public void applyBranches() {
+  public void applyHits() {
     if (myHitsMask == null) return;
     try {
       for (LineData lineData : myLinesArray) {
@@ -334,7 +323,7 @@ public class ClassData implements CoverageData {
         }
       }
     } catch (Throwable e) {
-      ErrorReporter.reportError("Unexpected error during applying branch data to class " + getName(), e);
+      ErrorReporter.reportError("Unexpected error during applying hits data to class " + getName(), e);
     }
   }
 

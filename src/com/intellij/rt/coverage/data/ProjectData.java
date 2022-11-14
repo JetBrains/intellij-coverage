@@ -245,14 +245,8 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public void applyHits() {
-    if (myBranchCoverage) {
-      for (ClassData data : myClasses.myClasses.values()) {
-        data.applyBranches();
-      }
-    } else {
-      for (ClassData data : myClasses.myClasses.values()) {
-        data.applyLinesMask();
-      }
+    for (ClassData data : myClasses.myClasses.values()) {
+      data.applyHits();
     }
   }
 

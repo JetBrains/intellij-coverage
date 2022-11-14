@@ -38,7 +38,7 @@ public class RawHitsReportTest {
 
     final File file = Files.createTempFile("coverage", "ric").toFile();
     RawHitsReport.dump(file, projectData);
-    classData.applyLinesMask();
+    classData.applyHits();
 
     final ProjectData loadedProjectData = createProject();
     RawHitsReport.load(file, loadedProjectData);

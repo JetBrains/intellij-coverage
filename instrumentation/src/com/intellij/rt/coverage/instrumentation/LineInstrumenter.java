@@ -29,6 +29,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 public class LineInstrumenter extends Instrumenter {
 
   private final CoverageDataAccess myDataAccess;
+  private int myLastId = 0;
 
   public LineInstrumenter(final ProjectData projectData,
                           final ClassVisitor classVisitor,
@@ -44,11 +45,16 @@ public class LineInstrumenter extends Instrumenter {
     mv = new LocalVariableInserter(mv, access, desc, "__$localHits$__", DataAccessUtil.HITS_ARRAY_TYPE) {
 
       public void visitLineNumber(final int line, final Label start) {
-        getOrCreateLineData(line, name, desc);
+        final LineData lineData = getOrCreateLineData(line, name, desc);
+        if (lineData != null) {
+          if (lineData.getId() == -1) {
+            lineData.setId(myLastId++);
+          }
 
-        mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
-        InstrumentationUtils.pushInt(mv, line);
-        InstrumentationUtils.incrementIntArrayByIndex(mv);
+          mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
+          InstrumentationUtils.pushInt(mv, lineData.getId());
+          InstrumentationUtils.incrementIntArrayByIndex(mv);
+        }
 
         super.visitLineNumber(line, start);
       }
@@ -69,8 +75,7 @@ public class LineInstrumenter extends Instrumenter {
 
   @Override
   protected void initLineData() {
-    final LineData[] lines = LinesUtil.calcLineArray(myMaxLineNumber, myLines);
-    myClassData.setLines(lines);
-    myClassData.createHitsMask(myMaxLineNumber + 1);
+    myClassData.setLines(LinesUtil.calcLineArray(myMaxLineNumber, myLines));
+    myClassData.createHitsMask(myLastId);
   }
 }
