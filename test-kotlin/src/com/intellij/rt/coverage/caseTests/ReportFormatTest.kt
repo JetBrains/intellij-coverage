@@ -18,8 +18,8 @@ package com.intellij.rt.coverage.caseTests
 
 import com.intellij.rt.coverage.createTmpFile
 import com.intellij.rt.coverage.logFile
+import com.intellij.rt.coverage.report.ProjectDataLoader
 import com.intellij.rt.coverage.util.CoverageIOUtil
-import com.intellij.rt.coverage.util.ProjectDataLoader
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before

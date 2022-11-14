@@ -21,7 +21,7 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 /**
- * Filters out coverage from method if matches filter.
+ * Filter for undesirable lines. These filters are enabled in line and branch coverage mode.
  */
 public abstract class LinesFilter extends MethodVisitor {
   protected Instrumenter myContext;

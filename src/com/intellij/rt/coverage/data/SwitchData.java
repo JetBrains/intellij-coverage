@@ -40,8 +40,7 @@ public class SwitchData implements CoverageData {
   public void touch(final int key) {
     if (key == -1) {
       myDefaultHits++;
-    }
-    else if (key < myHits.length && key >= 0) {
+    } else if (key < myHits.length && key >= 0) {
       myHits[key]++;
     }
   }
@@ -64,7 +63,7 @@ public class SwitchData implements CoverageData {
   }
 
   public void merge(final CoverageData data) {
-    SwitchData switchData = (SwitchData)data;
+    SwitchData switchData = (SwitchData) data;
     myDefaultHits += switchData.myDefaultHits;
     for (int i = Math.min(myHits.length, switchData.myHits.length) - 1; i >= 0; i--) {
       myHits[i] += switchData.myHits[i];
@@ -98,6 +97,9 @@ public class SwitchData implements CoverageData {
     return myIds[index];
   }
 
+  /**
+   * Switch ID is used to store coverage data in an array at runtime.
+   */
   public void setId(int id, int index) {
     if (myIds == null) {
       myIds = new int[myKeys.length + 1];

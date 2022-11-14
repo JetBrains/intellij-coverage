@@ -21,6 +21,9 @@ import com.intellij.rt.coverage.data.CoverageData;
 import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineMapData;
 
+/**
+ * This class performs line mapping for JSR45 support
+ */
 public abstract class LineMapper<T extends CoverageData> {
   protected abstract T createNewLine(T targetLine, int line);
 

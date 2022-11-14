@@ -50,7 +50,7 @@ public class JumpData implements CoverageData {
   }
 
   public void merge(final CoverageData data) {
-    final JumpData jumpData = (JumpData)data;
+    final JumpData jumpData = (JumpData) data;
     myTrueHits += jumpData.myTrueHits;
     myFalseHits += jumpData.myFalseHits;
   }
@@ -67,6 +67,9 @@ public class JumpData implements CoverageData {
     return type ? myTrueId : myFalseId;
   }
 
+  /**
+   * Branch ID is used to store coverage data in an array at runtime.
+   */
   public void setId(int id, boolean type) {
     if (type) {
       myTrueId = id;

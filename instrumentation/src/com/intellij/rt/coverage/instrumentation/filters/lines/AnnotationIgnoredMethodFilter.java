@@ -24,6 +24,9 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/**
+ * Filter out lines in method marked with annotation to ignore.
+ */
 public class AnnotationIgnoredMethodFilter extends LinesFilter {
   private boolean mySetIgnoreByMe;
 

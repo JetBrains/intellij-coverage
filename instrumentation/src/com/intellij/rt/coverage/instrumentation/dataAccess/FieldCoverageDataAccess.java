@@ -23,6 +23,9 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+/**
+ * Store coverage data in a synthetic field.
+ */
 public class FieldCoverageDataAccess extends CoverageDataAccess {
   private final ExtraFieldInstrumenter myExtraFieldInstrumenter;
   private final Init myInit;

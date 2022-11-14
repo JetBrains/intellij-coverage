@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingArrayMode;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingClassDataMode;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
+import com.intellij.rt.coverage.report.CoverageReport;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
@@ -34,6 +35,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+/**
+ * This is an entry point for coverage agent. It accepts coverage parameters and enables classes transformation.
+ */
 public class Instrumentator {
   public static boolean ourIsInitialized = false;
 
@@ -128,8 +132,8 @@ public class Instrumentator {
       }
     }));
 
-    final boolean shouldCalculateSource = sourceMapFile != null;
-    final CoverageTransformer transformer = new CoverageTransformer(data, shouldCalculateSource, excludePatterns, includePatterns, cf, testTrackingMode);
+    final boolean shouldSaveSource = sourceMapFile != null;
+    final CoverageTransformer transformer = new CoverageTransformer(data, shouldSaveSource, excludePatterns, includePatterns, cf, testTrackingMode);
     addTransformer(instrumentation, transformer);
   }
 

@@ -29,6 +29,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/**
+ * Provide source code for HTML report.
+ */
 public class DirectorySourceCodeProvider implements SourceCodeProvider {
   private final FileLocator myFileLocator;
 
@@ -59,6 +62,7 @@ public class DirectorySourceCodeProvider implements SourceCodeProvider {
    * In this case we cannot distinguish a/test.kt and b/test.kt as candidates of source file for c.Test.
    * In order to find the true source file, we can search for 'package c' line in candidate files.
    */
+
   /**
    * This method tries to find source code for a class.
    * If there are several candidates, it checks if a candidate file contains <code>package</code> directive.

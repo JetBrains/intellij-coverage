@@ -22,7 +22,7 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.lines.LinesFilter;
-import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntHashSet;
@@ -32,9 +32,12 @@ import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+/**
+ * Basic class for coverage instrumentation. Stores intermediate coverage data structure during instrumentation.
+ */
 public abstract class Instrumenter extends MethodFilteringVisitor {
   protected final ProjectData myProjectData;
-  private final boolean myShouldCalculateSource;
+  private final boolean myShouldSaveSource;
 
   protected TIntObjectHashMap<LineData> myLines = new TIntObjectHashMap<LineData>(4, 0.99f);
   private TIntHashSet myIgnoredLines;
@@ -44,10 +47,10 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   protected boolean myProcess;
   private boolean myIgnoreSection;
 
-  public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource) {
+  public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldSaveSource) {
     super(classVisitor, className);
     myProjectData = projectData;
-    myShouldCalculateSource = shouldCalculateSource;
+    myShouldSaveSource = shouldSaveSource;
   }
 
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
@@ -89,6 +92,9 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
     return root;
   }
 
+  /**
+   * Create coverage instrumentation for a single method.
+   */
   protected abstract MethodVisitor createMethodLineEnumerator(MethodVisitor mv, String name, String desc, int access, String signature, String[] exceptions);
 
   public void visitEnd() {
@@ -122,7 +128,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
 
   public void visitSource(String source, String debug) {
     super.visitSource(source, debug);
-    if (myShouldCalculateSource) {
+    if (myShouldSaveSource) {
       myProjectData.getOrCreateClassData(StringsPool.getFromPool(getClassName())).setSource(source);
     }
     if (debug != null) {
@@ -134,7 +140,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   }
 
   public void visitOuterClass(String outerClassName, String methodName, String methodSig) {
-    if (myShouldCalculateSource) {
+    if (myShouldSaveSource) {
       final String fqnName = ClassNameUtil.convertToFQName(outerClassName);
       final ClassData outerClass = myProjectData.getOrCreateClassData(StringsPool.getFromPool(fqnName));
       if (outerClass.getSource() == null) {

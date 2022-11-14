@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.util;
+package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
 
 import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.IOException;
 
 /**
- *
  * During lines mapping new classes can be created, but they include only mapped lines.
  * The goal of this section is to save <code>ClassData#isFullyAnalysed</code> field
  * in order to treat this class as unloaded when collecting coverage results.

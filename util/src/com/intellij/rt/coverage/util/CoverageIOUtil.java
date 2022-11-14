@@ -262,7 +262,7 @@ public class CoverageIOUtil {
     protected abstract String consume(String str);
   }
 
-  static String processWithDictionary(String methodSignature, Consumer consumer) {
+  public static String processWithDictionary(String methodSignature, Consumer consumer) {
     final Matcher matcher = TYPE_PATTERN.matcher(methodSignature);
     while (matcher.find()) {
       String s = matcher.group();

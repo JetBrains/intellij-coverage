@@ -18,11 +18,16 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
+import com.intellij.rt.coverage.instrumentation.util.SaveLabelsMethodNode;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import org.jetbrains.coverage.org.objectweb.asm.tree.MethodNode;
 
+/**
+ * Collect information about coverage and prepare jumps and switches execution for coverage collection.
+ * This class uses <code>MethodNode</code> inside, so bytecode is firstly fully analysed and then written to a <code>MethodWriter</code>
+ */
 public class BranchesEnumerator extends MethodVisitor implements Opcodes {
   private final BranchesInstrumenter myInstrumenter;
   private final MethodNode myMethodNode;

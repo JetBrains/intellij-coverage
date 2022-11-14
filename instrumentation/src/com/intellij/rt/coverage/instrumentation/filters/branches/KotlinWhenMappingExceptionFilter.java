@@ -20,13 +20,16 @@ import com.intellij.rt.coverage.data.JumpData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.SwitchData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
-import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Filter out generated branch of when statement.
+ */
 public class KotlinWhenMappingExceptionFilter extends BranchesFilter {
   private Map<Label, PositionData> myJumpLabels;
   private Map<Label, PositionData> mySwitchLabels;

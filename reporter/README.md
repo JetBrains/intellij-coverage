@@ -6,5 +6,5 @@ the agent's binary report.
   intermediate binary reports and collects coverage in unloaded classes.
   * Supports binary files in raw hits format generated in case of offline instrumentation
 * _Verificator_ sums up coverage statistics and checks if user defined coverage restrictions are passing
-* _Reporter_ generates a XML or HTML report from binary reports
+* _Reporter_ generates an XML or HTML report from binary reports
   * Supports binary files in raw hits format generated in case of offline instrumentation

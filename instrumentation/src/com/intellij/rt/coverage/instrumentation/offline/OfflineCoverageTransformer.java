@@ -36,8 +36,8 @@ import java.util.regex.Pattern;
  * @see ProjectData#getOrCreateHitsMask
  */
 public class OfflineCoverageTransformer extends CoverageTransformer {
-  public OfflineCoverageTransformer(ProjectData data, boolean shouldCalculateSource, List<Pattern> excludePatterns, List<Pattern> includePatterns) {
-    super(data, shouldCalculateSource, excludePatterns, includePatterns);
+  public OfflineCoverageTransformer(ProjectData data, boolean shouldSaveSource, List<Pattern> excludePatterns, List<Pattern> includePatterns) {
+    super(data, shouldSaveSource, excludePatterns, includePatterns);
   }
 
   @Override

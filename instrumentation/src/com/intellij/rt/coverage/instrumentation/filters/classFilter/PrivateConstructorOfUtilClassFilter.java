@@ -18,12 +18,15 @@ package com.intellij.rt.coverage.instrumentation.filters.classFilter;
 
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
-import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Ignore private constructor of class if all other methods are static.
+ */
 public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
   private static final String KOTLIN_OBJECT_CONSTRUCTOR_DESCRIPTOR = "(" + KotlinUtils.KOTLIN_DEFAULT_CONSTRUCTOR_MARKER + ")V";
 

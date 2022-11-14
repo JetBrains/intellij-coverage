@@ -112,7 +112,7 @@ public class LineData implements CoverageData {
   }
 
   public void merge(final CoverageData data) {
-    LineData lineData = (LineData)data;
+    LineData lineData = (LineData) data;
     myHits += lineData.myHits;
     if (myJumpsAndSwitches != null || lineData.myJumpsAndSwitches != null) {
       getOrCreateJumpsAndSwitches().merge(lineData.getOrCreateJumpsAndSwitches());
@@ -261,6 +261,9 @@ public class LineData implements CoverageData {
     return myId;
   }
 
+  /**
+   * Line ID is used to store coverage data in an array at runtime.
+   */
   public void setId(int id) {
     myId = id;
   }

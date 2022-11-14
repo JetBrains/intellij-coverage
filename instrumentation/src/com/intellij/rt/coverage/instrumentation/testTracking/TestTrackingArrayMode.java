@@ -22,10 +22,10 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.BranchesEnumerator;
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
-import com.intellij.rt.coverage.instrumentation.LocalVariableInserter;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
 import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.instrumentation.util.LocalVariableInserter;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
@@ -53,8 +53,8 @@ public class TestTrackingArrayMode implements TestTrackingMode {
     };
   }
 
-  public Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
-    return new TestTrackingArrayInstrumenter(projectData, classVisitor, cr, className, shouldCalculateSource, dataAccess);
+  public Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldSaveSource, CoverageDataAccess dataAccess) {
+    return new TestTrackingArrayInstrumenter(projectData, classVisitor, cr, className, shouldSaveSource, dataAccess);
   }
 }
 
@@ -64,8 +64,8 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
   private final CoverageDataAccess myArrayDataAccess;
   private final String myInternalClassName;
 
-  public TestTrackingArrayInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
-    super(projectData, classVisitor, cr, className, shouldCalculateSource, dataAccess);
+  public TestTrackingArrayInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldSaveSource, CoverageDataAccess dataAccess) {
+    super(projectData, classVisitor, cr, className, shouldSaveSource, dataAccess);
     myInternalClassName = ClassNameUtil.convertToInternalName(className);
     myArrayDataAccess = DataAccessUtil.createTestTrackingDataAccess(className, cr, true);
   }

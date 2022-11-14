@@ -20,12 +20,16 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
-import com.intellij.rt.coverage.util.LinesUtil;
+import com.intellij.rt.coverage.instrumentation.util.LinesUtil;
+import com.intellij.rt.coverage.instrumentation.util.LocalVariableInserter;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+/**
+ * Insert coverage hits in line coverage mode.
+ */
 public class LineInstrumenter extends Instrumenter {
 
   private final CoverageDataAccess myDataAccess;
@@ -34,9 +38,9 @@ public class LineInstrumenter extends Instrumenter {
   public LineInstrumenter(final ProjectData projectData,
                           final ClassVisitor classVisitor,
                           final String className,
-                          final boolean shouldCalculateSource,
+                          final boolean shouldSaveSource,
                           final CoverageDataAccess dataAccess) {
-    super(projectData, classVisitor, className, shouldCalculateSource);
+    super(projectData, classVisitor, className, shouldSaveSource);
     myDataAccess = dataAccess;
   }
 

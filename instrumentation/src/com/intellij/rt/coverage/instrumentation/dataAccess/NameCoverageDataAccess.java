@@ -19,6 +19,10 @@ package com.intellij.rt.coverage.instrumentation.dataAccess;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+/**
+ * Access coverage data from the coverage engine in the beginning of each method
+ * by name of the class.
+ */
 public class NameCoverageDataAccess extends CoverageDataAccess {
   private final Init myInit;
 

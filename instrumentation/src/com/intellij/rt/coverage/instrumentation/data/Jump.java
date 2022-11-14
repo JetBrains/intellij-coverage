@@ -16,6 +16,9 @@
 
 package com.intellij.rt.coverage.instrumentation.data;
 
+/**
+ * Temporary representation od single branch of a jump.
+ */
 public class Jump {
   private final int myId;
   private final int myIndex;

@@ -17,9 +17,9 @@
 package com.intellij.rt.coverage.report.data;
 
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.CoverageReport;
+import com.intellij.rt.coverage.report.CoverageReport;
+import com.intellij.rt.coverage.report.ProjectDataLoader;
 import com.intellij.rt.coverage.util.ErrorReporter;
-import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.RawHitsReport;
 import org.jetbrains.annotations.Nullable;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2022 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.instrumentation;
+package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
 import com.intellij.rt.coverage.instrumentation.filters.lines.KotlinInlineFilter;
-import com.intellij.rt.coverage.util.*;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
+import com.intellij.rt.coverage.util.DictionaryLookup;
+import com.intellij.rt.coverage.util.ErrorReporter;
+import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 
@@ -29,6 +33,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Save coverage report in specific binary format.
+ *
  * @author anna
  * @since 26-Feb-2010
  */
@@ -39,6 +45,14 @@ public class CoverageReport {
   private final ClassFinder myClassFinder;
   private final boolean myMergeFile;
 
+  /**
+   * Create coverage report class.
+   *
+   * @param dataFile       file where to save a coverage report
+   * @param appendUnloaded a flag to collect coverage information from unloaded classes
+   * @param classFinder    helper class to locate classes on disk
+   * @param mergeFile      a flag to merge new report with coverage stored in the <code>dataFile</code>
+   */
   public CoverageReport(File dataFile, boolean appendUnloaded, ClassFinder classFinder, boolean mergeFile) {
     myDataFile = dataFile;
     myAppendUnloaded = appendUnloaded;
@@ -46,6 +60,10 @@ public class CoverageReport {
     myMergeFile = mergeFile;
   }
 
+  /**
+   * Saves project data into a coverage report.
+   * This method firstly collect all internal information to be ready for save.
+   */
   public void save(ProjectData projectData) {
     projectData.stop();
     CoverageIOUtil.FileLock lock = null;
@@ -68,13 +86,20 @@ public class CoverageReport {
     }
   }
 
+  /**
+   * Set file to save mapping from class to source file name.
+   */
+  public void setSourceMapFile(File sourceMapFile) {
+    mySourceMapFile = sourceMapFile;
+  }
+
   private static void finalizeCoverage(ProjectData projectData, boolean appendUnloaded, ClassFinder cf, boolean calculateSource) {
     projectData.applyHits();
     if (appendUnloaded) {
       UnloadedUtil.appendUnloaded(projectData, cf, calculateSource, projectData.isBranchCoverage(), OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS);
     }
     projectData.applyLineMappings();
-    dropIgnoredLines(projectData);
+    projectData.dropIgnoredLines();
     KotlinInlineFilter.checkLineSignatures(projectData, cf);
   }
 
@@ -200,17 +225,6 @@ public class CoverageReport {
       }
     } finally {
       CoverageIOUtil.close(out);
-    }
-  }
-
-
-  public void setSourceMapFile(File sourceMapFile) {
-    mySourceMapFile = sourceMapFile;
-  }
-
-  private static void dropIgnoredLines(ProjectData projectData) {
-    for (final ClassData classData : projectData.getClassesCollection()) {
-      classData.dropIgnoredLines();
     }
   }
 }

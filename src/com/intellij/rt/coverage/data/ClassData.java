@@ -25,6 +25,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Represents a class in coverage engine.
+ */
 public class ClassData implements CoverageData {
   private final String myClassName;
   private LineData[] myLinesArray;
@@ -148,7 +151,7 @@ public class ClassData implements CoverageData {
     return myLinesArray;
   }
 
-  /** @noinspection UnusedDeclaration*/
+  @SuppressWarnings("unused")
   public boolean containsLine(int line) {
     return myLinesArray[line] != null;
   }

@@ -26,19 +26,23 @@ import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.branches.BranchesFilter;
-import com.intellij.rt.coverage.util.LinesUtil;
+import com.intellij.rt.coverage.instrumentation.util.LinesUtil;
+import com.intellij.rt.coverage.instrumentation.util.LocalVariableInserter;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+/**
+ * Insert coverage hits in branch coverage mode.
+ */
 public class BranchesInstrumenter extends Instrumenter {
 
   private final CoverageDataAccess myDataAccess;
   private final BranchDataContainer myBranchData = new BranchDataContainer(this);
 
-  public BranchesInstrumenter(ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
-    super(projectData, classVisitor, className, shouldCalculateSource);
+  public BranchesInstrumenter(ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldSaveSource, CoverageDataAccess dataAccess) {
+    super(projectData, classVisitor, className, shouldSaveSource);
     myDataAccess = dataAccess;
   }
 
@@ -54,6 +58,9 @@ public class BranchesInstrumenter extends Instrumenter {
     return chainFilters(name, desc, access, signature, exceptions, mv);
   }
 
+  /**
+   * Create instrumenter that will insert coverage hits increments into bytecode.
+   */
   public MethodVisitor createInstrumentingVisitor(MethodVisitor mv, BranchesEnumerator enumerator,
                                                   int access, String name, String desc) {
     if (enumerator.hasNoLines()) {

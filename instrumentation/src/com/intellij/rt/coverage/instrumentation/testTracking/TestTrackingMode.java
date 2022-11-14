@@ -23,7 +23,17 @@ import com.intellij.rt.coverage.util.TestTrackingCallback;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 
+/**
+ * Test tracking strategy.
+ * <p>
+ * Test tracking is an extra ability of coverage engine to track per test coverage.
+ * To do that, coverage engine listens to test start/end event and resets test specific coverage.
+ *
+ * @see ProjectData#testStarted
+ * @see ProjectData#testEnded
+ */
 public interface TestTrackingMode {
   TestTrackingCallback createTestTrackingCallback();
-  Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess);
+
+  Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldSaveSource, CoverageDataAccess dataAccess);
 }

@@ -19,12 +19,19 @@ package com.intellij.rt.coverage.instrumentation.testTracking;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.*;
+import com.intellij.rt.coverage.instrumentation.BranchesEnumerator;
+import com.intellij.rt.coverage.instrumentation.BranchesInstrumenter;
+import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
+import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
+import com.intellij.rt.coverage.instrumentation.util.LocalVariableInserter;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
+/**
+ * Test tracking mode that stores classData.
+ */
 public class TestTrackingClassDataMode implements TestTrackingMode {
   public TestTrackingCallback createTestTrackingCallback() {
     return new TestTrackingCallback() {
@@ -51,8 +58,8 @@ public class TestTrackingClassDataMode implements TestTrackingMode {
     };
   }
 
-  public Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
-    return new TestTrackingClassDataInstrumenter(projectData, classVisitor, cr, className, shouldCalculateSource, dataAccess);
+  public Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldSaveSource, CoverageDataAccess dataAccess) {
+    return new TestTrackingClassDataInstrumenter(projectData, classVisitor, cr, className, shouldSaveSource, dataAccess);
   }
 }
 
@@ -61,8 +68,8 @@ class TestTrackingClassDataInstrumenter extends BranchesInstrumenter {
 
   protected final CoverageDataAccess myDataAccess;
 
-  public TestTrackingClassDataInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldCalculateSource, CoverageDataAccess dataAccess) {
-    super(projectData, classVisitor, className, shouldCalculateSource, dataAccess);
+  public TestTrackingClassDataInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldSaveSource, CoverageDataAccess dataAccess) {
+    super(projectData, classVisitor, className, shouldSaveSource, dataAccess);
     myDataAccess = DataAccessUtil.createTestTrackingDataAccess(className, cr, false);
   }
 

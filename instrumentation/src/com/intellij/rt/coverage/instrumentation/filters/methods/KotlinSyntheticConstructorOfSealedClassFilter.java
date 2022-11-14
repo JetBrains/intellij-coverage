@@ -18,7 +18,7 @@ package com.intellij.rt.coverage.instrumentation.filters.methods;
 
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
-import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class KotlinSyntheticConstructorOfSealedClassFilter implements MethodFilter {

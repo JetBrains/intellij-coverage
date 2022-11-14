@@ -30,6 +30,11 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Collects information about number of instructions located at line/jump/switch.
+ * Note that this enumerator only collects data and does not affect runtime execution,
+ * so it may be enabled at unloaded classes analysis stage.
+ */
 public class InstructionsEnumerator extends BranchesEnumerator {
   private final Map<Label, Jump> myOriginalLabelToJump = new HashMap<Label, Jump>();
   private final Map<Label, Switch> myOriginalLabelToSwitch = new HashMap<Label, Switch>();

@@ -36,19 +36,19 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
   private static final List<ClassFilter> ourFilters = FilterUtils.createClassFilters();
 
   private final ProjectData data;
-  private final boolean shouldCalculateSource;
+  private final boolean shouldSaveSource;
   private final List<Pattern> excludePatterns;
   private final List<Pattern> includePatterns;
   private final ClassFinder cf;
   private final TestTrackingMode testTrackingMode;
 
-  public CoverageTransformer(ProjectData data, boolean shouldCalculateSource, List<Pattern> excludePatterns, List<Pattern> includePatterns) {
-    this(data, shouldCalculateSource, excludePatterns, includePatterns, null, null);
+  public CoverageTransformer(ProjectData data, boolean shouldSaveSource, List<Pattern> excludePatterns, List<Pattern> includePatterns) {
+    this(data, shouldSaveSource, excludePatterns, includePatterns, null, null);
   }
 
-  public CoverageTransformer(ProjectData data, boolean shouldCalculateSource, List<Pattern> excludePatterns, List<Pattern> includePatterns, ClassFinder cf, TestTrackingMode testTrackingMode) {
+  public CoverageTransformer(ProjectData data, boolean shouldSaveSource, List<Pattern> excludePatterns, List<Pattern> includePatterns, ClassFinder cf, TestTrackingMode testTrackingMode) {
     this.data = data;
-    this.shouldCalculateSource = shouldCalculateSource;
+    this.shouldSaveSource = shouldSaveSource;
     this.excludePatterns = excludePatterns;
     this.includePatterns = includePatterns;
     this.cf = cf;
@@ -58,7 +58,7 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
   @Override
   protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassVisitor cw) {
     return createInstrumenter(data, className, cr, cw, testTrackingMode, data.isBranchCoverage(),
-        shouldCalculateSource, OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS, createDataAccess(className, cr, data.isBranchCoverage()));
+        shouldSaveSource, OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS, createDataAccess(className, cr, data.isBranchCoverage()));
   }
 
   /**
@@ -67,7 +67,7 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
   static ClassVisitor createInstrumenter(ProjectData data, String className,
                                          ClassReader cr, ClassVisitor cw, TestTrackingMode testTrackingMode,
                                          boolean branchCoverage,
-                                         boolean shouldCalculateSource,
+                                         boolean shouldSaveSource,
                                          boolean shouldIgnorePrivateConstructorOfUtilCLass,
                                          CoverageDataAccess dataAccess) {
     for (ClassFilter filter : ourFilters) {
@@ -76,13 +76,13 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
     final Instrumenter instrumenter;
     if (branchCoverage) {
       if (testTrackingMode != null) {
-        instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldCalculateSource, dataAccess);
+        instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldSaveSource, dataAccess);
       } else {
-        instrumenter = new BranchesInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
+        instrumenter = new BranchesInstrumenter(data, cw, className, shouldSaveSource, dataAccess);
       }
     } else {
       //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
-      instrumenter = new LineInstrumenter(data, cw, className, shouldCalculateSource, dataAccess);
+      instrumenter = new LineInstrumenter(data, cw, className, shouldSaveSource, dataAccess);
     }
     ClassVisitor result = instrumenter;
     if (shouldIgnorePrivateConstructorOfUtilCLass) {

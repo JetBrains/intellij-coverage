@@ -2,7 +2,7 @@
 
 ## Test sources
 Test sources are located in the `testData` package. Each test case is located in a 
-separate subpackage. Main class should be test.kt for Kotlin or Test.java for Java, then it can be detected automatically in the `CoverageTest` test.
+separate subpackage. Main class should be `test.kt` for Kotlin or `Test.java` for Java, then it can be detected automatically in the `CoverageTest` test.
 Most of the test cases could be configured in source files, but `custom` subpackage is used for special manual test.
 
 ## Test configuration

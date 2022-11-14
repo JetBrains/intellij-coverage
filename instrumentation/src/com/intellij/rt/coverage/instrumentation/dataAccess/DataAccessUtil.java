@@ -25,7 +25,7 @@ public class DataAccessUtil {
   public static final String HITS_ARRAY_TYPE = "[I";
   public static final String TEST_MASK_ARRAY_TYPE = "[Z";
 
-  public static String CLASS_DATA_NAME = "__$classData$__";
+  public static final String CLASS_DATA_NAME = "__$classData$__";
 
 
   public static CoverageDataAccess createTestTrackingDataAccess(String className, ClassReader cr, boolean isArray) {

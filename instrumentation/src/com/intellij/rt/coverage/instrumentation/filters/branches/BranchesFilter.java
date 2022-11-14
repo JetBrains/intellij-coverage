@@ -21,6 +21,9 @@ import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+/**
+ * Filter for undesirable branches. These filters are enabled only in branch coverage mode.
+ */
 public abstract class BranchesFilter extends MethodVisitor {
   protected Instrumenter myContext;
   protected BranchDataContainer myBranchData;

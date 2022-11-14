@@ -18,12 +18,12 @@ package com.intellij.rt.coverage.aggregate;
 
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
-import com.intellij.rt.coverage.instrumentation.CoverageReport;
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
+import com.intellij.rt.coverage.report.CoverageReport;
+import com.intellij.rt.coverage.report.ProjectDataLoader;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.report.data.Module;
-import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.RawHitsReport;
 import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
@@ -34,6 +34,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Pattern;
 
+/**
+ * Collects results from different modules into a number of intermediate binary reports and collects coverage in unloaded classes
+ */
 public class Aggregator {
   private final List<BinaryReport> myReports;
   private final List<Module> myModules;

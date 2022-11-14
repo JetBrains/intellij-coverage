@@ -22,6 +22,11 @@ import com.intellij.rt.coverage.data.ProjectData;
 import java.io.File;
 import java.util.*;
 
+/**
+ * Searches for source files for all classes in ProjectData.
+ * It analyses both sources located at corresponding package directory
+ * and sources located in other directories.
+ */
 public class SourceFileLocator extends FileLocator {
   private final Map<String, List<File>> mySourceFiles = new HashMap<String, List<File>>();
 

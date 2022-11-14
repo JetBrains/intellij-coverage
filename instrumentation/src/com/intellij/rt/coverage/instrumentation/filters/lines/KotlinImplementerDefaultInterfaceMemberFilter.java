@@ -18,7 +18,7 @@ package com.intellij.rt.coverage.instrumentation.filters.lines;
 
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
-import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
@@ -36,7 +36,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Type;
  * <li>RETURN</li>
  * <li>LABEL</li>
  * </ol>
- * A method is filtered out is it's instructions list matches this structure.
+ * A method is filtered out if its instructions list matches this structure.
  */
 public class KotlinImplementerDefaultInterfaceMemberFilter extends LinesFilter {
   private enum State {

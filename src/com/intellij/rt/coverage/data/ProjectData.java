@@ -30,6 +30,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
+/**
+ * Represents coverage information of a whole project.
+ * This class is also used to access coverage data at runtime.
+ */
 public class ProjectData implements CoverageData, Serializable {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/ProjectData";
 
@@ -46,13 +50,13 @@ public class ProjectData implements CoverageData, Serializable {
   public static volatile ProjectData ourProjectData;
   private File myDataFile;
 
-  private boolean myTraceLines;
+  private boolean myTestTracking;
   private boolean myBranchCoverage = true;
   private boolean myCollectInstructions;
 
   /**
    * Test tracking trace storage. Test tracking supports only sequential tests (but code inside one test could be parallel).
-   * Nevertheless in case of parallel tests run setting storage to null truncates coverage significantly.
+   * Nevertheless, in case of parallel tests run setting storage to null truncates coverage significantly.
    * Using CAS for the storage update slightly improves test tracking coverage as the data are not cleared too frequently.
    */
   private final AtomicReference<Map<Object, boolean[]>> myTrace = new AtomicReference<Map<Object, boolean[]>>();
@@ -64,6 +68,9 @@ public class ProjectData implements CoverageData, Serializable {
   private volatile Map<String, FileMapData[]> myLinesMap;
   private Map<String, ClassInstructions> myInstructions;
 
+  /**
+   * Cached object for ProjectData access from user class loaders.
+   */
   private static Object ourProjectDataObject;
 
   private TestTrackingCallback myTestTrackingCallback;
@@ -100,7 +107,7 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public boolean isTestTracking() {
-    return myTraceLines;
+    return myTestTracking;
   }
 
   public boolean isInstructionsCoverageEnabled() {
@@ -156,7 +163,7 @@ public class ProjectData implements CoverageData, Serializable {
     }
     ourProjectData.myStopped = false;
     ourProjectData.myBranchCoverage = branchCoverage;
-    ourProjectData.myTraceLines = traceLines;
+    ourProjectData.myTestTracking = traceLines;
     ourProjectData.myCollectInstructions = OptionsUtil.INSTRUCTIONS_COVERAGE_ENABLED;
     ourProjectData.myDataFile = dataFile;
     ourProjectData.myIncludePatterns = includePatterns;
@@ -172,7 +179,7 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public void merge(final CoverageData data) {
-    final ProjectData projectData = (ProjectData)data;
+    final ProjectData projectData = (ProjectData) data;
     for (Map.Entry<String, ClassData> entry : projectData.myClasses.myClasses.entrySet()) {
       final String key = entry.getKey();
       final ClassData mergedData = entry.getValue();
@@ -244,9 +251,18 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
 
+  /**
+   * Update coverage data internally stored in arrays.
+   */
   public void applyHits() {
     for (ClassData data : myClasses.myClasses.values()) {
       data.applyHits();
+    }
+  }
+
+  public void dropIgnoredLines() {
+    for (final ClassData classData : getClassesCollection()) {
+      classData.dropIgnoredLines();
     }
   }
 
@@ -262,6 +278,10 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   // --------------- used from listeners --------------------- //
+
+  /**
+   * This method could be called in test tracking mode by test engine listeners
+   */
   public void testEnded(final String name) {
     final Map<Object, boolean[]> trace = myTrace.get();
     if (trace == null) return;
@@ -287,8 +307,11 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
 
+  /**
+   * This method could be called in test tracking mode by test engine listeners
+   */
   public void testStarted(final String ignoredName) {
-    if (myTraceLines) myTrace.compareAndSet(null, new ConcurrentHashMap<Object, boolean[]>());
+    if (myTestTracking) myTrace.compareAndSet(null, new ConcurrentHashMap<Object, boolean[]>());
   }
   //---------------------------------------------------------- //
 
@@ -320,7 +343,6 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
 
-
   // -----------------------  used from instrumentation  ------------------------------------------------//
 
   //load ProjectData always through system class loader (null) then user's ClassLoaders won't affect    //
@@ -329,6 +351,9 @@ public class ProjectData implements CoverageData, Serializable {
 
   // -------------------------------------------------------------------------------------------------- //
 
+  /**
+   * Mark line as covered in the current test during test tracking.
+   */
   @SuppressWarnings("unused")
   public static void traceLine(Object classData, int line) {
     if (ourProjectData != null) {
@@ -350,6 +375,7 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   /**
+   * Test tracking initialization.
    * Returns true if a test is running now, then the class has been registered.
    */
   @SuppressWarnings("unused")
@@ -358,7 +384,7 @@ public class ProjectData implements CoverageData, Serializable {
       final Map<Object, boolean[]> traces = ourProjectData.myTrace.get();
       if (traces != null) {
         synchronized (classData) {
-          final boolean[] trace = ((ClassData)classData).getTraceMask();
+          final boolean[] trace = ((ClassData) classData).getTraceMask();
           if (traces.put(classData, trace) == null) {
             // clear trace on register for a new test to prevent reporting about code running between tests
             Arrays.fill(trace, false);
@@ -377,6 +403,9 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
 
+  /**
+   * On class initialization at runtime, an instrumented class asks for hits array
+   */
   public static int[] getHitsMask(String className) {
     if (ourProjectData != null) {
       return ourProjectData.getClassData(className).getHitsMask();
@@ -434,6 +463,9 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
 
+  /**
+   * Get test tracking hits array at runtime.
+   */
   @SuppressWarnings("unused")
   public static boolean[] getTraceMask(String className) {
     if (ourProjectData != null) {
@@ -448,6 +480,9 @@ public class ProjectData implements CoverageData, Serializable {
     }
   }
 
+  /**
+   * Get class data object at runtime.
+   */
   @SuppressWarnings("unused")
   public static Object loadClassData(String className) {
     if (ourProjectData != null) {
@@ -472,12 +507,15 @@ public class ProjectData implements CoverageData, Serializable {
 
   // ----------------------------------------------------------------------------------------------- //
 
+  /**
+   * This is a wrapper for method calls via reflection.
+   */
   private static class MethodCaller {
     private Method myMethod;
     private final String myMethodName;
-    private final Class[] myParamTypes;
+    private final Class<?>[] myParamTypes;
 
-    private MethodCaller(final String methodName, final Class[] paramTypes) {
+    private MethodCaller(final String methodName, final Class<?>[] paramTypes) {
       myMethodName = methodName;
       myParamTypes = paramTypes;
     }
@@ -497,7 +535,7 @@ public class ProjectData implements CoverageData, Serializable {
       return myMethod.invoke(null, paramValues);
     }
 
-    private static Method findMethod(final Class<?> clazz, String name, Class[] paramTypes) throws NoSuchMethodException {
+    private static Method findMethod(final Class<?> clazz, String name, Class<?>[] paramTypes) throws NoSuchMethodException {
       Method m = clazz.getDeclaredMethod(name, paramTypes);
       // speedup method invocation by calling setAccessible(true)
       m.setAccessible(true);

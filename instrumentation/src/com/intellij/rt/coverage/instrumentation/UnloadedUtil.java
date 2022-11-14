@@ -34,6 +34,11 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import java.io.InputStream;
 import java.util.Map;
 
+/**
+ * Some classes may be untouched during application execution, so these classes
+ * have not been seen by coverage engine. In order to consider such classes in overall statistics,
+ * coverage engine can analyse bytecode of these classes on disk.
+ */
 public class UnloadedUtil {
   public static final MethodVisitor EMPTY_METHOD_VISITOR = new MethodVisitor(Opcodes.API_VERSION) {
   };

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 JetBrains s.r.o.
+ * Copyright 2000-2022 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.util;
+package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
+import com.intellij.rt.coverage.util.ErrorReporter;
+import com.intellij.rt.coverage.instrumentation.util.LinesUtil;
+import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.IOException;
 
 /**
+ * Load binary coverage report
+ *
  * @author anna
  * @since 05-May-2009
  */
@@ -100,13 +109,12 @@ public class ProjectDataLoader {
             lineInfo.fillArrays();
           }
         }
-        classInfo.setLines(com.intellij.rt.coverage.util.LinesUtil.calcLineArray(maxLine, lines));
+        classInfo.setLines(LinesUtil.calcLineArray(maxLine, lines));
       }
       loadExtraInfo(projectInfo, in, dict);
     } catch (Exception e) {
       ErrorReporter.reportError("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath(), e);
-    }
-    finally {
+    } finally {
       CoverageIOUtil.close(in);
     }
     return projectInfo;
@@ -140,7 +148,7 @@ public class ProjectDataLoader {
           + REPORT_VERSION + "\n" + "Please try to update coverage agent.");
       return;
     }
-    final String infoString = CoverageIOUtil.readUTFFast(in);
+    final String ignored = CoverageIOUtil.readUTFFast(in);
     ReportSectionsUtil.loadSections(projectData, in, dict);
   }
 }

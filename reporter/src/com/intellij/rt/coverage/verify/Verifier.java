@@ -17,8 +17,8 @@
 package com.intellij.rt.coverage.verify;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.report.ProjectDataLoader;
 import com.intellij.rt.coverage.report.util.FileUtils;
-import com.intellij.rt.coverage.util.ProjectDataLoader;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -30,6 +30,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Sums up coverage statistics and checks if user defined coverage restrictions are passing
+ */
 public class Verifier {
   private final List<Rule> myRules;
 
@@ -39,6 +42,7 @@ public class Verifier {
 
   /**
    * Check all rules and save a report on failed rules.
+   *
    * @param outputFile file to save violations
    */
   public void processRules(File outputFile) throws IOException {

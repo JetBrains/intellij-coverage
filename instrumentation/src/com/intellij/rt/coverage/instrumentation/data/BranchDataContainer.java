@@ -28,6 +28,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Storage for Label to jump/switch mapping.
+ * This class is used to set branch ids during instrumentation.
+ */
 public class BranchDataContainer {
   private final Instrumenter myContext;
 

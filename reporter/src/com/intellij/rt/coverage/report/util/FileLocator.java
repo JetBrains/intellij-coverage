@@ -20,6 +20,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Searches for file in a list of directories.
+ */
 public abstract class FileLocator {
   protected final List<File> myRoots;
 
@@ -27,6 +30,12 @@ public abstract class FileLocator {
     myRoots = roots;
   }
 
+  /**
+   * Suggest possible files related to specified class.
+   *
+   * @param fqName class name
+   * @return file candidates
+   */
   public abstract List<File> locate(String fqName);
 
   protected List<File> locateFile(String packageName, String fileName) {

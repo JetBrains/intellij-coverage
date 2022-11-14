@@ -27,6 +27,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+/**
+ * Creates XML or HTML coverage reports.
+ */
 public class Reporter {
   private final ReportLoadStrategy myLoad;
 

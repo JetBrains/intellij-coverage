@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2021 JetBrains s.r.o.
+ * Copyright 2000-2022 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.util;
+package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntProcedure;
@@ -26,6 +27,9 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.IOException;
 
+/**
+ * Basic section that can store additional information per each class.
+ */
 public abstract class ClassListSection extends ReportSection {
   protected abstract void loadClass(DataInputStream in, ClassData classData, int version) throws IOException;
 

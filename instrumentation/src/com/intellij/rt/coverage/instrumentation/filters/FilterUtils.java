@@ -25,7 +25,6 @@ import com.intellij.rt.coverage.instrumentation.filters.lines.LinesFilter;
 import com.intellij.rt.coverage.instrumentation.filters.methods.DeserializeLambdaFilter;
 import com.intellij.rt.coverage.instrumentation.filters.methods.EnumMethodsFilter;
 import com.intellij.rt.coverage.instrumentation.filters.methods.MethodFilter;
-import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
 
 import java.util.List;
 

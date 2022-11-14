@@ -19,7 +19,7 @@ package com.intellij.rt.coverage.instrumentation.filters.lines;
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.filters.branches.KotlinDefaultArgsBranchFilter;
-import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
@@ -33,6 +33,11 @@ import org.jetbrains.coverage.org.objectweb.asm.*;
 import java.io.InputStream;
 import java.util.*;
 
+/**
+ * When enabled, this filter tries to recover correct method signature for inlined lines.
+ * This is required when inline function definition class has not been loaded during execution.
+ * It is much more stable to load classes with unloaded classes analysis.
+ */
 public class KotlinInlineFilter extends LinesFilter {
   private static final String INLINE_FUNCTION_PREFIX = "$i$f$";
   private static final String INLINE_ARGUMENT_PREFIX = "$i$a-$";

@@ -18,13 +18,16 @@ package com.intellij.rt.coverage.instrumentation.filters.lines;
 
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.filters.branches.KotlinDefaultArgsBranchFilter;
-import com.intellij.rt.coverage.instrumentation.kotlin.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.util.HashSet;
 
+/**
+ * Filter methods marked with deprecated annotation.
+ */
 public class DeprecatedMethodFilter extends LinesFilter {
   private static final String DEPRECATED_METHODS = "DEPRECATED_METHODS_SET";
   private String myName;

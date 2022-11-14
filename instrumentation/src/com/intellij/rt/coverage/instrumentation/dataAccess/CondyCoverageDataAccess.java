@@ -22,6 +22,10 @@ import org.jetbrains.coverage.org.objectweb.asm.Handle;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+/**
+ * Store coverage data in a constant dynamic (ConDy).
+ * Supported for class files version 11+.
+ */
 public class CondyCoverageDataAccess extends CoverageDataAccess {
   private final ConstantDynamic myCondy;
   private final Init myInit;
