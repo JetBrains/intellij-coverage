@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import org.gradle.internal.jvm.Jvm
 import jetbrains.sign.GpgSignSignatoryProvider
 
 buildscript {
@@ -60,17 +59,6 @@ allprojects {
   apply plugin: 'java'
   sourceCompatibility = project.release ? 1.5 : 1.6
   targetCompatibility = project.release ? 1.5 : 1.6
-
-  configurations {
-    testArtifacts.extendsFrom testRuntime
-  }
-
-  dependencies {
-    def current = Jvm.current()
-    if (current != null && current.toolsJar != null) {
-      runtimeOnly files(current.toolsJar)
-    }
-  }
 
   sourceSets {
     main.java.srcDirs 'src'
