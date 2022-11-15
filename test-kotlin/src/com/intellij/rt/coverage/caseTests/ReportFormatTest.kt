@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.caseTests
 
+import com.intellij.rt.coverage.createTmpFile
 import com.intellij.rt.coverage.logFile
 import com.intellij.rt.coverage.util.CoverageIOUtil
 import com.intellij.rt.coverage.util.ProjectDataLoader
@@ -33,15 +34,15 @@ class ReportFormatTest {
 
     @Before
     fun setUp() {
-        file = createTempFile("test")
+        file = createTmpFile(".ic")
         out = DataOutputStream(FileOutputStream(file))
     }
 
     @After
     fun tearDown() {
         out.close()
+        logFile(file)?.delete()
         file.delete()
-        logFile(File(""))?.delete()
     }
 
     private fun writeSimpleProject() {
@@ -86,7 +87,7 @@ class ReportFormatTest {
         Assert.assertNotNull(readLog())
     }
 
-    private fun readLog(): String? = logFile(File(""))?.readText()
+    private fun readLog(): String? = logFile(file)?.readText()
 
     @Test
     fun testUnknownSection() {

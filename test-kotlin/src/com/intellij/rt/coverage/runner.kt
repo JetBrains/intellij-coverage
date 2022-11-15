@@ -23,11 +23,20 @@ import com.intellij.rt.coverage.data.instructions.LineInstructions
 import com.intellij.rt.coverage.util.TestTrackingIOUtil
 import org.junit.Assert
 import java.io.File
+import java.nio.file.Files
 import java.nio.file.Paths
 
 internal enum class Coverage {
     SAMPLING, NEW_SAMPLING, TRACING, NEW_TRACING, CONDY_SAMPLING, CONDY_TRACING;
     fun isSampling() = this == SAMPLING || this == NEW_SAMPLING || this == CONDY_SAMPLING
+}
+
+/**
+ * Creates temporary file in a separate directory
+ */
+fun createTmpFile(suffix: String): File {
+    val directory = Files.createTempDirectory("coverage")
+    return Files.createTempFile(directory, "test", suffix).toFile()
 }
 
 internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false, testTracking: Boolean = false,

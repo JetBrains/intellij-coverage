@@ -4,3 +4,4 @@ out
 build
 .gradle
 .idea/
+gradle.properties

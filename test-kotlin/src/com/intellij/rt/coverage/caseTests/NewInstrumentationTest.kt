@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.caseTests
 
 import com.intellij.rt.coverage.Coverage
+import com.intellij.rt.coverage.createTmpFile
 import com.intellij.rt.coverage.runWithCoverage
 import com.intellij.rt.coverage.util.diff.CoverageDiff
 import org.junit.Assert
@@ -41,7 +42,7 @@ internal class NewInstrumentationTest {
     }
 
     private fun assertEqualCoverage(before: Coverage, after: Coverage, testName: String, patterns: String) {
-        val (fileA, fileB) = List(2) { createTempFile("test") }.onEach { it.deleteOnExit() }
+        val (fileA, fileB) = List(2) { createTmpFile(".ic") }.onEach { it.deleteOnExit() }
         val projectA = runWithCoverage(fileA, testName, before, patterns = patterns)
         val projectB = runWithCoverage(fileB, testName, after, patterns = patterns)
         val diff = CoverageDiff.coverageDiff(projectA, projectB)

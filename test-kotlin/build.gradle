@@ -50,6 +50,9 @@ test {
         exclude("com/intellij/rt/coverage/Condy**")
         exclude("com/intellij/rt/coverage/caseTests/Condy**")
     }
+    if (rootProject.hasProperty("parallel.tests")) {
+        maxParallelForks = Math.min(2, Runtime.getRuntime().availableProcessors())
+    }
 }
 
 task runBenchmark(group: 'benchmarks', type: JavaExec) {

@@ -47,7 +47,7 @@ ext.coverage_jar_name = 'intellij-coverage-agent'
 ext.reporter_jar_name = 'intellij-coverage-reporter'
 
 // use this option to test with JDK11
-ext.release = "false" == project["test.configuration"]
+ext.release = rootProject.hasProperty("test.configuration") ? "false" == project["test.configuration"] : true
 
 allprojects {
   version calcVersion()

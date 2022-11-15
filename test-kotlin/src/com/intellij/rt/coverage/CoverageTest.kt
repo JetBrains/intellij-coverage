@@ -53,8 +53,7 @@ internal abstract class CoverageTest {
 
     @Before
     fun setUp() {
-        myDataFile = createTempFile("test")
-        logFile(myDataFile)?.delete()
+        myDataFile = createTmpFile(".ic")
     }
 
     @After
