@@ -79,7 +79,7 @@ public class RawHitsReport {
       while (!"".equals(className = CoverageIOUtil.readUTFFast(is))) {
         final ClassData classData = data.getClassData(className);
         if (classData == null) {
-          ErrorReporter.logInfo("Tried to apply coverage for class " + className + " but there is no such class in ProjectData");
+          ErrorReporter.reportError("Tried to apply coverage for class " + className + " but there is no such class in ProjectData");
           continue;
         }
         final int length = CoverageIOUtil.readINT(is);

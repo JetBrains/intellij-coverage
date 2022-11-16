@@ -86,7 +86,9 @@ public class XMLTest {
         "-classpath", System.getProperty("java.class.path"),
         "com.intellij.rt.coverage.report.Main",
         argsFile.getAbsolutePath()};
+    TestUtils.clearLogFile(new File("."));
     ProcessUtil.execJavaProcess(commandLine);
+    TestUtils.checkLogFile(new File("."));
     XMLTest.verifyProjectXML(xmlFile, "xml/simple.xml");
   }
 
@@ -106,7 +108,9 @@ public class XMLTest {
         "-classpath", System.getProperty("java.class.path"),
         "com.intellij.rt.coverage.report.Main",
         argsFile.getAbsolutePath()};
+    TestUtils.clearLogFile(new File("."));
     ProcessUtil.execJavaProcess(commandLine);
+    TestUtils.checkLogFile(new File("."));
     XMLTest.verifyProjectXML(xmlFile, "xml/simple.xml");
   }
 
@@ -132,14 +136,18 @@ public class XMLTest {
     classData2.setSource("A.java");
 
     final File file = createXMLFile();
+    TestUtils.clearLogFile(new File("."));
     new XMLCoverageReport().write(new FileOutputStream(file), project);
+    TestUtils.checkLogFile(new File("."));
     verifyProjectXML(file, "xml/xmlTest.xml");
   }
 
   private File runTestAndConvertToXML(String patterns, String className) throws Throwable {
     final BinaryReport report = TestUtils.runTest(patterns, className);
     final File xmlFile = createXMLFile();
+    TestUtils.clearLogFile(new File("."));
     TestUtils.createReporter(report, patterns).createXMLReport(xmlFile);
+    TestUtils.checkLogFile(new File("."));
     return xmlFile;
   }
 

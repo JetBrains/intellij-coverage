@@ -48,3 +48,8 @@ task javadocJar(type: Jar) {
   archiveClassifier = 'javadoc'
   from javadoc
 }
+
+test {
+  sourceCompatibility = 1.7
+  targetCompatibility = 1.7
+}

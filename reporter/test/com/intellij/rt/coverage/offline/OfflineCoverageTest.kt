@@ -22,8 +22,9 @@ import com.intellij.rt.coverage.report.XMLTest
 import com.intellij.rt.coverage.report.data.BinaryReport
 import com.intellij.rt.coverage.report.data.Filters
 import com.intellij.rt.coverage.util.ProcessUtil
+import com.intellij.rt.coverage.util.RawHitsReport
 import com.intellij.rt.coverage.util.ResourceUtil
-import org.junit.BeforeClass
+import org.junit.Assert
 import org.junit.Test
 import java.io.File
 import java.util.regex.Pattern
@@ -42,37 +43,38 @@ class OfflineCoverageTest {
     fun testInline() = test("inline")
 
     private fun test(testName: String) {
+        instrumentTestClasses()
         val report = runCoverage("testData.$testName.TestKt")
         val xmlFile = XMLTest.createXMLFile()
+        TestUtils.clearLogFile(File("."))
         TestUtils.createRawReporter(report, "testData\\.$testName\\..*").createXMLReport(xmlFile)
+        TestUtils.checkLogFile(File("."))
         XMLTest.verifyProjectXML(xmlFile, "xml/$testName.xml")
     }
 
     private fun runCoverage(className: String): BinaryReport {
         val coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent")
-        val classpath = System.getProperty("java.class.path").split(File.pathSeparator)
-                .filterNot { path -> path.replace(File.separator, "/").contains("/reporter/build/") }
+        val classpath = roots.map { it.absolutePath } + System.getProperty("java.class.path").split(File.pathSeparator)
+                .filterNot { path -> path.replace("\\\\", "/").replace("\\", "/").contains("/reporter/build/") }
                 .plus(coverageAgentPath)
-                .plus(roots!!.map { it.absolutePath })
-        val icrFile = File.createTempFile("report_tmp", ".icr")
+        val icrFile = TestUtils.createTmpFile()
         val commandLine = arrayOf(
                 "-classpath", classpath.joinToString(File.pathSeparator),
                 "-Dcoverage.offline.report.path=" + icrFile.absolutePath,
                 className)
+        TestUtils.clearLogFile(File("."))
         ProcessUtil.execJavaProcess(commandLine)
+        TestUtils.checkLogFile(File("."))
+        TestUtils.checkLogFile(icrFile.parentFile)
+        Assert.assertTrue(RawHitsReport.isRawHitsFile(icrFile))
         return BinaryReport(icrFile, null)
     }
 
-    companion object {
-        private var roots: List<File>? = null
-
-        @JvmStatic
-        @BeforeClass
-        fun instrumentTestClasses() {
-            val (first, second) = createInstrumentatorTask()
-            val filters = Filters(listOf(Pattern.compile("testData.*")), emptyList(), emptyList())
-            runInstrumentator(first, second, filters)
-            roots = second
-        }
+    private lateinit var roots: List<File>
+    private fun instrumentTestClasses() {
+        val (first, second) = createInstrumentatorTask()
+        val filters = Filters(listOf(Pattern.compile("testData.*")), emptyList(), emptyList())
+        runInstrumentator(first, second, filters)
+        roots = second
     }
 }

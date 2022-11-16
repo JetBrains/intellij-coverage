@@ -49,8 +49,9 @@ class InstrumentatorTest {
                 "-classpath", System.getProperty("java.class.path"),
                 "com.intellij.rt.coverage.instrument.Main",
                 argsFile.absolutePath)
+        TestUtils.clearLogFile(File("."))
         ProcessUtil.execJavaProcess(commandLine)
-
+        TestUtils.checkLogFile(File("."))
         checkOfflineInstrumentation(roots, outputRoots, filters)
     }
 
@@ -74,13 +75,15 @@ class InstrumentatorTest {
     companion object {
         fun runInstrumentator(roots: List<File>, outputRoots: List<File>, filters: Filters) {
             val inst = Instrumentator(roots, outputRoots, filters)
+            TestUtils.clearLogFile(File("."))
             inst.instrument()
+            TestUtils.checkLogFile(File("."))
             checkOfflineInstrumentation(roots, outputRoots, filters)
         }
 
         fun createInstrumentatorTask(): Pair<List<File>, List<File>> {
             val roots = listOf(TestUtils.JAVA_OUTPUT, TestUtils.KOTLIN_OUTPUT).map { File(it) }
-            val outputRoots = roots.map { createTempDirectory(it.name).toFile() }
+            val outputRoots = roots.map { createTempDirectory(it.path.replace(File.separator, "_")).toFile() }
             return roots to outputRoots
         }
     }

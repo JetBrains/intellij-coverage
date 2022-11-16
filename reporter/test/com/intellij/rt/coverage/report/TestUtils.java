@@ -21,10 +21,14 @@ import com.intellij.rt.coverage.aggregate.Aggregator;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.report.data.Module;
+import com.intellij.rt.coverage.report.util.FileUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -34,11 +38,34 @@ public class TestUtils {
   public static final String JAVA_OUTPUT = join("build", "classes", "java", "test");
   public static final String KOTLIN_OUTPUT = join("build", "classes", "kotlin", "test");
 
+  public static File createTmpFile() throws IOException {
+    final Path directory = Files.createTempDirectory("coverage");
+    return Files.createTempFile(directory, "test", ".ic").toFile();
+  }
+
   @NotNull
   public static BinaryReport runTest(String patterns, String className) throws IOException, InterruptedException {
-    final File icFile = File.createTempFile("report_tmp", ".ic");
+    final File icFile = createTmpFile();
     CoverageStatusTest.runCoverage(System.getProperty("java.class.path"), icFile, patterns, className, false, new String[]{"-Dcoverage.ignore.private.constructor.util.class=true"}, false, false);
+    checkLogFile(icFile.getParentFile());
     return new BinaryReport(icFile, null);
+  }
+
+  public static String clearLogFile(File directory) throws IOException {
+    final File logFile = new File(directory, "coverage-error.log");
+    if (logFile.exists()) {
+      final String content = FileUtils.readAll(logFile);
+      logFile.delete();
+      return content;
+    }
+    return null;
+  }
+
+  public static void checkLogFile(File directory) throws IOException {
+    final String content = clearLogFile(directory);
+    if (content != null && !content.isEmpty()) {
+      throw new RuntimeException("Log file is not empty!\n" + content);
+    }
   }
 
   @NotNull
@@ -105,10 +132,6 @@ public class TestUtils {
   }
 
   public static String join(String first, String... other) {
-    final StringBuilder builder = new StringBuilder(first);
-    for (String path : other) {
-      builder.append(File.separator).append(path);
-    }
-    return builder.toString();
+    return Paths.get(first, other).toFile().getPath();
   }
 }

@@ -92,7 +92,9 @@ public class HTMLTest {
   private File runTestAndConvertToHTML(String patterns, String className) throws Throwable {
     final BinaryReport report = TestUtils.runTest(patterns, className);
     final File htmlDir = createHtmlDir(report.getDataFile());
+    TestUtils.clearLogFile(new File("."));
     TestUtils.createRawReporter(report, patterns).createHTMLReport(htmlDir, DEFAULT_TITLE);
+    TestUtils.checkLogFile(new File("."));
     return htmlDir;
   }
 

@@ -38,6 +38,7 @@ public class ProcessUtil {
     process.waitFor();
 
     int exitCode = process.exitValue();
+    printStderr(process);
     if (exitCode != 0) {
       printStdout(process);
       process.destroy();
@@ -49,15 +50,17 @@ public class ProcessUtil {
 
   private static void printStdout(Process process) throws IOException {
     BufferedReader output = new BufferedReader(new InputStreamReader(process.getInputStream()));
-    BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
     String str;
-
     while ((str = output.readLine()) != null) {
       System.out.println(str);
     }
+  }
 
+  private static void printStderr(Process process) throws IOException {
+    BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+    String str;
     while ((str = error.readLine()) != null) {
-      System.out.println(str);
+      System.err.println(str);
     }
   }
 }

@@ -103,7 +103,9 @@ public class VerifierTest {
           rule.reportFile, null);
       requests.add(request);
     }
+    TestUtils.clearLogFile(new File("."));
     AggregatorTest.runAggregator(requests, "testData.branches.TestKt", "testData.inline.TestKt", "testData.simple.Main", "TestTopLevelKt");
+    TestUtils.checkLogFile(new File("."));
 
     final Verifier verifier = new Verifier(rules);
     check(expectedFileName, verifier);
@@ -111,7 +113,9 @@ public class VerifierTest {
 
   private static void check(String expectedFileName, Verifier verifier) throws IOException {
     final File outputFile = File.createTempFile("result", "json");
+    TestUtils.clearLogFile(new File("."));
     verifier.processRules(outputFile);
+    TestUtils.checkLogFile(new File("."));
     final File expected = TestUtils.getResourceFile(expectedFileName);
 
     final String expectedString = FileUtils.readAll(expected);

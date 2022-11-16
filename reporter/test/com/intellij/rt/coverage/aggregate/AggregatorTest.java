@@ -75,7 +75,9 @@ public class AggregatorTest {
       reports.add(report);
     }
 
+    TestUtils.clearLogFile(new File("."));
     new Aggregator(reports, TestUtils.getModules(), requests).processRequests();
+    TestUtils.checkLogFile(new File("."));
 
     final List<ProjectData> projectDataList = new ArrayList<ProjectData>();
     final Set<String> names = new HashSet<String>();
