@@ -42,21 +42,25 @@ class OfflineCoverageTest {
     @Test
     fun testInline() = test("inline")
 
-    private fun test(testName: String) {
+    @Test
+    fun testTopLevel() = test("topLevel", "TestTopLevelKt")
+
+    private fun test(testName: String, className: String = "testData.$testName.TestKt") {
         instrumentTestClasses()
-        val report = runCoverage("testData.$testName.TestKt")
+        val report = runCoverage(className)
         val xmlFile = XMLTest.createXMLFile()
         TestUtils.clearLogFile(File("."))
-        TestUtils.createRawReporter(report, "testData\\.$testName\\..*").createXMLReport(xmlFile)
+        TestUtils.createRawReporter(report, "testData\\.$testName\\..* $className").createXMLReport(xmlFile)
         TestUtils.checkLogFile(File("."))
         XMLTest.verifyProjectXML(xmlFile, "xml/$testName.xml")
     }
 
     private fun runCoverage(className: String): BinaryReport {
         val coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent")
-        val classpath = roots.map { it.absolutePath } + System.getProperty("java.class.path").split(File.pathSeparator)
-                .filterNot { path -> path.replace("\\\\", "/").replace("\\", "/").contains("/reporter/build/") }
+        val classpath = System.getProperty("java.class.path").split(File.pathSeparator)
+                .filter { path -> path.contains("kotlin-stdlib") }
                 .plus(coverageAgentPath)
+                .plus(roots.map { it.absolutePath })
         val icrFile = TestUtils.createTmpFile()
         val commandLine = arrayOf(
                 "-classpath", classpath.joinToString(File.pathSeparator),
@@ -73,7 +77,7 @@ class OfflineCoverageTest {
     private lateinit var roots: List<File>
     private fun instrumentTestClasses() {
         val (first, second) = createInstrumentatorTask()
-        val filters = Filters(listOf(Pattern.compile("testData.*")), emptyList(), emptyList())
+        val filters = Filters(listOf(Pattern.compile("testData.*"), Pattern.compile("TestTopLevelKt")), emptyList(), emptyList())
         runInstrumentator(first, second, filters)
         roots = second
     }

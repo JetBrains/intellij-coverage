@@ -73,7 +73,9 @@ public class Instrumentator {
 
         if (file.getName().endsWith(ClassNameUtil.CLASS_FILE_SUFFIX)) {
           final String classSimpleName = ClassNameUtil.removeClassSuffix(file.getName());
-          final String className = ClassNameUtil.convertToInternalName(packageName) + "/" + classSimpleName;
+          final String className = packageName.isEmpty()
+              ? classSimpleName
+              : ClassNameUtil.convertToInternalName(packageName) + "/" + classSimpleName;
           // This loader is not user actually, just need some not null loader
           final ClassLoader loader = ClassLoader.getSystemClassLoader();
           final byte[] transformed = myTransformer.transform(loader, className, null, null, bytes);

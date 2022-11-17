@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<report name="Intellij Coverage Report">
+<package name="TestTopLevelKt">
+<class name="TestTopLevelKt" sourcefilename="testTopLevel.kt">
+<method name="main" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<sourcefile name="testTopLevel.kt">
+<line nr="18" mi="0" ci="2" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+<counter type="CLASS" missed="0" covered="1"/>
+</package>
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+<counter type="CLASS" missed="0" covered="1"/>
+</report>
+
