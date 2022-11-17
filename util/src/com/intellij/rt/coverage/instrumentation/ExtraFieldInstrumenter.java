@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2020 JetBrains s.r.o.
+ * Copyright 2000-2022 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,11 +78,12 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
 
   /**
    * Create method visitor that ensures field initialization.
+   *
    * @param mv instrumenting method visitor
    */
   public MethodVisitor createMethodVisitor(MethodVisitor mv,
                                            final String name) {
-    if (InstrumentationUtils.CLASS_INIT.equals(name)) {
+    if ("<clinit>".equals(name)) {
       if (myInterface && (myJava8AndAbove || myShouldCoverClinit)) {
         mv = new MethodVisitor(Opcodes.API_VERSION, mv) {
           @Override
@@ -150,7 +151,7 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
   }
 
   private void generateExplicitClinitForInterfaces(ClassVisitor cv) {
-    MethodVisitor mv = cv.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC, InstrumentationUtils.CLASS_INIT, InstrumentationUtils.CONSTRUCTOR_DESCRIPTOR, null, null);
+    MethodVisitor mv = cv.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC, "<clinit>", "()V", null, null);
     initField(mv);
     mv.visitInsn(Opcodes.RETURN);
     mv.visitMaxs(ADDED_CODE_STACK_SIZE, 0);

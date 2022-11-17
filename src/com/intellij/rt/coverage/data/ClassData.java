@@ -259,14 +259,8 @@ public class ClassData implements CoverageData {
     return myHitsMask;
   }
 
-  /**
-   * This method is used in case of offline instrumentation.
-   */
-  public int[] getOrCreateHitsMask(int size) {
-    if (myHitsMask == null || myHitsMask.length < size) {
-      createHitsMask(size);
-    }
-    return myHitsMask;
+  public void setHitsMask(int[] hits) {
+    myHitsMask = hits;
   }
 
   public boolean[] getTraceMask() {

@@ -55,15 +55,7 @@ private setMavenMetadata(publication, publicationName, publicationDescription) {
   }
 }
 
-project(":instrumentation").afterEvaluate { instr ->
-  project(":reporter").afterEvaluate { reporter ->
-    project(":test-discovery").afterEvaluate { testDiscovery ->
-      setUpPublishing(instr, testDiscovery, reporter)
-    }
-  }
-}
-
-def setUpPublishing(instrumentation, testDiscovery, reporter) {
+project(":instrumentation").afterEvaluate { instrumentation ->
   publishing {
     publications {
       Coverage(MavenPublication) {
@@ -75,15 +67,13 @@ def setUpPublishing(instrumentation, testDiscovery, reporter) {
         artifact instrumentation.tasks.getByName("javadocJar")
         setMavenMetadata(owner, "Intellij Coverage Agent", "Code coverage engine for JVM")
       }
-      TestDiscovery(MavenPublication) {
-        group agentsGroupId
-        artifactId test_discovery_jar_name
-        version version
-        artifact testDiscovery.jar
-        artifact testDiscovery.tasks.getByName("soursesJar")
-        artifact testDiscovery.tasks.getByName("javadocJar")
-        setMavenMetadata(owner, "Intellij Test Discovery Agent", "Lightweight coverage during a testing session")
-      }
+    }
+  }
+}
+
+project(":reporter").afterEvaluate { reporter ->
+  publishing {
+    publications {
       Reporter(MavenPublication) {
         group agentsGroupId
         artifactId reporter_jar_name
@@ -93,6 +83,38 @@ def setUpPublishing(instrumentation, testDiscovery, reporter) {
         artifact reporter.tasks.getByName("javadocJar")
         addDependencies(it, reporter.getPublishDependencies())
         setMavenMetadata(owner, "Intellij Coverage Report", "Library for presenting coverage results")
+      }
+    }
+  }
+}
+
+project(":test-discovery").afterEvaluate { testDiscovery ->
+  publishing {
+    publications {
+      TestDiscovery(MavenPublication) {
+        group agentsGroupId
+        artifactId test_discovery_jar_name
+        version version
+        artifact testDiscovery.jar
+        artifact testDiscovery.tasks.getByName("soursesJar")
+        artifact testDiscovery.tasks.getByName("javadocJar")
+        setMavenMetadata(owner, "Intellij Test Discovery Agent", "Lightweight coverage during a testing session")
+      }
+    }
+  }
+}
+
+project(":offline-runtime").afterEvaluate { offline ->
+  publishing {
+    publications {
+      Offline(MavenPublication) {
+        group agentsGroupId
+        artifactId offline_jar_name
+        version version
+        artifact offline.jar
+        artifact offline.tasks.getByName("soursesJar")
+        artifact offline.tasks.getByName("javadocJar")
+        setMavenMetadata(owner, "Intellij Coverage Offline Runtime", "Lightweight coverage runtime in offline instrumentation mode")
       }
     }
   }

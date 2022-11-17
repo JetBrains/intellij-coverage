@@ -20,9 +20,9 @@ import com.intellij.rt.coverage.*
 import com.intellij.rt.coverage.data.ProjectData
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil
 import com.intellij.rt.coverage.instrumentation.offline.OfflineCoverageTransformer
+import com.intellij.rt.coverage.instrumentation.offline.RawReportLoader
 import com.intellij.rt.coverage.util.ProcessUtil
 import com.intellij.rt.coverage.util.ResourceUtil
-import com.intellij.rt.coverage.util.RawHitsReport
 import com.intellij.rt.coverage.util.classFinder.ClassFinder
 import org.junit.Test
 import java.io.File
@@ -111,7 +111,7 @@ internal abstract class OfflineInstrumentationTest(override val coverage: Covera
         cf.addClassLoader(URLClassLoader(arrayOf(outputRoot.toURI().toURL())))
         UnloadedUtil.appendUnloaded(projectData, cf, false, coverage.isBranchCoverage(), false)
 
-        RawHitsReport.load(myDataFile, projectData)
+        RawReportLoader.load(myDataFile, projectData)
         projectData.applyLineMappings()
 
         assertEqualsLines(projectData, config.coverageData, config.classes)

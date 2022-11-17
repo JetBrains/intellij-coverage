@@ -23,8 +23,6 @@ import com.intellij.rt.coverage.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -39,7 +37,6 @@ public class ProjectData implements CoverageData, Serializable {
 
   // ProjectData methods
   private static final MethodCaller GET_HITS_MASK_METHOD = new MethodCaller("getHitsMask", new Class[]{String.class});
-  private static final MethodCaller GET_OR_CREATE_HITS_MASK_INTERNAL_METHOD = new MethodCaller("getOrCreateHitsMaskInternal", new Class[]{String.class, int.class});
   private static final MethodCaller GET_TRACE_MASK_METHOD = new MethodCaller("getTraceMask", new Class[]{String.class});
   private static final MethodCaller GET_CLASS_DATA_METHOD = new MethodCaller("getClassData", new Class[]{String.class});
   private static final MethodCaller REGISTER_CLASS_FOR_TRACE_METHOD = new MethodCaller("registerClassForTrace", new Class[]{Object.class});
@@ -47,7 +44,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   private boolean myStopped;
 
-  public static volatile ProjectData ourProjectData;
+  public static ProjectData ourProjectData;
   private File myDataFile;
 
   private boolean myTestTracking;
@@ -420,50 +417,6 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   /**
-   * This method is used in case of offline instrumentation.
-   * As ProjectData is uninitialized, this method also creates ProjectData when needed and sets up reporting hook.
-   */
-  // This method must be called from system class loader only
-  @SuppressWarnings("unused")
-  public static int[] getOrCreateHitsMaskInternal(String className, int length) {
-    if (ourProjectData == null) {
-      synchronized (ProjectData.class) {
-        if (ourProjectData == null) {
-          ourProjectData = new ProjectData();
-          final String filePath = System.getProperty("coverage.offline.report.path");
-          if (filePath != null) {
-            final File file = new File(filePath);
-            RawHitsReport.dumpOnExit(file, ourProjectData);
-            ErrorReporter.setBasePath(file.getParent());
-          } else {
-            ErrorReporter.reportError("Output file path is not set. Please set 'coverage.offline.report.path' property");
-          }
-        }
-      }
-    }
-    return ourProjectData.getOrCreateClassData(className).getOrCreateHitsMask(length);
-  }
-
-  /**
-   * This method is used in case of offline instrumentation.
-   * As ProjectData is uninitialized, this method also creates ClassData when needed.
-   */
-  public static int[] getOrCreateHitsMask(String className, int length) {
-    if (ourProjectData != null) {
-      return ourProjectData.getOrCreateClassData(className).getOrCreateHitsMask(length);
-    }
-    try {
-      // Here we use system class loader here as in offline instrumentation mode
-      // coverage agent is not included to the bootstrap class loader
-      // but added to the class path as usual jar
-      return (int[]) GET_OR_CREATE_HITS_MASK_INTERNAL_METHOD.invokeStatic(new Object[]{className, length}, ClassLoader.getSystemClassLoader());
-    } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data access: " + className, e);
-      return null;
-    }
-  }
-
-  /**
    * Get test tracking hits array at runtime.
    */
   @SuppressWarnings("unused")
@@ -506,42 +459,6 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   // ----------------------------------------------------------------------------------------------- //
-
-  /**
-   * This is a wrapper for method calls via reflection.
-   */
-  private static class MethodCaller {
-    private Method myMethod;
-    private final String myMethodName;
-    private final Class<?>[] myParamTypes;
-
-    private MethodCaller(final String methodName, final Class<?>[] paramTypes) {
-      myMethodName = methodName;
-      myParamTypes = paramTypes;
-    }
-
-    public Object invoke(Object thisObj, final Object[] paramValues) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-      if (myMethod == null) {
-        myMethod = findMethod(thisObj.getClass(), myMethodName, myParamTypes);
-      }
-      return myMethod.invoke(thisObj, paramValues);
-    }
-
-    public Object invokeStatic(final Object[] paramValues, ClassLoader loader) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
-      if (myMethod == null) {
-        final Class<?> clazz = Class.forName(ProjectData.class.getName(), false, loader);
-        myMethod = findMethod(clazz, myMethodName, myParamTypes);
-      }
-      return myMethod.invoke(null, paramValues);
-    }
-
-    private static Method findMethod(final Class<?> clazz, String name, Class<?>[] paramTypes) throws NoSuchMethodException {
-      Method m = clazz.getDeclaredMethod(name, paramTypes);
-      // speedup method invocation by calling setAccessible(true)
-      m.setAccessible(true);
-      return m;
-    }
-  }
 
   /**
    * This map provides faster read operations for the case when key is mostly the same

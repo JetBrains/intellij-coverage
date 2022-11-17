@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 JetBrains s.r.o.
+ * Copyright 2000-2022 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,11 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
-import org.jetbrains.coverage.gnu.trove.THashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 import java.util.Map;
@@ -114,9 +111,9 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     if (computeFrames) {
       final int version = getClassFileVersion(cr);
       int flags = (version & 0xFFFF) >= Opcodes.V1_6 && version != Opcodes.V1_1 ? ClassWriter.COMPUTE_FRAMES : ClassWriter.COMPUTE_MAXS;
-      cw = new MyClassWriter(flags, loader);
+      cw = new ClassWriterImpl(flags, loader, classReaders);
     } else {
-      cw = new MyClassWriter(ClassWriter.COMPUTE_MAXS, loader);
+      cw = new ClassWriterImpl(ClassWriter.COMPUTE_MAXS, loader, classReaders);
     }
 
     final ClassVisitor cv = createClassVisitor(className, loader, cr, cw);
@@ -152,118 +149,5 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
    */
   private static int getClassFileVersion(ClassReader reader) {
     return reader.readInt(4);
-  }
-
-  private class MyClassWriter extends ClassWriter {
-    private static final String JAVA_LANG_OBJECT = "java/lang/Object";
-    private final ClassLoader classLoader;
-
-    MyClassWriter(int flags, ClassLoader classLoader) {
-      super(flags);
-      this.classLoader = classLoader;
-    }
-
-    protected String getCommonSuperClass(String type1, String type2) {
-      try {
-        ClassReader info1 = getOrLoadClassReader(type1, classLoader);
-        ClassReader info2 = getOrLoadClassReader(type2, classLoader);
-        String
-            superType = checkImplementInterface(type1, type2, info1, info2);
-        if (superType != null) return superType;
-        superType = checkImplementInterface(type2, type1, info2, info1);
-        if (superType != null) return superType;
-
-        StringBuilder b1 = typeAncestors(type1, info1);
-        StringBuilder b2 = typeAncestors(type2, info2);
-        String result = JAVA_LANG_OBJECT;
-        int end1 = b1.length();
-        int end2 = b2.length();
-        while (true) {
-          int start1 = b1.lastIndexOf(";", end1 - 1);
-          int start2 = b2.lastIndexOf(";", end2 - 1);
-          if (start1 != -1 && start2 != -1 && end1 - start1 == end2 - start2) {
-            String p1 = b1.substring(start1 + 1, end1);
-            String p2 = b2.substring(start2 + 1, end2);
-            if (p1.equals(p2)) {
-              result = p1;
-              end1 = start1;
-              end2 = start2;
-            } else {
-              return result;
-            }
-          } else {
-            return result;
-          }
-        }
-      } catch (IOException e) {
-        throw new RuntimeException(e.toString());
-      }
-    }
-
-    private String checkImplementInterface(String type1, String type2, ClassReader info1, ClassReader info2) throws IOException {
-      if ((info1.getAccess() & Opcodes.ACC_INTERFACE) != 0) {
-        if (typeImplements(type2, info2, type1)) {
-          return type1;
-        }
-        return JAVA_LANG_OBJECT;
-      }
-      return null;
-    }
-
-    private StringBuilder typeAncestors(String type, ClassReader info) throws IOException {
-      StringBuilder b = new StringBuilder();
-      while (!JAVA_LANG_OBJECT.equals(type)) {
-        b.append(';').append(type);
-        type = info.getSuperName();
-        info = getOrLoadClassReader(type, classLoader);
-      }
-      return b;
-    }
-
-
-    private boolean typeImplements(String type, ClassReader classReader, String interfaceName) throws IOException {
-      while (!JAVA_LANG_OBJECT.equals(type)) {
-        String[] interfaces = classReader.getInterfaces();
-        for (String itf1 : interfaces) {
-          if (itf1.equals(interfaceName)) {
-            return true;
-          }
-        }
-        for (String itf : interfaces) {
-          if (typeImplements(itf, getOrLoadClassReader(itf, classLoader), interfaceName)) {
-            return true;
-          }
-        }
-        type = classReader.getSuperName();
-        classReader = getOrLoadClassReader(type, classLoader);
-      }
-      return false;
-    }
-  }
-
-  private synchronized ClassReader getOrLoadClassReader(String className, ClassLoader classLoader) throws IOException {
-    Map<String, ClassReader> loaderClassReaders = classReaders.get(classLoader);
-    if (loaderClassReaders == null) {
-      classReaders.put(classLoader, loaderClassReaders = new THashMap<String, ClassReader>());
-    }
-    ClassReader classReader = loaderClassReaders.get(className);
-    if (classReader == null) {
-      InputStream is = null;
-      try {
-        String resource = className + ".class";
-        is = classLoader == null
-            ? ClassLoader.getSystemResourceAsStream(resource)
-            : classLoader.getResourceAsStream(resource);
-        if (is == null) {
-          throw new IOException("Class " + className + " not found");
-        }
-        loaderClassReaders.put(className, classReader = new ClassReader(is));
-      } finally {
-        if (is != null) {
-          is.close();
-        }
-      }
-    }
-    return classReader;
   }
 }

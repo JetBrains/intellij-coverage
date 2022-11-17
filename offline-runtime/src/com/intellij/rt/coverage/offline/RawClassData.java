@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 JetBrains s.r.o.
+ * Copyright 2000-2022 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
-dependencies {
-  compile 'junit:junit:4.13.1'
+package com.intellij.rt.coverage.offline;
+
+/**
+ * This class data represents required information to store in offline instrumentation mode.
+ */
+public class RawClassData {
+  public final String name;
+  public final int[] hits;
+
+  public RawClassData(String name, int[] hits) {
+    this.name = name;
+    this.hits = hits;
+  }
 }

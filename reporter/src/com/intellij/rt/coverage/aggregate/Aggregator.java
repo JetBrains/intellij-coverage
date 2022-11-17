@@ -19,12 +19,12 @@ package com.intellij.rt.coverage.aggregate;
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
+import com.intellij.rt.coverage.instrumentation.offline.RawReportLoader;
 import com.intellij.rt.coverage.report.CoverageReport;
 import com.intellij.rt.coverage.report.ProjectDataLoader;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.report.data.Module;
-import com.intellij.rt.coverage.util.RawHitsReport;
 import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import com.intellij.rt.coverage.util.classFinder.ClassPathEntry;
@@ -75,7 +75,7 @@ public class Aggregator {
     for (BinaryReport report : myReports) {
       if (report.isRawHitsReport()) {
         try {
-          RawHitsReport.load(report.getDataFile(), projectDataCopy);
+          RawReportLoader.load(report.getDataFile(), projectDataCopy);
         } catch (IOException e) {
           throw new RuntimeException(e);
         }

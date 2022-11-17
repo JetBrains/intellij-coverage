@@ -35,7 +35,7 @@ jar {
 
   )
   from(sourceSets.main.output)
-  from(["util"].collect({ project(":$it").sourceSets.main.output }))
+  from(["util", "common"].collect({ project(":$it").sourceSets.main.output }))
   with repackLibs
 }
 
@@ -43,13 +43,13 @@ task soursesJar(type: Jar, dependsOn: classes) {
   baseName = test_discovery_jar_name
   archiveClassifier = 'sources'
   from(sourceSets.main.allSource)
-  from(["util"].collect({ project(":$it").sourceSets.main.allSource }))
+  from(["util", "common", "test-discovery"].collect({ project(":$it").sourceSets.main.allSource }))
 }
 
 task allJavadoc(type: Javadoc) {
   options.tags = [ "noinspection" ]
-  source = ["util", "test-discovery"].collect { project(":$it").sourceSets.main.allSource }
-  classpath = files(["util", "test-discovery"].collect { project(":$it").sourceSets.main.compileClasspath })
+  source = ["util", "common", "test-discovery"].collect { project(":$it").sourceSets.main.allSource }
+  classpath = files(["util", "common", "test-discovery"].collect { project(":$it").sourceSets.main.compileClasspath })
 }
 
 task javadocJar(type: Jar) {

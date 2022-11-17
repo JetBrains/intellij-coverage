@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.offline.RawProjectInit;
 
 import java.lang.invoke.MethodHandles;
 
@@ -27,6 +28,6 @@ public class CondyUtils {
   }
 
   public static int[] getOrCreateHitsMask(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className, int length) {
-    return ProjectData.getOrCreateHitsMask(className, length);
+    return RawProjectInit.getOrCreateHitsMask(className, length);
   }
 }

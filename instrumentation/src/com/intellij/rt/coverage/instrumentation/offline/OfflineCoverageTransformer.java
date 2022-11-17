@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
  * Offline instrumentation is required when there is no ability to install transformer on VM start.
  * Instead, offline transformation is run before application start with modification of class files on disk.
  *
- * @see ProjectData#getOrCreateHitsMask
+ * @see com.intellij.rt.coverage.offline.RawProjectInit
  */
 public class OfflineCoverageTransformer extends CoverageTransformer {
   public OfflineCoverageTransformer(ProjectData data, boolean shouldSaveSource, List<Pattern> excludePatterns, List<Pattern> includePatterns) {
@@ -43,7 +43,7 @@ public class OfflineCoverageTransformer extends CoverageTransformer {
   @Override
   protected CoverageDataAccess.Init createInit(String className, ClassReader cr, boolean branchCoverage) {
     final int length = getRequiredArrayLength(cr, branchCoverage);
-    return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, ProjectData.PROJECT_DATA_OWNER,
+    return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, "com/intellij/rt/coverage/offline/RawProjectInit",
         "getOrCreateHitsMask", "(Ljava/lang/String;I)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className, length});
   }
 

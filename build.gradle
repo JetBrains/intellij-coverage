@@ -44,6 +44,7 @@ ext.library_project_asm_all = files(asm)
 
 ext.test_discovery_jar_name = 'intellij-test-discovery-agent'
 ext.coverage_jar_name = 'intellij-coverage-agent'
+ext.offline_jar_name = 'intellij-coverage-offline'
 ext.reporter_jar_name = 'intellij-coverage-reporter'
 
 // use this option to test with JDK11
@@ -62,6 +63,7 @@ allprojects {
 
   sourceSets {
     main.java.srcDirs 'src'
+    test.java.srcDirs = []
   }
 }
 
@@ -70,7 +72,7 @@ dependencies {
 }
 
 javadoc {
-  options.tags = [ "noinspection" ]
+  options.tags = ["noinspection"]
 }
 
 

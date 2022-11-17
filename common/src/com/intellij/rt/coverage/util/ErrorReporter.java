@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2022 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,10 +38,10 @@ public class ErrorReporter {
       os = getErrorLogStream();
       StringBuffer buf = prepareMessage(message);
 
-      System.err.println(buf.toString());
-      os.println(buf.toString());
+      System.err.println(buf);
+      os.println(buf);
     } catch (IOException e) {
-      System.err.println("Failed to write to error log file: " + e.toString());
+      System.err.println("Failed to write to error log file: " + e);
     } finally {
       CoverageIOUtil.close(os);
     }
@@ -53,12 +53,12 @@ public class ErrorReporter {
       os = getErrorLogStream();
       StringBuffer buf = prepareMessage(message);
 
-      System.err.println(buf.toString() + ": " + t.toString());
-      os.println(buf.toString());
+      System.err.println(buf + ": " + t.toString());
+      os.println(buf);
 
       t.printStackTrace(os);
     } catch (IOException e) {
-      System.err.println("Failed to write to error log file: " + e.toString());
+      System.err.println("Failed to write to error log file: " + e);
       System.err.println("Initial stack trace: " + t.toString());
     } finally {
       CoverageIOUtil.close(os);

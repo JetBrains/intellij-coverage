@@ -22,7 +22,6 @@ import com.intellij.rt.coverage.report.XMLTest
 import com.intellij.rt.coverage.report.data.BinaryReport
 import com.intellij.rt.coverage.report.data.Filters
 import com.intellij.rt.coverage.util.ProcessUtil
-import com.intellij.rt.coverage.util.RawHitsReport
 import com.intellij.rt.coverage.util.ResourceUtil
 import org.junit.Assert
 import org.junit.Test
@@ -56,10 +55,10 @@ class OfflineCoverageTest {
     }
 
     private fun runCoverage(className: String): BinaryReport {
-        val coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent")
+        val offlineCoveragePath = ResourceUtil.getAgentPath("intellij-coverage-offline")
         val classpath = System.getProperty("java.class.path").split(File.pathSeparator)
                 .filter { path -> path.contains("kotlin-stdlib") }
-                .plus(coverageAgentPath)
+                .plus(offlineCoveragePath)
                 .plus(roots.map { it.absolutePath })
         val icrFile = TestUtils.createTmpFile()
         val commandLine = arrayOf(

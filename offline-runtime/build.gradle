@@ -1,0 +1,29 @@
+dependencies {
+  compile(project(":common"))
+}
+
+jar {
+  baseName = offline_jar_name
+  destinationDir = file("../dist")
+  from(sourceSets.main.output)
+  from(["common"].collect({ project(":$it").sourceSets.main.output }))
+}
+
+task soursesJar(type: Jar, dependsOn: classes) {
+  baseName = offline_jar_name
+  archiveClassifier = 'sources'
+  from(sourceSets.main.allSource)
+  from(["common", "offline-runtime"].collect({ project(":$it").sourceSets.main.allSource }))
+}
+
+task allJavadoc(type: Javadoc) {
+  options.tags = ["noinspection"]
+  source = ["common", "offline-runtime"].collect { project(":$it").sourceSets.main.allSource }
+  classpath = files(["common", "offline-runtime"].collect { project(":$it").sourceSets.main.compileClasspath })
+}
+
+task javadocJar(type: Jar) {
+  baseName = offline_jar_name
+  archiveClassifier = 'javadoc'
+  from allJavadoc
+}

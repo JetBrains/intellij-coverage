@@ -72,6 +72,7 @@ class InstrumentatorTest {
         }
         return File.createTempFile("args", ".txt").apply { writeText(args.toString()) }
     }
+
     companion object {
         fun runInstrumentator(roots: List<File>, outputRoots: List<File>, filters: Filters) {
             val inst = Instrumentator(roots, outputRoots, filters)
@@ -119,7 +120,7 @@ private fun File.isInstrumented(): Boolean {
         override fun visitMethod(access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array<out String>?): MethodVisitor {
             return object : MethodVisitor(Opcodes.API_VERSION) {
                 override fun visitMethodInsn(opcode: Int, owner: String?, name: String?, descriptor: String?, isInterface: Boolean) {
-                    if (owner == "com/intellij/rt/coverage/data/ProjectData" && name == "getOrCreateHitsMask" && descriptor == "(Ljava/lang/String;I)[I") {
+                    if (owner == "com/intellij/rt/coverage/offline/RawProjectInit" && name == "getOrCreateHitsMask" && descriptor == "(Ljava/lang/String;I)[I") {
                         hasInstrumentation = true
                     }
                 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2021 JetBrains s.r.o.
+ * Copyright 2000-2022 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,6 +62,7 @@ public class InstrumentationUtils {
 
   /**
    * Push value on stack.
+   *
    * @param o value to push must be primitive or String
    */
   public static void push(MethodVisitor mv, Object o) {

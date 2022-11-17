@@ -19,7 +19,9 @@ package com.intellij.rt.coverage;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.util.RawHitsReport;
+import com.intellij.rt.coverage.instrumentation.offline.RawReportLoader;
+import com.intellij.rt.coverage.offline.RawHitsReport;
+import com.intellij.rt.coverage.offline.RawProjectData;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,19 +31,21 @@ import java.nio.file.Files;
 public class RawHitsReportTest {
   @Test
   public void testReportSave() throws Throwable {
-    final ProjectData projectData = createProject();
-    final ClassData classData = projectData.getClassData("A");
-    classData.createHitsMask(2);
-    final int[] hits = classData.getHitsMask();
+    final RawProjectData rawProjectData = new RawProjectData();
+    final int[] hits = rawProjectData.createClassData("A", 2).hits;
     hits[0] = 2;
     hits[1] = 3;
 
     final File file = Files.createTempFile("coverage", "ric").toFile();
-    RawHitsReport.dump(file, projectData);
+    RawHitsReport.dump(file, rawProjectData);
+
+    final ProjectData projectData = createProject();
+    final ClassData classData = projectData.getClassData("A");
+    classData.setHitsMask(hits);
     classData.applyHits();
 
     final ProjectData loadedProjectData = createProject();
-    RawHitsReport.load(file, loadedProjectData);
+    RawReportLoader.load(file, loadedProjectData);
 
     final ClassData loadedClassData = loadedProjectData.getClassData("A");
     for (int i = 0; i < classData.getLines().length; i++) {

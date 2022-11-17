@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.util;
+package com.intellij.rt.coverage.offline;
 
-import com.intellij.rt.coverage.data.ClassData;
-import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
+import com.intellij.rt.coverage.util.ErrorReporter;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -33,7 +33,7 @@ import java.io.IOException;
 public class RawHitsReport {
   private static final int MAGIC = 284996684;
 
-  public static void dump(File file, ProjectData data) {
+  public static void dump(File file, RawProjectData data) {
     DataOutputStream os = null;
     try {
       os = CoverageIOUtil.openWriteFile(file);
@@ -43,10 +43,10 @@ public class RawHitsReport {
       // leave empty line as a space for format configuration
       CoverageIOUtil.writeUTF(os, "");
 
-      for (ClassData classData : data.getClassesCollection()) {
-        final int[] hits = classData.getHitsMask();
+      for (RawClassData classData : data.getClasses()) {
+        final int[] hits = classData.hits;
         if (hits == null || hits.length == 0) continue;
-        CoverageIOUtil.writeUTF(os, classData.getName());
+        CoverageIOUtil.writeUTF(os, classData.name);
         CoverageIOUtil.writeINT(os, hits.length);
         for (int hit : hits) {
           CoverageIOUtil.writeINT(os, hit);
@@ -62,7 +62,8 @@ public class RawHitsReport {
     }
   }
 
-  public static void load(File file, ProjectData data) throws IOException {
+  public static RawProjectData load(File file) throws IOException {
+    final RawProjectData projectData = new RawProjectData();
     DataInputStream is = null;
     try {
       is = CoverageIOUtil.openReadFile(file);
@@ -77,21 +78,16 @@ public class RawHitsReport {
 
       String className;
       while (!"".equals(className = CoverageIOUtil.readUTFFast(is))) {
-        final ClassData classData = data.getClassData(className);
-        if (classData == null) {
-          ErrorReporter.reportError("Tried to apply coverage for class " + className + " but there is no such class in ProjectData");
-          continue;
-        }
         final int length = CoverageIOUtil.readINT(is);
-        final int[] hits = classData.getOrCreateHitsMask(length);
+        final int[] hits = projectData.getOrCreateClass(className, length).hits;
         for (int i = 0; i < length; i++) {
           hits[i] = CoverageIOUtil.readINT(is);
         }
-        classData.applyHits();
       }
     } finally {
       CoverageIOUtil.close(is);
     }
+    return projectData;
   }
 
   public static boolean isRawHitsFile(File file) throws IOException {
@@ -105,7 +101,7 @@ public class RawHitsReport {
     }
   }
 
-  public static void dumpOnExit(final File file, final ProjectData data) {
+  public static void dumpOnExit(final File file, final RawProjectData data) {
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
         dump(file, data);
