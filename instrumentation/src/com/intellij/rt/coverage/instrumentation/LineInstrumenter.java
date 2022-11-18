@@ -25,7 +25,6 @@ import com.intellij.rt.coverage.instrumentation.util.LocalVariableInserter;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 /**
  * Insert coverage hits in line coverage mode.
@@ -55,9 +54,7 @@ public class LineInstrumenter extends Instrumenter {
             lineData.setId(myLastId++);
           }
 
-          mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
-          InstrumentationUtils.pushInt(mv, lineData.getId());
-          InstrumentationUtils.incrementIntArrayByIndex(mv);
+          InstrumentationUtils.touchById(mv, getLVIndex(), lineData.getId());
         }
 
         super.visitLineNumber(line, start);

@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation;
 
+import com.intellij.rt.coverage.util.OptionsUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
@@ -27,21 +28,34 @@ public class InstrumentationUtils {
   public static final String CONSTRUCTOR_DESCRIPTOR = "()V";
 
   /**
-   * Util method for int array instrumentation.
-   * Stack must be: array, index.
-   * Generates code <code>array[index]++</code>.
+   * Util method for touching coverage counter which is stored in an int array.
+   * This method has different strategies basing on <code>OptionsUtil.CALCULATE_HITS_COUNT</code> option:
+   * when option is true, array counter is incremented,
+   * otherwise the value is just set to 1.
+   *
+   * @param mv current method visitor
+   * @param lv local variable index to load int array
+   * @param id index of a hit in the array
    */
-  public static void incrementIntArrayByIndex(MethodVisitor mv) {
-    mv.visitInsn(Opcodes.DUP2);
-    //load array[index]
-    mv.visitInsn(Opcodes.IALOAD);
+  public static void touchById(MethodVisitor mv, int lv, int id) {
+    mv.visitVarInsn(Opcodes.ALOAD, lv);
+    InstrumentationUtils.pushInt(mv, id);
 
-    //increment
-    mv.visitInsn(Opcodes.ICONST_1);
-    mv.visitInsn(Opcodes.IADD);
+    if (OptionsUtil.CALCULATE_HITS_COUNT) {
+      mv.visitInsn(Opcodes.DUP2);
+      // load array[index]
+      mv.visitInsn(Opcodes.IALOAD);
 
-    //stack: array, index, incremented value: store value in array[index]
-    mv.visitInsn(Opcodes.IASTORE);
+      // increment
+      mv.visitInsn(Opcodes.ICONST_1);
+      mv.visitInsn(Opcodes.IADD);
+
+      // stack: array, index, incremented value: store value in array[index]
+      mv.visitInsn(Opcodes.IASTORE);
+    } else {
+      mv.visitInsn(Opcodes.ICONST_1);
+      mv.visitInsn(Opcodes.IASTORE);
+    }
   }
 
   public static int getBytecodeVersion(ClassReader cr) {

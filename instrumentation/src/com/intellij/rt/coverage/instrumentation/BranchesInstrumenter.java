@@ -31,7 +31,6 @@ import com.intellij.rt.coverage.instrumentation.util.LocalVariableInserter;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 /**
  * Insert coverage hits in branch coverage mode.
@@ -133,9 +132,7 @@ public class BranchesInstrumenter extends Instrumenter {
 
     private void incrementHitById(int id) {
       if (id == -1) return;
-      mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
-      InstrumentationUtils.pushInt(mv, id);
-      InstrumentationUtils.incrementIntArrayByIndex(mv);
+      InstrumentationUtils.touchById(mv, getLVIndex(), id);
     }
   }
 }

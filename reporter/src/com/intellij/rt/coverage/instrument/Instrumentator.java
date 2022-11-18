@@ -48,7 +48,20 @@ public class Instrumentator {
     for (int i = 0; i < myRoots.size(); i++) {
       final File root = myRoots.get(i);
       final File outputRoot = myOutputRoots.get(i);
-      new InstrumentationVisitor(root, outputRoot).visitFiles();
+
+      final boolean newBranchCoverage = OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED;
+      final boolean ignorePrivateConstructor = OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS;
+      final boolean calculateHitsCount = OptionsUtil.CALCULATE_HITS_COUNT;
+      try {
+        OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = true;
+        OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS = true;
+        OptionsUtil.CALCULATE_HITS_COUNT = false;
+        new InstrumentationVisitor(root, outputRoot).visitFiles();
+      } finally {
+        OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = newBranchCoverage;
+        OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS = ignorePrivateConstructor;
+        OptionsUtil.CALCULATE_HITS_COUNT = calculateHitsCount;
+      }
     }
   }
 
@@ -61,8 +74,6 @@ public class Instrumentator {
       myOutput = output;
       final ProjectData projectData = ProjectData.createProjectData(true);
       projectData.setAnnotationsToIgnore(myFilters.excludeAnnotations);
-      OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = true;
-      OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS = true;
       myTransformer = new OfflineCoverageTransformer(projectData, false, myFilters.excludeClasses, myFilters.includeClasses);
     }
 
