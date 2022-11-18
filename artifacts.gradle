@@ -16,14 +16,26 @@
 
 ext.agentsGroupId = 'org.jetbrains.intellij.deps'
 
+class MyDependency {
+  String group
+  String name
+  String version
+
+  MyDependency(group, name, version) {
+    this.group = group
+    this.name = name
+    this.version = version
+  }
+}
+
 private addDependencies(publication, dependencyList) {
   publication.pom.withXml {
     def dependencies = asNode().appendNode('dependencies')
     dependencyList.each {
       def dependency = dependencies.appendNode('dependency')
-      dependency.appendNode('groupId', it.moduleGroup)
-      dependency.appendNode('artifactId', it.moduleName)
-      dependency.appendNode('version', it.moduleVersion)
+      dependency.appendNode('groupId', it.group)
+      dependency.appendNode('artifactId', it.name)
+      dependency.appendNode('version', it.version)
     }
   }
 }
@@ -81,7 +93,10 @@ project(":reporter").afterEvaluate { reporter ->
         artifact reporter.jar
         artifact reporter.tasks.getByName("soursesJar")
         artifact reporter.tasks.getByName("javadocJar")
-        addDependencies(it, reporter.getPublishDependencies())
+
+        def dependencies = reporter.getPublishDependencies().collect { new MyDependency(it.moduleGroup, it.moduleName, it.moduleVersion) }
+        dependencies.add(new MyDependency(agentsGroupId, coverage_jar_name, version))
+        addDependencies(it, dependencies)
         setMavenMetadata(owner, "Intellij Coverage Report", "Library for presenting coverage results")
       }
     }
