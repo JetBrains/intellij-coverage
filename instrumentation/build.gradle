@@ -3,7 +3,7 @@ dependencies {
   compile project(":offline-runtime")
 }
 
-task coverageAgentJar(type: Jar) {
+jar {
   baseName = coverage_jar_name
   destinationDir = file("../dist")
   manifest.attributes(
@@ -33,15 +33,4 @@ task javadocJar(type: Jar) {
   baseName = coverage_jar_name
   archiveClassifier = 'javadoc'
   from allJavadoc
-}
-
-build.dependsOn(coverageAgentJar)
-
-jar.enabled = false
-artifacts {
-  archives coverageAgentJar
-}
-
-jar {
-  baseName = "coverage-instrumenter"
 }

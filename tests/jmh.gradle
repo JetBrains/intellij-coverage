@@ -44,13 +44,13 @@ ext {
 
 dependencies {
   if (mode == NEW_INSTRUMENTATION) {
-    baseline project(path: ':instrumentation', configuration: 'archives')
+    baseline project(':instrumentation')
     baselineName = "SNAPSHOT $baselineName"
   } else {
     baseline "$agentsGroupId:$coverage_jar_name:$baselineVersion"
     baselineName = "$baselineVersion $baselineName"
   }
-  head project(path: ':instrumentation', configuration: 'archives')
+  head project(':instrumentation')
 }
 
 def setUpNewInstrumentation() {
@@ -67,7 +67,6 @@ baselineBenchmark {
 }
 
 headBenchmark {
-  dependsOn(":instrumentation:coverageAgentJar")
   doFirst {
     if (mode == NEW_INSTRUMENTATION || mode == PREVIOUS_VERSION_NEW_INSTRUMENTATION) {
       setUpNewInstrumentation()

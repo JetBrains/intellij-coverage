@@ -20,7 +20,6 @@ configurations {
 
 dependencies {
   implementation project(":instrumentation")
-  implementation(project(path: ":instrumentation", configuration: "archives"))
   externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.18")
   externalDependencies("org.json:json:20210307")
 

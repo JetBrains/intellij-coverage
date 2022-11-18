@@ -54,6 +54,7 @@ task baselineBenchmark(group: 'benchmarks', type: JavaExec) {
 
 // benchmark with current version of agent
 task headBenchmark(group: 'benchmarks', type: JavaExec) {
+  dependsOn configurations.head.buildDependencies
   configureBenchmark it as JavaExec, configurations.head
 }
 

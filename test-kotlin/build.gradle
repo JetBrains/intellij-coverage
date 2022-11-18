@@ -23,7 +23,6 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 
     testImplementation(files(project(":tests").sourceSets.test.output))
-    testImplementation(project(path: ":instrumentation", configuration: "archives"))
     testImplementation(project(":instrumentation"))
     testImplementation(fileTree(project(":benchmarks").file("lib")))
 

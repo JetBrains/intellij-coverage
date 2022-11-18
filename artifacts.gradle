@@ -74,7 +74,7 @@ project(":instrumentation").afterEvaluate { instrumentation ->
         group agentsGroupId
         artifactId coverage_jar_name
         version version
-        artifact instrumentation.tasks.getByName("coverageAgentJar")
+        artifact instrumentation.jar
         artifact instrumentation.tasks.getByName("soursesJar")
         artifact instrumentation.tasks.getByName("javadocJar")
         setMavenMetadata(owner, "Intellij Coverage Agent", "Code coverage engine for JVM")
