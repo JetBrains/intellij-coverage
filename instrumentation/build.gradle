@@ -12,7 +12,7 @@ jar {
       "Can-Retransform-Classes": "true"
   )
   from(sourceSets.main.output)
-  from(["util", "", "java7utils", "common", "offline-runtime"].collect({ project(":$it").sourceSets.main.output }))
+  from(["util", "", "java7-utils", "common", "offline-runtime"].collect({ project(":$it").sourceSets.main.output }))
   with repackLibs
 }
 
