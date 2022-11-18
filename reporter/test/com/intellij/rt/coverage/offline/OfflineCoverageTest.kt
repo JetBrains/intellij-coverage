@@ -60,9 +60,10 @@ class OfflineCoverageTest {
                 .filter { path -> path.contains("kotlin-stdlib") }
                 .plus(offlineCoveragePath)
                 .plus(roots.map { it.absolutePath })
+                .joinToString(File.pathSeparator)
         val icrFile = TestUtils.createTmpFile()
         val commandLine = arrayOf(
-                "-classpath", classpath.joinToString(File.pathSeparator),
+                "-classpath", classpath,
                 "-Dcoverage.offline.report.path=" + icrFile.absolutePath,
                 className)
         TestUtils.clearLogFile(File("."))

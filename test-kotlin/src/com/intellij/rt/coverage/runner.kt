@@ -40,10 +40,17 @@ fun createTmpFile(suffix: String): File {
     return Files.createTempFile(directory, "test", suffix).toFile()
 }
 
+private val libs = listOf("kotlin-stdlib", "kotlinx-coroutines-core", "kotlin-reflect", "kotlin-test",
+        "byte-buddy", "junit", "jmockit", "hamcrest", "joda")
+private val classpath = System.getProperty("java.class.path").split(File.pathSeparator)
+        .filter { path -> libs.any { path.contains(it) } }
+        .plus(pathToFile("build", "classes", "kotlin", "test").absolutePath)
+        .plus(pathToFile("build", "classes", "java", "test").absolutePath)
+        .joinToString(File.pathSeparator)
+
 internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false, testTracking: Boolean = false,
                     patterns: String = "$TEST_PACKAGE.*", extraArgs: MutableList<String> = mutableListOf(),
                     mainClass: String = getTestFile(testName).mainClass): ProjectData {
-    val classPath = System.getProperty("java.class.path")
     when (coverage) {
         Coverage.CONDY_LINE -> extraArgs.add("-Didea.new.sampling.coverage=true")
         Coverage.CONDY_BRANCH -> extraArgs.add("-Didea.new.tracing.coverage=true")
@@ -59,7 +66,7 @@ internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage:
 
         else -> {}
     }
-    return CoverageStatusTest.runCoverage(classPath, coverageDataFile, patterns, mainClass,
+    return CoverageStatusTest.runCoverage(classpath, coverageDataFile, patterns, mainClass,
             coverage.isBranchCoverage(), extraArgs.toTypedArray(), calcUnloaded, testTracking)
             .also { assertEmptyLogFile(coverageDataFile) }
 }
@@ -97,7 +104,7 @@ private fun extendedLineInfo(project: ProjectData, classNames: List<String>) = c
             val instructionsMap = hashMapOf<Int, LineInstructions>()
             getClasses(classNames, project).forEach { classData ->
                 val classInstructions = project.instructions[classData.name]!!
-                classData.lines.filterIsInstance<LineData>().forEach { instructionsMap.getOrPut(it.lineNumber) { LineInstructions()}.merge(classInstructions.getlines()[it.lineNumber]) }
+                classData.lines.filterIsInstance<LineData>().forEach { instructionsMap.getOrPut(it.lineNumber) { LineInstructions() }.merge(classInstructions.getlines()[it.lineNumber]) }
             }
             associate { line ->
                 val branches = line.branchData
