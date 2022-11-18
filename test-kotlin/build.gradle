@@ -36,6 +36,13 @@ dependencies {
     testAnnotationProcessor('org.projectlombok:lombok:1.18.24')
 }
 
+task generateTests(type: JavaExec) {
+    group = "verification"
+    description = "Generate tests"
+    classpath = sourceSets.test.runtimeClasspath
+    main = "com.intellij.rt.coverage.TestGenerationKt"
+}
+
 test {
     exclude("testData/**")
     if (javaVersion < JavaVersion.VERSION_11) {

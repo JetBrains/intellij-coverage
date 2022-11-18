@@ -13,6 +13,9 @@ Test configuration is set with comments in source files. The supported settings 
 * `// extra args: -Dflag=true` - space-separated list of VM options
 * `// calculate unloaded: [true|false]` - a flag to include unloaded classes into a coverage report, false by default
 * `// markers: [file]` - relative path to a file with `coverage` markers
+* `// test: ...` - list of tests that are covering a line in test tracking mode, see `caseTests/TestTrackingTest.kt`
+* `// instructions & branches` - enable instruction and branch coverage counters testing, see `caseTests/InstructionsBranchesTest.kt`
+  * `// stats: COVERED_INSTRUCTIONS/TOTAL_INSTRUCTIONS [COVERED_BRANCHES/TOTAL_BRANCHES]` - instructions and branch coverage
 
 See runner.kt for source file processing details.
 
