@@ -39,6 +39,16 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testBadCycleInterfaces() = test("badCycle.interfaces")
 
     @Test
+    fun testCasesJavaSwitch() = test("cases.javaSwitch")
+
+    @Test
+    fun testCasesWhenEnum() = test("cases.whenEnum")
+
+    @Test
+    @Ignore("Not implemented")
+    fun testCasesWhenString() = test("cases.whenString")
+
+    @Test
     fun testCoroutinesAsync() = test("coroutines.async")
 
     @Test
@@ -211,9 +221,6 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testInterfaceWithClinit() = test("interfaceWithClinit")
 
     @Test
-    fun testJavaSwitch() = test("javaSwitch")
-
-    @Test
     fun testLateinit() = test("lateinit")
 
     @Test
@@ -276,9 +283,6 @@ internal abstract class CoverageRunTest : CoverageTest() {
 
     @Test
     fun testUtilClassKotlin() = test("utilClass.kotlin")
-
-    @Test
-    fun testWhenMapping() = test("whenMapping")
 
     //===GENERATED TESTS===
 

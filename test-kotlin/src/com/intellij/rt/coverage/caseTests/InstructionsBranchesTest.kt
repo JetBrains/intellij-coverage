@@ -34,6 +34,9 @@ internal abstract class InstructionsBranchesTest(override val coverage: Coverage
     //===GENERATED TESTS===
 
     @Test
+    fun testCasesWhenEnum() = test("cases.whenEnum")
+
+    @Test
     fun testDefaultArgsConstructor() = test("defaultArgs.constructor")
 
     @Test
@@ -50,9 +53,6 @@ internal abstract class InstructionsBranchesTest(override val coverage: Coverage
 
     @Test
     fun testUnloadedSingleFile() = test("unloaded.singleFile")
-
-    @Test
-    fun testWhenMapping() = test("whenMapping")
 
     //===GENERATED TESTS===
 }
