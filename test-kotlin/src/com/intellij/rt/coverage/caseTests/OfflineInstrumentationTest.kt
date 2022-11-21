@@ -32,6 +32,8 @@ import java.util.regex.Pattern
 import kotlin.io.path.createTempDirectory
 
 internal abstract class OfflineInstrumentationTest(override val coverage: Coverage) : CoverageTest() {
+    @Test
+    fun testCasesJavaSwitch() = test("cases.javaSwitch")
 
     @Test
     fun testDefaultArgsArgs32() = test("defaultArgs.args32")
@@ -62,9 +64,6 @@ internal abstract class OfflineInstrumentationTest(override val coverage: Covera
 
     @Test
     fun testInlineSimple() = test("inline.simple")
-
-    @Test
-    fun testJavaSwitch() = test("javaSwitch")
 
     @Test
     fun testPropertiesFile() = test("properties.file")
