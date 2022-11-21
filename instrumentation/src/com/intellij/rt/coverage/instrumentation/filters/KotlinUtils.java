@@ -86,6 +86,7 @@ public class KotlinUtils {
     result.add(new KotlinLateinitFilter());
     result.add(new KotlinOpenMemberWithDefaultArgsFilter());
     result.add(new KotlinUnsafeCastFilter());
+    result.add(new KotlinNotFilter());
     return result;
   }
 }

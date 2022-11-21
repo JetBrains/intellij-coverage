@@ -221,6 +221,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testInterfaceWithClinit() = test("interfaceWithClinit")
 
     @Test
+    fun testKotlinNot() = test("kotlin.not")
+
+    @Test
     fun testLateinit() = test("lateinit")
 
     @Test
