@@ -22,6 +22,7 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.data.instructions.LineInstructions;
+import com.intellij.rt.coverage.util.ArrayUtil;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
@@ -138,7 +139,10 @@ public class XMLCoverageReport {
        lineCounter = new Counter();
        groupedLines.put(lineNumber, lineCounter);
       }
-      lineCounter.add(lineCounters.get(lineData));
+      final Counter counter = lineCounters.get(lineData);
+      if (counter != null) {
+        lineCounter.add(counter);
+      }
     }
 
     final List<LineCounter> groupedLinesList = new ArrayList<LineCounter>();
@@ -217,8 +221,7 @@ public class XMLCoverageReport {
     final LineInstructions[] instructions = classInstructions == null ? null : classInstructions.getlines();
     for (LineData lineData : lines) {
       if (lineData == null) continue;
-      if (instructions != null && lineData.getLineNumber() >= instructions.length) break;
-      final LineInstructions lineInstructions = instructions == null ? null : instructions[lineData.getLineNumber()];
+      final LineInstructions lineInstructions = ArrayUtil.safeLoad(instructions, lineData.getLineNumber());
       final Counter lineCounter = getLineCounter(lineInstructions, lineData);
       lineCounters.put(lineData, lineCounter);
       counter.add(lineCounter);
