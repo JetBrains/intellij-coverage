@@ -19,6 +19,8 @@ package com.intellij.rt.coverage.report;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.instructions.ClassInstructions;
+import com.intellij.rt.coverage.data.instructions.LineInstructions;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.util.FileUtils;
 import com.intellij.rt.coverage.util.ProcessUtil;
@@ -29,6 +31,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Map;
 
 public class XMLTest {
 
@@ -140,6 +143,41 @@ public class XMLTest {
     new XMLCoverageReport().write(new FileOutputStream(file), project);
     TestUtils.checkLogFile(new File("."));
     verifyProjectXML(file, "xml/xmlTest.xml");
+  }
+
+  @Test
+  public void sameFileNameTest() throws Throwable {
+    final ProjectData project = new ProjectData();
+    project.setInstructionsCoverage(true);
+    final Map<String, ClassInstructions> projectInstructions = project.getInstructions();
+
+    final ClassData classData1 = project.getOrCreateClassData("package.A");
+    final LineData lineData1 = new LineData(1, "foo()V");
+    lineData1.setHits(1);
+    final LineData[] lines1 = new LineData[]{null, lineData1};
+    classData1.setLines(lines1);
+    classData1.setSource("A.kt");
+
+    final LineInstructions lineInstructions1 = new LineInstructions();
+    lineInstructions1.setInstructions(1);
+    projectInstructions.put("package.A", new ClassInstructions(new LineInstructions[]{null, lineInstructions1}));
+
+    final ClassData classData2 = project.getOrCreateClassData("package.B");
+    final LineData lineData2 = new LineData(1, "foo()V");
+    lineData2.setHits(1);
+    final LineData[] lines2 = new LineData[]{null, lineData2};
+    classData2.setLines(lines2);
+    classData2.setSource("A.kt");
+
+    final LineInstructions lineInstructions2 = new LineInstructions();
+    lineInstructions2.setInstructions(1);
+    projectInstructions.put("package.B", new ClassInstructions(new LineInstructions[]{null, lineInstructions2}));
+
+    final File file = createXMLFile();
+    TestUtils.clearLogFile(new File("."));
+    new XMLCoverageReport().write(new FileOutputStream(file), project);
+    TestUtils.checkLogFile(new File("."));
+    verifyProjectXML(file, "xml/sameSource.xml");
   }
 
   private File runTestAndConvertToXML(String patterns, String className) throws Throwable {

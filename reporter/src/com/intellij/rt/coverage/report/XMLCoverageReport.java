@@ -24,6 +24,8 @@ import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.data.instructions.LineInstructions;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
+import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
+import org.jetbrains.coverage.gnu.trove.TIntObjectProcedure;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -112,15 +114,7 @@ public class XMLCoverageReport {
       counter.add(classCounter);
     }
     for (Map.Entry<String, List<LineData>> fileEntry : myFiles.entrySet()) {
-      String fileName = fileEntry.getKey();
-      List<LineData> lines = fileEntry.getValue();
-      Collections.sort(lines, new Comparator<LineData>() {
-        @Override
-        public int compare(LineData o1, LineData o2) {
-          return o1.getLineNumber() - o2.getLineNumber();
-        }
-      });
-      writeFile(fileName, lines, lineCounters);
+      writeFile(fileEntry.getKey(), fileEntry.getValue(), lineCounters);
     }
 
     writeCounter(counter, INSTRUCTION_MASK | LINE_MASK | BRANCH_MASK | METHOD_MASK | CLASS_MASK);
@@ -135,11 +129,37 @@ public class XMLCoverageReport {
     myOut.writeStartElement("sourcefile");
     myOut.writeAttribute("name", fileName);
     newLine();
-    final Counter counter = new Counter();
+    final TIntObjectHashMap<Counter> groupedLines = new TIntObjectHashMap<Counter>();
     for (LineData lineData : lines) {
       if (lineData == null) continue;
-      final Counter lineCounter = writeLine(lineCounters.get(lineData), lineData);
-      counter.add(lineCounter);
+      final int lineNumber = lineData.getLineNumber();
+      Counter lineCounter = groupedLines.get(lineNumber);
+      if (lineCounter == null) {
+       lineCounter = new Counter();
+       groupedLines.put(lineNumber, lineCounter);
+      }
+      lineCounter.add(lineCounters.get(lineData));
+    }
+
+    final List<LineCounter> groupedLinesList = new ArrayList<LineCounter>();
+    groupedLines.forEachEntry(new TIntObjectProcedure<Counter>() {
+      public boolean execute(int lineNumber, Counter counter) {
+        groupedLinesList.add(new LineCounter(lineNumber, counter));
+        return true;
+      }
+    });
+
+    Collections.sort(groupedLinesList, new Comparator<LineCounter>() {
+      public int compare(LineCounter o1, LineCounter o2) {
+        return o1.line - o2.line;
+      }
+    });
+
+
+    final Counter counter = new Counter();
+    for (LineCounter lineCounter : groupedLinesList) {
+      writeLine(lineCounter.counter, lineCounter.line);
+      counter.add(lineCounter.counter);
     }
     writeCounter(counter, INSTRUCTION_MASK | LINE_MASK | BRANCH_MASK);
     myOut.writeEndElement();
@@ -153,21 +173,19 @@ public class XMLCoverageReport {
     myOut.writeAttribute("name", className);
     String sourceName = classData.getSource();
     if (sourceName != null && sourceName.length() > 0) {
-      myOut.writeAttribute("sourcefilename", classData.getSource());
+      myOut.writeAttribute("sourcefilename", sourceName);
       newLine();
       List<LineData> lines = myFiles.get(sourceName);
-      List<LineData> newLines = new ArrayList<LineData>();
+      if (lines == null) {
+        lines = new ArrayList<LineData>();
+        myFiles.put(sourceName, lines);
+      }
       LineData[] linesArray = (LineData[]) classData.getLines();
       if (linesArray != null) {
         for (LineData line : linesArray) {
           if (line == null) continue;
-          newLines.add(line);
+          lines.add(line);
         }
-      }
-      if (lines == null) {
-        myFiles.put(sourceName, newLines);
-      } else {
-        lines.addAll(newLines);
       }
     } else {
       newLine();
@@ -214,16 +232,15 @@ public class XMLCoverageReport {
     return counter;
   }
 
-  private Counter writeLine(Counter counter, LineData lineData) throws XMLStreamException {
+  private void writeLine(Counter counter, int lineNumber) throws XMLStreamException {
     myOut.writeEmptyElement("line");
-    myOut.writeAttribute("nr", Integer.toString(lineData.getLineNumber()));
+    myOut.writeAttribute("nr", Integer.toString(lineNumber));
 
     myOut.writeAttribute("mi", Integer.toString(counter.totalInstructions - counter.coveredInstructions));
     myOut.writeAttribute("ci", Integer.toString(counter.coveredInstructions));
     myOut.writeAttribute("mb", Integer.toString(counter.totalBranches - counter.coveredBranches));
     myOut.writeAttribute("cb", Integer.toString(counter.coveredBranches));
     newLine();
-    return counter;
   }
 
   private Counter getLineCounter(LineInstructions lineInstructions, LineData lineData) {
@@ -325,6 +342,16 @@ public class XMLCoverageReport {
       coveredBranches += other.coveredBranches;
       totalInstructions += other.totalInstructions;
       coveredInstructions += other.coveredInstructions;
+    }
+  }
+
+  private static class LineCounter {
+    private final int line;
+    private final Counter counter;
+
+    private LineCounter(int line, Counter counter) {
+      this.line = line;
+      this.counter = counter;
     }
   }
 }
