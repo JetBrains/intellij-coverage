@@ -41,6 +41,7 @@ public class InstructionsEnumerator extends BranchesEnumerator {
   private Jump myLastJump;
   private Label myLastLabel;
   private int myInstructionCounter;
+  private boolean myHasInstructions = false;
 
 
   public InstructionsEnumerator(BranchesInstrumenter instrumenter, BranchDataContainer branchData, MethodVisitor mv, int access, String name, String desc, String signature, String[] exceptions) {
@@ -127,19 +128,19 @@ public class InstructionsEnumerator extends BranchesEnumerator {
 
   @Override
   public void visitJumpInsn(final int opcode, final Label label) {
-    myInstructionCounter++;
+    touch();
     saveInstructionsToOwner();
     super.visitJumpInsn(opcode, label);
   }
 
   public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-    myInstructionCounter++;
+    touch();
     saveInstructionsToOwner();
     super.visitLookupSwitchInsn(dflt, keys, labels);
   }
 
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
-    myInstructionCounter++;
+    touch();
     saveInstructionsToOwner();
     super.visitTableSwitchInsn(min, max, dflt, labels);
   }
@@ -147,63 +148,68 @@ public class InstructionsEnumerator extends BranchesEnumerator {
   @Override
   public void visitTypeInsn(int opcode, String type) {
     super.visitTypeInsn(opcode, type);
-    myInstructionCounter++;
+    touch();
   }
 
   @Override
   public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
     super.visitMultiANewArrayInsn(descriptor, numDimensions);
-    myInstructionCounter++;
+    touch();
   }
 
   @Override
   public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
     super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
-    myInstructionCounter++;
+    touch();
   }
 
   @Override
   public void visitLdcInsn(Object value) {
     super.visitLdcInsn(value);
-    myInstructionCounter++;
+    touch();
   }
 
   @Override
   public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
     super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
-    myInstructionCounter++;
+    touch();
   }
 
   @Override
   public void visitIntInsn(int opcode, int operand) {
     super.visitIntInsn(opcode, operand);
-    myInstructionCounter++;
+    touch();
   }
 
   @Override
   public void visitIincInsn(int var, int increment) {
     super.visitIincInsn(var, increment);
-    myInstructionCounter++;
+    touch();
   }
 
   @Override
   public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
     super.visitFieldInsn(opcode, owner, name, descriptor);
-    myInstructionCounter++;
+    touch();
   }
 
   @Override
   public void visitInsn(int opcode) {
     super.visitInsn(opcode);
-    if (Opcodes.IRETURN <= opcode && opcode <= Opcodes.RETURN) {
+    if (myHasInstructions && Opcodes.IRETURN <= opcode && opcode <= Opcodes.RETURN) {
       return;
     }
-    myInstructionCounter++;
+    touch();
   }
 
   @Override
   public void visitVarInsn(int opcode, int var) {
     super.visitVarInsn(opcode, var);
+    touch();
+  }
+
+  private void touch() {
     myInstructionCounter++;
+    myHasInstructions = true;
   }
 }

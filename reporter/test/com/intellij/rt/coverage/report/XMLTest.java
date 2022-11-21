@@ -58,6 +58,11 @@ public class XMLTest {
   }
 
   @Test
+  public void testEmptyMethod() throws Throwable {
+    test("emptyMethod");
+  }
+
+  @Test
   public void testExcludeAnnotation() throws Throwable {
     verifyProjectXML(runTestAndConvertToXML("testData.excludeAnnotation.* -excludeAnnotations testData.excludeAnnotation.ExcludeFromCoverage", "testData.excludeAnnotation.TestKt"), "xml/excludeAnnotation.xml");
   }

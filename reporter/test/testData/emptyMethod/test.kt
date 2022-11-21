@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package testData.unloaded.multiFile
+package testData.emptyMethod
 
-class UnusedClass {   // coverage: NONE // stats: 0/2
-    fun emptyFunction() = Unit // coverage: NONE // stats: 0/1
+fun foo() {
 
-    fun foo() {
-    }                 // coverage: NONE // stats: 0/1
+}
+
+fun main() {
+    foo()
 }
