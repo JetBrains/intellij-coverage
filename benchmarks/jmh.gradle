@@ -24,42 +24,23 @@ repositories {
   maven { url "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies" }
 }
 
-
 ext {
-  baselineVersion = '1.0.424'
+  benchmarkRegexp = ""
+  benchmarkMode = "ss"
   becnhmarkForks = 1
-  benchmarkIterations = 25
+  benchmarkIterations = 10
   benchmarkWarmupIterations = 10
   benchmarkProfilers = []
-  benchmarkExtraAgentArgs = ""
-  benchmarkExtraArgs = []
-  baselineName = baselineVersion
-  headName = "Head"
+  secondaryMetrics = []
 }
 
-configurations {
-  baseline
-  head
-}
-
-// benchmark without agent
-task noAgentBenchmark(group: 'benchmarks', type: JavaExec) {
+task NoAgent(type: JavaExec) {
   configureBenchmark it as JavaExec
 }
 
-// benchmark with baseline version of agent
-task baselineBenchmark(group: 'benchmarks', type: JavaExec) {
-  configureBenchmark it as JavaExec, configurations.baseline
-}
-
-// benchmark with current version of agent
-task headBenchmark(group: 'benchmarks', type: JavaExec) {
-  dependsOn configurations.head.buildDependencies
-  configureBenchmark it as JavaExec, configurations.head
-}
-
-def configureBenchmark(JavaExec benchmark, Configuration agent = null) {
+def configureBenchmark(JavaExec benchmark, List<String> jvmArgs = []) {
   benchmark.with {
+    group = 'benchmarks'
     dependsOn ":benchmarks:jmhClasses"
     main = 'org.openjdk.jmh.Main'
     doFirst {
@@ -82,9 +63,8 @@ def configureBenchmark(JavaExec benchmark, Configuration agent = null) {
       for (String profiler : benchmarkProfilers) {
         args += ['-prof', profiler]
       }
-      if (agent != null) {
-        args += ['-jvmArgs', "-javaagent:${agent.find { it.name.startsWith(benchmarkAgentName) }.absolutePath}$benchmarkExtraAgentArgs"]
-        args += benchmarkExtraArgs
+      for (String arg : jvmArgs) {
+        args += ['-jvmArgs', arg]
       }
       benchmarkReport(benchmark).createNewFile()
       Files.deleteIfExists(file('td.ijtc').toPath())
@@ -97,30 +77,23 @@ def benchmarkReport(Task benchmark) {
   file("$benchmark.temporaryDir/${benchmark.name}.json")
 }
 
-task benchmark(group: 'benchmarks', dependsOn: [noAgentBenchmark, baselineBenchmark, headBenchmark]) {
-  doLast {
-    def secondaryMetrics = [
-        'trace.file.size',
-        '·gc.alloc.rate',
-        '·gc.count', '·gc.time'
-    ]
-    def noAgentReport = ResourceGroovyMethods.getText(benchmarkReport(noAgentBenchmark), 'UTF-8')
-    def baselineReport = ResourceGroovyMethods.getText(benchmarkReport(baselineBenchmark), 'UTF-8')
-    def headReport = ResourceGroovyMethods.getText(benchmarkReport(headBenchmark), 'UTF-8')
-    project.logger.quiet """Benchmark score:
-    No agent vs $baselineName:
 
-    ${ReportReader.readScore(noAgentReport, baselineReport, secondaryMetrics)}
+ext.configureCompareWith = { benchmark, jvmArgs, basicBenchmark ->
+  configureBenchmark(benchmark, jvmArgs)
+  benchmark.with {
+    dependsOn(basicBenchmark)
+    doLast {
+      def noAgentReport = ResourceGroovyMethods.getText(benchmarkReport(basicBenchmark), 'UTF-8')
+      def currentReport = ResourceGroovyMethods.getText(benchmarkReport(benchmark), 'UTF-8')
 
-
-    No agent vs $headName:
-
-    ${ReportReader.readScore(noAgentReport, headReport, secondaryMetrics)}
-
-
-    $baselineName vs $headName:
-
-    ${ReportReader.readScore(baselineReport, headReport, secondaryMetrics)}
-    """
+      project.logger.quiet """Benchmark score:
+      $basicBenchmark.name vs $benchmark.name:
+      ${ReportReader.readScore(noAgentReport, currentReport, secondaryMetrics)}
+      """
+    }
   }
+}
+
+ext.configureCompare = { benchmark, jvmArgs ->
+  configureCompareWith(benchmark, jvmArgs, NoAgent)
 }

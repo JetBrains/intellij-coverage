@@ -17,16 +17,37 @@
 apply from: project(":benchmarks").file("jmh.gradle")
 
 ext {
+  baselineVersion = '1.0.424'
+  benchmarkIterations = 25
+  benchmarkWarmupIterations = 10
   benchmarkRegexp = 'com\\.intellij\\.rt\\.coverage\\.jmh\\.DiscoveryAgentBenchmark.*'
-  benchmarkMode = 'ss'
   benchmarkProfilers = ['org.openjdk.jmh.profile.GCProfiler', 'com.intellij.rt.coverage.jmh.TraceFileProfiler']
-  benchmarkAgentName = test_discovery_jar_name
-  benchmarkExtraArgs = [
-      '-jvmArgs', '-Dtest.discovery.data.listener=com.intellij.rt.coverage.data.SingleTrFileDiscoveryProtocolDataListener'
-  ]
+  secondaryMetrics = ['trace.file.size', '·gc.alloc.rate', '·gc.count', '·gc.time']
+}
+
+configurations {
+  head
+  baseline
 }
 
 dependencies {
-  baseline "$agentsGroupId:$test_discovery_jar_name:$baselineVersion"
   head project(':test-discovery')
+  baseline "$agentsGroupId:$test_discovery_jar_name:$baselineVersion"
+}
+
+def findAgent(Configuration configuration) {
+  return configuration.find { it.name.startsWith(test_discovery_jar_name) }.absolutePath
+}
+
+def agentParams(Configuration configuration) {
+  return ["-javaagent:${findAgent(configuration)}", "-Dtest.discovery.data.listener=com.intellij.rt.coverage.data.SingleTrFileDiscoveryProtocolDataListener"]
+}
+
+task Baseline(type: JavaExec) {
+  configureCompare(it, agentParams(configurations.baseline))
+}
+
+task Head(type: JavaExec) {
+  dependsOn configurations.head.buildDependencies
+  configureCompare(it, agentParams(configurations.head))
 }
