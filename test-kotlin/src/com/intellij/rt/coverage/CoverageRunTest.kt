@@ -343,6 +343,7 @@ internal abstract class CoverageRunTest : CoverageTest() {
     }
 
     @Test
+    @Ignore
     fun testMethodReference() {
         val testName = "custom.methodReference"
         test(testName) { projectData, config, file ->

@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation;
 
+import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.dataAccess.*;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
@@ -24,6 +25,7 @@ import com.intellij.rt.coverage.instrumentation.filters.classes.ClassFilter;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.OptionsUtil;
+import com.intellij.rt.coverage.util.StringsPool;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
@@ -57,8 +59,10 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
 
   @Override
   protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassVisitor cw) {
+    className = StringsPool.getFromPool(className);
     return createInstrumenter(data, className, cr, cw, testTrackingMode, data.isBranchCoverage(),
-        shouldSaveSource, OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS, createDataAccess(className, cr, data.isBranchCoverage()));
+        shouldSaveSource, OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS,
+        createDataAccess(data.getOrCreateClassData(className), cr, data.isBranchCoverage()));
   }
 
   /**
@@ -91,26 +95,26 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
     return result;
   }
 
-  private CoverageDataAccess createDataAccess(String className, ClassReader cr, boolean branchCoverage) {
+  private CoverageDataAccess createDataAccess(ClassData classData, ClassReader cr, boolean branchCoverage) {
     if (!branchCoverage && OptionsUtil.NEW_LINE_COVERAGE_ENABLED || branchCoverage && OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED) {
       if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
-        return new CondyCoverageDataAccess(createCondyInit(className, cr, branchCoverage));
+        return new CondyCoverageDataAccess(createCondyInit(classData, cr, branchCoverage));
       } else {
-        return new FieldCoverageDataAccess(cr, className, createInit(className, cr, branchCoverage));
+        return new FieldCoverageDataAccess(cr, classData.getName(), createInit(classData, cr, branchCoverage));
       }
     } else {
-      return new NameCoverageDataAccess(createInit(className, cr, branchCoverage));
+      return new NameCoverageDataAccess(createInit(classData, cr, branchCoverage));
     }
   }
 
-  protected CoverageDataAccess.Init createInit(String className, ClassReader cr, boolean branchCoverage) {
+  protected CoverageDataAccess.Init createInit(ClassData classData, ClassReader cr, boolean branchCoverage) {
     return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, ProjectData.PROJECT_DATA_OWNER,
-        "getHitsMask", "(Ljava/lang/String;)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className});
+        "getHitsMask", "(I)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{classData.getId()});
   }
 
-  protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr, boolean branchCoverage) {
+  protected CoverageDataAccess.Init createCondyInit(ClassData classData, ClassReader cr, boolean branchCoverage) {
     return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, "com/intellij/rt/coverage/util/CondyUtils",
-        "getHitsMask", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className});
+        "getHitsMask", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;I)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{classData.getId()});
   }
 
   @Override

@@ -67,7 +67,7 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
   public TestTrackingArrayInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldSaveSource, CoverageDataAccess dataAccess) {
     super(projectData, classVisitor, cr, className, shouldSaveSource, dataAccess);
     myInternalClassName = ClassNameUtil.convertToInternalName(className);
-    myArrayDataAccess = DataAccessUtil.createTestTrackingDataAccess(className, cr, true);
+    myArrayDataAccess = DataAccessUtil.createTestTrackingDataAccess(myClassData, cr, true);
   }
 
   protected MethodVisitor createMethodTransformer(final MethodVisitor mv, BranchesEnumerator enumerator, final int access, String name, final String desc) {

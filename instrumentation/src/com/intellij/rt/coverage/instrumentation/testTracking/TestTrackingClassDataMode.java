@@ -70,7 +70,7 @@ class TestTrackingClassDataInstrumenter extends BranchesInstrumenter {
 
   public TestTrackingClassDataInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldSaveSource, CoverageDataAccess dataAccess) {
     super(projectData, classVisitor, className, shouldSaveSource, dataAccess);
-    myDataAccess = DataAccessUtil.createTestTrackingDataAccess(className, cr, false);
+    myDataAccess = DataAccessUtil.createTestTrackingDataAccess(myClassData, cr, false);
   }
 
   @Override

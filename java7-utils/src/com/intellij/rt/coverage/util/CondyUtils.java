@@ -23,8 +23,8 @@ import java.lang.invoke.MethodHandles;
 
 @SuppressWarnings("unused")
 public class CondyUtils {
-  public static int[] getHitsMask(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className) {
-    return ProjectData.getHitsMask(className);
+  public static int[] getHitsMask(MethodHandles.Lookup lookup, String name, Class<?> clazz, int classId) {
+    return ProjectData.getHitsMask(classId);
   }
 
   public static int[] getOrCreateHitsMask(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className, int length) {

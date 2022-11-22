@@ -30,6 +30,7 @@ import java.util.*;
  */
 public class ClassData implements CoverageData {
   private final String myClassName;
+  private final int myId;
   private LineData[] myLinesArray;
   private Map<String, Integer> myStatus;
   private String mySource;
@@ -57,12 +58,21 @@ public class ClassData implements CoverageData {
    */
   private boolean myFullyAnalysed = false;
 
-  public ClassData(final String name) {
+  public ClassData(String name) {
+    this(name, -1);
+  }
+
+  public ClassData(String name, int id) {
     myClassName = name;
+    myId = id;
   }
 
   public String getName() {
     return myClassName;
+  }
+
+  public int getId() {
+    return myId;
   }
 
   public void save(final DataOutputStream os, DictionaryLookup dictionaryLookup) throws IOException {

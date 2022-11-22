@@ -43,7 +43,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   private TIntHashSet myIgnoredLines;
   protected int myMaxLineNumber = -1;
 
-  protected ClassData myClassData;
+  protected final ClassData myClassData;
   protected boolean myProcess;
   private boolean myIgnoreSection;
 
@@ -51,11 +51,11 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
     super(classVisitor, className);
     myProjectData = projectData;
     myShouldSaveSource = shouldSaveSource;
+    myClassData = myProjectData.getOrCreateClassData(className);
   }
 
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
     myProcess = (access & Opcodes.ACC_INTERFACE) == 0;
-    myClassData = myProjectData.getOrCreateClassData(StringsPool.getFromPool(getClassName()));
     super.visit(version, access, name, signature, superName, interfaces);
   }
 
@@ -129,7 +129,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   public void visitSource(String source, String debug) {
     super.visitSource(source, debug);
     if (myShouldSaveSource) {
-      myProjectData.getOrCreateClassData(StringsPool.getFromPool(getClassName())).setSource(source);
+      myProjectData.getOrCreateClassData(getClassName()).setSource(source);
     }
     if (debug != null) {
       final FileMapData[] mapping = JSR45Util.extractLineMapping(debug, getClassName());

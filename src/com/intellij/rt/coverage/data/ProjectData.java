@@ -36,7 +36,7 @@ public class ProjectData implements CoverageData, Serializable {
   public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/ProjectData";
 
   // ProjectData methods
-  private static final MethodCaller GET_HITS_MASK_METHOD = new MethodCaller("getHitsMask", new Class[]{String.class});
+  private static final MethodCaller GET_HITS_MASK_METHOD = new MethodCaller("getHitsMask", new Class[]{int.class});
   private static final MethodCaller GET_TRACE_MASK_METHOD = new MethodCaller("getTraceMask", new Class[]{String.class});
   private static final MethodCaller GET_CLASS_DATA_METHOD = new MethodCaller("getClassData", new Class[]{String.class});
   private static final MethodCaller REGISTER_CLASS_FOR_TRACE_METHOD = new MethodCaller("registerClassForTrace", new Class[]{Object.class});
@@ -44,7 +44,7 @@ public class ProjectData implements CoverageData, Serializable {
 
   private boolean myStopped;
 
-  public static ProjectData ourProjectData;
+  public static volatile ProjectData ourProjectData;
   private File myDataFile;
 
   private boolean myTestTracking;
@@ -61,7 +61,7 @@ public class ProjectData implements CoverageData, Serializable {
   private List<Pattern> myIncludePatterns;
   private List<Pattern> myExcludePatterns;
 
-  private final ClassesMap myClasses = new ClassesMap();
+  private final ClassStorage myClasses = new ClassStorage();
   private volatile Map<String, FileMapData[]> myLinesMap;
   private Map<String, ClassInstructions> myInstructions;
 
@@ -79,12 +79,7 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public ClassData getOrCreateClassData(String name) {
-    ClassData classData = myClasses.get(name);
-    if (classData == null) {
-      classData = new ClassData(name);
-      myClasses.put(name, classData);
-    }
-    return classData;
+    return myClasses.getOrCreate(name);
   }
 
   public static ProjectData getProjectData() {
@@ -177,14 +172,10 @@ public class ProjectData implements CoverageData, Serializable {
 
   public void merge(final CoverageData data) {
     final ProjectData projectData = (ProjectData) data;
-    for (Map.Entry<String, ClassData> entry : projectData.myClasses.myClasses.entrySet()) {
+    for (Map.Entry<String, ClassData> entry : projectData.myClasses.map().entrySet()) {
       final String key = entry.getKey();
       final ClassData mergedData = entry.getValue();
-      ClassData classData = myClasses.get(key);
-      if (classData == null) {
-        classData = new ClassData(mergedData.getName());
-        myClasses.put(key, classData);
-      }
+      ClassData classData = myClasses.getOrCreate(key);
       classData.merge(mergedData);
     }
 
@@ -252,7 +243,7 @@ public class ProjectData implements CoverageData, Serializable {
    * Update coverage data internally stored in arrays.
    */
   public void applyHits() {
-    for (ClassData data : myClasses.myClasses.values()) {
+    for (ClassData data : myClasses.values()) {
       data.applyHits();
     }
   }
@@ -332,11 +323,11 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public Map<String, ClassData> getClasses() {
-    return myClasses.asMap();
+    return myClasses.map();
   }
 
   public Collection<ClassData> getClassesCollection() {
-    return myClasses.myClasses.values();
+    return myClasses.values();
   }
 
 
@@ -403,15 +394,15 @@ public class ProjectData implements CoverageData, Serializable {
   /**
    * On class initialization at runtime, an instrumented class asks for hits array
    */
-  public static int[] getHitsMask(String className) {
+  public static int[] getHitsMask(int id) {
     if (ourProjectData != null) {
-      return ourProjectData.getClassData(className).getHitsMask();
+      return ourProjectData.myClasses.get(id).getHitsMask();
     }
     try {
       final Object projectData = getProjectDataObject();
-      return (int[]) GET_HITS_MASK_METHOD.invoke(projectData, new Object[]{className});
+      return (int[]) GET_HITS_MASK_METHOD.invoke(projectData, new Object[]{id});
     } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data access: " + className, e);
+      ErrorReporter.reportError("Error in class data access: " + id, e);
       return null;
     }
   }
@@ -420,15 +411,15 @@ public class ProjectData implements CoverageData, Serializable {
    * Get test tracking hits array at runtime.
    */
   @SuppressWarnings("unused")
-  public static boolean[] getTraceMask(String className) {
+  public static boolean[] getTraceMask(int id) {
     if (ourProjectData != null) {
-      return ourProjectData.getClassData(className).getTraceMask();
+      return ourProjectData.myClasses.get(id).getTraceMask();
     }
     try {
       final Object projectData = getProjectDataObject();
-      return (boolean[]) GET_TRACE_MASK_METHOD.invoke(projectData, new Object[]{className});
+      return (boolean[]) GET_TRACE_MASK_METHOD.invoke(projectData, new Object[]{id});
     } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data access: " + className, e);
+      ErrorReporter.reportError("Error in class data access: " + id, e);
       return null;
     }
   }
@@ -437,15 +428,15 @@ public class ProjectData implements CoverageData, Serializable {
    * Get class data object at runtime.
    */
   @SuppressWarnings("unused")
-  public static Object loadClassData(String className) {
+  public static Object loadClassData(int id) {
     if (ourProjectData != null) {
-      return ourProjectData.getClassData(className);
+      return ourProjectData.myClasses.get(id);
     }
     try {
       final Object projectData = getProjectDataObject();
-      return GET_CLASS_DATA_METHOD.invoke(projectData, new Object[]{className});
+      return GET_CLASS_DATA_METHOD.invoke(projectData, new Object[]{id});
     } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data loading: " + className, e);
+      ErrorReporter.reportError("Error in class data loading: " + id, e);
       return null;
     }
   }
@@ -459,72 +450,4 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   // ----------------------------------------------------------------------------------------------- //
-
-  /**
-   * This map provides faster read operations for the case when key is mostly the same
-   * object. In our case key is the class name which is the same string with high probability.
-   * According to CPU snapshots with usual map we spend a lot of time on equals() operation.
-   * This class was introduced to reduce number of equals().
-   */
-  private static class ClassesMap {
-    private static final int POOL_SIZE = 1024; // must be a power of two
-    private static final int MASK = POOL_SIZE - 1;
-    private static final int DEFAULT_CAPACITY = 1000;
-    private final IdentityClassData[] myIdentityArray = new IdentityClassData[POOL_SIZE];
-    private final Map<String, ClassData> myClasses = createClassesMap();
-
-    public int size() {
-      return myClasses.size();
-    }
-
-    public ClassData get(String name) {
-      int idx = name.hashCode() & MASK;
-      final IdentityClassData lastClassData = myIdentityArray[idx];
-      if (lastClassData != null) {
-        final ClassData data = lastClassData.getClassData(name);
-        if (data != null) return data;
-      }
-
-      final ClassData data = myClasses.get(name);
-      myIdentityArray[idx] = new IdentityClassData(name, data);
-      return data;
-    }
-
-    public void put(String name, ClassData data) {
-      myClasses.put(name, data);
-    }
-
-    public HashMap<String, ClassData> asMap() {
-      return new HashMap<String, ClassData>(myClasses);
-    }
-
-    public Collection<String> names() {
-      return myClasses.keySet();
-    }
-
-    private static Map<String, ClassData> createClassesMap() {
-      if (OptionsUtil.THREAD_SAFE_STORAGE) {
-        return new ConcurrentHashMap<String, ClassData>(DEFAULT_CAPACITY);
-      }
-      return new HashMap<String, ClassData>(DEFAULT_CAPACITY);
-    }
-  }
-
-  private static class IdentityClassData {
-    private final String myClassName;
-    private final ClassData myClassData;
-
-    private IdentityClassData(String className, ClassData classData) {
-      myClassName = className;
-      myClassData = classData;
-    }
-
-    public ClassData getClassData(String name) {
-      if (name == myClassName) {
-        return myClassData;
-      }
-      return null;
-    }
-  }
-
 }

@@ -54,14 +54,15 @@ public class UnloadedUtil {
                                     final boolean ignorePrivateConstructorOfUtilClass) {
     classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
       public void consume(ClassEntry classEntry) {
-        final ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
+        final String className = StringsPool.getFromPool(classEntry.getClassName());
+        final ClassData cd = projectData.getClassData(className);
         if (cd != null && cd.getLines() != null && cd.isFullyAnalysed()) return;
         try {
           final InputStream is = classEntry.getClassInputStream();
           if (is == null) return;
-          appendUnloadedClass(projectData, classEntry.getClassName(), new ClassReader(is), branchCoverage, calculateSource, ignorePrivateConstructorOfUtilClass, false);
+          appendUnloadedClass(projectData, className, new ClassReader(is), branchCoverage, calculateSource, ignorePrivateConstructorOfUtilClass, false);
         } catch (Throwable e) {
-          ErrorReporter.reportError("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
+          ErrorReporter.reportError("Failed to process unloaded class: " + className + ", error: " + e.getMessage(), e);
         }
       }
     });

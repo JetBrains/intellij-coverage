@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.dataAccess;
 
+import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.util.OptionsUtil;
@@ -28,21 +29,21 @@ public class DataAccessUtil {
   public static final String CLASS_DATA_NAME = "__$classData$__";
 
 
-  public static CoverageDataAccess createTestTrackingDataAccess(String className, ClassReader cr, boolean isArray) {
+  public static CoverageDataAccess createTestTrackingDataAccess(ClassData classData, ClassReader cr, boolean isArray) {
     if (OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED) {
-      return new FieldCoverageDataAccess(cr, className, isArray ? createTestTrackingArrayInit(className) : createTestTrackingInit(className));
+      return new FieldCoverageDataAccess(cr, classData.getName(), isArray ? createTestTrackingArrayInit(classData) : createTestTrackingInit(classData));
     } else {
-      return new NameCoverageDataAccess(createTestTrackingInit(className));
+      return new NameCoverageDataAccess(createTestTrackingInit(classData));
     }
   }
 
-  private static CoverageDataAccess.Init createTestTrackingInit(String className) {
+  private static CoverageDataAccess.Init createTestTrackingInit(ClassData classData) {
     return new CoverageDataAccess.Init(CLASS_DATA_NAME, InstrumentationUtils.OBJECT_TYPE, ProjectData.PROJECT_DATA_OWNER,
-        "loadClassData", "(Ljava/lang/String;)" + InstrumentationUtils.OBJECT_TYPE, new Object[]{className});
+        "loadClassData", "(I)" + InstrumentationUtils.OBJECT_TYPE, new Object[]{classData.getId()});
   }
 
-  private static CoverageDataAccess.Init createTestTrackingArrayInit(String className) {
+  private static CoverageDataAccess.Init createTestTrackingArrayInit(ClassData classData) {
     return new CoverageDataAccess.Init("__$traceMask$__", TEST_MASK_ARRAY_TYPE, ProjectData.PROJECT_DATA_OWNER,
-        "getTraceMask", "(Ljava/lang/String;)" + TEST_MASK_ARRAY_TYPE, new Object[]{className});
+        "getTraceMask", "(I)" + TEST_MASK_ARRAY_TYPE, new Object[]{classData.getId()});
   }
 }
