@@ -22,7 +22,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 /**
- * Kotlin compiler extra instruction to invert boolean value:
+ * Java/Kotlin compilers generate extra instructions to invert boolean value:
  * <ol>
  * <li>IFNE LABEL_1</li>
  * <li>ICONST_1</li>
@@ -32,7 +32,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * <li>LABEL_2</li>
  * </ol>
  */
-public class KotlinNotFilter extends BranchesFilter {
+public class BooleanInvertFilter extends BranchesFilter {
   private Label myTrueLabel;
   private Label myFalseLabel;
   private int myState = 0;
@@ -40,7 +40,7 @@ public class KotlinNotFilter extends BranchesFilter {
 
   @Override
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
-    return KotlinUtils.isKotlinClass(context);
+    return true;
   }
 
   @Override

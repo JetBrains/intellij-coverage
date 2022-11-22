@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package testData.kotlin.not
+package testData.not.java;
 
-fun main() {
-    val x = listOf(1)  // coverage: FULL
-    val y = x.isNotEmpty()  // coverage: FULL
-    println(!y)  // coverage: FULL
-    println(!!y) // coverage: FULL
+public class Test { // coverage: NONE
+  public static void main(String[] args) {
+    boolean x = true;             // coverage: FULL
+    System.out.println(!x);       // coverage: FULL
+
+    boolean y = args.length == 0; // coverage: FULL
+    System.out.println(!y);       // coverage: FULL
+  }
 }

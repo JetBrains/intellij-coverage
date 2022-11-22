@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters;
 
+import com.intellij.rt.coverage.instrumentation.filters.branches.BooleanInvertFilter;
 import com.intellij.rt.coverage.instrumentation.filters.branches.BranchesFilter;
 import com.intellij.rt.coverage.instrumentation.filters.branches.NotNullAssertionsFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classes.ClassFilter;
@@ -51,6 +52,7 @@ public class FilterUtils {
   public static List<BranchesFilter> createBranchFilters() {
     List<BranchesFilter> result = KotlinUtils.createBranchFilters();
     result.add(new NotNullAssertionsFilter());
+    result.add(new BooleanInvertFilter());
     return result;
   }
 }
