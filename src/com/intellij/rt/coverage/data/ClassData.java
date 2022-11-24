@@ -29,6 +29,11 @@ import java.util.*;
  * Represents a class in coverage engine.
  */
 public class ClassData implements CoverageData {
+  /**
+   * Hits value forced to be in [0, MAX_HITS] to prevent hits overflow.
+   */
+  private static final int MAX_HITS = 1000000000;
+
   private final String myClassName;
   private LineData[] myLinesArray;
   private Map<String, Integer> myStatus;
@@ -271,15 +276,27 @@ public class ClassData implements CoverageData {
     myTraceMask = traceMask;
   }
 
+  public static int trimHits(int hits) {
+    if (0 <= hits && hits <= MAX_HITS) return hits;
+    return MAX_HITS;
+  }
+
   public void applyHits() {
-    if (myHitsMask == null) return;
+    final int[] hits = myHitsMask;
+    if (hits == null) return;
+
+    for (int i = 0; i < hits.length; ++i) {
+      if (hits[i] < 0 || hits[i] > MAX_HITS) {
+        hits[i] = MAX_HITS;
+      }
+    }
     try {
       for (LineData lineData : myLinesArray) {
         if (lineData == null) continue;
         int lineId = lineData.getId();
         if (lineId != -1) {
-          lineData.setHits(lineData.getHits() + myHitsMask[lineId]);
-          myHitsMask[lineId] = 0;
+          lineData.setHits(lineData.getHits() + hits[lineId]);
+          hits[lineId] = 0;
         }
 
         JumpData[] jumps = lineData.getJumps();
@@ -288,13 +305,13 @@ public class ClassData implements CoverageData {
             if (jumpData == null) continue;
             int trueId = jumpData.getId(true);
             if (trueId != -1) {
-              jumpData.setTrueHits(jumpData.getTrueHits() + myHitsMask[trueId]);
-              myHitsMask[trueId] = 0;
+              jumpData.setTrueHits(jumpData.getTrueHits() + hits[trueId]);
+              hits[trueId] = 0;
             }
             int falseId = jumpData.getId(false);
             if (falseId != -1) {
-              jumpData.setFalseHits(jumpData.getFalseHits() + myHitsMask[falseId]);
-              myHitsMask[falseId] = 0;
+              jumpData.setFalseHits(jumpData.getFalseHits() + hits[falseId]);
+              hits[falseId] = 0;
             }
           }
         }
@@ -305,17 +322,17 @@ public class ClassData implements CoverageData {
             if (switchData == null) continue;
             int defaultId = switchData.getId(-1);
             if (defaultId != -1) {
-              switchData.setDefaultHits(switchData.getDefaultHits() + myHitsMask[defaultId]);
-              myHitsMask[defaultId] = 0;
+              switchData.setDefaultHits(switchData.getDefaultHits() + hits[defaultId]);
+              hits[defaultId] = 0;
             }
-            int[] hits = switchData.getHits();
-            for (int i = 0; i < hits.length; i++) {
+            int[] switchHits = switchData.getHits();
+            for (int i = 0; i < switchHits.length; i++) {
               int caseId = switchData.getId(i);
               if (caseId == -1) continue;
-              hits[i] += myHitsMask[caseId];
-              myHitsMask[caseId] = 0;
+              switchHits[i] += hits[caseId];
+              hits[caseId] = 0;
             }
-            switchData.setKeysAndHits(switchData.getKeys(), hits);
+            switchData.setKeysAndHits(switchData.getKeys(), switchHits);
           }
         }
       }

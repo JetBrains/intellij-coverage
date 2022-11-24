@@ -113,7 +113,7 @@ public class LineData implements CoverageData {
 
   public void merge(final CoverageData data) {
     LineData lineData = (LineData) data;
-    myHits += lineData.myHits;
+    setHits(myHits + lineData.getHits());
     if (myJumpsAndSwitches != null || lineData.myJumpsAndSwitches != null) {
       getOrCreateJumpsAndSwitches().merge(lineData.getOrCreateJumpsAndSwitches());
     }
@@ -228,7 +228,7 @@ public class LineData implements CoverageData {
   }
 
   public void setHits(final int hits) {
-    myHits = hits;
+    myHits = ClassData.trimHits(hits);
   }
 
   public void setTestName(String testName) {

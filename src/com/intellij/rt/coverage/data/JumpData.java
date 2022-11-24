@@ -51,16 +51,16 @@ public class JumpData implements CoverageData {
 
   public void merge(final CoverageData data) {
     final JumpData jumpData = (JumpData) data;
-    myTrueHits += jumpData.myTrueHits;
-    myFalseHits += jumpData.myFalseHits;
+    setTrueHits(myTrueHits + jumpData.myTrueHits);
+    setFalseHits(myFalseHits + jumpData.myFalseHits);
   }
 
   public void setTrueHits(final int trueHits) {
-    myTrueHits = trueHits;
+    myTrueHits = ClassData.trimHits(trueHits);
   }
 
   public void setFalseHits(final int falseHits) {
-    myFalseHits = falseHits;
+    myFalseHits = ClassData.trimHits(falseHits);
   }
 
   public int getId(boolean type) {

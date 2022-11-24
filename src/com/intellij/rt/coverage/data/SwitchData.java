@@ -64,9 +64,9 @@ public class SwitchData implements CoverageData {
 
   public void merge(final CoverageData data) {
     SwitchData switchData = (SwitchData) data;
-    myDefaultHits += switchData.myDefaultHits;
+    setDefaultHits(myDefaultHits + switchData.myDefaultHits);
     for (int i = Math.min(myHits.length, switchData.myHits.length) - 1; i >= 0; i--) {
-      myHits[i] += switchData.myHits[i];
+      myHits[i] = ClassData.trimHits(myHits[i] + switchData.myHits[i]);
     }
     if (switchData.myHits.length > myHits.length) {
       int[] old = myHits;
@@ -78,12 +78,15 @@ public class SwitchData implements CoverageData {
   }
 
   public void setDefaultHits(final int defaultHits) {
-    myDefaultHits = defaultHits;
+    myDefaultHits = ClassData.trimHits(defaultHits);
   }
 
   public void setKeysAndHits(final int[] keys, final int[] hits) {
     myKeys = keys;
     myHits = hits;
+    for (int i = 0; i < myHits.length; i++) {
+      myHits[i] = ClassData.trimHits(myHits[i]);
+    }
   }
 
   public int[] getKeys() {
