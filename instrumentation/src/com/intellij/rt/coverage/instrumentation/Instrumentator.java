@@ -20,7 +20,7 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingArrayMode;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingClassDataMode;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
-import com.intellij.rt.coverage.report.CoverageReport;
+import com.intellij.rt.coverage.util.CoverageReport;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.TestTrackingCallback;

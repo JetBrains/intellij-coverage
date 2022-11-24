@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.report;
+package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.util.CoverageIOUtil;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntProcedure;

@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.report;
+package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
 import com.intellij.rt.coverage.instrumentation.filters.lines.KotlinInlineFilter;
-import com.intellij.rt.coverage.util.CoverageIOUtil;
-import com.intellij.rt.coverage.util.DictionaryLookup;
-import com.intellij.rt.coverage.util.ErrorReporter;
-import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 

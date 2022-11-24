@@ -18,10 +18,10 @@ package com.intellij.rt.coverage.aggregate;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.report.ProjectDataLoader;
 import com.intellij.rt.coverage.report.TestUtils;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.data.Filters;
+import com.intellij.rt.coverage.util.ProjectDataLoader;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;

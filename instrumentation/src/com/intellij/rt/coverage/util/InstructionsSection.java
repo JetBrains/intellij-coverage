@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.report;
+package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
@@ -24,7 +24,6 @@ import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.data.instructions.JumpInstructions;
 import com.intellij.rt.coverage.data.instructions.LineInstructions;
 import com.intellij.rt.coverage.data.instructions.SwitchInstructions;
-import com.intellij.rt.coverage.util.CoverageIOUtil;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 
 import java.io.DataInputStream;

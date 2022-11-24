@@ -17,7 +17,7 @@
 package com.intellij.rt.coverage;
 
 import com.intellij.rt.coverage.data.ClassData;
-import com.intellij.rt.coverage.report.CoverageReport;
+import com.intellij.rt.coverage.util.CoverageReport;
 import junit.framework.TestCase;
 
 import java.io.File;

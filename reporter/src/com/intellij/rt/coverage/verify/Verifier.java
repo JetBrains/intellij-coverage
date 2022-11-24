@@ -17,8 +17,8 @@
 package com.intellij.rt.coverage.verify;
 
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.report.ProjectDataLoader;
 import com.intellij.rt.coverage.report.util.FileUtils;
+import com.intellij.rt.coverage.util.ProjectDataLoader;
 import org.json.JSONObject;
 
 import java.io.File;
