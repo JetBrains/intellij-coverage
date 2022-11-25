@@ -60,7 +60,7 @@ public class LineMapData {
   }
 
   public String toString() {
-    return "map [" + myMappedStart + "; " + myMappedStart + myCount * myIncrement + ") to [" + mySourceStart + "; " + mySourceStart + myCount + ")";
+    return "map [" + myMappedStart + "; " + (myMappedStart + myCount * myIncrement) + ") to [" + mySourceStart + "; " + (mySourceStart + myCount) + ")";
   }
 
   private void checkIndex(int index) {

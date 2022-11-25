@@ -79,7 +79,8 @@ public class BranchDataContainer {
     }
   }
 
-  public void addJump(LineData lineData, int index, Label trueLabel, Label falseLabel) {
+  public void addJump(LineData lineData, Label trueLabel, Label falseLabel) {
+    int index = lineData.jumpsCount();
     int line = lineData.getLineNumber();
     // jump type is inverted as jump occurs if value is true
     Jump trueJump = new Jump(incrementId(), index, line, false);
@@ -96,7 +97,8 @@ public class BranchDataContainer {
     jumpData.setId(falseJump.getId(), falseJump.getType());
   }
 
-  public void addSwitch(LineData lineData, int index, Label dflt, int[] keys, Label[] labels) {
+  public void addSwitch(LineData lineData, int[] keys, Label dflt, Label[] labels) {
+    final int index = lineData.switchesCount();
     List<Switch> switches = rememberSwitchLabels(lineData.getLineNumber(), dflt, labels, index);
     SwitchData switchData = lineData.addSwitch(index, keys);
     setSwitchIds(switchData, switches);

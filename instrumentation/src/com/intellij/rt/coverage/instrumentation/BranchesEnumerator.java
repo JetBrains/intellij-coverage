@@ -83,10 +83,9 @@ public class BranchesEnumerator extends MethodVisitor implements Opcodes {
     if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR && !InstrumentationUtils.CLASS_INIT.equals(myMethodName)) {
       final LineData lineData = myInstrumenter.getLineData(myCurrentLine);
       if (lineData != null) {
-        int currentJump = lineData.jumpsCount();
         Label trueLabel = new Label();
         Label falseLabel = new Label();
-        myBranchData.addJump(lineData, currentJump, trueLabel, falseLabel);
+        myBranchData.addJump(lineData, trueLabel, falseLabel);
         onNewJump(label, trueLabel, falseLabel);
 
         jumpInstrumented = true;
@@ -117,7 +116,7 @@ public class BranchesEnumerator extends MethodVisitor implements Opcodes {
     super.visitJumpInsn(Opcodes.GOTO, beforeSwitchLabel);
 
     final SwitchLabels replacement = new SwitchLabels(newDefaultLabel, newLabels);
-    myBranchData.addSwitch(lineData, lineData.switchesCount(), newDefaultLabel, keys, newLabels);
+    myBranchData.addSwitch(lineData, keys, newDefaultLabel, newLabels);
     onNewSwitch(original, replacement);
 
     for (int i = 0; i < newLabels.length; i++) {
