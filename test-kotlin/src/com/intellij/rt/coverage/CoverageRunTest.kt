@@ -45,7 +45,6 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testCasesWhenEnum() = test("cases.whenEnum")
 
     @Test
-    @Ignore("Not implemented")
     fun testCasesWhenString() = test("cases.whenString")
 
     @Test

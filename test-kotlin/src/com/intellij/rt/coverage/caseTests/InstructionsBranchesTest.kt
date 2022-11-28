@@ -37,6 +37,9 @@ internal abstract class InstructionsBranchesTest(override val coverage: Coverage
     fun testCasesWhenEnum() = test("cases.whenEnum")
 
     @Test
+    fun testCasesWhenString() = test("cases.whenString")
+
+    @Test
     fun testDefaultArgsConstructor() = test("defaultArgs.constructor")
 
     @Test
