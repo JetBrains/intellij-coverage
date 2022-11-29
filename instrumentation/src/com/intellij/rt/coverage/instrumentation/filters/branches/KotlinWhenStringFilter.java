@@ -25,7 +25,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * In <code>when</code> by String construction, Kotlin compiler generates extra branches.
  * Firstly, check for null string if applicable:
  * <ol>
- *   <il>IFNULL (default branch)</il>
+ *   <li>IFNULL (default branch)</li>
  * </ol>
  * <p>
  * Secondly, switch by hashCode:
@@ -95,17 +95,17 @@ public class KotlinWhenStringFilter extends BranchesFilter {
   @Override
   public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
     super.visitLookupSwitchInsn(dflt, keys, labels);
-    visitSwitch(dflt, labels);
+    visitSwitch(dflt);
   }
 
 
   @Override
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
     super.visitTableSwitchInsn(min, max, dflt, labels);
-    visitSwitch(dflt, labels);
+    visitSwitch(dflt);
   }
 
-  private void visitSwitch(Label dflt, Label[] labels) {
+  private void visitSwitch(Label dflt) {
     if (myState == 2) {
       if (myJumpLabel == dflt) {
         myJumpLabel = null;
