@@ -1,56 +1,76 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.7.21'
+  id 'org.jetbrains.kotlin.jvm'
 }
 
 sourceSets {
-    main.java.srcDirs = []
-    test.java.srcDirs = [file('src')]
+  main.java.srcDirs = []
+  test.java.srcDirs = [file('src')]
 }
 
 String testJdkVersion = test.javaVersion >= JavaVersion.VERSION_11 ? 11 : 1.8
 sourceCompatibility = 1.8
 targetCompatibility = testJdkVersion
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        jvmTarget = testJdkVersion
-    }
+  kotlinOptions {
+    jvmTarget = testJdkVersion
+  }
 }
 
 dependencies {
-    testImplementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    testImplementation('org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0')
-    testImplementation("org.jetbrains.kotlin:kotlin-reflect:1.7.0-RC2")
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
+  testImplementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+  def coroutinesVersion = rootProject.hasProperty("kotlin.version") &&
+      rootProject["kotlin.version"].startsWith("1.5") ? "1.5.2" : "1.6.4"
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+  testImplementation("org.jetbrains.kotlin:kotlin-reflect")
+  testImplementation("org.jetbrains.kotlin:kotlin-test")
 
-    testImplementation(files(project(":tests").sourceSets.test.output))
-    testImplementation(project(":instrumentation"))
-    testImplementation(fileTree(project(":benchmarks").file("lib")))
+  testImplementation(files(project(":tests").sourceSets.test.output))
+  testImplementation(project(":instrumentation"))
+  testImplementation(fileTree(project(":benchmarks").file("lib")))
 
-    testImplementation('junit:junit:4.13.2')
+  testImplementation('junit:junit:4.13.2')
 
-    testImplementation("net.bytebuddy:byte-buddy:1.11.12")
-    testImplementation("net.bytebuddy:byte-buddy-agent:1.11.12")
+  testImplementation("net.bytebuddy:byte-buddy:1.11.12")
+  testImplementation("net.bytebuddy:byte-buddy-agent:1.11.12")
 
-    testImplementation("org.jmockit:jmockit:1.49")
-    testCompileOnly('org.projectlombok:lombok:1.18.24')
-    testAnnotationProcessor('org.projectlombok:lombok:1.18.24')
+  testImplementation("org.jmockit:jmockit:1.49")
+  testCompileOnly('org.projectlombok:lombok:1.18.24')
+  testAnnotationProcessor('org.projectlombok:lombok:1.18.24')
 }
 
 task generateTests(type: JavaExec) {
+  group = "verification"
+  description = "Generate tests"
+  classpath = sourceSets.test.runtimeClasspath
+  main = "com.intellij.rt.coverage.TestGenerationKt"
+}
+
+def configureTests(Test task) {
+  task.with {
     group = "verification"
-    description = "Generate tests"
-    classpath = sourceSets.test.runtimeClasspath
-    main = "com.intellij.rt.coverage.TestGenerationKt"
+    exclude("testData/**")
+    if (javaVersion < JavaVersion.VERSION_11) {
+      print("Condy tests require JDK11")
+      exclude("com/intellij/rt/coverage/Condy**")
+      exclude("com/intellij/rt/coverage/caseTests/Condy**")
+    }
+    if (rootProject.hasProperty("parallel.tests")) {
+      maxParallelForks = Math.min(2, Runtime.getRuntime().availableProcessors())
+    }
+  }
 }
 
 test {
-    exclude("testData/**")
-    if (javaVersion < JavaVersion.VERSION_11) {
-        print("Condy tests require JDK11")
-        exclude("com/intellij/rt/coverage/Condy**")
-        exclude("com/intellij/rt/coverage/caseTests/Condy**")
-    }
-    if (rootProject.hasProperty("parallel.tests")) {
-        maxParallelForks = Math.min(2, Runtime.getRuntime().availableProcessors())
-    }
+  configureTests(it)
+}
+
+// These tests should pass for different kotlin compiler versions
+task lineStatusTests(type: Test) {
+  configureTests(it)
+  filter {
+    includeTestsMatching("com.intellij.rt.coverage.**CoverageTest")
+    includeTestsMatching("com.intellij.rt.coverage.caseTests.LineSignatureTest")
+    includeTestsMatching("com.intellij.rt.coverage.caseTests.Offline**InstrumentationTest")
+    excludeTestsMatching("com.intellij.rt.coverage.**CoverageTest.testThreadSafeStructure")
+  }
 }

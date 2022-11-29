@@ -1,3 +1,11 @@
+pluginManagement {
+  def kotlinVersion = settings.hasProperty("kotlin.version") ? (String)settings["kotlin.version"] : "1.7.21"
+  println "Use Kotlin version $kotlinVersion"
+  plugins {
+    id 'org.jetbrains.kotlin.jvm' version kotlinVersion
+  }
+}
+
 rootProject.name = 'intellij-coverage'
 
 include ':instrumentation'
