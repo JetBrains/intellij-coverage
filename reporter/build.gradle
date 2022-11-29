@@ -1,9 +1,5 @@
 plugins {
-  id 'org.jetbrains.kotlin.jvm' version '1.6.0'
-}
-
-repositories {
-  mavenCentral()
+  id 'org.jetbrains.kotlin.jvm' version '1.7.21'
 }
 
 sourceCompatibility = 1.6

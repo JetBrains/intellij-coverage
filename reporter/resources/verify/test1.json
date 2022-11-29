@@ -6,7 +6,7 @@
         "testData.branches.TestKt": "5",
         "testData.noReport.branches.MyBranchedUnloadedClass": "0",
         "testData.crossinline.TestKt$main$3": "0",
-        "testData.branches.MyBranchedClass": "8",
+        "testData.branches.MyBranchedClass": "9",
         "testData.crossinline.TestKt$main$$inlined$run$1": "0",
         "testData.crossinline.TestKt$run$2": "0",
         "testData.defaultArgs.Example": "0",
@@ -18,7 +18,10 @@
         "testData.outOfPackageStructure.TestOutOfPackageStructureKt": "0",
         "testData.crossinline.TestKt": "0"
       },
-      "max": {"testData.simple.Main": "17"}
+      "max": {
+        "testData.simple.Main": "17",
+        "testData.inline.TestKt": "18"
+      }
     },
     "2": {"max": {
       "testData.noReport.branches.MyBranchedUnloadedClass": "1.000000",

@@ -19,36 +19,36 @@ package testData.simple.ifelse
 // instructions & branches
 
 fun test(x: Boolean, y: Boolean, z: Boolean) {
-    if (x) {                            // coverage: PARTIAL // stats: 3/3 1/2
-        println("X is true")            // coverage: FULL    // stats: 4/4
+    if (x) {                            // coverage: PARTIAL // stats: 2/2 1/2
+        println("X is true")            // coverage: FULL    // stats: 5/5
     } else {
-        println("X is false")           // coverage: NONE    // stats: 0/2
+        println("X is false")           // coverage: NONE    // stats: 0/4
     }
-    if (y) {                            // coverage: PARTIAL // stats: 2/3 1/2
-        println("Y is true")            // coverage: NONE    // stats: 0/2
+    if (y) {                            // coverage: PARTIAL // stats: 2/2 1/2
+        println("Y is true")            // coverage: NONE    // stats: 0/4
     }
-    if (z) {                            // coverage: PARTIAL // stats: 3/3 1/2
-        println("Y is true")            // coverage: FULL    // stats: 2/2
+    if (z) {                            // coverage: PARTIAL // stats: 2/2 1/2
+        println("Y is true")            // coverage: FULL    // stats: 4/4
         return
     }
 }
 
 fun test2(x: Boolean, y: Boolean) {
-    if (x) {                            // coverage: FULL    // stats: 3/3 2/2
-        println("X is true")            // coverage: FULL    // stats: 4/4
+    if (x) {                            // coverage: FULL    // stats: 2/2 2/2
+        println("X is true")            // coverage: FULL    // stats: 5/5
     } else {
-        println("X is false")           // coverage: FULL    // stats: 2/2
+        println("X is false")           // coverage: FULL    // stats: 4/4
     }
-    if (y) {                            // coverage: PARTIAL // stats: 3/3 1/2
-        println("Y is true")            // coverage: FULL    // stats: 2/2
+    if (y) {                            // coverage: PARTIAL // stats: 2/2 1/2
+        println("Y is true")            // coverage: FULL    // stats: 4/4
     }
 }
 
 
 fun test3(b: Boolean) {
     if (!b) {                           // coverage: PARTIAL // stats: 2/2 1/2
-        while (b) {                     // coverage: PARTIAL // stats: 2/3 1/2
-            println("")                 // coverage: NONE    // stats: 0/3
+        while (b) {                     // coverage: PARTIAL // stats: 2/2 1/2
+            println("")                 // coverage: NONE    // stats: 0/5
         }
     }
 }

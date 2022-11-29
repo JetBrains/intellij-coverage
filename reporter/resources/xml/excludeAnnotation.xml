@@ -3,18 +3,18 @@
 <package name="testData/excludeAnnotation">
 <class name="testData/excludeAnnotation/AbsolutelyUnusedClass" sourcefilename="test.kt">
 <method name="boo" desc="()V">
-<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="INSTRUCTION" missed="8" covered="0"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="2" covered="0"/>
 </method>
-<counter type="INSTRUCTION" missed="7" covered="0"/>
+<counter type="INSTRUCTION" missed="8" covered="0"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="2" covered="0"/>
 <counter type="METHOD" missed="1" covered="0"/>
 </class>
 <class name="testData/excludeAnnotation/Foo" sourcefilename="test.kt">
 <method name="foo" desc="()V">
-<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="INSTRUCTION" missed="0" covered="4"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="1"/>
 </method>
@@ -23,61 +23,61 @@
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="1"/>
 </method>
-<counter type="INSTRUCTION" missed="0" covered="4"/>
+<counter type="INSTRUCTION" missed="0" covered="6"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="2"/>
 <counter type="METHOD" missed="0" covered="2"/>
 </class>
 <class name="testData/excludeAnnotation/TestKt" sourcefilename="test.kt">
 <method name="foo" desc="()V">
-<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="INSTRUCTION" missed="0" covered="4"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="1"/>
 </method>
 <method name="main" desc="()V">
-<counter type="INSTRUCTION" missed="0" covered="17"/>
+<counter type="INSTRUCTION" missed="0" covered="14"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="5"/>
 </method>
-<counter type="INSTRUCTION" missed="0" covered="19"/>
+<counter type="INSTRUCTION" missed="0" covered="18"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="0" covered="6"/>
 <counter type="METHOD" missed="0" covered="2"/>
 </class>
 <class name="testData/excludeAnnotation/UnusedClass" sourcefilename="test.kt">
 <method name="boo" desc="()V">
-<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="1" covered="0"/>
 </method>
-<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="1" covered="0"/>
 <counter type="METHOD" missed="1" covered="0"/>
 </class>
 <sourcefile name="test.kt">
-<line nr="21" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="21" mi="0" ci="4" mb="0" cb="0"/>
 <line nr="29" mi="0" ci="2" mb="0" cb="0"/>
-<line nr="31" mi="0" ci="2" mb="0" cb="0"/>
-<line nr="51" mi="2" ci="0" mb="0" cb="0"/>
-<line nr="64" mi="5" ci="0" mb="0" cb="0"/>
-<line nr="65" mi="2" ci="0" mb="0" cb="0"/>
-<line nr="70" mi="0" ci="3" mb="0" cb="0"/>
-<line nr="71" mi="0" ci="3" mb="0" cb="0"/>
+<line nr="31" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="51" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="64" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="65" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="70" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="71" mi="0" ci="2" mb="0" cb="0"/>
 <line nr="72" mi="0" ci="4" mb="0" cb="0"/>
 <line nr="73" mi="0" ci="4" mb="0" cb="0"/>
-<line nr="74" mi="0" ci="3" mb="0" cb="0"/>
-<counter type="INSTRUCTION" missed="9" covered="23"/>
+<line nr="74" mi="0" ci="2" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="12" covered="24"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="3" covered="8"/>
 </sourcefile>
-<counter type="INSTRUCTION" missed="9" covered="23"/>
+<counter type="INSTRUCTION" missed="12" covered="24"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="3" covered="8"/>
 <counter type="METHOD" missed="2" covered="4"/>
 <counter type="CLASS" missed="2" covered="2"/>
 </package>
-<counter type="INSTRUCTION" missed="9" covered="23"/>
+<counter type="INSTRUCTION" missed="12" covered="24"/>
 <counter type="BRANCH" missed="0" covered="0"/>
 <counter type="LINE" missed="3" covered="8"/>
 <counter type="METHOD" missed="2" covered="4"/>

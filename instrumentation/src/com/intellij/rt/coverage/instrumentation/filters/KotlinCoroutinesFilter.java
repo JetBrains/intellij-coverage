@@ -38,6 +38,8 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   private boolean myHadLineDataBefore = false;
   private final Instrumenter myContext;
 
+  private int myState = 0;
+
   public KotlinCoroutinesFilter(MethodVisitor methodVisitor, Instrumenter instrumenter) {
     super(Opcodes.API_VERSION, methodVisitor);
     myContext = instrumenter;
@@ -72,6 +74,14 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   @Override
   public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
     super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+
+    if (myState == 3 && opcode == Opcodes.INVOKESPECIAL
+        && "java/lang/IllegalStateException".equals(owner)
+        && "<init>".equals(name) && "(Ljava/lang/String;)V".equals(descriptor)) {
+      myState = 4;
+    } else {
+      myState = 0;
+    }
 
     boolean getCoroutinesSuspendedVisited = opcode == Opcodes.INVOKESTATIC
         && owner.equals("kotlin/coroutines/intrinsics/IntrinsicsKt")
@@ -144,9 +154,39 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   @Override
   public void visitInsn(int opcode) {
     super.visitInsn(opcode);
+    if (myState == 1 && opcode == Opcodes.DUP) {
+      myState = 2;
+      return;
+    } else if (myState == 4 && opcode == Opcodes.ATHROW) {
+      if (!myHadLineDataBefore) {
+        onIgnoredLine(myLine);
+      }
+      return;
+    }
+    myState = 0;
     // ignore generated return on the first line
     if (opcode == Opcodes.ARETURN && myLoadCoroutinesSuspendedVisited && !myHadLineDataBefore) {
       onIgnoredLine(myLine);
+    }
+  }
+
+  @Override
+  public void visitTypeInsn(int opcode, String type) {
+    super.visitTypeInsn(opcode, type);
+    if (opcode == Opcodes.NEW && "java/lang/IllegalStateException".equals(type)) {
+      myState = 1;
+    } else {
+      myState = 0;
+    }
+  }
+
+  @Override
+  public void visitLdcInsn(Object value) {
+    super.visitLdcInsn(value);
+    if (myState == 2 && "call to 'resume' before 'invoke' with coroutine".equals(value)) {
+      myState = 3;
+    } else {
+      myState = 0;
     }
   }
 }

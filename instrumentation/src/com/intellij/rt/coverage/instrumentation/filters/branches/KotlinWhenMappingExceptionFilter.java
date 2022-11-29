@@ -29,12 +29,16 @@ import java.util.Map;
 
 /**
  * Filter out generated branch of when statement.
+ * There could be an if or switch branch leading to a throw.
+ * Alternatively, there could be an if, jumping over the throw.
  */
 public class KotlinWhenMappingExceptionFilter extends BranchesFilter {
   private Map<Label, PositionData> myJumpLabels;
   private Map<Label, PositionData> mySwitchLabels;
   private Label myCurrentLabel = null;
   private int myCurrentLine;
+  private int myState = 0;
+  private Label myJumpLabel;
 
   @Override
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
@@ -51,10 +55,16 @@ public class KotlinWhenMappingExceptionFilter extends BranchesFilter {
   public void visitLabel(Label label) {
     super.visitLabel(label);
     myCurrentLabel = label;
+    if (myState == 2 && label == myJumpLabel) {
+      myBranchData.removeLastJump();
+    }
+    myState = 0;
   }
 
   @Override
   public void visitJumpInsn(int opcode, Label label) {
+    myJumpLabel = label;
+    myState = 1;
     if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR) {
       final LineData lineData = myContext.getLineData(myCurrentLine);
       if (lineData != null) {
@@ -79,6 +89,11 @@ public class KotlinWhenMappingExceptionFilter extends BranchesFilter {
   public void visitTypeInsn(int opcode, String type) {
     super.visitTypeInsn(opcode, type);
     if (opcode == Opcodes.NEW && type.equals("kotlin/NoWhenBranchMatchedException")) {
+      if (myState == 1) {
+        myState = 2;
+      } else {
+        myState = 0;
+      }
       final PositionData jumpPosition = myJumpLabels == null ? null : myJumpLabels.get(myCurrentLabel);
       if (jumpPosition != null) {
         final LineData lineData = myContext.getLineData(jumpPosition.myLine);
@@ -99,6 +114,8 @@ public class KotlinWhenMappingExceptionFilter extends BranchesFilter {
           }
         }
       }
+    } else {
+      myState = 0;
     }
   }
 

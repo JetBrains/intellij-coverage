@@ -56,7 +56,7 @@ public class VerifierTest {
     final Verifier.Bound bound1_2 = new Verifier.Bound(2, Verifier.Counter.BRANCH, Verifier.ValueType.COVERED_RATE, BigDecimal.valueOf(0.0), null);
     rules.add(createRule(Verifier.Target.ALL, bound1_1, bound1_2));
 
-    final Verifier.Bound bound2_1 = new Verifier.Bound(1, Verifier.Counter.INSTRUCTION, Verifier.ValueType.COVERED, BigDecimal.valueOf(5), BigDecimal.valueOf(43));
+    final Verifier.Bound bound2_1 = new Verifier.Bound(1, Verifier.Counter.INSTRUCTION, Verifier.ValueType.COVERED, BigDecimal.valueOf(5), BigDecimal.valueOf(52));
     final Verifier.Bound bound2_2 = new Verifier.Bound(2, Verifier.Counter.BRANCH, Verifier.ValueType.MISSED_RATE, BigDecimal.valueOf(0.0), null);
     rules.add(createRule(Verifier.Target.ALL, bound2_1, bound2_2));
 
