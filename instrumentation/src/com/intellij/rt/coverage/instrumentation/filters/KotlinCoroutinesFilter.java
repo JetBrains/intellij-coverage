@@ -39,6 +39,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   private final Instrumenter myContext;
 
   private int myState = 0;
+  private boolean myHasInstructions;
 
   public KotlinCoroutinesFilter(MethodVisitor methodVisitor, Instrumenter instrumenter) {
     super(Opcodes.API_VERSION, methodVisitor);
@@ -69,6 +70,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
     myHadLineDataBefore = myContext.getLineData(line) != null;
     super.visitLineNumber(line, start);
     myLine = line;
+    myHasInstructions = false;
   }
 
   @Override
@@ -81,6 +83,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
       myState = 4;
     } else {
       myState = 0;
+      myHasInstructions = true;
     }
 
     boolean getCoroutinesSuspendedVisited = opcode == Opcodes.INVOKESTATIC
@@ -103,6 +106,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   @Override
   public void visitVarInsn(int opcode, int var) {
     super.visitVarInsn(opcode, var);
+    myHasInstructions = true;
     if (!myStoreCoroutinesSuspendedVisited && myGetCoroutinesSuspendedVisited && opcode == Opcodes.ASTORE) {
       myStoreCoroutinesSuspendedVisited = true;
       myCoroutinesSuspendedIndex = var;
@@ -119,6 +123,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   @Override
   public void visitJumpInsn(int opcode, Label label) {
     super.visitJumpInsn(opcode, label);
+    myHasInstructions = true;
     boolean compareWithCoroutinesSuspend = myLoadCoroutinesSuspendedVisited || myGetCoroutinesSuspendedVisited;
     if (compareWithCoroutinesSuspend && mySuspendCallVisited && opcode == Opcodes.IF_ACMPNE) {
       onIgnoredJump();
@@ -130,6 +135,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   @Override
   public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
     super.visitFieldInsn(opcode, owner, name, descriptor);
+    myHasInstructions = true;
     final boolean labelVisited = name.equals("label")
         && descriptor.equals("I")
         && Type.getObjectType(owner).getClassName().startsWith(myContext.getClassName());
@@ -142,6 +148,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   @Override
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
     super.visitTableSwitchInsn(min, max, dflt, labels);
+    myHasInstructions = true;
     if (myLoadStateLabelVisited) {
       onIgnoredSwitch(dflt, labels);
       if (!myHadLineDataBefore) {
@@ -158,11 +165,12 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
       myState = 2;
       return;
     } else if (myState == 4 && opcode == Opcodes.ATHROW) {
-      if (!myHadLineDataBefore) {
+      if (!myHadLineDataBefore && !myHasInstructions) {
         onIgnoredLine(myLine);
       }
       return;
     }
+    myHasInstructions = true;
     myState = 0;
     // ignore generated return on the first line
     if (opcode == Opcodes.ARETURN && myLoadCoroutinesSuspendedVisited && !myHadLineDataBefore) {
@@ -176,6 +184,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
     if (opcode == Opcodes.NEW && "java/lang/IllegalStateException".equals(type)) {
       myState = 1;
     } else {
+      myHasInstructions = true;
       myState = 0;
     }
   }
@@ -186,7 +195,36 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
     if (myState == 2 && "call to 'resume' before 'invoke' with coroutine".equals(value)) {
       myState = 3;
     } else {
+      myHasInstructions = true;
       myState = 0;
     }
+  }
+
+  @Override
+  public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
+    super.visitLookupSwitchInsn(dflt, keys, labels);
+    myHasInstructions = true;
+    myState = 0;
+  }
+
+  @Override
+  public void visitIincInsn(int var, int increment) {
+    super.visitIincInsn(var, increment);
+    myHasInstructions = true;
+    myState = 0;
+  }
+
+  @Override
+  public void visitIntInsn(int opcode, int operand) {
+    super.visitIntInsn(opcode, operand);
+    myHasInstructions = true;
+    myState = 0;
+  }
+
+  @Override
+  public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
+    super.visitMultiANewArrayInsn(descriptor, numDimensions);
+    myHasInstructions = true;
+    myState = 0;
   }
 }
