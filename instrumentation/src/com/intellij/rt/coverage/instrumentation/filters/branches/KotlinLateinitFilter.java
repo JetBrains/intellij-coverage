@@ -45,6 +45,8 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  *   <li>LCD name</li>
  *   <li>INVOKESTATIC kotlin/jvm/internal/Intrinsics.throwUninitializedPropertyAccessException (Ljava/lang/String;)V</li>
  * </ol>
+ * For internal classes direct access to a field of the containing class is replaced
+ * with access to the containing class (GETFIELD) and then a call to an access method.
  */
 public class KotlinLateinitFilter extends BranchesFilter {
   private int myState;
@@ -74,8 +76,8 @@ public class KotlinLateinitFilter extends BranchesFilter {
   @Override
   public void visitJumpInsn(int opcode, Label label) {
     super.visitJumpInsn(opcode, label);
-    if (myState == 1 && (opcode == Opcodes.IFNONNULL || opcode == Opcodes.IFNULL)) {
-      myState = 2;
+    if ((myState == 1 || myState == 2) && (opcode == Opcodes.IFNONNULL || opcode == Opcodes.IFNULL)) {
+      myState = 3;
       return;
     }
     myState = 0;
@@ -84,8 +86,8 @@ public class KotlinLateinitFilter extends BranchesFilter {
   @Override
   public void visitLdcInsn(Object value) {
     super.visitLdcInsn(value);
-    if (myState == 2 && value instanceof String) {
-      myState = 3;
+    if (myState == 3 && value instanceof String) {
+      myState = 4;
       return;
     }
     myState = 0;
@@ -94,12 +96,18 @@ public class KotlinLateinitFilter extends BranchesFilter {
   @Override
   public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
     super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
-    if (myState == 3
+    if (myState == 4
         && opcode == Opcodes.INVOKESTATIC
         && "kotlin/jvm/internal/Intrinsics".equals(owner)
         && "throwUninitializedPropertyAccessException".equals(name)
         && "(Ljava/lang/String;)V".equals(descriptor)) {
       myBranchData.removeLastJump();
+    } else if (myState == 1
+        && opcode == Opcodes.INVOKESTATIC
+        && myInternalClassName.startsWith(owner)
+        && name.startsWith("access$")) {
+      myState = 2;
+      return;
     }
     myState = 0;
   }

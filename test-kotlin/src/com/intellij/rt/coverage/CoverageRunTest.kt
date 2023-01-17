@@ -220,7 +220,10 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testInterfaceWithClinit() = test("interfaceWithClinit")
 
     @Test
-    fun testLateinit() = test("lateinit")
+    fun testLateinitInternal() = test("lateinit.internal")
+
+    @Test
+    fun testLateinitSimple() = test("lateinit.simple")
 
     @Test
     fun testLombok() = test("lombok")
