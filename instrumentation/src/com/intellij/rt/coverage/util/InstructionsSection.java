@@ -92,9 +92,20 @@ public class InstructionsSection extends ClassListSection {
 
   @Override
   protected void saveClass(ClassData classData, DataOutput out, int index) throws IOException {
-    final ClassInstructions classInstructions = myProjectData.getInstructions().get(classData.getName());
     final LineData[] lines = (LineData[]) classData.getLines();
     if (lines == null) return;
+    final ClassInstructions classInstructions = myProjectData.getInstructions().get(classData.getName());
+    if (classInstructions == null) {
+      int lineCount = 0;
+      for (LineData lineData : lines) {
+        if (lineData != null) {
+          lineCount++;
+        }
+      }
+      ErrorReporter.reportError("Class " + classData.getName() + " does not have instructions info, while there are " +
+          lineCount + " lines available", new Throwable());
+      return;
+    }
     CoverageIOUtil.writeINT(out, index);
     final LineInstructions[] lineInstructions = classInstructions.getlines();
     for (int line = 0; line < lines.length; line++) {

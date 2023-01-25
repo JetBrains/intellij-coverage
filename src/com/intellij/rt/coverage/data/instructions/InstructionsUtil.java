@@ -54,6 +54,7 @@ public class InstructionsUtil {
   public static void dropMappedLines(ProjectData projectData, String className, FileMapData[] mappings) {
     if (!projectData.isInstructionsCoverageEnabled()) return;
     final ClassInstructions classInstructions = projectData.getInstructions().get(className);
+    if (classInstructions == null) return;
     final LineInstructions[] instructions = classInstructions.getlines();
     LineMapper.dropMappedLines(mappings, instructions, className);
   }
