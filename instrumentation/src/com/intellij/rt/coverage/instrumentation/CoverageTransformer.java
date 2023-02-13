@@ -19,8 +19,9 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.dataAccess.*;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
+import com.intellij.rt.coverage.instrumentation.filters.classFilter.ClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
-import com.intellij.rt.coverage.instrumentation.filters.classes.ClassFilter;
+import com.intellij.rt.coverage.instrumentation.filters.classes.ClassSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.OptionsUtil;
@@ -33,7 +34,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
-  private static final List<ClassFilter> ourFilters = FilterUtils.createClassFilters();
+  private static final List<ClassSignatureFilter> ourFilters = FilterUtils.createClassSignatureFilters();
 
   private final ProjectData data;
   private final boolean shouldSaveSource;
@@ -70,7 +71,7 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
                                          boolean shouldSaveSource,
                                          boolean shouldIgnorePrivateConstructorOfUtilCLass,
                                          CoverageDataAccess dataAccess) {
-    for (ClassFilter filter : ourFilters) {
+    for (ClassSignatureFilter filter : ourFilters) {
       if (filter.shouldFilter(cr)) return null;
     }
     final Instrumenter instrumenter;
@@ -85,8 +86,12 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
       instrumenter = new LineInstrumenter(data, cw, className, shouldSaveSource, dataAccess);
     }
     ClassVisitor result = instrumenter;
-    if (shouldIgnorePrivateConstructorOfUtilCLass) {
-      result = PrivateConstructorOfUtilClassFilter.createWithContext(result, instrumenter);
+    instrumenter.addProperty(PrivateConstructorOfUtilClassFilter.MARKER, shouldIgnorePrivateConstructorOfUtilCLass);
+    for (ClassFilter cv : FilterUtils.createClassFilters()) {
+      if (cv.isApplicable(instrumenter)) {
+        cv.initFilter(instrumenter, result);
+        result = cv;
+      }
     }
     return result;
   }

@@ -18,7 +18,9 @@ package com.intellij.rt.coverage.instrumentation.filters;
 
 import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
 import com.intellij.rt.coverage.instrumentation.filters.branches.*;
-import com.intellij.rt.coverage.instrumentation.filters.classes.ClassFilter;
+import com.intellij.rt.coverage.instrumentation.filters.classFilter.ClassFilter;
+import com.intellij.rt.coverage.instrumentation.filters.classFilter.KotlinValueClassFilter;
+import com.intellij.rt.coverage.instrumentation.filters.classes.ClassSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classes.KotlinFunctionOrPropertyReferenceFilter;
 import com.intellij.rt.coverage.instrumentation.filters.lines.*;
 import com.intellij.rt.coverage.instrumentation.filters.methods.KotlinSyntheticAccessMethodFilter;
@@ -59,9 +61,9 @@ public class KotlinUtils {
     return result;
   }
 
-  public static List<ClassFilter> createClassFilters() {
+  public static List<ClassSignatureFilter> createClassSignatureFilters() {
     if (!ourKotlinEnabled) return Collections.emptyList();
-    List<ClassFilter> result = new ArrayList<ClassFilter>();
+    List<ClassSignatureFilter> result = new ArrayList<ClassSignatureFilter>();
     result.add(new KotlinFunctionOrPropertyReferenceFilter());
     return result;
   }
@@ -87,6 +89,13 @@ public class KotlinUtils {
     result.add(new KotlinOpenMemberWithDefaultArgsFilter());
     result.add(new KotlinUnsafeCastFilter());
     result.add(new KotlinWhenStringFilter());
+    return result;
+  }
+
+  public static List<ClassFilter> createClassFilters() {
+    if (!ourKotlinEnabled) return Collections.emptyList();
+    List<ClassFilter> result = new ArrayList<ClassFilter>();
+    result.add(new KotlinValueClassFilter());
     return result;
   }
 }

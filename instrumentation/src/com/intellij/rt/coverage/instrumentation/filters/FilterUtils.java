@@ -19,7 +19,9 @@ package com.intellij.rt.coverage.instrumentation.filters;
 import com.intellij.rt.coverage.instrumentation.filters.branches.BooleanInvertFilter;
 import com.intellij.rt.coverage.instrumentation.filters.branches.BranchesFilter;
 import com.intellij.rt.coverage.instrumentation.filters.branches.NotNullAssertionsFilter;
-import com.intellij.rt.coverage.instrumentation.filters.classes.ClassFilter;
+import com.intellij.rt.coverage.instrumentation.filters.classFilter.ClassFilter;
+import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
+import com.intellij.rt.coverage.instrumentation.filters.classes.ClassSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.filters.lines.AnnotationIgnoredMethodFilter;
 import com.intellij.rt.coverage.instrumentation.filters.lines.ClosingBracesFilter;
 import com.intellij.rt.coverage.instrumentation.filters.lines.LinesFilter;
@@ -38,8 +40,14 @@ public class FilterUtils {
     return result;
   }
 
+  public static List<ClassSignatureFilter> createClassSignatureFilters() {
+    return KotlinUtils.createClassSignatureFilters();
+  }
+
   public static List<ClassFilter> createClassFilters() {
-    return KotlinUtils.createClassFilters();
+    List<ClassFilter> result = KotlinUtils.createClassFilters();
+    result.add(new PrivateConstructorOfUtilClassFilter());
+    return result;
   }
 
   public static List<LinesFilter> createLineFilters() {

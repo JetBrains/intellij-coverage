@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 JetBrains s.r.o.
+ * Copyright 2000-2023 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,13 +14,21 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.instrumentation.filters.classes;
+package testData.valueClass
 
-import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
+// classes: ALL
+// patterns: testData.valueClass.*
 
-/**
- * Filters out coverage from class if it's signature matches filter.
- */
-public interface ClassFilter {
-  boolean shouldFilter(ClassReader cr);
+@JvmInline
+value class MyValueClass(val data: String) {
+    fun foo() {
+        println(data) // coverage: FULL
+    }
+}
+
+fun main() {
+    val v = MyValueClass("ABC") // coverage: FULL
+    if (v.data != "ABC") // coverage: PARTIAL
+        error("not abc") // coverage: NONE
+    v.foo() // coverage: FULL
 }

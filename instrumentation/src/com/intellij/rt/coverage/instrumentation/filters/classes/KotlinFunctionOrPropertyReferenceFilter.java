@@ -23,7 +23,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * Function or property reference instance causes Kotlin to generate a synthetic class.
  * Line numbers in this class are uncovered when a reference is not called.
  */
-public class KotlinFunctionOrPropertyReferenceFilter implements ClassFilter {
+public class KotlinFunctionOrPropertyReferenceFilter implements ClassSignatureFilter {
   public boolean shouldFilter(ClassReader cr) {
     final String superClass = cr.getSuperName();
     final int access = cr.getAccess();

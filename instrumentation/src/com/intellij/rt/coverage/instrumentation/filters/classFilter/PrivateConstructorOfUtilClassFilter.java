@@ -27,10 +27,10 @@ import java.util.List;
 /**
  * Ignore private constructor of class if all other methods are static.
  */
-public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
+public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
+  public static final String MARKER = "PrivateConstructorOfUtilClassFilter";
   private static final String KOTLIN_OBJECT_CONSTRUCTOR_DESCRIPTOR = "(" + KotlinUtils.KOTLIN_DEFAULT_CONSTRUCTOR_MARKER + ")V";
 
-  private final Instrumenter myInstrumenter;
   private boolean myIsAbstractClass;
   private boolean myAllMethodsStatic = true;
   private boolean myIsKotlinObject = false;
@@ -40,12 +40,11 @@ public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
   private String myName;
   private String mySuperName;
 
-  public PrivateConstructorOfUtilClassFilter(ClassVisitor classVisitor, Instrumenter context) {
-    super(Opcodes.API_VERSION, classVisitor);
-    myInstrumenter = context;
+  @Override
+  public boolean isApplicable(Instrumenter context) {
+    Boolean enabled = (Boolean) context.getProperty(MARKER);
+    return enabled != null && enabled;
   }
-
-  protected abstract void removeLine(int line);
 
   @Override
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
@@ -82,8 +81,8 @@ public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
         && myConstructorLines != null
         && !isSealedClassConstructor()) {
       for (int line : myConstructorLines) {
-        if (myIsKotlinObject && myIsKotlinClass && myInstrumenter.linesCount() <= 1) continue;
-        removeLine(line);
+        if (myIsKotlinObject && myIsKotlinClass && myContext.linesCount() <= 1) continue;
+        myContext.removeLine(line);
       }
     }
     super.visitEnd();
@@ -99,7 +98,7 @@ public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
    * Do not filter generated sealed class private constructor, as it is unrelated to util classes
    */
   private boolean isSealedClassConstructor() {
-    if (myInstrumenter != null && KotlinUtils.isSealedClass(myInstrumenter)) return true;
+    if (myContext != null && KotlinUtils.isSealedClass(myContext)) return true;
     // if a sealed class has no derived classes, it is not marked,
     // so we have to filter such a case here
     return myIsAbstractClass && myIsKotlinClass;
@@ -226,15 +225,5 @@ public abstract class PrivateConstructorOfUtilClassFilter extends ClassVisitor {
       myConstructorLines = new ArrayList<Integer>();
     }
     myConstructorLines.add(line);
-  }
-
-
-  public static PrivateConstructorOfUtilClassFilter createWithContext(ClassVisitor cv, final Instrumenter context) {
-    return new PrivateConstructorOfUtilClassFilter(cv, context) {
-      @Override
-      protected void removeLine(int line) {
-        context.removeLine(line);
-      }
-    };
   }
 }
