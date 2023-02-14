@@ -21,6 +21,7 @@ package testData.valueClass
 
 @JvmInline
 value class MyValueClass(val data: String) {  // coverage: FULL
+    val boo get() = 42 // coverage: NONE
     fun foo() {
         println(data) // coverage: FULL
     }
@@ -30,6 +31,7 @@ value class MyValueClass(val data: String) {  // coverage: FULL
 value class MyValueClass2( // coverage: FULL
     val data: String
 ) {
+    val boo get() = 42 // coverage: NONE
     fun foo() {
         println(data) // coverage: FULL
     }
@@ -39,6 +41,7 @@ value class MyValueClass2( // coverage: FULL
 value class MyValueClass3( // coverage: NONE
     val data: String
 ) {
+    val boo get() = 42 // coverage: NONE
     fun foo() {
         println(data) // coverage: NONE
     }
@@ -46,6 +49,7 @@ value class MyValueClass3( // coverage: NONE
 
 @JvmInline
 value class MyValueClass4(val data: String) { // coverage: NONE
+    val boo get() = 42 // coverage: NONE
     fun foo() {
         println(data) // coverage: NONE
     }

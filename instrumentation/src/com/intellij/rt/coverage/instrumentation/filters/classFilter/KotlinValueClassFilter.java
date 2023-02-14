@@ -27,7 +27,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 /**
  * Kotlin value classes are inlined into bytecode to avoid overhead for creating a class instance.
  * All methods of such classes are generated as static (instance methods also exist for Java interop).
- * <p/>
+ * <p>
  * There are line numbers only in a synthetic constructor and a getter. However, the getter is not called from
  * Kotlin code, so in this filter we ignore the getter line. The constructor is called via <code>constructor-impl</code>
  * static method, so in this filter we add an extra line to this method.
@@ -42,6 +42,7 @@ public class KotlinValueClassFilter extends ClassFilter {
   private int myGetterLine = -1;
   private int myConstructorLine = -1;
   private int myFieldsCount = 0;
+  private String myFieldType;
 
   @Override
   public boolean isApplicable(Instrumenter context) {
@@ -86,7 +87,8 @@ public class KotlinValueClassFilter extends ClassFilter {
       myUnboxingVisited = true;
       return mv;
     }
-    if (name.startsWith("get")) {
+    if (name.startsWith("get") && myFieldType != null && ("()" + myFieldType).equals(descriptor)
+        && !name.endsWith("-impl")) {
       return new MethodVisitor(Opcodes.API_VERSION, mv) {
         @Override
         public void visitLineNumber(int line, Label start) {
@@ -120,6 +122,7 @@ public class KotlinValueClassFilter extends ClassFilter {
   @Override
   public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
     myFieldsCount++;
+    myFieldType = descriptor;
     return super.visitField(access, name, descriptor, signature, value);
   }
 
