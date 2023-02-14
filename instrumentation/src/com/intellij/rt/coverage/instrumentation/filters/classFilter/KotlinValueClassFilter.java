@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.classFilter;
 
+import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.FieldVisitor;
@@ -23,6 +24,14 @@ import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+/**
+ * Kotlin value classes are inlined into bytecode to avoid overhead for creating a class instance.
+ * All methods of such classes are generated as static (instance methods also exist for Java interop).
+ * <p/>
+ * There are line numbers only in a synthetic constructor and a getter. However, the getter is not called from
+ * Kotlin code, so in this filter we ignore the getter line. The constructor is called via <code>constructor-impl</code>
+ * static method, so in this filter we add an extra line to this method.
+ */
 public class KotlinValueClassFilter extends ClassFilter {
   private boolean myEqualsVisited;
   private boolean myToStringVisited;
@@ -31,6 +40,7 @@ public class KotlinValueClassFilter extends ClassFilter {
   private boolean myBoxingVisited;
   private boolean myUnboxingVisited;
   private int myGetterLine = -1;
+  private int myConstructorLine = -1;
   private int myFieldsCount = 0;
 
   @Override
@@ -44,7 +54,17 @@ public class KotlinValueClassFilter extends ClassFilter {
     if (!KotlinUtils.isKotlinClass(myContext)) return mv;
     if ("constructor-impl".equals(name) && (access & Opcodes.ACC_STATIC) != 0) {
       myConstructorVisited = true;
-      return mv;
+      return new MethodVisitor(Opcodes.API_VERSION, mv) {
+        @Override
+        public void visitCode() {
+          super.visitCode();
+          if (myConstructorLine >= 0) {
+            Label label = new Label();
+            super.visitLabel(label);
+            super.visitLineNumber(myConstructorLine, label);
+          }
+        }
+      };
     }
     if ("toString-impl".equals(name) && (access & Opcodes.ACC_STATIC) != 0) {
       myToStringVisited = true;
@@ -66,19 +86,35 @@ public class KotlinValueClassFilter extends ClassFilter {
       myUnboxingVisited = true;
       return mv;
     }
-    if (!name.startsWith("get")) return mv;
-    return new MethodVisitor(Opcodes.API_VERSION, mv) {
-      @Override
-      public void visitLineNumber(int line, Label start) {
-        super.visitLineNumber(line, start);
-        if (myGetterLine == line) return;
-        if (myGetterLine == -1) {
-          myGetterLine = line;
-        } else {
-          myGetterLine = -2;
+    if (name.startsWith("get")) {
+      return new MethodVisitor(Opcodes.API_VERSION, mv) {
+        @Override
+        public void visitLineNumber(int line, Label start) {
+          super.visitLineNumber(line, start);
+          if (myGetterLine == line) return;
+          if (myGetterLine == -1) {
+            myGetterLine = line;
+          } else {
+            myGetterLine = -2;
+          }
         }
-      }
-    };
+      };
+    } else if (InstrumentationUtils.CONSTRUCTOR.equals(name) && (access & Opcodes.ACC_SYNTHETIC) != 0
+        && (access & Opcodes.ACC_PRIVATE) != 0) {
+      return new MethodVisitor(Opcodes.API_VERSION, mv) {
+        @Override
+        public void visitLineNumber(int line, Label start) {
+          super.visitLineNumber(line, start);
+          if (myConstructorLine == line) return;
+          if (myConstructorLine == -1) {
+            myConstructorLine = line;
+          } else {
+            myConstructorLine = -2;
+          }
+        }
+      };
+    }
+    return mv;
   }
 
   @Override
@@ -92,7 +128,8 @@ public class KotlinValueClassFilter extends ClassFilter {
     if (myConstructorVisited && myEqualsVisited && myHashCodeVisited
         && myToStringVisited && myBoxingVisited && myUnboxingVisited
         && myFieldsCount == 1
-        && myGetterLine >= 0) {
+        && myGetterLine >= 0
+        && myGetterLine != myConstructorLine) {
       myContext.removeLine(myGetterLine);
     }
     super.visitEnd();

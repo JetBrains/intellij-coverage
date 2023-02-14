@@ -20,9 +20,34 @@ package testData.valueClass
 // patterns: testData.valueClass.*
 
 @JvmInline
-value class MyValueClass(val data: String) {
+value class MyValueClass(val data: String) {  // coverage: FULL
     fun foo() {
         println(data) // coverage: FULL
+    }
+}
+
+@JvmInline
+value class MyValueClass2( // coverage: FULL
+    val data: String
+) {
+    fun foo() {
+        println(data) // coverage: FULL
+    }
+}
+
+@JvmInline
+value class MyValueClass3( // coverage: NONE
+    val data: String
+) {
+    fun foo() {
+        println(data) // coverage: NONE
+    }
+}
+
+@JvmInline
+value class MyValueClass4(val data: String) { // coverage: NONE
+    fun foo() {
+        println(data) // coverage: NONE
     }
 }
 
@@ -31,4 +56,8 @@ fun main() {
     if (v.data != "ABC") // coverage: PARTIAL
         error("not abc") // coverage: NONE
     v.foo() // coverage: FULL
+    val v2 = MyValueClass2("DEF") // coverage: FULL
+    v2.foo() // coverage: FULL
+    Class.forName(MyValueClass3::class.qualifiedName) // coverage: FULL
+    Class.forName(MyValueClass4::class.qualifiedName) // coverage: FULL
 }
