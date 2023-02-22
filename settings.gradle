@@ -1,5 +1,5 @@
 pluginManagement {
-  def kotlinVersion = settings.hasProperty("kotlin.version") ? (String)settings["kotlin.version"] : "1.7.21"
+  def kotlinVersion = settings.hasProperty("kotlin.version") ? (String)settings["kotlin.version"] : "1.8.10"
   println "Use Kotlin version $kotlinVersion"
   plugins {
     id 'org.jetbrains.kotlin.jvm' version kotlinVersion
