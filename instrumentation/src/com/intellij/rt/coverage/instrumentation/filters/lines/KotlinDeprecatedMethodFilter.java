@@ -28,10 +28,11 @@ import java.util.HashSet;
 /**
  * Filter methods marked with deprecated annotation.
  */
-public class DeprecatedMethodFilter extends LinesFilter {
+public class KotlinDeprecatedMethodFilter extends LinesFilter {
   private static final String DEPRECATED_METHODS = "DEPRECATED_METHODS_SET";
   private String myName;
-  private boolean mySetIgnoreByMe;
+  private String myDesc;
+  private boolean myShouldIgnore;
 
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
     return KotlinUtils.isKotlinClass(context);
@@ -41,6 +42,7 @@ public class DeprecatedMethodFilter extends LinesFilter {
   public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
     super.initFilter(methodVisitor, context, name, desc);
     myName = name;
+    myDesc = desc;
     if (name.endsWith(KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX)) {
       final Object property = myContext.getProperty(DEPRECATED_METHODS);
       if (property != null) {
@@ -49,7 +51,7 @@ public class DeprecatedMethodFilter extends LinesFilter {
         final String originalName = name.substring(0, name.length() - KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX.length());
         if (deprecatedMethods.contains(originalName)) {
           myContext.setIgnoreSection(true);
-          mySetIgnoreByMe = true;
+          myShouldIgnore = true;
         }
       }
     }
@@ -65,8 +67,10 @@ public class DeprecatedMethodFilter extends LinesFilter {
         super.visitEnum(name, descriptor, value);
         if (!"Lkotlin/DeprecationLevel;".equals(descriptor)) return;
         if ("ERROR".equals(value) || "HIDDEN".equals(value)) {
-          myContext.setIgnoreSection(true);
-          mySetIgnoreByMe = true;
+          if (!myShouldIgnore) {
+            myContext.setIgnoreSection(true);
+            myShouldIgnore = true;
+          }
           Object property = myContext.getProperty(DEPRECATED_METHODS);
           if (property == null) {
             property = new HashSet<String>();
@@ -81,9 +85,17 @@ public class DeprecatedMethodFilter extends LinesFilter {
   }
 
   @Override
+  public void visitCode() {
+    super.visitCode();
+    if (myShouldIgnore) {
+      myContext.getProjectData().addIgnoredMethod(myContext.getClassName(), myName, myDesc);
+    }
+  }
+
+  @Override
   public void visitEnd() {
     super.visitEnd();
-    if (mySetIgnoreByMe) {
+    if (myShouldIgnore) {
       myContext.setIgnoreSection(false);
     }
   }

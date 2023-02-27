@@ -16,13 +16,9 @@
 
 package testData.deprecated
 
-// classes: ALL
-// patterns: testData.deprecated.*
-// calculate unloaded: true
-
 @Deprecated("", level = DeprecationLevel.WARNING)
 fun deprecatedFunction1() {
-    println() // coverage: NONE
+    println()
 }
 
 @Deprecated("", level = DeprecationLevel.ERROR)
@@ -65,7 +61,11 @@ fun deprecatedFunctionWithAnonymousClass() {
     }
 }
 
-object A { // coverage: NONE
+object A {
+    fun foo() {
+        println("Hi")
+    }
+
     @Deprecated("", level = DeprecationLevel.HIDDEN)
     fun deprecatedFunctionWithAnonymousClass() {
         functionWithLambda {
@@ -91,7 +91,7 @@ object A { // coverage: NONE
 }
 
 fun functionWithLambda(lambda: (Int) -> Int) {
-    print(lambda(5)) // coverage: NONE
+    print(lambda(5))
 }
 
 interface Foo {
@@ -99,4 +99,4 @@ interface Foo {
 }
 
 fun main() {
-} // coverage: FULL
+}

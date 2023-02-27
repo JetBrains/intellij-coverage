@@ -58,6 +58,11 @@ public class XMLTest {
   }
 
   @Test
+  public void testDeprecated() throws Throwable {
+    test("deprecated");
+  }
+
+  @Test
   public void testEmptyMethod() throws Throwable {
     test("emptyMethod");
   }

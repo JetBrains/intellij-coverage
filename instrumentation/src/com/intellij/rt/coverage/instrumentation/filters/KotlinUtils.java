@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.instrumentation.filters;
 import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
 import com.intellij.rt.coverage.instrumentation.filters.branches.*;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.ClassFilter;
+import com.intellij.rt.coverage.instrumentation.filters.classFilter.KotlinAnonymousClassInIgnoredMethodFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.KotlinValueClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classes.ClassSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classes.KotlinFunctionOrPropertyReferenceFilter;
@@ -74,7 +75,7 @@ public class KotlinUtils {
     result.add(new KotlinImplementerDefaultInterfaceMemberFilter());
     result.add(new KotlinCoroutinesLinesFilter());
     result.add(new KotlinInlineFilter());
-    result.add(new DeprecatedMethodFilter());
+    result.add(new KotlinDeprecatedMethodFilter());
     result.add(new KotlinDefaultArgsLineFilter());
     return result;
   }
@@ -96,6 +97,7 @@ public class KotlinUtils {
     if (!ourKotlinEnabled) return Collections.emptyList();
     List<ClassFilter> result = new ArrayList<ClassFilter>();
     result.add(new KotlinValueClassFilter());
+    result.add(new KotlinAnonymousClassInIgnoredMethodFilter());
     return result;
   }
 }

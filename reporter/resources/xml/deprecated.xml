@@ -1,0 +1,57 @@
+<?xml version="1.0" ?>
+<report name="Intellij Coverage Report">
+<package name="testData/deprecated">
+<class name="testData/deprecated/A" sourcefilename="test.kt">
+<method name="foo" desc="()V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="testData/deprecated/TestKt" sourcefilename="test.kt">
+<method name="functionWithLambda" desc="(Lkotlin/jvm/functions/Function1;)V">
+<counter type="INSTRUCTION" missed="10" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="deprecatedFunction1" desc="()V">
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="main" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="1"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="12" covered="1"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="1"/>
+<counter type="METHOD" missed="2" covered="1"/>
+</class>
+<sourcefile name="test.kt">
+<line nr="21" mi="2" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="4" ci="0" mb="0" cb="0"/>
+<line nr="94" mi="10" ci="0" mb="0" cb="0"/>
+<line nr="102" mi="0" ci="1" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="16" covered="1"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="1"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="16" covered="1"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="1"/>
+<counter type="METHOD" missed="3" covered="1"/>
+<counter type="CLASS" missed="1" covered="1"/>
+</package>
+<counter type="INSTRUCTION" missed="16" covered="1"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="3" covered="1"/>
+<counter type="METHOD" missed="3" covered="1"/>
+<counter type="CLASS" missed="1" covered="1"/>
+</report>
+

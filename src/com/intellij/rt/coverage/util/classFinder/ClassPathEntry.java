@@ -89,6 +89,12 @@ public class ClassPathEntry {
       File[] files = parent.listFiles();
       if (files != null) {
         String prefix = curPath.length() == 0 ? "" : curPath + ".";
+        // force anonymous classes to come after its outer class
+        Arrays.sort(files, new Comparator<File>() {
+          public int compare(File o1, File o2) {
+            return ClassNameUtil.removeClassSuffix(o1.getName()).compareTo(ClassNameUtil.removeClassSuffix(o2.getName()));
+          }
+        });
         for (final File f : files) {
           final String name = f.getName();
           if (name.endsWith(ClassNameUtil.CLASS_FILE_SUFFIX)) {

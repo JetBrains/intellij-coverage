@@ -73,6 +73,7 @@ public class ProjectData implements CoverageData, Serializable {
   private TestTrackingCallback myTestTrackingCallback;
 
   private List<Pattern> myAnnotationsToIgnore;
+  private Set<String> myIgnoredMethods;
 
   public ClassData getClassData(final String name) {
     return myClasses.get(name);
@@ -144,6 +145,23 @@ public class ProjectData implements CoverageData, Serializable {
   public void setAnnotationsToIgnore(List<Pattern> annotations) {
     myAnnotationsToIgnore = annotations;
   }
+
+  public synchronized boolean isMethodIgnored(String owner, String methodName, String desc) {
+    return myIgnoredMethods != null && myIgnoredMethods.contains(createDesc(owner, methodName, desc));
+  }
+
+  public synchronized void addIgnoredMethod(String owner, String methodName, String desc) {
+    if (myIgnoredMethods == null) {
+      myIgnoredMethods = Collections.newSetFromMap(new HashMap<String, Boolean>());
+    }
+    final String methodDesc = createDesc(owner, methodName, desc);
+    myIgnoredMethods.add(methodDesc);
+  }
+
+  private static String createDesc(String owner, String methodName, String desc) {
+    return owner + "#" + methodName + desc;
+  }
+
 
   public static ProjectData createProjectData(final File dataFile,
                                               final ProjectData initialData,

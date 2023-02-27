@@ -28,7 +28,9 @@ import java.util.regex.Pattern;
  * Filter out lines in method marked with annotation to ignore.
  */
 public class AnnotationIgnoredMethodFilter extends LinesFilter {
-  private boolean mySetIgnoreByMe;
+  private boolean myShouldIgnore;
+  private String myName;
+  private String myDesc;
 
   @Override
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
@@ -39,12 +41,14 @@ public class AnnotationIgnoredMethodFilter extends LinesFilter {
   @Override
   public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
     super.initFilter(methodVisitor, context, name, desc);
+    myName = name;
+    myDesc = desc;
     final List<Pattern> annotations = context.getProjectData().getAnnotationsToIgnore();
     for (String annotation : context.getAnnotations()) {
       final String annotationName = ClassNameUtil.convertVMNameToFQN(annotation);
       if (ClassNameUtil.matchesPatterns(annotationName, annotations)) {
         myContext.setIgnoreSection(true);
-        mySetIgnoreByMe = true;
+        myShouldIgnore = true;
         break;
       }
     }
@@ -53,17 +57,25 @@ public class AnnotationIgnoredMethodFilter extends LinesFilter {
   @Override
   public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
     final String annotationName = ClassNameUtil.convertVMNameToFQN(descriptor);
-    if (ClassNameUtil.matchesPatterns(annotationName, myContext.getProjectData().getAnnotationsToIgnore())) {
+    if (!myShouldIgnore && ClassNameUtil.matchesPatterns(annotationName, myContext.getProjectData().getAnnotationsToIgnore())) {
       myContext.setIgnoreSection(true);
-      mySetIgnoreByMe = true;
+      myShouldIgnore = true;
     }
     return super.visitAnnotation(descriptor, visible);
   }
 
   @Override
+  public void visitCode() {
+    super.visitCode();
+    if (myShouldIgnore) {
+      myContext.getProjectData().addIgnoredMethod(myContext.getClassName(), myName, myDesc);
+    }
+  }
+
+  @Override
   public void visitEnd() {
     super.visitEnd();
-    if (mySetIgnoreByMe) {
+    if (myShouldIgnore) {
       myContext.setIgnoreSection(false);
     }
   }
