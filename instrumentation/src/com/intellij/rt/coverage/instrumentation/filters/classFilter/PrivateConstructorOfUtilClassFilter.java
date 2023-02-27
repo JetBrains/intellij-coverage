@@ -26,6 +26,7 @@ import java.util.List;
 
 /**
  * Ignore private constructor of class if all other methods are static.
+ * The constructor may optionally throw an exception.
  */
 public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
   public static final String MARKER = "PrivateConstructorOfUtilClassFilter";
@@ -38,7 +39,6 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
   private boolean myConstructorIsEmpty = true;
   private List<Integer> myConstructorLines;
   private String myName;
-  private String mySuperName;
 
   @Override
   public boolean isApplicable(Instrumenter context) {
@@ -50,7 +50,6 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
     super.visit(version, access, name, signature, superName, interfaces);
     myName = name;
-    mySuperName = superName;
     myIsKotlinObject |= name != null && name.endsWith("$Companion");
     myIsAbstractClass = (access & Opcodes.ACC_ABSTRACT) != 0;
   }
@@ -104,6 +103,13 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
     return myIsAbstractClass && myIsKotlinClass;
   }
 
+  //    ALOAD 0
+  //    INVOKESPECIAL java/lang/Object.<init> ()V
+
+  //    NEW <exception>
+  //    DUP
+  //    INVOKESPECIAL <exception>.<init> ()V
+  //    ATHROW
   private class EmptyConstructorVisitor extends MethodVisitor {
     private boolean myALoadVisited = false;
     private boolean myInvokeSpecialVisited = false;
@@ -133,7 +139,7 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
       super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
       if (myALoadVisited
           && opcode == Opcodes.INVOKESPECIAL
-          && owner != null && (owner.equals(mySuperName) || owner.equals(myName))
+          && owner != null // it could be super call or an exception creation
           && InstrumentationUtils.CONSTRUCTOR.equals(name)
           && InstrumentationUtils.CONSTRUCTOR_DESCRIPTOR.equals(descriptor)) {
         myInvokeSpecialVisited = true;
@@ -146,6 +152,9 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
     public void visitInsn(int opcode) {
       super.visitInsn(opcode);
       if (myInvokeSpecialVisited && opcode == Opcodes.RETURN) {
+        return;
+      }
+      if (opcode == Opcodes.ATHROW || opcode == Opcodes.DUP) {
         return;
       }
       myConstructorIsEmpty = false;
@@ -172,6 +181,9 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
     @Override
     public void visitTypeInsn(int opcode, String type) {
       super.visitTypeInsn(opcode, type);
+      if (opcode == Opcodes.NEW) {
+        return;
+      }
       myConstructorIsEmpty = false;
     }
 

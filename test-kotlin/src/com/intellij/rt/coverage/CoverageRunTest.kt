@@ -296,6 +296,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testUtilClassKotlin() = test("utilClass.kotlin")
 
     @Test
+    fun testUtilClassThrowing() = test("utilClass.throwing")
+
+    @Test
     fun testValueClass() = test("valueClass")
 
     //===GENERATED TESTS===
