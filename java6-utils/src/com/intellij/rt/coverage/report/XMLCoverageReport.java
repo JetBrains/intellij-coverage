@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2020 JetBrains s.r.o.
+ * Copyright 2000-2023 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,8 @@ import com.intellij.rt.coverage.util.ErrorReporter;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.gnu.trove.TIntObjectProcedure;
 
-import javax.xml.stream.XMLOutputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import javax.xml.stream.*;
+import java.io.*;
 import java.util.*;
 
 public class XMLCoverageReport {
@@ -50,8 +46,168 @@ public class XMLCoverageReport {
   private static final int INSTRUCTION_MASK = 16;
 
   private static final String NEW_LINE = System.getProperty("line.separator");
+  private static final String REPORT_TAG = "report";
+  private static final String NAME_TAG = "name";
+  private static final String IJ_REPORT_NAME = "Intellij Coverage Report";
+  public static final String PACKAGE_TAG = "package";
+  public static final String SOURCEFILE_TAG = "sourcefile";
+  public static final String CLASS_TAG = "class";
+  public static final String METHOD_TAG = "method";
+  public static final String DESC_TAG = "desc";
+  public static final String LINE_TAG = "line";
+  public static final String LINE_NUMBER_TAG = "nr";
+  public static final String MISSED_INSTRUCTIONS_TAG = "mi";
+  public static final String COVERED_INSTRUCTIONS_TAG = "ci";
+  public static final String MISSED_BRANCHES_TAG = "mb";
+  public static final String COVERED_BRANCHES_TAG = "cb";
+  public static final String COUNTER_TAG = "counter";
+  public static final String TYPE_TAG = "type";
+  public static final String MISSED_TAG = "missed";
+  public static final String COVERED_TAG = "covered";
+  private static final String SOURCEFILE_NAME_TAG = "sourcefilename";
   private final Map<String, List<LineData>> myFiles = new HashMap<String, List<LineData>>();
   private XMLStreamWriter myOut;
+  private XMLStreamReader myIn;
+
+  public XMLProjectData read(InputStream fIn) throws IOException {
+    XMLInputFactory factory = XMLInputFactory.newInstance();
+    XMLProjectData report = new XMLProjectData();
+    try {
+      myIn = factory.createXMLStreamReader(new BufferedInputStream(fIn));
+      while (myIn.hasNext()) {
+        int event = myIn.next();
+        if (event == XMLStreamReader.START_ELEMENT) {
+          String name = myIn.getLocalName();
+          if (REPORT_TAG.equals(name)) {
+            readProject(report);
+          }
+        }
+      }
+      return report;
+    } catch (XMLStreamException e) {
+      throw wrapIOException(e);
+    } finally {
+      if (myIn != null) {
+        try {
+          myIn.close();
+        } catch (XMLStreamException ignored) {
+        }
+        myIn = null;
+      }
+      fIn.close();
+    }
+  }
+
+  private void readProject(XMLProjectData report) throws XMLStreamException {
+    while (myIn.hasNext()) {
+      int event = myIn.next();
+      if (event == XMLStreamReader.START_ELEMENT) {
+        String name = myIn.getLocalName();
+        if (PACKAGE_TAG.equals(name) && myIn.getAttributeCount() >= 1 && NAME_TAG.equals(myIn.getAttributeLocalName(0))) {
+          String packageName = myIn.getAttributeValue(0);
+          readPackage(report, packageName);
+        }
+      }
+    }
+  }
+
+  private void readPackage(XMLProjectData report, String packageName) throws XMLStreamException {
+    while (myIn.hasNext()) {
+      int event = myIn.next();
+      if (event == XMLStreamReader.START_ELEMENT) {
+        String name = myIn.getLocalName();
+        if (CLASS_TAG.equals(name)) {
+          String className = getAttribute(NAME_TAG);
+          if (className != null) {
+            readClass(report, ClassNameUtil.convertToFQName(className), getAttribute(SOURCEFILE_NAME_TAG));
+          }
+        } else if (SOURCEFILE_TAG.equals(name)) {
+          String fileName = getAttribute(NAME_TAG);
+          if (fileName != null) {
+            String path = packageName.isEmpty() ? fileName : packageName + "/" + fileName;
+            readFile(report, path);
+          }
+        }
+      } else if (event == XMLStreamReader.END_ELEMENT) {
+        if (PACKAGE_TAG.equals(myIn.getLocalName())) break;
+      }
+    }
+  }
+
+  private void readFile(XMLProjectData report, String path) throws XMLStreamException {
+    XMLProjectData.FileInfo file = new XMLProjectData.FileInfo(path);
+    report.addFile(file);
+    while (myIn.hasNext()) {
+      int event = myIn.next();
+      if (event == XMLStreamReader.START_ELEMENT) {
+        String name = myIn.getLocalName();
+        if (LINE_TAG.equals(name)) {
+          int lineNumber = Integer.parseInt(getAttribute(LINE_NUMBER_TAG));
+          int mi = Integer.parseInt(getAttribute(MISSED_INSTRUCTIONS_TAG));
+          int ci = Integer.parseInt(getAttribute(COVERED_INSTRUCTIONS_TAG));
+          int mb = Integer.parseInt(getAttribute(MISSED_BRANCHES_TAG));
+          int cb = Integer.parseInt(getAttribute(COVERED_BRANCHES_TAG));
+
+          XMLProjectData.LineInfo lineInfo = new XMLProjectData.LineInfo(lineNumber, mi, ci, mb, cb);
+          file.lines.add(lineInfo);
+        }
+      } else if (event == XMLStreamReader.END_ELEMENT) {
+        if (SOURCEFILE_TAG.equals(myIn.getLocalName())) break;
+      }
+    }
+  }
+
+  private void readClass(XMLProjectData report, String className, String fileName) throws XMLStreamException {
+    int mi = 0, ci = 0, mb = 0, cb = 0, mm = 0, cm = 0, ml = 0, cl = 0;
+    while (myIn.hasNext()) {
+      int event = myIn.next();
+      if (event == XMLStreamReader.START_ELEMENT) {
+        String name = myIn.getLocalName();
+        if (METHOD_TAG.equals(name)) {
+          readMethod();
+        } else if (COUNTER_TAG.equals(name)) {
+          String type = getAttribute(TYPE_TAG);
+          if (LINE_COUNTER.equals(type)) {
+            ml = Integer.parseInt(getAttribute(MISSED_TAG));
+            cl = Integer.parseInt(getAttribute(COVERED_TAG));
+          } else if (INSTRUCTION_COUNTER.equals(type)) {
+            mi = Integer.parseInt(getAttribute(MISSED_TAG));
+            ci = Integer.parseInt(getAttribute(COVERED_TAG));
+          } else if (METHOD_COUNTER.equals(type)) {
+            mm = Integer.parseInt(getAttribute(MISSED_TAG));
+            cm = Integer.parseInt(getAttribute(COVERED_TAG));
+          } else if (BRANCH_COUNTER.equals(type)) {
+            mb = Integer.parseInt(getAttribute(MISSED_TAG));
+            cb = Integer.parseInt(getAttribute(COVERED_TAG));
+          }
+        }
+      } else if (event == XMLStreamReader.END_ELEMENT) {
+        if (CLASS_TAG.equals(myIn.getLocalName())) break;
+      }
+    }
+    XMLProjectData.ClassInfo classInfo = new XMLProjectData.ClassInfo(className, fileName, ml, cl, mi, ci, mb, cb, mm, cm);
+    report.addClass(classInfo);
+  }
+
+  private void readMethod() throws XMLStreamException {
+    while (myIn.hasNext()) {
+      int event = myIn.next();
+      if (event == XMLStreamReader.END_ELEMENT && METHOD_TAG.equals(myIn.getLocalName())) {
+        break;
+      }
+    }
+  }
+
+  private String getAttribute(String attributeName) {
+    String value = null;
+    for (int i = 0; i < myIn.getAttributeCount(); i++) {
+      if (attributeName.equals(myIn.getAttributeLocalName(i))) {
+        value = (myIn.getAttributeValue(i));
+        break;
+      }
+    }
+    return value;
+  }
 
   public void write(FileOutputStream fOut, ProjectData project) throws IOException {
     XMLOutputFactory factory = XMLOutputFactory.newInstance();
@@ -67,9 +223,8 @@ public class XMLCoverageReport {
           myOut.flush();
           myOut.close();
           myOut = null;
-        } else {
-          fOut.close();
         }
+        fOut.close();
       } catch (XMLStreamException e) {
         ErrorReporter.reportError("Error closing file.", e);
       }
@@ -83,8 +238,8 @@ public class XMLCoverageReport {
   private void writeProject(ProjectData project) throws XMLStreamException {
     myOut.writeStartDocument();
     newLine();
-    myOut.writeStartElement("report");
-    myOut.writeAttribute("name", "Intellij Coverage Report");
+    myOut.writeStartElement(REPORT_TAG);
+    myOut.writeAttribute(NAME_TAG, IJ_REPORT_NAME);
     newLine();
 
     final HashMap<String, List<ClassData>> packages = mapClassesToPackages(project, true);
@@ -104,7 +259,7 @@ public class XMLCoverageReport {
   }
 
   private Counter writePackage(ProjectData project, String packageName, List<ClassData> classes) throws XMLStreamException {
-    myOut.writeStartElement("package");
+    myOut.writeStartElement(PACKAGE_TAG);
     myOut.writeAttribute("name", ClassNameUtil.convertToInternalName(packageName));
     newLine();
     myFiles.clear();
@@ -127,8 +282,8 @@ public class XMLCoverageReport {
   }
 
   private void writeFile(String fileName, List<LineData> lines, Map<LineData, Counter> lineCounters) throws XMLStreamException {
-    myOut.writeStartElement("sourcefile");
-    myOut.writeAttribute("name", fileName);
+    myOut.writeStartElement(SOURCEFILE_TAG);
+    myOut.writeAttribute(NAME_TAG, fileName);
     newLine();
     final TIntObjectHashMap<Counter> groupedLines = new TIntObjectHashMap<Counter>();
     for (LineData lineData : lines) {
@@ -136,8 +291,8 @@ public class XMLCoverageReport {
       final int lineNumber = lineData.getLineNumber();
       Counter lineCounter = groupedLines.get(lineNumber);
       if (lineCounter == null) {
-       lineCounter = new Counter();
-       groupedLines.put(lineNumber, lineCounter);
+        lineCounter = new Counter();
+        groupedLines.put(lineNumber, lineCounter);
       }
       final Counter counter = lineCounters.get(lineData);
       if (counter != null) {
@@ -172,12 +327,12 @@ public class XMLCoverageReport {
 
   private Counter writeClass(ProjectData project, ClassData classData, Map<LineData, Counter> lineCounters) throws XMLStreamException {
     final ClassInstructions classInstructions = project.getInstructions().get(classData.getName());
-    myOut.writeStartElement("class");
+    myOut.writeStartElement(CLASS_TAG);
     final String className = ClassNameUtil.convertToInternalName(classData.getName());
     myOut.writeAttribute("name", className);
     String sourceName = classData.getSource();
-    if (sourceName != null && sourceName.length() > 0) {
-      myOut.writeAttribute("sourcefilename", sourceName);
+    if (sourceName != null && !sourceName.isEmpty()) {
+      myOut.writeAttribute(SOURCEFILE_NAME_TAG, sourceName);
       newLine();
       List<LineData> lines = myFiles.get(sourceName);
       if (lines == null) {
@@ -209,12 +364,12 @@ public class XMLCoverageReport {
   }
 
   private Counter writeMethod(ClassInstructions classInstructions, String signature, List<LineData> lines, Map<LineData, Counter> lineCounters) throws XMLStreamException {
-    myOut.writeStartElement("method");
+    myOut.writeStartElement(METHOD_TAG);
     int nameIndex = signature.indexOf('(');
     String name = signature.substring(0, nameIndex);
     String descriptor = signature.substring(nameIndex);
-    myOut.writeAttribute("name", name);
-    myOut.writeAttribute("desc", descriptor);
+    myOut.writeAttribute(NAME_TAG, name);
+    myOut.writeAttribute(DESC_TAG, descriptor);
     newLine();
 
     final Counter counter = new Counter();
@@ -236,13 +391,13 @@ public class XMLCoverageReport {
   }
 
   private void writeLine(Counter counter, int lineNumber) throws XMLStreamException {
-    myOut.writeEmptyElement("line");
-    myOut.writeAttribute("nr", Integer.toString(lineNumber));
+    myOut.writeEmptyElement(LINE_TAG);
+    myOut.writeAttribute(LINE_NUMBER_TAG, Integer.toString(lineNumber));
 
-    myOut.writeAttribute("mi", Integer.toString(counter.totalInstructions - counter.coveredInstructions));
-    myOut.writeAttribute("ci", Integer.toString(counter.coveredInstructions));
-    myOut.writeAttribute("mb", Integer.toString(counter.totalBranches - counter.coveredBranches));
-    myOut.writeAttribute("cb", Integer.toString(counter.coveredBranches));
+    myOut.writeAttribute(MISSED_INSTRUCTIONS_TAG, Integer.toString(counter.totalInstructions - counter.coveredInstructions));
+    myOut.writeAttribute(COVERED_INSTRUCTIONS_TAG, Integer.toString(counter.coveredInstructions));
+    myOut.writeAttribute(MISSED_BRANCHES_TAG, Integer.toString(counter.totalBranches - counter.coveredBranches));
+    myOut.writeAttribute(COVERED_BRANCHES_TAG, Integer.toString(counter.coveredBranches));
     newLine();
   }
 
@@ -259,6 +414,9 @@ public class XMLCoverageReport {
       final BranchData instructionsData = lineInstructions.getInstructionsData(lineData);
       counter.totalInstructions = instructionsData.getTotalBranches();
       counter.coveredInstructions = instructionsData.getCoveredBranches();
+    } else {
+      counter.totalInstructions = 1;
+      counter.coveredInstructions = counter.coveredLines;
     }
     return counter;
   }
@@ -272,10 +430,10 @@ public class XMLCoverageReport {
   }
 
   private void writeCounter(String type, int total, int covered) throws XMLStreamException {
-    myOut.writeEmptyElement("counter");
-    myOut.writeAttribute("type", type);
-    myOut.writeAttribute("missed", Integer.toString(total - covered));
-    myOut.writeAttribute("covered", Integer.toString(covered));
+    myOut.writeEmptyElement(COUNTER_TAG);
+    myOut.writeAttribute(TYPE_TAG, type);
+    myOut.writeAttribute(MISSED_TAG, Integer.toString(total - covered));
+    myOut.writeAttribute(COVERED_TAG, Integer.toString(covered));
     newLine();
   }
 

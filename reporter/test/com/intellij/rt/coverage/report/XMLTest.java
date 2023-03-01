@@ -16,21 +16,19 @@
 
 package com.intellij.rt.coverage.report;
 
-import com.intellij.rt.coverage.data.ClassData;
-import com.intellij.rt.coverage.data.LineData;
-import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.data.instructions.LineInstructions;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.util.FileUtils;
 import com.intellij.rt.coverage.util.ProcessUtil;
+import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.util.HashMap;
 import java.util.Map;
 
 public class XMLTest {
@@ -39,7 +37,8 @@ public class XMLTest {
     final String patterns = "testData\\." + testName + "\\..*";
     final String className = "testData." + testName + ".TestKt";
     final String expectedFileName = "xml/" + testName + ".xml";
-    verifyProjectXML(runTestAndConvertToXML(patterns, className), expectedFileName);
+
+    verifyXML(patterns, className, expectedFileName);
   }
 
   @Test
@@ -69,7 +68,9 @@ public class XMLTest {
 
   @Test
   public void testExcludeAnnotation() throws Throwable {
-    verifyProjectXML(runTestAndConvertToXML("testData.excludeAnnotation.* -excludeAnnotations testData.excludeAnnotation.ExcludeFromCoverage", "testData.excludeAnnotation.TestKt"), "xml/excludeAnnotation.xml");
+    final String patterns = "testData.excludeAnnotation.* -excludeAnnotations testData.excludeAnnotation.ExcludeFromCoverage";
+    final String className = "testData.excludeAnnotation.TestKt";
+    verifyXML(patterns, className, "xml/excludeAnnotation.xml");
   }
 
   @Test
@@ -81,12 +82,14 @@ public class XMLTest {
   public void testNoReport() throws Throwable {
     final File xmlFile = createXMLFile();
     TestUtils.createRawReporter(null, "testData.noReport.*").createXMLReport(xmlFile);
-    verifyProjectXML(xmlFile, "xml/noReport.xml");
+    verifyXMLWithExpected(xmlFile, "xml/noReport.xml");
   }
 
   @Test
   public void testSimple() throws Throwable {
-    verifyProjectXML(runTestAndConvertToXML("testData.simple.*", "testData.simple.Main"), "xml/simple.xml");
+    final String patterns = "testData.simple.*";
+    final String className = "testData.simple.Main";
+    verifyXML(patterns, className, "xml/simple.xml");
   }
 
   @Test
@@ -102,7 +105,7 @@ public class XMLTest {
     TestUtils.clearLogFile(new File("."));
     ProcessUtil.execJavaProcess(commandLine);
     TestUtils.checkLogFile(new File("."));
-    XMLTest.verifyProjectXML(xmlFile, "xml/simple.xml");
+    XMLTest.verifyXMLWithExpected(xmlFile, "xml/simple.xml");
   }
 
   @Test
@@ -124,7 +127,7 @@ public class XMLTest {
     TestUtils.clearLogFile(new File("."));
     ProcessUtil.execJavaProcess(commandLine);
     TestUtils.checkLogFile(new File("."));
-    XMLTest.verifyProjectXML(xmlFile, "xml/simple.xml");
+    verifyXMLWithExpected(xmlFile, "xml/simple.xml");
   }
 
   @Test
@@ -152,7 +155,7 @@ public class XMLTest {
     TestUtils.clearLogFile(new File("."));
     new XMLCoverageReport().write(new FileOutputStream(file), project);
     TestUtils.checkLogFile(new File("."));
-    verifyProjectXML(file, "xml/xmlTest.xml");
+    verifyXMLWithExpected(file, "xml/xmlTest.xml");
   }
 
   @Test
@@ -187,16 +190,139 @@ public class XMLTest {
     TestUtils.clearLogFile(new File("."));
     new XMLCoverageReport().write(new FileOutputStream(file), project);
     TestUtils.checkLogFile(new File("."));
-    verifyProjectXML(file, "xml/sameSource.xml");
+    verifyXMLWithExpected(file, "xml/sameSource.xml");
   }
 
-  private File runTestAndConvertToXML(String patterns, String className) throws Throwable {
+  @Test
+  public void testXMLRead() throws Throwable {
+    final InputStream inputStream = TestUtils.class.getClassLoader().getResourceAsStream("xml/simple.xml");
+    final XMLProjectData report = new XMLCoverageReport().read(inputStream);
+
+    Assert.assertEquals(1, report.getClasses().size());
+    XMLProjectData.ClassInfo classInfo = report.getClass("testData.simple.Main");
+    Assert.assertNotNull(classInfo);
+    Assert.assertEquals(22, classInfo.missedInstructions);
+    Assert.assertEquals(17, classInfo.coveredInstructions);
+    Assert.assertEquals(3, classInfo.missedBranches);
+    Assert.assertEquals(2, classInfo.coveredBranches);
+    Assert.assertEquals(5, classInfo.missedLines);
+    Assert.assertEquals(6, classInfo.coveredLines);
+    Assert.assertEquals(1, classInfo.missedMethods);
+    Assert.assertEquals(1, classInfo.coveredMethods);
+
+    Assert.assertEquals(1, report.getFiles().size());
+    XMLProjectData.FileInfo fileInfo = report.getFile("testData/simple/Main.java");
+    Assert.assertNotNull(fileInfo);
+    Assert.assertEquals(11, fileInfo.lines.size());
+    XMLProjectData.LineInfo lineInfo = fileInfo.lines.get(0);
+    Assert.assertEquals(19, lineInfo.lineNumber);
+    Assert.assertEquals(2, lineInfo.missedInstructions);
+    Assert.assertEquals(0, lineInfo.coveredInstructions);
+    Assert.assertEquals(0, lineInfo.missedBranches);
+    Assert.assertEquals(0, lineInfo.coveredBranches);
+  }
+
+  private static void verifyXMLRead(File xmlReport, ProjectData expected) throws Throwable {
+    XMLProjectData actual = new XMLCoverageReport().read(new FileInputStream(xmlReport));
+    int classCount = 0;
+    Map<String, Map<Integer, XMLProjectData.LineInfo>> files = new HashMap<String, Map<Integer, XMLProjectData.LineInfo>>();
+    for (ClassData classData : expected.getClassesCollection()) {
+      if (!hasLines(classData.getLines())) continue;
+      classCount++;
+      XMLProjectData.ClassInfo classInfo = actual.getClass(classData.getName());
+      Assert.assertNotNull(classInfo);
+      Map<String, Boolean> methods = new HashMap<String, Boolean>();
+
+      Assert.assertNotNull(classData.getSource());
+      Assert.assertEquals(classData.getSource(), classInfo.fileName);
+      int index = classData.getName().lastIndexOf('.');
+      String packageName = index < 0 ? "" : classData.getName().substring(0, index);
+      String path = packageName.isEmpty() ? classData.getSource() : packageName.replace('.', '/') + "/" + classData.getSource();
+      Map<Integer, XMLProjectData.LineInfo> fileLines = files.get(path);
+      if (fileLines == null) {
+        fileLines = new HashMap<Integer, XMLProjectData.LineInfo>();
+        files.put(path, fileLines);
+      }
+      int mi = 0, ci = 0, mb = 0, cb = 0, mm = 0, cm = 0, ml = 0, cl = 0;
+      for (LineData line : (LineData[]) classData.getLines()) {
+        if (line == null) continue;
+
+        XMLProjectData.LineInfo lineInfo = fileLines.get(line.getLineNumber());
+        if (lineInfo == null) {
+          lineInfo = new XMLProjectData.LineInfo(line.getLineNumber());
+          fileLines.put(line.getLineNumber(), lineInfo);
+        }
+        final BranchData branchData = line.getBranchData();
+        if (branchData != null) {
+          lineInfo.coveredBranches += branchData.getCoveredBranches();
+          lineInfo.missedBranches += branchData.getTotalBranches() - branchData.getCoveredBranches();
+        }
+
+        int i = expected.getInstructions().get(classData.getName()).getlines()[line.getLineNumber()].getInstructions();
+        if (line.getStatus() == LineCoverage.NONE) {
+          ml++;
+          lineInfo.missedInstructions += i;
+          if (!methods.containsKey(line.getMethodSignature())) {
+            methods.put(line.getMethodSignature(), false);
+          }
+        } else {
+          cl++;
+          lineInfo.coveredInstructions += i;
+          methods.put(line.getMethodSignature(), true);
+        }
+        ci += lineInfo.coveredInstructions;
+        mi += lineInfo.missedInstructions;
+        cb += lineInfo.coveredBranches;
+        mb += lineInfo.missedBranches;
+      }
+      for (Map.Entry<String, Boolean> e : methods.entrySet()) {
+        if (e.getValue()) {
+          cm++;
+        } else {
+          mm++;
+        }
+      }
+      Assert.assertEquals(mi, classInfo.missedInstructions);
+      Assert.assertEquals(ci, classInfo.coveredInstructions);
+      Assert.assertEquals(mb, classInfo.missedBranches);
+      Assert.assertEquals(cb, classInfo.coveredBranches);
+      Assert.assertEquals(ml, classInfo.missedLines);
+      Assert.assertEquals(cl, classInfo.coveredLines);
+      Assert.assertEquals(mm, classInfo.missedMethods);
+      Assert.assertEquals(cm, classInfo.coveredMethods);
+    }
+    Assert.assertEquals(classCount, actual.getClasses().size());
+    Assert.assertEquals(files.size(), actual.getFiles().size());
+    for (XMLProjectData.FileInfo fileInfo : actual.getFiles()) {
+      Map<Integer, XMLProjectData.LineInfo> expectedFile = files.get(fileInfo.path);
+      Assert.assertNotNull(expectedFile);
+      for (XMLProjectData.LineInfo lineInfo : fileInfo.lines) {
+        XMLProjectData.LineInfo expectedLine = expectedFile.get(lineInfo.lineNumber);
+        Assert.assertNotNull(expectedLine);
+        Assert.assertEquals(expectedLine.coveredBranches, lineInfo.coveredBranches);
+        Assert.assertEquals(expectedLine.missedBranches, lineInfo.missedBranches);
+        Assert.assertEquals(expectedLine.coveredInstructions, lineInfo.coveredInstructions);
+        Assert.assertEquals(expectedLine.missedInstructions, lineInfo.missedInstructions);
+      }
+    }
+  }
+
+  private static boolean hasLines(Object[] lines) {
+    if (lines == null) return false;
+    for (Object line : lines) {
+      if (line != null) return true;
+    }
+    return false;
+  }
+
+  private static Pair<File, ProjectData> runXMLTest(String patterns, String className) throws Throwable {
     final BinaryReport report = TestUtils.runTest(patterns, className);
     final File xmlFile = createXMLFile();
     TestUtils.clearLogFile(new File("."));
-    TestUtils.createReporter(report, patterns).createXMLReport(xmlFile);
+    final Reporter reporter = TestUtils.createReporter(report, patterns);
+    reporter.createXMLReport(xmlFile);
     TestUtils.checkLogFile(new File("."));
-    return xmlFile;
+    return new Pair<File, ProjectData>(xmlFile, reporter.getProjectData());
   }
 
   @NotNull
@@ -204,8 +330,15 @@ public class XMLTest {
     return File.createTempFile("report_tmp", ".xml");
   }
 
-  public static void verifyProjectXML(File file, String expectedFileName) throws Throwable {
+  public static void verifyXMLWithExpected(File file, String expectedFileName) throws Throwable {
     final File expected = TestUtils.getResourceFile(expectedFileName);
     Assert.assertEquals(FileUtils.readAll(expected), FileUtils.readAll(file));
+  }
+
+  private static void verifyXML(String patterns, String className, String expectedFileName) throws Throwable {
+    Pair<File, ProjectData> result = runXMLTest(patterns, className);
+
+    verifyXMLWithExpected(result.getFirst(), expectedFileName);
+    verifyXMLRead(result.getFirst(), result.getSecond());
   }
 }

@@ -41,14 +41,15 @@ object TestUtils {
     @JvmStatic
     fun runTest(patterns: String?, className: String?): BinaryReport {
         val icFile = createTmpFile()
+        val smapFile = createTmpFile()
         val classpath = System.getProperty("java.class.path").split(File.pathSeparator)
                 .filter { path -> path.contains("kotlin-stdlib") }
                 .plus(File(JAVA_OUTPUT).absolutePath)
                 .plus(File(KOTLIN_OUTPUT).absolutePath)
                 .joinToString(File.pathSeparator)
-        CoverageStatusTest.runCoverage(classpath, icFile, patterns, className, true, arrayOf("-Dcoverage.ignore.private.constructor.util.class=true"), false, false)
+        CoverageStatusTest.runCoverage(classpath, icFile, "true ${smapFile.absolutePath} $patterns", className, true, arrayOf("-Dcoverage.ignore.private.constructor.util.class=true"), false, false)
         checkLogFile(icFile.parentFile)
-        return BinaryReport(icFile, null)
+        return BinaryReport(icFile, smapFile)
     }
 
     @JvmStatic

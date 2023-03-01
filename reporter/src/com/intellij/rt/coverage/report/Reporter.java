@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.report;
 
+import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import jetbrains.coverage.report.ReportBuilderFactory;
 import jetbrains.coverage.report.SourceCodeProvider;
@@ -56,5 +57,9 @@ public class Reporter {
     }
     final SourceCodeProvider sourceCodeProvider = new DirectorySourceCodeProvider(myLoad.getProjectData(), myLoad.getSources());
     builder.generateReport(new IDEACoverageData(myLoad.getProjectData(), sourceCodeProvider));
+  }
+
+  public ProjectData getProjectData() {
+    return myLoad.getProjectData();
   }
 }

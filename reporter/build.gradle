@@ -16,6 +16,7 @@ configurations {
 
 dependencies {
   implementation project(":instrumentation")
+  implementation project(":java6-utils")
   externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.18")
   externalDependencies("org.json:json:20210307")
 

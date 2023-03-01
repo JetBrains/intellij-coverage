@@ -51,7 +51,7 @@ class OfflineCoverageTest {
         TestUtils.clearLogFile(File("."))
         TestUtils.createRawReporter(report, "testData\\.$testName\\..* $className").createXMLReport(xmlFile)
         TestUtils.checkLogFile(File("."))
-        XMLTest.verifyProjectXML(xmlFile, "xml/$testName.xml")
+        XMLTest.verifyXMLWithExpected(xmlFile, "xml/$testName.xml")
     }
 
     private fun runCoverage(className: String): BinaryReport {

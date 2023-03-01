@@ -134,7 +134,7 @@ public class CoverageReport {
     if (sourceMapFile == null) return;
     Map<String, String> readNames = Collections.emptyMap();
     try {
-      if (sourceMapFile.exists()) {
+      if (sourceMapFile.exists() && sourceMapFile.length() > 0) {
         readNames = loadSourceMapFromFile(classes, sourceMapFile);
       }
     } catch (IOException e) {
