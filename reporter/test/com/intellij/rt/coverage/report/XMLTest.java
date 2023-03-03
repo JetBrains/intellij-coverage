@@ -223,6 +223,7 @@ public class XMLTest {
   }
 
   private static void verifyXMLRead(File xmlReport, ProjectData expected) throws Throwable {
+    Assert.assertTrue(XMLCoverageReport.canReadFile(xmlReport));
     XMLProjectData actual = new XMLCoverageReport().read(new FileInputStream(xmlReport));
     int classCount = 0;
     Map<String, Map<Integer, XMLProjectData.LineInfo>> files = new HashMap<String, Map<Integer, XMLProjectData.LineInfo>>();

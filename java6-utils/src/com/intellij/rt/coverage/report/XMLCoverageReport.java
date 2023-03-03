@@ -24,6 +24,7 @@ import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.data.instructions.LineInstructions;
 import com.intellij.rt.coverage.util.ArrayUtil;
 import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.gnu.trove.TIntObjectProcedure;
@@ -68,6 +69,41 @@ public class XMLCoverageReport {
   private final Map<String, List<LineData>> myFiles = new HashMap<String, List<LineData>>();
   private XMLStreamWriter myOut;
   private XMLStreamReader myIn;
+
+  /**
+   * Check whether a file may be an XML coverage report of a suitable format.
+   */
+  public static boolean canReadFile(File file) {
+    InputStream is = null;
+    XMLStreamReader in = null;
+    try {
+      XMLInputFactory factory = XMLInputFactory.newInstance();
+      is = new BufferedInputStream(new FileInputStream(file));
+      in = factory.createXMLStreamReader(is);
+      while (in.hasNext()) {
+        if (in.next() == XMLStreamReader.START_ELEMENT) {
+          if (!REPORT_TAG.equals(in.getLocalName())) return false;
+          while (in.hasNext()) {
+            if (in.next() == XMLStreamReader.START_ELEMENT) {
+              if (PACKAGE_TAG.equals(in.getLocalName()) && in.getAttributeCount() >= 1 && NAME_TAG.equals(in.getAttributeLocalName(0))) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+    } catch (Throwable ignored) {
+    } finally {
+      CoverageIOUtil.close(is);
+      if (in != null) {
+        try {
+          in.close();
+        } catch (XMLStreamException ignored) {
+        }
+      }
+    }
+    return false;
+  }
 
   public XMLProjectData read(InputStream fIn) throws IOException {
     XMLInputFactory factory = XMLInputFactory.newInstance();
