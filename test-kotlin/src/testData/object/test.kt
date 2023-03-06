@@ -18,7 +18,6 @@ package testData.`object`
 
 // classes: ALL
 // patterns: testData.object.*
-// extra args: -Dcoverage.ignore.private.constructor.util.class=true
 // calculate unloaded: true
 
 object EmptyObjectDeclaration // coverage: FULL

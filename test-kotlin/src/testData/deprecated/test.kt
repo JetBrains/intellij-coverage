@@ -65,7 +65,7 @@ fun deprecatedFunctionWithAnonymousClass() {
     }
 }
 
-object A { // coverage: NONE
+object A {
     @Deprecated("", level = DeprecationLevel.HIDDEN)
     fun deprecatedFunctionWithAnonymousClass() {
         functionWithLambda {
@@ -88,6 +88,8 @@ object A { // coverage: NONE
             }
         }
     }
+
+    fun foo() = Unit // coverage: NONE
 }
 
 fun functionWithLambda(lambda: (Int) -> Int) {

@@ -22,7 +22,7 @@ import testData.ignoreAnnotation.IgnoreCoverage
 // calculate unloaded: true
 // patterns: testData.ignoreAnnotation.inlineUnloaded.* -excludeAnnotations testData.ignoreAnnotation.IgnoreCoverage
 
-object UnusedClass {      // coverage: NONE
+object UnusedClass {
     @IgnoreCoverage
     @JvmStatic
     inline fun foo() {
@@ -35,7 +35,7 @@ object UnusedClass {      // coverage: NONE
     }
 }
 
-object AbsolutelyUnusedClass {      // coverage: NONE
+object AbsolutelyUnusedClass {
     @IgnoreCoverage
     @JvmStatic
     inline fun foo() {

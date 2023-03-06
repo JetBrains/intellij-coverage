@@ -50,16 +50,13 @@ public class Instrumentator {
       final File outputRoot = myOutputRoots.get(i);
 
       final boolean newBranchCoverage = OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED;
-      final boolean ignorePrivateConstructor = OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS;
       final boolean calculateHitsCount = OptionsUtil.CALCULATE_HITS_COUNT;
       try {
         OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = true;
-        OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS = true;
         OptionsUtil.CALCULATE_HITS_COUNT = false;
         new InstrumentationVisitor(root, outputRoot).visitFiles();
       } finally {
         OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = newBranchCoverage;
-        OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS = ignorePrivateConstructor;
         OptionsUtil.CALCULATE_HITS_COUNT = calculateHitsCount;
       }
     }

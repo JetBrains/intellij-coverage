@@ -17,7 +17,6 @@
 package testData.utilClass.throwing;
 
 // classes: ALL
-// extra args: -Dcoverage.ignore.private.constructor.util.class=true
 // patterns: testData.utilClass.throwing.*
 // calculate unloaded: true
 

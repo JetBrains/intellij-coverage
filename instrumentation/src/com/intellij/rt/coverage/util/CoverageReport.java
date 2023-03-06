@@ -92,7 +92,7 @@ public class CoverageReport {
   private static void finalizeCoverage(ProjectData projectData, boolean appendUnloaded, ClassFinder cf, boolean calculateSource) {
     projectData.applyHits();
     if (appendUnloaded) {
-      UnloadedUtil.appendUnloaded(projectData, cf, calculateSource, projectData.isBranchCoverage(), OptionsUtil.IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS);
+      UnloadedUtil.appendUnloaded(projectData, cf, calculateSource, projectData.isBranchCoverage());
     }
     projectData.applyLineMappings();
     projectData.dropIgnoredLines();

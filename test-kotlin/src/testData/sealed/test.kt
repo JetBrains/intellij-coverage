@@ -18,7 +18,6 @@ package testData.sealed
 
 // classes: Sealed Child UncoveredSealed UncoveredChild AbandonedSealed Abstract
 // calculate unloaded: true
-// extra args: -Dcoverage.ignore.private.constructor.util.class=true
 
 sealed class Sealed                          // coverage: FULL
 data class Child(val value: Int) : Sealed()  // coverage: FULL

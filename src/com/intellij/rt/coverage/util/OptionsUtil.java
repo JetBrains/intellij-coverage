@@ -25,7 +25,5 @@ public class OptionsUtil {
   public static final boolean THREAD_SAFE_STORAGE = "true".equals(System.getProperty("idea.coverage.thread-safe.enabled", "true"));
   public static boolean CALCULATE_HITS_COUNT = "true".equals(System.getProperty("idea.coverage.calculate.hits", "true"));
 
-  public static boolean IGNORE_PRIVATE_CONSTRUCTOR_OF_UTIL_CLASS = "true".equals(System.getProperty("coverage.ignore.private.constructor.util.class", "false"));
-
   public static final String LOG_LEVEL = System.getProperty("idea.coverage.log.level");
 }

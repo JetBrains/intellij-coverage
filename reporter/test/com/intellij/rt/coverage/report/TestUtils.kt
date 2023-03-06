@@ -47,7 +47,7 @@ object TestUtils {
                 .plus(File(JAVA_OUTPUT).absolutePath)
                 .plus(File(KOTLIN_OUTPUT).absolutePath)
                 .joinToString(File.pathSeparator)
-        CoverageStatusTest.runCoverage(classpath, icFile, "true ${smapFile.absolutePath} $patterns", className, true, arrayOf("-Dcoverage.ignore.private.constructor.util.class=true"), false, false)
+        CoverageStatusTest.runCoverage(classpath, icFile, "true ${smapFile.absolutePath} $patterns", className, true, emptyArray(), false, false)
         checkLogFile(icFile.parentFile)
         return BinaryReport(icFile, smapFile)
     }

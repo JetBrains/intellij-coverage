@@ -29,7 +29,6 @@ import java.util.List;
  * The constructor may optionally throw an exception.
  */
 public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
-  public static final String MARKER = "PrivateConstructorOfUtilClassFilter";
   private static final String KOTLIN_OBJECT_CONSTRUCTOR_DESCRIPTOR = "(" + KotlinUtils.KOTLIN_DEFAULT_CONSTRUCTOR_MARKER + ")V";
 
   private boolean myIsAbstractClass;
@@ -42,8 +41,7 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
 
   @Override
   public boolean isApplicable(Instrumenter context) {
-    Boolean enabled = (Boolean) context.getProperty(MARKER);
-    return enabled != null && enabled;
+    return true;
   }
 
   @Override

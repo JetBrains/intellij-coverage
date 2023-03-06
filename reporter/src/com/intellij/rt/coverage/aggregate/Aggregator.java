@@ -180,7 +180,7 @@ public class Aggregator {
     }
     projectData.setInstructionsCoverage(true);
     projectData.setAnnotationsToIgnore(excludeAnnotations);
-    UnloadedUtil.appendUnloaded(projectData, createClassFinder(), true, true, true);
+    UnloadedUtil.appendUnloaded(projectData, createClassFinder(), true, true);
     return projectData;
   }
 

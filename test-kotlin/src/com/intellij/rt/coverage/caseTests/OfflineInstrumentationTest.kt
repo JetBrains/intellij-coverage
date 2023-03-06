@@ -108,7 +108,7 @@ internal abstract class OfflineInstrumentationTest(override val coverage: Covera
         val projectData = createProjectData(includes, excludes)
         val cf = ClassFinder(includes, excludes)
         cf.addClassLoader(URLClassLoader(arrayOf(outputRoot.toURI().toURL())))
-        UnloadedUtil.appendUnloaded(projectData, cf, false, coverage.isBranchCoverage(), false)
+        UnloadedUtil.appendUnloaded(projectData, cf, false, coverage.isBranchCoverage())
 
         RawReportLoader.load(myDataFile, projectData)
         projectData.applyLineMappings()

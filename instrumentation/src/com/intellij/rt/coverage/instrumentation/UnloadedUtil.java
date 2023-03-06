@@ -50,8 +50,7 @@ public class UnloadedUtil {
   };
 
   public static void appendUnloaded(final ProjectData projectData, final ClassFinder classFinder,
-                                    final boolean calculateSource, final boolean branchCoverage,
-                                    final boolean ignorePrivateConstructorOfUtilClass) {
+                                    final boolean calculateSource, final boolean branchCoverage) {
     classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
       public void consume(ClassEntry classEntry) {
         final ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
@@ -59,7 +58,7 @@ public class UnloadedUtil {
         try {
           final InputStream is = classEntry.getClassInputStream();
           if (is == null) return;
-          appendUnloadedClass(projectData, classEntry.getClassName(), new ClassReader(is), branchCoverage, calculateSource, ignorePrivateConstructorOfUtilClass, false);
+          appendUnloadedClass(projectData, classEntry.getClassName(), new ClassReader(is), branchCoverage, calculateSource, false);
         } catch (Throwable e) {
           ErrorReporter.reportError("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
         }
@@ -68,14 +67,14 @@ public class UnloadedUtil {
   }
 
   @SuppressWarnings("unused") // used in IntelliJ
-  public static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean branchCoverage, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass) {
-    appendUnloadedClass(projectData, className, reader, branchCoverage, calculateSource, ignorePrivateConstructorOfUtilClass, true);
+  public static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean branchCoverage, boolean calculateSource) {
+    appendUnloadedClass(projectData, className, reader, branchCoverage, calculateSource, true);
   }
 
-  private static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean branchCoverage, boolean calculateSource, boolean ignorePrivateConstructorOfUtilClass, boolean checkLineMappings) {
+  private static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean branchCoverage, boolean calculateSource, boolean checkLineMappings) {
     final ClassVisitor visitor = CoverageTransformer.createInstrumenter(
         projectData, className, reader, EMPTY_CLASS_VISITOR,
-        null, branchCoverage, calculateSource, ignorePrivateConstructorOfUtilClass, EmptyCoverageDataAccess.INSTANCE);
+        null, branchCoverage, calculateSource, EmptyCoverageDataAccess.INSTANCE);
     if (visitor == null) return;
     reader.accept(visitor, ClassReader.SKIP_FRAMES);
     final ClassData classData = projectData.getClassData(className);

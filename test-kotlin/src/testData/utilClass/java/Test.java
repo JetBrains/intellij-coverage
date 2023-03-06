@@ -17,7 +17,6 @@
 package testData.utilClass.java;
 
 // classes: ALL
-// extra args: -Dcoverage.ignore.private.constructor.util.class=true
 // patterns: testData.utilClass.java.*
 // calculate unloaded: true
 

@@ -22,7 +22,7 @@ fun main() {
     Test.test()                                                                    // coverage: FULL
 }
 
-object Test {                                                                      // coverage: FULL
+object Test {
     inline fun a(x: Int) {
         println(x)                                                                 // coverage: FULL
     }

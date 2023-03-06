@@ -19,7 +19,7 @@ package testData.unloaded.inline
 // classes: UnusedClass
 // calculate unloaded: true
 
-object UnusedClass {      // coverage: NONE
+object UnusedClass {
     @JvmStatic
     inline fun foo() {
         println("foo")    // coverage: FULL

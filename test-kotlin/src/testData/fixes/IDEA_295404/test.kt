@@ -17,7 +17,6 @@
 package testData.fixes.IDEA_295404
 
 // patterns: kotlin.reflect.* testData.fixes.IDEA_295404.*
-// extra args: -Dcoverage.ignore.private.constructor.util.class=true
 
 fun main() {
     Class.forName("kotlin.reflect.jvm.internal.impl.builtins.jvm.JavaToKotlinClassMap") // coverage: FULL

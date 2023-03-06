@@ -17,7 +17,6 @@
 package testData.utilClass.kotlin
 
 // classes: ALL
-// extra args: -Dcoverage.ignore.private.constructor.util.class=true
 // patterns: testData.utilClass.kotlin.*
 // calculate unloaded: true
 
