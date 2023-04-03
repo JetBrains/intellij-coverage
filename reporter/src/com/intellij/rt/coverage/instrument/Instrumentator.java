@@ -44,7 +44,7 @@ public class Instrumentator {
     myFilters = filters;
   }
 
-  public void instrument() {
+  public void instrument(boolean countHits) {
     for (int i = 0; i < myRoots.size(); i++) {
       final File root = myRoots.get(i);
       final File outputRoot = myOutputRoots.get(i);
@@ -53,7 +53,7 @@ public class Instrumentator {
       final boolean calculateHitsCount = OptionsUtil.CALCULATE_HITS_COUNT;
       try {
         OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = true;
-        OptionsUtil.CALCULATE_HITS_COUNT = false;
+        OptionsUtil.CALCULATE_HITS_COUNT = countHits;
         new InstrumentationVisitor(root, outputRoot).visitFiles();
       } finally {
         OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = newBranchCoverage;

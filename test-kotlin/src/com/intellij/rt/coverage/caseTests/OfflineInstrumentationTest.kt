@@ -135,7 +135,7 @@ internal abstract class OfflineInstrumentationTest(override val coverage: Covera
         val coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent")
         val commandLine = arrayOf(
                 "-classpath", coverageAgentPath + File.pathSeparator + outputDir.absolutePath,
-                "-Dcoverage.offline.report.path=${myDataFile.absolutePath}",
+                "-Dkover.offline.report.path=${myDataFile.absolutePath}",
                 className)
         ProcessUtil.execJavaProcess(commandLine)
         assertEmptyLogFile(myDataFile)

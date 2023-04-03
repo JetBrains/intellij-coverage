@@ -64,7 +64,7 @@ class OfflineCoverageTest {
         val icrFile = TestUtils.createTmpFile()
         val commandLine = arrayOf(
                 "-classpath", classpath,
-                "-Dcoverage.offline.report.path=" + icrFile.absolutePath,
+                "-Dkover.offline.report.path=" + icrFile.absolutePath,
                 className)
         TestUtils.clearLogFile(File("."))
         ProcessUtil.execJavaProcess(commandLine)

@@ -42,6 +42,7 @@ public class Reporter {
     final XMLCoverageReport report = new XMLCoverageReport();
     FileOutputStream out = null;
     try {
+      xmlFile.getParentFile().mkdirs();
       out = new FileOutputStream(xmlFile);
       report.write(out, myLoad.getProjectData());
     } finally {
@@ -50,6 +51,7 @@ public class Reporter {
   }
 
   public void createHTMLReport(File htmlDir, String title) throws IOException {
+    htmlDir.mkdirs();
     final HTMLReportBuilder builder = ReportBuilderFactory.createHTMLReportBuilderForKover();
     builder.setReportDir(htmlDir);
     if (builder instanceof HTMLReportBuilderImpl) {

@@ -61,7 +61,7 @@ public abstract class ReportLoadStrategy {
   public static class RawReportLoadStrategy extends ReportLoadStrategy {
     private final Filters myFilters;
 
-    protected RawReportLoadStrategy(List<BinaryReport> reports, List<Module> modules, Filters filters) {
+    public RawReportLoadStrategy(List<BinaryReport> reports, List<Module> modules, Filters filters) {
       super(reports, modules);
       myFilters = filters;
     }

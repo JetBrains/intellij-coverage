@@ -62,13 +62,13 @@ public class RawProjectInit {
       synchronized (RawProjectData.class) {
         if (ourProjectData == null) {
           ourProjectData = new RawProjectData();
-          final String filePath = System.getProperty("coverage.offline.report.path");
+          final String filePath = System.getProperty("kover.offline.report.path");
           if (filePath != null) {
             final File file = new File(filePath);
             RawHitsReport.dumpOnExit(file, ourProjectData);
             ErrorReporter.setBasePath(file.getParent());
           } else {
-            ErrorReporter.reportError("Output file path is not set. Please set 'coverage.offline.report.path' property");
+            ErrorReporter.reportError("Output file path is not set. Please set 'kover.offline.report.path' property");
           }
         }
       }
