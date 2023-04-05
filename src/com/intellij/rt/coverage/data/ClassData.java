@@ -149,6 +149,7 @@ public class ClassData implements CoverageData {
   }
 
   public LineData getLineData(int line) {
+    if (line < 0 || line >= myLinesArray.length) return null;
     return myLinesArray[line];
   }
 
@@ -158,7 +159,7 @@ public class ClassData implements CoverageData {
 
   @SuppressWarnings("unused")
   public boolean containsLine(int line) {
-    return myLinesArray[line] != null;
+    return 0 <= line && line < myLinesArray.length && myLinesArray[line] != null;
   }
 
   public Collection<String> getMethodSigs() {
