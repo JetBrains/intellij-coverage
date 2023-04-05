@@ -80,8 +80,8 @@ public class CoverageDiff {
 
 
   private void compareClasses(final ClassData before, final ClassData after) {
-    LineData[] beforeLines = (LineData[]) before.getLines();
-    LineData[] afterLines = (LineData[]) after.getLines();
+    LineData[] beforeLines = before.getLines();
+    LineData[] afterLines = after.getLines();
     if (afterLines == null && beforeLines == null) return;
     if (afterLines == null) {
       myClassesDiff.add(new DeleteDiffElement<ClassData>(before.getName(), before));

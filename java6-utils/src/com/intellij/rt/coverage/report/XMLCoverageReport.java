@@ -375,7 +375,7 @@ public class XMLCoverageReport {
         lines = new ArrayList<LineData>();
         myFiles.put(sourceName, lines);
       }
-      LineData[] linesArray = (LineData[]) classData.getLines();
+      LineData[] linesArray = classData.getLines();
       if (linesArray != null) {
         for (LineData line : linesArray) {
           if (line == null) continue;
@@ -474,9 +474,9 @@ public class XMLCoverageReport {
   }
 
   private static boolean shouldIncludeClass(ClassData classData) {
-    final Object[] lines = classData.getLines();
+    final LineData[] lines = classData.getLines();
     if (lines == null) return false;
-    for (Object line : lines) {
+    for (LineData line : lines) {
       if (line != null) return true;
     }
     return false;

@@ -46,8 +46,7 @@ public class UncoveredBranchesSection extends ClassListSection {
 
   @Override
   protected void loadClass(DataInputStream in, ClassData classData, int version) throws IOException {
-    for (Object object : classData.getLines()) {
-      final LineData line = (LineData) object;
+    for (LineData line : classData.getLines()) {
       if (line == null || line.getHits() > 0) continue;
 
       final int jumpsNumber = CoverageIOUtil.readINT(in);
@@ -72,7 +71,7 @@ public class UncoveredBranchesSection extends ClassListSection {
   @Override
   protected void saveClass(ClassData classData, DataOutput out, int index) throws IOException {
     int line = 0;
-    final LineData[] lines = (LineData[]) classData.getLines();
+    final LineData[] lines = classData.getLines();
     if (lines == null) return;
     for (; line < lines.length; line++) {
       final LineData lineData = lines[line];

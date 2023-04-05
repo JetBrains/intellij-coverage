@@ -258,7 +258,7 @@ public class KotlinInlineFilter extends LinesFilter {
   public static void checkLineSignatures(final ClassData classData, final ClassFinder classFinder) {
     if (!ourCheckInlineSignatures) return;
     final TIntHashSet linesWithIncorrectSignatures = new TIntHashSet();
-    for (LineData line : (LineData[]) classData.getLines()) {
+    for (LineData line : classData.getLines()) {
       if (line != null && line.getMethodSignature() != null && line.getMethodSignature().endsWith(UNKNOWN_DESC)) {
         linesWithIncorrectSignatures.add(line.getLineNumber());
       }

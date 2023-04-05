@@ -104,7 +104,7 @@ private fun extendedLineInfo(project: ProjectData, classNames: List<String>) = c
             val instructionsMap = hashMapOf<Int, LineInstructions>()
             getClasses(classNames, project).forEach { classData ->
                 val classInstructions = project.instructions[classData.name]!!
-                classData.lines.filterIsInstance<LineData>().forEach { instructionsMap.getOrPut(it.lineNumber) { LineInstructions() }.merge(classInstructions.getlines()[it.lineNumber]) }
+                classData.lines.filterNotNull().forEach { instructionsMap.getOrPut(it.lineNumber) { LineInstructions() }.merge(classInstructions.getlines()[it.lineNumber]) }
             }
             associate { line ->
                 val branches = line.branchData
@@ -190,8 +190,7 @@ private fun Map<Int, Int>.statusToString() = mapValues {
     }
 }
 
-private fun ClassData.getLinesData() = (lines ?: Array<LineData?>(0) { null })
-        .filterIsInstance(LineData::class.java).sortedBy { it.lineNumber }
+private fun ClassData.getLinesData() = (lines ?: emptyArray()).filterNotNull().sortedBy { it.lineNumber }
 
 internal fun extractTestTrackingDataFromFile(file: File): Map<Int, Set<String>> =
     TestTrackingMatcher().let { callback ->

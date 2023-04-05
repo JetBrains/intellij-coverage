@@ -245,7 +245,7 @@ public class XMLTest {
         files.put(path, fileLines);
       }
       int mi = 0, ci = 0, mb = 0, cb = 0, mm = 0, cm = 0, ml = 0, cl = 0;
-      for (LineData line : (LineData[]) classData.getLines()) {
+      for (LineData line : classData.getLines()) {
         if (line == null) continue;
 
         XMLProjectData.LineInfo lineInfo = fileLines.get(line.getLineNumber());

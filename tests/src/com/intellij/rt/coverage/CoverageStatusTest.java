@@ -200,11 +200,11 @@ public class CoverageStatusTest extends TestCase {
 
     assert classInfo != null;
 
-    final Object[] objects = classInfo.getLines();
+    final LineData[] linesArray = classInfo.getLines();
     final ArrayList<LineData> lines = new ArrayList<LineData>();
-    for (Object object : objects) {
-      if (object != null) {
-        lines.add((LineData)object);
+    for (LineData lineData : linesArray) {
+      if (lineData != null) {
+        lines.add(lineData);
       }
     }
     Collections.sort(lines, new Comparator<LineData>() {

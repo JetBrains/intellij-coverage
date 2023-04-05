@@ -80,8 +80,7 @@ public class UnloadedUtil {
     final ClassData classData = projectData.getClassData(className);
     if (classData == null || classData.getLines() == null) return;
     classData.dropIgnoredLines();
-    final LineData[] lines = (LineData[]) classData.getLines();
-    for (LineData line : lines) {
+    for (LineData line : classData.getLines()) {
       if (line == null) continue;
       classData.registerMethodSignature(line);
     }

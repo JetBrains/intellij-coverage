@@ -153,7 +153,7 @@ public class ClassData implements CoverageData {
     return myLinesArray[line];
   }
 
-  public Object[] getLines() {
+  public LineData[] getLines() {
     return myLinesArray;
   }
 

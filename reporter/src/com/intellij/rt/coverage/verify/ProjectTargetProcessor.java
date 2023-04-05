@@ -48,9 +48,9 @@ public class ProjectTargetProcessor implements TargetProcessor {
     final LineInstructions[] instructions = classInstructions == null ? null : classInstructions.getlines();
 
     final Verifier.CollectedCoverage coverage = new Verifier.CollectedCoverage();
-    final Object[] lines = classData.getLines();
+    final LineData[] lines = classData.getLines();
     if (lines == null) return coverage;
-    for (LineData lineData : (LineData[]) lines) {
+    for (LineData lineData : lines) {
       if (lineData == null) continue;
       if (lineData.getHits() > 0) {
         coverage.lineCounter.covered++;

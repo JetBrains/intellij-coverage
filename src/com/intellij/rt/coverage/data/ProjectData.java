@@ -309,10 +309,10 @@ public class ProjectData implements CoverageData, Serializable {
       for (Map.Entry<Object, boolean[]> entry : trace.entrySet()) {
         final ClassData classData = (ClassData) entry.getKey();
         final boolean[] touched = entry.getValue();
-        final Object[] lines = classData.getLines();
+        final LineData[] lines = classData.getLines();
         final int lineCount = Math.min(lines.length, touched.length);
         for (int i = 1; i < lineCount; i++) {
-          final LineData lineData = (LineData) lines[i];
+          final LineData lineData = lines[i];
           if (lineData == null || !touched[i]) continue;
           lineData.setTestName(name);
         }

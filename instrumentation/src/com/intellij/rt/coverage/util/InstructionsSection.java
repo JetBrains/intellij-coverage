@@ -64,7 +64,7 @@ public class InstructionsSection extends ClassListSection {
 
   @Override
   protected void loadClass(DataInputStream in, ClassData classData, int version) throws IOException {
-    final LineData[] lines = (LineData[]) classData.getLines();
+    final LineData[] lines = classData.getLines();
     final LineInstructions[] instructions = new LineInstructions[lines.length];
     for (LineData lineData : lines) {
       if (lineData == null) continue;
@@ -92,7 +92,7 @@ public class InstructionsSection extends ClassListSection {
 
   @Override
   protected void saveClass(ClassData classData, DataOutput out, int index) throws IOException {
-    final LineData[] lines = (LineData[]) classData.getLines();
+    final LineData[] lines = classData.getLines();
     if (lines == null) return;
     final ClassInstructions classInstructions = myProjectData.getInstructions().get(classData.getName());
     if (classInstructions == null) {

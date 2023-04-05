@@ -64,11 +64,11 @@ public class CoverageNotNullInstrumentationTest {
     new TransformedClassLoader(WithNotNulls.class.getClassLoader(), name, doTransform(name, projectData)).loadClass(name, true);
     ClassData classData = projectData.getClassData(name);
     assertNotNull(classData);
-    Object[] lines = classData.getLines();
+    LineData[] lines = classData.getLines();
     int jumpsCount = 0;
-    for (Object line : lines) {
+    for (LineData line : lines) {
       if (line != null) {
-        JumpData[] jumps = ((LineData) line).getJumps();
+        JumpData[] jumps = line.getJumps();
         if (jumps != null && jumps.length > 0) {
           jumpsCount++;
         }
