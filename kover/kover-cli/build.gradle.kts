@@ -45,4 +45,6 @@ tasks.jar {
         exclude("META-INF/**")
         exclude("LICENSE")
     }
+
+    destinationDirectory.set(rootDir.resolve("dist"))
 }
