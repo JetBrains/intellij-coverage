@@ -1,5 +1,3 @@
-import jdk.nashorn.internal.codegen.Compiler
-
 /*
  * Copyright 2000-2023 JetBrains s.r.o.
  *
