@@ -33,16 +33,28 @@ internal class OfflineInstrumentCommand : Command {
     @Option(name = "--dest", usage = "path to write instrumented Java classes to", metaVar = "<dir>", required = true)
     private var outputDir: File? = null
 
-    @Option(name = "--hits", usage = "path to write instrumented Java classes to")
+    @Option(name = "--hits", usage = "a flag to enable line hits counting")
     private var countHits = false
 
-    @Option(name = "--include", usage = "", metaVar = "<class-name>")
+    @Option(
+        name = "--include",
+        usage = "instrument only specified classes, wildcards `*` and `?` are acceptable",
+        metaVar = "<class-name>"
+    )
     private var includeClasses: MutableList<String> = ArrayList()
 
-    @Option(name = "--exclude", usage = "", metaVar = "<class-name>")
+    @Option(
+        name = "--exclude",
+        usage = "filter to exclude classes from instrumentation, wildcards `*` and `?` are acceptable",
+        metaVar = "<class-name>"
+    )
     private var excludeClasses: MutableList<String> = ArrayList()
 
-    @Option(name = "--excludeAnnotation", usage = "", metaVar = "<annotation-name>")
+    @Option(
+        name = "--excludeAnnotation",
+        usage = "filter to exclude annotated classes from instrumentation, wildcards `*` and `?` are acceptable",
+        metaVar = "<annotation-name>"
+    )
     private var excludeAnnotation: MutableList<String> = ArrayList()
 
     override val name: String = "instrument"
@@ -60,8 +72,15 @@ internal class OfflineInstrumentCommand : Command {
             excludeClasses.asPatterns(),
             excludeAnnotation.asPatterns()
         )
-        val instrumentator = Instrumentator(roots, outputRoots, filters)
-        instrumentator.instrument(countHits)
+
+        try {
+            val instrumentator = Instrumentator(roots, outputRoots, filters)
+            instrumentator.instrument(countHits)
+        } catch (e: Exception) {
+            error.println("Instrumentation failed: " + e.message)
+            return -1
+        }
+
         return 0
     }
 }

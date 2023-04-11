@@ -18,12 +18,32 @@ package kotlinx.kover.cli.commands
 
 import org.kohsuke.args4j.CmdLineParser
 import java.io.PrintWriter
+import java.io.StringWriter
 
 internal interface Command {
     val name: String?
 
     val description: String
+
     fun call(output: PrintWriter, error: PrintWriter): Int
 }
 
 internal class CommandParser(val command: Command) : CmdLineParser(command)
+
+internal fun Command.printHelp(writer: PrintWriter) {
+    val parser = CommandParser(this)
+    writer.println(description)
+    writer.println()
+    writer.println("Usage: " + parser.command.usage(parser))
+    parser.printUsage(writer, null)
+}
+
+private fun Command.usage(parser: CommandParser): String {
+    val writer = StringWriter()
+    parser.printSingleLineUsage(writer, null)
+    return if (name != null) {
+        "java -jar kover-cli.jar $name$writer"
+    } else {
+        "java -jar kover-cli.jar$writer"
+    }
+}

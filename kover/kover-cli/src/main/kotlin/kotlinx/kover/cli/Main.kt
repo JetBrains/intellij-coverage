@@ -19,8 +19,10 @@ package kotlinx.kover.cli
 import kotlinx.kover.cli.commands.Command
 import kotlinx.kover.cli.commands.CommandParser
 import kotlinx.kover.cli.commands.RootCommand
+import kotlinx.kover.cli.commands.printHelp
 import org.kohsuke.args4j.CmdLineException
 import java.io.PrintWriter
+import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     val rootCommand: Command = RootCommand()
@@ -33,12 +35,14 @@ fun main(args: Array<String>) {
     } catch (e: CmdLineException) {
         val errorParser = e.parser
         if (errorParser is CommandParser) {
-            errorParser.printUsage(error, null)
+            errorParser.command.printHelp(error)
             error.println()
         }
         error.println(e.message)
-        return
+
+        exitProcess(-1)
     }
 
-    rootCommand.call(output, error)
+    val code = rootCommand.call(output, error)
+    exitProcess(code)
 }

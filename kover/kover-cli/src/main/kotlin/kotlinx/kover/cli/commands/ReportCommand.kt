@@ -31,8 +31,8 @@ import java.io.PrintWriter
 
 
 internal class ReportCommand : Command {
-    @Argument(usage = "list of raw reports files", metaVar = "<raw-report-path>")
-    private var rawReports: MutableList<File> = ArrayList()
+    @Argument(usage = "list of binary reports files", metaVar = "<binary-report-path>")
+    private var binaryReports: MutableList<File> = ArrayList()
 
     @Option(name = "--src", usage = "location of the source files root", metaVar = "<sources-path>", required = true)
     private var sourceRoots: MutableList<File> = ArrayList()
@@ -77,13 +77,13 @@ internal class ReportCommand : Command {
 
     override val name: String = "report"
 
-    override val description: String = "Generates human-readable reports in various formats from raw report files (*.ic)"
+    override val description: String = "Generates human-readable reports in various formats from binary report files (*.ic)"
 
 
     override fun call(output: PrintWriter, error: PrintWriter): Int {
         val binaryReports: MutableList<BinaryReport> = ArrayList()
-        for (rawReport in rawReports) {
-            binaryReports.add(BinaryReport(rawReport, null))
+        for (binaryReport in this.binaryReports) {
+            binaryReports.add(BinaryReport(binaryReport, null))
         }
         val module = Module(outputRoots, sourceRoots)
         val filters = Filters(
@@ -114,6 +114,6 @@ internal class ReportCommand : Command {
             error.println("At least one format must be used: XML, HTML.")
             fail = true
         }
-        return if (fail) 1 else 0
+        return if (fail) -1 else 0
     }
 }
