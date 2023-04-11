@@ -31,6 +31,8 @@ java {
 dependencies {
     implementation(project(":reporter"))
     implementation("args4j:args4j:2.33")
+
+    testImplementation(kotlin("test"))
 }
 
 tasks.jar {

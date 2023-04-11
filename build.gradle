@@ -57,6 +57,10 @@ allprojects {
     mavenCentral()
   }
 
+  if (name.startsWith("kover")) {
+    return
+  }
+
   apply plugin: 'java'
   sourceCompatibility = project.release ? 1.5 : 1.6
   targetCompatibility = project.release ? 1.5 : 1.6

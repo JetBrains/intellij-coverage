@@ -24,11 +24,11 @@ import org.kohsuke.args4j.CmdLineException
 import java.io.PrintWriter
 import kotlin.system.exitProcess
 
-fun main(args: Array<String>) {
-    val rootCommand: Command = RootCommand()
+internal fun invokeCli(args: Array<String>): Int {
     val output = PrintWriter(System.out, true)
     val error = PrintWriter(System.err, true)
 
+    val rootCommand: Command = RootCommand()
     val parser = CommandParser(rootCommand)
     try {
         parser.parseArgument(*args)
@@ -40,9 +40,13 @@ fun main(args: Array<String>) {
         }
         error.println(e.message)
 
-        exitProcess(-1)
+        return -1
     }
 
-    val code = rootCommand.call(output, error)
+    return rootCommand.call(output, error)
+}
+
+fun main(args: Array<String>) {
+    val code = invokeCli(args)
     exitProcess(code)
 }
