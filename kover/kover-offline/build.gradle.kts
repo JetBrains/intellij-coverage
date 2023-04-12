@@ -20,7 +20,7 @@ plugins {
 }
 
 extensions.configure<Kover_publishing_conventions_gradle.KoverPublicationExtension> {
-    description.set("Compiled dependency to ensure the operation of the code that has been instrumented offline")
+    description.set("Compiled dependency to ensure the operation of the code that has been instrumented off-line")
 }
 
 repositories {

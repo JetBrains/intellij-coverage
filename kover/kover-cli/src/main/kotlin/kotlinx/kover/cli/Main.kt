@@ -19,7 +19,7 @@ package kotlinx.kover.cli
 import kotlinx.kover.cli.commands.Command
 import kotlinx.kover.cli.commands.CommandParser
 import kotlinx.kover.cli.commands.RootCommand
-import kotlinx.kover.cli.commands.printHelp
+import kotlinx.kover.cli.printers.TerminalPrinter
 import org.kohsuke.args4j.CmdLineException
 import java.io.PrintWriter
 import kotlin.system.exitProcess
@@ -35,7 +35,7 @@ internal fun invokeCli(args: Array<String>): Int {
     } catch (e: CmdLineException) {
         val errorParser = e.parser
         if (errorParser is CommandParser) {
-            errorParser.command.printHelp(error)
+            TerminalPrinter.printUsage(errorParser.command, error)
             error.println()
         }
         error.println(e.message)

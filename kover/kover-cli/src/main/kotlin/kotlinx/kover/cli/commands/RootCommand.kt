@@ -74,7 +74,7 @@ internal class RootCommand : Command {
     }
 
     companion object {
-        private val commands: List<Command> =
+        val commands: List<Command> =
             listOf(OfflineInstrumentCommand(), ReportCommand())
 
         private fun joinedCommandNames(): String {

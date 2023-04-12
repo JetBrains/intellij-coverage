@@ -37,7 +37,7 @@ class SimpleTests {
             add(targetPath)
         }
 
-        println("Offline instrumentation with args: " + args.joinToString(" "))
+        println("Off-line instrumentation with args: " + args.joinToString(" "))
         println("Output dir file://$targetPath")
         invokeCli(args.toTypedArray())
     }

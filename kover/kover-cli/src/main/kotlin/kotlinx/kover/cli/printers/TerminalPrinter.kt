@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package kotlinx.kover.cli.commands
+package kotlinx.kover.cli.printers
 
-import org.kohsuke.args4j.CmdLineParser
+import kotlinx.kover.cli.commands.Command
+import kotlinx.kover.cli.commands.CommandParser
 import java.io.PrintWriter
 
-internal interface Command {
-    val name: String?
-
-    val description: String
-
-    fun call(output: PrintWriter, error: PrintWriter): Int
+internal object TerminalPrinter {
+    internal fun printUsage(command: Command, writer: PrintWriter) {
+        val parser = CommandParser(command)
+        writer.println(command.description)
+        writer.println()
+        writer.printSingleLineUsage(parser)
+        writer.println()
+        parser.printUsage(writer, null)
+    }
 }
-
-internal class CommandParser(val command: Command) : CmdLineParser(command)

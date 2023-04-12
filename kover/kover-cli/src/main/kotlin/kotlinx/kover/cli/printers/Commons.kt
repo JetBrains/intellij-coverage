@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package kotlinx.kover.cli.commands
+package kotlinx.kover.cli.printers
 
-import org.kohsuke.args4j.CmdLineParser
+import kotlinx.kover.cli.commands.CommandParser
 import java.io.PrintWriter
 
-internal interface Command {
-    val name: String?
+internal fun PrintWriter.printSingleLineUsage(parser: CommandParser) {
+    val visibleName = if (parser.command.name != null) {
+        " ${parser.command.name}"
+    } else {
+        ""
+    }
 
-    val description: String
-
-    fun call(output: PrintWriter, error: PrintWriter): Int
+    print("Usage: java -jar kover-cli.jar$visibleName")
+    parser.printSingleLineUsage(this, null)
 }
-
-internal class CommandParser(val command: Command) : CmdLineParser(command)
