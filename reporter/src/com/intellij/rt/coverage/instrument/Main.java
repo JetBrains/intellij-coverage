@@ -23,7 +23,7 @@ public class Main {
     try {
       final InstrumentatorArgs args = InstrumentatorArgs.from(argsList);
       final Instrumentator instrumentator = new Instrumentator(args.roots, args.outputRoots, args.filters);
-      instrumentator.instrument();
+      instrumentator.instrument(false);
 
     } catch (ArgParseException e) {
       e.printStackTrace(System.err);

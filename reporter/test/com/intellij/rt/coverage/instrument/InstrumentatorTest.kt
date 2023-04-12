@@ -77,7 +77,7 @@ class InstrumentatorTest {
         fun runInstrumentator(roots: List<File>, outputRoots: List<File>, filters: Filters) {
             val inst = Instrumentator(roots, outputRoots, filters)
             TestUtils.clearLogFile(File("."))
-            inst.instrument()
+            inst.instrument(false)
             TestUtils.checkLogFile(File("."))
             checkOfflineInstrumentation(roots, outputRoots, filters)
         }

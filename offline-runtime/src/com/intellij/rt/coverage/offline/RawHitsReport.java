@@ -33,9 +33,16 @@ import java.io.IOException;
 public class RawHitsReport {
   private static final int MAGIC = 284996684;
 
+  private static boolean reportFileExists = "true".equals(System.getProperty("kover.offline.report.exists", "false"));
+
   public static void dump(File file, RawProjectData data) {
     DataOutputStream os = null;
     try {
+      if (!reportFileExists && !file.exists()) {
+        file.getParentFile().mkdirs();
+        file.createNewFile();
+      }
+
       os = CoverageIOUtil.openWriteFile(file);
 
       CoverageIOUtil.writeINT(os, MAGIC);
