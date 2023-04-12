@@ -12,7 +12,7 @@ Java 1.6 or greater is required for execution.
 
 | Option                                | Description                                                                                    | Required | Multiple |
 |---------------------------------------|------------------------------------------------------------------------------------------------|:--------:|:--------:|
-| <class-file-path>                     | list of the compiled class-files roots                                                         |          |    +     |
+| `<class-file-path>`                   | list of the compiled class-files roots                                                         |          |    +     |
 | --dest <dir>                          | path to write instrumented Java classes to                                                     |    +     |          |
 | --exclude <class-name>                | filter to exclude classes from instrumentation, wildcards `*` and `?` are acceptable           |          |    +     |
 | --excludeAnnotation <annotation-name> | filter to exclude annotated classes from instrumentation, wildcards `*` and `?` are acceptable |          |    +     |
@@ -26,7 +26,7 @@ Allows you to generate HTML and XML reports.
 
 | Option                                | Description                                                                                             | Required | Multiple |
 |---------------------------------------|---------------------------------------------------------------------------------------------------------|:--------:|:--------:|
-| <binary-report-path>                  | list of binary reports files                                                                            |          |    +     |
+| `<binary-report-path>`                | list of binary reports files                                                                            |          |    +     |
 | --classfiles <class-file-path>        | location of the compiled class-files root (must be original and not instrumented)                       |    +     |    +     |
 | --exclude <class-name>                | filter to exclude classes, wildcards `*` and `?` are acceptable                                         |          |    +     |
 | --excludeAnnotation <annotation-name> | filter to include classes and functions marked by this annotation, wildcards `*` and `?` are acceptable |          |    +     |
