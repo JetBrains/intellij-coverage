@@ -50,12 +50,13 @@ public class Reporter {
     }
   }
 
-  public void createHTMLReport(File htmlDir, String title) throws IOException {
+  public void createHTMLReport(File htmlDir, String title, String charset) throws IOException {
     htmlDir.mkdirs();
     final HTMLReportBuilder builder = ReportBuilderFactory.createHTMLReportBuilderForKover();
     builder.setReportDir(htmlDir);
     if (builder instanceof HTMLReportBuilderImpl) {
       ((HTMLReportBuilderImpl) builder).setReportTitle(title);
+      ((HTMLReportBuilderImpl) builder).setCharset(charset);
     }
     final SourceCodeProvider sourceCodeProvider = new DirectorySourceCodeProvider(myLoad.getProjectData(), myLoad.getSources());
     builder.generateReport(new IDEACoverageData(myLoad.getProjectData(), sourceCodeProvider));

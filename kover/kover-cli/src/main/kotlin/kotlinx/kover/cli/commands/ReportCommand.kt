@@ -54,6 +54,9 @@ internal class ReportCommand : Command {
     @Option(name = "--title", usage = "title in the HTML report", metaVar = "<html-title>")
     private var htmlTitle: String? = null
 
+    @Option(name = "--charset", usage = "charset in the HTML report", metaVar = "<html-charset>")
+    private var charset: String? = null
+
     @Option(
         name = "--include",
         usage = "filter to include classes, wildcards `*` and `?` are acceptable",
@@ -104,7 +107,7 @@ internal class ReportCommand : Command {
         }
         if (htmlDir != null) {
             try {
-                reporter.createHTMLReport(htmlDir, htmlTitle)
+                reporter.createHTMLReport(htmlDir, htmlTitle, charset)
             } catch (e: IOException) {
                 fail = true
                 error.println("HTML generation failed: " + e.message)
