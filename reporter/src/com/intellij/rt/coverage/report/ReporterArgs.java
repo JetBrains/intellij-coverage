@@ -114,7 +114,7 @@ public class ReporterArgs {
         ? args.getString(FORMAT_TAG)
         : RAW_FORMAT;
     final String title = args.has(TITLE_TAG) ? args.getString(TITLE_TAG) : "";
-    final String charset = args.has(CHARSET_TAG) ? args.getString(CHARSET_TAG) : "";
+    final String charset = args.has(CHARSET_TAG) ? args.getString(CHARSET_TAG) : null;
     final List<Module> moduleList = parseModules(args);
     final List<BinaryReport> reportList = parseReports(args);
     final Filters filters = parseFilters(args);

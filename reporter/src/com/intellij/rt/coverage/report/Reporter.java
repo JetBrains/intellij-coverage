@@ -56,7 +56,10 @@ public class Reporter {
     builder.setReportDir(htmlDir);
     if (builder instanceof HTMLReportBuilderImpl) {
       ((HTMLReportBuilderImpl) builder).setReportTitle(title);
-      ((HTMLReportBuilderImpl) builder).setCharset(charset);
+
+      if (charset != null) {
+        ((HTMLReportBuilderImpl) builder).setCharset(charset);
+      }
     }
     final SourceCodeProvider sourceCodeProvider = new DirectorySourceCodeProvider(myLoad.getProjectData(), myLoad.getSources());
     builder.generateReport(new IDEACoverageData(myLoad.getProjectData(), sourceCodeProvider));
