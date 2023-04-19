@@ -28,6 +28,7 @@ import java.io.IOException;
 
 public class HTMLTest {
   private static final String DEFAULT_TITLE = "TITLE";
+  private static final String DEFAULT_CHARSET = "UTF-8";
 
   @Test
   public void testSimple() throws Throwable {
@@ -93,7 +94,7 @@ public class HTMLTest {
     final BinaryReport report = TestUtils.runTest(patterns, className);
     final File htmlDir = createHtmlDir(report.getDataFile());
     TestUtils.clearLogFile(new File("."));
-    TestUtils.createRawReporter(report, patterns).createHTMLReport(htmlDir, DEFAULT_TITLE);
+    TestUtils.createRawReporter(report, patterns).createHTMLReport(htmlDir, DEFAULT_TITLE, DEFAULT_CHARSET);
     TestUtils.checkLogFile(new File("."));
     return htmlDir;
   }

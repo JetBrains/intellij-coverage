@@ -34,6 +34,7 @@ Allows you to generate HTML and XML reports.
 | --include <class-name>                | filter to include classes, wildcards `*` and `?` are acceptable                                         |          |    +     |
 | --src <sources-path>                  | location of the source files root                                                                       |    +     |    +     |
 | --title <html-title>                  | title in the HTML report                                                                                |          |          |
+| --charset <html-charset>              | charset in the HTML report                                                                              |          |          |
 | --xml <xml-file-path>                 | generate a XML report in the specified path                                                             |          |          |
 
 ## Off-line instrumentation

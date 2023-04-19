@@ -46,6 +46,7 @@ public class ReporterArgs {
   static final String XML_FILE_TAG = "xml";
   static final String HTML_DIR_TAG = "html";
   public static final String TITLE_TAG = "title";
+  public static final String CHARSET_TAG = "charset";
   static final String MODULES_TAG = "modules";
   static final String REPORTS_TAG = "reports";
   static final String IC_FILE_TAG = "ic";
@@ -60,18 +61,21 @@ public class ReporterArgs {
 
   public final String format;
   public final String title;
+  public final String charset;
+
   public final List<BinaryReport> reports;
   public final List<Module> modules;
   public final File xmlFile;
   public final File htmlDir;
   public final Filters filters;
 
-  ReporterArgs(String format, String title,
+  ReporterArgs(String format, String title, String charset,
                List<BinaryReport> reportList, List<Module> modules,
                File xmlFile, File htmlDir,
                Filters filters) {
     this.format = format;
     this.title = title;
+    this.charset = charset;
     this.reports = reportList;
     this.modules = modules;
     this.xmlFile = xmlFile;
@@ -110,6 +114,7 @@ public class ReporterArgs {
         ? args.getString(FORMAT_TAG)
         : RAW_FORMAT;
     final String title = args.has(TITLE_TAG) ? args.getString(TITLE_TAG) : "";
+    final String charset = args.has(CHARSET_TAG) ? args.getString(CHARSET_TAG) : null;
     final List<Module> moduleList = parseModules(args);
     final List<BinaryReport> reportList = parseReports(args);
     final Filters filters = parseFilters(args);
@@ -117,7 +122,7 @@ public class ReporterArgs {
     final File xmlFile = args.has(XML_FILE_TAG) ? new File(args.getString(XML_FILE_TAG)) : null;
     final File htmlDir = args.has(HTML_DIR_TAG) ? new File(args.getString(HTML_DIR_TAG)) : null;
 
-    return new ReporterArgs(format, title, reportList, moduleList, xmlFile, htmlDir, filters);
+    return new ReporterArgs(format, title, charset, reportList, moduleList, xmlFile, htmlDir, filters);
   }
 
   public static List<BinaryReport> parseReports(JSONObject args) {
