@@ -6,7 +6,7 @@ jar {
   baseName = offline_jar_name
   destinationDir = file("../dist")
   from(sourceSets.main.output)
-  from(["common"].collect({ project(":$it").sourceSets.main.output }))
+  from(["common", "java7-utils"].collect({ project(":$it").sourceSets.main.output }))
 }
 
 task soursesJar(type: Jar, dependsOn: classes) {

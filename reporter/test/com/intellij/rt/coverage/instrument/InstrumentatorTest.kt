@@ -20,10 +20,7 @@ import com.intellij.rt.coverage.report.TestUtils
 import com.intellij.rt.coverage.report.data.Filters
 import com.intellij.rt.coverage.util.ClassNameUtil
 import com.intellij.rt.coverage.util.ProcessUtil
-import org.jetbrains.coverage.org.objectweb.asm.ClassReader
-import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes
+import org.jetbrains.coverage.org.objectweb.asm.*
 import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
@@ -116,6 +113,7 @@ private fun checkOfflineInstrumentation(roots: List<File>, outputRoots: List<Fil
 private fun File.isInstrumented(): Boolean {
     val bytes = readBytes()
     var hasInstrumentation = false
+    var hasCondyInstrumentation = false
     val visitor = object : ClassVisitor(Opcodes.API_VERSION) {
         override fun visitMethod(access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array<out String>?): MethodVisitor {
             return object : MethodVisitor(Opcodes.API_VERSION) {
@@ -124,9 +122,16 @@ private fun File.isInstrumented(): Boolean {
                         hasInstrumentation = true
                     }
                 }
+
+                override fun visitLdcInsn(value: Any?) {
+                    if (value is ConstantDynamic && value.name == "__\$hits\$__") {
+                        hasCondyInstrumentation = true
+                    }
+                }
             }
         }
     }
     ClassReader(bytes).accept(visitor, ClassReader.SKIP_FRAMES or ClassReader.SKIP_DEBUG)
-    return hasInstrumentation
+    check(!(hasInstrumentation && hasCondyInstrumentation))
+    return hasInstrumentation || hasCondyInstrumentation
 }
