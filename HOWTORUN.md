@@ -10,7 +10,8 @@
 ### Dependencies:
 All the dependencies could be found in the Maven Central repository
 
-* `org.jetbrains.intellij.deps:intellij-coverage-agent` (we will call it `agent.jar`)
+* `org.jetbrains.intellij.deps:intellij-coverage-agent` 
+  * we will call the jar `intellij-coverage-agent-1.0.716.jar`. **It is important to keep the exact name as it is stated in the Maven repository**
 * `org.jetbrains.intellij.deps:intellij-coverage-reporter` (we will call it `reporter.jar`) with dependencies
   * `org.jetbrains.intellij.deps:coverage-report` (we will call it `builder.jar`)
   * `org.json:json` (we will call it `json.jar`)
@@ -58,7 +59,7 @@ Here `report.ic` is a path to a file with a binary report, `<include>` and `<exc
 To run your app with coverage agent, you need to add `javaagent` argument and mention agent location and configuration file location.
 You could also add `-Didea.new.tracing.coverage=true` option to run faster coverage.
 ```
-java -cp project.jar -javaagent:agent.jar=config.args -Didea.new.tracing.coverage=true example.TestKt
+java -cp project.jar -javaagent:intellij-coverage-agent-1.0.716.jar=config.args -Didea.new.tracing.coverage=true example.TestKt
 ```
 After that you will see output:
 ```
@@ -98,7 +99,7 @@ Please write the following JSON configuration into a file `config.json`:
 
 Now you can generate an XML report with the following command:
 ```
-java -cp reporter.jar:agent.jar:builder.jar:json.jar com.intellij.rt.coverage.report.Main config.json
+java -cp reporter.jar:intellij-coverage-agent-1.0.716.jar:builder.jar:json.jar com.intellij.rt.coverage.report.Main config.json
 ```
 Generated XML report is written to the `report.xml` file.
 <details>
@@ -191,7 +192,7 @@ Please change `config.json` to:
 Here we need to specify an output directory `html` and sources root to add sources into the HTML report.
 You can generate an HTML report with the following command:
 ```
-java -cp reporter.jar:agent.jar:builder.jar:json.jar:annotations.jar:freemarker.jar com.intellij.rt.coverage.report.Main config.json
+java -cp reporter.jar:intellij-coverage-agent-1.0.716.jar:builder.jar:json.jar:annotations.jar:freemarker.jar com.intellij.rt.coverage.report.Main config.json
 ```
 As a result in `html` directory you will get an HTML report in `index.html` file.
 
