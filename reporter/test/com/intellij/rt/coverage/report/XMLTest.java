@@ -19,6 +19,8 @@ package com.intellij.rt.coverage.report;
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.data.instructions.LineInstructions;
+import com.intellij.rt.coverage.report.api.Filters;
+import com.intellij.rt.coverage.report.api.ReportApi;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.util.FileUtils;
 import com.intellij.rt.coverage.util.ProcessUtil;
@@ -28,8 +30,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.*;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
+
+import static java.util.Collections.singletonList;
 
 public class XMLTest {
 
@@ -93,41 +99,16 @@ public class XMLTest {
   }
 
   @Test
-  public void integrationTest() throws Throwable {
+  public void apiTest() throws Throwable {
     final BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
     final File xmlFile = createXMLFile();
-    final File argsFile = ReporterArgsTest.argsToFile(report, TestUtils.JAVA_OUTPUT, "test", xmlFile.getAbsolutePath(), null, "testData.simple.*", "raw", null);
 
-    final String[] commandLine = {
-        "-classpath", System.getProperty("java.class.path"),
-        "com.intellij.rt.coverage.report.Main",
-        argsFile.getAbsolutePath()};
     TestUtils.clearLogFile(new File("."));
-    ProcessUtil.execJavaProcess(commandLine);
+    Filters filters = new Filters(singletonList(Pattern.compile("testData.simple.*")), Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList());
+    ReportApi.xmlReport(xmlFile, singletonList(report.getDataFile()), singletonList(new File(TestUtils.JAVA_OUTPUT)), singletonList(new File("test")), filters);
+
     TestUtils.checkLogFile(new File("."));
     XMLTest.verifyXMLWithExpected(xmlFile, "xml/simple.xml");
-  }
-
-  @Test
-  public void integrationWithAggregatorTest() throws Throwable {
-    final String patterns = "testData.simple.*";
-    final BinaryReport report = TestUtils.runTest(patterns, "testData.simple.Main");
-
-    final File smapFile = new File(report.getDataFile().getAbsolutePath() + ".sm");
-    final BinaryReport aggregatedReport = new BinaryReport(report.getDataFile(), smapFile);
-    TestUtils.runAggregator(aggregatedReport, patterns);
-
-    final File xmlFile = createXMLFile();
-    final File argsFile = ReporterArgsTest.argsToFile(aggregatedReport, TestUtils.JAVA_OUTPUT, "test", xmlFile.getAbsolutePath(), null, patterns, "kover-agg", null);
-
-    final String[] commandLine = {
-        "-classpath", System.getProperty("java.class.path"),
-        "com.intellij.rt.coverage.report.Main",
-        argsFile.getAbsolutePath()};
-    TestUtils.clearLogFile(new File("."));
-    ProcessUtil.execJavaProcess(commandLine);
-    TestUtils.checkLogFile(new File("."));
-    verifyXMLWithExpected(xmlFile, "xml/simple.xml");
   }
 
   @Test

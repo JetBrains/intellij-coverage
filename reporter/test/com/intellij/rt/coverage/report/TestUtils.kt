@@ -17,10 +17,11 @@ package com.intellij.rt.coverage.report
 
 import com.intellij.rt.coverage.CoverageStatusTest
 import com.intellij.rt.coverage.aggregate.Aggregator
+import com.intellij.rt.coverage.aggregate.api.Request
 import com.intellij.rt.coverage.report.ReportLoadStrategy.AggregatedReportLoadStrategy
 import com.intellij.rt.coverage.report.ReportLoadStrategy.RawReportLoadStrategy
 import com.intellij.rt.coverage.report.data.BinaryReport
-import com.intellij.rt.coverage.report.data.Filters
+import com.intellij.rt.coverage.report.api.Filters
 import com.intellij.rt.coverage.report.data.Module
 import com.intellij.rt.coverage.report.util.FileUtils
 import java.io.File
@@ -98,7 +99,11 @@ object TestUtils {
     @JvmStatic
     fun runAggregator(report: BinaryReport, patterns: String) {
         val filters = getFilters(patterns)
-        val request = Aggregator.Request(filters, report.dataFile, report.sourceMapFile)
+        val request = Request(
+            filters,
+            report.dataFile,
+            report.sourceMapFile
+        )
         Aggregator(listOf(report), modules, request).processRequests()
     }
 

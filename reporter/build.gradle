@@ -18,7 +18,6 @@ dependencies {
   implementation project(":instrumentation")
   implementation project(":java6-utils")
   externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.19")
-  externalDependencies("org.json:json:20210307")
 
   testImplementation('junit:junit:4.13.2')
   testImplementation(files(project(":tests").sourceSets.test.output))

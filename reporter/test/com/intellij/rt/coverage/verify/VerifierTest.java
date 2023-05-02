@@ -16,11 +16,12 @@
 
 package com.intellij.rt.coverage.verify;
 
-import com.intellij.rt.coverage.aggregate.Aggregator;
 import com.intellij.rt.coverage.aggregate.AggregatorTest;
+import com.intellij.rt.coverage.aggregate.api.Request;
 import com.intellij.rt.coverage.report.TestUtils;
-import com.intellij.rt.coverage.report.data.Filters;
+import com.intellij.rt.coverage.report.api.Filters;
 import com.intellij.rt.coverage.report.util.FileUtils;
+import com.intellij.rt.coverage.verify.api.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -29,51 +30,112 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class VerifierTest {
   @Test
   public void test1() throws IOException, InterruptedException {
-    final List<Verifier.Rule> rules = new ArrayList<Verifier.Rule>();
-    final Verifier.Bound bound1_1 = new Verifier.Bound(1, Verifier.Counter.LINE, Verifier.ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
-    final Verifier.Bound bound1_2 = new Verifier.Bound(2, Verifier.Counter.BRANCH, Verifier.ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
-    rules.add(createRule(Verifier.Target.ALL, bound1_1, bound1_2));
+    final List<Rule> rules = new ArrayList<Rule>();
+    final Bound bound1_1 = new Bound(1, Counter.LINE, ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
+    final Bound bound1_2 = new Bound(2, Counter.BRANCH, ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
+    rules.add(createRule(Target.ALL, bound1_1, bound1_2));
 
-    final Verifier.Bound bound2_1 = new Verifier.Bound(1, Verifier.Counter.INSTRUCTION, Verifier.ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
-    final Verifier.Bound bound2_2 = new Verifier.Bound(2, Verifier.Counter.BRANCH, Verifier.ValueType.MISSED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
-    rules.add(createRule(Verifier.Target.CLASS, bound2_1, bound2_2));
+    final Bound bound2_1 = new Bound(1, Counter.INSTRUCTION, ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
+    final Bound bound2_2 = new Bound(2, Counter.BRANCH, ValueType.MISSED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
+    rules.add(createRule(Target.CLASS, bound2_1, bound2_2));
 
-    final Verifier.Bound bound3_1 = new Verifier.Bound(1, Verifier.Counter.LINE, Verifier.ValueType.MISSED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
-    final Verifier.Bound bound3_2 = new Verifier.Bound(2, Verifier.Counter.BRANCH, Verifier.ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
-    rules.add(createRule(Verifier.Target.PACKAGE, bound3_1, bound3_2));
+    final Bound bound3_1 = new Bound(1, Counter.LINE, ValueType.MISSED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
+    final Bound bound3_2 = new Bound(2, Counter.BRANCH, ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
+    rules.add(createRule(Target.PACKAGE, bound3_1, bound3_2));
 
-    runVerifier(rules, "verify/test1.json");
+
+
+    BoundViolation boundViolation1x2 = new BoundViolation(2);
+    boundViolation1x2.minViolations.add(new Violation("all", new BigDecimal("0.090909")));
+    RuleViolation rule1 = new RuleViolation(1, Collections.singletonList(boundViolation1x2));
+
+    BoundViolation boundViolation2x1 = new BoundViolation(1);
+    boundViolation2x1.minViolations.add(new Violation("testData.noReport.branches.MyBranchedUnloadedClass", new BigDecimal("0")));
+    boundViolation2x1.minViolations.add(new Violation("TestTopLevelKt", new BigDecimal("2")));
+    boundViolation2x1.minViolations.add(new Violation("testData.branches.MyBranchedClass", new BigDecimal("9")));
+    boundViolation2x1.minViolations.add(new Violation("testData.branches.MyBranchedUnloadedClass", new BigDecimal("0")));
+    boundViolation2x1.minViolations.add(new Violation("testData.noReport.branches.MyBranchedClass", new BigDecimal("0")));
+    boundViolation2x1.minViolations.add(new Violation("testData.crossinline.TestKt$main$$inlined$run$1", new BigDecimal("0")));
+    boundViolation2x1.minViolations.add(new Violation("testData.crossinline.TestKt$run$2", new BigDecimal("0")));
+    boundViolation2x1.minViolations.add(new Violation("testData.noReport.branches.TestKt", new BigDecimal("0")));
+    boundViolation2x1.minViolations.add(new Violation("testData.defaultArgs.Example", new BigDecimal("0")));
+    boundViolation2x1.minViolations.add(new Violation("testData.crossinline.TestKt$main$3", new BigDecimal("0")));
+    boundViolation2x1.minViolations.add(new Violation("testData.defaultArgs.TestKt", new BigDecimal("0")));
+    boundViolation2x1.minViolations.add(new Violation("testData.outOfPackageStructure.TestOutOfPackageStructureKt", new BigDecimal("0")));
+    boundViolation2x1.minViolations.add(new Violation("testData.branches.TestKt", new BigDecimal("5")));
+    boundViolation2x1.minViolations.add(new Violation("testData.crossinline.TestKt", new BigDecimal("0")));
+
+    boundViolation2x1.maxViolations.add(new Violation("testData.simple.Main", new BigDecimal("17")));
+    boundViolation2x1.maxViolations.add(new Violation("testData.inline.TestKt", new BigDecimal("18")));
+
+    BoundViolation boundViolation2x2 = new BoundViolation(2);
+    boundViolation2x2.maxViolations.add(new Violation( "testData.noReport.branches.MyBranchedUnloadedClass", new BigDecimal("1.000000")));
+    boundViolation2x2.maxViolations.add(new Violation( "testData.branches.MyBranchedUnloadedClass", new BigDecimal("1.000000")));
+    boundViolation2x2.maxViolations.add(new Violation( "testData.noReport.branches.MyBranchedClass", new BigDecimal("1.000000")));
+
+    RuleViolation rule2 = new RuleViolation(2, Arrays.asList(boundViolation2x1, boundViolation2x2));
+
+    BoundViolation boundViolation3x1 = new BoundViolation(1);
+    boundViolation3x1.minViolations.add(new Violation("", BigDecimal.ZERO));
+    boundViolation3x1.minViolations.add(new Violation("testData.inline", new BigDecimal("2")));
+    boundViolation3x1.minViolations.add(new Violation("testData.defaultArgs", new BigDecimal("6")));
+    boundViolation3x1.minViolations.add(new Violation("testData.outOfPackageStructure", new BigDecimal("1")));
+    boundViolation3x1.minViolations.add(new Violation("testData.simple", new BigDecimal("5")));
+    boundViolation3x1.minViolations.add(new Violation("testData.crossinline", new BigDecimal("4")));
+
+    boundViolation3x1.maxViolations.add(new Violation("testData.noReport.branches", new BigDecimal("23")));
+    boundViolation3x1.maxViolations.add(new Violation("testData.branches", new BigDecimal("19")));
+
+    BoundViolation boundViolation3x2 = new BoundViolation(2);
+    boundViolation3x2.minViolations.add(new Violation("testData.noReport.branches", new BigDecimal("0.000000")));
+    boundViolation3x2.minViolations.add(new Violation("testData.branches", new BigDecimal("0.071429")));
+
+    RuleViolation rule3 = new RuleViolation(3, Arrays.asList(boundViolation3x1, boundViolation3x2));
+
+    runVerifier(rules, Arrays.asList(rule1, rule2, rule3));
   }
 
   @Test
   public void test2() throws IOException, InterruptedException {
-    final List<Verifier.Rule> rules = new ArrayList<Verifier.Rule>();
-    final Verifier.Bound bound1_1 = new Verifier.Bound(1, Verifier.Counter.LINE, Verifier.ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
-    final Verifier.Bound bound1_2 = new Verifier.Bound(2, Verifier.Counter.BRANCH, Verifier.ValueType.COVERED_RATE, BigDecimal.valueOf(0.0), null);
-    rules.add(createRule(Verifier.Target.ALL, bound1_1, bound1_2));
+    final List<Rule> rules = new ArrayList<Rule>();
+    final Bound bound1_1 = new Bound(1, Counter.LINE, ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
+    final Bound bound1_2 = new Bound(2, Counter.BRANCH, ValueType.COVERED_RATE, BigDecimal.valueOf(0.0), null);
+    rules.add(createRule(Target.ALL, bound1_1, bound1_2));
 
-    final Verifier.Bound bound2_1 = new Verifier.Bound(1, Verifier.Counter.INSTRUCTION, Verifier.ValueType.COVERED, BigDecimal.valueOf(5), BigDecimal.valueOf(52));
-    final Verifier.Bound bound2_2 = new Verifier.Bound(2, Verifier.Counter.BRANCH, Verifier.ValueType.MISSED_RATE, BigDecimal.valueOf(0.0), null);
-    rules.add(createRule(Verifier.Target.ALL, bound2_1, bound2_2));
+    final Bound bound2_1 = new Bound(1, Counter.INSTRUCTION, ValueType.COVERED, BigDecimal.valueOf(5), BigDecimal.valueOf(52));
+    final Bound bound2_2 = new Bound(2, Counter.BRANCH, ValueType.MISSED_RATE, BigDecimal.valueOf(0.0), null);
+    rules.add(createRule(Target.ALL, bound2_1, bound2_2));
 
-    final Verifier.Bound bound3_1 = new Verifier.Bound(1, Verifier.Counter.LINE, Verifier.ValueType.MISSED, BigDecimal.valueOf(10), BigDecimal.valueOf(70));
-    final Verifier.Bound bound3_2 = new Verifier.Bound(2, Verifier.Counter.INSTRUCTION, Verifier.ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
-    rules.add(createRule(Verifier.Target.ALL, bound3_1, bound3_2));
+    final Bound bound3_1 = new Bound(1, Counter.LINE, ValueType.MISSED, BigDecimal.valueOf(10), BigDecimal.valueOf(70));
+    final Bound bound3_2 = new Bound(2, Counter.INSTRUCTION, ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
+    rules.add(createRule(Target.ALL, bound3_1, bound3_2));
 
-    runVerifier(rules, "verify/test2.json");
+    runVerifier(rules, Collections.<RuleViolation>emptyList());
   }
 
   @Test
   public void test3() throws IOException, InterruptedException {
-    final List<Verifier.Rule> rules = new ArrayList<Verifier.Rule>();
-    final Verifier.Bound bound1_1 = new Verifier.Bound(1, Verifier.Counter.LINE, Verifier.ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
-    rules.add(createRule(Verifier.Target.PACKAGE, bound1_1));
+    final List<Rule> rules = new ArrayList<Rule>();
+    final Bound bound1_1 = new Bound(1, Counter.LINE, ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
+    rules.add(createRule(Target.PACKAGE, bound1_1));
 
-    runVerifier(rules, "verify/test3.json");
+    BoundViolation boundViolation = new BoundViolation(1);
+    boundViolation.minViolations.add(new Violation("", BigDecimal.ONE));
+    boundViolation.minViolations.add(new Violation("testData.inline", new BigDecimal("3")));
+    boundViolation.minViolations.add(new Violation("testData.defaultArgs", BigDecimal.ZERO));
+    boundViolation.minViolations.add(new Violation("testData.outOfPackageStructure", BigDecimal.ZERO));
+    boundViolation.minViolations.add(new Violation("testData.simple", new BigDecimal("6")));
+    boundViolation.minViolations.add(new Violation("testData.crossinline", BigDecimal.ZERO));
+    boundViolation.minViolations.add(new Violation("testData.noReport.branches", BigDecimal.ZERO));
+    boundViolation.minViolations.add(new Violation("testData.branches", new BigDecimal("4")));
+
+    RuleViolation ruleViolation = new RuleViolation(1, Collections.singletonList(boundViolation));
+    runVerifier(rules, Collections.singletonList(ruleViolation));
   }
 
   private File getFile() throws IOException {
@@ -82,12 +144,12 @@ public class VerifierTest {
 
   private int ruleId = 1;
 
-  private Verifier.Rule createRule(Verifier.Target target, Verifier.Bound... bounds) throws IOException {
-    return new Verifier.Rule(ruleId++, getFile(), target, Arrays.asList(bounds));
+  private Rule createRule(Target target, Bound... bounds) throws IOException {
+    return new Rule(ruleId++, getFile(), target, Arrays.asList(bounds));
   }
 
-  public static void runVerifier(List<Verifier.Rule> rules, String expectedFileName) throws IOException, InterruptedException {
-    final List<Aggregator.Request> requests = new ArrayList<Aggregator.Request>();
+  public static void runVerifier(List<Rule> rules, List<RuleViolation> expected) throws IOException, InterruptedException {
+    final List<Request> requests = new ArrayList<Request>();
     final List<Pattern> includes = new ArrayList<Pattern>();
     includes.add(Pattern.compile("testData\\.branches\\..*"));
     includes.add(Pattern.compile("testData\\.crossinline\\..*"));
@@ -97,8 +159,8 @@ public class VerifierTest {
     includes.add(Pattern.compile("testData\\.simple\\..*"));
     includes.add(Pattern.compile("testData\\.outOfPackageStructure\\..*"));
     includes.add(Pattern.compile("[^.]*"));
-    for (Verifier.Rule rule : rules) {
-      final Aggregator.Request request = new Aggregator.Request(
+    for (Rule rule : rules) {
+      final Request request = new Request(
           new Filters(includes, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList()),
           rule.reportFile, null);
       requests.add(request);
@@ -108,23 +170,42 @@ public class VerifierTest {
     TestUtils.checkLogFile(new File("."));
 
     final Verifier verifier = new Verifier(rules);
-    check(expectedFileName, verifier);
+    check(expected, verifier);
   }
 
-  private static void check(String expectedFileName, Verifier verifier) throws IOException {
-    final File outputFile = File.createTempFile("result", "json");
+  private static void check(List<RuleViolation> expected, Verifier verifier) throws IOException {
     TestUtils.clearLogFile(new File("."));
-    verifier.processRules(outputFile);
+    List<RuleViolation> actual = verifier.processRules();
     TestUtils.checkLogFile(new File("."));
-    final File expected = TestUtils.getResourceFile(expectedFileName);
 
-    final String expectedString = FileUtils.readAll(expected);
-    final String actualString = FileUtils.readAll(outputFile);
-//    Assert.assertEquals(expectedString, actualString);
+    Assert.assertEquals(expected.size(), actual.size());
 
-    // compare as a set of strings to avoid  errors with order
-    final Set<String> expectedSet = new HashSet<String>(Arrays.asList(expectedString.split("\n")));
-    final Set<String> actualSet = new HashSet<String>(Arrays.asList(actualString.split("\n")));
-    Assert.assertEquals(expectedSet, actualSet);
+    for (int i = 0; i < expected.size(); i++) {
+      RuleViolation expectedRule = expected.get(i);
+      RuleViolation actualRule = actual.get(i);
+      Assert.assertEquals(expectedRule.id, actualRule.id);
+
+      Assert.assertEquals(expectedRule.violations.size(), actualRule.violations.size());
+      for (int j = 0; j < expectedRule.violations.size(); j++) {
+        BoundViolation expectedBound = expectedRule.violations.get(j);
+        BoundViolation actualBound = actualRule.violations.get(j);
+        Assert.assertEquals(expectedBound.id, actualBound.id);
+
+        checkViolations(expectedBound.maxViolations, actualBound.maxViolations);
+        checkViolations(expectedBound.minViolations, actualBound.minViolations);
+      }
+    }
+  }
+
+  private static void checkViolations(List<Violation> expected, List<Violation> actual) {
+    Assert.assertEquals(expected.size(), actual.size());
+
+    for (int i = 0; i < expected.size(); i++) {
+      Violation expectedV = expected.get(i);
+      Violation actualV = actual.get(i);
+
+      Assert.assertEquals(expectedV.targetName, actualV.targetName);
+      Assert.assertEquals(expectedV.targetValue, actualV.targetValue);
+    }
   }
 }

@@ -20,7 +20,7 @@ import com.intellij.rt.coverage.instrument.InstrumentatorTest.Companion.runInstr
 import com.intellij.rt.coverage.report.TestUtils
 import com.intellij.rt.coverage.report.XMLTest
 import com.intellij.rt.coverage.report.data.BinaryReport
-import com.intellij.rt.coverage.report.data.Filters
+import com.intellij.rt.coverage.report.api.Filters
 import com.intellij.rt.coverage.util.ProcessUtil
 import com.intellij.rt.coverage.util.ResourceUtil
 import org.junit.Assert
@@ -77,7 +77,12 @@ class OfflineCoverageTest {
     private lateinit var roots: List<File>
     private fun instrumentTestClasses() {
         val (first, second) = createInstrumentatorTask()
-        val filters = Filters(listOf(Pattern.compile("testData.*"), Pattern.compile("TestTopLevelKt")), emptyList(), emptyList())
+        val filters = Filters(
+            listOf(
+                Pattern.compile("testData.*"),
+                Pattern.compile("TestTopLevelKt")
+            ), emptyList(), emptyList()
+        )
         runInstrumentator(first, second, filters)
         roots = second
     }

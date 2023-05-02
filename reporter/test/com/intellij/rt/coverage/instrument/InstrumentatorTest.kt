@@ -15,13 +15,12 @@
  */
 package com.intellij.rt.coverage.instrument
 
-import com.intellij.rt.coverage.report.ReporterArgs
+import com.intellij.rt.coverage.instrument.api.OfflineInstrumentationApi
 import com.intellij.rt.coverage.report.TestUtils
-import com.intellij.rt.coverage.report.data.Filters
+import com.intellij.rt.coverage.report.api.Filters
 import com.intellij.rt.coverage.util.ClassNameUtil
 import com.intellij.rt.coverage.util.ProcessUtil
 import org.jetbrains.coverage.org.objectweb.asm.*
-import org.json.JSONObject
 import org.junit.Assert
 import org.junit.Test
 import java.io.File
@@ -32,42 +31,21 @@ class InstrumentatorTest {
     @Test
     fun test() {
         val (roots, outputRoots) = createInstrumentatorTask()
-        val filters = Filters(emptyList(), emptyList(), emptyList())
+        val filters =
+            Filters(emptyList(), emptyList(), emptyList())
         runInstrumentator(roots, outputRoots, filters)
     }
 
     @Test
-    fun integrationTest() {
+    fun apiTest() {
         val (roots, outputRoots) = createInstrumentatorTask()
-        val filters = Filters(emptyList(), emptyList(), emptyList())
-        val argsFile = argsToFile(roots, outputRoots, filters)
+        val filters =
+            Filters(emptyList(), emptyList(), emptyList())
 
-        val commandLine = arrayOf(
-                "-classpath", System.getProperty("java.class.path"),
-                "com.intellij.rt.coverage.instrument.Main",
-                argsFile.absolutePath)
         TestUtils.clearLogFile(File("."))
-        ProcessUtil.execJavaProcess(commandLine)
+        OfflineInstrumentationApi.instrument(roots, outputRoots, filters, true)
         TestUtils.checkLogFile(File("."))
         checkOfflineInstrumentation(roots, outputRoots, filters)
-    }
-
-    private fun argsToFile(roots: List<File>, outputRoots: List<File>, filters: Filters): File {
-        val args = JSONObject()
-        for (root in roots) {
-            args.append(ReporterArgs.OUTPUTS_TAG, root.absoluteFile)
-        }
-        for (root in outputRoots) {
-            args.append(InstrumentatorArgs.OUTPUT_COPY_TAG, root.absoluteFile)
-        }
-        if (filters.includeClasses.isNotEmpty()) {
-            val includes = JSONObject()
-            for (pattern in filters.includeClasses) {
-                includes.append(ReporterArgs.CLASSES_TAG, pattern)
-            }
-            args.put(ReporterArgs.INCLUDE_TAG, includes)
-        }
-        return File.createTempFile("args", ".txt").apply { writeText(args.toString()) }
     }
 
     companion object {

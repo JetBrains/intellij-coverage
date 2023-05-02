@@ -16,12 +16,12 @@
 
 package com.intellij.rt.coverage.aggregate;
 
+import com.intellij.rt.coverage.aggregate.api.Request;
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
 import com.intellij.rt.coverage.instrumentation.offline.RawReportLoader;
 import com.intellij.rt.coverage.report.data.BinaryReport;
-import com.intellij.rt.coverage.report.data.Filters;
 import com.intellij.rt.coverage.report.data.Module;
 import com.intellij.rt.coverage.util.CoverageReport;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
@@ -212,20 +212,4 @@ public class Aggregator {
     }
   }
 
-  /**
-   * A request to collect all classes that match filter to a specified binary report file.
-   */
-  public static class Request {
-    public final ClassFilter.PatternFilter classFilter;
-    public final List<Pattern> excludeAnnotations;
-    public final File outputFile;
-    public final File smapFile;
-
-    public Request(Filters filters, File outputFile, File smapFile) {
-      this.classFilter = new ClassFilter.PatternFilter(filters.includeClasses, filters.excludeClasses);
-      this.excludeAnnotations = filters.excludeAnnotations;
-      this.outputFile = outputFile;
-      this.smapFile = smapFile;
-    }
-  }
 }

@@ -17,9 +17,10 @@
 package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.aggregate.Aggregator;
+import com.intellij.rt.coverage.aggregate.api.Request;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.report.data.BinaryReport;
-import com.intellij.rt.coverage.report.data.Filters;
+import com.intellij.rt.coverage.report.api.Filters;
 import com.intellij.rt.coverage.report.data.Module;
 
 import java.io.File;
@@ -68,7 +69,7 @@ public abstract class ReportLoadStrategy {
 
     @Override
     protected ProjectData loadProjectData() {
-      final Aggregator aggregator = new Aggregator(myReports, myModules, new Aggregator.Request(myFilters, null, null));
+      final Aggregator aggregator = new Aggregator(myReports, myModules, new Request(myFilters, null, null));
       return aggregator.getProjectData();
     }
   }
