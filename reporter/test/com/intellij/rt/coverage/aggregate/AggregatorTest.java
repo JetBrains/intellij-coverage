@@ -16,11 +16,13 @@
 
 package com.intellij.rt.coverage.aggregate;
 
+import com.intellij.rt.coverage.aggregate.api.AggregatorApi;
+import com.intellij.rt.coverage.aggregate.api.Request;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.report.TestUtils;
 import com.intellij.rt.coverage.report.data.BinaryReport;
-import com.intellij.rt.coverage.report.data.Filters;
+import com.intellij.rt.coverage.report.api.Filters;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
@@ -34,28 +36,28 @@ import java.util.regex.Pattern;
 public class AggregatorTest {
 
   @Test
-  public void testSingleReport() throws IOException, InterruptedException {
-    final List<Aggregator.Request> requests = createRequests();
+  public void testSingleReport() throws IOException {
+    final List<Request> requests = createRequests();
     runAggregator(requests, "testData.defaultArgs.TestKt");
   }
 
   @Test
-  public void testSeveralReport() throws IOException, InterruptedException {
-    final List<Aggregator.Request> requests = createRequests();
+  public void testSeveralReport() throws IOException {
+    final List<Request> requests = createRequests();
     runAggregator(requests, "testData.defaultArgs.TestKt", "testData.branches.TestKt", "testData.crossinline.TestKt");
   }
 
   @NotNull
-  private static List<Aggregator.Request> createRequests() throws IOException {
-    final List<Aggregator.Request> requests = new ArrayList<Aggregator.Request>();
-    final Aggregator.Request request1 = new Aggregator.Request(
+  private static List<Request> createRequests() throws IOException {
+    final List<Request> requests = new ArrayList<Request>();
+    final Request request1 = new Request(
         new Filters(
             Collections.singletonList(Pattern.compile("testData\\..*")),
             Collections.singletonList(Pattern.compile("testData\\.inline")),
             Collections.<Pattern>emptyList()),
         File.createTempFile("request", "ic"), null
     );
-    final Aggregator.Request request2 = new Aggregator.Request(
+    final Request request2 = new Request(
         new Filters(
             Collections.singletonList(Pattern.compile(".*inline.*")),
             Collections.singletonList(Pattern.compile(".*ss.*")),
@@ -68,20 +70,20 @@ public class AggregatorTest {
   }
 
 
-  public static void runAggregator(List<Aggregator.Request> requests, String... testsClasses) throws IOException, InterruptedException {
-    final List<BinaryReport> reports = new ArrayList<BinaryReport>();
+  public static void runAggregator(List<Request> requests, String... testsClasses) {
+    final List<File> reports = new ArrayList<File>();
     for (String test : testsClasses) {
       final BinaryReport report = TestUtils.runTest("", test);
-      reports.add(report);
+      reports.add(report.getDataFile());
     }
 
     TestUtils.clearLogFile(new File("."));
-    new Aggregator(reports, TestUtils.getModules(), requests).processRequests();
+    AggregatorApi.aggregate(requests, reports, TestUtils.getOutputRoots());
     TestUtils.checkLogFile(new File("."));
 
     final List<ProjectData> projectDataList = new ArrayList<ProjectData>();
     final Set<String> names = new HashSet<String>();
-    for (Aggregator.Request request : requests) {
+    for (Request request : requests) {
       final File file = request.outputFile;
       final ProjectData projectData = ProjectDataLoader.load(file);
       for (ClassData classData : projectData.getClassesCollection()) {
@@ -91,7 +93,7 @@ public class AggregatorTest {
     }
 
     for (int i = 0; i < requests.size(); i++) {
-      final Aggregator.Request request = requests.get(i);
+      final Request request = requests.get(i);
       final ProjectData projectData = projectDataList.get(i);
       for (String name : names) {
         Assert.assertEquals(request.classFilter.shouldInclude(name), projectData.getClassData(name) != null);

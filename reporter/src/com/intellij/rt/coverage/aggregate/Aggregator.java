@@ -16,13 +16,12 @@
 
 package com.intellij.rt.coverage.aggregate;
 
+import com.intellij.rt.coverage.aggregate.api.Request;
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
 import com.intellij.rt.coverage.instrumentation.offline.RawReportLoader;
 import com.intellij.rt.coverage.report.data.BinaryReport;
-import com.intellij.rt.coverage.report.data.Filters;
-import com.intellij.rt.coverage.report.data.Module;
 import com.intellij.rt.coverage.util.CoverageReport;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.classFinder.ClassFilter;
@@ -39,20 +38,20 @@ import java.util.regex.Pattern;
  */
 public class Aggregator {
   private final List<BinaryReport> myReports;
-  private final List<Module> myModules;
+  private final List<File> myOutputs;
   private final List<Request> myRequests;
 
   /** This is a merged project data for all requests. */
   private ProjectData myProjectData;
 
-  public Aggregator(List<BinaryReport> reports, List<Module> modules, List<Request> requests) {
+  public Aggregator(List<BinaryReport> reports, List<File> outputRoots, List<Request> requests) {
     myReports = reports;
-    myModules = modules;
+    myOutputs = outputRoots;
     myRequests = requests;
   }
 
-  public Aggregator(List<BinaryReport> reports, List<Module> modules, Request request) {
-    this(reports, modules, Collections.singletonList(request));
+  public Aggregator(List<BinaryReport> reports, List<File> outputRoots, Request request) {
+    this(reports, outputRoots, Collections.singletonList(request));
   }
 
   /**
@@ -201,31 +200,11 @@ public class Aggregator {
     @Override
     protected Collection<ClassPathEntry> getClassPathEntries() {
       final List<ClassPathEntry> entries = new ArrayList<ClassPathEntry>();
-      for (Module module : myModules) {
-        List<File> outputs = module.getOutputRoots();
-        if (outputs == null) continue;
-        for (File outputRoot : outputs) {
-          entries.add(new ClassPathEntry(outputRoot.getAbsolutePath()));
-        }
+      for (File outputRoot : myOutputs) {
+        entries.add(new ClassPathEntry(outputRoot.getAbsolutePath()));
       }
       return entries;
     }
   }
 
-  /**
-   * A request to collect all classes that match filter to a specified binary report file.
-   */
-  public static class Request {
-    public final ClassFilter.PatternFilter classFilter;
-    public final List<Pattern> excludeAnnotations;
-    public final File outputFile;
-    public final File smapFile;
-
-    public Request(Filters filters, File outputFile, File smapFile) {
-      this.classFilter = new ClassFilter.PatternFilter(filters.includeClasses, filters.excludeClasses);
-      this.excludeAnnotations = filters.excludeAnnotations;
-      this.outputFile = outputFile;
-      this.smapFile = smapFile;
-    }
-  }
 }

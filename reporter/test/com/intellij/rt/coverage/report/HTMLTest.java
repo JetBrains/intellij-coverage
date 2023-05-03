@@ -16,15 +16,20 @@
 
 package com.intellij.rt.coverage.report;
 
+import com.intellij.rt.coverage.report.api.Filters;
+import com.intellij.rt.coverage.report.api.ReportApi;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.util.FileUtils;
-import com.intellij.rt.coverage.util.ProcessUtil;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.regex.Pattern;
+
+import static java.util.Collections.singletonList;
 
 public class HTMLTest {
   private static final String DEFAULT_TITLE = "TITLE";
@@ -61,16 +66,13 @@ public class HTMLTest {
   }
 
   @Test
-  public void integrationTest() throws Throwable {
+  public void apiTest() throws Throwable {
     final BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
     final File htmlDir = createHtmlDir(report.getDataFile());
-    final File argsFile = ReporterArgsTest.argsToFile(report, TestUtils.JAVA_OUTPUT, "test", null, htmlDir.getAbsolutePath(), "testData.simple.*", "raw", DEFAULT_TITLE);
 
-    final String[] commandLine = {
-        "-classpath", System.getProperty("java.class.path"),
-        "com.intellij.rt.coverage.report.Main",
-        argsFile.getAbsolutePath()};
-    ProcessUtil.execJavaProcess(commandLine);
+    Filters filters = new Filters(singletonList(Pattern.compile("testData.simple.*")), Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList());
+    ReportApi.htmlReport(htmlDir, DEFAULT_TITLE, null, singletonList(report.getDataFile()), singletonList(new File(TestUtils.JAVA_OUTPUT)), singletonList(new File("test")), filters);
+
     verifyHTMLDir(htmlDir);
   }
 

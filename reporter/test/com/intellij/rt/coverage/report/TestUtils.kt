@@ -17,11 +17,11 @@ package com.intellij.rt.coverage.report
 
 import com.intellij.rt.coverage.CoverageStatusTest
 import com.intellij.rt.coverage.aggregate.Aggregator
+import com.intellij.rt.coverage.aggregate.api.Request
 import com.intellij.rt.coverage.report.ReportLoadStrategy.AggregatedReportLoadStrategy
 import com.intellij.rt.coverage.report.ReportLoadStrategy.RawReportLoadStrategy
+import com.intellij.rt.coverage.report.api.Filters
 import com.intellij.rt.coverage.report.data.BinaryReport
-import com.intellij.rt.coverage.report.data.Filters
-import com.intellij.rt.coverage.report.data.Module
 import com.intellij.rt.coverage.report.util.FileUtils
 import java.io.File
 import java.nio.file.Files
@@ -79,10 +79,9 @@ object TestUtils {
 
     @JvmStatic
     fun createRawReporter(report: BinaryReport?, patterns: String): Reporter {
-        val modules = modules
         val reports = if (report == null) emptyList() else listOf(report)
         val filters = getFilters(patterns)
-        return Reporter(RawReportLoadStrategy(reports, modules, filters))
+        return Reporter(RawReportLoadStrategy(reports, outputRoots, sourceRoots, filters))
     }
 
     @JvmStatic
@@ -91,15 +90,18 @@ object TestUtils {
         val aggregatedReport = BinaryReport(report.dataFile, smapFile)
         runAggregator(aggregatedReport, patterns)
         val reports = listOf(aggregatedReport)
-        val modules = modules
-        return Reporter(AggregatedReportLoadStrategy(reports, modules))
+        return Reporter(AggregatedReportLoadStrategy(reports, outputRoots, sourceRoots))
     }
 
     @JvmStatic
     fun runAggregator(report: BinaryReport, patterns: String) {
         val filters = getFilters(patterns)
-        val request = Aggregator.Request(filters, report.dataFile, report.sourceMapFile)
-        Aggregator(listOf(report), modules, request).processRequests()
+        val request = Request(
+            filters,
+            report.dataFile,
+            report.sourceMapFile
+        )
+        Aggregator(listOf(report), outputRoots, request).processRequests()
     }
 
     private fun getFilters(patterns: String): Filters {
@@ -124,13 +126,10 @@ object TestUtils {
     }
 
     @JvmStatic
-    val modules: List<Module>
-        get() {
-            val output: MutableList<File> = ArrayList()
-            output.add(File(KOTLIN_OUTPUT))
-            output.add(File(JAVA_OUTPUT))
-            return listOf(Module(output, listOf(File("test"))))
-        }
+    val outputRoots: List<File> = listOf(File(KOTLIN_OUTPUT), File(JAVA_OUTPUT))
+
+    @JvmStatic
+    val sourceRoots: List<File> = listOf(File("test"))
 
     @JvmStatic
     fun join(first: String, vararg other: String): String = Paths.get(first, *other).toFile().path

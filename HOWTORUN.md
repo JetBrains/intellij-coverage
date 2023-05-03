@@ -14,7 +14,6 @@ All the dependencies could be found in the Maven Central repository
   * we will call the jar `intellij-coverage-agent-1.0.716.jar`. **It is important to keep the exact name as it is stated in the Maven repository**
 * `org.jetbrains.intellij.deps:intellij-coverage-reporter` (we will call it `reporter.jar`) with dependencies
   * `org.jetbrains.intellij.deps:coverage-report` (we will call it `builder.jar`)
-  * `org.json:json` (we will call it `json.jar`)
   * `org.freemarker:freemarker` (we will call it `freemarker.jar`)
   * `org.jetbrains:annotations` (we will call it `annotations.jar`)
 
@@ -99,7 +98,7 @@ Please write the following JSON configuration into a file `config.json`:
 
 Now you can generate an XML report with the following command:
 ```
-java -cp reporter.jar:intellij-coverage-agent-1.0.716.jar:builder.jar:json.jar com.intellij.rt.coverage.report.Main config.json
+java -cp reporter.jar:intellij-coverage-agent-1.0.716.jar:builder.jar com.intellij.rt.coverage.report.Main config.json
 ```
 Generated XML report is written to the `report.xml` file.
 <details>

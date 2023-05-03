@@ -17,23 +17,24 @@
 package com.intellij.rt.coverage.report;
 
 import com.intellij.rt.coverage.aggregate.Aggregator;
+import com.intellij.rt.coverage.aggregate.api.Request;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.report.api.Filters;
 import com.intellij.rt.coverage.report.data.BinaryReport;
-import com.intellij.rt.coverage.report.data.Filters;
-import com.intellij.rt.coverage.report.data.Module;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ReportLoadStrategy {
   protected final List<BinaryReport> myReports;
-  protected final List<Module> myModules;
+  protected final List<File> myOutputRoots;
+  protected final List<File> mySourceRoots;
   private ProjectData myCacheData;
 
-  protected ReportLoadStrategy(List<BinaryReport> reports, List<Module> modules) {
+  protected ReportLoadStrategy(List<BinaryReport> reports, List<File> outputRoots, List<File> sourceRoots) {
     myReports = reports;
-    myModules = modules;
+    myOutputRoots = outputRoots;
+    mySourceRoots = sourceRoots;
   }
 
 
@@ -48,11 +49,7 @@ public abstract class ReportLoadStrategy {
 
 
   public List<File> getSources() {
-    final List<File> sources = new ArrayList<File>();
-    for (Module module : myModules) {
-      sources.addAll(module.getSources());
-    }
-    return sources;
+    return mySourceRoots;
   }
 
   /**
@@ -61,14 +58,14 @@ public abstract class ReportLoadStrategy {
   public static class RawReportLoadStrategy extends ReportLoadStrategy {
     private final Filters myFilters;
 
-    public RawReportLoadStrategy(List<BinaryReport> reports, List<Module> modules, Filters filters) {
-      super(reports, modules);
+    public RawReportLoadStrategy(List<BinaryReport> reports, List<File> outputRoots, List<File> sourceRoots, Filters filters) {
+      super(reports, outputRoots, sourceRoots);
       myFilters = filters;
     }
 
     @Override
     protected ProjectData loadProjectData() {
-      final Aggregator aggregator = new Aggregator(myReports, myModules, new Aggregator.Request(myFilters, null, null));
+      final Aggregator aggregator = new Aggregator(myReports, myOutputRoots, new Request(myFilters, null, null));
       return aggregator.getProjectData();
     }
   }
@@ -79,8 +76,8 @@ public abstract class ReportLoadStrategy {
    */
   public static class AggregatedReportLoadStrategy extends ReportLoadStrategy {
 
-    protected AggregatedReportLoadStrategy(List<BinaryReport> reports, List<Module> modules) {
-      super(reports, modules);
+    protected AggregatedReportLoadStrategy(List<BinaryReport> reports, List<File> outputRoots, List<File> sourceRoots) {
+      super(reports, outputRoots, sourceRoots);
       if (reports.size() != 1) {
         throw new IllegalArgumentException("One aggregated report expected, but " + reports.size() + " reports found.");
       }

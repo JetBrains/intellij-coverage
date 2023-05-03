@@ -55,7 +55,9 @@ public class Reporter {
     final HTMLReportBuilder builder = ReportBuilderFactory.createHTMLReportBuilderForKover();
     builder.setReportDir(htmlDir);
     if (builder instanceof HTMLReportBuilderImpl) {
-      ((HTMLReportBuilderImpl) builder).setReportTitle(title);
+      if (title != null) {
+        ((HTMLReportBuilderImpl) builder).setReportTitle(title);
+      }
 
       if (charset != null) {
         ((HTMLReportBuilderImpl) builder).setCharset(charset);
