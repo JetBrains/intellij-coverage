@@ -291,7 +291,6 @@ public class XMLCoverageReport {
     myOut.writeEndElement();
     newLine();
     myOut.writeEndDocument();
-    newLine();
   }
 
   private Counter writePackage(ProjectData project, String packageName, List<ClassData> classes) throws XMLStreamException {
