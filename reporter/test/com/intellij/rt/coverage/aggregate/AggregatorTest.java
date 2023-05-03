@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.aggregate;
 
+import com.intellij.rt.coverage.aggregate.api.AggregatorApi;
 import com.intellij.rt.coverage.aggregate.api.Request;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
@@ -35,13 +36,13 @@ import java.util.regex.Pattern;
 public class AggregatorTest {
 
   @Test
-  public void testSingleReport() throws IOException, InterruptedException {
+  public void testSingleReport() throws IOException {
     final List<Request> requests = createRequests();
     runAggregator(requests, "testData.defaultArgs.TestKt");
   }
 
   @Test
-  public void testSeveralReport() throws IOException, InterruptedException {
+  public void testSeveralReport() throws IOException {
     final List<Request> requests = createRequests();
     runAggregator(requests, "testData.defaultArgs.TestKt", "testData.branches.TestKt", "testData.crossinline.TestKt");
   }
@@ -69,15 +70,15 @@ public class AggregatorTest {
   }
 
 
-  public static void runAggregator(List<Request> requests, String... testsClasses) throws IOException, InterruptedException {
-    final List<BinaryReport> reports = new ArrayList<BinaryReport>();
+  public static void runAggregator(List<Request> requests, String... testsClasses) {
+    final List<File> reports = new ArrayList<File>();
     for (String test : testsClasses) {
       final BinaryReport report = TestUtils.runTest("", test);
-      reports.add(report);
+      reports.add(report.getDataFile());
     }
 
     TestUtils.clearLogFile(new File("."));
-    new Aggregator(reports, TestUtils.getModules(), requests).processRequests();
+    AggregatorApi.aggregate(requests, reports, TestUtils.getOutputRoots());
     TestUtils.checkLogFile(new File("."));
 
     final List<ProjectData> projectDataList = new ArrayList<ProjectData>();

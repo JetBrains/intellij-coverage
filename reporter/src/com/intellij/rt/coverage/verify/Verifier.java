@@ -20,7 +20,6 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.verify.api.*;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;

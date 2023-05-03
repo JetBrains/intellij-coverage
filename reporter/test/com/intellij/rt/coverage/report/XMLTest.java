@@ -23,7 +23,6 @@ import com.intellij.rt.coverage.report.api.Filters;
 import com.intellij.rt.coverage.report.api.ReportApi;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.report.util.FileUtils;
-import com.intellij.rt.coverage.util.ProcessUtil;
 import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;

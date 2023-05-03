@@ -19,7 +19,6 @@ import com.intellij.rt.coverage.instrument.api.OfflineInstrumentationApi
 import com.intellij.rt.coverage.report.TestUtils
 import com.intellij.rt.coverage.report.api.Filters
 import com.intellij.rt.coverage.util.ClassNameUtil
-import com.intellij.rt.coverage.util.ProcessUtil
 import org.jetbrains.coverage.org.objectweb.asm.*
 import org.junit.Assert
 import org.junit.Test

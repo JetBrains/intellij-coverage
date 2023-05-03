@@ -19,13 +19,11 @@ package com.intellij.rt.coverage.report.api;
 import com.intellij.rt.coverage.report.ReportLoadStrategy;
 import com.intellij.rt.coverage.report.Reporter;
 import com.intellij.rt.coverage.report.data.BinaryReport;
-import com.intellij.rt.coverage.report.data.Module;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ReportApi {
@@ -57,10 +55,8 @@ public class ReportApi {
       binaryReports.add(new BinaryReport(report, null));
     }
 
-    Module module = new Module(outputRoots, sourceRoots);
-
     ReportLoadStrategy loadStrategy =
-        new ReportLoadStrategy.RawReportLoadStrategy(binaryReports, Collections.singletonList(module), filters);
+        new ReportLoadStrategy.RawReportLoadStrategy(binaryReports, outputRoots, sourceRoots, filters);
 
     return new Reporter(loadStrategy);
   }

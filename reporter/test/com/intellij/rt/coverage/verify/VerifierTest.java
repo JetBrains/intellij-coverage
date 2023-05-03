@@ -20,7 +20,6 @@ import com.intellij.rt.coverage.aggregate.AggregatorTest;
 import com.intellij.rt.coverage.aggregate.api.Request;
 import com.intellij.rt.coverage.report.TestUtils;
 import com.intellij.rt.coverage.report.api.Filters;
-import com.intellij.rt.coverage.report.util.FileUtils;
 import com.intellij.rt.coverage.verify.api.*;
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,9 +27,11 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class VerifierTest {
   @Test
@@ -47,7 +48,6 @@ public class VerifierTest {
     final Bound bound3_1 = new Bound(1, Counter.LINE, ValueType.MISSED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
     final Bound bound3_2 = new Bound(2, Counter.BRANCH, ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
     rules.add(createRule(Target.PACKAGE, bound3_1, bound3_2));
-
 
 
     BoundViolation boundViolation1x2 = new BoundViolation(2);
@@ -74,9 +74,9 @@ public class VerifierTest {
     boundViolation2x1.maxViolations.add(new Violation("testData.inline.TestKt", new BigDecimal("18")));
 
     BoundViolation boundViolation2x2 = new BoundViolation(2);
-    boundViolation2x2.maxViolations.add(new Violation( "testData.noReport.branches.MyBranchedUnloadedClass", new BigDecimal("1.000000")));
-    boundViolation2x2.maxViolations.add(new Violation( "testData.branches.MyBranchedUnloadedClass", new BigDecimal("1.000000")));
-    boundViolation2x2.maxViolations.add(new Violation( "testData.noReport.branches.MyBranchedClass", new BigDecimal("1.000000")));
+    boundViolation2x2.maxViolations.add(new Violation("testData.noReport.branches.MyBranchedUnloadedClass", new BigDecimal("1.000000")));
+    boundViolation2x2.maxViolations.add(new Violation("testData.branches.MyBranchedUnloadedClass", new BigDecimal("1.000000")));
+    boundViolation2x2.maxViolations.add(new Violation("testData.noReport.branches.MyBranchedClass", new BigDecimal("1.000000")));
 
     RuleViolation rule2 = new RuleViolation(2, Arrays.asList(boundViolation2x1, boundViolation2x2));
 
@@ -169,15 +169,14 @@ public class VerifierTest {
     AggregatorTest.runAggregator(requests, "testData.branches.TestKt", "testData.inline.TestKt", "testData.simple.Main", "TestTopLevelKt");
     TestUtils.checkLogFile(new File("."));
 
-    final Verifier verifier = new Verifier(rules);
-    check(expected, verifier);
+
+    TestUtils.clearLogFile(new File("."));
+    List<RuleViolation> actual = VerificationApi.verify(rules);
+    TestUtils.checkLogFile(new File("."));
+    check(expected, actual);
   }
 
-  private static void check(List<RuleViolation> expected, Verifier verifier) throws IOException {
-    TestUtils.clearLogFile(new File("."));
-    List<RuleViolation> actual = verifier.processRules();
-    TestUtils.checkLogFile(new File("."));
-
+  private static void check(List<RuleViolation> expected, List<RuleViolation> actual) {
     Assert.assertEquals(expected.size(), actual.size());
 
     for (int i = 0; i < expected.size(); i++) {

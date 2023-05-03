@@ -18,11 +18,9 @@ package com.intellij.rt.coverage.aggregate.api;
 
 import com.intellij.rt.coverage.aggregate.Aggregator;
 import com.intellij.rt.coverage.report.data.BinaryReport;
-import com.intellij.rt.coverage.report.data.Module;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class AggregatorApi {
@@ -30,14 +28,12 @@ public class AggregatorApi {
     // no-op
   }
 
-  public static void aggregate(List<Request> requests, List<File> reports, List<File> outputRoots, List<File> sourceRoots) {
+  public static void aggregate(List<Request> requests, List<File> reports, List<File> outputRoots) {
     List<BinaryReport> binaryReports = new ArrayList<BinaryReport>();
     for (File report : reports) {
       binaryReports.add(new BinaryReport(report, null));
     }
 
-    Module module = new Module(outputRoots, sourceRoots);
-
-    new Aggregator(binaryReports, Collections.singletonList(module), requests).processRequests();
+    new Aggregator(binaryReports, outputRoots, requests).processRequests();
   }
 }
