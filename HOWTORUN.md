@@ -69,6 +69,9 @@ Class transformation time: 0.370297627s for 72 classes or 0.005143022597222223s 
 ```
 Collected coverage is written to the `report.ic` file.
 
+#### Open report in IDEA
+You can open the resulting `report.ic` in IDEA with [Show Coverage Data action](https://www.jetbrains.com/help/idea/switching-between-code-coverage-suites.html)
+
 ### Generate XML report
 Now we can transform binary report to an XML report via Reporter API. 
 
