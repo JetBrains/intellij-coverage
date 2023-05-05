@@ -12,10 +12,7 @@ All the dependencies could be found in the Maven Central repository
 
 * `org.jetbrains.intellij.deps:intellij-coverage-agent` 
   * we will call the jar `intellij-coverage-agent-1.0.716.jar`. **It is important to keep the exact name as it is stated in the Maven repository**
-* `org.jetbrains.intellij.deps:intellij-coverage-reporter` (we will call it `reporter.jar`) with dependencies
-  * `org.jetbrains.intellij.deps:coverage-report` (we will call it `builder.jar`)
-  * `org.freemarker:freemarker` (we will call it `freemarker.jar`)
-  * `org.jetbrains:annotations` (we will call it `annotations.jar`)
+* `org.jetbrains.intellij.deps:intellij-coverage-reporter`
 
 ### Example project 
 
@@ -73,33 +70,19 @@ Class transformation time: 0.370297627s for 72 classes or 0.005143022597222223s 
 Collected coverage is written to the `report.ic` file.
 
 ### Generate XML report
-Now we can transform binary report to an XML report with the `reporter.jar`. 
-Please write the following JSON configuration into a file `config.json`:
+Now we can transform binary report to an XML report via Reporter API. 
+
 ```
-{
-  "reports": [
-        { "ic": "report.ic" }
-  ],
-  "xml": "report.xml",
-  "modules": [
-    {
-      "output": [
-        "project.jar"
-      ]
-    }
-  ],
-  "include": {
-    "classes": [
-      "example.*"
-    ]
-  }
-}
+File xmlPath = ...; // path to the output XML file
+File icPath = ...; // path to the report.ic
+List<File> reports = Collections.singletonList(icPath);
+List<File> outputRoots = ...; // list of output roots for all modules in a the project
+List<File> sourceRoots = ...; // list of source roots for all modules in a the project
+Filters filters = Filters.EMPTY; // Filters to exclude unnesesary classes from the report
+
+ReportApi.xmlReport(xmlPath, reports, outputRoots, sourceRoots, filters);
 ```
 
-Now you can generate an XML report with the following command:
-```
-java -cp reporter.jar:intellij-coverage-agent-1.0.716.jar:builder.jar com.intellij.rt.coverage.report.Main config.json
-```
 Generated XML report is written to the `report.xml` file.
 <details>
   <summary>An example of an XML report</summary>
@@ -163,36 +146,21 @@ Generated XML report is written to the `report.xml` file.
 </details>
 
 ### Generate HTML report
-You can generate an HTML report with the `reporter.jar` too, but you will need to change the configuration file.
-Please change `config.json` to:
+You can generate an HTML report via Reporter API too, here is a template configuration:
+
 ```
-{
-  "reports": [
-        { "ic": "report.ic" }
-  ],
-  "html": "html",
-  "modules": [
-    {
-      "output": [
-        "project.jar"
-      ],
-      "sources": [
-        "<PATH TO SOURCE ROOT>"
-      ]
-    }
-  ],
-  "include": {
-    "classes": [
-      "example.*"
-    ]
-  }
-}
+File htmlPath = ...; // path to the output HTML directory
+String title = "..."; // title of the HTML document
+String charset = null; // charset of the HTML document, or null to use the default one on the current machine
+File icPath = ...; // path to the report.ic
+List<File> reports = Collections.singletonList(icPath);
+List<File> outputRoots = ...; // list of output roots for all modules in a the project
+List<File> sourceRoots = ...; // list of source roots for all modules in a the project
+Filters filters = Filters.EMPTY; // Filters to exclude unnesesary classes from the report
+
+ReportApi.htmlReport(htmlPath, title, charset, reports, outputRoots, sourceRoots, filters);
 ```
-Here we need to specify an output directory `html` and sources root to add sources into the HTML report.
-You can generate an HTML report with the following command:
-```
-java -cp reporter.jar:intellij-coverage-agent-1.0.716.jar:builder.jar:json.jar:annotations.jar:freemarker.jar com.intellij.rt.coverage.report.Main config.json
-```
+
 As a result in `html` directory you will get an HTML report in `index.html` file.
 
 ![](https://user-images.githubusercontent.com/31644752/161734145-f5d0dffc-b830-4147-8768-c39d59aa1693.png)
