@@ -82,7 +82,7 @@ public class BranchDataContainer {
   public void addJump(LineData lineData, Label trueLabel, Label falseLabel) {
     int index = lineData.jumpsCount();
     int line = lineData.getLineNumber();
-    // jump type is inverted as jump occurs if value is true
+    // the jump type is inverted as jump occurs if value is true
     Jump trueJump = new Jump(incrementId(), index, line, false);
     Jump falseJump = new Jump(incrementId(), index, line, true);
     myLastTrueJump = trueLabel;

@@ -69,6 +69,9 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
                                          boolean branchCoverage,
                                          boolean shouldSaveSource,
                                          CoverageDataAccess dataAccess) {
+    // uncomment to get readable bytecode
+    // cw = new TraceClassVisitor(cw, new PrintWriter(System.err));
+
     for (ClassSignatureFilter filter : ourFilters) {
       if (filter.shouldFilter(cr)) return null;
     }
@@ -80,7 +83,6 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
         instrumenter = new BranchesInstrumenter(data, cw, className, shouldSaveSource, dataAccess);
       }
     } else {
-      //wrap cw with new TraceClassVisitor(cw, new PrintWriter(new StringWriter())) to get readable bytecode
       instrumenter = new LineInstrumenter(data, cw, className, shouldSaveSource, dataAccess);
     }
     ClassVisitor result = instrumenter;

@@ -24,6 +24,25 @@ fun test(a: A?) {
     println(a!!.x)            // coverage: FULL
 }
 
+fun test2(nullableField: String?) {
+    // See https://github.com/Kotlin/kotlinx-kover/issues/368
+    // `let { "Hello : $it" }` is always not-null here, but it is checked for nullability still
+    val name = (nullableField    // coverage: PARTIAL
+        ?.let { "Hello : $it" }) // coverage: FULL
+        ?: "Nobody?"          // coverage: FULL
+    println(name)             // coverage: FULL
+}
+
+fun test3(nullableField: String?) {
+    val fooBar = nullableField?.let { "Hello : $it" } // coverage: FULL
+    val name = fooBar ?: "Nobody?"                    // coverage: FULL
+    println(name)             // coverage: FULL
+}
+
 fun main() {
     test(A(42))               // coverage: FULL
+    test2(null)               // coverage: FULL
+    test2("X")                // coverage: FULL
+    test3(null)               // coverage: FULL
+    test3("X")                // coverage: FULL
 }
