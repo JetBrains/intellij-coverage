@@ -36,7 +36,6 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * Basic class for coverage instrumentation. Stores intermediate coverage data structure during instrumentation.
  */
 public abstract class Instrumenter extends MethodFilteringVisitor {
-  protected final ProjectData myProjectData;
   private final boolean myShouldSaveSource;
 
   protected TIntObjectHashMap<LineData> myLines = new TIntObjectHashMap<LineData>(4, 0.99f);
@@ -48,8 +47,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   private int myIgnoreSection = 0;
 
   public Instrumenter(final ProjectData projectData, ClassVisitor classVisitor, String className, boolean shouldSaveSource) {
-    super(classVisitor, className);
-    myProjectData = projectData;
+    super(classVisitor, className, projectData);
     myShouldSaveSource = shouldSaveSource;
   }
 
@@ -187,9 +185,5 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
     } else {
       myIgnoreSection--;
     }
-  }
-
-  public ProjectData getProjectData() {
-    return myProjectData;
   }
 }

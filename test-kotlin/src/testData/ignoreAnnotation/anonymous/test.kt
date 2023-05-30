@@ -20,6 +20,7 @@ import testData.ignoreAnnotation.IgnoreCoverage
 
 // patterns: testData.ignoreAnnotation.anonymous.* -excludeAnnotations testData.ignoreAnnotation.IgnoreCoverage
 // classes: ALL
+// calculate unloaded: true
 
 @IgnoreCoverage
 fun boo() {
@@ -32,6 +33,28 @@ fun boo() {
     println("boo")
 }
 
+@IgnoreCoverage
+fun booWithInner() {
+    fun localFun() {
+        fun localFun2() {
+            println()
+        }
+        println()
+    }
+    println("boo")
+}
+
+// TODO !!! here ignoring is false positive due to the same outer method name
+fun booWithInner(x: Int) {
+    fun localFun() {
+        fun localFun2() {
+            println()
+        }
+        println()
+    }
+    println("boo") // coverage: FULL
+}
+
 
 fun functionWithLambda(lambda: (Int) -> Int) {
     print(lambda(5)) // coverage: FULL
@@ -39,4 +62,6 @@ fun functionWithLambda(lambda: (Int) -> Int) {
 
 fun main() {
     boo() // coverage: FULL
+    booWithInner() // coverage: FULL
+    booWithInner(2) // coverage: FULL
 }

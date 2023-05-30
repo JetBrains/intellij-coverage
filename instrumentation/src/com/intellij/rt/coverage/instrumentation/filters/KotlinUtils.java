@@ -24,6 +24,7 @@ import com.intellij.rt.coverage.instrumentation.filters.classFilter.KotlinValueC
 import com.intellij.rt.coverage.instrumentation.filters.classes.ClassSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classes.KotlinFunctionOrPropertyReferenceFilter;
 import com.intellij.rt.coverage.instrumentation.filters.lines.*;
+import com.intellij.rt.coverage.instrumentation.filters.methods.KotlinLocalFunctionInsideIgnoredMethodFilter;
 import com.intellij.rt.coverage.instrumentation.filters.methods.KotlinSyntheticAccessMethodFilter;
 import com.intellij.rt.coverage.instrumentation.filters.methods.KotlinSyntheticConstructorOfSealedClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.methods.MethodFilter;
@@ -59,6 +60,7 @@ public class KotlinUtils {
     List<MethodFilter> result = new ArrayList<MethodFilter>();
     result.add(new KotlinSyntheticConstructorOfSealedClassFilter());
     result.add(new KotlinSyntheticAccessMethodFilter());
+    result.add(new KotlinLocalFunctionInsideIgnoredMethodFilter());
     return result;
   }
 

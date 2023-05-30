@@ -152,10 +152,24 @@ public class ProjectData implements CoverageData, Serializable {
 
   public synchronized void addIgnoredMethod(String owner, String methodName, String desc) {
     if (myIgnoredMethods == null) {
-      myIgnoredMethods = Collections.newSetFromMap(new HashMap<String, Boolean>());
+      myIgnoredMethods = new HashSet<String>();
     }
     final String methodDesc = createDesc(owner, methodName, desc);
     myIgnoredMethods.add(methodDesc);
+  }
+
+  /**
+   * This is a heuristic method to check if a method with the provided name is ignored.
+   * The result could be incorrect in cae of functions having the same name, but a different signature.
+   * It is used for local function determination.
+   */
+  public synchronized boolean isMethodIgnored(String owner, String methodName) {
+    if (myIgnoredMethods == null) return false;
+    String target = owner + "#" + methodName;
+    for (String candidate : myIgnoredMethods) {
+      if (candidate.startsWith(target)) return true;
+    }
+    return false;
   }
 
   private static String createDesc(String owner, String methodName, String desc) {

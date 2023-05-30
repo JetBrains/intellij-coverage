@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation;
 
+import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.methods.MethodFilter;
 import com.intellij.rt.coverage.util.StringsPool;
@@ -33,6 +34,7 @@ import java.util.List;
 public class MethodFilteringVisitor extends ClassVisitor {
   private static final List<MethodFilter> ourMethodFilters = FilterUtils.createMethodFilters();
 
+  protected final ProjectData myProjectData;
   private final String myClassName;
   private boolean myEnum = false;
   private boolean myHasInterfaces = false;
@@ -40,8 +42,9 @@ public class MethodFilteringVisitor extends ClassVisitor {
   private final List<String> myAnnotations = new ArrayList<String>();
   private HashMap<String, Object> myProperties;
 
-  public MethodFilteringVisitor(ClassVisitor classVisitor, String className) {
+  public MethodFilteringVisitor(ClassVisitor classVisitor, String className, ProjectData projectData) {
     super(Opcodes.API_VERSION, classVisitor);
+    myProjectData = projectData;
     myClassName = className;
   }
 
@@ -106,5 +109,9 @@ public class MethodFilteringVisitor extends ClassVisitor {
       myProperties = new HashMap<String, Object>();
     }
     myProperties.put(key, value);
+  }
+
+  public ProjectData getProjectData() {
+    return myProjectData;
   }
 }
