@@ -32,9 +32,23 @@ class Boo {
     fun boo() {
         println("boo")
     }
+
+    companion object {
+        fun staticBoo() {
+            println()
+        }
+    }
+
+    class Foo { // coverage: FULL
+        fun foo() {
+            println() // coverage: FULL
+        }
+    }
 }
 
 fun main() {
     Foo().foo() // coverage: FULL
     Boo().boo() // coverage: FULL
+    Boo.staticBoo() // coverage: FULL
+    Boo.Foo().foo() // coverage: FULL
 }

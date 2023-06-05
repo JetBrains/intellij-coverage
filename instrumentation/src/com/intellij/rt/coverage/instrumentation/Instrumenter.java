@@ -32,6 +32,9 @@ import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+import java.util.List;
+import java.util.regex.Pattern;
+
 /**
  * Basic class for coverage instrumentation. Stores intermediate coverage data structure during instrumentation.
  */
@@ -185,5 +188,16 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
     } else {
       myIgnoreSection--;
     }
+  }
+
+  public boolean isClassIgnoredByAnnotation() {
+    final List<Pattern> ignoreAnnotations = getProjectData().getAnnotationsToIgnore();
+    for (String classAnnotation : getAnnotations()) {
+      final String annotationName = ClassNameUtil.convertVMNameToFQN(classAnnotation);
+      if (ClassNameUtil.matchesPatterns(annotationName, ignoreAnnotations)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

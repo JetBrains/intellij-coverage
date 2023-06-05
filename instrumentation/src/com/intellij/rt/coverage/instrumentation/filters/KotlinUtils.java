@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
 import com.intellij.rt.coverage.instrumentation.filters.branches.*;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.ClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.KotlinAnonymousClassInIgnoredMethodFilter;
+import com.intellij.rt.coverage.instrumentation.filters.classFilter.KotlinCompanionInIgnoredClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.KotlinValueClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classes.ClassSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classes.KotlinFunctionOrPropertyReferenceFilter;
@@ -100,6 +101,7 @@ public class KotlinUtils {
     List<ClassFilter> result = new ArrayList<ClassFilter>();
     result.add(new KotlinValueClassFilter());
     result.add(new KotlinAnonymousClassInIgnoredMethodFilter());
+    result.add(new KotlinCompanionInIgnoredClassFilter());
     return result;
   }
 }

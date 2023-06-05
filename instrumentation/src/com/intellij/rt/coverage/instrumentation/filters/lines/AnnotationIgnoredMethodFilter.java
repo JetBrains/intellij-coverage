@@ -34,6 +34,10 @@ public class AnnotationIgnoredMethodFilter extends LinesFilter {
 
   @Override
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
+    return hasIgnoreAnnotations(context);
+  }
+
+  public static boolean hasIgnoreAnnotations(Instrumenter context) {
     final List<Pattern> annotations = context.getProjectData().getAnnotationsToIgnore();
     return annotations != null && !annotations.isEmpty();
   }
@@ -43,14 +47,9 @@ public class AnnotationIgnoredMethodFilter extends LinesFilter {
     super.initFilter(methodVisitor, context, name, desc);
     myName = name;
     myDesc = desc;
-    final List<Pattern> annotations = context.getProjectData().getAnnotationsToIgnore();
-    for (String annotation : context.getAnnotations()) {
-      final String annotationName = ClassNameUtil.convertVMNameToFQN(annotation);
-      if (ClassNameUtil.matchesPatterns(annotationName, annotations)) {
-        myContext.setIgnoreSection(true);
-        myShouldIgnore = true;
-        break;
-      }
+    if (context.isClassIgnoredByAnnotation()) {
+      myContext.setIgnoreSection(true);
+      myShouldIgnore = true;
     }
   }
 
