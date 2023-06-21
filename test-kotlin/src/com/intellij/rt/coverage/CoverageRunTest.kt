@@ -157,6 +157,9 @@ internal abstract class CoverageRunTest : CoverageTest() {
     fun testFixesIDEA_295404() = test("fixes.IDEA_295404")
 
     @Test
+    fun testFixesIDEA_323017() = test("fixes.IDEA_323017")
+
+    @Test
     fun testFixesKT_39038() = test("fixes.KT_39038")
 
     @Test
