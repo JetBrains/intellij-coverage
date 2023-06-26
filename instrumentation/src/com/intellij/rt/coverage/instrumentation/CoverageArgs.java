@@ -98,6 +98,7 @@ class CoverageArgs {
       char c = argumentString.charAt(i);
       switch (c) {
         case ' ':
+        case ',':
           String arg = currentArg.toString();
           if (!arg.isEmpty()) {
             tokenizedArgs.add(arg);

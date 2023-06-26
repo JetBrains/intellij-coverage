@@ -45,6 +45,12 @@ class CoverageArgsTest {
     }
 
     @Test
+    fun `test all args from string with comma delimiter`() {
+        val args = CoverageArgs.fromString(BASIC_INPUT.replace(' ', ','))
+        testBasicInput(args)
+    }
+
+    @Test
     fun `test all args from file`() {
         val file = createTmpFile("coverage")
         file.writeText(BASIC_INPUT.replace(' ', '\n'))
