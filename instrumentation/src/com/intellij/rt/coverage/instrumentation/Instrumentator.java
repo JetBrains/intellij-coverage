@@ -26,14 +26,11 @@ import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 
-import java.io.*;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 /**
  * This is an entry point for coverage agent. It accepts coverage parameters and enables classes transformation.
@@ -56,101 +53,46 @@ public class Instrumentator {
       ourIsInitialized = true;
     }
 
-    String[] args;
-    if (argsString != null) {
-      File argsFile = new File(argsString);
-      if (argsFile.isFile()) {
-        try {
-          args = readArgsFromFile(argsString);
-        } catch (IOException e) {
-          ErrorReporter.reportError("Arguments were not passed correctly", e);
-          return;
-        }
-      } else {
-        args = tokenize(argsString);
-      }
-    } else {
-      ErrorReporter.reportError("Argument string should be passed");
+    CoverageArgs args;
+    try {
+      args = CoverageArgs.fromString(argsString);
+    } catch (IllegalArgumentException e) {
+      ErrorReporter.reportError("Failed to parse agent arguments", e);
+      System.exit(1);
       return;
     }
 
-    if (args.length < 5) {
-      ErrorReporter.logError("At least 5 arguments expected but " + args.length + " found.\n"
-          + '\'' + argsString + "'\n"
-          + "Expected arguments are:\n"
-          + "1) data file to save coverage result\n"
-          + "2) a flag to enable tracking per test coverage\n"
-          + "3) a flag to calculate coverage for unloaded classes\n"
-          + "4) a flag to use data file as initial coverage, also use it if several parallel processes are to write into one file\n"
-          + "5) a flag to run line coverage or branch coverage otherwise\n");
-      System.exit(1);
-    }
-
-    final File dataFile = new File(args[0]);
-    final boolean testTracking = Boolean.parseBoolean(args[1]);
-    final boolean calcUnloaded = Boolean.parseBoolean(args[2]);
-    final boolean mergeData = Boolean.parseBoolean(args[3]);
-    final boolean branchCoverage = !Boolean.parseBoolean(args[4]);
-    ErrorReporter.setBasePath(dataFile.getParent());
-
-    int i = 5;
-    final File sourceMapFile;
-    if (args.length > 5 && Boolean.parseBoolean(args[5])) {
-      sourceMapFile = new File(args[6]);
-      i = 7;
-    } else {
-      sourceMapFile = null;
-    }
-
     ErrorReporter.logInfo("---- IntelliJ IDEA coverage runner ---- ");
-    ErrorReporter.logInfo(branchCoverage ? ("Branch coverage " + (testTracking ? "with tracking per test coverage ..." : "...")) : "Line coverage ...");
+    ErrorReporter.logInfo(args.branchCoverage ? ("Branch coverage " + (args.testTracking ? "with tracking per test coverage ..." : "...")) : "Line coverage ...");
+    logPatterns(args.includePatterns, "include");
+    logPatterns(args.excludePatterns, "exclude");
+    logPatterns(args.annotationsToIgnore, "exclude annotations");
 
-    final List<Pattern> includePatterns = new ArrayList<Pattern>();
-    i = readPatterns(includePatterns, i, args, "include");
-
-    final List<Pattern> excludePatterns = new ArrayList<Pattern>();
-    if (i < args.length && "-exclude".equals(args[i])) {
-      i = readPatterns(excludePatterns, i + 1, args, "exclude");
-    }
-
-    final List<Pattern> annotationsToIgnore = new ArrayList<Pattern>();
-    if (i < args.length && "-excludeAnnotations".equals(args[i])) {
-      readPatterns(annotationsToIgnore, i + 1, args, "exclude annotations");
-    }
-
-    final TestTrackingMode testTrackingMode = createTestTrackingMode(testTracking);
+    final TestTrackingMode testTrackingMode = createTestTrackingMode(args.testTracking);
     final TestTrackingCallback callback = testTrackingMode == null ? null : testTrackingMode.createTestTrackingCallback();
-    final ProjectData data = ProjectData.createProjectData(dataFile, null, testTracking, branchCoverage, includePatterns, excludePatterns, callback);
-    data.setAnnotationsToIgnore(annotationsToIgnore);
-    final ClassFinder cf = new ClassFinder(includePatterns, excludePatterns);
+    final ProjectData data = ProjectData.createProjectData(args.dataFile, null, args.testTracking, args.branchCoverage, args.includePatterns, args.excludePatterns, callback);
+    data.setAnnotationsToIgnore(args.annotationsToIgnore);
+    final ClassFinder cf = new ClassFinder(args.includePatterns, args.excludePatterns);
 
-    final CoverageReport report = new CoverageReport(dataFile, calcUnloaded, cf, mergeData);
-    report.setSourceMapFile(sourceMapFile);
+    final CoverageReport report = new CoverageReport(args.dataFile, args.calcUnloaded, cf, args.mergeData);
+    report.setSourceMapFile(args.sourceMap);
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
         report.save(data);
       }
     }));
 
-    final boolean shouldSaveSource = sourceMapFile != null;
-    final CoverageTransformer transformer = new CoverageTransformer(data, shouldSaveSource, excludePatterns, includePatterns, cf, testTrackingMode);
+    final boolean shouldSaveSource = args.sourceMap != null;
+    final CoverageTransformer transformer = new CoverageTransformer(data, shouldSaveSource, args.excludePatterns, args.includePatterns, cf, testTrackingMode);
     addTransformer(instrumentation, transformer);
   }
 
-  private int readPatterns(final List<Pattern> patterns, int i, final String[] args, final String name) {
+  private void logPatterns(List<Pattern> patterns, String name) {
+    if (patterns.isEmpty()) return;
     ErrorReporter.logInfo(name + " patterns:");
-    for (; i < args.length; i++) {
-      if (args[i].startsWith("-")) break;
-      try {
-        patterns.add(Pattern.compile(args[i]));
-        ErrorReporter.logInfo(args[i]);
-      } catch (PatternSyntaxException ex) {
-        ErrorReporter.reportError("Problem occurred with " + name + " pattern " + args[i] +
-            ". This may cause no tests run and no coverage collected", ex);
-        System.exit(1);
-      }
+    for (Pattern pattern : patterns) {
+      ErrorReporter.logInfo(pattern.pattern());
     }
-    return i;
   }
 
   private void checkLogLevel() {
@@ -183,53 +125,5 @@ public class Instrumentator {
       return new TestTrackingArrayMode();
     }
     return new TestTrackingClassDataMode();
-  }
-
-  private String[] readArgsFromFile(String arg) throws IOException {
-    final List<String> result = new ArrayList<String>();
-    final File file = new File(arg);
-    final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-    try {
-      while (reader.ready()) {
-        result.add(reader.readLine());
-      }
-    } finally {
-      reader.close();
-    }
-    return result.toArray(new String[0]);
-  }
-
-  private static String[] tokenize(String argumentString) {
-    List<String> tokenizedArgs = new ArrayList<String>();
-    StringBuilder currentArg = new StringBuilder();
-    for (int i = 0; i < argumentString.length(); i++) {
-      char c = argumentString.charAt(i);
-      switch (c) {
-        default:
-          currentArg.append(c);
-          break;
-        case ' ':
-          String arg = currentArg.toString();
-          if (arg.length() > 0) {
-            tokenizedArgs.add(arg);
-          }
-          currentArg = new StringBuilder();
-          break;
-        case '\"':
-          for (i++; i < argumentString.length(); i++) {
-            char d = argumentString.charAt(i);
-            if (d == '\"') {
-              break;
-            }
-            currentArg.append(d);
-          }
-      }
-    }
-
-    String arg = currentArg.toString();
-    if (arg.length() > 0) {
-      tokenizedArgs.add(arg);
-    }
-    return tokenizedArgs.toArray(new String[0]);
   }
 }
