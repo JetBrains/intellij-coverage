@@ -44,7 +44,11 @@ public class CoverageStatusTest extends TestCase {
 
   @Override
   protected void tearDown() throws Exception {
-    if (myDataFile != null) myDataFile.delete();
+    if (myDataFile != null) {
+      File logFile = new File(myDataFile.getParent(), "coverage-error.log");
+      if (logFile.exists()) logFile.delete();
+      myDataFile.delete();
+    }
     if (myClassFile != null) myClassFile.delete();
     super.tearDown();
   }
