@@ -98,6 +98,11 @@ public class XMLTest {
   }
 
   @Test
+  public void testProperties() throws Throwable {
+    test("properties");
+  }
+
+  @Test
   public void apiTest() throws Throwable {
     final BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
     final File xmlFile = createXMLFile();
