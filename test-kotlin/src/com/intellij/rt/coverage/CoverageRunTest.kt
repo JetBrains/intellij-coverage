@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage
 
 import com.intellij.rt.coverage.data.ProjectData
+import com.intellij.rt.coverage.instrumentation.CoverageTransformer
 import org.junit.Assert
 import org.junit.Ignore
 import org.junit.Test
@@ -384,4 +385,13 @@ internal class BranchCoverageTest : CoverageVerifyResultsTest(Coverage.BRANCH)
 internal class NewLineCoverageTest : AbstractLineCoverageTest(Coverage.NEW_LINE)
 internal class NewBranchCoverageTest : CoverageVerifyResultsTest(Coverage.NEW_BRANCH)
 internal class CondyLineCoverageTest : AbstractLineCoverageTest(Coverage.CONDY_LINE)
-internal class CondyBranchCoverageTest : CoverageVerifyResultsTest(Coverage.CONDY_BRANCH)
+internal class CondyBranchCoverageTest : CoverageVerifyResultsTest(Coverage.CONDY_BRANCH) {
+    @Test
+    fun additionalTest() {
+        val bytecode = File("/Users/Maksim.Zuev/Downloads/DrawCapOptionWithPrice.class").readBytes()
+        val projectData = ProjectData()
+        projectData.setInstructionsCoverage(true)
+        val transformer = CoverageTransformer(projectData, false, emptyList(), emptyList())
+        transformer.instrument(bytecode, "com.example.scx.common.DrawCapOptionWithPrice", null, false)
+    }
+}

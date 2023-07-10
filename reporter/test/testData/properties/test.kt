@@ -17,12 +17,15 @@
 package testData.properties
 
 class A(
-    private val x: Int,
-    val y: String
+    val x: Int,
+    val y: Boolean = false
 )
 
 
 fun main() {
-    val a = A(42, "42")
+    val a = A(42)
     println(a.y)
+    a.a()
 }
+
+fun A.a() = println(y)
