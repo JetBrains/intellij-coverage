@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 JetBrains s.r.o.
+ * Copyright 2000-2023 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage;
+package com.intellij.rt.coverage.offline;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.offline.RawReportLoader;
-import com.intellij.rt.coverage.offline.RawHitsReport;
-import com.intellij.rt.coverage.offline.RawProjectData;
+import com.intellij.rt.coverage.instrument.RawReportLoader;
 import org.junit.Assert;
 import org.junit.Test;
 

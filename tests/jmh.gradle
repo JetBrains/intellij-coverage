@@ -29,7 +29,7 @@ configurations {
 }
 
 dependencies {
-  head project(":instrumentation")
+  head files(project(':instrumentation').jar.archivePath)
   baseline "$agentsGroupId:$coverage_jar_name:$baselineVersion"
 }
 

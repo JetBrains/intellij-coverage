@@ -28,6 +28,7 @@ import java.util.HashSet;
 /**
  * Filter methods marked with deprecated annotation.
  */
+@SuppressWarnings("unchecked")
 public class KotlinDeprecatedMethodFilter extends LinesFilter {
   private static final String DEPRECATED_METHODS = "DEPRECATED_METHODS_SET";
   private String myName;
@@ -46,7 +47,6 @@ public class KotlinDeprecatedMethodFilter extends LinesFilter {
     if (name.endsWith(KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX)) {
       final Object property = myContext.getProperty(DEPRECATED_METHODS);
       if (property != null) {
-        //noinspection unchecked
         final HashSet<String> deprecatedMethods = (HashSet<String>) property;
         final String originalName = name.substring(0, name.length() - KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX.length());
         if (deprecatedMethods.contains(originalName)) {
@@ -76,7 +76,6 @@ public class KotlinDeprecatedMethodFilter extends LinesFilter {
             property = new HashSet<String>();
             myContext.addProperty(DEPRECATED_METHODS, property);
           }
-          //noinspection unchecked
           final HashSet<String> deprecatedMethods = (HashSet<String>) property;
           deprecatedMethods.add(myName);
         }

@@ -19,8 +19,8 @@ package com.intellij.rt.coverage.caseTests
 import com.intellij.rt.coverage.*
 import com.intellij.rt.coverage.data.ProjectData
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil
-import com.intellij.rt.coverage.instrumentation.offline.OfflineCoverageTransformer
-import com.intellij.rt.coverage.instrumentation.offline.RawReportLoader
+import com.intellij.rt.coverage.instrument.OfflineCoverageTransformer
+import com.intellij.rt.coverage.instrument.RawReportLoader
 import com.intellij.rt.coverage.util.ProcessUtil
 import com.intellij.rt.coverage.util.ResourceUtil
 import com.intellij.rt.coverage.util.classFinder.ClassFinder
@@ -132,9 +132,9 @@ internal abstract class OfflineInstrumentationTest(override val coverage: Covera
         val packageRoot = File(outputDir, packageName.replace(".", File.separator)).apply { mkdirs() }
         File(packageRoot, File(path).name).writeBytes(bytes)
 
-        val coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent")
+        val offlineArtifactPath = ResourceUtil.getAgentPath("intellij-coverage-offline")
         val commandLine = arrayOf(
-                "-classpath", coverageAgentPath + File.pathSeparator + outputDir.absolutePath,
+                "-classpath", offlineArtifactPath + File.pathSeparator + outputDir.absolutePath,
                 "-Dkover.offline.report.path=${myDataFile.absolutePath}",
                 className)
         ProcessUtil.execJavaProcess(commandLine)

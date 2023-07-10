@@ -20,7 +20,7 @@ import com.intellij.rt.coverage.aggregate.api.Request;
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
-import com.intellij.rt.coverage.instrumentation.offline.RawReportLoader;
+import com.intellij.rt.coverage.instrument.RawReportLoader;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.util.CoverageReport;
 import com.intellij.rt.coverage.util.ProjectDataLoader;

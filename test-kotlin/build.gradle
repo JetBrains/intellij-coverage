@@ -25,7 +25,8 @@ dependencies {
   testImplementation("org.jetbrains.kotlin:kotlin-test")
 
   testImplementation(files(project(":tests").sourceSets.test.output))
-  testImplementation(project(":instrumentation"))
+  testImplementation(files(project(':instrumentation').jar.archivePath))
+  testImplementation(project(":reporter"))
   testImplementation(fileTree(project(":benchmarks").file("lib")))
 
   testImplementation('junit:junit:4.13.2')

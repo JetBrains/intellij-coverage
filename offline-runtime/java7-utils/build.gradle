@@ -2,7 +2,6 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 dependencies {
-  implementation project(":")
   // prevent circular dependency with this module
   implementation project(":offline-runtime").sourceSets.main.output
 }

@@ -1,3 +1,5 @@
+import com.intellij.rt.coverage.build.ArtifactBuilder
+
 plugins {
   id 'org.jetbrains.kotlin.jvm'
 }
@@ -15,8 +17,15 @@ configurations {
 }
 
 dependencies {
-  implementation project(":instrumentation")
-  implementation project(":java6-utils")
+  compileOnly project(":instrumentation")
+  testCompileOnly project(":instrumentation")
+  runtimeOnly files(project(':instrumentation').jar.archivePath)
+
+  compileOnly project(":java6-utils")
+  compileOnly project(":offline-runtime")
+  testCompileOnly project(":offline-runtime")
+  runtimeOnly files(project(':offline-runtime').jar.archivePath)
+
   externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.21")
 
   testImplementation('junit:junit:4.13.2')
@@ -27,19 +36,4 @@ def getPublishDependencies() {
   configurations.getByName("externalDependencies").getResolvedConfiguration().getFirstLevelModuleDependencies()
 }
 
-jar {
-  baseName = reporter_jar_name
-  destinationDir = file("../dist")
-}
-
-task soursesJar(type: Jar, dependsOn: classes) {
-  baseName = reporter_jar_name
-  archiveClassifier = 'sources'
-  from(sourceSets.main.allSource)
-}
-
-task javadocJar(type: Jar) {
-  baseName = reporter_jar_name
-  archiveClassifier = 'javadoc'
-  from javadoc
-}
+ArtifactBuilder.setUpArtifact(project, reporter_jar_name, [":offline-runtime"])

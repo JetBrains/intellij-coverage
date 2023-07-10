@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 JetBrains s.r.o.
+ * Copyright 2000-2023 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.util;
-
-import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.offline.RawProjectInit;
+package com.intellij.rt.coverage.offline;
 
 import java.lang.invoke.MethodHandles;
 
 @SuppressWarnings("unused")
 public class CondyUtils {
-  public static int[] getHitsMask(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className) {
-    return ProjectData.getHitsMask(className);
-  }
-
   public static int[] getOrCreateHitsMask(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className, int length) {
     return RawProjectInit.getOrCreateHitsMask(className, length);
   }

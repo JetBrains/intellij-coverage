@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 JetBrains s.r.o.
+ * Copyright 2000-2023 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.instrumentation.offline;
+package com.intellij.rt.coverage.instrument;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 JetBrains s.r.o.
+ * Copyright 2000-2023 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.instrumentation.offline;
+package com.intellij.rt.coverage.instrument;
 
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.CoverageTransformer;
@@ -50,7 +50,7 @@ public class OfflineCoverageTransformer extends CoverageTransformer {
   @Override
   protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr, boolean branchCoverage) {
     final int length = getRequiredArrayLength(cr, branchCoverage);
-    return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, "com/intellij/rt/coverage/util/CondyUtils",
+    return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, "com/intellij/rt/coverage/offline/CondyUtils",
         "getOrCreateHitsMask", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;I)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className, length});
   }
 

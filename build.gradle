@@ -36,12 +36,6 @@ private calcVersion() {
 
 apply plugin: 'maven-publish'
 
-def trove = rootProject.file('lib/trove.jar')
-def asm = rootProject.file('lib/asm-all.jar')
-
-ext.library_project_trove4j = files(trove)
-ext.library_project_asm_all = files(asm)
-
 ext.test_discovery_jar_name = 'intellij-test-discovery-agent'
 ext.coverage_jar_name = 'intellij-coverage-agent'
 ext.offline_jar_name = 'intellij-coverage-offline'
@@ -57,10 +51,6 @@ allprojects {
     mavenCentral()
   }
 
-  if (name.startsWith("kover")) {
-    return
-  }
-
   apply plugin: 'java'
   sourceCompatibility = project.release ? 1.5 : 1.6
   targetCompatibility = project.release ? 1.5 : 1.6
@@ -69,52 +59,15 @@ allprojects {
     main.java.srcDirs 'src'
     test.java.srcDirs = []
   }
+
+  tasks.withType(JavaCompile) {
+    options.compilerArgs << '-Xlint:-options'
+  }
 }
 
 dependencies {
-  compile project(':util')
+  compile(project(':util'))
 }
-
-javadoc {
-  options.tags = ["noinspection"]
-}
-
-
-ext.repackLibs = copySpec {
-  from { zipTree(trove.path) } {
-    include(troveClasses())
-  }
-  from { zipTree(asm.path) } {
-    include '**/*.class'
-  }
-}
-
-// @formatter:off
-private static troveClasses() {
-  return '**/*.class' // todo: use proguard
-  [  'THash'
-   , 'Equality'
-   , 'THashSet'
-   , 'TIntHash'
-   , 'TLongHash'
-   , 'PrimeFinder'
-   , 'TIntHashSet'
-   , 'TObjectHash'
-   , 'HashFunctions'
-   , 'TIntIntHashMap'
-   , 'TPrimitiveHash'
-   , 'TObjectFunction'
-   , 'TIntObjectHashMap'
-   , 'TObjectIntHashMap'
-   , 'TLongObjectHashMap'
-   , 'TIntHashingStrategy'
-   , 'TIntObjectProcedure'
-   , 'TObjectIntProcedure'
-   , 'TLongObjectProcedure'
-   , 'TLongHashingStrategy'
-   , 'TObjectHashingStrategy'].collect { "org/jetbrains/coverage/**/${it}.class" }
-}
-// @formatter:on
 
 clean.doFirst {
   delete "dist"

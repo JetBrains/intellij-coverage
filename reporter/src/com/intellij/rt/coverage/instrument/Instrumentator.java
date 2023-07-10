@@ -18,7 +18,6 @@ package com.intellij.rt.coverage.instrument;
 
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.CoverageTransformer;
-import com.intellij.rt.coverage.instrumentation.offline.OfflineCoverageTransformer;
 import com.intellij.rt.coverage.report.api.Filters;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.OptionsUtil;

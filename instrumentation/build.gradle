@@ -1,36 +1,14 @@
+import com.intellij.rt.coverage.build.ArtifactBuilder
+
 dependencies {
   compile project(":")
-  compile project(":offline-runtime")
 }
 
-jar {
-  baseName = coverage_jar_name
-  destinationDir = file("../dist")
-  manifest.attributes(
+ArtifactBuilder.setUpArtifact(project, coverage_jar_name,
+    [":common", ":util", ":", ":java6-utils", ":instrumentation:java7-utils", ":lib"]) { Jar jar ->
+  jar.manifest.attributes(
       "Premain-Class": "com.intellij.rt.coverage.main.CoveragePremain",
-      "Boot-Class-Path": "$archiveName",
+      "Boot-Class-Path": "${jar.archivePath.name}",
       "Can-Retransform-Classes": "true"
   )
-  from(sourceSets.main.output)
-  from(["util", "", "java7-utils", "java6-utils", "common", "offline-runtime"].collect({ project(":$it").sourceSets.main.output }))
-  with repackLibs
-}
-
-task soursesJar(type: Jar, dependsOn: classes) {
-  baseName = coverage_jar_name
-  archiveClassifier = 'sources'
-  from(sourceSets.main.allSource)
-  from(["util", "", "common", "offline-runtime"].collect({ project(":$it").sourceSets.main.allSource }))
-}
-
-task allJavadoc(type: Javadoc) {
-  options.tags = ["noinspection"]
-  source = ["util", "", "common", "offline-runtime", "instrumentation"].collect { project(":$it").sourceSets.main.allSource }
-  classpath = files(["util", "", "common", "offline-runtime", "instrumentation"].collect { project(":$it").sourceSets.main.compileClasspath })
-}
-
-task javadocJar(type: Jar) {
-  baseName = coverage_jar_name
-  archiveClassifier = 'javadoc'
-  from allJavadoc
 }

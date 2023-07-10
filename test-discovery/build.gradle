@@ -1,3 +1,5 @@
+import com.intellij.rt.coverage.build.ArtifactBuilder
+
 /*
  * Copyright 2000-2019 JetBrains s.r.o.
  *
@@ -25,37 +27,12 @@ sourceSets {
   test.java.srcDirs = [file('test')]
 }
 
-jar {
-  baseName = test_discovery_jar_name
-  destinationDir = file("../dist")
-  manifest.attributes(
+ArtifactBuilder.setUpArtifact(project, test_discovery_jar_name, [":common", ":util", ":lib"]) { Jar jar ->
+  jar.manifest.attributes(
       "Premain-Class": "com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain",
-      "Boot-Class-Path": "$archiveName",
+      "Boot-Class-Path": "${jar.archiveName}",
       "Can-Retransform-Classes": "true",
-
   )
-  from(sourceSets.main.output)
-  from(["util", "common"].collect({ project(":$it").sourceSets.main.output }))
-  with repackLibs
-}
-
-task soursesJar(type: Jar, dependsOn: classes) {
-  baseName = test_discovery_jar_name
-  archiveClassifier = 'sources'
-  from(sourceSets.main.allSource)
-  from(["util", "common", "test-discovery"].collect({ project(":$it").sourceSets.main.allSource }))
-}
-
-task allJavadoc(type: Javadoc) {
-  options.tags = [ "noinspection" ]
-  source = ["util", "common", "test-discovery"].collect { project(":$it").sourceSets.main.allSource }
-  classpath = files(["util", "common", "test-discovery"].collect { project(":$it").sourceSets.main.compileClasspath })
-}
-
-task javadocJar(type: Jar) {
-  baseName = test_discovery_jar_name
-  archiveClassifier = 'javadoc'
-  from allJavadoc
 }
 
 apply from: 'jmh.gradle'

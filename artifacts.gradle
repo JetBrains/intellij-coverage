@@ -67,72 +67,34 @@ private setMavenMetadata(publication, publicationName, publicationDescription) {
   }
 }
 
-project(":instrumentation").afterEvaluate { instrumentation ->
-  publishing {
-    publications {
-      Coverage(MavenPublication) {
-        group agentsGroupId
-        artifactId coverage_jar_name
-        version version
-        artifact instrumentation.jar
-        artifact instrumentation.tasks.getByName("soursesJar")
-        artifact instrumentation.tasks.getByName("javadocJar")
-        setMavenMetadata(owner, "Intellij Coverage Agent", "Code coverage engine for JVM")
+def setUpPublication(String projectName, String artifactName, String name, String description, Closure addDependencies = null) {
+  project(projectName).afterEvaluate { Project proj ->
+    publishing {
+      publications {
+        "${projectName.replace(":", "-")}-"(MavenPublication) {
+          group agentsGroupId
+          artifactId artifactName
+          version version
+          artifact proj.jar
+          artifact proj.tasks.getByName("soursesJar")
+          artifact proj.tasks.getByName("javadocJar")
+
+          if (addDependencies != null) addDependencies(it)
+
+          setMavenMetadata(owner, name, description)
+        }
       }
     }
   }
 }
 
-project(":reporter").afterEvaluate { reporter ->
-  publishing {
-    publications {
-      Reporter(MavenPublication) {
-        group agentsGroupId
-        artifactId reporter_jar_name
-        version version
-        artifact reporter.jar
-        artifact reporter.tasks.getByName("soursesJar")
-        artifact reporter.tasks.getByName("javadocJar")
-
-        def dependencies = reporter.getPublishDependencies().collect { new MyDependency(it.moduleGroup, it.moduleName, it.moduleVersion) }
-        dependencies.add(new MyDependency(agentsGroupId, coverage_jar_name, version))
-        addDependencies(it, dependencies)
-        setMavenMetadata(owner, "Intellij Coverage Report", "Library for presenting coverage results")
-      }
-    }
-  }
-}
-
-project(":test-discovery").afterEvaluate { testDiscovery ->
-  publishing {
-    publications {
-      TestDiscovery(MavenPublication) {
-        group agentsGroupId
-        artifactId test_discovery_jar_name
-        version version
-        artifact testDiscovery.jar
-        artifact testDiscovery.tasks.getByName("soursesJar")
-        artifact testDiscovery.tasks.getByName("javadocJar")
-        setMavenMetadata(owner, "Intellij Test Discovery Agent", "Lightweight coverage during a testing session")
-      }
-    }
-  }
-}
-
-project(":offline-runtime").afterEvaluate { offline ->
-  publishing {
-    publications {
-      Offline(MavenPublication) {
-        group agentsGroupId
-        artifactId offline_jar_name
-        version version
-        artifact offline.jar
-        artifact offline.tasks.getByName("soursesJar")
-        artifact offline.tasks.getByName("javadocJar")
-        setMavenMetadata(owner, "Intellij Coverage Offline Runtime", "Lightweight coverage runtime in offline instrumentation mode")
-      }
-    }
-  }
+setUpPublication(":instrumentation", coverage_jar_name, "Intellij Coverage Agent", "Code coverage engine for JVM")
+setUpPublication(":test-discovery", test_discovery_jar_name, "Intellij Test Discovery Agent", "Lightweight coverage during a testing session")
+setUpPublication(":offline-runtime", offline_jar_name, "Intellij Coverage Offline Runtime", "Lightweight coverage runtime in offline instrumentation mode")
+setUpPublication(":reporter", reporter_jar_name, "Intellij Coverage Report", "Library for presenting coverage results") { publication ->
+  def dependencies = project(":reporter").getPublishDependencies().collect { new MyDependency(it.moduleGroup, it.moduleName, it.moduleVersion) }
+  dependencies.add(new MyDependency(agentsGroupId, coverage_jar_name, version))
+  addDependencies(publication, dependencies)
 }
 
 ext.publishingUser = System.getenv('PUBLISHING_USER')
