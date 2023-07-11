@@ -35,12 +35,20 @@ public class ResourceUtil {
     File dist = new File("../dist");
     File[] jars = dist.listFiles(new FilenameFilter() {
       public boolean accept(File dir, String name) {
-        return name.startsWith(agentName);
+        return name.startsWith(agentName) && new File(dir, name).isFile();
       }
     });
 
-    if (jars == null || jars.length != 1) {
+    if (jars == null || jars.length == 0) {
       throw new RuntimeException("\"" + agentName + "\" agent does not exist. Please rebuild all artifacts to build it.");
+    }
+
+    if (jars.length > 1) {
+      StringBuilder names = new StringBuilder();
+      for (File jar : jars) {
+        names.append(jar.getName()).append(' ');
+      }
+      throw new RuntimeException("\"" + agentName + "\" agent choice is ambiguous: " + names);
     }
 
     return jars[0].getCanonicalPath();

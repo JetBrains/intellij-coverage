@@ -45,12 +45,21 @@ public class CoverageStatusTest extends TestCase {
   @Override
   protected void tearDown() throws Exception {
     if (myDataFile != null) {
-      File logFile = new File(myDataFile.getParent(), "coverage-error.log");
+      File logFile = getLogFile();
       if (logFile.exists()) logFile.delete();
       myDataFile.delete();
     }
     if (myClassFile != null) myClassFile.delete();
     super.tearDown();
+  }
+
+  private File getLogFile() {
+    String logFileName = "coverage-error.log";
+    File logFile = new File(myDataFile.getParent(), logFileName);
+    if (!logFile.exists()) {
+      logFile = new File(logFileName);
+    }
+    return logFile;
   }
 
   public void testSimple() throws Exception {
