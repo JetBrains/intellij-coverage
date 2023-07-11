@@ -29,6 +29,10 @@ import java.io.IOException;
 public class RawReportLoader {
   public static void load(File file, ProjectData projectData) throws IOException {
     final RawProjectData rawProjectData = RawHitsReport.load(file);
+    apply(projectData, rawProjectData);
+  }
+
+  public static void apply(ProjectData projectData, RawProjectData rawProjectData) {
     for (RawClassData rawClassData : rawProjectData.getClasses()) {
       final ClassData classData = projectData.getClassData(rawClassData.name);
       if (classData == null) {

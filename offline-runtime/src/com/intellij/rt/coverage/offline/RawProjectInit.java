@@ -67,12 +67,22 @@ public class RawProjectInit {
             final File file = new File(filePath);
             RawHitsReport.dumpOnExit(file, ourProjectData);
             ErrorReporter.setBasePath(file.getParent());
-          } else {
-            ErrorReporter.reportError("Output file path is not set. Please set 'kover.offline.report.path' property");
           }
         }
       }
     }
     return ourProjectData.getOrCreateClass(className, length).hits;
+  }
+
+  public static RawProjectData getProjectData() {
+    RawProjectData projectData = ourProjectData;
+    if (projectData == null) {
+      ClassLoader loader = RawProjectData.class.getClassLoader();
+      ErrorReporter.reportError("Coverage data is null in RawProjectInit. " +
+          "This can be caused by accessing coverage data before tests' start. " +
+          "Alternatively, this could be a class loading issue: the data access method is called in class loaded by "
+          + loader + ". It is supposed to be called from the system class loader.");
+    }
+    return projectData;
   }
 }

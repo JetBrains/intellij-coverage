@@ -1,0 +1,10 @@
+Class testData.custom.offline.api.constructor.TestKt in test.kt:
+  Method main()V hits=1:
+    Line 27 hits=1
+    Line 28 hits=1
+
+Class testData.custom.offline.api.constructor.A in test.kt:
+  Method <init>()V hits=2:
+    Line 22 hits=2
+    Line 23 hits=1
+

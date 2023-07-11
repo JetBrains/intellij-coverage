@@ -39,6 +39,7 @@ apply plugin: 'maven-publish'
 ext.test_discovery_jar_name = 'intellij-test-discovery-agent'
 ext.coverage_jar_name = 'intellij-coverage-agent'
 ext.offline_jar_name = 'intellij-coverage-offline'
+ext.offline_api_jar_name = 'intellij-coverage-api-offline'
 ext.reporter_jar_name = 'intellij-coverage-reporter'
 
 // use this option to test with JDK11

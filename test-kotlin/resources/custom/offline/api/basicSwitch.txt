@@ -1,0 +1,22 @@
+Class testData.custom.offline.api.basicSwitch.TestKt in test.kt:
+  Method foo(Ljava/lang/String;)V hits=2:
+    Line 21 hits=2
+      Branches: 1, 1, 0, 0
+    Line 22 hits=2
+    Line 23 hits=0
+    Line 24 hits=0
+  Method main()V hits=1:
+    Line 35 hits=1
+    Line 36 hits=1
+    Line 38 hits=1
+    Line 39 hits=1
+    Line 40 hits=1
+    Line 41 hits=1
+    Line 43 hits=1
+  Method foo2(Ljava/lang/String;)V hits=4:
+    Line 28 hits=4
+      Branches: 1, 1, 1, 1
+    Line 29 hits=2
+    Line 30 hits=1
+    Line 31 hits=1
+

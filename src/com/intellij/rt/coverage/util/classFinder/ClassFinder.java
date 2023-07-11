@@ -66,8 +66,6 @@ public class ClassFinder {
     }
   }
 
-  // Overriden in IntelliJ
-  @SuppressWarnings("WeakerAccess")
   protected Collection<ClassPathEntry> getClassPathEntries() {
     Set<ClassPathEntry> result = new HashSet<ClassPathEntry>();
     result.addAll(extractEntries(System.getProperty("java.class.path")));
@@ -105,7 +103,7 @@ public class ClassFinder {
       ErrorReporter.reportError("Could not decode the path: " + path + ", error: " + e.getMessage(), e);
     }
 
-    if (result.length() == 0) return result;
+    if (result.isEmpty()) return result;
     if (result.charAt(0) == '/' && result.length() > 3 && result.charAt(2) == ':') {
       // windows path prefix: /C:/
       result = result.substring(1);

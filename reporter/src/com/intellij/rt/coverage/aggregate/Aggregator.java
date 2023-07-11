@@ -25,8 +25,7 @@ import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.util.CoverageReport;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import com.intellij.rt.coverage.util.classFinder.ClassFilter;
-import com.intellij.rt.coverage.util.classFinder.ClassFinder;
-import com.intellij.rt.coverage.util.classFinder.ClassPathEntry;
+import com.intellij.rt.coverage.util.classFinder.OutputClassFinder;
 
 import java.io.File;
 import java.io.IOException;
@@ -188,23 +187,6 @@ public class Aggregator {
     for (Request request : myRequests) {
       filters.add(request.classFilter);
     }
-    return new OutputClassFinder(new GroupPatternFilter(filters));
+    return new OutputClassFinder(new GroupPatternFilter(filters), myOutputs);
   }
-
-  private class OutputClassFinder extends ClassFinder {
-
-    public OutputClassFinder(ClassFilter filter) {
-      super(filter);
-    }
-
-    @Override
-    protected Collection<ClassPathEntry> getClassPathEntries() {
-      final List<ClassPathEntry> entries = new ArrayList<ClassPathEntry>();
-      for (File outputRoot : myOutputs) {
-        entries.add(new ClassPathEntry(outputRoot.getAbsolutePath()));
-      }
-      return entries;
-    }
-  }
-
 }

@@ -67,6 +67,7 @@ public class ClassPathEntry {
       myFilter = filter;
     }
     protected final boolean shouldInclude(final String className) {
+      if (myFilter == null) return true;
       return myFilter.shouldInclude(className);
     }
   }

@@ -4,7 +4,8 @@ plugins {
 
 sourceSets {
   main.java.srcDirs = []
-  test.java.srcDirs = [file('src')]
+  test.java.srcDirs 'src'
+  test.resources.srcDir 'resources'
 }
 
 String testJdkVersion = test.javaVersion >= JavaVersion.VERSION_11 ? 11 : 1.8
@@ -25,8 +26,15 @@ dependencies {
   testImplementation("org.jetbrains.kotlin:kotlin-test")
 
   testImplementation(files(project(":tests").sourceSets.test.output))
-  testImplementation(files(project(':instrumentation').jar.archivePath))
+
+  testRuntimeOnly(files(project(':instrumentation').jar.archivePath))
+  testRuntimeOnly(files(project(':offline-runtime:api').jar.archivePath))
+  testCompileOnly(project(":instrumentation"))
+  testCompileOnly(project(":offline-runtime:api"))
+
   testImplementation(project(":reporter"))
+  testImplementation(project(":reporter:offline"))
+
   testImplementation(fileTree(project(":benchmarks").file("lib")))
 
   testImplementation('junit:junit:4.13.2')

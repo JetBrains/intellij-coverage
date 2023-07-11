@@ -1,0 +1,12 @@
+import com.intellij.rt.coverage.build.ArtifactBuilder
+
+dependencies {
+  implementation(project(":instrumentation"))
+  implementation(project(":offline-runtime"))
+  implementation(project(":reporter:offline"))
+}
+
+ArtifactBuilder.setUpArtifactWithProguard(project, offline_api_jar_name,
+    [":offline-runtime", ":instrumentation", ":reporter:offline"]) { Jar jar ->
+  jar.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}

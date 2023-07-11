@@ -1,0 +1,4 @@
+dependencies {
+  implementation project(":")
+  implementation project(":offline-runtime")
+}

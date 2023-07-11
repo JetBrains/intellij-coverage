@@ -1,0 +1,14 @@
+Class testData.custom.offline.api.basic.TestKt in test.kt:
+  Method foo(I)V hits=2:
+    Line 22 hits=2
+      Branches: 0, 2
+    Line 23 hits=0
+    Line 24 hits=2
+      Branches: 0, 2
+    Line 25 hits=0
+    Line 27 hits=2
+  Method main()V hits=1:
+    Line 32 hits=1
+    Line 33 hits=1
+    Line 35 hits=1
+

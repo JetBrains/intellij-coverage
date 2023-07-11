@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.data.ProjectData
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil
 import com.intellij.rt.coverage.instrument.OfflineCoverageTransformer
 import com.intellij.rt.coverage.instrument.RawReportLoader
+import com.intellij.rt.coverage.util.OptionsUtil
 import com.intellij.rt.coverage.util.ProcessUtil
 import com.intellij.rt.coverage.util.ResourceUtil
 import com.intellij.rt.coverage.util.classFinder.ClassFinder
@@ -103,9 +104,9 @@ internal abstract class OfflineInstrumentationTest(override val coverage: Covera
         val includes = Collections.singletonList(Pattern.compile(test.mainClass))
         val excludes = Collections.emptyList<Pattern>()
 
-        runOfflineCoverage(test, outputRoot, includes, excludes)
+        runOfflineCoverage(test, outputRoot)
 
-        val projectData = createProjectData(includes, excludes)
+        val projectData = createProjectData(coverage.isBranchCoverage(), includes, excludes)
         val cf = ClassFinder(includes, excludes)
         cf.addClassLoader(URLClassLoader(arrayOf(outputRoot.toURI().toURL())))
         UnloadedUtil.appendUnloaded(projectData, cf, false, coverage.isBranchCoverage())
@@ -116,33 +117,51 @@ internal abstract class OfflineInstrumentationTest(override val coverage: Covera
         assertEqualsLines(projectData, config.coverageData, config.classes)
     }
 
-    private fun runOfflineCoverage(test: TestFile, outputRoot: File, includes: List<Pattern>, excludes: List<Pattern>) {
-        val className = test.mainClass
-        val packageName = className.substring(0, className.lastIndexOf('.'))
-        val path = className.replace(".", File.separator) + ".class"
-        val classFile = File(outputRoot, path)
-        if (classFile.parentFile.list()!!.size > 1) {
-            error("Cannot run offline coverage for several classes")
-        }
-        val projectData = createProjectData(includes, excludes)
-        val transformer = OfflineCoverageTransformer(projectData, false, excludes, includes)
-        val bytes = transformer.transform(ClassLoader.getSystemClassLoader(), className, null, null, classFile.readBytes())
-
-        val outputDir = createTempDirectory("output").toFile()
-        val packageRoot = File(outputDir, packageName.replace(".", File.separator)).apply { mkdirs() }
-        File(packageRoot, File(path).name).writeBytes(bytes)
+    private fun runOfflineCoverage(test: TestFile, outputRoot: File) {
+        val outputDir = offlineCoverageTransform(coverage.isBranchCoverage(), test, outputRoot)
 
         val offlineArtifactPath = ResourceUtil.getAgentPath("intellij-coverage-offline")
         val commandLine = arrayOf(
-                "-classpath", offlineArtifactPath + File.pathSeparator + outputDir.absolutePath,
-                "-Dkover.offline.report.path=${myDataFile.absolutePath}",
-                className)
+            "-classpath", offlineArtifactPath + File.pathSeparator + outputDir.absolutePath,
+            "-Dkover.offline.report.path=${myDataFile.absolutePath}",
+            test.mainClass
+        )
         ProcessUtil.execJavaProcess(commandLine)
         assertEmptyLogFile(myDataFile)
     }
+}
 
-    private fun createProjectData(includes: List<Pattern>, excludes: List<Pattern>): ProjectData =
-            ProjectData.createProjectData(null, null, false, coverage.isBranchCoverage(), includes, excludes, null)
+private fun createProjectData(isBranchCoverage: Boolean, includes: List<Pattern>, excludes: List<Pattern>): ProjectData =
+    ProjectData.createProjectData(null, null, false, isBranchCoverage, includes, excludes, null)
+
+internal fun offlineCoverageTransform(isBranchCoverage: Boolean, test: TestFile, outputRoot: File): File {
+    val className = test.mainClass
+    val packageName = className.substring(0, className.lastIndexOf('.'))
+    val path = className.replace(".", File.separator) + ".class"
+    val parentDir = File(outputRoot, path).parentFile
+    val outputDir = createTempDirectory("output").toFile()
+    val packageRoot = File(outputDir, packageName.replace(".", File.separator)).apply { mkdirs() }
+
+    val includes = Collections.singletonList(Pattern.compile("$packageName\\..*"))
+    val excludes = Collections.emptyList<Pattern>()
+
+    val defaultBranchCoverage = OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED
+    try {
+        OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = true
+        val projectData = createProjectData(isBranchCoverage, includes, excludes)
+        val transformer = OfflineCoverageTransformer(projectData, false, excludes, includes)
+
+        for (file in parentDir.listFiles()!!) {
+            if (!file.isFile) continue
+            val name = "$packageName.${file.name.removeSuffix(".class")}"
+            val bytes = transformer.transform(ClassLoader.getSystemClassLoader(), name, null, null, file.readBytes())
+            File(packageRoot, file.name).writeBytes(bytes)
+        }
+    } finally {
+        OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = defaultBranchCoverage
+    }
+
+    return outputDir
 }
 
 internal class OfflineLinesInstrumentationTest : OfflineInstrumentationTest(Coverage.LINE)

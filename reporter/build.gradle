@@ -17,6 +17,7 @@ configurations {
 }
 
 dependencies {
+  implementation project(":reporter:offline")
   compileOnly project(":instrumentation")
   testCompileOnly project(":instrumentation")
   runtimeOnly files(project(':instrumentation').jar.archivePath)
@@ -36,4 +37,4 @@ def getPublishDependencies() {
   configurations.getByName("externalDependencies").getResolvedConfiguration().getFirstLevelModuleDependencies()
 }
 
-ArtifactBuilder.setUpArtifact(project, reporter_jar_name, [":offline-runtime"])
+ArtifactBuilder.setUpArtifact(project, reporter_jar_name, [":reporter:offline", ":offline-runtime"])
