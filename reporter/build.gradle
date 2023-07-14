@@ -37,4 +37,4 @@ def getPublishDependencies() {
   configurations.getByName("externalDependencies").getResolvedConfiguration().getFirstLevelModuleDependencies()
 }
 
-ArtifactBuilder.setUpArtifact(project, reporter_jar_name, [":reporter:offline", ":offline-runtime"])
+ArtifactBuilder.setUpArtifact(project, reporter_jar_name, [":reporter:offline", ":offline-runtime:data"])
