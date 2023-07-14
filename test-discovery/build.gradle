@@ -27,7 +27,7 @@ sourceSets {
   test.java.srcDirs = [file('test')]
 }
 
-ArtifactBuilder.setUpArtifact(project, test_discovery_jar_name, [":common", ":util", ":lib"]) { Jar jar ->
+ArtifactBuilder.setUpArtifactWithProguard(project, test_discovery_jar_name, [":common", ":util", ":lib"]) { Jar jar ->
   jar.manifest.attributes(
       "Premain-Class": "com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain",
       "Boot-Class-Path": "${jar.archiveName}",

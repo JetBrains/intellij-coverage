@@ -17,8 +17,10 @@
 package com.intellij.rt.coverage.build
 
 import org.gradle.api.Project
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.javadoc.Javadoc
+import proguard.gradle.ProGuardTask
 
 class ArtifactBuilder {
 
@@ -33,6 +35,7 @@ class ArtifactBuilder {
 
     def jarConfiguration = { Jar jar ->
       jar.archiveBaseName.set(artifactName)
+      jar.setDuplicatesStrategy(DuplicatesStrategy.FAIL)
       if (alternativeJarTask == null) {
         jar.destinationDirectory.set(new File(project.rootDir, "dist"))
       }
@@ -68,6 +71,58 @@ class ArtifactBuilder {
       archiveBaseName = artifactName
       archiveClassifier = 'javadoc'
       from project.getTasksByName("allJavadoc", false)
+    }
+  }
+
+  private static def setUpProguard(Project project, Jar fullJar, String fullName, String name) {
+    project.tasks.register('proguard', ProGuardTask) {
+      dependsOn(fullJar)
+
+      def javaHome = System.getProperty('java.home')
+      if (System.getProperty('java.version').startsWith('1.')) {
+        libraryjars("${javaHome}/lib/rt.jar")
+      } else {
+        libraryjars(["java.base.jmod", "java.instrument.jmod", "java.xml.jmod"].collect { "${javaHome}/jmods/${it}" })
+      }
+
+      keep('public class com.intellij.rt.coverage.** { *; }')
+      keepclassmembers('class * { public protected *; }')
+      keepattributes()
+      keepnames('class ** { *; }')
+
+      def fullPath = fullJar.archiveFile.get().asFile.absolutePath
+      def compressedPath = fullPath.replace(fullName, name)
+      injars(fullPath)
+      outjars(compressedPath)
+    }
+  }
+
+  static def setUpArtifactWithProguard(Project project, String artifactName,
+                                       List<String> dependencyModules,
+                                       Closure<Jar> configureJar = null) {
+    def proguardEnabled = project.rootProject.hasProperty("coverage.proguard.enable") ? "true" == project.rootProject["coverage.proguard.enable"] : true
+    if (!proguardEnabled) {
+      setUpArtifact(project, artifactName, dependencyModules, configureJar)
+      return
+    }
+    def fullName = "full-$artifactName"
+    def compressedName = "compressed-$artifactName"
+    def fullJarTaskName = "fullJar"
+    setUpArtifactInternal(project, fullName, dependencyModules, configureJar, fullJarTaskName)
+
+    def fullJarTask = (Jar) project.tasks.named(fullJarTaskName).get()
+    setUpProguard(project, fullJarTask, fullName, compressedName)
+    project.tasks.named("jar", Jar) {
+      dependsOn("proguard")
+      archiveBaseName.set(artifactName)
+      destinationDirectory.set(new File(project.rootDir, "dist"))
+      // do not copy original class files
+      mainSpec.sourcePaths.clear()
+      from {
+        def compressedJar = fullJarTask.archiveFile.get().asFile.absolutePath.replace(fullName, compressedName)
+        project.zipTree(compressedJar)
+      }
+      if (configureJar != null) configureJar(it)
     }
   }
 }

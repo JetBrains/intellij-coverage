@@ -21,3 +21,7 @@ plugins {
 repositories {
     mavenCentral()
 }
+
+dependencies {
+    implementation("com.guardsquare:proguard-gradle:7.3.0")
+}
