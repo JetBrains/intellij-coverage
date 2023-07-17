@@ -74,7 +74,7 @@ class ArtifactBuilder {
     }
   }
 
-  private static def setUpProguard(Project project, Jar fullJar, String fullName, String name) {
+  private static def setUpProguard(Project project, Jar fullJar, String fullName, String name, Closure<ProGuardTask> configureFilters) {
     project.tasks.register('proguard', ProGuardTask) {
       dependsOn(fullJar)
 
@@ -85,7 +85,11 @@ class ArtifactBuilder {
         libraryjars(["java.base.jmod", "java.instrument.jmod", "java.xml.jmod"].collect { "${javaHome}/jmods/${it}" })
       }
 
-      keep('public class com.intellij.rt.coverage.** { *; }')
+      if (configureFilters == null) {
+        keep('public class com.intellij.rt.coverage.** { *; }')
+      } else {
+        configureFilters(it)
+      }
       keepclassmembers('class * { public protected *; }')
       keepattributes()
       keepnames('class ** { *; }')
@@ -99,6 +103,7 @@ class ArtifactBuilder {
 
   static def setUpArtifactWithProguard(Project project, String artifactName,
                                        List<String> dependencyModules,
+                                       Closure<ProGuardTask> configureFilters,
                                        Closure<Jar> configureJar = null) {
     def proguardEnabled = project.rootProject.hasProperty("coverage.proguard.enable") ? "true" == project.rootProject["coverage.proguard.enable"] : true
     if (!proguardEnabled) {
@@ -111,7 +116,7 @@ class ArtifactBuilder {
     setUpArtifactInternal(project, fullName, dependencyModules, configureJar, fullJarTaskName)
 
     def fullJarTask = (Jar) project.tasks.named(fullJarTaskName).get()
-    setUpProguard(project, fullJarTask, fullName, compressedName)
+    setUpProguard(project, fullJarTask, fullName, compressedName, configureFilters)
     project.tasks.named("jar", Jar) {
       dependsOn("proguard")
       archiveBaseName.set(artifactName)

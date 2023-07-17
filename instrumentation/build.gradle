@@ -5,7 +5,7 @@ dependencies {
 }
 
 ArtifactBuilder.setUpArtifactWithProguard(project, coverage_jar_name,
-    [":common", ":util", ":", ":java6-utils", ":instrumentation:java7-utils", ":lib"]) { Jar jar ->
+    [":common", ":util", ":", ":java6-utils", ":instrumentation:java7-utils", ":lib"], null) { Jar jar ->
   jar.manifest.attributes(
       "Premain-Class": "com.intellij.rt.coverage.main.CoveragePremain",
       "Boot-Class-Path": "${jar.archivePath.name}",
