@@ -40,10 +40,16 @@ public class RawProjectInit {
       return ourProjectData.getOrCreateClass(className, length).hits;
     }
     try {
-      // Here we use system class loader here as in offline instrumentation mode
-      // coverage agent is not included to the bootstrap class loader
-      // but added to the class path as usual jar
-      return (int[]) GET_OR_CREATE_HITS_MASK_INTERNAL_METHOD.invokeStatic(RawProjectInit.class.getName(), new Object[]{className, length}, ClassLoader.getSystemClassLoader());
+      try {
+        // Here we use system class loader here as in offline instrumentation mode
+        // coverage agent is not included to the bootstrap class loader
+        // but added to the class path as usual jar
+        return (int[]) GET_OR_CREATE_HITS_MASK_INTERNAL_METHOD.invokeStatic(RawProjectInit.class.getName(), new Object[]{className, length}, ClassLoader.getSystemClassLoader());
+      } catch (ClassNotFoundException ignored) {
+        // On Android devices system classloader does not contain the application classes,
+        // so we use any class loaded in this case.
+        return getOrCreateHitsInternal(className, length);
+      }
     } catch (Exception e) {
       ErrorReporter.reportError("Error in class data access: " + className, e);
       return null;
@@ -55,8 +61,6 @@ public class RawProjectInit {
    * This method is used in case of offline instrumentation.
    * As ProjectData is uninitialized, this method also creates ProjectData when needed and sets up reporting hook.
    */
-  // This method must be called from system class loader only
-  @SuppressWarnings("unused")
   public static int[] getOrCreateHitsInternal(String className, int length) {
     if (ourProjectData == null) {
       synchronized (RawProjectData.class) {
@@ -81,7 +85,7 @@ public class RawProjectInit {
       ErrorReporter.reportError("Coverage data is null in RawProjectInit. " +
           "This can be caused by accessing coverage data before tests' start. " +
           "Alternatively, this could be a class loading issue: the data access method is called in class loaded by "
-          + loader + ". It is supposed to be called from the system class loader.");
+          + loader);
     }
     return projectData;
   }

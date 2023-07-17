@@ -28,9 +28,9 @@ import java.util.Map;
 
 public class CoverageCollector {
   static List<ClassCoverage> collect(RawProjectData rawData, ClassFinder classFinder) {
-    ProjectData projectData = collectRawData(rawData, classFinder);
-
     List<ClassCoverage> classes = new ArrayList<ClassCoverage>();
+    if (rawData == null) return classes;
+    ProjectData projectData = collectRawData(rawData, classFinder);
 
     for (ClassData classData : projectData.getClassesCollection()) {
       ClassCoverage classCoverage = new ClassCoverage(classData.getName(), classData.getSource());
