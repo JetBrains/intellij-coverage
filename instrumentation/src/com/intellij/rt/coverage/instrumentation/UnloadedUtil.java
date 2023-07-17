@@ -72,7 +72,7 @@ public class UnloadedUtil {
   }
 
   private static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean branchCoverage, boolean calculateSource, boolean checkLineMappings) {
-    final ClassVisitor visitor = CoverageTransformer.createInstrumenter(
+    final ClassVisitor visitor = InstrumentationStrategy.createInstrumenter(
         projectData, className, reader, EMPTY_CLASS_VISITOR,
         null, branchCoverage, calculateSource, EmptyCoverageDataAccess.INSTANCE);
     if (visitor == null) return;

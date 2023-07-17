@@ -18,9 +18,6 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.dataAccess.*;
-import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
-import com.intellij.rt.coverage.instrumentation.filters.classFilter.ClassFilter;
-import com.intellij.rt.coverage.instrumentation.filters.classes.ClassSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.OptionsUtil;
@@ -33,7 +30,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
-  private static final List<ClassSignatureFilter> ourFilters = FilterUtils.createClassSignatureFilters();
 
   private final ProjectData data;
   private final boolean shouldSaveSource;
@@ -57,42 +53,8 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
 
   @Override
   protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassVisitor cw) {
-    return createInstrumenter(data, className, cr, cw, testTrackingMode, data.isBranchCoverage(),
+    return InstrumentationStrategy.createInstrumenter(data, className, cr, cw, testTrackingMode, data.isBranchCoverage(),
         shouldSaveSource, createDataAccess(className, cr, data.isBranchCoverage()));
-  }
-
-  /**
-   * Create instrumenter for class or return null if class should be ignored.
-   */
-  static ClassVisitor createInstrumenter(ProjectData data, String className,
-                                         ClassReader cr, ClassVisitor cw, TestTrackingMode testTrackingMode,
-                                         boolean branchCoverage,
-                                         boolean shouldSaveSource,
-                                         CoverageDataAccess dataAccess) {
-    // uncomment to get readable bytecode
-    // cw = new TraceClassVisitor(cw, new PrintWriter(System.err));
-
-    for (ClassSignatureFilter filter : ourFilters) {
-      if (filter.shouldFilter(cr)) return null;
-    }
-    final Instrumenter instrumenter;
-    if (branchCoverage) {
-      if (testTrackingMode != null) {
-        instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldSaveSource, dataAccess);
-      } else {
-        instrumenter = new BranchesInstrumenter(data, cw, className, shouldSaveSource, dataAccess);
-      }
-    } else {
-      instrumenter = new LineInstrumenter(data, cw, className, shouldSaveSource, dataAccess);
-    }
-    ClassVisitor result = instrumenter;
-    for (ClassFilter cv : FilterUtils.createClassFilters()) {
-      if (cv.isApplicable(instrumenter)) {
-        cv.initFilter(instrumenter, result);
-        result = cv;
-      }
-    }
-    return result;
   }
 
   private CoverageDataAccess createDataAccess(String className, ClassReader cr, boolean branchCoverage) {
