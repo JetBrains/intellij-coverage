@@ -16,6 +16,8 @@
 
 package testData.nullability
 
+// classes: TestKt
+
 class A(val x: Int)
 
 fun test(a: A?) {

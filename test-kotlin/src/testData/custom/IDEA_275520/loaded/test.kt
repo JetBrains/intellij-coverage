@@ -21,6 +21,8 @@ import testData.custom.IDEA_275520.oneLineInline
 import testData.custom.IDEA_275520.simpleInline
 import testData.custom.IDEA_275520.testWithLambda
 
+// patterns: testData.custom.IDEA_275520.*
+
 fun main() {
     simpleInline(3)
     nestedInlines(3)

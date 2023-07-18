@@ -16,8 +16,6 @@
 
 package testData.inline.noinline
 
-// classes: ALL
-
 private inline fun foo(
     noinline a: () -> Int,
     b: () -> Int,

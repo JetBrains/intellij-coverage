@@ -16,8 +16,6 @@
 
 package testData.utilClass.throwing;
 
-// classes: ALL
-// patterns: testData.utilClass.throwing.*
 // calculate unloaded: true
 
 public class Test {

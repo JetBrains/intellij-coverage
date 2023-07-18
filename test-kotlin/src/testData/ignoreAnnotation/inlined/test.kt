@@ -18,9 +18,8 @@ package testData.ignoreAnnotation.inlined
 
 import testData.ignoreAnnotation.IgnoreCoverage
 
-// patterns: -excludeAnnotations testData.ignoreAnnotation.IgnoreCoverage
+// patterns: testData.ignoreAnnotation.inlined.* -excludeAnnotations testData.ignoreAnnotation.IgnoreCoverage
 
-// class: TestKt
 inline fun foo() {
     println("foo") // coverage: FULL
 }

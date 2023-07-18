@@ -8,8 +8,9 @@ Most of the test cases could be configured in source files, but `custom` subpack
 ## Test configuration
 Test configuration is set with comments in source files. The supported settings are:
 * `// coverage: [FULL|PARTIAL|NONE]` - line coverage, no such marker means that a line is ignored by coverage agent
-* `// patterns: PATTERNS` - include/exclude patterns. Exclude patterns are listed after `-exclude` keyword, `testData\..*` by default
-* `// classes: Class1 Class2 ..` - space-separated list of simple class names witch are interesting for this test, by default includes test source file class (TestKt or Test)
+* `// patterns: PATTERNS` - include/exclude patterns. Exclude patterns are listed after `-exclude` keyword, test package is used by default
+* `// classes: Class1 Class2 ..` - space-separated list of simple class names witch are interesting for this test, by default includes all classes
+* `// class: Class1`, `// classs: Class2` - when specified, these classes must be a complete list of available classes in the report
 * `// extra args: -Dflag=true` - space-separated list of VM options
 * `// calculate unloaded: [true|false]` - a flag to include unloaded classes into a coverage report, false by default
 * `// markers: [file]` - relative path to a file with `coverage` markers

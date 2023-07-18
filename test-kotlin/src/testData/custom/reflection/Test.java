@@ -18,6 +18,8 @@ package testData.custom.reflection;
 
 import java.lang.reflect.Field;
 
+// classes: Test
+
 public class Test {  // coverage: NONE
   public static class A {
     public static int x = 1;

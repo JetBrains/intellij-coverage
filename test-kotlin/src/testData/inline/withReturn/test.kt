@@ -16,8 +16,6 @@
 
 package testData.inline.withReturn
 
-// classes: ALL
-
 fun main() {
     MyClass().f { testF() } // coverage: FULL
     MyClass().f2(fun() { testF() }) // coverage: FULL

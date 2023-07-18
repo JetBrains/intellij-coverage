@@ -16,9 +16,6 @@
 
 package testData.defaultArgs.openMethod
 
-// classes: ALL
-// patterns: testData.defaultArgs.openMethod.*
-
 interface IFace {
     fun func(value: Int = 0) { // coverage: FULL
         println(value) // coverage: FULL

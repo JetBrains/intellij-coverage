@@ -21,8 +21,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
 
-// classes: ALL
-
 fun test() = runBlocking {                                    // coverage: FULL
     val time = measureTimeMillis {                            // coverage: FULL
         val one = async {                                     // coverage: FULL

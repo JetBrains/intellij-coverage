@@ -19,7 +19,6 @@ package testData.ignoreAnnotation.anonymous
 import testData.ignoreAnnotation.IgnoreCoverage
 
 // patterns: testData.ignoreAnnotation.anonymous.* -excludeAnnotations testData.ignoreAnnotation.IgnoreCoverage
-// classes: ALL
 // calculate unloaded: true
 
 @IgnoreCoverage

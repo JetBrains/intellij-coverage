@@ -18,8 +18,6 @@ package testData.coroutines.smallBody
 
 import kotlinx.coroutines.runBlocking
 
-// classes: ALL
-
 suspend fun call(action: () -> Unit) {
     action()                   // coverage: FULL
 }

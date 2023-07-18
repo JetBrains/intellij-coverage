@@ -16,8 +16,6 @@
 
 package testData.inline.crossinline
 
-// classes: ALL
-
 private var counter = 0
 fun logAndDo(s: String, operation: (String) -> Unit) {
     println("Log: \"$s\"")               // coverage: FULL

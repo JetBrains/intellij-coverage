@@ -16,7 +16,6 @@
 
 package testData.inline.reflection
 
-// classes: ALL
 
 fun main() {
     Test.test()                                                                    // coverage: FULL

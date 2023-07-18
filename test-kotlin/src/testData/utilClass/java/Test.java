@@ -16,8 +16,6 @@
 
 package testData.utilClass.java;
 
-// classes: ALL
-// patterns: testData.utilClass.java.*
 // calculate unloaded: true
 
 public class Test {

@@ -16,7 +16,7 @@
 
 package testData.custom.IDEA_275520.call
 
-// classes: ALL
+// patterns: testData.custom.IDEA_275520.*
 // extra args: -Didea.coverage.check.inline.signatures=true
 
 object UnloadedObject {

@@ -22,8 +22,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
 
-// classes: ALL
-
 suspend fun foo1(flag: Boolean) {
     if (flag) {                                          // coverage: FULL
         foo1(false)                                      // coverage: FULL

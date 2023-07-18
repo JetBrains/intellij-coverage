@@ -16,8 +16,6 @@
 
 package testData.utilClass.kotlin
 
-// classes: ALL
-// patterns: testData.utilClass.kotlin.*
 // calculate unloaded: true
 
 object Util {        // should be ignored

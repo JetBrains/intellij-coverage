@@ -18,8 +18,6 @@ package testData.defaultArgs.simple
 
 import kotlin.random.Random
 
-// classes: TestKt X
-
 class X {                                       // coverage: FULL
     fun functionWithDefaultArguments(
         x: Int = 3,                             // coverage: FULL , generated if is ignored

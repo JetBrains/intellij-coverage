@@ -16,7 +16,6 @@
 
 package testData.cases.whenEnum
 
-// classes: ALL
 // instructions & branches
 
 enum class F {

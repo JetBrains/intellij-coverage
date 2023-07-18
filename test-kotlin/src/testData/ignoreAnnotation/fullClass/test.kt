@@ -21,7 +21,6 @@ import testData.ignoreAnnotation.IgnoreCoverage
 
 
 // patterns: testData.ignoreAnnotation.fullClass.* -excludeAnnotations testData.ignoreAnnotation.IgnoreCoverage kotlinx.serialization.Serializable
-// classes: ALL
 // calculate unloaded: true
 
 // class: Foo

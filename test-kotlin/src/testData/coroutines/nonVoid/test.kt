@@ -19,8 +19,6 @@ package testData.coroutines.nonVoid
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
-// classes: ALL
-
 suspend fun f(): Int {
     delay(10)                    // coverage: FULL
     return 42                    // coverage: FULL

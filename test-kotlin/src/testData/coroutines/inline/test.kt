@@ -19,8 +19,6 @@ package testData.coroutines.inline
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
-// classes: ALL
-
 fun test() = runBlocking {       // coverage: FULL
     foo {                        // coverage: FULL
         34                       // coverage: FULL

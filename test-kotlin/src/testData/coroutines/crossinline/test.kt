@@ -16,10 +16,6 @@
 
 package testData.coroutines.crossinline
 
-// classes: ALL
-// patterns: testData\.coroutines\.crossinline\..*
-// calculate unloaded: true
-
 suspend fun call(action: suspend () -> Unit) {
     action()           // coverage: FULL
 }

@@ -16,10 +16,6 @@
 
 package testData.coroutines.suspendLambda
 
-// classes: ALL
-// patterns: testData.coroutines.suspendLambda.*
-
-
 fun foo(lambda: suspend () -> Unit) {} // coverage: FULL
 fun bar() {
     foo {} // coverage: FULL

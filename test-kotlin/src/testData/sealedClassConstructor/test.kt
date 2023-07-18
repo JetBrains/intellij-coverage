@@ -16,8 +16,6 @@
 
 package testData.sealedClassConstructor
 
-// classes: ALL
-
 sealed class SealedClass                      // coverage: FULL
 ()
 

@@ -18,7 +18,6 @@ package testData.ignoreAnnotation.inlineUnloaded
 
 import testData.ignoreAnnotation.IgnoreCoverage
 
-// classes: ALL
 // calculate unloaded: true
 // patterns: testData.ignoreAnnotation.inlineUnloaded.* -excludeAnnotations testData.ignoreAnnotation.IgnoreCoverage
 

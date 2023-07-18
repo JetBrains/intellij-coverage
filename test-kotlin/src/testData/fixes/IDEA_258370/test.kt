@@ -19,8 +19,6 @@ package testData.fixes.IDEA_258370
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
 
-// classes: ALL
-
 suspend inline fun foo(crossinline block: suspend () -> Unit) {
     yield()                      // coverage: FULL
     block()                      // coverage: FULL

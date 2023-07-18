@@ -16,9 +16,6 @@
 
 package testData.lateinit.internal
 
-// patterns: testData.lateinit.internal.*
-// classes: ALL
-
 class DummyService2 { // coverage: FULL
     fun foo() {
     } // coverage: FULL

@@ -16,9 +16,6 @@
 
 package testData.valueClass
 
-// classes: ALL
-// patterns: testData.valueClass.*
-
 @JvmInline
 value class MyValueClass(val data: String) {  // coverage: FULL
     val boo get() = 42 // coverage: NONE

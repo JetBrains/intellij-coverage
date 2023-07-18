@@ -16,8 +16,6 @@
 
 package testData.custom.methodReference
 
-// classes: ALL
-// patterns: testData.custom.methodReference.*
 // calculate unloaded: true
 
 class Foo {         // coverage: FULL

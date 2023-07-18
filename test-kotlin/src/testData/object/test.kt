@@ -16,8 +16,6 @@
 
 package testData.`object`
 
-// classes: ALL
-// patterns: testData.object.*
 // calculate unloaded: true
 
 object EmptyObjectDeclaration // coverage: FULL

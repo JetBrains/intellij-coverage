@@ -19,6 +19,7 @@ package testData.typeCast
 import kotlin.random.Random
 import kotlin.test.assertIs
 
+// classes: TestKt
 
 interface A {
     companion object {

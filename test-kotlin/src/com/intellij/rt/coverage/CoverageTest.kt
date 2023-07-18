@@ -103,8 +103,7 @@ internal abstract class CoverageTest {
     private fun TestConfiguration.setDefaults(test: TestFile): TestConfiguration {
         extraArgs.addAll(commonExtraArgs)
         val fullClassNames = when {
-            classes.contains("ALL") -> listOf(all)
-            classes.isEmpty() -> listOf(test.mainClass)
+            classes.isEmpty() -> listOf(all)
             else -> classes.map { getFQN(test.testName, it) }
         }
         val fullExpectedClasses = when {
@@ -112,7 +111,8 @@ internal abstract class CoverageTest {
             expectedClasses.any { it.startsWith(TEST_PACKAGE) } -> expectedClasses
             else -> expectedClasses.map { getFQN(test.testName, it) }
         }
-        return copy(patterns = this.patterns ?: "$TEST_PACKAGE\\..*", classes = fullClassNames, expectedClasses = fullExpectedClasses)
+        val patternsOrDefault = this.patterns ?: "$TEST_PACKAGE.${test.testName}\\..*"
+        return copy(patterns = patternsOrDefault, classes = fullClassNames, expectedClasses = fullExpectedClasses)
     }
 }
 

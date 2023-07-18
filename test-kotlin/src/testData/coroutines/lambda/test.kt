@@ -20,8 +20,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// classes: ALL
-
 fun main() {
     GlobalScope.launch {           // coverage: FULL
         delay(10)                  // coverage: FULL

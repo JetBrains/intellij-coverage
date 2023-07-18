@@ -19,8 +19,6 @@ package testData.coroutines.tailSuspendCall
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
-// classes: ALL
-
 suspend fun test() {
     delay(10L)                   // coverage: FULL
 }

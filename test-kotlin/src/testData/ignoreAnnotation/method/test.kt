@@ -18,7 +18,7 @@ package testData.ignoreAnnotation.method
 
 import testData.ignoreAnnotation.IgnoreCoverage
 
-// patterns: -excludeAnnotations testData.ignoreAnnotation.IgnoreCoverage
+// patterns: testData.ignoreAnnotation.method.* -excludeAnnotations testData.ignoreAnnotation.IgnoreCoverage
 
 fun foo() {
     println("foo") // coverage: FULL

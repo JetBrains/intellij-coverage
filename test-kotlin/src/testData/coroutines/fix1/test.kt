@@ -22,7 +22,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
 
-// classes: ALL
 // ignore: To be fixed
 
 suspend fun foo1(useStateMachineCodePath: Boolean) {

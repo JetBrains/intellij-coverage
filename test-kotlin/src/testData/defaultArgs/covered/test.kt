@@ -16,8 +16,6 @@
 
 package testData.defaultArgs.covered
 
-// classes: TestKt A
-
 private class A { // coverage: FULL
     fun functionWithDefaultArgument(x: Int = 3): Int { // coverage: FULL
         return x + 5                                           // coverage: FULL

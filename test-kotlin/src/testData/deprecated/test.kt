@@ -16,8 +16,6 @@
 
 package testData.deprecated
 
-// classes: ALL
-// patterns: testData.deprecated.*
 // calculate unloaded: true
 
 @Deprecated("", level = DeprecationLevel.WARNING)

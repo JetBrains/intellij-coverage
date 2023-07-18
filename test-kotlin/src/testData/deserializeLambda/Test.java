@@ -19,9 +19,6 @@ package testData.deserializeLambda;
 import java.io.Serializable;
 import java.util.function.Supplier;
 
-// classes: ALL
-// patterns: testData.deserializeLambda.*
-
 interface Foo { // generated $deserializeLambda$ is ignored here
   default void bar() {
     ((Supplier & Serializable) () -> {  // coverage: FULL

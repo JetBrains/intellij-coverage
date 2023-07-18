@@ -20,8 +20,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// classes: ALL
-
 suspend fun suspendFunction() {
     delay(10)                  // coverage: FULL
     println("World!")          // coverage: FULL

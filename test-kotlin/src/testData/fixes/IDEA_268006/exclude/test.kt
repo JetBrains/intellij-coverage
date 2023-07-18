@@ -16,7 +16,6 @@
 
 package testData.fixes.IDEA_268006.exclude
 
-// classes: ALL
 // patterns: testData.fixes.IDEA_268006.exclude.TestKt -exclude testData.fixes.IDEA_268006.exclude.ExcludedClass
 
 object ExcludedClass {
