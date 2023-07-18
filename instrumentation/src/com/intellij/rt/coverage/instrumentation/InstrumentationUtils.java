@@ -18,6 +18,7 @@ package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.util.OptionsUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
+import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -91,5 +92,26 @@ public class InstrumentationUtils {
     } else {
       throw new IllegalArgumentException("Cannot push element of type " + o.getClass());
     }
+  }
+
+  /**
+   * Get the name of the parent class if the given class is an inner class.
+   *
+   * @param cr the ClassReader that reads the class file
+   * @return the name of the parent class if the given class is an inner class, null otherwise
+   */
+  public static String getParentClassIfIsInner(ClassReader cr) {
+    final String className = cr.getClassName();
+    final String[] result = {null};
+    cr.accept(new ClassVisitor(Opcodes.API_VERSION) {
+      @Override
+      public void visitInnerClass(String name, String outerName, String innerName, int access) {
+        super.visitInnerClass(name, outerName, innerName, access);
+        if (className.equals(name) && outerName != null) {
+          result[0] = outerName;
+        }
+      }
+    }, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+    return result[0];
   }
 }

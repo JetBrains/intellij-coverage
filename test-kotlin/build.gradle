@@ -1,5 +1,6 @@
 plugins {
   id 'org.jetbrains.kotlin.jvm'
+  id 'org.jetbrains.kotlin.plugin.serialization' version '1.8.21'
 }
 
 sourceSets {
@@ -24,6 +25,7 @@ dependencies {
   testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
   testImplementation("org.jetbrains.kotlin:kotlin-reflect")
   testImplementation("org.jetbrains.kotlin:kotlin-test")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
   testImplementation(files(project(":tests").sourceSets.test.output))
 

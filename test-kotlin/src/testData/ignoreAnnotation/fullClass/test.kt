@@ -16,10 +16,13 @@
 
 package testData.ignoreAnnotation.fullClass
 
+import kotlinx.serialization.Serializable
 import testData.ignoreAnnotation.IgnoreCoverage
 
-// patterns: -excludeAnnotations testData.ignoreAnnotation.IgnoreCoverage
+
+// patterns: testData.ignoreAnnotation.fullClass.* -excludeAnnotations testData.ignoreAnnotation.IgnoreCoverage kotlinx.serialization.Serializable
 // classes: ALL
+// calculate unloaded: true
 
 class Foo { // coverage: FULL
     fun foo() {
@@ -42,6 +45,15 @@ class Boo {
     class Foo { // coverage: FULL
         fun foo() {
             println() // coverage: FULL
+        }
+    }
+}
+
+@Serializable
+data class DataClass(val i: Int) {
+    companion object {
+        fun foo() {
+            println()
         }
     }
 }

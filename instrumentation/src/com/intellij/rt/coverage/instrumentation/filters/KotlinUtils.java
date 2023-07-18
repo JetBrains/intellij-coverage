@@ -18,17 +18,10 @@ package com.intellij.rt.coverage.instrumentation.filters;
 
 import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
 import com.intellij.rt.coverage.instrumentation.filters.branches.*;
-import com.intellij.rt.coverage.instrumentation.filters.classFilter.ClassFilter;
-import com.intellij.rt.coverage.instrumentation.filters.classFilter.KotlinAnonymousClassInIgnoredMethodFilter;
-import com.intellij.rt.coverage.instrumentation.filters.classFilter.KotlinCompanionInIgnoredClassFilter;
-import com.intellij.rt.coverage.instrumentation.filters.classFilter.KotlinValueClassFilter;
-import com.intellij.rt.coverage.instrumentation.filters.classes.ClassSignatureFilter;
-import com.intellij.rt.coverage.instrumentation.filters.classes.KotlinFunctionOrPropertyReferenceFilter;
+import com.intellij.rt.coverage.instrumentation.filters.classFilter.*;
+import com.intellij.rt.coverage.instrumentation.filters.classes.*;
 import com.intellij.rt.coverage.instrumentation.filters.lines.*;
-import com.intellij.rt.coverage.instrumentation.filters.methods.KotlinLocalFunctionInsideIgnoredMethodFilter;
-import com.intellij.rt.coverage.instrumentation.filters.methods.KotlinSyntheticAccessMethodFilter;
-import com.intellij.rt.coverage.instrumentation.filters.methods.KotlinSyntheticConstructorOfSealedClassFilter;
-import com.intellij.rt.coverage.instrumentation.filters.methods.MethodFilter;
+import com.intellij.rt.coverage.instrumentation.filters.methods.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,6 +62,7 @@ public class KotlinUtils {
     if (!ourKotlinEnabled) return Collections.emptyList();
     List<ClassSignatureFilter> result = new ArrayList<ClassSignatureFilter>();
     result.add(new KotlinFunctionOrPropertyReferenceFilter());
+    result.add(new KotlinSerializerFilter());
     return result;
   }
 
