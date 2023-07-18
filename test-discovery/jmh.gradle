@@ -32,7 +32,7 @@ configurations {
 
 dependencies {
   head project(':test-discovery')
-  baseline "$agentsGroupId:$test_discovery_jar_name:$baselineVersion"
+  baseline "$group:$test_discovery_jar_name:$baselineVersion"
 }
 
 def findAgent(Configuration configuration) {

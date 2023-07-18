@@ -30,7 +30,7 @@ configurations {
 
 dependencies {
   head files(project(':instrumentation').jar.archivePath)
-  baseline "$agentsGroupId:$coverage_jar_name:$baselineVersion"
+  baseline "$group:$coverage_jar_name:$baselineVersion"
 }
 
 def findAgent(Configuration configuration) {
