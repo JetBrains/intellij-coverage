@@ -42,7 +42,7 @@ public class InstrumentationStrategy {
     // cw = new TraceClassVisitor(cw, new PrintWriter(System.err));
 
     for (ClassSignatureFilter filter : ourFilters) {
-      if (filter.shouldFilter(cr)) return null;
+      if (filter.shouldFilter(cr, data)) return null;
     }
     final Instrumenter instrumenter;
     if (branchCoverage) {

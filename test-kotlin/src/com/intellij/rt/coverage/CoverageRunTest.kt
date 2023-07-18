@@ -370,6 +370,11 @@ internal abstract class CoverageRunTest : CoverageTest() {
 
 internal abstract class CoverageVerifyResultsTest(override val coverage: Coverage) : CoverageRunTest() {
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
+        if (configuration.expectedClasses != null) {
+            val actualClasses = projectData.classesCollection.map { it.name }
+            val expectedClasses = configuration.expectedClasses
+            assertEquals(expectedClasses.sorted(), actualClasses.sorted())
+        }
         assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
     }
 }

@@ -24,6 +24,7 @@ import testData.ignoreAnnotation.IgnoreCoverage
 // classes: ALL
 // calculate unloaded: true
 
+// class: Foo
 class Foo { // coverage: FULL
     fun foo() {
         println("foo") // coverage: FULL
@@ -34,6 +35,7 @@ class Foo { // coverage: FULL
 class Boo {
     fun boo() {
         println("boo")
+        functionWithLambda { 42 }
     }
 
     companion object {
@@ -42,6 +44,7 @@ class Boo {
         }
     }
 
+    // class: Boo$Foo
     class Foo { // coverage: FULL
         fun foo() {
             println() // coverage: FULL
@@ -58,6 +61,11 @@ data class DataClass(val i: Int) {
     }
 }
 
+fun functionWithLambda(lambda: (Int) -> Int) {
+    print(lambda(5)) // coverage: FULL
+}
+
+// class: TestKt
 fun main() {
     Foo().foo() // coverage: FULL
     Boo().boo() // coverage: FULL

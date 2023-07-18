@@ -94,8 +94,6 @@ public class KotlinUtils {
     if (!ourKotlinEnabled) return Collections.emptyList();
     List<ClassFilter> result = new ArrayList<ClassFilter>();
     result.add(new KotlinValueClassFilter());
-    result.add(new KotlinAnonymousClassInIgnoredMethodFilter());
-    result.add(new KotlinCompanionInIgnoredClassFilter());
     return result;
   }
 }

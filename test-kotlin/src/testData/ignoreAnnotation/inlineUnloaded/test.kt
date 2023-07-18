@@ -18,10 +18,11 @@ package testData.ignoreAnnotation.inlineUnloaded
 
 import testData.ignoreAnnotation.IgnoreCoverage
 
-// classes: UnusedClass AbsolutelyUnusedClass
+// classes: ALL
 // calculate unloaded: true
 // patterns: testData.ignoreAnnotation.inlineUnloaded.* -excludeAnnotations testData.ignoreAnnotation.IgnoreCoverage
 
+// class: UnusedClass
 object UnusedClass {
     @IgnoreCoverage
     @JvmStatic
@@ -35,6 +36,7 @@ object UnusedClass {
     }
 }
 
+// class: AbsolutelyUnusedClass
 object AbsolutelyUnusedClass {
     @IgnoreCoverage
     @JvmStatic
@@ -49,6 +51,7 @@ object AbsolutelyUnusedClass {
     }
 }
 
+// class: TestKt
 fun main() {
-    UnusedClass.foo()
+    UnusedClass.foo() // coverage: FULL
 }

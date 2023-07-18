@@ -20,6 +20,7 @@ import testData.ignoreAnnotation.IgnoreCoverage
 
 // patterns: -excludeAnnotations testData.ignoreAnnotation.IgnoreCoverage
 
+// class: TestKt
 inline fun foo() {
     println("foo") // coverage: FULL
 }

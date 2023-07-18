@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.lines;
 
+import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
@@ -34,11 +35,11 @@ public class AnnotationIgnoredMethodFilter extends LinesFilter {
 
   @Override
   public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
-    return hasIgnoreAnnotations(context);
+    return hasIgnoreAnnotations(context.getProjectData());
   }
 
-  public static boolean hasIgnoreAnnotations(Instrumenter context) {
-    final List<Pattern> annotations = context.getProjectData().getAnnotationsToIgnore();
+  public static boolean hasIgnoreAnnotations(ProjectData projectData) {
+    final List<Pattern> annotations = projectData.getAnnotationsToIgnore();
     return annotations != null && !annotations.isEmpty();
   }
 
@@ -47,10 +48,6 @@ public class AnnotationIgnoredMethodFilter extends LinesFilter {
     super.initFilter(methodVisitor, context, name, desc);
     myName = name;
     myDesc = desc;
-    if (context.isClassIgnoredByAnnotation()) {
-      myContext.setIgnoreSection(true);
-      myShouldIgnore = true;
-    }
   }
 
   @Override
@@ -67,7 +64,7 @@ public class AnnotationIgnoredMethodFilter extends LinesFilter {
   public void visitCode() {
     super.visitCode();
     if (myShouldIgnore) {
-      myContext.getProjectData().addIgnoredMethod(myContext.getClassName(), myName, myDesc);
+      myContext.getProjectData().getIgnoredStorage().addIgnoredMethod(myContext.getClassName(), myName, myDesc);
     }
   }
 

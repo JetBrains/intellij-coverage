@@ -37,7 +37,8 @@ internal data class TestConfiguration(
     val classes: List<String> = emptyList(),
     val patterns: String? = null,
     val extraArgs: MutableList<String> = mutableListOf(),
-    val calculateUnloaded: Boolean = false
+    val calculateUnloaded: Boolean = false,
+    val expectedClasses: List<String>? = null,
 )
 
 internal const val LOG_NAME = "coverage-error.log"
@@ -106,7 +107,12 @@ internal abstract class CoverageTest {
             classes.isEmpty() -> listOf(test.mainClass)
             else -> classes.map { getFQN(test.testName, it) }
         }
-        return copy(patterns = this.patterns ?: "$TEST_PACKAGE\\..*", classes = fullClassNames)
+        val fullExpectedClasses = when {
+            expectedClasses == null -> null
+            expectedClasses.any { it.startsWith(TEST_PACKAGE) } -> expectedClasses
+            else -> expectedClasses.map { getFQN(test.testName, it) }
+        }
+        return copy(patterns = this.patterns ?: "$TEST_PACKAGE\\..*", classes = fullClassNames, expectedClasses = fullExpectedClasses)
     }
 }
 

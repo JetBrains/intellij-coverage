@@ -60,6 +60,7 @@ fun functionWithLambda(lambda: (Int) -> Int) {
     print(lambda(5)) // coverage: FULL
 }
 
+// class: TestKt
 fun main() {
     boo() // coverage: FULL
     booWithInner() // coverage: FULL

@@ -17,10 +17,10 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.util.OptionsUtil;
-import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
-import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
+import org.jetbrains.coverage.org.objectweb.asm.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class InstrumentationUtils {
   public static final String OBJECT_TYPE = "Ljava/lang/Object;";
@@ -113,5 +113,53 @@ public class InstrumentationUtils {
       }
     }, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
     return result[0];
+  }
+
+  /**
+   * Get the annotations of a class in the bytecode.
+   *
+   * @param cr the ClassReader that reads the class file
+   * @return a list of annotations for the given class
+   */
+  public static List<String> getClassAnnotations(ClassReader cr) {
+    final List<String> result = new ArrayList<String>();
+    cr.accept(new ClassVisitor(Opcodes.API_VERSION) {
+      @Override
+      public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+        result.add(descriptor);
+        return super.visitAnnotation(descriptor, visible);
+      }
+    }, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+    return result;
+  }
+
+  /**
+   * Get the outer class of a class in the bytecode.
+   *
+   * @param cr the ClassReader that reads the class file
+   * @return the outer class of the given class, or null if there is no outer class
+   */
+  public static MethodDescriptor getOuterClass(ClassReader cr) {
+    final MethodDescriptor[] result = {null};
+    cr.accept(new ClassVisitor(Opcodes.API_VERSION) {
+      @Override
+      public void visitOuterClass(String owner, String name, String descriptor) {
+        super.visitOuterClass(owner, name, descriptor);
+        result[0] = new MethodDescriptor(owner, name, descriptor);
+      }
+    }, ClassReader.SKIP_CODE | ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+    return result[0];
+  }
+
+  public static class MethodDescriptor {
+    public final String owner;
+    public final String name;
+    public final String descriptor;
+
+    public MethodDescriptor(String owner, String name, String descriptor) {
+      this.owner = owner;
+      this.name = name;
+      this.descriptor = descriptor;
+    }
   }
 }

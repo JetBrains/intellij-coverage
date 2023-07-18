@@ -216,12 +216,13 @@ internal fun pathToFile(name: String, vararg names: String): File = Paths.get(na
 internal fun extractTestConfiguration(file: File): TestConfiguration {
     var coverage = CoverageMatcher()
     val classes = StringListMatcher(classesMarkerRegex, 1)
+    val expectedClasses = StringListMatcher(expectedClassesMarkerRegex, 1)
     val extraArgs = StringListMatcher(extraArgumentsMarkerRegex, 1)
     val patterns = StringMatcher(patternsMarkerRegex, 1)
     val calculateUnloaded = FlagMatcher(calculateUnloadedMarkerRegex, 1)
     val otherFile = StringMatcher(fileWithCoverageMarkersRegex, 1)
 
-    processFile(file, coverage, classes, extraArgs, patterns, calculateUnloaded, otherFile)
+    processFile(file, coverage, classes, expectedClasses, extraArgs, patterns, calculateUnloaded, otherFile)
     if (otherFile.value !== null) {
         coverage = CoverageMatcher()
         val fileWithMarkers = File(file.parentFile, otherFile.value!!)
@@ -229,10 +230,11 @@ internal fun extractTestConfiguration(file: File): TestConfiguration {
     }
     return TestConfiguration(
         coverage.result,
-        classes.values,
+        classes.values ?: emptyList(),
         patterns.value,
-        extraArgs.values,
-        calculateUnloaded.value
+        extraArgs.values ?: mutableListOf(),
+        calculateUnloaded.value,
+        expectedClasses.values,
     )
 }
 
@@ -248,6 +250,7 @@ internal fun processFile(file: File, vararg callbacks: Matcher) {
 
 private val coverageMarkerRegex = Regex("// coverage: (FULL|PARTIAL|NONE)( .*)?\$")
 private val classesMarkerRegex = Regex("// classes: (.*)\$")
+private val expectedClassesMarkerRegex = Regex("// class: (.*)\$")
 private val patternsMarkerRegex = Regex("// patterns: (.*)\$")
 private val calculateUnloadedMarkerRegex = Regex("// calculate unloaded: (.*)\$")
 private val extraArgumentsMarkerRegex = Regex("// extra args: (.*)\$")
@@ -283,9 +286,14 @@ class StringMatcher(regex: Regex, group: Int) : SingleGroupMatcher(regex, group)
 }
 
 class StringListMatcher(regex: Regex, group: Int) : SingleGroupMatcher(regex, group) {
-    val values = mutableListOf<String>()
+    var values: MutableList<String>? = null
     override fun onMatchFound(line: Int, match: String) {
-        values.addAll(match.split(' '))
+        var result = values
+        if (result == null) {
+            result = mutableListOf()
+            values = result
+        }
+        result.addAll(match.split(' '))
     }
 }
 

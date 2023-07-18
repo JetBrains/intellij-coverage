@@ -16,11 +16,12 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.classes;
 
+import com.intellij.rt.coverage.data.ProjectData;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
 /**
  * Filters out coverage from class if it's signature matches filter.
  */
 public interface ClassSignatureFilter {
-  boolean shouldFilter(ClassReader cr);
+  boolean shouldFilter(ClassReader cr, ProjectData projectData);
 }

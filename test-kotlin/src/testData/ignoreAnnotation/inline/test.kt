@@ -29,6 +29,7 @@ inline fun boo() {
     println("boo")
 }
 
+// class: TestKt
 fun main() {
     foo() // coverage: FULL
     boo() // coverage: FULL

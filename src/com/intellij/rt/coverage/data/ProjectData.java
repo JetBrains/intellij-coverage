@@ -73,7 +73,7 @@ public class ProjectData implements CoverageData, Serializable {
   private TestTrackingCallback myTestTrackingCallback;
 
   private List<Pattern> myAnnotationsToIgnore;
-  private Set<String> myIgnoredMethods;
+  private final IgnoredStorage myIgnoredStorage = new IgnoredStorage();
 
   public ClassData getClassData(final String name) {
     return myClasses.get(name);
@@ -146,34 +146,8 @@ public class ProjectData implements CoverageData, Serializable {
     myAnnotationsToIgnore = annotations;
   }
 
-  public synchronized boolean isMethodIgnored(String owner, String methodName, String desc) {
-    return myIgnoredMethods != null && myIgnoredMethods.contains(createDesc(owner, methodName, desc));
-  }
-
-  public synchronized void addIgnoredMethod(String owner, String methodName, String desc) {
-    if (myIgnoredMethods == null) {
-      myIgnoredMethods = new HashSet<String>();
-    }
-    final String methodDesc = createDesc(owner, methodName, desc);
-    myIgnoredMethods.add(methodDesc);
-  }
-
-  /**
-   * This is a heuristic method to check if a method with the provided name is ignored.
-   * The result could be incorrect in cae of functions having the same name, but a different signature.
-   * It is used for local function determination.
-   */
-  public synchronized boolean isMethodIgnored(String owner, String methodName) {
-    if (myIgnoredMethods == null) return false;
-    String target = owner + "#" + methodName;
-    for (String candidate : myIgnoredMethods) {
-      if (candidate.startsWith(target)) return true;
-    }
-    return false;
-  }
-
-  private static String createDesc(String owner, String methodName, String desc) {
-    return owner + "#" + methodName + desc;
+  public IgnoredStorage getIgnoredStorage() {
+    return myIgnoredStorage;
   }
 
 

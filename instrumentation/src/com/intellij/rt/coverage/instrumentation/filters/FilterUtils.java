@@ -16,18 +16,11 @@
 
 package com.intellij.rt.coverage.instrumentation.filters;
 
-import com.intellij.rt.coverage.instrumentation.filters.branches.BooleanInvertFilter;
-import com.intellij.rt.coverage.instrumentation.filters.branches.BranchesFilter;
-import com.intellij.rt.coverage.instrumentation.filters.branches.NotNullAssertionsFilter;
-import com.intellij.rt.coverage.instrumentation.filters.classFilter.ClassFilter;
-import com.intellij.rt.coverage.instrumentation.filters.classFilter.PrivateConstructorOfUtilClassFilter;
-import com.intellij.rt.coverage.instrumentation.filters.classes.ClassSignatureFilter;
-import com.intellij.rt.coverage.instrumentation.filters.lines.AnnotationIgnoredMethodFilter;
-import com.intellij.rt.coverage.instrumentation.filters.lines.ClosingBracesFilter;
-import com.intellij.rt.coverage.instrumentation.filters.lines.LinesFilter;
-import com.intellij.rt.coverage.instrumentation.filters.methods.DeserializeLambdaFilter;
-import com.intellij.rt.coverage.instrumentation.filters.methods.EnumMethodsFilter;
-import com.intellij.rt.coverage.instrumentation.filters.methods.MethodFilter;
+import com.intellij.rt.coverage.instrumentation.filters.branches.*;
+import com.intellij.rt.coverage.instrumentation.filters.classFilter.*;
+import com.intellij.rt.coverage.instrumentation.filters.classes.*;
+import com.intellij.rt.coverage.instrumentation.filters.lines.*;
+import com.intellij.rt.coverage.instrumentation.filters.methods.*;
 
 import java.util.List;
 
@@ -41,7 +34,9 @@ public class FilterUtils {
   }
 
   public static List<ClassSignatureFilter> createClassSignatureFilters() {
-    return KotlinUtils.createClassSignatureFilters();
+    List<ClassSignatureFilter> result = KotlinUtils.createClassSignatureFilters();
+    result.add(new ClassIgnoredByAnnotationFilter());
+    return result;
   }
 
   public static List<ClassFilter> createClassFilters() {

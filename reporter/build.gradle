@@ -23,8 +23,10 @@ dependencies {
   runtimeOnly files(project(':instrumentation').jar.archivePath)
 
   compileOnly project(":java6-utils")
+  testCompileOnly project(":java6-utils")
   compileOnly project(":offline-runtime")
   testCompileOnly project(":offline-runtime")
+  testCompileOnly project(":offline-runtime:data")
   runtimeOnly files(project(':offline-runtime').jar.archivePath)
 
   externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.21")

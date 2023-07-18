@@ -87,7 +87,7 @@ public class KotlinDeprecatedMethodFilter extends LinesFilter {
   public void visitCode() {
     super.visitCode();
     if (myShouldIgnore) {
-      myContext.getProjectData().addIgnoredMethod(myContext.getClassName(), myName, myDesc);
+      myContext.getProjectData().getIgnoredStorage().addIgnoredMethod(myContext.getClassName(), myName, myDesc);
     }
   }
 

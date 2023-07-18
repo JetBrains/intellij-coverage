@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.classes;
 
+import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
@@ -27,7 +28,7 @@ public class KotlinSerializerFilter implements ClassSignatureFilter {
   public static final String SERIALIZER_SUFFIX = "$$serializer";
 
   @Override
-  public boolean shouldFilter(ClassReader cr) {
+  public boolean shouldFilter(ClassReader cr, ProjectData projectData) {
     String className = cr.getClassName();
     if (!className.endsWith(SERIALIZER_SUFFIX)) return false;
     String[] interfaces = cr.getInterfaces();
