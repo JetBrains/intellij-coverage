@@ -56,7 +56,7 @@ class OfflineAPITest {
         val outputRoot = pathToFile("build", "classes", "kotlin", "test")
         val outputDir = offlineCoverageTransform(true, test, outputRoot)
 
-        val offlineArtifactPath = ResourceUtil.getAgentPath("intellij-coverage-api")
+        val offlineArtifactPath = ResourceUtil.getAgentPath("intellij-coverage-offline")
         val classpath = System.getProperty("java.class.path").split(File.pathSeparator)
             .filter { path -> path.contains("kotlin-stdlib") }
             .plus(offlineArtifactPath).plus(outputDir.absolutePath).plus(outputRoot.absolutePath)

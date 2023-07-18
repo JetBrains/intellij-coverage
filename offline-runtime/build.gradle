@@ -1,8 +1,4 @@
-import com.intellij.rt.coverage.build.ArtifactBuilder
-
 dependencies {
   compile(project(":common"))
-  implementation(project(":offline-runtime:data"))
+  compile(project(":offline-runtime:data"))
 }
-
-ArtifactBuilder.setUpArtifact(project, offline_jar_name, [":common", ":offline-runtime:java7-utils", ":offline-runtime:data"])

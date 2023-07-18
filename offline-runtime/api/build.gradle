@@ -8,8 +8,8 @@ dependencies {
   implementation(project(":reporter:offline"))
 }
 
-ArtifactBuilder.setUpArtifactWithProguard(project, offline_api_jar_name,
-    [":offline-runtime", ":instrumentation", ":reporter:offline"], { ProGuardTask task ->
+ArtifactBuilder.setUpArtifactWithProguard(project, offline_jar_name,
+    [":common", ":offline-runtime:java7-utils", ":offline-runtime:data", ":offline-runtime", ":instrumentation", ":reporter:offline"], { ProGuardTask task ->
   task.keep('public class com.intellij.rt.coverage.offline.** { *; }')
 }) { Jar jar ->
   jar.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)

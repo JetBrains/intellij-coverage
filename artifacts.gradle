@@ -90,8 +90,7 @@ def setUpPublication(String projectName, String artifactName, String name, Strin
 
 setUpPublication(":instrumentation", coverage_jar_name, "Intellij Coverage Agent", "Code coverage engine for JVM")
 setUpPublication(":test-discovery", test_discovery_jar_name, "Intellij Test Discovery Agent", "Lightweight coverage during a testing session")
-setUpPublication(":offline-runtime", offline_jar_name, "Intellij Coverage Offline Runtime", "Lightweight coverage runtime in offline instrumentation mode")
-setUpPublication(":offline-runtime:api", offline_api_jar_name, "Intellij Coverage Offline Runtime With API calls", "API to collect coverage result at runtime")
+setUpPublication(":offline-runtime:api", offline_jar_name, "Intellij Coverage Offline Runtime", "Coverage runtime in offline instrumentation mode with API to collect coverage result at runtime")
 setUpPublication(":reporter", reporter_jar_name, "Intellij Coverage Report", "Library for presenting coverage results") { publication ->
   def dependencies = project(":reporter").getPublishDependencies().collect { new MyDependency(it.moduleGroup, it.moduleName, it.moduleVersion) }
   dependencies.add(new MyDependency(agentsGroupId, coverage_jar_name, version))
