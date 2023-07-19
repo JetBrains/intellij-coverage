@@ -4,6 +4,8 @@ dependencies {
 }
 
 jar {
-  from(zipTree(file("trove.jar")))
+  from(zipTree(file("trove.jar"))) {
+    exclude("classpath.index")
+  }
   from(zipTree(file("asm-all.jar")))
 }
