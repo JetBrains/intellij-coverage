@@ -38,9 +38,7 @@ public class TestTrackingIOUtil {
         entries++;
         os.writeUTF(entry.getKey().toString());
         // copy lines array as it can be modified or cleared by another thread
-        final boolean[] oldLines = entry.getValue();
-        final boolean[] lines = new boolean[oldLines.length];
-        System.arraycopy(oldLines, 0, lines, 0, lines.length);
+        final boolean[] lines = ArrayUtil.copy(entry.getValue());
         int numberOfTraces = 0;
         for (int idx = 1; idx < lines.length; idx++) {
           if (lines[idx]) numberOfTraces++;

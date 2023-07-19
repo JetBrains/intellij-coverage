@@ -27,4 +27,24 @@ public class ArrayUtil {
       array[index] = element;
     }
   }
+
+  public static int[] copy(int[] array) {
+    return copy(array, array.length);
+  }
+
+  public static int[] copy(int[] array, int newLength) {
+    int[] result = new int[newLength];
+    System.arraycopy(array, 0, result, 0, Math.min(array.length, newLength));
+    return result;
+  }
+
+  public static boolean[] copy(boolean[] array) {
+    return copy(array, array.length);
+  }
+
+  public static boolean[] copy(boolean[] array, int newLength) {
+    boolean[] result = new boolean[newLength];
+    System.arraycopy(array, 0, result, 0, Math.min(array.length, newLength));
+    return result;
+  }
 }

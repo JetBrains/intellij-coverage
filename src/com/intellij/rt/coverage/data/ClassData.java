@@ -244,21 +244,19 @@ public class ClassData implements CoverageData {
   }
 
   public synchronized void createHitsMask(int size) {
-    if (myHitsMask != null && myHitsMask.length >= size) return;
-    int[] newMask = new int[size];
-    if (myHitsMask != null) {
-      System.arraycopy(myHitsMask, 0, newMask, 0, myHitsMask.length);
+    if (myHitsMask == null) {
+      myHitsMask = new int[size];
+    } else if (myHitsMask.length < size) {
+      myHitsMask = ArrayUtil.copy(myHitsMask, size);
     }
-    myHitsMask = newMask;
   }
 
   public synchronized void createTraceMask(int size) {
-    if (myTraceMask != null && myTraceMask.length >= size) return;
-    final boolean[] newMask = new boolean[size];
-    if (myTraceMask != null) {
-      System.arraycopy(newMask, 0, myTraceMask, 0, myTraceMask.length);
+    if (myTraceMask == null) {
+      myTraceMask = new boolean[size];
+    } else if (myTraceMask.length < size) {
+      myTraceMask = ArrayUtil.copy(myTraceMask, size);
     }
-    myTraceMask = newMask;
   }
 
   public int[] getHitsMask() {

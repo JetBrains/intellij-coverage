@@ -16,6 +16,8 @@
 
 package com.intellij.rt.coverage.data.instructions;
 
+import com.intellij.rt.coverage.util.ArrayUtil;
+
 public class SwitchInstructions {
   private int myDefaultInstructions = 0;
   private int[] myInstructions;
@@ -45,9 +47,7 @@ public class SwitchInstructions {
 
   public void merge(SwitchInstructions other) {
     if (myInstructions.length < other.myInstructions.length) {
-      final int[] old = myInstructions;
-      myInstructions = new int[other.myInstructions.length];
-      System.arraycopy(old, 0, myInstructions, 0, old.length);
+      myInstructions = ArrayUtil.copy(myInstructions, other.myInstructions.length);
     }
     myDefaultInstructions = Math.max(myDefaultInstructions, other.myDefaultInstructions);
     for (int i = 0; i < Math.min(myInstructions.length, other.myInstructions.length); i++) {

@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.data;
 
+import com.intellij.rt.coverage.util.ArrayUtil;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 
 import java.io.DataOutputStream;
@@ -65,15 +66,12 @@ public class SwitchData implements CoverageData {
   public void merge(final CoverageData data) {
     SwitchData switchData = (SwitchData) data;
     setDefaultHits(myDefaultHits + switchData.myDefaultHits);
+    if (switchData.myHits.length > myHits.length) {
+      myHits = ArrayUtil.copy(myHits, switchData.myHits.length);
+      myKeys = switchData.myKeys;
+    }
     for (int i = Math.min(myHits.length, switchData.myHits.length) - 1; i >= 0; i--) {
       myHits[i] = ClassData.trimHits(myHits[i] + switchData.myHits[i]);
-    }
-    if (switchData.myHits.length > myHits.length) {
-      int[] old = myHits;
-      myHits = new int[switchData.myHits.length];
-      System.arraycopy(old, 0, myHits, 0, old.length);
-      System.arraycopy(switchData.myHits, old.length, myHits, old.length, myHits.length - old.length);
-      myKeys = switchData.myKeys;
     }
   }
 
