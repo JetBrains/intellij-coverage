@@ -19,7 +19,6 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.methods.MethodFilter;
-import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
@@ -75,7 +74,7 @@ public class MethodFilteringVisitor extends ClassVisitor {
 
   @Override
   public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-    myAnnotations.add(StringsPool.getFromPool(descriptor));
+    myAnnotations.add(myProjectData.getFromPool(descriptor));
     return super.visitAnnotation(descriptor, visible);
   }
 

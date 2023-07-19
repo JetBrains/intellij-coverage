@@ -64,6 +64,7 @@ public class ProjectData implements CoverageData, Serializable {
   private final ClassesMap myClasses = new ClassesMap();
   private volatile Map<String, FileMapData[]> myLinesMap;
   private Map<String, ClassInstructions> myInstructions;
+  private final StringsPool myStringPool = new StringsPool();
 
   /**
    * Cached object for ProjectData access from user class loaders.
@@ -80,6 +81,7 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public ClassData getOrCreateClassData(String name) {
+    name = getFromPool(name);
     ClassData classData = myClasses.get(name);
     if (classData == null) {
       classData = new ClassData(name);
@@ -148,6 +150,10 @@ public class ProjectData implements CoverageData, Serializable {
 
   public IgnoredStorage getIgnoredStorage() {
     return myIgnoredStorage;
+  }
+
+  public String getFromPool(String s) {
+    return myStringPool.getFromPool(s);
   }
 
 

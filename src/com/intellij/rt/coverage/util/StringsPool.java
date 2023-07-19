@@ -24,10 +24,10 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Pavel.Sher
  */
 public class StringsPool {
-  private final static Map<Long, String> myReusableStrings = new ConcurrentHashMap<Long, String>(30000);
+  private final Map<Long, String> myReusableStrings = new ConcurrentHashMap<Long, String>(1000);
   private final static String EMPTY = "";
 
-  public static String getFromPool(String value) {
+  public String getFromPool(String value) {
     if (value == null) return null;
     if (value.isEmpty()) return EMPTY;
 
@@ -36,7 +36,7 @@ public class StringsPool {
     if (reused != null) return reused;
     // new String() is required because value often is passed as substring which has a reference to original char array
     // see {@link String.substring(int, int} method implementation.
-    //noinspection RedundantStringConstructorCall
+    //noinspection StringOperationCanBeSimplified
     reused = new String(value);
     myReusableStrings.put(hash, reused);
     return reused;

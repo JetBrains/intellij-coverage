@@ -57,7 +57,7 @@ public class ProjectDataLoader {
       final TIntObjectHashMap<ClassData> dict = new TIntObjectHashMap<ClassData>(1000, 0.99f);
       final int classCount = CoverageIOUtil.readINT(in);
       for (int c = 0; c < classCount; c++) {
-        final ClassData classInfo = projectInfo.getOrCreateClassData(StringsPool.getFromPool(CoverageIOUtil.readUTFFast(in)));
+        final ClassData classInfo = projectInfo.getOrCreateClassData(CoverageIOUtil.readUTFFast(in));
         dict.put(c, classInfo);
       }
       for (int c = 0; c < classCount; c++) {
@@ -72,13 +72,13 @@ public class ProjectDataLoader {
             final int line = CoverageIOUtil.readINT(in);
             LineData lineInfo = lines.get(line);
             if (lineInfo == null) {
-              lineInfo = new LineData(line, StringsPool.getFromPool(methodSig));
+              lineInfo = new LineData(line, projectInfo.getFromPool(methodSig));
               lines.put(line, lineInfo);
               if (line > maxLine) maxLine = line;
             }
             classInfo.registerMethodSignature(lineInfo);
             String testName = CoverageIOUtil.readUTFFast(in);
-            if (testName != null && testName.length() > 0) {
+            if (testName != null && !testName.isEmpty()) {
               lineInfo.setTestName(testName);
             }
             final int hits = CoverageIOUtil.readINT(in);
@@ -120,7 +120,7 @@ public class ProjectDataLoader {
   private static String expand(DataInputStream in, final TIntObjectHashMap<ClassData> dict) throws IOException {
     return CoverageIOUtil.processWithDictionary(CoverageIOUtil.readUTFFast(in), new CoverageIOUtil.Consumer() {
       protected String consume(String type) {
-        if (type.length() > 0 && Character.isDigit(type.charAt(0))) {
+        if (!type.isEmpty() && Character.isDigit(type.charAt(0))) {
           try {
             final int typeIdx = Integer.parseInt(type);
             return (dict.get(typeIdx)).getName();

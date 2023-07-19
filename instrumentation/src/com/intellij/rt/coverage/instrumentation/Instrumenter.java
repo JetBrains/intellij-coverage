@@ -24,7 +24,6 @@ import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.lines.LinesFilter;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import com.intellij.rt.coverage.util.ClassNameUtil;
-import com.intellij.rt.coverage.util.StringsPool;
 import org.jetbrains.coverage.gnu.trove.TIntHashSet;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
@@ -53,7 +52,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
 
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
     myProcess = (access & Opcodes.ACC_INTERFACE) == 0;
-    myClassData = myProjectData.getOrCreateClassData(StringsPool.getFromPool(getClassName()));
+    myClassData = myProjectData.getOrCreateClassData(getClassName());
     super.visit(version, access, name, signature, superName, interfaces);
   }
 
@@ -118,7 +117,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
     if (!isIgnoreSection() && myIgnoredLines != null) myIgnoredLines.remove(line);
     LineData lineData = myLines.get(line);
     if (lineData == null) {
-      lineData = new LineData(line, StringsPool.getFromPool(name + desc));
+      lineData = new LineData(line, myProjectData.getFromPool(name + desc));
       myLines.put(line, lineData);
     }
     return lineData;
@@ -127,7 +126,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   public void visitSource(String source, String debug) {
     super.visitSource(source, debug);
     if (myShouldSaveSource) {
-      myProjectData.getOrCreateClassData(StringsPool.getFromPool(getClassName())).setSource(source);
+      myProjectData.getOrCreateClassData(getClassName()).setSource(source);
     }
     if (debug != null) {
       final FileMapData[] mapping = JSR45Util.extractLineMapping(debug, getClassName());
@@ -140,7 +139,7 @@ public abstract class Instrumenter extends MethodFilteringVisitor {
   public void visitOuterClass(String outerClassName, String methodName, String methodSig) {
     if (myShouldSaveSource) {
       final String fqnName = ClassNameUtil.convertToFQName(outerClassName);
-      final ClassData outerClass = myProjectData.getOrCreateClassData(StringsPool.getFromPool(fqnName));
+      final ClassData outerClass = myProjectData.getOrCreateClassData(fqnName);
       if (outerClass.getSource() == null) {
         outerClass.setSource(myClassData.getSource());
       }

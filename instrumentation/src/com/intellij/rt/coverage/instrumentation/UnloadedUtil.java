@@ -23,7 +23,6 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.instrumentation.dataAccess.EmptyCoverageDataAccess;
 import com.intellij.rt.coverage.util.ErrorReporter;
-import com.intellij.rt.coverage.util.StringsPool;
 import com.intellij.rt.coverage.util.classFinder.ClassEntry;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
@@ -53,7 +52,7 @@ public class UnloadedUtil {
                                     final boolean calculateSource, final boolean branchCoverage) {
     classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
       public void consume(ClassEntry classEntry) {
-        final ClassData cd = projectData.getClassData(StringsPool.getFromPool(classEntry.getClassName()));
+        final ClassData cd = projectData.getClassData(classEntry.getClassName());
         if (cd != null && cd.getLines() != null && cd.isFullyAnalysed()) return;
         try {
           final InputStream is = classEntry.getClassInputStream();
