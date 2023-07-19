@@ -25,7 +25,6 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * A class visitor to collect information about number of jumps and lines.
  */
 class ClassLengthAnalyser extends ClassVisitor {
-  private int myMaxLine = -1;
   private int myHits = 0;
 
   public ClassLengthAnalyser() {
@@ -34,10 +33,6 @@ class ClassLengthAnalyser extends ClassVisitor {
 
   public int getHits() {
     return myHits;
-  }
-
-  public int getMaxLine() {
-    return myMaxLine;
   }
 
   @Override
@@ -65,7 +60,6 @@ class ClassLengthAnalyser extends ClassVisitor {
       @Override
       public void visitLineNumber(int line, Label start) {
         super.visitLineNumber(line, start);
-        if (line > myMaxLine) myMaxLine = line;
         myHits++;
       }
     };

@@ -41,22 +41,21 @@ public class OfflineCoverageTransformer extends CoverageTransformer {
   }
 
   @Override
-  protected CoverageDataAccess.Init createInit(String className, ClassReader cr, boolean branchCoverage) {
-    final int length = getRequiredArrayLength(cr, branchCoverage);
+  protected CoverageDataAccess.Init createInit(String className, ClassReader cr) {
+    final int length = getRequiredArrayLength(cr);
     return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, "com/intellij/rt/coverage/offline/RawProjectInit",
         "getOrCreateHitsMask", "(Ljava/lang/String;I)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className, length});
   }
 
   @Override
-  protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr, boolean branchCoverage) {
-    final int length = getRequiredArrayLength(cr, branchCoverage);
+  protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr) {
+    final int length = getRequiredArrayLength(cr);
     return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, "com/intellij/rt/coverage/offline/CondyUtils",
         "getOrCreateHitsMask", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;I)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className, length});
   }
 
-  private static int getRequiredArrayLength(ClassReader cr, boolean branchCoverage) {
-    final ClassLengthAnalyser analyser = analyseClassLength(cr);
-    return branchCoverage ? analyser.getHits() : analyser.getMaxLine() + 1;
+  private static int getRequiredArrayLength(ClassReader cr) {
+    return analyseClassLength(cr).getHits();
   }
 
   private static ClassLengthAnalyser analyseClassLength(ClassReader cr) {

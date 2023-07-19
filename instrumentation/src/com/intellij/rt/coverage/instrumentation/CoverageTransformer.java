@@ -60,21 +60,21 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
   private CoverageDataAccess createDataAccess(String className, ClassReader cr, boolean branchCoverage) {
     if (!branchCoverage && OptionsUtil.NEW_LINE_COVERAGE_ENABLED || branchCoverage && OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED) {
       if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
-        return new CondyCoverageDataAccess(createCondyInit(className, cr, branchCoverage));
+        return new CondyCoverageDataAccess(createCondyInit(className, cr));
       } else {
-        return new FieldCoverageDataAccess(cr, className, createInit(className, cr, branchCoverage));
+        return new FieldCoverageDataAccess(cr, className, createInit(className, cr));
       }
     } else {
-      return new NameCoverageDataAccess(createInit(className, cr, branchCoverage));
+      return new NameCoverageDataAccess(createInit(className, cr));
     }
   }
 
-  protected CoverageDataAccess.Init createInit(String className, ClassReader cr, boolean branchCoverage) {
+  protected CoverageDataAccess.Init createInit(String className, ClassReader cr) {
     return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, ProjectData.PROJECT_DATA_OWNER,
         "getHitsMask", "(Ljava/lang/String;)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className});
   }
 
-  protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr, boolean branchCoverage) {
+  protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr) {
     return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, "com/intellij/rt/coverage/util/CondyUtils",
         "getHitsMask", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className});
   }
