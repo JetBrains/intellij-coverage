@@ -121,7 +121,7 @@ public class Instrumentator {
 
   private TestTrackingMode createTestTrackingMode(boolean traceLines) {
     if (!traceLines) return null;
-    if (OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED && OptionsUtil.NEW_TEST_TRACKING_ENABLED) {
+    if (OptionsUtil.FIELD_INSTRUMENTATION_ENABLED && OptionsUtil.NEW_TEST_TRACKING_ENABLED) {
       return new TestTrackingArrayMode();
     }
     return new TestTrackingClassDataMode();

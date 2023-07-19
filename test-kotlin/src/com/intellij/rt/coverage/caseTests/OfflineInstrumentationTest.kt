@@ -21,7 +21,6 @@ import com.intellij.rt.coverage.data.ProjectData
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil
 import com.intellij.rt.coverage.instrument.OfflineCoverageTransformer
 import com.intellij.rt.coverage.instrument.RawReportLoader
-import com.intellij.rt.coverage.util.OptionsUtil
 import com.intellij.rt.coverage.util.ProcessUtil
 import com.intellij.rt.coverage.util.ResourceUtil
 import com.intellij.rt.coverage.util.classFinder.ClassFinder
@@ -145,20 +144,14 @@ internal fun offlineCoverageTransform(isBranchCoverage: Boolean, test: TestFile,
     val includes = Collections.singletonList(Pattern.compile("$packageName\\..*"))
     val excludes = Collections.emptyList<Pattern>()
 
-    val defaultBranchCoverage = OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED
-    try {
-        OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = true
-        val projectData = createProjectData(isBranchCoverage, includes, excludes)
-        val transformer = OfflineCoverageTransformer(projectData, false, excludes, includes)
+    val projectData = createProjectData(isBranchCoverage, includes, excludes)
+    val transformer = OfflineCoverageTransformer(projectData, false, excludes, includes)
 
-        for (file in parentDir.listFiles()!!) {
-            if (!file.isFile) continue
-            val name = "$packageName.${file.name.removeSuffix(".class")}"
-            val bytes = transformer.transform(ClassLoader.getSystemClassLoader(), name, null, null, file.readBytes())
-            File(packageRoot, file.name).writeBytes(bytes)
-        }
-    } finally {
-        OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = defaultBranchCoverage
+    for (file in parentDir.listFiles()!!) {
+        if (!file.isFile) continue
+        val name = "$packageName.${file.name.removeSuffix(".class")}"
+        val bytes = transformer.transform(ClassLoader.getSystemClassLoader(), name, null, null, file.readBytes())
+        File(packageRoot, file.name).writeBytes(bytes)
     }
 
     return outputDir

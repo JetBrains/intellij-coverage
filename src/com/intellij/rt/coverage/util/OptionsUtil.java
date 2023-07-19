@@ -17,8 +17,9 @@
 package com.intellij.rt.coverage.util;
 
 public class OptionsUtil {
-  public static final boolean NEW_LINE_COVERAGE_ENABLED = System.getProperty("idea.new.sampling.coverage") != null;
-  public static boolean NEW_BRANCH_COVERAGE_ENABLED = System.getProperty("idea.new.tracing.coverage") != null;
+  public static final boolean FIELD_INSTRUMENTATION_ENABLED =
+      "true".equals(System.getProperty("idea.new.sampling.coverage", "true"))
+          || "true".equals(System.getProperty("idea.new.tracing.coverage", "true"));
   public static final boolean NEW_TEST_TRACKING_ENABLED = "true".equals(System.getProperty("idea.new.test.tracking.coverage", "true"));
   public static final boolean CONDY_ENABLED = "true".equals(System.getProperty("coverage.condy.enable", "true"));
   public static final boolean INSTRUCTIONS_COVERAGE_ENABLED = "true".equals(System.getProperty("coverage.instructions.enable", "false"));

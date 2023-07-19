@@ -53,9 +53,8 @@ false
 Here `report.ic` is a path to a file with a binary report, `<include>` and `<exclude>` should be replaced with include/exclude regex if needed.
 
 To run your app with coverage agent, you need to add `javaagent` argument and mention agent location and configuration file location.
-You could also add `-Didea.new.tracing.coverage=true` option to run faster coverage.
 ```
-java -cp project.jar -javaagent:intellij-coverage-agent-1.0.716.jar=config.args -Didea.new.tracing.coverage=true example.TestKt
+java -cp project.jar -javaagent:intellij-coverage-agent-1.0.716.jar=config.args example.TestKt
 ```
 After that you will see output:
 ```

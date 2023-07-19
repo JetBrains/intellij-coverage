@@ -48,14 +48,11 @@ public class Instrumentator {
       final File root = myRoots.get(i);
       final File outputRoot = myOutputRoots.get(i);
 
-      final boolean newBranchCoverage = OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED;
       final boolean calculateHitsCount = OptionsUtil.CALCULATE_HITS_COUNT;
       try {
-        OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = true;
         OptionsUtil.CALCULATE_HITS_COUNT = countHits;
         new InstrumentationVisitor(root, outputRoot).visitFiles();
       } finally {
-        OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED = newBranchCoverage;
         OptionsUtil.CALCULATE_HITS_COUNT = calculateHitsCount;
       }
     }

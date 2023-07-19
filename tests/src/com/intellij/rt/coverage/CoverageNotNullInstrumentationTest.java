@@ -35,16 +35,6 @@ import static org.junit.Assert.assertNotNull;
 
 public class CoverageNotNullInstrumentationTest {
 
-  @Before
-  public void setUp() {
-    System.setProperty("idea.new.sampling.coverage", "true"); 
-  }
-
-  @After
-  public void tearDown() {
-    System.clearProperty("idea.new.sampling.coverage");
-  }
-
   private byte[] doTransform(final String name, final ProjectData data) throws IOException {
     final String resource = name.replace('.', '/') + ".class";
     ClassLoader loader = WithNotNulls.class.getClassLoader();

@@ -54,11 +54,11 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
   @Override
   protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassVisitor cw) {
     return InstrumentationStrategy.createInstrumenter(data, className, cr, cw, testTrackingMode, data.isBranchCoverage(),
-        shouldSaveSource, createDataAccess(className, cr, data.isBranchCoverage()));
+        shouldSaveSource, createDataAccess(className, cr));
   }
 
-  private CoverageDataAccess createDataAccess(String className, ClassReader cr, boolean branchCoverage) {
-    if (!branchCoverage && OptionsUtil.NEW_LINE_COVERAGE_ENABLED || branchCoverage && OptionsUtil.NEW_BRANCH_COVERAGE_ENABLED) {
+  private CoverageDataAccess createDataAccess(String className, ClassReader cr) {
+    if (OptionsUtil.FIELD_INSTRUMENTATION_ENABLED) {
       if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
         return new CondyCoverageDataAccess(createCondyInit(className, cr));
       } else {

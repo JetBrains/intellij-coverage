@@ -52,17 +52,8 @@ internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage:
                     patterns: String = "$TEST_PACKAGE.*", extraArgs: MutableList<String> = mutableListOf(),
                     mainClass: String = getTestFile(testName).mainClass): ProjectData {
     when (coverage) {
-        Coverage.CONDY_LINE -> extraArgs.add("-Didea.new.sampling.coverage=true")
-        Coverage.CONDY_BRANCH -> extraArgs.add("-Didea.new.tracing.coverage=true")
-        Coverage.NEW_LINE -> {
-            extraArgs.add("-Didea.new.sampling.coverage=true")
-            extraArgs.add("-Dcoverage.condy.enable=false")
-        }
-
-        Coverage.NEW_BRANCH -> {
-            extraArgs.add("-Didea.new.tracing.coverage=true")
-            extraArgs.add("-Dcoverage.condy.enable=false")
-        }
+        Coverage.NEW_LINE, Coverage.NEW_BRANCH -> extraArgs.add("-Dcoverage.condy.enable=false")
+        Coverage.LINE, Coverage.BRANCH -> extraArgs.add("-Didea.new.sampling.coverage=false")
 
         else -> {}
     }
