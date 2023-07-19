@@ -17,7 +17,7 @@
 package testData.custom.IDEA_275520.stdlib
 
 // patterns: testData.custom.IDEA_275520.*
-// extra args: -Didea.coverage.check.inline.signatures=true
+// calculate unloaded: true
 
 fun main() {
     listOf(1).forEach { println(it) }

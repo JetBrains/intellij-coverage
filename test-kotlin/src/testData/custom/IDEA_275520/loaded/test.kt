@@ -22,6 +22,7 @@ import testData.custom.IDEA_275520.simpleInline
 import testData.custom.IDEA_275520.testWithLambda
 
 // patterns: testData.custom.IDEA_275520.*
+// calculate unloaded: true
 
 fun main() {
     simpleInline(3)

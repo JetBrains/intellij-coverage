@@ -38,7 +38,7 @@ internal class LineSignatureTest : CoverageTest() {
         test_IDEA_275520(projectData, hashMapOf(
                 "$TEST_PACKAGE.custom.IDEA_275520.call.TestKt" to hashMapOf(
                         "main()V" to 37..39),
-                "$TEST_PACKAGE.custom.IDEA_275520.call.UnloadedObject" to hashMapOf(
+                "$TEST_PACKAGE.custom.IDEA_275520.call.SomeObject" to hashMapOf(
                         "foo(Lkotlin/jvm/functions/Function1;)V" to 25..25,
                         "boo(Lkotlin/jvm/functions/Function1;)V" to 30..30)))
     })

@@ -71,7 +71,6 @@ public class KotlinUtils {
     List<LinesFilter> result = new ArrayList<LinesFilter>();
     result.add(new KotlinImplementerDefaultInterfaceMemberFilter());
     result.add(new KotlinCoroutinesLinesFilter());
-    result.add(new KotlinInlineFilter());
     result.add(new KotlinDeprecatedMethodFilter());
     result.add(new KotlinDefaultArgsLineFilter());
     return result;

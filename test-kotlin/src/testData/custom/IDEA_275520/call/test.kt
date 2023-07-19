@@ -17,9 +17,9 @@
 package testData.custom.IDEA_275520.call
 
 // patterns: testData.custom.IDEA_275520.*
-// extra args: -Didea.coverage.check.inline.signatures=true
+// calculate unloaded: true
 
-object UnloadedObject {
+object SomeObject {
     @JvmStatic
     inline fun foo(f: (Int) -> Int) {
         println(f(3) + 10)
@@ -34,7 +34,7 @@ object UnloadedObject {
 inline fun Int.sum() = this
 
 fun main() {
-    UnloadedObject.foo { 42 }
-    UnloadedObject.foo { UnloadedObject.boo { 42 }; 43}
+    SomeObject.foo { 42 }
+    SomeObject.foo { SomeObject.boo { 42 }; 43}
     5.sum()
 }
