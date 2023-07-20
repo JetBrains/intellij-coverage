@@ -53,7 +53,7 @@ internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage:
                     mainClass: String = getTestFile(testName).mainClass): ProjectData {
     when (coverage) {
         Coverage.NEW_LINE, Coverage.NEW_BRANCH -> extraArgs.add("-Dcoverage.condy.enable=false")
-        Coverage.LINE, Coverage.BRANCH -> extraArgs.add("-Didea.new.sampling.coverage=false")
+        Coverage.LINE, Coverage.BRANCH -> extraArgs.add("-Didea.new.tracing.coverage=false")
 
         else -> {}
     }
