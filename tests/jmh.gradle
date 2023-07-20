@@ -20,7 +20,8 @@ ext {
   benchmarkRegexp = 'com\\.intellij\\.rt\\.coverage\\.jmh\\.CoverageAgentBenchmark.*'
   benchmarkIterations = 30
   benchmarkWarmupIterations = 10
-  baselineVersion = '1.0.684'
+  baselineVersion = '1.0.725'
+  coverageFile = "coverage.ic"
 }
 
 configurations {
@@ -38,14 +39,39 @@ def findAgent(Configuration configuration) {
 }
 
 def agentParams(Configuration configuration, boolean branchCoverage) {
-  return "-javaagent:${findAgent(configuration)}=coverage.ic false false false ${!branchCoverage} org.joda.* org.apache.commons.*"
+  return [
+      "-javaagent:${findAgent(configuration)}=${coverageFile} false false false ${!branchCoverage} org.joda.* org.apache.commons.*",
+      "-Didea.new.sampling.coverage=true", "-Didea.new.tracing.coverage=true"
+  ]
 }
 
+def branchCoverage = true
 
-task LineCoverage(type: JavaExec) {
-  configureCompare(it, [agentParams(configurations.head, false), "-Didea.new.sampling.coverage=true"])
+task BaselineCoverage(type: JavaExec) {
+  configureCompare(it, agentParams(configurations.baseline, branchCoverage))
+  clear(it)
 }
 
-task BranchCoverage(type: JavaExec) {
-  configureCompare(it, [agentParams(configurations.head, true), "-Didea.new.tracing.coverage=true"])
+task HeadCoverage(type: JavaExec) {
+  dependsOn(project(':instrumentation').jar)
+  configureCompare(it, agentParams(configurations.head, branchCoverage))
+  clear(it)
+}
+
+task HeadVsBaselineCoverage(type: JavaExec) {
+  dependsOn(project(':instrumentation').jar)
+  configureCompareWith(it, agentParams(configurations.head, branchCoverage), BaselineCoverage)
+  clear(it)
+}
+
+task LineVsBranchCoverage(type: JavaExec) {
+  dependsOn(project(':instrumentation').jar)
+  configureCompareWith(it, agentParams(configurations.head, false), HeadCoverage)
+  clear(it)
+}
+
+def clear(Task task) {
+  task.doLast {
+    delete(coverageFile)
+  }
 }

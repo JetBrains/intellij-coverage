@@ -44,7 +44,16 @@ final class ReportReader {
         !isGrowthPositive && score <= 0
     def error = percentage(base.scoreError, base.score)
         .add(percentage(next.scoreError, next.score))
-    "${base.mode != null ? "[$base.mode] " : ''}${score.abs()}% ${isPositive ? 'speedup' : 'degradation'} +- $error%"
+    "${base.mode != null ? "[$base.mode] " : ''}${score.abs()}% ${isPositive ? 'speedup' : 'degradation'} +- $error%\n" +
+        "\t\t${scoreToString(base)} vs ${scoreToString(next)}"
+  }
+
+  private static def scoreToString(Report report) {
+    return "${round(report.score)} (+-${round(report.scoreError)})"
+  }
+
+  private static def round(BigDecimal x) {
+    return x.setScale(2, RoundingMode.HALF_UP)
   }
 
   private static def percentage(BigDecimal x, BigDecimal y) {
