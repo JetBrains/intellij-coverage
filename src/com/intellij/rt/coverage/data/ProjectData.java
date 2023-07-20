@@ -30,26 +30,19 @@ import java.util.regex.Pattern;
 
 /**
  * Represents coverage information of a whole project.
- * This class is also used to access coverage data at runtime.
  */
 public class ProjectData implements CoverageData, Serializable {
-  public static final String PROJECT_DATA_OWNER = "com/intellij/rt/coverage/data/ProjectData";
-
-  // ProjectData methods
-  private static final MethodCaller GET_HITS_MASK_METHOD = new MethodCaller("getHitsMask", new Class[]{String.class});
-  private static final MethodCaller GET_TRACE_MASK_METHOD = new MethodCaller("getTraceMask", new Class[]{String.class});
-  private static final MethodCaller GET_CLASS_DATA_METHOD = new MethodCaller("getClassData", new Class[]{String.class});
-  private static final MethodCaller REGISTER_CLASS_FOR_TRACE_METHOD = new MethodCaller("registerClassForTrace", new Class[]{Object.class});
-  private static final MethodCaller TRACE_LINE_METHOD = new MethodCaller("traceLine", new Class[]{Object.class, int.class});
-
-  private boolean myStopped;
-
   public static ProjectData ourProjectData;
-  private File myDataFile;
 
-  private boolean myTestTracking;
-  private boolean myBranchCoverage = true;
-  private boolean myCollectInstructions;
+  private final File myDataFile;
+  private final boolean myBranchCoverage;
+  private final List<Pattern> myIncludePatterns;
+  private final List<Pattern> myExcludePatterns;
+  private List<Pattern> myAnnotationsToIgnore;
+  private final Map<String, ClassData> myClasses = new ConcurrentHashMap<String, ClassData>(1000);
+  private final StringsPool myStringPool = new StringsPool();
+  private final IgnoredStorage myIgnoredStorage = new IgnoredStorage();
+  private volatile Map<String, FileMapData[]> myLinesMap;
 
   /**
    * Test tracking trace storage. Test tracking supports only sequential tests (but code inside one test could be parallel).
@@ -57,24 +50,29 @@ public class ProjectData implements CoverageData, Serializable {
    * Using CAS for the storage update slightly improves test tracking coverage as the data are not cleared too frequently.
    */
   private final AtomicReference<Map<Object, boolean[]>> myTrace = new AtomicReference<Map<Object, boolean[]>>();
+  private final TestTrackingCallback myTestTrackingCallback;
   private File myTracesDir;
-  private List<Pattern> myIncludePatterns;
-  private List<Pattern> myExcludePatterns;
 
-  private final ClassesMap myClasses = new ClassesMap();
-  private volatile Map<String, FileMapData[]> myLinesMap;
+  private boolean myCollectInstructions;
   private Map<String, ClassInstructions> myInstructions;
-  private final StringsPool myStringPool = new StringsPool();
 
-  /**
-   * Cached object for ProjectData access from user class loaders.
-   */
-  private static Object ourProjectDataObject;
+  private boolean myStopped;
 
-  private TestTrackingCallback myTestTrackingCallback;
+  public ProjectData() {
+    this(null, true, null, null, null);
+  }
 
-  private List<Pattern> myAnnotationsToIgnore;
-  private final IgnoredStorage myIgnoredStorage = new IgnoredStorage();
+  public ProjectData(File dataFile,
+                     boolean branchCoverage,
+                     List<Pattern> includePatterns,
+                     List<Pattern> excludePatterns,
+                     TestTrackingCallback testTrackingCallback) {
+    myDataFile = dataFile;
+    myBranchCoverage = branchCoverage;
+    myIncludePatterns = includePatterns;
+    myExcludePatterns = excludePatterns;
+    myTestTrackingCallback = testTrackingCallback;
+  }
 
   public ClassData getClassData(final String name) {
     return myClasses.get(name);
@@ -90,8 +88,16 @@ public class ProjectData implements CoverageData, Serializable {
     return classData;
   }
 
-  public static ProjectData getProjectData() {
-    return ourProjectData;
+  public int getClassesNumber() {
+    return myClasses.size();
+  }
+
+  public Map<String, ClassData> getClasses() {
+    return new HashMap<String, ClassData>(myClasses);
+  }
+
+  public Collection<ClassData> getClassesCollection() {
+    return myClasses.values();
   }
 
   public void stop() {
@@ -107,19 +113,14 @@ public class ProjectData implements CoverageData, Serializable {
   }
 
   public boolean isTestTracking() {
-    return myTestTracking;
+    return myTestTrackingCallback != null;
   }
 
   public boolean isInstructionsCoverageEnabled() {
     return myCollectInstructions;
   }
-
-  public void setInstructionsCoverage(boolean isEnabled) {
-    myCollectInstructions = isEnabled;
-  }
-
-  public int getClassesNumber() {
-    return myClasses.size();
+  public void setInstructionsCoverage(boolean collectInstructions) {
+    myCollectInstructions = collectInstructions;
   }
 
   public Map<String, FileMapData[]> getLinesMap() {
@@ -156,40 +157,18 @@ public class ProjectData implements CoverageData, Serializable {
     return myStringPool.getFromPool(s);
   }
 
-
-  public static ProjectData createProjectData(final File dataFile,
-                                              final ProjectData initialData,
-                                              boolean traceLines,
-                                              boolean branchCoverage,
-                                              List<Pattern> includePatterns,
-                                              List<Pattern> excludePatterns,
-                                              final TestTrackingCallback testTrackingCallback) throws IOException {
-    ourProjectData = initialData == null ? new ProjectData() : initialData;
-    if (dataFile != null && !dataFile.exists()) {
-      final File parentDir = dataFile.getParentFile();
-      if (parentDir != null && !parentDir.exists()) parentDir.mkdirs();
-      dataFile.createNewFile();
-    }
-    ourProjectData.myStopped = false;
-    ourProjectData.myBranchCoverage = branchCoverage;
-    ourProjectData.myTestTracking = traceLines;
-    ourProjectData.myCollectInstructions = OptionsUtil.INSTRUCTIONS_COVERAGE_ENABLED;
-    ourProjectData.myDataFile = dataFile;
-    ourProjectData.myIncludePatterns = includePatterns;
-    ourProjectData.myExcludePatterns = excludePatterns;
-    ourProjectData.myTestTrackingCallback = testTrackingCallback;
-    return ourProjectData;
+  public Map<Object, boolean[]> getTraces() {
+    return myTrace.get();
   }
 
-  public static ProjectData createProjectData(boolean branchCoverage) {
-    final ProjectData projectData = new ProjectData();
-    projectData.myBranchCoverage = branchCoverage;
-    return projectData;
+  public boolean[] traceLineByTest(ClassData classData, int line) {
+    if (myTestTrackingCallback == null) return null;
+    return myTestTrackingCallback.traceLine(classData, line);
   }
 
   public void merge(final CoverageData data) {
     final ProjectData projectData = (ProjectData) data;
-    for (Map.Entry<String, ClassData> entry : projectData.myClasses.myClasses.entrySet()) {
+    for (Map.Entry<String, ClassData> entry : projectData.myClasses.entrySet()) {
       final String key = entry.getKey();
       final ClassData mergedData = entry.getValue();
       ClassData classData = myClasses.get(key);
@@ -239,7 +218,7 @@ public class ProjectData implements CoverageData, Serializable {
           if ((myExcludePatterns == null || !ClassNameUtil.matchesPatterns(mappedClassName, myExcludePatterns))
               && (myIncludePatterns == null || myIncludePatterns.isEmpty() || ClassNameUtil.matchesPatterns(mappedClassName, myIncludePatterns))) {
             classInfo = getOrCreateClassData(mappedClassName);
-            if (classInfo.getSource() == null || classInfo.getSource().length() == 0) {
+            if (classInfo.getSource() == null || classInfo.getSource().isEmpty()) {
               classInfo.setSource(aFileData.getFileName());
             }
           } else {
@@ -264,7 +243,7 @@ public class ProjectData implements CoverageData, Serializable {
    * Update coverage data internally stored in arrays.
    */
   public void applyHits() {
-    for (ClassData data : myClasses.myClasses.values()) {
+    for (ClassData data : myClasses.values()) {
       data.applyHits();
     }
   }
@@ -288,11 +267,15 @@ public class ProjectData implements CoverageData, Serializable {
 
   // --------------- used from listeners --------------------- //
 
+  public static ProjectData getProjectData() {
+    return ourProjectData;
+  }
+
   /**
    * This method could be called in test tracking mode by test engine listeners
    */
   public void testEnded(final String name) {
-    final Map<Object, boolean[]> trace = myTrace.get();
+    final Map<Object, boolean[]> trace = myTrace.getAndSet(null);
     if (trace == null) return;
     File tracesDir = getTracesDir();
     try {
@@ -312,7 +295,6 @@ public class ProjectData implements CoverageData, Serializable {
         }
         myTestTrackingCallback.clearTrace(classData);
       }
-      myTrace.compareAndSet(trace, null);
     }
   }
 
@@ -320,7 +302,7 @@ public class ProjectData implements CoverageData, Serializable {
    * This method could be called in test tracking mode by test engine listeners
    */
   public void testStarted(final String ignoredName) {
-    if (myTestTracking) myTrace.compareAndSet(null, new ConcurrentHashMap<Object, boolean[]>());
+    if (isTestTracking()) myTrace.compareAndSet(null, new ConcurrentHashMap<Object, boolean[]>());
   }
   //---------------------------------------------------------- //
 
@@ -342,194 +324,4 @@ public class ProjectData implements CoverageData, Serializable {
     }
     return result;
   }
-
-  public Map<String, ClassData> getClasses() {
-    return myClasses.asMap();
-  }
-
-  public Collection<ClassData> getClassesCollection() {
-    return myClasses.myClasses.values();
-  }
-
-
-  // -----------------------  used from instrumentation  ------------------------------------------------//
-
-  //load ProjectData always through system class loader (null) then user's ClassLoaders won't affect    //
-  //IMPORTANT: do not remove reflection, it was introduced to avoid ClassCastExceptions in CoverageData //
-  //loaded via user's class loader                                                                      //
-
-  // -------------------------------------------------------------------------------------------------- //
-
-  /**
-   * Mark line as covered in the current test during test tracking.
-   */
-  @SuppressWarnings("unused")
-  public static void traceLine(Object classData, int line) {
-    if (ourProjectData != null) {
-      final Map<Object, boolean[]> traces = ourProjectData.myTrace.get();
-      if (traces != null) {
-        final boolean[] lines = ourProjectData.myTestTrackingCallback.traceLine((ClassData) classData, line);
-        if (lines != null) {
-          traces.put(classData, lines);
-        }
-      }
-      return;
-    }
-    try {
-      final Object projectData = getProjectDataObject();
-      TRACE_LINE_METHOD.invoke(projectData, new Object[]{classData, line});
-    } catch (Exception e) {
-      ErrorReporter.reportError("Error during test tracking in class " + classData.toString(), e);
-    }
-  }
-
-  /**
-   * Test tracking initialization.
-   * Returns true if a test is running now, then the class has been registered.
-   */
-  @SuppressWarnings("unused")
-  public static boolean registerClassForTrace(Object classData) {
-    if (ourProjectData != null) {
-      final Map<Object, boolean[]> traces = ourProjectData.myTrace.get();
-      if (traces != null) {
-        synchronized (classData) {
-          final boolean[] trace = ((ClassData) classData).getTraceMask();
-          if (traces.put(classData, trace) == null) {
-            // clear trace on register for a new test to prevent reporting about code running between tests
-            Arrays.fill(trace, false);
-          }
-        }
-        return true;
-      }
-      return false;
-    }
-    try {
-      final Object projectData = getProjectDataObject();
-      return (Boolean) REGISTER_CLASS_FOR_TRACE_METHOD.invoke(projectData, new Object[]{classData});
-    } catch (Exception e) {
-      ErrorReporter.reportError("Error during test tracking in class " + classData.toString(), e);
-      return false;
-    }
-  }
-
-  /**
-   * On class initialization at runtime, an instrumented class asks for hits array
-   */
-  public static int[] getHitsMask(String className) {
-    if (ourProjectData != null) {
-      return ourProjectData.getClassData(className).getHitsMask();
-    }
-    try {
-      final Object projectData = getProjectDataObject();
-      return (int[]) GET_HITS_MASK_METHOD.invoke(projectData, new Object[]{className});
-    } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data access: " + className, e);
-      return null;
-    }
-  }
-
-  /**
-   * Get test tracking hits array at runtime.
-   */
-  @SuppressWarnings("unused")
-  public static boolean[] getTraceMask(String className) {
-    if (ourProjectData != null) {
-      return ourProjectData.getClassData(className).getTraceMask();
-    }
-    try {
-      final Object projectData = getProjectDataObject();
-      return (boolean[]) GET_TRACE_MASK_METHOD.invoke(projectData, new Object[]{className});
-    } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data access: " + className, e);
-      return null;
-    }
-  }
-
-  /**
-   * Get class data object at runtime.
-   */
-  @SuppressWarnings("unused")
-  public static Object loadClassData(String className) {
-    if (ourProjectData != null) {
-      return ourProjectData.getClassData(className);
-    }
-    try {
-      final Object projectData = getProjectDataObject();
-      return GET_CLASS_DATA_METHOD.invoke(projectData, new Object[]{className});
-    } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data loading: " + className, e);
-      return null;
-    }
-  }
-
-  private static Object getProjectDataObject() throws ClassNotFoundException, IllegalAccessException, NoSuchFieldException {
-    if (ourProjectDataObject == null) {
-      final Class<?> projectDataClass = Class.forName(ProjectData.class.getName(), false, null);
-      ourProjectDataObject = projectDataClass.getDeclaredField("ourProjectData").get(null);
-    }
-    return ourProjectDataObject;
-  }
-
-  // ----------------------------------------------------------------------------------------------- //
-
-  /**
-   * This map provides faster read operations for the case when key is mostly the same
-   * object. In our case key is the class name which is the same string with high probability.
-   * According to CPU snapshots with usual map we spend a lot of time on equals() operation.
-   * This class was introduced to reduce number of equals().
-   */
-  private static class ClassesMap {
-    private static final int POOL_SIZE = 1024; // must be a power of two
-    private static final int MASK = POOL_SIZE - 1;
-    private static final int DEFAULT_CAPACITY = 1000;
-    private final IdentityClassData[] myIdentityArray = new IdentityClassData[POOL_SIZE];
-    private final Map<String, ClassData> myClasses = new ConcurrentHashMap<String, ClassData>(DEFAULT_CAPACITY);
-
-    public int size() {
-      return myClasses.size();
-    }
-
-    public ClassData get(String name) {
-      int idx = name.hashCode() & MASK;
-      final IdentityClassData lastClassData = myIdentityArray[idx];
-      if (lastClassData != null) {
-        final ClassData data = lastClassData.getClassData(name);
-        if (data != null) return data;
-      }
-
-      final ClassData data = myClasses.get(name);
-      myIdentityArray[idx] = new IdentityClassData(name, data);
-      return data;
-    }
-
-    public void put(String name, ClassData data) {
-      myClasses.put(name, data);
-    }
-
-    public HashMap<String, ClassData> asMap() {
-      return new HashMap<String, ClassData>(myClasses);
-    }
-
-    public Collection<String> names() {
-      return myClasses.keySet();
-    }
-  }
-
-  private static class IdentityClassData {
-    private final String myClassName;
-    private final ClassData myClassData;
-
-    private IdentityClassData(String className, ClassData classData) {
-      myClassName = className;
-      myClassData = classData;
-    }
-
-    public ClassData getClassData(String name) {
-      if (name == myClassName) {
-        return myClassData;
-      }
-      return null;
-    }
-  }
-
 }

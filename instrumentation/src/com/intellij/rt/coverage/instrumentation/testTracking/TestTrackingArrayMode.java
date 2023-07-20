@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.BranchesEnumerator;
+import com.intellij.rt.coverage.instrumentation.CoverageRuntime;
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.Instrumenter;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
@@ -90,7 +91,7 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
 
           // call register
           mv.visitFieldInsn(Opcodes.GETSTATIC, myInternalClassName, DataAccessUtil.CLASS_DATA_NAME, InstrumentationUtils.OBJECT_TYPE);
-          mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "registerClassForTrace", "(" + InstrumentationUtils.OBJECT_TYPE + ")Z", false);
+          mv.visitMethodInsn(Opcodes.INVOKESTATIC, CoverageRuntime.COVERAGE_RUNTIME_OWNER, "registerClassForTrace", "(" + InstrumentationUtils.OBJECT_TYPE + ")Z", false);
 
           // if register is successful set array[0] = true
           // it may be unsuccessful if no test is running now

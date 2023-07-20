@@ -19,10 +19,7 @@ package com.intellij.rt.coverage.instrumentation.testTracking;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.BranchesEnumerator;
-import com.intellij.rt.coverage.instrumentation.BranchesInstrumenter;
-import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.*;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
 import com.intellij.rt.coverage.instrumentation.util.LocalVariableInserter;
@@ -93,7 +90,7 @@ class TestTrackingClassDataInstrumenter extends BranchesInstrumenter {
         if (lineData != null) {
           mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
           InstrumentationUtils.pushInt(mv, line);
-          mv.visitMethodInsn(Opcodes.INVOKESTATIC, ProjectData.PROJECT_DATA_OWNER, "traceLine", "(" + InstrumentationUtils.OBJECT_TYPE + "I)V", false);
+          mv.visitMethodInsn(Opcodes.INVOKESTATIC, CoverageRuntime.COVERAGE_RUNTIME_OWNER, "traceLine", "(" + InstrumentationUtils.OBJECT_TYPE + "I)V", false);
         }
         super.visitLineNumber(line, start);
       }

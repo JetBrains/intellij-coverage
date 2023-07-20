@@ -52,7 +52,7 @@ public class RawHitsReportTest {
   }
 
   private static ProjectData createProject() {
-    final ProjectData projectData = ProjectData.createProjectData(false);
+    final ProjectData projectData = new ProjectData();
     final ClassData classData = projectData.getOrCreateClassData("A");
     classData.setLines(new LineData[]{
         new LineData(0, "a()"),

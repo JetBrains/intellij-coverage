@@ -65,7 +65,7 @@ public class Instrumentator {
     private InstrumentationVisitor(File root, File output) {
       super(root);
       myOutput = output;
-      final ProjectData projectData = ProjectData.createProjectData(true);
+      final ProjectData projectData = new ProjectData();
       projectData.setAnnotationsToIgnore(myFilters.excludeAnnotations);
       myTransformer = new OfflineCoverageTransformer(projectData, false, myFilters.excludeClasses, myFilters.includeClasses);
     }

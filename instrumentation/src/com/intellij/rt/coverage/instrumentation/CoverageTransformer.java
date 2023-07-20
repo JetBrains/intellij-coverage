@@ -62,16 +62,16 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
       if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
         return new CondyCoverageDataAccess(createCondyInit(className, cr));
       } else {
-        return new FieldCoverageDataAccess(cr, className, createInit(className, cr));
+        return new FieldCoverageDataAccess(cr, className, createInit(className, cr, false));
       }
     } else {
-      return new NameCoverageDataAccess(createInit(className, cr));
+      return new NameCoverageDataAccess(createInit(className, cr, true));
     }
   }
 
-  protected CoverageDataAccess.Init createInit(String className, ClassReader cr) {
-    return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, ProjectData.PROJECT_DATA_OWNER,
-        "getHitsMask", "(Ljava/lang/String;)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className});
+  protected CoverageDataAccess.Init createInit(String className, ClassReader cr, boolean needCache) {
+    return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, CoverageRuntime.COVERAGE_RUNTIME_OWNER,
+        needCache ? "getHitsMaskCached" : "getHitsMask", "(Ljava/lang/String;)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className});
   }
 
   protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr) {

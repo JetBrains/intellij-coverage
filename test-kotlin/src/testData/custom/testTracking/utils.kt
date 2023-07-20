@@ -16,10 +16,10 @@
 
 package testData.custom.testTracking
 
-import com.intellij.rt.coverage.data.ProjectData
+import com.intellij.rt.coverage.instrumentation.CoverageRuntime
 
 internal inline fun runTestTracking(name: String, action: () -> Unit) {
-    val data = ProjectData.getProjectData()
+    val data = CoverageRuntime.ourRuntime.myProjectData
     data.testStarted(name)
     try {
         action()

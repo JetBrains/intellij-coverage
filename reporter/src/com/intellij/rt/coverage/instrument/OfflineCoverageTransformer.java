@@ -41,7 +41,7 @@ public class OfflineCoverageTransformer extends CoverageTransformer {
   }
 
   @Override
-  protected CoverageDataAccess.Init createInit(String className, ClassReader cr) {
+  protected CoverageDataAccess.Init createInit(String className, ClassReader cr, boolean needCache) {
     final int length = getRequiredArrayLength(cr);
     return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, "com/intellij/rt/coverage/offline/RawProjectInit",
         "getOrCreateHitsMask", "(Ljava/lang/String;I)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className, length});

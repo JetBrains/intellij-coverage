@@ -16,7 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.dataAccess;
 
-import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.CoverageRuntime;
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.util.OptionsUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
@@ -30,19 +30,19 @@ public class DataAccessUtil {
 
   public static CoverageDataAccess createTestTrackingDataAccess(String className, ClassReader cr, boolean isArray) {
     if (OptionsUtil.FIELD_INSTRUMENTATION_ENABLED) {
-      return new FieldCoverageDataAccess(cr, className, isArray ? createTestTrackingArrayInit(className) : createTestTrackingInit(className));
+      return new FieldCoverageDataAccess(cr, className, isArray ? createTestTrackingArrayInit(className) : createTestTrackingInit(className, false));
     } else {
-      return new NameCoverageDataAccess(createTestTrackingInit(className));
+      return new NameCoverageDataAccess(createTestTrackingInit(className, true));
     }
   }
 
-  private static CoverageDataAccess.Init createTestTrackingInit(String className) {
-    return new CoverageDataAccess.Init(CLASS_DATA_NAME, InstrumentationUtils.OBJECT_TYPE, ProjectData.PROJECT_DATA_OWNER,
-        "loadClassData", "(Ljava/lang/String;)" + InstrumentationUtils.OBJECT_TYPE, new Object[]{className});
+  private static CoverageDataAccess.Init createTestTrackingInit(String className, boolean needCache) {
+    return new CoverageDataAccess.Init(CLASS_DATA_NAME, InstrumentationUtils.OBJECT_TYPE, CoverageRuntime.COVERAGE_RUNTIME_OWNER,
+        needCache ? "loadClassDataCached" : "loadClassData", "(Ljava/lang/String;)" + InstrumentationUtils.OBJECT_TYPE, new Object[]{className});
   }
 
   private static CoverageDataAccess.Init createTestTrackingArrayInit(String className) {
-    return new CoverageDataAccess.Init("__$traceMask$__", TEST_MASK_ARRAY_TYPE, ProjectData.PROJECT_DATA_OWNER,
+    return new CoverageDataAccess.Init("__$traceMask$__", TEST_MASK_ARRAY_TYPE, CoverageRuntime.COVERAGE_RUNTIME_OWNER,
         "getTraceMask", "(Ljava/lang/String;)" + TEST_MASK_ARRAY_TYPE, new Object[]{className});
   }
 }

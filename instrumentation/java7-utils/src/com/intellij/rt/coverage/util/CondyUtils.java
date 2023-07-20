@@ -16,13 +16,13 @@
 
 package com.intellij.rt.coverage.util;
 
-import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.CoverageRuntime;
 
 import java.lang.invoke.MethodHandles;
 
 @SuppressWarnings("unused")
 public class CondyUtils {
   public static int[] getHitsMask(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className) {
-    return ProjectData.getHitsMask(className);
+    return CoverageRuntime.getHitsMask(className);
   }
 }

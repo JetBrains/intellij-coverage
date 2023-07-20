@@ -91,7 +91,7 @@ public class Aggregator {
   }
 
   private static ProjectData copyProjectData(ProjectData projectData) {
-    final ProjectData projectDataCopy = ProjectData.createProjectData(true);
+    final ProjectData projectDataCopy = new ProjectData();
     for (ClassData classData : projectData.getClassesCollection()) {
       final ClassData classCopy = projectDataCopy.getOrCreateClassData(classData.getName());
       final LineData[] lines = (LineData[]) classData.getLines();

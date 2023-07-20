@@ -26,6 +26,8 @@ import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Method;
@@ -70,8 +72,13 @@ public class Instrumentator {
 
     final TestTrackingMode testTrackingMode = createTestTrackingMode(args.testTracking);
     final TestTrackingCallback callback = testTrackingMode == null ? null : testTrackingMode.createTestTrackingCallback();
-    final ProjectData data = ProjectData.createProjectData(args.dataFile, null, args.testTracking, args.branchCoverage, args.includePatterns, args.excludePatterns, callback);
+
+    final ProjectData data = new ProjectData(args.dataFile, args.branchCoverage, args.includePatterns, args.excludePatterns, callback);
     data.setAnnotationsToIgnore(args.annotationsToIgnore);
+    data.setInstructionsCoverage(OptionsUtil.INSTRUCTIONS_COVERAGE_ENABLED);
+    createDataFile(args.dataFile);
+    CoverageRuntime.installRuntime(data);
+
     final ClassFinder cf = new ClassFinder(args.includePatterns, args.excludePatterns);
 
     final CoverageReport report = new CoverageReport(args.dataFile, args.calcUnloaded, cf, args.mergeData);
@@ -85,6 +92,14 @@ public class Instrumentator {
     final boolean shouldSaveSource = args.sourceMap != null;
     final CoverageTransformer transformer = new CoverageTransformer(data, shouldSaveSource, args.excludePatterns, args.includePatterns, cf, testTrackingMode);
     addTransformer(instrumentation, transformer);
+  }
+
+  private void createDataFile(File dataFile) throws IOException {
+    if (dataFile != null && !dataFile.exists()) {
+      final File parentDir = dataFile.getParentFile();
+      if (parentDir != null && !parentDir.exists()) parentDir.mkdirs();
+      dataFile.createNewFile();
+    }
   }
 
   private void logPatterns(List<Pattern> patterns, String name) {
