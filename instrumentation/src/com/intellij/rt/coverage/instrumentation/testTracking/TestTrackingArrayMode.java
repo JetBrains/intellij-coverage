@@ -91,15 +91,7 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
 
           // call register
           mv.visitFieldInsn(Opcodes.GETSTATIC, myInternalClassName, DataAccessUtil.CLASS_DATA_NAME, InstrumentationUtils.OBJECT_TYPE);
-          mv.visitMethodInsn(Opcodes.INVOKESTATIC, CoverageRuntime.COVERAGE_RUNTIME_OWNER, "registerClassForTrace", "(" + InstrumentationUtils.OBJECT_TYPE + ")Z", false);
-
-          // if register is successful set array[0] = true
-          // it may be unsuccessful if no test is running now
-          mv.visitJumpInsn(Opcodes.IFEQ, skip);
-          mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
-          mv.visitInsn(Opcodes.ICONST_0);
-          mv.visitInsn(Opcodes.ICONST_1);
-          mv.visitInsn(Opcodes.BASTORE);
+          mv.visitMethodInsn(Opcodes.INVOKESTATIC, CoverageRuntime.COVERAGE_RUNTIME_OWNER, "registerClassForTrace", "(" + InstrumentationUtils.OBJECT_TYPE + ")V", false);
 
           mv.visitLabel(skip);
 

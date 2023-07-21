@@ -105,7 +105,7 @@ public class CoverageRuntime {
    * Returns true if a test is running now, then the class has been registered.
    */
   @SuppressWarnings("unused")
-  public static boolean registerClassForTrace(Object classData) {
+  public static void registerClassForTrace(Object classData) {
     if (ourRuntime != null) {
       final Map<Object, boolean[]> traces = ourRuntime.myProjectData.getTraces();
       if (traces != null) {
@@ -115,17 +115,16 @@ public class CoverageRuntime {
             // clear trace on register for a new test to prevent reporting about code running between tests
             Arrays.fill(trace, false);
           }
+          trace[0] = true;
         }
-        return true;
       }
-      return false;
+      return;
     }
     try {
       final Object runtimeObject = getRuntimeObject();
-      return (Boolean) REGISTER_CLASS_FOR_TRACE_METHOD.invoke(runtimeObject, new Object[]{classData});
+      REGISTER_CLASS_FOR_TRACE_METHOD.invoke(runtimeObject, new Object[]{classData});
     } catch (Exception e) {
       ErrorReporter.reportError("Error during test tracking in class " + classData.toString(), e);
-      return false;
     }
   }
 
