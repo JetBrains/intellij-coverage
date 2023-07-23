@@ -18,7 +18,6 @@ package com.intellij.rt.coverage.instrumentation.filters.classes;
 
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
-import com.intellij.rt.coverage.instrumentation.filters.lines.AnnotationIgnoredMethodFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
@@ -35,7 +34,8 @@ public class ClassIgnoredByAnnotationFilter implements ClassSignatureFilter {
   @Override
   public boolean shouldFilter(ClassReader cr, ProjectData projectData) {
     boolean ignoredAnonymous = isAnonymousClassInIgnoredMethod(cr, projectData);
-    if (!AnnotationIgnoredMethodFilter.hasIgnoreAnnotations(projectData) && !ignoredAnonymous) return false;
+    final List<Pattern> annotations = projectData.getAnnotationsToIgnore();
+    if (!(annotations != null && !annotations.isEmpty()) && !ignoredAnonymous) return false;
     String className = ClassNameUtil.convertToFQName(cr.getClassName());
     boolean ignored = ignoredAnonymous
         || isIgnoredCompanionObject(className, projectData)

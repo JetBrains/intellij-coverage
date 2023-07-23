@@ -60,4 +60,8 @@ public class LocalVariableInserter extends LocalVariablesSorter {
     }
     return myVariableIndex;
   }
+
+  public void loadFromLocal() {
+    mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
+  }
 }

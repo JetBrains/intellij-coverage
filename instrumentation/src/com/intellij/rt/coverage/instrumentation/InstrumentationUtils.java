@@ -30,16 +30,16 @@ public class InstrumentationUtils {
 
   /**
    * Util method for touching coverage counter which is stored in an int array.
+   * An array must be already loaded on stack.
    * This method has different strategies basing on <code>OptionsUtil.CALCULATE_HITS_COUNT</code> option:
    * when option is true, array counter is incremented,
    * otherwise the value is just set to 1.
    *
    * @param mv current method visitor
-   * @param lv local variable index to load int array
    * @param id index of a hit in the array
    */
-  public static void touchById(MethodVisitor mv, int lv, int id) {
-    mv.visitVarInsn(Opcodes.ALOAD, lv);
+  public static void touchById(MethodVisitor mv, int id) {
+    // stack: int[]
     InstrumentationUtils.pushInt(mv, id);
 
     if (OptionsUtil.CALCULATE_HITS_COUNT) {

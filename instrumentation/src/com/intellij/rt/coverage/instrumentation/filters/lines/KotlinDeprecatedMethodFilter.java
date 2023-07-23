@@ -16,38 +16,35 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.lines;
 
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
-import com.intellij.rt.coverage.instrumentation.filters.branches.KotlinDefaultArgsBranchFilter;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.filters.branches.KotlinDefaultArgsBranchFilter;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Filter methods marked with deprecated annotation.
  */
-@SuppressWarnings("unchecked")
-public class KotlinDeprecatedMethodFilter extends LinesFilter {
-  private static final String DEPRECATED_METHODS = "DEPRECATED_METHODS_SET";
-  private String myName;
-  private String myDesc;
+public class KotlinDeprecatedMethodFilter extends CoverageFilter {
   private boolean myShouldIgnore;
 
-  public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
+  @Override
+  public boolean isApplicable(InstrumentationData context) {
     return KotlinUtils.isKotlinClass(context);
   }
 
   @Override
-  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
-    super.initFilter(methodVisitor, context, name, desc);
-    myName = name;
-    myDesc = desc;
+  public void initFilter(MethodVisitor methodVisitor, InstrumentationData context) {
+    super.initFilter(methodVisitor, context);
+    String name = context.getMethodName();
     if (name.endsWith(KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX)) {
-      final Object property = myContext.getProperty(DEPRECATED_METHODS);
-      if (property != null) {
-        final HashSet<String> deprecatedMethods = (HashSet<String>) property;
+      Set<String> deprecatedMethods = myContext.get(Key.DEPRECATED_METHODS);
+      if (deprecatedMethods != null) {
         final String originalName = name.substring(0, name.length() - KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX.length());
         if (deprecatedMethods.contains(originalName)) {
           myContext.setIgnoreSection(true);
@@ -71,13 +68,12 @@ public class KotlinDeprecatedMethodFilter extends LinesFilter {
             myContext.setIgnoreSection(true);
             myShouldIgnore = true;
           }
-          Object property = myContext.getProperty(DEPRECATED_METHODS);
-          if (property == null) {
-            property = new HashSet<String>();
-            myContext.addProperty(DEPRECATED_METHODS, property);
+          Set<String> deprecatedMethods = myContext.get(Key.DEPRECATED_METHODS);
+          if (deprecatedMethods == null) {
+            deprecatedMethods = new HashSet<String>();
+            myContext.put(Key.DEPRECATED_METHODS, deprecatedMethods);
           }
-          final HashSet<String> deprecatedMethods = (HashSet<String>) property;
-          deprecatedMethods.add(myName);
+          deprecatedMethods.add(myContext.getMethodName());
         }
       }
     };
@@ -87,7 +83,7 @@ public class KotlinDeprecatedMethodFilter extends LinesFilter {
   public void visitCode() {
     super.visitCode();
     if (myShouldIgnore) {
-      myContext.getProjectData().getIgnoredStorage().addIgnoredMethod(myContext.getClassName(), myName, myDesc);
+      myContext.get(Key.PROJECT_DATA).getIgnoredStorage().addIgnoredMethod(myContext.get(Key.CLASS_NAME), myContext.getMethodName(), myContext.getMethodDesc());
     }
   }
 

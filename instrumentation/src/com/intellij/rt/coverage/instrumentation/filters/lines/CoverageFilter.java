@@ -16,25 +16,24 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.lines;
 
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 /**
  * Filter for undesirable lines. These filters are enabled in line and branch coverage mode.
  */
-public abstract class LinesFilter extends MethodVisitor {
-  protected Instrumenter myContext;
+public abstract class CoverageFilter extends MethodVisitor {
+  protected InstrumentationData myContext;
 
-  public LinesFilter() {
+  public CoverageFilter() {
     super(Opcodes.API_VERSION);
   }
 
-  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
+  public void initFilter(MethodVisitor methodVisitor, InstrumentationData context) {
     mv = methodVisitor;
     myContext = context;
   }
 
-  public abstract boolean isApplicable(Instrumenter context, int access, String name,
-                                       String desc, String signature, String[] exceptions);
+  public abstract boolean isApplicable(InstrumentationData context);
 }

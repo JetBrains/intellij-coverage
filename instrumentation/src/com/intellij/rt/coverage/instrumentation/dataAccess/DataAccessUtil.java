@@ -18,8 +18,9 @@ package com.intellij.rt.coverage.instrumentation.dataAccess;
 
 import com.intellij.rt.coverage.instrumentation.CoverageRuntime;
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.util.OptionsUtil;
-import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
 public class DataAccessUtil {
   public static final String HITS_ARRAY_TYPE = "[I";
@@ -28,9 +29,11 @@ public class DataAccessUtil {
   public static final String CLASS_DATA_NAME = "__$classData$__";
 
 
-  public static CoverageDataAccess createTestTrackingDataAccess(String className, ClassReader cr, boolean isArray) {
+  public static CoverageDataAccess createTestTrackingDataAccess(InstrumentationData data, boolean isArray) {
+    String className = data.get(Key.CLASS_NAME);
     if (OptionsUtil.FIELD_INSTRUMENTATION_ENABLED) {
-      return new FieldCoverageDataAccess(cr, className, isArray ? createTestTrackingArrayInit(className) : createTestTrackingInit(className, false));
+      CoverageDataAccess.Init init = isArray ? createTestTrackingArrayInit(className) : createTestTrackingInit(className, false);
+      return new FieldCoverageDataAccess(data.get(Key.CLASS_READER), className, init);
     } else {
       return new NameCoverageDataAccess(createTestTrackingInit(className, true));
     }

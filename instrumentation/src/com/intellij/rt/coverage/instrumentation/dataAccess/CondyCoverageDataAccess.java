@@ -28,12 +28,11 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  */
 public class CondyCoverageDataAccess extends CoverageDataAccess {
   private final ConstantDynamic myCondy;
-  private final Init myInit;
 
   public CondyCoverageDataAccess(Init init) {
+    super(init);
     final Handle handle = new Handle(Opcodes.H_INVOKESTATIC, init.initOwner, init.initName, init.initDesc, false);
     myCondy = new ConstantDynamic(init.name, InstrumentationUtils.OBJECT_TYPE, handle, init.params);
-    myInit = init;
   }
 
   @Override

@@ -16,7 +16,9 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.methods;
 
-import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
+import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.util.OptionsUtil;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -33,17 +35,21 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 public class KotlinLocalFunctionInsideIgnoredMethodFilter implements MethodFilter {
 
   @Override
-  public boolean shouldFilter(int access, String name, String desc, String signature, String[] exceptions, MethodFilteringVisitor context) {
+  public boolean shouldFilter(InstrumentationData data) {
     if (!OptionsUtil.IGNORE_LOCAL_FUNCTIONS_IN_IGNORED_METHODS) return false;
+    int access = data.getMethodAccess();
     if (!((access & Opcodes.ACC_PRIVATE) != 0
         && (access & Opcodes.ACC_FINAL) != 0
         && (access & Opcodes.ACC_STATIC) != 0)) return false;
     int idx = -1;
+    String name = data.getMethodName();
+    String className = data.get(Key.CLASS_NAME);
+    ProjectData projectData = data.get(Key.PROJECT_DATA);
     while (true) {
       idx = name.indexOf('$', idx + 1);
       if (idx < 0) return false;
       String outerMethodName = name.substring(0, idx);
-      if (context.getProjectData().getIgnoredStorage().isMethodIgnored(context.getClassName(), outerMethodName)) return true;
+      if (projectData.getIgnoredStorage().isMethodIgnored(className, outerMethodName)) return true;
     }
   }
 }

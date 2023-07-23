@@ -45,15 +45,15 @@ public class FilterUtils {
     return result;
   }
 
-  public static List<LinesFilter> createLineFilters() {
-    List<LinesFilter> result = KotlinUtils.createLineFilters();
+  public static List<CoverageFilter> createLineFilters() {
+    List<CoverageFilter> result = KotlinUtils.createLineFilters();
     result.add(new ClosingBracesFilter());
     result.add(new AnnotationIgnoredMethodFilter());
     return result;
   }
 
-  public static List<BranchesFilter> createBranchFilters() {
-    List<BranchesFilter> result = KotlinUtils.createBranchFilters();
+  public static List<CoverageFilter> createBranchFilters() {
+    List<CoverageFilter> result = KotlinUtils.createBranchFilters();
     result.add(new NotNullAssertionsFilter());
     result.add(new BooleanInvertFilter());
     return result;

@@ -16,15 +16,15 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.methods;
 
-import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class DeserializeLambdaFilter implements MethodFilter {
-  public boolean shouldFilter(int access, String name, String desc, String signature, String[] exceptions, MethodFilteringVisitor context) {
-
+  public boolean shouldFilter(InstrumentationData data) {
+    int access = data.getMethodAccess();
     return (access & Opcodes.ACC_STATIC) != 0
         && (access & Opcodes.ACC_SYNTHETIC) != 0
-        && "$deserializeLambda$".equals(name)
-        && "(Ljava/lang/invoke/SerializedLambda;)Ljava/lang/Object;".equals(desc);
+        && "$deserializeLambda$".equals(data.getMethodName())
+        && "(Ljava/lang/invoke/SerializedLambda;)Ljava/lang/Object;".equals(data.getMethodDesc());
   }
 }

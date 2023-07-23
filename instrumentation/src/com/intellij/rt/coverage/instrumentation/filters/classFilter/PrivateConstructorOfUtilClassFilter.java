@@ -17,7 +17,8 @@
 package com.intellij.rt.coverage.instrumentation.filters.classFilter;
 
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
@@ -40,7 +41,7 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
   private String myName;
 
   @Override
-  public boolean isApplicable(Instrumenter context) {
+  public boolean isApplicable(InstrumentationData context) {
     return true;
   }
 
@@ -78,7 +79,7 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
         && myConstructorLines != null
         && !isSealedClassConstructor()) {
       for (int line : myConstructorLines) {
-        if (myIsKotlinObject && myIsKotlinClass && myContext.linesCount() <= 1) continue;
+        if (myIsKotlinObject && myIsKotlinClass && myContext.getLineCount() <= 1) continue;
         myContext.removeLine(line);
       }
     }
@@ -95,7 +96,8 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
    * Do not filter generated sealed class private constructor, as it is unrelated to util classes
    */
   private boolean isSealedClassConstructor() {
-    if (myContext != null && KotlinUtils.isSealedClass(myContext)) return true;
+    Boolean value = myContext.get(Key.IS_SEALED_CLASS);
+    if (value != null && value) return true;
     // if a sealed class has no derived classes, it is not marked,
     // so we have to filter such a case here
     return myIsAbstractClass && myIsKotlinClass;

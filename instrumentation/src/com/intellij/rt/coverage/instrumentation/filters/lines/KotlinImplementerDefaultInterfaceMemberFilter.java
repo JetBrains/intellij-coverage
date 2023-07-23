@@ -17,7 +17,8 @@
 package com.intellij.rt.coverage.instrumentation.filters.lines;
 
 import com.intellij.rt.coverage.data.LineData;
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
@@ -38,7 +39,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Type;
  * </ol>
  * A method is filtered out if its instructions list matches this structure.
  */
-public class KotlinImplementerDefaultInterfaceMemberFilter extends LinesFilter {
+public class KotlinImplementerDefaultInterfaceMemberFilter extends CoverageFilter {
   private enum State {
     SHOULD_COVER, SHOULD_NOT_COVER, UNKNOWN
   }
@@ -51,16 +52,16 @@ public class KotlinImplementerDefaultInterfaceMemberFilter extends LinesFilter {
   private int myLoadArgIndex;
 
   @Override
-  public boolean isApplicable(Instrumenter context, int access, String name,
-                              String desc, String signature, String[] exceptions) {
-    return KotlinUtils.isKotlinClass(context) && context.hasInterfaces();
+  public boolean isApplicable(InstrumentationData context) {
+    String[] interfaces = context.get(Key.INTERFACES);
+    return KotlinUtils.isKotlinClass(context) && interfaces != null && interfaces.length > 0;
   }
 
   @Override
-  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
-    super.initFilter(methodVisitor, context, name, desc);
+  public void initFilter(MethodVisitor methodVisitor, InstrumentationData context) {
+    super.initFilter(methodVisitor, context);
     myState = State.UNKNOWN;
-    myLoadArgsNumber = Type.getArgumentTypes(desc).length + 1;
+    myLoadArgsNumber = Type.getArgumentTypes(context.getMethodDesc()).length + 1;
     myLoadArgIndex = 0;
   }
 

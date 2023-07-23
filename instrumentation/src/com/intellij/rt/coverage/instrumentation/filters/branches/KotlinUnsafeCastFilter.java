@@ -17,11 +17,10 @@
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
-import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 /**
@@ -36,18 +35,12 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  *   <li>ATHROW</li>
  * </ol>
  */
-public class KotlinUnsafeCastFilter extends BranchesFilter {
+public class KotlinUnsafeCastFilter extends CoverageFilter {
   private int myState = 0;
 
   @Override
-  public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
+  public boolean isApplicable(InstrumentationData context) {
     return KotlinUtils.isKotlinClass(context);
-  }
-
-  @Override
-  public void initFilter(MethodVisitor mv, Instrumenter context, BranchDataContainer branchData) {
-    super.initFilter(mv, context, branchData);
-    myState = 0;
   }
 
   @Override
@@ -57,7 +50,7 @@ public class KotlinUnsafeCastFilter extends BranchesFilter {
     if (myState == 2 && opcode == Opcodes.DUP) {
       myState++;
     } else if (myState == 5 && opcode == Opcodes.ATHROW) {
-      myBranchData.removeLastJump();
+      myContext.removeLastJump();
       myState = 0;
     } else {
       myState = 0;

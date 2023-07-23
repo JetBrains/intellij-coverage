@@ -18,11 +18,11 @@ package com.intellij.rt.coverage.instrumentation.testTracking;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
-import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.*;
-import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
+import com.intellij.rt.coverage.instrumentation.CoverageRuntime;
+import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccessVisitor;
 import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
-import com.intellij.rt.coverage.instrumentation.util.LocalVariableInserter;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
@@ -55,58 +55,35 @@ public class TestTrackingClassDataMode implements TestTrackingMode {
     };
   }
 
-  public Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldSaveSource, CoverageDataAccess dataAccess) {
-    return new TestTrackingClassDataInstrumenter(projectData, classVisitor, cr, className, shouldSaveSource, dataAccess);
+  public ClassVisitor createInstrumenter(ClassVisitor classVisitor, InstrumentationData data) {
+    return new TestTrackingClassDataInstrumenter(classVisitor, data);
   }
 }
 
-class TestTrackingClassDataInstrumenter extends BranchesInstrumenter {
-  protected static final String CLASS_DATA_LOCAL_VARIABLE_NAME = "__$classDataLocal$__";
+class TestTrackingClassDataInstrumenter extends ClassVisitor {
+  private final InstrumentationData myData;
+  private final CoverageDataAccessVisitor myDataAccess;
 
-  protected final CoverageDataAccess myDataAccess;
-
-  public TestTrackingClassDataInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldSaveSource, CoverageDataAccess dataAccess) {
-    super(projectData, classVisitor, className, shouldSaveSource, dataAccess);
-    myDataAccess = DataAccessUtil.createTestTrackingDataAccess(className, cr, false);
+  public TestTrackingClassDataInstrumenter(ClassVisitor classVisitor, InstrumentationData data) {
+    super(Opcodes.API_VERSION, new CoverageDataAccessVisitor(classVisitor, DataAccessUtil.createTestTrackingDataAccess(data, false)));
+    myData = data;
+    myDataAccess = (CoverageDataAccessVisitor) cv;
   }
 
   @Override
-  public MethodVisitor createInstrumentingVisitor(MethodVisitor mv,
-                                                  final BranchesEnumerator enumerator,
-                                                  final int access,
-                                                  final String name,
-                                                  final String desc) {
-    mv = super.createInstrumentingVisitor(mv, enumerator, access, name, desc);
-    return createMethodTransformer(mv, enumerator, access, name, desc);
-  }
-
-  protected MethodVisitor createMethodTransformer(final MethodVisitor mv, BranchesEnumerator enumerator, final int access, String name, final String desc) {
-    if (enumerator.hasNoLines()) {
-      return myDataAccess.createMethodVisitor(mv, name, false);
-    }
-    final MethodVisitor visitor = new LocalVariableInserter(mv, access, desc, CLASS_DATA_LOCAL_VARIABLE_NAME, InstrumentationUtils.OBJECT_TYPE) {
+  public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+    MethodVisitor methodVisitor = super.visitMethod(access, name, descriptor, signature, exceptions);
+    return new MethodVisitor(Opcodes.API_VERSION, methodVisitor) {
       public void visitLineNumber(final int line, final Label start) {
-        final LineData lineData = getLineData(line);
+        LineData lineData = myData.getLineData(line);
         if (lineData != null) {
-          mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
+          myDataAccess.loadFromLocal();
           InstrumentationUtils.pushInt(mv, line);
           mv.visitMethodInsn(Opcodes.INVOKESTATIC, CoverageRuntime.COVERAGE_RUNTIME_OWNER, "traceLine", "(" + InstrumentationUtils.OBJECT_TYPE + "I)V", false);
         }
         super.visitLineNumber(line, start);
       }
-
-      public void visitCode() {
-        myDataAccess.onMethodStart(mv, getLVIndex());
-        super.visitCode();
-      }
     };
-    return myDataAccess.createMethodVisitor(visitor, name, true);
-  }
-
-  @Override
-  public void visitEnd() {
-    myDataAccess.onClassEnd(this);
-    super.visitEnd();
   }
 }
 

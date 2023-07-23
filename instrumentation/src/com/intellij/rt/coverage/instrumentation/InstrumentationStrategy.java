@@ -17,11 +17,14 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.ClassFilter;
 import com.intellij.rt.coverage.instrumentation.filters.classes.ClassSignatureFilter;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
+import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 
@@ -33,7 +36,7 @@ public class InstrumentationStrategy {
   /**
    * Create instrumenter for class or return null if class should be ignored.
    */
-  static ClassVisitor createInstrumenter(ProjectData data, String className,
+  static ClassVisitor createInstrumenter(ProjectData projectData, String className,
                                          ClassReader cr, ClassVisitor cw, TestTrackingMode testTrackingMode,
                                          boolean branchCoverage,
                                          boolean shouldSaveSource,
@@ -42,25 +45,24 @@ public class InstrumentationStrategy {
     // cw = new TraceClassVisitor(cw, new PrintWriter(System.err));
 
     for (ClassSignatureFilter filter : ourFilters) {
-      if (filter.shouldFilter(cr, data)) return null;
+      if (filter.shouldFilter(cr, projectData)) return null;
     }
-    final Instrumenter instrumenter;
-    if (branchCoverage) {
-      if (testTrackingMode != null) {
-        instrumenter = testTrackingMode.createInstrumenter(data, cw, cr, className, shouldSaveSource, dataAccess);
-      } else {
-        instrumenter = new BranchesInstrumenter(data, cw, className, shouldSaveSource, dataAccess);
-      }
-    } else {
-      instrumenter = new LineInstrumenter(data, cw, className, shouldSaveSource, dataAccess);
+    InstrumentationData data = new InstrumentationData(projectData);
+    data.put(Key.PROJECT_DATA, projectData);
+    data.put(Key.CLASS_READER, cr);
+    data.put(Key.CLASS_NAME, className);
+    data.put(Key.CLASS_INTERNAL_NAME, ClassNameUtil.convertToInternalName(className));
+
+    if (testTrackingMode != null) {
+      cw = testTrackingMode.createInstrumenter(cw, data);
     }
-    ClassVisitor result = instrumenter;
+    cw = new Instrumenter(cw, dataAccess, data, projectData, branchCoverage, shouldSaveSource);
     for (ClassFilter cv : FilterUtils.createClassFilters()) {
-      if (cv.isApplicable(instrumenter)) {
-        cv.initFilter(instrumenter, result);
-        result = cv;
+      if (cv.isApplicable(data)) {
+        cv.initFilter(cw, data);
+        cw = cv;
       }
     }
-    return result;
+    return cw;
   }
 }

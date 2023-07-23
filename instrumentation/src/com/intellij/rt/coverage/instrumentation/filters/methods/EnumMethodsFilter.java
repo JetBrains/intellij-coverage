@@ -16,16 +16,18 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.methods;
 
-import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
-import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class EnumMethodsFilter implements MethodFilter {
-  public boolean shouldFilter(int access, String name, String desc, String signature, String[] exceptions, MethodFilteringVisitor context) {
-    return context.isEnum() && isDefaultEnumMethod(name, desc, signature, context.getClassName());
-  }
-
-  private static boolean isDefaultEnumMethod(String name, String desc, String signature, String className) {
-    final String internalName = ClassNameUtil.convertToInternalName(className);
+  public boolean shouldFilter(InstrumentationData data) {
+    int classAccess = data.get(Key.CLASS_ACCESS);
+    if ((classAccess & Opcodes.ACC_ENUM) == 0) return false;
+    String name = data.getMethodName();
+    String desc = data.getMethodDesc();
+    String signature = data.get(Key.METHOD_SIGNATURE);
+    final String internalName = data.get(Key.CLASS_INTERNAL_NAME);
     return name.equals("values") && desc.equals("()[L" + internalName + ";") ||
         name.equals("valueOf") && desc.equals("(Ljava/lang/String;)L" + internalName + ";") ||
         name.equals("<init>") && signature != null && signature.equals("()V");

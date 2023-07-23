@@ -19,8 +19,9 @@ package com.intellij.rt.coverage.instrumentation.filters.branches;
 import com.intellij.rt.coverage.data.JumpData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.SwitchData;
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -32,7 +33,7 @@ import java.util.Map;
  * There could be an if or switch branch leading to a throw.
  * Alternatively, there could be an if, jumping over the throw.
  */
-public class KotlinWhenMappingExceptionFilter extends BranchesFilter {
+public class KotlinWhenMappingExceptionFilter extends CoverageFilter {
   private Map<Label, PositionData> myJumpLabels;
   private Map<Label, PositionData> mySwitchLabels;
   private Label myCurrentLabel = null;
@@ -41,7 +42,7 @@ public class KotlinWhenMappingExceptionFilter extends BranchesFilter {
   private Label myJumpLabel;
 
   @Override
-  public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
+  public boolean isApplicable(InstrumentationData context) {
     return KotlinUtils.isKotlinClass(context);
   }
 
@@ -56,7 +57,7 @@ public class KotlinWhenMappingExceptionFilter extends BranchesFilter {
     super.visitLabel(label);
     myCurrentLabel = label;
     if (myState == 2 && label == myJumpLabel) {
-      myBranchData.removeLastJump();
+      myContext.removeLastJump();
     }
     myState = 0;
   }

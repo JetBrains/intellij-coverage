@@ -17,7 +17,8 @@
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -35,13 +36,13 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * <li>ATHROW</li>
  * </ol>
  */
-public class KotlinOpenMemberWithDefaultArgsFilter extends BranchesFilter {
+public class KotlinOpenMemberWithDefaultArgsFilter extends CoverageFilter {
   private int myState = 0;
 
 
   @Override
-  public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
-    return KotlinDefaultArgsBranchFilter.isApplicable(context, access, name, desc);
+  public boolean isApplicable(InstrumentationData context) {
+    return KotlinDefaultArgsBranchFilter.isFilterApplicable(context);
   }
 
   @Override
@@ -92,7 +93,7 @@ public class KotlinOpenMemberWithDefaultArgsFilter extends BranchesFilter {
       return;
     }
     if (myState == 7 && opcode == Opcodes.ATHROW) {
-      myBranchData.removeLastJump();
+      myContext.removeLastJump();
     }
     myState = 0;
   }

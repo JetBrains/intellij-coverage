@@ -25,6 +25,16 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
  * so that different strategies could be implemented.
  */
 public abstract class CoverageDataAccess {
+  protected final Init myInit;
+
+  public CoverageDataAccess(Init init) {
+    myInit = init;
+  }
+
+  public Init getInit() {
+    return myInit;
+  }
+
   /**
    * This method should access coverage data and store it to a local variable.
    */

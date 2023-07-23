@@ -28,9 +28,9 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  */
 public class FieldCoverageDataAccess extends CoverageDataAccess {
   private final ExtraFieldInstrumenter myExtraFieldInstrumenter;
-  private final Init myInit;
 
   public FieldCoverageDataAccess(ClassReader cr, final String className, final Init init) {
+    super(init);
     myExtraFieldInstrumenter = new ExtraFieldInstrumenter(cr, null, className, init.name, init.desc, true) {
 
       public void initField(MethodVisitor mv) {
@@ -42,7 +42,6 @@ public class FieldCoverageDataAccess extends CoverageDataAccess {
         mv.visitFieldInsn(Opcodes.PUTSTATIC, getInternalClassName(), init.name, init.desc);
       }
     };
-    myInit = init;
   }
 
   @Override

@@ -119,6 +119,7 @@ public class ProjectData implements CoverageData, Serializable {
   public boolean isInstructionsCoverageEnabled() {
     return myCollectInstructions;
   }
+
   public void setInstructionsCoverage(boolean collectInstructions) {
     myCollectInstructions = collectInstructions;
   }

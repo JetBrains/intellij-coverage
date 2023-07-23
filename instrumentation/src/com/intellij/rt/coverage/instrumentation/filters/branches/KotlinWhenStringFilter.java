@@ -16,8 +16,9 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -43,13 +44,13 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  *  <li>[OPTIONAL for the last branch]GOTO (default label)</li>
  * </ol>
  */
-public class KotlinWhenStringFilter extends BranchesFilter {
+public class KotlinWhenStringFilter extends CoverageFilter {
   private int myState = 0;
   private Label myJumpLabel;
   private Label myDefaultLabel;
 
   @Override
-  public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
+  public boolean isApplicable(InstrumentationData context) {
     return KotlinUtils.isKotlinClass(context);
   }
 
@@ -61,12 +62,12 @@ public class KotlinWhenStringFilter extends BranchesFilter {
       myState++;
     } else if (myState == 5 && opcode == Opcodes.IFEQ && label == myDefaultLabel) {
       myState = 0;
-      myBranchData.removeLastJump();
+      myContext.removeLastJump();
     } else if (myState == 5 && opcode == Opcodes.IFNE) {
       myState++;
     } else if (myState == 6 && opcode == Opcodes.GOTO && label == myDefaultLabel) {
       myState = 3;
-      myBranchData.removeLastJump();
+      myContext.removeLastJump();
     } else {
       myState = 0;
     }
@@ -109,7 +110,7 @@ public class KotlinWhenStringFilter extends BranchesFilter {
     if (myState == 2) {
       if (myJumpLabel == dflt) {
         myJumpLabel = null;
-        myBranchData.removeLastJump();
+        myContext.removeLastJump();
       }
       myDefaultLabel = dflt;
       myState++;

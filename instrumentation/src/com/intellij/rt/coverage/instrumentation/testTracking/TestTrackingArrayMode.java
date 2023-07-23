@@ -18,17 +18,17 @@ package com.intellij.rt.coverage.instrumentation.testTracking;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
-import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.instrumentation.BranchesEnumerator;
 import com.intellij.rt.coverage.instrumentation.CoverageRuntime;
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
-import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
+import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccessVisitor;
 import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
-import com.intellij.rt.coverage.util.ClassNameUtil;
-import com.intellij.rt.coverage.instrumentation.util.LocalVariableInserter;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
-import org.jetbrains.coverage.org.objectweb.asm.*;
+import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Label;
+import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 /**
  * Instrument class code with a boolean array field.
@@ -54,33 +54,35 @@ public class TestTrackingArrayMode implements TestTrackingMode {
     };
   }
 
-  public Instrumenter createInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldSaveSource, CoverageDataAccess dataAccess) {
-    return new TestTrackingArrayInstrumenter(projectData, classVisitor, cr, className, shouldSaveSource, dataAccess);
+  public ClassVisitor createInstrumenter(ClassVisitor classVisitor, InstrumentationData data) {
+    return new TestTrackingArrayInstrumenter(classVisitor, data);
   }
 }
 
-class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
-  private static final String TRACE_MASK_LOCAL_VARIABLE_NAME = "__$traceMaskLocal$__";
+class TestTrackingArrayInstrumenter extends ClassVisitor {
+  private final InstrumentationData myData;
+  private final CoverageDataAccessVisitor myClassDataAccess;
+  private final CoverageDataAccessVisitor myArrayDataAccess;
+  private int myMaxLine;
 
-  private final CoverageDataAccess myArrayDataAccess;
-  private final String myInternalClassName;
-
-  public TestTrackingArrayInstrumenter(ProjectData projectData, ClassVisitor classVisitor, ClassReader cr, String className, boolean shouldSaveSource, CoverageDataAccess dataAccess) {
-    super(projectData, classVisitor, cr, className, shouldSaveSource, dataAccess);
-    myInternalClassName = ClassNameUtil.convertToInternalName(className);
-    myArrayDataAccess = DataAccessUtil.createTestTrackingDataAccess(className, cr, true);
+  public TestTrackingArrayInstrumenter(ClassVisitor classVisitor, InstrumentationData data) {
+    super(Opcodes.API_VERSION, new CoverageDataAccessVisitor(new CoverageDataAccessVisitor(classVisitor, DataAccessUtil.createTestTrackingDataAccess(data, false)), DataAccessUtil.createTestTrackingDataAccess(data, true)));
+    myData = data;
+    myClassDataAccess = (CoverageDataAccessVisitor) cv.getDelegate();
+    myArrayDataAccess = (CoverageDataAccessVisitor) cv;
   }
 
-  protected MethodVisitor createMethodTransformer(final MethodVisitor mv, BranchesEnumerator enumerator, final int access, String name, final String desc) {
-    if (enumerator.hasNoLines()) {
-      return myArrayDataAccess.createMethodVisitor(super.myDataAccess.createMethodVisitor(mv, name, false), name, false);
-    }
-    final MethodVisitor visitor = new LocalVariableInserter(mv, access, desc, TRACE_MASK_LOCAL_VARIABLE_NAME, DataAccessUtil.TEST_MASK_ARRAY_TYPE) {
+  @Override
+  public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+    MethodVisitor methodVisitor = super.visitMethod(access, name, descriptor, signature, exceptions);
+    return new MethodVisitor(Opcodes.API_VERSION, methodVisitor) {
       public void visitLineNumber(final int line, final Label start) {
-        LineData lineData = getLineData(line);
+        LineData lineData = myData.getLineData(line);
         if (lineData != null) {
+          if (line > myMaxLine) myMaxLine = line;
+
           // load trace mask array
-          mv.visitVarInsn(Opcodes.ALOAD, getLVIndex());
+          myArrayDataAccess.loadFromLocal();
 
           // check if register method should be called. array[0] == false => register has not been called
           mv.visitInsn(Opcodes.DUP);
@@ -90,7 +92,7 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
           mv.visitJumpInsn(Opcodes.IFNE, skip);
 
           // call register
-          mv.visitFieldInsn(Opcodes.GETSTATIC, myInternalClassName, DataAccessUtil.CLASS_DATA_NAME, InstrumentationUtils.OBJECT_TYPE);
+          myClassDataAccess.loadFromLocal();
           mv.visitMethodInsn(Opcodes.INVOKESTATIC, CoverageRuntime.COVERAGE_RUNTIME_OWNER, "registerClassForTrace", "(" + InstrumentationUtils.OBJECT_TYPE + ")V", false);
 
           mv.visitLabel(skip);
@@ -102,24 +104,12 @@ class TestTrackingArrayInstrumenter extends TestTrackingClassDataInstrumenter {
         }
         super.visitLineNumber(line, start);
       }
-
-      public void visitCode() {
-        myArrayDataAccess.onMethodStart(mv, getLVIndex());
-        super.visitCode();
-      }
     };
-    return myArrayDataAccess.createMethodVisitor(super.myDataAccess.createMethodVisitor(visitor, name, true), name, true);
   }
 
   @Override
   public void visitEnd() {
-    myArrayDataAccess.onClassEnd(this);
     super.visitEnd();
-  }
-
-  @Override
-  protected void initLineData() {
-    myClassData.createTraceMask(myMaxLineNumber + 1);
-    super.initLineData();
+    myData.get(Key.PROJECT_DATA).getOrCreateClassData(myData.get(Key.CLASS_NAME)).createTraceMask(1 + myMaxLine);
   }
 }

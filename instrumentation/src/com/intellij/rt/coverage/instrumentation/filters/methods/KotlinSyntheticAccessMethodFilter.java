@@ -16,14 +16,14 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.methods;
 
-import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class KotlinSyntheticAccessMethodFilter implements MethodFilter {
-  public boolean shouldFilter(int access, String name, String desc, String signature, String[] exceptions, MethodFilteringVisitor context) {
-    return (access & Opcodes.ACC_SYNTHETIC) != 0
-        && KotlinUtils.isKotlinClass(context)
-        && name.startsWith("access$");
+  public boolean shouldFilter(InstrumentationData data) {
+    return (data.getMethodAccess() & Opcodes.ACC_SYNTHETIC) != 0
+        && KotlinUtils.isKotlinClass(data)
+        && data.getMethodName().startsWith("access$");
   }
 }

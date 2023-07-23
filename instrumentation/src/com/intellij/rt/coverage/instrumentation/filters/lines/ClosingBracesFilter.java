@@ -16,7 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.lines;
 
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -24,7 +24,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * This filter ignores lines which consist of return statement only.
  * If a method contains only one line, it cannot be ignored.
  */
-public class ClosingBracesFilter extends LinesFilter {
+public class ClosingBracesFilter extends CoverageFilter {
   private boolean myHasInstructions;
   private int myCurrentLine = -1;
   private boolean mySeenReturn;
@@ -143,8 +143,7 @@ public class ClosingBracesFilter extends LinesFilter {
   }
 
   @Override
-  public boolean isApplicable(Instrumenter context, int access, String name,
-                              String desc, String signature, String[] exceptions) {
+  public boolean isApplicable(InstrumentationData context) {
     return true;
   }
 }

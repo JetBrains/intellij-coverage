@@ -17,9 +17,9 @@
 package com.intellij.rt.coverage.instrumentation.filters.lines;
 
 import com.intellij.rt.coverage.data.LineData;
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.filters.branches.KotlinDefaultArgsBranchFilter;
-import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
@@ -29,7 +29,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * <p>
  * Kotlin 1.6 includes extra line, and all the generated code is located at that line.
  */
-public class KotlinDefaultArgsLineFilter extends LinesFilter {
+public class KotlinDefaultArgsLineFilter extends CoverageFilter {
   private int myFirstLine = -1;
   private int myCurrentLine = -1;
   private int myState = 0;
@@ -48,13 +48,15 @@ public class KotlinDefaultArgsLineFilter extends LinesFilter {
   private int myMinMaskIndex = -1;
 
 
-  public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
-    return KotlinDefaultArgsBranchFilter.isApplicable(context, access, name, desc);
+  public boolean isApplicable(InstrumentationData context) {
+    return KotlinDefaultArgsBranchFilter.isFilterApplicable(context);
   }
 
   @Override
-  public void initFilter(MethodVisitor methodVisitor, Instrumenter context, String name, String desc) {
-    super.initFilter(methodVisitor, context, name, desc);
+  public void initFilter(MethodVisitor methodVisitor, InstrumentationData context) {
+    super.initFilter(methodVisitor, context);
+    String name = context.getMethodName();
+    String desc = context.getMethodDesc();
     myNameDesc = KotlinDefaultArgsBranchFilter.getOriginalNameAndDesc(name, desc);
     myName = myNameDesc.substring(0, myNameDesc.indexOf('('));
     final int[] range = KotlinDefaultArgsBranchFilter.getMaskIndexRange(name, desc);
@@ -177,7 +179,7 @@ public class KotlinDefaultArgsLineFilter extends LinesFilter {
   public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
     super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
     if (myCurrentLine != myFirstLine) return;
-    if (myState == 10 && myName.equals(name) && ClassNameUtil.convertToInternalName(myContext.getClassName()).equals(owner)) {
+    if (myState == 10 && myName.equals(name) && myContext.get(Key.CLASS_INTERNAL_NAME).equals(owner)) {
       myState = 11;
       return;
     }

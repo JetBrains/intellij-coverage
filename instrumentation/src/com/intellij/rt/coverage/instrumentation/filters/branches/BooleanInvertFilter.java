@@ -16,8 +16,8 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
-import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -32,14 +32,14 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * <li>LABEL_2</li>
  * </ol>
  */
-public class BooleanInvertFilter extends BranchesFilter {
+public class BooleanInvertFilter extends CoverageFilter {
   private Label myTrueLabel;
   private Label myFalseLabel;
   private int myState = 0;
 
 
   @Override
-  public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
+  public boolean isApplicable(InstrumentationData context) {
     return true;
   }
 
@@ -75,7 +75,7 @@ public class BooleanInvertFilter extends BranchesFilter {
     if (label == myFalseLabel && myState == 3) {
       myState = 4;
     } else if (label == myTrueLabel && myState == 5) {
-      myBranchData.removeLastJump();
+      myContext.removeLastJump();
       myState = 0;
     } else {
       myState = 0;

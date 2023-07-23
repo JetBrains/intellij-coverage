@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2020 JetBrains s.r.o.
+ * Copyright 2000-2023 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage.instrumentation.filters;
+package com.intellij.rt.coverage.instrumentation.filters.lines;
 
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
+import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import org.jetbrains.coverage.org.objectweb.asm.Type;
 
@@ -27,7 +28,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Type;
  * Filter out generated Kotlin coroutines state machines.
  * Namely, TABLESWITCH on state and 'if suspend' checks are ignored.
  */
-public abstract class KotlinCoroutinesFilter extends MethodVisitor {
+public class KotlinCoroutinesFilter extends CoverageFilter {
   private boolean myGetCoroutinesSuspendedVisited = false;
   private boolean myStoreCoroutinesSuspendedVisited = false;
   private boolean myLoadCoroutinesSuspendedVisited = false;
@@ -36,33 +37,19 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
   private int myCoroutinesSuspendedIndex = -1;
   private int myLine = -1;
   private boolean myHadLineDataBefore = false;
-  private final Instrumenter myContext;
 
   private int myState = 0;
   private boolean myHasInstructions;
-
-  public KotlinCoroutinesFilter(MethodVisitor methodVisitor, Instrumenter instrumenter) {
-    super(Opcodes.API_VERSION, methodVisitor);
-    myContext = instrumenter;
-  }
-
-
-  protected abstract void onIgnoredJump();
-
-  protected abstract void onIgnoredSwitch(Label dflt, Label... labels);
-
-  protected void onIgnoredLine(int line) {
-    myContext.removeLine(line);
-  }
 
   /**
    * This filter is applicable for suspend methods of Kotlin class.
    * It could be a suspend lambda, then it's name is 'invokeSuspend'.
    * Or it could be a suspend method, then it's last parameter is a Continuation.
    */
-  public static boolean isApplicable(Instrumenter context, String name, String desc) {
+  @Override
+  public boolean isApplicable(InstrumentationData context) {
     return KotlinUtils.isKotlinClass(context)
-        && (name.equals("invokeSuspend") || desc.endsWith("Lkotlin/coroutines/Continuation;)" + InstrumentationUtils.OBJECT_TYPE));
+        && (context.getMethodName().equals("invokeSuspend") || context.getMethodDesc().endsWith("Lkotlin/coroutines/Continuation;)" + InstrumentationUtils.OBJECT_TYPE));
   }
 
   @Override
@@ -126,7 +113,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
     myHasInstructions = true;
     boolean compareWithCoroutinesSuspend = myLoadCoroutinesSuspendedVisited || myGetCoroutinesSuspendedVisited;
     if (compareWithCoroutinesSuspend && mySuspendCallVisited && opcode == Opcodes.IF_ACMPNE) {
-      onIgnoredJump();
+      myContext.removeLastJump();
       mySuspendCallVisited = false;
     }
     myLoadCoroutinesSuspendedVisited = false;
@@ -138,7 +125,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
     myHasInstructions = true;
     final boolean labelVisited = name.equals("label")
         && descriptor.equals("I")
-        && Type.getObjectType(owner).getClassName().startsWith(myContext.getClassName());
+        && Type.getObjectType(owner).getClassName().startsWith(myContext.get(Key.CLASS_NAME));
     myLoadStateLabelVisited = labelVisited && opcode == Opcodes.GETFIELD;
   }
 
@@ -150,7 +137,7 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
     super.visitTableSwitchInsn(min, max, dflt, labels);
     myHasInstructions = true;
     if (myLoadStateLabelVisited) {
-      onIgnoredSwitch(dflt, labels);
+      myContext.removeLastSwitch(dflt, labels);
       if (!myHadLineDataBefore) {
         onIgnoredLine(myLine);
       }
@@ -226,5 +213,9 @@ public abstract class KotlinCoroutinesFilter extends MethodVisitor {
     super.visitMultiANewArrayInsn(descriptor, numDimensions);
     myHasInstructions = true;
     myState = 0;
+  }
+
+  private void onIgnoredLine(int line) {
+    myContext.removeLine(line);
   }
 }

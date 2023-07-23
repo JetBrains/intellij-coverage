@@ -16,11 +16,10 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
-import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
-import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
+import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 /**
@@ -34,22 +33,15 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * </ol>
  * A corresponding jump is filtered out if it's instructions list matches this structure.
  */
-public class NotNullAssertionsFilter extends BranchesFilter {
+public class NotNullAssertionsFilter extends CoverageFilter {
   private static final byte SEEN_NOTHING = 0;
   private static final byte DUP_SEEN = 1;
   private static final byte IFNONNULL_SEEN = 2;
   private static final byte PARAM_CONST_SEEN = 3;
   private static final byte ASSERTIONS_DISABLED_STATE = 5;
 
-  private byte myState;
+  private byte myState = SEEN_NOTHING;
   private boolean myHasLines;
-
-  @Override
-  public void initFilter(MethodVisitor mv, Instrumenter context, BranchDataContainer branchData) {
-    super.initFilter(mv, context, branchData);
-    myState = SEEN_NOTHING;
-    myHasLines = false;
-  }
 
   @Override
   public void visitLineNumber(int line, Label start) {
@@ -63,8 +55,8 @@ public class NotNullAssertionsFilter extends BranchesFilter {
     if (!myHasLines) return;
     if (myState == ASSERTIONS_DISABLED_STATE && opcode == Opcodes.IFNE) {
       myState = SEEN_NOTHING;
-      if (myBranchData.getJump(label) != null) {
-        myBranchData.removeLastJump();
+      if (myContext.getJump(label) != null) {
+        myContext.removeLastJump();
       }
     }
     if (myState == DUP_SEEN && opcode == Opcodes.IFNONNULL) {
@@ -100,14 +92,15 @@ public class NotNullAssertionsFilter extends BranchesFilter {
     }
   }
 
+  @Override
   public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
     super.visitMethodInsn(opcode, owner, name, desc, itf);
     if (!myHasLines) return;
     if (myState == PARAM_CONST_SEEN &&
         opcode == Opcodes.INVOKESTATIC &&
         name.startsWith("$$$reportNull$$$") &&
-        ClassNameUtil.convertToFQName(owner).equals(myContext.getClassName())) {
-      myBranchData.removeLastJump();
+        myContext.get(Key.CLASS_INTERNAL_NAME).equals(owner)) {
+      myContext.removeLastJump();
     }
     myState = SEEN_NOTHING;
   }
@@ -166,7 +159,8 @@ public class NotNullAssertionsFilter extends BranchesFilter {
     }
   }
 
-  public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
+  @Override
+  public boolean isApplicable(InstrumentationData context) {
     return true;
   }
 }

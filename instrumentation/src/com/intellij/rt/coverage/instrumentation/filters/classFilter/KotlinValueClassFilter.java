@@ -17,7 +17,7 @@
 package com.intellij.rt.coverage.instrumentation.filters.classFilter;
 
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.FieldVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
@@ -45,7 +45,7 @@ public class KotlinValueClassFilter extends ClassFilter {
   private String myFieldType;
 
   @Override
-  public boolean isApplicable(Instrumenter context) {
+  public boolean isApplicable(InstrumentationData context) {
     return true;
   }
 

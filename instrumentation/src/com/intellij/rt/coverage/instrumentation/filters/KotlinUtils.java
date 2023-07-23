@@ -16,7 +16,8 @@
 
 package com.intellij.rt.coverage.instrumentation.filters;
 
-import com.intellij.rt.coverage.instrumentation.MethodFilteringVisitor;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.filters.branches.*;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.*;
 import com.intellij.rt.coverage.instrumentation.filters.classes.*;
@@ -29,22 +30,16 @@ import java.util.List;
 
 public class KotlinUtils {
   public static final String KOTLIN_DEFAULT_CONSTRUCTOR_MARKER = "Lkotlin/jvm/internal/DefaultConstructorMarker;";
-  private static final String KOTLIN_CLASS_LABEL = "IS_KOTLIN";
-  public static final String SEALED_CLASS_LABEL = "IS_SEALED_CLASS";
   public static final String KOTLIN_METADATA = "Lkotlin/Metadata;";
 
-  public static boolean isKotlinClass(MethodFilteringVisitor context) {
-    Object currentProperty = context.getProperty(KOTLIN_CLASS_LABEL);
-    if (currentProperty instanceof Boolean) return (Boolean) currentProperty;
-    boolean isKotlin = context.getAnnotations().contains(KOTLIN_METADATA);
-    context.addProperty(KOTLIN_CLASS_LABEL, isKotlin);
+  public static boolean isKotlinClass(InstrumentationData data) {
+    Boolean isKotlin = data.get(Key.IS_KOTLIN);
+    if (isKotlin == null) {
+      List<String> annotations = data.get(Key.CLASS_ANNOTATIONS);
+      isKotlin = annotations != null && annotations.contains(KOTLIN_METADATA);
+      data.put(Key.IS_KOTLIN, isKotlin);
+    }
     return isKotlin;
-  }
-
-  public static boolean isSealedClass(MethodFilteringVisitor context) {
-    final Object currentProperty = context.getProperty(SEALED_CLASS_LABEL);
-    if (currentProperty instanceof Boolean) return (Boolean) currentProperty;
-    return false;
   }
 
   private static final boolean ourKotlinEnabled = !"false".equals(System.getProperty("coverage.kotlin.enable", "true"));
@@ -66,22 +61,21 @@ public class KotlinUtils {
     return result;
   }
 
-  public static List<LinesFilter> createLineFilters() {
+  public static List<CoverageFilter> createLineFilters() {
     if (!ourKotlinEnabled) return Collections.emptyList();
-    List<LinesFilter> result = new ArrayList<LinesFilter>();
+    List<CoverageFilter> result = new ArrayList<CoverageFilter>();
     result.add(new KotlinImplementerDefaultInterfaceMemberFilter());
-    result.add(new KotlinCoroutinesLinesFilter());
+    result.add(new KotlinCoroutinesFilter());
     result.add(new KotlinDeprecatedMethodFilter());
     result.add(new KotlinDefaultArgsLineFilter());
     return result;
   }
 
-  public static List<BranchesFilter> createBranchFilters() {
+  public static List<CoverageFilter> createBranchFilters() {
     if (!ourKotlinEnabled) return Collections.emptyList();
-    List<BranchesFilter> result = new ArrayList<BranchesFilter>();
+    List<CoverageFilter> result = new ArrayList<CoverageFilter>();
     result.add(new KotlinWhenMappingExceptionFilter());
     result.add(new KotlinDefaultArgsBranchFilter());
-    result.add(new KotlinCoroutinesBranchesFilter());
     result.add(new KotlinLateinitFilter());
     result.add(new KotlinOpenMemberWithDefaultArgsFilter());
     result.add(new KotlinUnsafeCastFilter());

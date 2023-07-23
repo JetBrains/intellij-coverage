@@ -16,21 +16,21 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.classFilter;
 
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public abstract class ClassFilter extends ClassVisitor {
-  protected Instrumenter myContext;
+  protected InstrumentationData myContext;
 
   public ClassFilter() {
     super(Opcodes.API_VERSION);
   }
 
-  public void initFilter(Instrumenter context, ClassVisitor cv) {
-    myContext = context;
+  public void initFilter(ClassVisitor cv, InstrumentationData context) {
     this.cv = cv;
+    myContext = context;
   }
 
-  public abstract boolean isApplicable(Instrumenter context);
+  public abstract boolean isApplicable(InstrumentationData context);
 }

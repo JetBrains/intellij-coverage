@@ -19,12 +19,11 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.JumpData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.SwitchData;
-import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Jump;
 import com.intellij.rt.coverage.instrumentation.data.Switch;
 import org.jetbrains.coverage.org.objectweb.asm.Handle;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.util.HashMap;
@@ -35,7 +34,7 @@ import java.util.Map;
  * Note that this enumerator only collects data and does not affect runtime execution,
  * so it may be enabled at unloaded classes analysis stage.
  */
-public class InstructionsEnumerator extends BranchesEnumerator {
+public class CoverageEnumeratorWithInstructions extends CoverageEnumerator {
   private final Map<Label, Jump> myOriginalLabelToJump = new HashMap<Label, Jump>();
   private final Map<Label, Switch> myOriginalLabelToSwitch = new HashMap<Label, Switch>();
   private Jump myLastJump;
@@ -44,12 +43,12 @@ public class InstructionsEnumerator extends BranchesEnumerator {
   private boolean myHasInstructions = false;
 
 
-  public InstructionsEnumerator(BranchesInstrumenter instrumenter, BranchDataContainer branchData, MethodVisitor mv, int access, String name, String desc, String signature, String[] exceptions) {
-    super(instrumenter, branchData, mv, access, name, desc, signature, exceptions);
+  public CoverageEnumeratorWithInstructions(InstrumentationData data, boolean branchCoverage) {
+    super(data, branchCoverage);
   }
 
   private void saveInstructionsToOwner() {
-    final LineData lineData = getInstrumenter().getLineData(myCurrentLine);
+    final LineData lineData = myData.getLineData(myCurrentLine);
     if (myInstructionCounter > 0 && lineData != null) {
       final Jump jump = myLastJump != null ? myLastJump : (myLastLabel == null ? null : myOriginalLabelToJump.get(myLastLabel));
       final Switch aSwitch = myLastLabel == null ? null : myOriginalLabelToSwitch.get(myLastLabel);
@@ -61,13 +60,13 @@ public class InstructionsEnumerator extends BranchesEnumerator {
         for (int index = 0; index < lineData.jumpsCount(); index++) {
           final JumpData jumpData = lineData.getJumpData(index);
           if (jumpData.getId(true) == jumpId) {
-            myBranchData.addInstructions(jumpId, myInstructionCounter);
+            myData.addInstructions(jumpId, myInstructionCounter);
             applied = true;
             break;
           }
 
           if (jumpData.getId(false) == jumpId) {
-            myBranchData.addInstructions(jumpId, myInstructionCounter);
+            myData.addInstructions(jumpId, myInstructionCounter);
             applied = true;
             break;
           }
@@ -79,7 +78,7 @@ public class InstructionsEnumerator extends BranchesEnumerator {
           final SwitchData switchData = lineData.getSwitchData(index);
           for (int i = -1; i < switchData.getKeys().length; i++) {
             if (switchData.getId(i) == switchId) {
-              myBranchData.addInstructions(switchId, myInstructionCounter);
+              myData.addInstructions(switchId, myInstructionCounter);
               applied = true;
               break loop;
             }
@@ -87,7 +86,7 @@ public class InstructionsEnumerator extends BranchesEnumerator {
         }
       }
       if (!applied) {
-        myBranchData.addInstructions(lineData.getId(), myInstructionCounter);
+        myData.addInstructions(lineData.getId(), myInstructionCounter);
       }
     }
     myLastLabel = null;
@@ -97,15 +96,15 @@ public class InstructionsEnumerator extends BranchesEnumerator {
 
   @Override
   protected void onNewJump(Label originalLabel, Label trueLabel, Label falseLabel) {
-    myLastJump = myBranchData.getJump(falseLabel);
-    myOriginalLabelToJump.put(originalLabel, myBranchData.getJump(trueLabel));
+    myLastJump = myData.getJump(falseLabel);
+    myOriginalLabelToJump.put(originalLabel, myData.getJump(trueLabel));
   }
 
   @Override
   protected void onNewSwitch(SwitchLabels original, SwitchLabels replacement) {
-    myOriginalLabelToSwitch.put(original.getDefault(), myBranchData.getSwitch(replacement.getDefault()));
+    myOriginalLabelToSwitch.put(original.getDefault(), myData.getSwitch(replacement.getDefault()));
     for (int i = 0; i < original.getLabels().length; i++) {
-      myOriginalLabelToSwitch.put(original.getLabels()[i], myBranchData.getSwitch(replacement.getLabels()[i]));
+      myOriginalLabelToSwitch.put(original.getLabels()[i], myData.getSwitch(replacement.getLabels()[i]));
     }
   }
 
@@ -133,12 +132,14 @@ public class InstructionsEnumerator extends BranchesEnumerator {
     super.visitJumpInsn(opcode, label);
   }
 
+  @Override
   public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
     touch();
     saveInstructionsToOwner();
     super.visitLookupSwitchInsn(dflt, keys, labels);
   }
 
+  @Override
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
     touch();
     saveInstructionsToOwner();

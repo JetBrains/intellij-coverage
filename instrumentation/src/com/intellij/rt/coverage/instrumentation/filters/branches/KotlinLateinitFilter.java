@@ -16,12 +16,11 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
-import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
-import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
-import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 
@@ -48,25 +47,17 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * For internal classes direct access to a field of the containing class is replaced
  * with access to the containing class (GETFIELD) and then a call to an access method.
  */
-public class KotlinLateinitFilter extends BranchesFilter {
+public class KotlinLateinitFilter extends CoverageFilter {
   private int myState;
-  private String myInternalClassName;
 
-  public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
+  public boolean isApplicable(InstrumentationData context) {
     return KotlinUtils.isKotlinClass(context);
-  }
-
-  @Override
-  public void initFilter(MethodVisitor mv, Instrumenter context, BranchDataContainer branchData) {
-    super.initFilter(mv, context, branchData);
-    myState = 0;
-    myInternalClassName = ClassNameUtil.convertToInternalName(context.getClassName());
   }
 
   @Override
   public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
     super.visitFieldInsn(opcode, owner, name, descriptor);
-    if (myState == 0 && opcode == Opcodes.GETFIELD && myInternalClassName.equals(owner)) {
+    if (myState == 0 && opcode == Opcodes.GETFIELD && myContext.get(Key.CLASS_INTERNAL_NAME).equals(owner)) {
       myState = 1;
       return;
     }
@@ -101,10 +92,10 @@ public class KotlinLateinitFilter extends BranchesFilter {
         && "kotlin/jvm/internal/Intrinsics".equals(owner)
         && "throwUninitializedPropertyAccessException".equals(name)
         && "(Ljava/lang/String;)V".equals(descriptor)) {
-      myBranchData.removeLastJump();
+      myContext.removeLastJump();
     } else if (myState == 1
         && opcode == Opcodes.INVOKESTATIC
-        && myInternalClassName.startsWith(owner)
+        && myContext.get(Key.CLASS_INTERNAL_NAME).startsWith(owner)
         && name.startsWith("access$")) {
       myState = 2;
       return;

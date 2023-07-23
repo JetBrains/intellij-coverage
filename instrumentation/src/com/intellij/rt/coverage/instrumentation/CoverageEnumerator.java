@@ -17,7 +17,9 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
-import com.intellij.rt.coverage.instrumentation.data.BranchDataContainer;
+import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.util.SaveLabelsMethodNode;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
@@ -28,29 +30,25 @@ import org.jetbrains.coverage.org.objectweb.asm.tree.MethodNode;
  * Collect information about coverage and prepare jumps and switches execution for coverage collection.
  * This class uses <code>MethodNode</code> inside, so bytecode is firstly fully analysed and then written to a <code>MethodWriter</code>
  */
-public class BranchesEnumerator extends MethodVisitor implements Opcodes {
-  private final BranchesInstrumenter myInstrumenter;
+public class CoverageEnumerator extends MethodVisitor implements Opcodes {
   private final MethodNode myMethodNode;
-  private final MethodVisitor myWriterMethodVisitor;
-  protected final BranchDataContainer myBranchData;
-  private final int myAccess;
-  private final String myMethodName;
-  private final String myDescriptor;
+  protected final InstrumentationData myData;
+  private final String myMethodDesc;
+  private final boolean myBranchCoverage;
 
   protected int myCurrentLine;
-  private boolean myHasExecutableLines = false;
 
-  public BranchesEnumerator(BranchesInstrumenter instrumenter, BranchDataContainer branchData, MethodVisitor mv,
-                            int access, String name, String desc, String signature, String[] exceptions) {
-    super(Opcodes.API_VERSION, new SaveLabelsMethodNode(access, name, desc, signature, exceptions));
+  public CoverageEnumerator(InstrumentationData data, boolean branchCoverage) {
+    super(Opcodes.API_VERSION, new SaveLabelsMethodNode(
+        data.getMethodAccess(), data.getMethodName(), data.getMethodDesc(),
+        data.get(Key.METHOD_SIGNATURE), data.get(Key.EXCEPTIONS)));
 
     myMethodNode = (MethodNode) super.mv;
-    myInstrumenter = instrumenter;
-    myWriterMethodVisitor = mv;
-    myAccess = access;
-    myMethodName = name;
-    myDescriptor = desc;
-    myBranchData = branchData;
+    myData = data;
+
+    ProjectData projectData = myData.get(Key.PROJECT_DATA);
+    myMethodDesc = projectData.getFromPool(myData.getMethodName() + myData.getMethodDesc());
+    myBranchCoverage = branchCoverage;
   }
 
   protected void onNewJump(Label originalLabel, Label trueLabel, Label falseLabel) {
@@ -59,33 +57,30 @@ public class BranchesEnumerator extends MethodVisitor implements Opcodes {
   protected void onNewSwitch(SwitchLabels original, SwitchLabels replacement) {
   }
 
-  public void visitEnd() {
-    super.visitEnd();
-    if (myWriterMethodVisitor != UnloadedUtil.EMPTY_METHOD_VISITOR) {
-      myMethodNode.accept(myInstrumenter.createInstrumentingVisitor(myWriterMethodVisitor, this, myAccess, myMethodName, myDescriptor));
-    }
+  public void accept(MethodVisitor visitor) {
+    myMethodNode.accept(visitor);
   }
 
+  @Override
   public void visitLineNumber(int line, Label start) {
     myCurrentLine = line;
-    myHasExecutableLines = true;
-    final LineData lineData = myInstrumenter.getOrCreateLineData(myCurrentLine, myMethodName, myDescriptor);
-    if (lineData != null) myBranchData.addLine(lineData);
+    myData.createLineData(line, myMethodDesc);
     super.visitLineNumber(line, start);
   }
 
+  @Override
   public void visitJumpInsn(final int opcode, final Label label) {
-    if (!myHasExecutableLines) {
+    if (myData.hasNoLinesInCurrentMethod() || !myBranchCoverage) {
       super.visitJumpInsn(opcode, label);
       return;
     }
     boolean jumpInstrumented = false;
-    if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR && !InstrumentationUtils.CLASS_INIT.equals(myMethodName)) {
-      final LineData lineData = myInstrumenter.getLineData(myCurrentLine);
+    if (opcode != Opcodes.GOTO && opcode != Opcodes.JSR) {
+      LineData lineData = myData.getLineData(myCurrentLine);
       if (lineData != null) {
         Label trueLabel = new Label();
         Label falseLabel = new Label();
-        myBranchData.addJump(lineData, trueLabel, falseLabel);
+        myData.addJump(lineData, trueLabel, falseLabel);
         onNewJump(label, trueLabel, falseLabel);
 
         jumpInstrumented = true;
@@ -116,7 +111,7 @@ public class BranchesEnumerator extends MethodVisitor implements Opcodes {
     super.visitJumpInsn(Opcodes.GOTO, beforeSwitchLabel);
 
     final SwitchLabels replacement = new SwitchLabels(newDefaultLabel, newLabels);
-    myBranchData.addSwitch(lineData, keys, newDefaultLabel, newLabels);
+    myData.addSwitch(lineData, keys, newDefaultLabel, newLabels);
     onNewSwitch(original, replacement);
 
     for (int i = 0; i < newLabels.length; i++) {
@@ -132,8 +127,9 @@ public class BranchesEnumerator extends MethodVisitor implements Opcodes {
     return replacement;
   }
 
+  @Override
   public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-    if (!myHasExecutableLines) {
+    if (myData.hasNoLinesInCurrentMethod() || !myBranchCoverage) {
       super.visitLookupSwitchInsn(dflt, keys, labels);
       return;
     }
@@ -141,8 +137,9 @@ public class BranchesEnumerator extends MethodVisitor implements Opcodes {
     super.visitLookupSwitchInsn(switchLabels.getDefault(), keys, switchLabels.getLabels());
   }
 
+  @Override
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
-    if (!myHasExecutableLines) {
+    if (myData.hasNoLinesInCurrentMethod() || !myBranchCoverage) {
       super.visitTableSwitchInsn(min, max, dflt, labels);
       return;
     }
@@ -152,7 +149,7 @@ public class BranchesEnumerator extends MethodVisitor implements Opcodes {
 
   private SwitchLabels visitSwitch(Label dflt, Label[] labels, int[] keys) {
     SwitchLabels switchLabels = new SwitchLabels(dflt, labels);
-    final LineData lineData = myInstrumenter.getLineData(myCurrentLine);
+    LineData lineData = myData.getLineData(myCurrentLine);
     if (lineData != null) {
       switchLabels = replaceLabels(switchLabels, lineData, keys);
     }
@@ -167,14 +164,6 @@ public class BranchesEnumerator extends MethodVisitor implements Opcodes {
       keys[i - min] = i;
     }
     return keys;
-  }
-
-  public boolean hasNoLines() {
-    return !myHasExecutableLines;
-  }
-
-  protected Instrumenter getInstrumenter() {
-    return myInstrumenter;
   }
 
   protected static class SwitchLabels {

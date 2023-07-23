@@ -24,10 +24,9 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * by name of the class.
  */
 public class NameCoverageDataAccess extends CoverageDataAccess {
-  private final Init myInit;
 
   public NameCoverageDataAccess(Init init) {
-    myInit = init;
+    super(init);
   }
 
   @Override

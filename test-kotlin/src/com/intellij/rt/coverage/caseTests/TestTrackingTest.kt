@@ -33,13 +33,13 @@ internal abstract class AbstractTestTrackingTest(override val coverage: Coverage
         assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
     }
 
-    @Test
+    @Test(timeout = 20000)
     fun testOneTest() = test("custom.testTracking.oneTest")
 
-    @Test
+    @Test(timeout = 20000)
     fun testTwoTests() = test("custom.testTracking.twoTests")
 
-    @Test
+    @Test(timeout = 20000)
     fun testManyTests() {
         val test = getTestFile("custom.testTracking.parallelTests")
         test(
@@ -53,7 +53,7 @@ internal abstract class AbstractTestTrackingTest(override val coverage: Coverage
         }
     }
 
-    @Test
+    @Test(timeout = 20000)
     fun testThreadSafeStructure() {
         val test = getTestFile("custom.testTracking.parallelTests")
         test(

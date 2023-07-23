@@ -17,8 +17,9 @@
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
-import com.intellij.rt.coverage.instrumentation.Instrumenter;
+import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import org.jetbrains.coverage.org.objectweb.asm.Type;
@@ -29,7 +30,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Type;
  * several masks(each bit means whither this parameter is given or default value should be used) and one Object.
  * One extra if is generated for each default param.
  */
-public class KotlinDefaultArgsBranchFilter extends BranchesFilter {
+public class KotlinDefaultArgsBranchFilter extends CoverageFilter {
   public static final String DEFAULT_ARGS_SUFFIX = "$default";
 
   /**
@@ -44,20 +45,16 @@ public class KotlinDefaultArgsBranchFilter extends BranchesFilter {
 
   private boolean myIgnoreNextIf = false;
   private boolean myAndVisited = false;
-  private String myName;
-  private String myDesc;
 
   @Override
-  public boolean isApplicable(Instrumenter context, int access, String name, String desc, String signature, String[] exceptions) {
-    myName = name;
-    myDesc = desc;
-    return isApplicable(context, access, name, desc);
+  public boolean isApplicable(InstrumentationData context) {
+    return isFilterApplicable(context);
   }
 
-  public static boolean isApplicable(Instrumenter context, int access, String name, String desc) {
-    return (access & Opcodes.ACC_SYNTHETIC) != 0
-        && KotlinUtils.isKotlinClass(context)
-        && (name.endsWith(DEFAULT_ARGS_SUFFIX) || isConstructorWithDefaultArgs(name, desc));
+  public static boolean isFilterApplicable(InstrumentationData data) {
+    return (data.getMethodAccess() & Opcodes.ACC_SYNTHETIC) != 0
+        && KotlinUtils.isKotlinClass(data)
+        && (data.getMethodName().endsWith(DEFAULT_ARGS_SUFFIX) || isConstructorWithDefaultArgs(data.getMethodName(), data.getMethodDesc()));
   }
 
   private static boolean isConstructorWithDefaultArgs(String name, String desc) {
@@ -83,7 +80,7 @@ public class KotlinDefaultArgsBranchFilter extends BranchesFilter {
   @Override
   public void visitCode() {
     super.visitCode();
-    int[] range = getMaskIndexRange(myName, myDesc);
+    int[] range = getMaskIndexRange(myContext.getMethodName(), myContext.getMethodDesc());
     myMinMaskIndex = range[0];
     myMaxMaskIndex = range[1];
   }
@@ -142,7 +139,7 @@ public class KotlinDefaultArgsBranchFilter extends BranchesFilter {
     super.visitJumpInsn(opcode, label);
     if (opcode == Opcodes.IFEQ && myIgnoreNextIf) {
       if (myAndVisited) {
-        myBranchData.removeLastJump();
+        myContext.removeLastJump();
       }
       myIgnoreNextIf = false;
       myAndVisited = false;

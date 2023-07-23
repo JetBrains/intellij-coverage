@@ -26,6 +26,11 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
  */
 public class EmptyCoverageDataAccess extends CoverageDataAccess {
   public static final EmptyCoverageDataAccess INSTANCE = new EmptyCoverageDataAccess();
+
+  public EmptyCoverageDataAccess() {
+    super(null);
+  }
+
   @Override
   public void onMethodStart(MethodVisitor mv, int localVariable) {
   }
