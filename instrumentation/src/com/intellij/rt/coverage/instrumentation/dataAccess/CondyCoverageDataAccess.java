@@ -38,7 +38,9 @@ public class CondyCoverageDataAccess extends CoverageDataAccess {
   @Override
   public void onMethodStart(MethodVisitor mv, int localVariable) {
     mv.visitLdcInsn(myCondy);
-    mv.visitTypeInsn(Opcodes.CHECKCAST, myInit.desc);
+    if (!InstrumentationUtils.OBJECT_TYPE.equals(myInit.desc)) {
+      mv.visitTypeInsn(Opcodes.CHECKCAST, myInit.desc);
+    }
     mv.visitVarInsn(Opcodes.ASTORE, localVariable);
   }
 }

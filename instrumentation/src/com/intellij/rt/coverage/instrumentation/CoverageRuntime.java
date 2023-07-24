@@ -167,7 +167,6 @@ public class CoverageRuntime {
   /**
    * Get test tracking hits array at runtime.
    */
-  @SuppressWarnings("unused")
   public static boolean[] getTraceMask(String className) {
     CoverageRuntime runtime = ourRuntime;
     if (runtime != null) {
@@ -185,7 +184,6 @@ public class CoverageRuntime {
   /**
    * Get class data object at runtime.
    */
-  @SuppressWarnings("unused")
   public static Object loadClassData(String className) {
     CoverageRuntime runtime = ourRuntime;
     if (runtime != null) {

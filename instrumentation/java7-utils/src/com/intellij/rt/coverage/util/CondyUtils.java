@@ -25,4 +25,12 @@ public class CondyUtils {
   public static int[] getHitsMask(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className) {
     return CoverageRuntime.getHitsMask(className);
   }
+
+  public static boolean[] getTraceMask(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className) {
+    return CoverageRuntime.getTraceMask(className);
+  }
+
+  public static Object loadClassData(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className) {
+    return CoverageRuntime.loadClassData(className);
+  }
 }

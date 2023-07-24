@@ -74,13 +74,19 @@ internal abstract class AbstractTestTrackingTest(override val coverage: Coverage
     }
 }
 
-internal class TestTrackingTest : AbstractTestTrackingTest(Coverage.BRANCH)
-internal class NewTestTrackingTest : AbstractTestTrackingTest(Coverage.NEW_BRANCH)
-internal class ClassDataTestTrackingTest : AbstractTestTrackingTest(Coverage.NEW_BRANCH) {
+internal abstract class AbstractClassDataTestTrackingTest(coverage: Coverage) : AbstractTestTrackingTest(coverage) {
     init {
         commonExtraArgs.add("-Didea.new.test.tracking.coverage=false")
     }
 }
+
+internal class TestTrackingTest : AbstractTestTrackingTest(Coverage.BRANCH)
+internal class NewTestTrackingTest : AbstractTestTrackingTest(Coverage.NEW_BRANCH)
+internal class CondyTrackingTest : AbstractTestTrackingTest(Coverage.CONDY_BRANCH)
+internal class ClassDataTestTrackingTest : AbstractClassDataTestTrackingTest(Coverage.BRANCH)
+internal class ClassDataNewTestTrackingTest : AbstractClassDataTestTrackingTest(Coverage.NEW_BRANCH)
+internal class ClassDataCondyTrackingTest : AbstractClassDataTestTrackingTest(Coverage.CONDY_BRANCH)
+
 
 internal abstract class TestTrackingVerifyInstrumentationTest(override val coverage: Coverage) : CoverageTest() {
     override val testTracking = true
@@ -98,10 +104,16 @@ internal abstract class TestTrackingVerifyInstrumentationTest(override val cover
     fun testCoroutinesInline() = test("coroutines.inline")
 }
 
-internal class TestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.BRANCH)
-internal class NewTestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.NEW_BRANCH)
-internal class ClassDataTestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.NEW_BRANCH) {
+internal abstract class AbstractClassDataTestTrackingVerifyInstrumentationTest(coverage: Coverage) : AbstractTestTrackingTest(coverage) {
     init {
         commonExtraArgs.add("-Didea.new.test.tracking.coverage=false")
     }
 }
+
+internal class TestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.BRANCH)
+internal class NewTestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.NEW_BRANCH)
+internal class CondyTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.CONDY_BRANCH)
+internal class ClassDataTestTrackingInstrumentationTest : AbstractClassDataTestTrackingVerifyInstrumentationTest(Coverage.BRANCH)
+internal class ClassDataNewTestTrackingInstrumentationTest : AbstractClassDataTestTrackingVerifyInstrumentationTest(Coverage.NEW_BRANCH)
+internal class ClassDataCondyTrackingInstrumentationTest : AbstractClassDataTestTrackingVerifyInstrumentationTest(Coverage.CONDY_BRANCH)
+

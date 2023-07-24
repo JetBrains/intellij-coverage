@@ -26,26 +26,38 @@ public class DataAccessUtil {
   public static final String HITS_ARRAY_TYPE = "[I";
   public static final String TEST_MASK_ARRAY_TYPE = "[Z";
 
-  public static final String CLASS_DATA_NAME = "__$classData$__";
-
 
   public static CoverageDataAccess createTestTrackingDataAccess(InstrumentationData data, boolean isArray) {
     String className = data.get(Key.CLASS_NAME);
-    if (OptionsUtil.FIELD_INSTRUMENTATION_ENABLED) {
-      CoverageDataAccess.Init init = isArray ? createTestTrackingArrayInit(className) : createTestTrackingInit(className, false);
-      return new FieldCoverageDataAccess(data.get(Key.CLASS_READER), className, init);
+    boolean fieldInstrumentation = OptionsUtil.FIELD_INSTRUMENTATION_ENABLED;
+    if (fieldInstrumentation && OptionsUtil.CONDY_ENABLED) {
+      CoverageDataAccess.Init init = isArray ? createTestTrackingArrayCondyInit(className) : createTestTrackingCondyInit(className);
+      return new CondyCoverageDataAccess(init);
     } else {
-      return new NameCoverageDataAccess(createTestTrackingInit(className, true));
+      CoverageDataAccess.Init init = isArray ? createTestTrackingArrayInit(className) : createTestTrackingInit(className, !fieldInstrumentation);
+      return fieldInstrumentation
+          ? new FieldCoverageDataAccess(data.get(Key.CLASS_READER), className, init)
+          : new NameCoverageDataAccess(init);
     }
   }
 
   private static CoverageDataAccess.Init createTestTrackingInit(String className, boolean needCache) {
-    return new CoverageDataAccess.Init(CLASS_DATA_NAME, InstrumentationUtils.OBJECT_TYPE, CoverageRuntime.COVERAGE_RUNTIME_OWNER,
+    return new CoverageDataAccess.Init("__$classData$__", InstrumentationUtils.OBJECT_TYPE, CoverageRuntime.COVERAGE_RUNTIME_OWNER,
         needCache ? "loadClassDataCached" : "loadClassData", "(Ljava/lang/String;)" + InstrumentationUtils.OBJECT_TYPE, new Object[]{className});
+  }
+
+  private static CoverageDataAccess.Init createTestTrackingCondyInit(String className) {
+    return new CoverageDataAccess.Init("__$classData$__", InstrumentationUtils.OBJECT_TYPE, "com/intellij/rt/coverage/util/CondyUtils",
+        "loadClassData", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)" + InstrumentationUtils.OBJECT_TYPE, new Object[]{className});
   }
 
   private static CoverageDataAccess.Init createTestTrackingArrayInit(String className) {
     return new CoverageDataAccess.Init("__$traceMask$__", TEST_MASK_ARRAY_TYPE, CoverageRuntime.COVERAGE_RUNTIME_OWNER,
         "getTraceMask", "(Ljava/lang/String;)" + TEST_MASK_ARRAY_TYPE, new Object[]{className});
+  }
+
+  private static CoverageDataAccess.Init createTestTrackingArrayCondyInit(String className) {
+    return new CoverageDataAccess.Init("__$traceMask$__", TEST_MASK_ARRAY_TYPE, "com/intellij/rt/coverage/util/CondyUtils",
+        "getTraceMask", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)" + TEST_MASK_ARRAY_TYPE, new Object[]{className});
   }
 }
