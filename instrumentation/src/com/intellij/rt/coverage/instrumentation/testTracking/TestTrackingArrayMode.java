@@ -83,19 +83,11 @@ class TestTrackingArrayInstrumenter extends ClassVisitor {
 
           // load trace mask array
           myArrayDataAccess.loadFromLocal();
-
-          // check if register method should be called. array[0] == false => register has not been called
           mv.visitInsn(Opcodes.DUP);
-          mv.visitInsn(Opcodes.ICONST_0);
-          mv.visitInsn(Opcodes.BALOAD);
-          final Label skip = new Label();
-          mv.visitJumpInsn(Opcodes.IFNE, skip);
-
-          // call register
+          // load ClassData
           myClassDataAccess.loadFromLocal();
-          mv.visitMethodInsn(Opcodes.INVOKESTATIC, CoverageRuntime.COVERAGE_RUNTIME_OWNER, "registerClassForTrace", "(" + InstrumentationUtils.OBJECT_TYPE + ")V", false);
-
-          mv.visitLabel(skip);
+          // call check register
+          mv.visitMethodInsn(Opcodes.INVOKESTATIC, CoverageRuntime.COVERAGE_RUNTIME_OWNER, "checkRegister", "(" + DataAccessUtil.TEST_MASK_ARRAY_TYPE + InstrumentationUtils.OBJECT_TYPE + ")V", false);
 
           // load true value, stack: array. do: array[line] = true
           InstrumentationUtils.pushInt(mv, line);

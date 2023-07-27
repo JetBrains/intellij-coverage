@@ -100,11 +100,17 @@ public class CoverageRuntime {
     }
   }
 
+  @SuppressWarnings("unused")
+  public static void checkRegister(boolean[] trace, Object classData) {
+    if (!trace[0]) {
+      registerClassForTrace(classData);
+    }
+  }
+
   /**
    * Test tracking initialization.
    * Returns true if a test is running now, then the class has been registered.
    */
-  @SuppressWarnings("unused")
   public static void registerClassForTrace(Object classData) {
     if (ourRuntime != null) {
       final Map<Object, boolean[]> traces = ourRuntime.myProjectData.getTraces();
