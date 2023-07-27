@@ -22,8 +22,6 @@ import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
-import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * This transformer instruments classes in such a way that these classes
@@ -36,8 +34,8 @@ import java.util.regex.Pattern;
  * @see com.intellij.rt.coverage.offline.RawProjectInit
  */
 public class OfflineCoverageTransformer extends CoverageTransformer {
-  public OfflineCoverageTransformer(ProjectData data, boolean shouldSaveSource, List<Pattern> excludePatterns, List<Pattern> includePatterns) {
-    super(data, shouldSaveSource, excludePatterns, includePatterns);
+  public OfflineCoverageTransformer(ProjectData data, boolean shouldSaveSource) {
+    super(data, shouldSaveSource);
   }
 
   @Override

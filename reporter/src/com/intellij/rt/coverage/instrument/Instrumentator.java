@@ -67,7 +67,7 @@ public class Instrumentator {
       myOutput = output;
       final ProjectData projectData = new ProjectData();
       projectData.setAnnotationsToIgnore(myFilters.excludeAnnotations);
-      myTransformer = new OfflineCoverageTransformer(projectData, false, myFilters.excludeClasses, myFilters.includeClasses);
+      myTransformer = new OfflineCoverageTransformer(projectData, false);
     }
 
     @Override

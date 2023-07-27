@@ -22,13 +22,9 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.CoverageTransformer;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -43,7 +39,7 @@ public class CoverageNotNullInstrumentationTest {
   }
 
   private byte[] doTransform(String name, byte[] bytes, ClassLoader loader, final ProjectData data) {
-    return new CoverageTransformer(data, false, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList())
+    return new CoverageTransformer(data, false)
         .instrument(bytes, name, loader, true);
   }
 

@@ -36,8 +36,8 @@ public class ProjectData implements CoverageData, Serializable {
 
   private final File myDataFile;
   private final boolean myBranchCoverage;
-  private final List<Pattern> myIncludePatterns;
-  private final List<Pattern> myExcludePatterns;
+  private List<Pattern> myIncludePatterns;
+  private List<Pattern> myExcludePatterns;
   private List<Pattern> myAnnotationsToIgnore;
   private final Map<String, ClassData> myClasses = new ConcurrentHashMap<String, ClassData>(1000);
   private final StringsPool myStringPool = new StringsPool();
@@ -59,18 +59,14 @@ public class ProjectData implements CoverageData, Serializable {
   private boolean myStopped;
 
   public ProjectData() {
-    this(null, true, null, null, null);
+    this(null, true, null);
   }
 
   public ProjectData(File dataFile,
                      boolean branchCoverage,
-                     List<Pattern> includePatterns,
-                     List<Pattern> excludePatterns,
                      TestTrackingCallback testTrackingCallback) {
     myDataFile = dataFile;
     myBranchCoverage = branchCoverage;
-    myIncludePatterns = includePatterns;
-    myExcludePatterns = excludePatterns;
     myTestTrackingCallback = testTrackingCallback;
   }
 
@@ -140,6 +136,22 @@ public class ProjectData implements CoverageData, Serializable {
       }
     }
     return instructions;
+  }
+
+  public List<Pattern> getIncudePatterns() {
+    return myIncludePatterns;
+  }
+
+  public void setIncludePatterns(List<Pattern> patterns) {
+    myIncludePatterns = patterns;
+  }
+
+  public List<Pattern> getExcludePatterns() {
+    return myExcludePatterns;
+  }
+
+  public void setExcludePatterns(List<Pattern> patterns) {
+    myExcludePatterns = patterns;
   }
 
   public List<Pattern> getAnnotationsToIgnore() {
@@ -216,7 +228,7 @@ public class ProjectData implements CoverageData, Serializable {
             continue;
           }
           final ClassData classInfo;
-          if ((myExcludePatterns == null || !ClassNameUtil.matchesPatterns(mappedClassName, myExcludePatterns))
+          if (!ClassNameUtil.matchesPatterns(mappedClassName, myExcludePatterns)
               && (myIncludePatterns == null || myIncludePatterns.isEmpty() || ClassNameUtil.matchesPatterns(mappedClassName, myIncludePatterns))) {
             classInfo = getOrCreateClassData(mappedClassName);
             if (classInfo.getSource() == null || classInfo.getSource().isEmpty()) {

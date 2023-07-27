@@ -67,15 +67,8 @@ class InstrumentedBytecodeTest {
         val testTrackingMode = testTracking.createMode()
         OptionsUtil.FIELD_INSTRUMENTATION_ENABLED = coverage != Coverage.LINE && coverage != Coverage.BRANCH
         OptionsUtil.CONDY_ENABLED = coverage == Coverage.CONDY_LINE || coverage == Coverage.CONDY_BRANCH
-        val projectData = ProjectData(
-            null,
-            coverage.isBranchCoverage(),
-            emptyList(),
-            emptyList(),
-            testTrackingMode?.createTestTrackingCallback()
-        )
-        val transformer =
-            CoverageTransformer(projectData, false, emptyList(), emptyList(), null, testTrackingMode)
+        val projectData = ProjectData(null, coverage.isBranchCoverage(), testTrackingMode?.createTestTrackingCallback())
+        val transformer = CoverageTransformer(projectData, false, null, testTrackingMode)
         val bytes = transformer.instrument(originalBytes, className, null, false)
 
         getReadableBytecode(bytes).preprocess()

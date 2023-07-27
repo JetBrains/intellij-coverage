@@ -33,20 +33,16 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
 
   private final ProjectData data;
   private final boolean shouldSaveSource;
-  private final List<Pattern> excludePatterns;
-  private final List<Pattern> includePatterns;
   private final ClassFinder cf;
   private final TestTrackingMode testTrackingMode;
 
-  public CoverageTransformer(ProjectData data, boolean shouldSaveSource, List<Pattern> excludePatterns, List<Pattern> includePatterns) {
-    this(data, shouldSaveSource, excludePatterns, includePatterns, null, null);
+  public CoverageTransformer(ProjectData data, boolean shouldSaveSource) {
+    this(data, shouldSaveSource, null, null);
   }
 
-  public CoverageTransformer(ProjectData data, boolean shouldSaveSource, List<Pattern> excludePatterns, List<Pattern> includePatterns, ClassFinder cf, TestTrackingMode testTrackingMode) {
+  public CoverageTransformer(ProjectData data, boolean shouldSaveSource, ClassFinder cf, TestTrackingMode testTrackingMode) {
     this.data = data;
     this.shouldSaveSource = shouldSaveSource;
-    this.excludePatterns = excludePatterns;
-    this.includePatterns = includePatterns;
     this.cf = cf;
     this.testTrackingMode = testTrackingMode;
   }
@@ -81,14 +77,15 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
 
   @Override
   protected boolean shouldExclude(String className) {
-    return ClassNameUtil.matchesPatterns(className, excludePatterns);
+    return ClassNameUtil.matchesPatterns(className, data.getExcludePatterns());
   }
 
   @Override
   protected InclusionPattern getInclusionPattern() {
-    return includePatterns.isEmpty() ? null : new InclusionPattern() {
+    final List<Pattern> includes = data.getIncudePatterns();
+    return includes == null || includes.isEmpty() ? null : new InclusionPattern() {
       public boolean accept(String className) {
-        return ClassNameUtil.matchesPatterns(className, includePatterns);
+        return ClassNameUtil.matchesPatterns(className, includes);
       }
     };
   }

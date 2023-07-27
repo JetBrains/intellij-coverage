@@ -32,6 +32,7 @@ public class ClassNameUtil {
   }
 
   public static boolean matchesPatterns(String className, List<Pattern> patterns) {
+    if (patterns == null) return false;
     for (Pattern excludePattern : patterns) {
       if (excludePattern.matcher(className).matches()) return true;
     }

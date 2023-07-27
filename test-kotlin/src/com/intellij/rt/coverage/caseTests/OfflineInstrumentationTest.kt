@@ -131,7 +131,10 @@ internal abstract class OfflineInstrumentationTest(override val coverage: Covera
 }
 
 private fun createProjectData(isBranchCoverage: Boolean, includes: List<Pattern>, excludes: List<Pattern>): ProjectData =
-    ProjectData(null, isBranchCoverage, includes, excludes, null)
+    ProjectData(null, isBranchCoverage, null).apply {
+        setIncludePatterns(includes)
+        excludePatterns = excludes
+    }
 
 internal fun offlineCoverageTransform(isBranchCoverage: Boolean, test: TestFile, outputRoot: File): File {
     val className = test.mainClass
@@ -145,7 +148,7 @@ internal fun offlineCoverageTransform(isBranchCoverage: Boolean, test: TestFile,
     val excludes = Collections.emptyList<Pattern>()
 
     val projectData = createProjectData(isBranchCoverage, includes, excludes)
-    val transformer = OfflineCoverageTransformer(projectData, false, excludes, includes)
+    val transformer = OfflineCoverageTransformer(projectData, false)
 
     for (file in parentDir.listFiles()!!) {
         if (!file.isFile) continue

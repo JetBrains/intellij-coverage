@@ -73,7 +73,9 @@ public class Instrumentator {
     final TestTrackingMode testTrackingMode = createTestTrackingMode(args.testTracking);
     final TestTrackingCallback callback = testTrackingMode == null ? null : testTrackingMode.createTestTrackingCallback();
 
-    final ProjectData data = new ProjectData(args.dataFile, args.branchCoverage, args.includePatterns, args.excludePatterns, callback);
+    final ProjectData data = new ProjectData(args.dataFile, args.branchCoverage, callback);
+    data.setIncludePatterns(args.includePatterns);
+    data.setExcludePatterns(args.excludePatterns);
     data.setAnnotationsToIgnore(args.annotationsToIgnore);
     data.setInstructionsCoverage(OptionsUtil.INSTRUCTIONS_COVERAGE_ENABLED);
     createDataFile(args.dataFile);
@@ -90,7 +92,7 @@ public class Instrumentator {
     }));
 
     final boolean shouldSaveSource = args.sourceMap != null;
-    final CoverageTransformer transformer = new CoverageTransformer(data, shouldSaveSource, args.excludePatterns, args.includePatterns, cf, testTrackingMode);
+    final CoverageTransformer transformer = new CoverageTransformer(data, shouldSaveSource, cf, testTrackingMode);
     addTransformer(instrumentation, transformer);
   }
 

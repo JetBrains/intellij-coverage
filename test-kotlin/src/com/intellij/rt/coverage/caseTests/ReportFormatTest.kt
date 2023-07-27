@@ -17,8 +17,10 @@
 package com.intellij.rt.coverage.caseTests
 
 import com.intellij.rt.coverage.createTmpFile
+import com.intellij.rt.coverage.data.ProjectData
 import com.intellij.rt.coverage.logFile
 import com.intellij.rt.coverage.util.CoverageIOUtil
+import com.intellij.rt.coverage.util.CoverageReport
 import com.intellij.rt.coverage.util.ProjectDataLoader
 import org.junit.After
 import org.junit.Assert
@@ -27,6 +29,8 @@ import org.junit.Test
 import java.io.DataOutputStream
 import java.io.File
 import java.io.FileOutputStream
+import java.util.regex.Pattern
+import kotlin.test.assertEquals
 
 class ReportFormatTest {
     private lateinit var file: File
@@ -143,5 +147,23 @@ class ReportFormatTest {
         val projectData = ProjectDataLoader.load(file)
         Assert.assertNotNull(readLog())
         Assert.assertEquals(1, projectData.getClassData("ClassName").getLineData(43).jumpsCount())
+    }
+
+    @Test
+    fun testIncludeFiltersPersist() {
+        val includeFilters = listOf(Pattern.compile("a.*"))
+        val excludeFilters = listOf(Pattern.compile("a.b.*"))
+        val annotations = listOf(Pattern.compile("a.b.C.*\$"))
+
+        val projectData = ProjectData()
+        projectData.setIncludePatterns(includeFilters)
+        projectData.excludePatterns = excludeFilters
+        projectData.annotationsToIgnore = annotations
+        CoverageReport.save(projectData, file, null)
+
+        val readProjectData = ProjectDataLoader.load(file)
+        assertEquals(includeFilters.toString(), readProjectData.incudePatterns.toString())
+        assertEquals(excludeFilters.toString(), readProjectData.excludePatterns.toString())
+        assertEquals(annotations.toString(), readProjectData.annotationsToIgnore.toString())
     }
 }
