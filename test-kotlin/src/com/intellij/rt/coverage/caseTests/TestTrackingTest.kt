@@ -24,8 +24,10 @@ import testData.custom.testTracking.parallelTests.CALLS_PER_LINE
 import testData.custom.testTracking.sequentialTests.TESTS
 import java.io.File
 
-internal abstract class AbstractTestTrackingTest(override val coverage: Coverage) : CoverageTest() {
-    override val testTracking = true
+internal abstract class AbstractTestTrackingTest(
+    override val coverage: Coverage,
+    override val testTracking: TestTracking,
+) : CoverageTest() {
 
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
         val expected = extractTestTrackingDataFromFile(testFile)
@@ -74,22 +76,18 @@ internal abstract class AbstractTestTrackingTest(override val coverage: Coverage
     }
 }
 
-internal abstract class AbstractClassDataTestTrackingTest(coverage: Coverage) : AbstractTestTrackingTest(coverage) {
-    init {
-        commonExtraArgs.add("-Didea.new.test.tracking.coverage=false")
-    }
-}
-
-internal class TestTrackingTest : AbstractTestTrackingTest(Coverage.BRANCH)
-internal class NewTestTrackingTest : AbstractTestTrackingTest(Coverage.NEW_BRANCH)
-internal class CondyTrackingTest : AbstractTestTrackingTest(Coverage.CONDY_BRANCH)
-internal class ClassDataTestTrackingTest : AbstractClassDataTestTrackingTest(Coverage.BRANCH)
-internal class ClassDataNewTestTrackingTest : AbstractClassDataTestTrackingTest(Coverage.NEW_BRANCH)
-internal class ClassDataCondyTrackingTest : AbstractClassDataTestTrackingTest(Coverage.CONDY_BRANCH)
+internal class TestTrackingTest : AbstractTestTrackingTest(Coverage.BRANCH, TestTracking.ARRAY)
+internal class NewTestTrackingTest : AbstractTestTrackingTest(Coverage.NEW_BRANCH, TestTracking.ARRAY)
+internal class CondyTrackingTest : AbstractTestTrackingTest(Coverage.CONDY_BRANCH, TestTracking.ARRAY)
+internal class ClassDataTestTrackingTest : AbstractTestTrackingTest(Coverage.BRANCH, TestTracking.CLASS_DATA)
+internal class ClassDataNewTestTrackingTest : AbstractTestTrackingTest(Coverage.NEW_BRANCH, TestTracking.CLASS_DATA)
+internal class ClassDataCondyTrackingTest : AbstractTestTrackingTest(Coverage.CONDY_BRANCH, TestTracking.CLASS_DATA)
 
 
-internal abstract class TestTrackingVerifyInstrumentationTest(override val coverage: Coverage) : CoverageTest() {
-    override val testTracking = true
+internal abstract class TestTrackingVerifyInstrumentationTest(
+    override val coverage: Coverage,
+    override val testTracking: TestTracking,
+) : CoverageTest() {
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
         // just check that instrumentation does not cause runtime issues
     }
@@ -104,16 +102,9 @@ internal abstract class TestTrackingVerifyInstrumentationTest(override val cover
     fun testCoroutinesInline() = test("coroutines.inline")
 }
 
-internal abstract class AbstractClassDataTestTrackingVerifyInstrumentationTest(coverage: Coverage) : AbstractTestTrackingTest(coverage) {
-    init {
-        commonExtraArgs.add("-Didea.new.test.tracking.coverage=false")
-    }
-}
-
-internal class TestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.BRANCH)
-internal class NewTestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.NEW_BRANCH)
-internal class CondyTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.CONDY_BRANCH)
-internal class ClassDataTestTrackingInstrumentationTest : AbstractClassDataTestTrackingVerifyInstrumentationTest(Coverage.BRANCH)
-internal class ClassDataNewTestTrackingInstrumentationTest : AbstractClassDataTestTrackingVerifyInstrumentationTest(Coverage.NEW_BRANCH)
-internal class ClassDataCondyTrackingInstrumentationTest : AbstractClassDataTestTrackingVerifyInstrumentationTest(Coverage.CONDY_BRANCH)
-
+internal class TestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.BRANCH, TestTracking.ARRAY)
+internal class NewTestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.NEW_BRANCH, TestTracking.ARRAY)
+internal class CondyTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.CONDY_BRANCH, TestTracking.ARRAY)
+internal class ClassDataTestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.BRANCH, TestTracking.CLASS_DATA)
+internal class ClassDataNewTestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.NEW_BRANCH, TestTracking.CLASS_DATA)
+internal class ClassDataCondyTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.CONDY_BRANCH, TestTracking.CLASS_DATA)

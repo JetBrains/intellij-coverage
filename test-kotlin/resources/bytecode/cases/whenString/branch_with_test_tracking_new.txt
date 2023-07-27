@@ -1,0 +1,2168 @@
+// access flags 0x31
+public final class testData/cases/whenString/TestKt {
+
+  // compiled from: test.kt
+
+
+  // access flags 0x19
+  public final static foo(Ljava/lang/String;)V
+    // annotable parameter count: 1 (invisible)
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    ASTORE 1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    ASTORE 2
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    ASTORE 3
+   L0
+    ALOAD 0
+    LDC "x"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+   L1
+    LINENUMBER 21 L1
+    ALOAD 1
+    ICONST_0
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L2
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L2
+    BIPUSH 21
+    ICONST_1
+    BASTORE
+    ALOAD 0
+    ASTORE 4
+    ALOAD 4
+    INVOKEVIRTUAL java/lang/String.hashCode ()I
+    GOTO L3
+   L4
+    ALOAD 1
+    ICONST_4
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L5
+   L6
+    ALOAD 1
+    ICONST_3
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L7
+   L8
+    ALOAD 1
+    ICONST_2
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L9
+   L10
+    ALOAD 1
+    ICONST_1
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L11
+   L3
+    TABLESWITCH
+      97: L4
+      98: L6
+      99: L8
+      default: L10
+   L5
+   FRAME FULL [java/lang/String [I [Z java/lang/Object java/lang/String] []
+    ALOAD 4
+    LDC "a"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L12
+    GOTO L13
+   L12
+    GOTO L14
+   L13
+    GOTO L11
+   L7
+   FRAME SAME
+    ALOAD 4
+    LDC "b"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L15
+    GOTO L16
+   L15
+    GOTO L14
+   L16
+    GOTO L11
+   L9
+   FRAME SAME
+    ALOAD 4
+    LDC "c"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L17
+    GOTO L18
+   L17
+    GOTO L19
+   L18
+    GOTO L11
+   L14
+    LINENUMBER 22 L14
+    ALOAD 1
+    BIPUSH 11
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L20
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L20
+    BIPUSH 22
+    ICONST_1
+    BASTORE
+   L21
+   FRAME SAME
+    ICONST_5
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L22
+   L19
+    LINENUMBER 23 L19
+    ALOAD 1
+    BIPUSH 12
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L23
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L23
+    BIPUSH 23
+    ICONST_1
+    BASTORE
+   L24
+   FRAME SAME
+    BIPUSH 6
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L22
+   L11
+    LINENUMBER 24 L11
+    ALOAD 1
+    BIPUSH 13
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L25
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L25
+    BIPUSH 24
+    ICONST_1
+    BASTORE
+   L26
+   FRAME SAME
+    BIPUSH 7
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L22
+    LINENUMBER 25 L22
+   FRAME APPEND [I]
+    RETURN
+   L27
+    LOCALVARIABLE x Ljava/lang/String; L0 L27 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L27 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L27 2
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L27 3
+    MAXSTACK = 5
+    MAXLOCALS = 6
+
+  // access flags 0x19
+  public final static foo2(Ljava/lang/String;)V
+    // annotable parameter count: 1 (invisible)
+    @Lorg/jetbrains/annotations/Nullable;() // invisible, parameter 0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    ASTORE 1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    ASTORE 2
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    ASTORE 3
+   L0
+    LINENUMBER 28 L0
+    ALOAD 1
+    BIPUSH 15
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L1
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L1
+    BIPUSH 28
+    ICONST_1
+    BASTORE
+    ALOAD 0
+    ASTORE 4
+    ALOAD 4
+    IFNULL L2
+    GOTO L3
+   L2
+    GOTO L4
+   L3
+    ALOAD 4
+    INVOKEVIRTUAL java/lang/String.hashCode ()I
+    GOTO L5
+   L6
+    ALOAD 1
+    BIPUSH 21
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L7
+   L8
+    ALOAD 1
+    BIPUSH 20
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L9
+   L10
+    ALOAD 1
+    BIPUSH 19
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L11
+   L12
+    ALOAD 1
+    BIPUSH 18
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L4
+   L5
+    TABLESWITCH
+      97: L6
+      98: L8
+      99: L10
+      default: L12
+   L7
+   FRAME FULL [java/lang/String [I [Z java/lang/Object java/lang/String] []
+    ALOAD 4
+    LDC "a"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L13
+    GOTO L14
+   L13
+    GOTO L15
+   L14
+    GOTO L4
+   L9
+   FRAME SAME
+    ALOAD 4
+    LDC "b"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L16
+    GOTO L17
+   L16
+    GOTO L15
+   L17
+    GOTO L4
+   L11
+   FRAME SAME
+    ALOAD 4
+    LDC "c"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L18
+    GOTO L19
+   L18
+    GOTO L20
+   L19
+    GOTO L4
+   L15
+    LINENUMBER 29 L15
+    ALOAD 1
+    BIPUSH 28
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L21
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L21
+    BIPUSH 29
+    ICONST_1
+    BASTORE
+   L22
+   FRAME SAME
+    ICONST_5
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L23
+   L20
+    LINENUMBER 30 L20
+    ALOAD 1
+    BIPUSH 29
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L24
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L24
+    BIPUSH 30
+    ICONST_1
+    BASTORE
+   L25
+   FRAME SAME
+    BIPUSH 6
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L23
+   L4
+    LINENUMBER 31 L4
+    ALOAD 1
+    BIPUSH 30
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L26
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L26
+    BIPUSH 31
+    ICONST_1
+    BASTORE
+   L27
+   FRAME SAME
+    BIPUSH 7
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L23
+    LINENUMBER 32 L23
+   FRAME APPEND [I]
+    RETURN
+   L28
+    LOCALVARIABLE x Ljava/lang/String; L0 L28 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L28 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L28 2
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L28 3
+    MAXSTACK = 5
+    MAXLOCALS = 6
+
+  // access flags 0x19
+  public final static foo3(Ljava/lang/String;)V
+    // annotable parameter count: 1 (invisible)
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    ASTORE 1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    ASTORE 2
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    ASTORE 3
+   L0
+    ALOAD 0
+    LDC "x"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+   L1
+    LINENUMBER 35 L1
+    ALOAD 1
+    BIPUSH 32
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L2
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L2
+    BIPUSH 35
+    ICONST_1
+    BASTORE
+    ALOAD 0
+    ASTORE 4
+    ALOAD 4
+    INVOKEVIRTUAL java/lang/String.hashCode ()I
+    GOTO L3
+   L4
+    ALOAD 1
+    BIPUSH 36
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L5
+   L6
+    ALOAD 1
+    BIPUSH 35
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L7
+   L8
+    ALOAD 1
+    BIPUSH 34
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L9
+   L10
+    ALOAD 1
+    BIPUSH 33
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L11
+   L3
+    TABLESWITCH
+      97: L4
+      98: L6
+      99: L8
+      default: L10
+   L5
+   FRAME FULL [java/lang/String [I [Z java/lang/Object java/lang/String] []
+    ALOAD 4
+    LDC "a"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L12
+    GOTO L13
+   L12
+    GOTO L14
+   L13
+    GOTO L11
+   L7
+   FRAME SAME
+    ALOAD 4
+    LDC "b"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L15
+    GOTO L16
+   L15
+    GOTO L14
+   L16
+    GOTO L11
+   L9
+   FRAME SAME
+    ALOAD 4
+    LDC "c"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFEQ L17
+    GOTO L18
+   L17
+    GOTO L11
+   L18
+    LINENUMBER 36 L18
+    ALOAD 1
+    BIPUSH 43
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L19
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L19
+    BIPUSH 36
+    ICONST_1
+    BASTORE
+    BIPUSH 6
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L20
+   L14
+    LINENUMBER 37 L14
+    ALOAD 1
+    BIPUSH 44
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L21
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L21
+    BIPUSH 37
+    ICONST_1
+    BASTORE
+   L22
+   FRAME SAME
+    ICONST_5
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L20
+   L11
+    LINENUMBER 38 L11
+    ALOAD 1
+    BIPUSH 45
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L23
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L23
+    BIPUSH 38
+    ICONST_1
+    BASTORE
+   L24
+   FRAME SAME
+    BIPUSH 7
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L20
+    LINENUMBER 39 L20
+   FRAME APPEND [I]
+    RETURN
+   L25
+    LOCALVARIABLE x Ljava/lang/String; L0 L25 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L25 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L25 2
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L25 3
+    MAXSTACK = 5
+    MAXLOCALS = 6
+
+  // access flags 0x19
+  public final static boo(Ljava/lang/String;)V
+    // annotable parameter count: 1 (invisible)
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    ASTORE 1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    ASTORE 2
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    ASTORE 3
+   L0
+    ALOAD 0
+    LDC "x"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+   L1
+    LINENUMBER 42 L1
+    ALOAD 1
+    BIPUSH 47
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L2
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L2
+    BIPUSH 42
+    ICONST_1
+    BASTORE
+    ALOAD 0
+    ASTORE 4
+    ALOAD 4
+    INVOKEVIRTUAL java/lang/String.hashCode ()I
+    GOTO L3
+   L4
+    ALOAD 1
+    BIPUSH 53
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L5
+   L6
+    ALOAD 1
+    BIPUSH 52
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L7
+   L8
+    ALOAD 1
+    BIPUSH 51
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L9
+   L10
+    ALOAD 1
+    BIPUSH 50
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L11
+   L12
+    ALOAD 1
+    BIPUSH 49
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L13
+   L14
+    ALOAD 1
+    BIPUSH 48
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L15
+   L3
+    LOOKUPSWITCH
+      99: L4
+      100: L6
+      101: L8
+      102: L10
+      2112: L12
+      default: L14
+   L13
+   FRAME FULL [java/lang/String [I [Z java/lang/Object java/lang/String] []
+    ALOAD 4
+    LDC "Aa"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L16
+    GOTO L17
+   L16
+    ALOAD 1
+    BIPUSH 54
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L18
+   L17
+    ALOAD 1
+    BIPUSH 55
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 4
+    LDC "BB"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L19
+    GOTO L20
+   L19
+    GOTO L18
+   L20
+    GOTO L15
+   L5
+   FRAME SAME
+    ALOAD 4
+    LDC "c"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L21
+    GOTO L22
+   L21
+    GOTO L23
+   L22
+    GOTO L15
+   L7
+   FRAME SAME
+    ALOAD 4
+    LDC "d"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L24
+    GOTO L25
+   L24
+    GOTO L26
+   L25
+    GOTO L15
+   L9
+   FRAME SAME
+    ALOAD 4
+    LDC "e"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L27
+    GOTO L28
+   L27
+    GOTO L29
+   L28
+    GOTO L15
+   L11
+   FRAME SAME
+    ALOAD 4
+    LDC "f"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L30
+    GOTO L31
+   L30
+    GOTO L32
+   L31
+    GOTO L15
+   L18
+    LINENUMBER 43 L18
+    ALOAD 1
+    BIPUSH 66
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L33
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L33
+    BIPUSH 43
+    ICONST_1
+    BASTORE
+   L34
+   FRAME SAME
+    ICONST_5
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L35
+   L23
+    LINENUMBER 44 L23
+    ALOAD 1
+    BIPUSH 67
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L36
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L36
+    BIPUSH 44
+    ICONST_1
+    BASTORE
+   L37
+   FRAME SAME
+    BIPUSH 6
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L35
+   L26
+    LINENUMBER 45 L26
+    ALOAD 1
+    BIPUSH 68
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L38
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L38
+    BIPUSH 45
+    ICONST_1
+    BASTORE
+   L39
+   FRAME SAME
+    BIPUSH 7
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L35
+   L29
+    LINENUMBER 46 L29
+    ALOAD 1
+    BIPUSH 69
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L40
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L40
+    BIPUSH 46
+    ICONST_1
+    BASTORE
+   L41
+   FRAME SAME
+    BIPUSH 8
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L35
+   L32
+    LINENUMBER 47 L32
+    ALOAD 1
+    BIPUSH 70
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L42
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L42
+    BIPUSH 47
+    ICONST_1
+    BASTORE
+   L43
+   FRAME SAME
+    BIPUSH 9
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L35
+   L15
+    LINENUMBER 48 L15
+    ALOAD 1
+    BIPUSH 71
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L44
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L44
+    BIPUSH 48
+    ICONST_1
+    BASTORE
+   L45
+   FRAME SAME
+    BIPUSH 10
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L35
+    LINENUMBER 49 L35
+   FRAME APPEND [I]
+    RETURN
+   L46
+    LOCALVARIABLE x Ljava/lang/String; L0 L46 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L46 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L46 2
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L46 3
+    MAXSTACK = 5
+    MAXLOCALS = 6
+
+  // access flags 0x19
+  public final static boo2(Ljava/lang/String;)V
+    // annotable parameter count: 1 (invisible)
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    ASTORE 1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    ASTORE 2
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    ASTORE 3
+   L0
+    ALOAD 0
+    LDC "x"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+   L1
+    LINENUMBER 52 L1
+    ALOAD 1
+    BIPUSH 73
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L2
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L2
+    BIPUSH 52
+    ICONST_1
+    BASTORE
+    ALOAD 0
+    ASTORE 4
+    ALOAD 4
+    INVOKEVIRTUAL java/lang/String.hashCode ()I
+    GOTO L3
+   L4
+    ALOAD 1
+    BIPUSH 79
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L5
+   L6
+    ALOAD 1
+    BIPUSH 78
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L7
+   L8
+    ALOAD 1
+    BIPUSH 77
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L9
+   L10
+    ALOAD 1
+    BIPUSH 76
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L11
+   L12
+    ALOAD 1
+    BIPUSH 75
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L13
+   L14
+    ALOAD 1
+    BIPUSH 74
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L15
+   L3
+    LOOKUPSWITCH
+      99: L4
+      100: L6
+      101: L8
+      102: L10
+      2112: L12
+      default: L14
+   L13
+   FRAME FULL [java/lang/String [I [Z java/lang/Object java/lang/String] []
+    ALOAD 4
+    LDC "Aa"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L16
+    GOTO L17
+   L16
+    ALOAD 1
+    BIPUSH 80
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L18
+   L17
+    ALOAD 1
+    BIPUSH 81
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 4
+    LDC "BB"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L19
+    GOTO L20
+   L19
+    GOTO L18
+   L20
+    GOTO L15
+   L5
+   FRAME SAME
+    ALOAD 4
+    LDC "c"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L21
+    GOTO L22
+   L21
+    GOTO L23
+   L22
+    GOTO L15
+   L7
+   FRAME SAME
+    ALOAD 4
+    LDC "d"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L24
+    GOTO L25
+   L24
+    GOTO L26
+   L25
+    GOTO L15
+   L9
+   FRAME SAME
+    ALOAD 4
+    LDC "e"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L27
+    GOTO L28
+   L27
+    GOTO L29
+   L28
+    GOTO L15
+   L11
+   FRAME SAME
+    ALOAD 4
+    LDC "f"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L30
+    GOTO L31
+   L30
+    GOTO L32
+   L31
+    GOTO L15
+   L18
+    LINENUMBER 53 L18
+    ALOAD 1
+    BIPUSH 92
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L33
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L33
+    BIPUSH 53
+    ICONST_1
+    BASTORE
+   L34
+   FRAME SAME
+    ICONST_5
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L35
+   L23
+    LINENUMBER 54 L23
+    ALOAD 1
+    BIPUSH 93
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L36
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L36
+    BIPUSH 54
+    ICONST_1
+    BASTORE
+   L37
+   FRAME SAME
+    BIPUSH 6
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L35
+   L26
+    LINENUMBER 55 L26
+    ALOAD 1
+    BIPUSH 94
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L38
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L38
+    BIPUSH 55
+    ICONST_1
+    BASTORE
+   L39
+   FRAME SAME
+    BIPUSH 7
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L35
+   L29
+    LINENUMBER 56 L29
+    ALOAD 1
+    BIPUSH 95
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L40
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L40
+    BIPUSH 56
+    ICONST_1
+    BASTORE
+   L41
+   FRAME SAME
+    BIPUSH 8
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L35
+   L32
+    LINENUMBER 57 L32
+    ALOAD 1
+    BIPUSH 96
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L42
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L42
+    BIPUSH 57
+    ICONST_1
+    BASTORE
+   L43
+   FRAME SAME
+    BIPUSH 9
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L35
+   L15
+    LINENUMBER 58 L15
+    ALOAD 1
+    BIPUSH 97
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L44
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L44
+    BIPUSH 58
+    ICONST_1
+    BASTORE
+   L45
+   FRAME SAME
+    BIPUSH 10
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L35
+    LINENUMBER 59 L35
+   FRAME APPEND [I]
+    RETURN
+   L46
+    LOCALVARIABLE x Ljava/lang/String; L0 L46 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L46 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L46 2
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L46 3
+    MAXSTACK = 5
+    MAXLOCALS = 6
+
+  // access flags 0x19
+  public final static voo(Ljava/lang/String;)V
+    // annotable parameter count: 1 (invisible)
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    ASTORE 1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    ASTORE 2
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    ASTORE 3
+   L0
+    ALOAD 0
+    LDC "x"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+   L1
+    LINENUMBER 62 L1
+    ALOAD 1
+    BIPUSH 99
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L2
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L2
+    BIPUSH 62
+    ICONST_1
+    BASTORE
+    ALOAD 0
+    ASTORE 4
+   L3
+    LINENUMBER 63 L3
+    ALOAD 1
+    BIPUSH 100
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L4
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L4
+    BIPUSH 63
+    ICONST_1
+    BASTORE
+    ALOAD 4
+    LDC "Aa"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.areEqual (Ljava/lang/Object;Ljava/lang/Object;)Z
+    IFEQ L5
+    GOTO L6
+   L5
+    ALOAD 1
+    BIPUSH 101
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L7
+   L6
+    ALOAD 1
+    BIPUSH 102
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ICONST_1
+    GOTO L8
+   L7
+   FRAME FULL [java/lang/String [I [Z java/lang/Object java/lang/String] []
+    ALOAD 4
+    LDC "BB"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.areEqual (Ljava/lang/Object;Ljava/lang/Object;)Z
+   L8
+   FRAME SAME1 I
+    IFEQ L9
+    GOTO L10
+   L9
+    ALOAD 1
+    BIPUSH 103
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L11
+   L10
+    ALOAD 1
+    BIPUSH 104
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ICONST_5
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L12
+   L11
+    LINENUMBER 64 L11
+    ALOAD 1
+    BIPUSH 105
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L13
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L13
+    BIPUSH 64
+    ICONST_1
+    BASTORE
+   L14
+   FRAME SAME
+    BIPUSH 10
+    ISTORE 5
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 5
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L12
+    LINENUMBER 65 L12
+   FRAME APPEND [I]
+    RETURN
+   L15
+    LOCALVARIABLE x Ljava/lang/String; L0 L15 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L15 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L15 2
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L15 3
+    MAXSTACK = 4
+    MAXLOCALS = 6
+
+  // access flags 0x19
+  public final static main()V
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    ASTORE 0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    ASTORE 1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    ASTORE 2
+   L0
+    LINENUMBER 68 L0
+    ALOAD 0
+    BIPUSH 107
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L1
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L1
+    BIPUSH 68
+    ICONST_1
+    BASTORE
+    LDC "a"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
+   L2
+    LINENUMBER 69 L2
+    ALOAD 0
+    BIPUSH 108
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L3
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L3
+    BIPUSH 69
+    ICONST_1
+    BASTORE
+    LDC "b"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
+   L4
+    LINENUMBER 70 L4
+    ALOAD 0
+    BIPUSH 109
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L5
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L5
+    BIPUSH 70
+    ICONST_1
+    BASTORE
+    LDC "c"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
+   L6
+    LINENUMBER 71 L6
+    ALOAD 0
+    BIPUSH 110
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L7
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L7
+    BIPUSH 71
+    ICONST_1
+    BASTORE
+    LDC "d"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
+   L8
+    LINENUMBER 73 L8
+    ALOAD 0
+    BIPUSH 111
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L9
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L9
+    BIPUSH 73
+    ICONST_1
+    BASTORE
+    LDC "a"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
+   L10
+    LINENUMBER 74 L10
+    ALOAD 0
+    BIPUSH 112
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L11
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L11
+    BIPUSH 74
+    ICONST_1
+    BASTORE
+    LDC "b"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
+   L12
+    LINENUMBER 75 L12
+    ALOAD 0
+    BIPUSH 113
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L13
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L13
+    BIPUSH 75
+    ICONST_1
+    BASTORE
+    LDC "c"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
+   L14
+    LINENUMBER 76 L14
+    ALOAD 0
+    BIPUSH 114
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L15
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L15
+    BIPUSH 76
+    ICONST_1
+    BASTORE
+    LDC "d"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
+   L16
+    LINENUMBER 78 L16
+    ALOAD 0
+    BIPUSH 115
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L17
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L17
+    BIPUSH 78
+    ICONST_1
+    BASTORE
+    LDC "a"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
+   L18
+    LINENUMBER 79 L18
+    ALOAD 0
+    BIPUSH 116
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L19
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L19
+    BIPUSH 79
+    ICONST_1
+    BASTORE
+    LDC "b"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
+   L20
+    LINENUMBER 80 L20
+    ALOAD 0
+    BIPUSH 117
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L21
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L21
+    BIPUSH 80
+    ICONST_1
+    BASTORE
+    LDC "c"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
+   L22
+    LINENUMBER 81 L22
+    ALOAD 0
+    BIPUSH 118
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L23
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L23
+    BIPUSH 81
+    ICONST_1
+    BASTORE
+    LDC "d"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
+   L24
+    LINENUMBER 83 L24
+    ALOAD 0
+    BIPUSH 119
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L25
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L25
+    BIPUSH 83
+    ICONST_1
+    BASTORE
+    LDC "Aa"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L26
+    LINENUMBER 84 L26
+    ALOAD 0
+    BIPUSH 120
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L27
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L27
+    BIPUSH 84
+    ICONST_1
+    BASTORE
+    LDC "BB"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L28
+    LINENUMBER 85 L28
+    ALOAD 0
+    BIPUSH 121
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L29
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L29
+    BIPUSH 85
+    ICONST_1
+    BASTORE
+    LDC "c"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L30
+    LINENUMBER 86 L30
+    ALOAD 0
+    BIPUSH 122
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L31
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L31
+    BIPUSH 86
+    ICONST_1
+    BASTORE
+    LDC "d"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L32
+    LINENUMBER 87 L32
+    ALOAD 0
+    BIPUSH 123
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L33
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L33
+    BIPUSH 87
+    ICONST_1
+    BASTORE
+    LDC "e"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L34
+    LINENUMBER 88 L34
+    ALOAD 0
+    BIPUSH 124
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L35
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L35
+    BIPUSH 88
+    ICONST_1
+    BASTORE
+    LDC "f"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L36
+    LINENUMBER 89 L36
+    ALOAD 0
+    BIPUSH 125
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L37
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L37
+    BIPUSH 89
+    ICONST_1
+    BASTORE
+    LDC "g"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L38
+    LINENUMBER 91 L38
+    ALOAD 0
+    BIPUSH 126
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L39
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L39
+    BIPUSH 91
+    ICONST_1
+    BASTORE
+    LDC "Aa"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
+   L40
+    LINENUMBER 92 L40
+    ALOAD 0
+    BIPUSH 127
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L41
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L41
+    BIPUSH 92
+    ICONST_1
+    BASTORE
+    LDC "c"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
+   L42
+    LINENUMBER 93 L42
+    ALOAD 0
+    SIPUSH 128
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L43
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L43
+    BIPUSH 93
+    ICONST_1
+    BASTORE
+    LDC "d"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
+   L44
+    LINENUMBER 94 L44
+    ALOAD 0
+    SIPUSH 129
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L45
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L45
+    BIPUSH 94
+    ICONST_1
+    BASTORE
+    LDC "e"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
+   L46
+    LINENUMBER 95 L46
+    ALOAD 0
+    SIPUSH 130
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L47
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L47
+    BIPUSH 95
+    ICONST_1
+    BASTORE
+    LDC "f"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
+   L48
+    LINENUMBER 96 L48
+    ALOAD 0
+    SIPUSH 131
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L49
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L49
+    BIPUSH 96
+    ICONST_1
+    BASTORE
+    LDC "g"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
+   L50
+    LINENUMBER 98 L50
+    ALOAD 0
+    SIPUSH 132
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L51
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L51
+    BIPUSH 98
+    ICONST_1
+    BASTORE
+    LDC "Aa"
+    INVOKESTATIC testData/cases/whenString/TestKt.voo (Ljava/lang/String;)V
+   L52
+    LINENUMBER 99 L52
+    ALOAD 0
+    SIPUSH 133
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L53
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L53
+    BIPUSH 99
+    ICONST_1
+    BASTORE
+    LDC "BB"
+    INVOKESTATIC testData/cases/whenString/TestKt.voo (Ljava/lang/String;)V
+   L54
+    LINENUMBER 100 L54
+    ALOAD 0
+    SIPUSH 134
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 1
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L55
+    ALOAD 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L55
+    BIPUSH 100
+    ICONST_1
+    BASTORE
+    LDC "g"
+    INVOKESTATIC testData/cases/whenString/TestKt.voo (Ljava/lang/String;)V
+   L56
+    LINENUMBER 101 L56
+    RETURN
+    LOCALVARIABLE __$coverage_local$__ [I L0 L56 0
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L56 1
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L56 2
+    MAXSTACK = 4
+    MAXLOCALS = 3
+
+  // access flags 0x1009
+  public static synthetic main([Ljava/lang/String;)V
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    ASTORE 1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    ASTORE 2
+   L0
+    INVOKESTATIC testData/cases/whenString/TestKt.main ()V
+    RETURN
+   L1
+    LOCALVARIABLE args [Ljava/lang/String; L0 L1 0
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L1 1
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L1 2
+    MAXSTACK = 1
+    MAXLOCALS = 3
+}

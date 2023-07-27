@@ -1,0 +1,230 @@
+// access flags 0x31
+public final class testData/simple/branches/MyBranchedClass {
+
+  // compiled from: test.kt
+
+
+  // access flags 0x1
+  public <init>()V
+    LDC "testData.simple.branches.MyBranchedClass"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    ASTORE 1
+    LDC "testData.simple.branches.MyBranchedClass"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    ASTORE 2
+    LDC "testData.simple.branches.MyBranchedClass"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    ASTORE 3
+   L0
+    LINENUMBER 22 L0
+    ALOAD 1
+    ICONST_0
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L1
+    ALOAD 3
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L1
+    BIPUSH 22
+    ICONST_1
+    BASTORE
+    ALOAD 0
+    INVOKESPECIAL java/lang/Object.<init> ()V
+    RETURN
+   L2
+    LOCALVARIABLE this LtestData/simple/branches/MyBranchedClass; L0 L2 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L2 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L2 2
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L2 3
+    MAXSTACK = 4
+    MAXLOCALS = 4
+
+  // access flags 0x11
+  public final foo(I)V
+    LDC "testData.simple.branches.MyBranchedClass"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    ASTORE 2
+    LDC "testData.simple.branches.MyBranchedClass"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    ASTORE 3
+    LDC "testData.simple.branches.MyBranchedClass"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    ASTORE 4
+   L0
+    LINENUMBER 24 L0
+    ALOAD 2
+    ICONST_1
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 3
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L1
+    ALOAD 4
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L1
+    BIPUSH 24
+    ICONST_1
+    BASTORE
+    ILOAD 1
+    IFGE L2
+    GOTO L3
+   L2
+    ALOAD 2
+    ICONST_2
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L4
+   L3
+    ALOAD 2
+    ICONST_3
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L5
+    LINENUMBER 25 L5
+    ALOAD 2
+    ICONST_4
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 3
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L6
+    ALOAD 4
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L6
+    BIPUSH 25
+    ICONST_1
+    BASTORE
+    LDC "LE"
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    SWAP
+    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/Object;)V
+    GOTO L7
+   L4
+    LINENUMBER 26 L4
+    ALOAD 2
+    ICONST_5
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 3
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L8
+    ALOAD 4
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L8
+    BIPUSH 26
+    ICONST_1
+    BASTORE
+   L9
+   FRAME APPEND [[I [Z java/lang/Object]
+    ILOAD 1
+    IFNE L10
+    GOTO L11
+   L10
+    ALOAD 2
+    BIPUSH 6
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L12
+   L11
+    ALOAD 2
+    BIPUSH 7
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L13
+    LINENUMBER 27 L13
+    ALOAD 2
+    BIPUSH 8
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 3
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L14
+    ALOAD 4
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L14
+    BIPUSH 27
+    ICONST_1
+    BASTORE
+    LDC "EQ"
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    SWAP
+    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/Object;)V
+    GOTO L7
+   L12
+    LINENUMBER 29 L12
+    ALOAD 2
+    BIPUSH 9
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 3
+    DUP
+    ICONST_0
+    BALOAD
+    IFNE L15
+    ALOAD 4
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.registerClassForTrace (Ljava/lang/Object;)V
+   L15
+    BIPUSH 29
+    ICONST_1
+    BASTORE
+   L16
+   FRAME SAME
+    LDC "GE"
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    SWAP
+    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/Object;)V
+   L7
+    LINENUMBER 31 L7
+   FRAME SAME
+    RETURN
+   L17
+    LOCALVARIABLE this LtestData/simple/branches/MyBranchedClass; L0 L17 0
+    LOCALVARIABLE value I L0 L17 1
+    LOCALVARIABLE __$coverage_local$__ [I L0 L17 2
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L17 3
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L17 4
+    MAXSTACK = 4
+    MAXLOCALS = 5
+}

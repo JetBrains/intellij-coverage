@@ -1,0 +1,1515 @@
+// access flags 0x31
+public final class testData/cases/whenString/TestKt {
+
+  // compiled from: test.kt
+
+
+  // access flags 0x108A
+  private static transient synthetic [I __$hits$__
+
+  // access flags 0x19
+  public final static foo(Ljava/lang/String;)V
+    // annotable parameter count: 1 (invisible)
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+   L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 1
+   L1
+    ALOAD 0
+    LDC "x"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+   L2
+    LINENUMBER 21 L2
+    ALOAD 1
+    ICONST_0
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 0
+    ASTORE 2
+    ALOAD 2
+    INVOKEVIRTUAL java/lang/String.hashCode ()I
+    GOTO L3
+   L4
+    ALOAD 1
+    ICONST_4
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L5
+   L6
+    ALOAD 1
+    ICONST_3
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L7
+   L8
+    ALOAD 1
+    ICONST_2
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L9
+   L10
+    ALOAD 1
+    ICONST_1
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L11
+   L3
+    TABLESWITCH
+      97: L4
+      98: L6
+      99: L8
+      default: L10
+   L5
+   FRAME APPEND [[I java/lang/String]
+    ALOAD 2
+    LDC "a"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L12
+    GOTO L13
+   L12
+    GOTO L14
+   L13
+    GOTO L11
+   L7
+   FRAME SAME
+    ALOAD 2
+    LDC "b"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L15
+    GOTO L16
+   L15
+    GOTO L14
+   L16
+    GOTO L11
+   L9
+   FRAME SAME
+    ALOAD 2
+    LDC "c"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L17
+    GOTO L18
+   L17
+    GOTO L19
+   L18
+    GOTO L11
+   L14
+    LINENUMBER 22 L14
+    ALOAD 1
+    BIPUSH 11
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L20
+   FRAME SAME
+    ICONST_5
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L21
+   L19
+    LINENUMBER 23 L19
+    ALOAD 1
+    BIPUSH 12
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L22
+   FRAME SAME
+    BIPUSH 6
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L21
+   L11
+    LINENUMBER 24 L11
+    ALOAD 1
+    BIPUSH 13
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L23
+   FRAME SAME
+    BIPUSH 7
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L21
+    LINENUMBER 25 L21
+   FRAME APPEND [I]
+    RETURN
+   L24
+    LOCALVARIABLE x Ljava/lang/String; L1 L24 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L24 1
+    MAXSTACK = 5
+    MAXLOCALS = 4
+
+  // access flags 0x19
+  public final static foo2(Ljava/lang/String;)V
+    // annotable parameter count: 1 (invisible)
+    @Lorg/jetbrains/annotations/Nullable;() // invisible, parameter 0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+   L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 1
+   L1
+    LINENUMBER 28 L1
+    ALOAD 1
+    BIPUSH 15
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 0
+    ASTORE 2
+    ALOAD 2
+    IFNULL L2
+    GOTO L3
+   L2
+    GOTO L4
+   L3
+    ALOAD 2
+    INVOKEVIRTUAL java/lang/String.hashCode ()I
+    GOTO L5
+   L6
+    ALOAD 1
+    BIPUSH 21
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L7
+   L8
+    ALOAD 1
+    BIPUSH 20
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L9
+   L10
+    ALOAD 1
+    BIPUSH 19
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L11
+   L12
+    ALOAD 1
+    BIPUSH 18
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L4
+   L5
+    TABLESWITCH
+      97: L6
+      98: L8
+      99: L10
+      default: L12
+   L7
+   FRAME APPEND [[I java/lang/String]
+    ALOAD 2
+    LDC "a"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L13
+    GOTO L14
+   L13
+    GOTO L15
+   L14
+    GOTO L4
+   L9
+   FRAME SAME
+    ALOAD 2
+    LDC "b"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L16
+    GOTO L17
+   L16
+    GOTO L15
+   L17
+    GOTO L4
+   L11
+   FRAME SAME
+    ALOAD 2
+    LDC "c"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L18
+    GOTO L19
+   L18
+    GOTO L20
+   L19
+    GOTO L4
+   L15
+    LINENUMBER 29 L15
+    ALOAD 1
+    BIPUSH 28
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L21
+   FRAME SAME
+    ICONST_5
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L22
+   L20
+    LINENUMBER 30 L20
+    ALOAD 1
+    BIPUSH 29
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L23
+   FRAME SAME
+    BIPUSH 6
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L22
+   L4
+    LINENUMBER 31 L4
+    ALOAD 1
+    BIPUSH 30
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L24
+   FRAME SAME
+    BIPUSH 7
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L22
+    LINENUMBER 32 L22
+   FRAME APPEND [I]
+    RETURN
+   L25
+    LOCALVARIABLE x Ljava/lang/String; L1 L25 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L25 1
+    MAXSTACK = 5
+    MAXLOCALS = 4
+
+  // access flags 0x19
+  public final static foo3(Ljava/lang/String;)V
+    // annotable parameter count: 1 (invisible)
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+   L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 1
+   L1
+    ALOAD 0
+    LDC "x"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+   L2
+    LINENUMBER 35 L2
+    ALOAD 1
+    BIPUSH 32
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 0
+    ASTORE 2
+    ALOAD 2
+    INVOKEVIRTUAL java/lang/String.hashCode ()I
+    GOTO L3
+   L4
+    ALOAD 1
+    BIPUSH 36
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L5
+   L6
+    ALOAD 1
+    BIPUSH 35
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L7
+   L8
+    ALOAD 1
+    BIPUSH 34
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L9
+   L10
+    ALOAD 1
+    BIPUSH 33
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L11
+   L3
+    TABLESWITCH
+      97: L4
+      98: L6
+      99: L8
+      default: L10
+   L5
+   FRAME APPEND [[I java/lang/String]
+    ALOAD 2
+    LDC "a"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L12
+    GOTO L13
+   L12
+    GOTO L14
+   L13
+    GOTO L11
+   L7
+   FRAME SAME
+    ALOAD 2
+    LDC "b"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L15
+    GOTO L16
+   L15
+    GOTO L14
+   L16
+    GOTO L11
+   L9
+   FRAME SAME
+    ALOAD 2
+    LDC "c"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFEQ L17
+    GOTO L18
+   L17
+    GOTO L11
+   L18
+    LINENUMBER 36 L18
+    ALOAD 1
+    BIPUSH 43
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    BIPUSH 6
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L19
+   L14
+    LINENUMBER 37 L14
+    ALOAD 1
+    BIPUSH 44
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L20
+   FRAME SAME
+    ICONST_5
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L19
+   L11
+    LINENUMBER 38 L11
+    ALOAD 1
+    BIPUSH 45
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L21
+   FRAME SAME
+    BIPUSH 7
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L19
+    LINENUMBER 39 L19
+   FRAME APPEND [I]
+    RETURN
+   L22
+    LOCALVARIABLE x Ljava/lang/String; L1 L22 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L22 1
+    MAXSTACK = 5
+    MAXLOCALS = 4
+
+  // access flags 0x19
+  public final static boo(Ljava/lang/String;)V
+    // annotable parameter count: 1 (invisible)
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+   L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 1
+   L1
+    ALOAD 0
+    LDC "x"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+   L2
+    LINENUMBER 42 L2
+    ALOAD 1
+    BIPUSH 47
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 0
+    ASTORE 2
+    ALOAD 2
+    INVOKEVIRTUAL java/lang/String.hashCode ()I
+    GOTO L3
+   L4
+    ALOAD 1
+    BIPUSH 53
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L5
+   L6
+    ALOAD 1
+    BIPUSH 52
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L7
+   L8
+    ALOAD 1
+    BIPUSH 51
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L9
+   L10
+    ALOAD 1
+    BIPUSH 50
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L11
+   L12
+    ALOAD 1
+    BIPUSH 49
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L13
+   L14
+    ALOAD 1
+    BIPUSH 48
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L15
+   L3
+    LOOKUPSWITCH
+      99: L4
+      100: L6
+      101: L8
+      102: L10
+      2112: L12
+      default: L14
+   L13
+   FRAME APPEND [[I java/lang/String]
+    ALOAD 2
+    LDC "Aa"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L16
+    GOTO L17
+   L16
+    ALOAD 1
+    BIPUSH 54
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L18
+   L17
+    ALOAD 1
+    BIPUSH 55
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    LDC "BB"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L19
+    GOTO L20
+   L19
+    GOTO L18
+   L20
+    GOTO L15
+   L5
+   FRAME SAME
+    ALOAD 2
+    LDC "c"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L21
+    GOTO L22
+   L21
+    GOTO L23
+   L22
+    GOTO L15
+   L7
+   FRAME SAME
+    ALOAD 2
+    LDC "d"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L24
+    GOTO L25
+   L24
+    GOTO L26
+   L25
+    GOTO L15
+   L9
+   FRAME SAME
+    ALOAD 2
+    LDC "e"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L27
+    GOTO L28
+   L27
+    GOTO L29
+   L28
+    GOTO L15
+   L11
+   FRAME SAME
+    ALOAD 2
+    LDC "f"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L30
+    GOTO L31
+   L30
+    GOTO L32
+   L31
+    GOTO L15
+   L18
+    LINENUMBER 43 L18
+    ALOAD 1
+    BIPUSH 66
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L33
+   FRAME SAME
+    ICONST_5
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L34
+   L23
+    LINENUMBER 44 L23
+    ALOAD 1
+    BIPUSH 67
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L35
+   FRAME SAME
+    BIPUSH 6
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L34
+   L26
+    LINENUMBER 45 L26
+    ALOAD 1
+    BIPUSH 68
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L36
+   FRAME SAME
+    BIPUSH 7
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L34
+   L29
+    LINENUMBER 46 L29
+    ALOAD 1
+    BIPUSH 69
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L37
+   FRAME SAME
+    BIPUSH 8
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L34
+   L32
+    LINENUMBER 47 L32
+    ALOAD 1
+    BIPUSH 70
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L38
+   FRAME SAME
+    BIPUSH 9
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L34
+   L15
+    LINENUMBER 48 L15
+    ALOAD 1
+    BIPUSH 71
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L39
+   FRAME SAME
+    BIPUSH 10
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L34
+    LINENUMBER 49 L34
+   FRAME APPEND [I]
+    RETURN
+   L40
+    LOCALVARIABLE x Ljava/lang/String; L1 L40 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L40 1
+    MAXSTACK = 5
+    MAXLOCALS = 4
+
+  // access flags 0x19
+  public final static boo2(Ljava/lang/String;)V
+    // annotable parameter count: 1 (invisible)
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+   L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 1
+   L1
+    ALOAD 0
+    LDC "x"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+   L2
+    LINENUMBER 52 L2
+    ALOAD 1
+    BIPUSH 73
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 0
+    ASTORE 2
+    ALOAD 2
+    INVOKEVIRTUAL java/lang/String.hashCode ()I
+    GOTO L3
+   L4
+    ALOAD 1
+    BIPUSH 79
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L5
+   L6
+    ALOAD 1
+    BIPUSH 78
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L7
+   L8
+    ALOAD 1
+    BIPUSH 77
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L9
+   L10
+    ALOAD 1
+    BIPUSH 76
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L11
+   L12
+    ALOAD 1
+    BIPUSH 75
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L13
+   L14
+    ALOAD 1
+    BIPUSH 74
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L15
+   L3
+    LOOKUPSWITCH
+      99: L4
+      100: L6
+      101: L8
+      102: L10
+      2112: L12
+      default: L14
+   L13
+   FRAME APPEND [[I java/lang/String]
+    ALOAD 2
+    LDC "Aa"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L16
+    GOTO L17
+   L16
+    ALOAD 1
+    BIPUSH 80
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L18
+   L17
+    ALOAD 1
+    BIPUSH 81
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    LDC "BB"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L19
+    GOTO L20
+   L19
+    GOTO L18
+   L20
+    GOTO L15
+   L5
+   FRAME SAME
+    ALOAD 2
+    LDC "c"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L21
+    GOTO L22
+   L21
+    GOTO L23
+   L22
+    GOTO L15
+   L7
+   FRAME SAME
+    ALOAD 2
+    LDC "d"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L24
+    GOTO L25
+   L24
+    GOTO L26
+   L25
+    GOTO L15
+   L9
+   FRAME SAME
+    ALOAD 2
+    LDC "e"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L27
+    GOTO L28
+   L27
+    GOTO L29
+   L28
+    GOTO L15
+   L11
+   FRAME SAME
+    ALOAD 2
+    LDC "f"
+    INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
+    IFNE L30
+    GOTO L31
+   L30
+    GOTO L32
+   L31
+    GOTO L15
+   L18
+    LINENUMBER 53 L18
+    ALOAD 1
+    BIPUSH 92
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L33
+   FRAME SAME
+    ICONST_5
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L34
+   L23
+    LINENUMBER 54 L23
+    ALOAD 1
+    BIPUSH 93
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L35
+   FRAME SAME
+    BIPUSH 6
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L34
+   L26
+    LINENUMBER 55 L26
+    ALOAD 1
+    BIPUSH 94
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L36
+   FRAME SAME
+    BIPUSH 7
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L34
+   L29
+    LINENUMBER 56 L29
+    ALOAD 1
+    BIPUSH 95
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L37
+   FRAME SAME
+    BIPUSH 8
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L34
+   L32
+    LINENUMBER 57 L32
+    ALOAD 1
+    BIPUSH 96
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L38
+   FRAME SAME
+    BIPUSH 9
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L34
+   L15
+    LINENUMBER 58 L15
+    ALOAD 1
+    BIPUSH 97
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L39
+   FRAME SAME
+    BIPUSH 10
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L34
+    LINENUMBER 59 L34
+   FRAME APPEND [I]
+    RETURN
+   L40
+    LOCALVARIABLE x Ljava/lang/String; L1 L40 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L40 1
+    MAXSTACK = 5
+    MAXLOCALS = 4
+
+  // access flags 0x19
+  public final static voo(Ljava/lang/String;)V
+    // annotable parameter count: 1 (invisible)
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+   L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 1
+   L1
+    ALOAD 0
+    LDC "x"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+   L2
+    LINENUMBER 62 L2
+    ALOAD 1
+    BIPUSH 99
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 0
+    ASTORE 2
+   L3
+    LINENUMBER 63 L3
+    ALOAD 1
+    BIPUSH 100
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    LDC "Aa"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.areEqual (Ljava/lang/Object;Ljava/lang/Object;)Z
+    IFEQ L4
+    GOTO L5
+   L4
+    ALOAD 1
+    BIPUSH 101
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L6
+   L5
+    ALOAD 1
+    BIPUSH 102
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ICONST_1
+    GOTO L7
+   L6
+   FRAME APPEND [[I java/lang/String]
+    ALOAD 2
+    LDC "BB"
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.areEqual (Ljava/lang/Object;Ljava/lang/Object;)Z
+   L7
+   FRAME SAME1 I
+    IFEQ L8
+    GOTO L9
+   L8
+    ALOAD 1
+    BIPUSH 103
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L10
+   L9
+    ALOAD 1
+    BIPUSH 104
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ICONST_5
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+    GOTO L11
+   L10
+    LINENUMBER 64 L10
+    ALOAD 1
+    BIPUSH 105
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L12
+   FRAME SAME
+    BIPUSH 10
+    ISTORE 3
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    ILOAD 3
+    INVOKEVIRTUAL java/io/PrintStream.println (I)V
+   L11
+    LINENUMBER 65 L11
+   FRAME APPEND [I]
+    RETURN
+   L13
+    LOCALVARIABLE x Ljava/lang/String; L1 L13 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L13 1
+    MAXSTACK = 4
+    MAXLOCALS = 4
+
+  // access flags 0x19
+  public final static main()V
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+   L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 0
+   L1
+    LINENUMBER 68 L1
+    ALOAD 0
+    BIPUSH 107
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "a"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
+   L2
+    LINENUMBER 69 L2
+    ALOAD 0
+    BIPUSH 108
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "b"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
+   L3
+    LINENUMBER 70 L3
+    ALOAD 0
+    BIPUSH 109
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "c"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
+   L4
+    LINENUMBER 71 L4
+    ALOAD 0
+    BIPUSH 110
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "d"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
+   L5
+    LINENUMBER 73 L5
+    ALOAD 0
+    BIPUSH 111
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "a"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
+   L6
+    LINENUMBER 74 L6
+    ALOAD 0
+    BIPUSH 112
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "b"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
+   L7
+    LINENUMBER 75 L7
+    ALOAD 0
+    BIPUSH 113
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "c"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
+   L8
+    LINENUMBER 76 L8
+    ALOAD 0
+    BIPUSH 114
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "d"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
+   L9
+    LINENUMBER 78 L9
+    ALOAD 0
+    BIPUSH 115
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "a"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
+   L10
+    LINENUMBER 79 L10
+    ALOAD 0
+    BIPUSH 116
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "b"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
+   L11
+    LINENUMBER 80 L11
+    ALOAD 0
+    BIPUSH 117
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "c"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
+   L12
+    LINENUMBER 81 L12
+    ALOAD 0
+    BIPUSH 118
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "d"
+    INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
+   L13
+    LINENUMBER 83 L13
+    ALOAD 0
+    BIPUSH 119
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "Aa"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L14
+    LINENUMBER 84 L14
+    ALOAD 0
+    BIPUSH 120
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "BB"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L15
+    LINENUMBER 85 L15
+    ALOAD 0
+    BIPUSH 121
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "c"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L16
+    LINENUMBER 86 L16
+    ALOAD 0
+    BIPUSH 122
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "d"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L17
+    LINENUMBER 87 L17
+    ALOAD 0
+    BIPUSH 123
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "e"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L18
+    LINENUMBER 88 L18
+    ALOAD 0
+    BIPUSH 124
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "f"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L19
+    LINENUMBER 89 L19
+    ALOAD 0
+    BIPUSH 125
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "g"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
+   L20
+    LINENUMBER 91 L20
+    ALOAD 0
+    BIPUSH 126
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "Aa"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
+   L21
+    LINENUMBER 92 L21
+    ALOAD 0
+    BIPUSH 127
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "c"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
+   L22
+    LINENUMBER 93 L22
+    ALOAD 0
+    SIPUSH 128
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "d"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
+   L23
+    LINENUMBER 94 L23
+    ALOAD 0
+    SIPUSH 129
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "e"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
+   L24
+    LINENUMBER 95 L24
+    ALOAD 0
+    SIPUSH 130
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "f"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
+   L25
+    LINENUMBER 96 L25
+    ALOAD 0
+    SIPUSH 131
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "g"
+    INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
+   L26
+    LINENUMBER 98 L26
+    ALOAD 0
+    SIPUSH 132
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "Aa"
+    INVOKESTATIC testData/cases/whenString/TestKt.voo (Ljava/lang/String;)V
+   L27
+    LINENUMBER 99 L27
+    ALOAD 0
+    SIPUSH 133
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "BB"
+    INVOKESTATIC testData/cases/whenString/TestKt.voo (Ljava/lang/String;)V
+   L28
+    LINENUMBER 100 L28
+    ALOAD 0
+    SIPUSH 134
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    LDC "g"
+    INVOKESTATIC testData/cases/whenString/TestKt.voo (Ljava/lang/String;)V
+   L29
+    LINENUMBER 101 L29
+    RETURN
+    LOCALVARIABLE __$coverage_local$__ [I L0 L29 0
+    MAXSTACK = 4
+    MAXLOCALS = 1
+
+  // access flags 0x1009
+  public static synthetic main([Ljava/lang/String;)V
+   L0
+    INVOKESTATIC testData/cases/whenString/TestKt.main ()V
+    RETURN
+   L1
+    LOCALVARIABLE args [Ljava/lang/String; L0 L1 0
+    MAXSTACK = 0
+    MAXLOCALS = 1
+}

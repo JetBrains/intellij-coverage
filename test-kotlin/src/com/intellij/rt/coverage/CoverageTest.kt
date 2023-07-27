@@ -49,7 +49,7 @@ internal fun logFile(dataFile: File) = File(dataFile.parent, LOG_NAME).ifExists(
 internal abstract class CoverageTest {
     protected lateinit var myDataFile: File
     abstract val coverage: Coverage
-    protected open val testTracking = false
+    protected open val testTracking: TestTracking? = null
     protected val commonExtraArgs = mutableListOf<String>()
 
     @Before

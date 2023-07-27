@@ -32,6 +32,10 @@ internal enum class Coverage {
     fun isBranchCoverage() = name.endsWith("BRANCH")
 }
 
+internal enum class TestTracking {
+    ARRAY, CLASS_DATA
+}
+
 /**
  * Creates temporary file in a separate directory
  */
@@ -48,7 +52,7 @@ private val classpath = System.getProperty("java.class.path").split(File.pathSep
         .plus(pathToFile("build", "classes", "java", "test").absolutePath)
         .joinToString(File.pathSeparator)
 
-internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false, testTracking: Boolean = false,
+internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false, testTracking: TestTracking? = null,
                     patterns: String = "$TEST_PACKAGE.*", extraArgs: MutableList<String> = mutableListOf(),
                     mainClass: String = getTestFile(testName).mainClass): ProjectData {
     when (coverage) {
@@ -57,8 +61,11 @@ internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage:
 
         else -> {}
     }
+    if (testTracking == TestTracking.CLASS_DATA) {
+        extraArgs.add("-Didea.new.test.tracking.coverage=false")
+    }
     return CoverageStatusTest.runCoverage(classpath, coverageDataFile, patterns, mainClass,
-            coverage.isBranchCoverage(), extraArgs.toTypedArray(), calcUnloaded, testTracking)
+            coverage.isBranchCoverage(), extraArgs.toTypedArray(), calcUnloaded, testTracking != null)
             .also { assertEmptyLogFile(coverageDataFile) }
 }
 
