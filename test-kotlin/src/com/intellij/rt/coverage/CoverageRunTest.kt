@@ -20,6 +20,8 @@ import com.intellij.rt.coverage.data.ProjectData
 import org.junit.Assert
 import org.junit.Ignore
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import testData.custom.threadSafe.data.THREAD_SAFE_DATA_EXPECTED_HITS
 import testData.custom.threadSafe.structure.THREAD_SAFE_STRUCTURE_CLASSES
 import java.io.File
@@ -29,7 +31,29 @@ import kotlin.test.*
  * Tests between ===GENERATED TESTS=== marker are generated automatically by testGeneration.kt code.
  * @see [generateTests]
  */
-internal abstract class CoverageRunTest : CoverageTest() {
+@RunWith(Parameterized::class)
+internal class CoverageRunTest(override val coverage: Coverage) : CoverageTest() {
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0}")
+        fun data() = Coverage.valuesWithCondyWhenPossible()
+    }
+
+    override fun preprocessConfiguration(configuration: TestConfiguration) = if (coverage.isBranchCoverage()) {
+        super.preprocessConfiguration(configuration)
+    } else {
+        configuration.copy(coverageData = configuration.coverageData.mapValues { (_, v) -> if (v == "PARTIAL") "FULL" else v })
+    }
+
+    override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
+        if (configuration.expectedClasses != null) {
+            val actualClasses = projectData.classesCollection.map { it.name }
+            val expectedClasses = configuration.expectedClasses
+            assertEquals(expectedClasses.sorted(), actualClasses.sorted())
+        }
+        assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
+    }
+
     //===GENERATED TESTS===
 
     @Test
@@ -337,7 +361,7 @@ internal abstract class CoverageRunTest : CoverageTest() {
 
     @Test
     fun testReflection() {
-        if (coverage == Coverage.NEW_LINE || coverage == Coverage.NEW_BRANCH) {
+        if (coverage == Coverage.LINE_FIELD || coverage == Coverage.BRANCH_FIELD) {
             Assert.assertThrows(RuntimeException::class.java) {
                 test("custom.reflection")
             }
@@ -367,26 +391,3 @@ internal abstract class CoverageRunTest : CoverageTest() {
         }
     }
 }
-
-internal abstract class CoverageVerifyResultsTest(override val coverage: Coverage) : CoverageRunTest() {
-    override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
-        if (configuration.expectedClasses != null) {
-            val actualClasses = projectData.classesCollection.map { it.name }
-            val expectedClasses = configuration.expectedClasses
-            assertEquals(expectedClasses.sorted(), actualClasses.sorted())
-        }
-        assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
-    }
-}
-
-internal abstract class AbstractLineCoverageTest(coverage: Coverage) : CoverageVerifyResultsTest(coverage) {
-    override fun preprocessConfiguration(configuration: TestConfiguration) =
-            configuration.copy(coverageData = configuration.coverageData.mapValues { (_, v) -> if (v == "PARTIAL") "FULL" else v })
-}
-
-internal class LineCoverageTest : AbstractLineCoverageTest(Coverage.LINE)
-internal class BranchCoverageTest : CoverageVerifyResultsTest(Coverage.BRANCH)
-internal class NewLineCoverageTest : AbstractLineCoverageTest(Coverage.NEW_LINE)
-internal class NewBranchCoverageTest : CoverageVerifyResultsTest(Coverage.NEW_BRANCH)
-internal class CondyLineCoverageTest : AbstractLineCoverageTest(Coverage.CONDY_LINE)
-internal class CondyBranchCoverageTest : CoverageVerifyResultsTest(Coverage.CONDY_BRANCH)

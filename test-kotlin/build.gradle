@@ -60,11 +60,6 @@ def configureTests(Test task) {
   task.with {
     group = "verification"
     exclude("testData/**")
-    if (javaVersion < JavaVersion.VERSION_11) {
-      print("Condy tests require JDK11")
-      exclude("com/intellij/rt/coverage/Condy**")
-      exclude("com/intellij/rt/coverage/caseTests/**Condy**")
-    }
     if (rootProject.hasProperty("parallel.tests")) {
       maxParallelForks = Math.min(2, Runtime.getRuntime().availableProcessors())
     }
@@ -79,9 +74,9 @@ test {
 task lineStatusTests(type: Test) {
   configureTests(it)
   filter {
-    includeTestsMatching("com.intellij.rt.coverage.**CoverageTest")
+    includeTestsMatching("com.intellij.rt.coverage.CoverageRunTest")
+    excludeTestsMatching("com.intellij.rt.coverage.CoverageRunTest.testThreadSafeStructure")
     includeTestsMatching("com.intellij.rt.coverage.caseTests.LineSignatureTest")
-    includeTestsMatching("com.intellij.rt.coverage.caseTests.Offline**InstrumentationTest")
-    excludeTestsMatching("com.intellij.rt.coverage.**CoverageTest.testThreadSafeStructure")
+    includeTestsMatching("com.intellij.rt.coverage.caseTests.OfflineInstrumentationTest")
   }
 }

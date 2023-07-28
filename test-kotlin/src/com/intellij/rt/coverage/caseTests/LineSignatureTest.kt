@@ -71,7 +71,7 @@ internal class LineSignatureTest : CoverageTest() {
         }
     }
 
-    override val coverage get() = Coverage.NEW_LINE
+    override val coverage get() = Coverage.LINE_FIELD
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
         assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
     }

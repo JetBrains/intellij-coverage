@@ -76,7 +76,7 @@ class InstrumentedBytecodeTest {
     ) {
         val testTrackingMode = testTracking.createMode()
         OptionsUtil.FIELD_INSTRUMENTATION_ENABLED = coverage != Coverage.LINE && coverage != Coverage.BRANCH
-        OptionsUtil.CONDY_ENABLED = coverage == Coverage.CONDY_LINE || coverage == Coverage.CONDY_BRANCH
+        OptionsUtil.CONDY_ENABLED = coverage.isCondyEnabled()
         val projectData = ProjectData(null, coverage.isBranchCoverage(), testTrackingMode?.createTestTrackingCallback())
         val transformer = CoverageTransformer(projectData, false, null, testTrackingMode)
         val bytes = transformer.instrument(originalBytes, className, null, false)
@@ -110,11 +110,11 @@ private fun createExpectedFileName(
     append("/")
     val coverageName = when (coverage) {
         Coverage.LINE -> "line"
-        Coverage.NEW_LINE -> "line_field"
+        Coverage.LINE_FIELD -> "line_field"
         Coverage.BRANCH -> "branch"
-        Coverage.NEW_BRANCH -> "branch_field"
-        Coverage.CONDY_LINE -> "line_condy"
-        Coverage.CONDY_BRANCH -> "branch_condy"
+        Coverage.BRANCH_FIELD -> "branch_field"
+        Coverage.LINE_CONDY -> "line_condy"
+        Coverage.BRANCH_CONDY -> "branch_condy"
     }
     append(coverageName)
     if (testTracking != null) {

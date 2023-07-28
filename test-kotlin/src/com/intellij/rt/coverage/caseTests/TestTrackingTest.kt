@@ -20,14 +20,23 @@ import com.intellij.rt.coverage.*
 import com.intellij.rt.coverage.data.ProjectData
 import org.junit.Assert
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import testData.custom.testTracking.parallelTests.CALLS_PER_LINE
 import testData.custom.testTracking.sequentialTests.TESTS
 import java.io.File
 
-internal abstract class AbstractTestTrackingTest(
+@RunWith(Parameterized::class)
+internal class TestTrackingTest(
     override val coverage: Coverage,
     override val testTracking: TestTracking,
 ) : CoverageTest() {
+
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0} coverage with {1} test tracking")
+        fun data() = allTestTrackingModes()
+    }
 
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
         val expected = extractTestTrackingDataFromFile(testFile)
@@ -76,18 +85,17 @@ internal abstract class AbstractTestTrackingTest(
     }
 }
 
-internal class TestTrackingTest : AbstractTestTrackingTest(Coverage.BRANCH, TestTracking.ARRAY)
-internal class NewTestTrackingTest : AbstractTestTrackingTest(Coverage.NEW_BRANCH, TestTracking.ARRAY)
-internal class CondyTrackingTest : AbstractTestTrackingTest(Coverage.CONDY_BRANCH, TestTracking.ARRAY)
-internal class ClassDataTestTrackingTest : AbstractTestTrackingTest(Coverage.BRANCH, TestTracking.CLASS_DATA)
-internal class ClassDataNewTestTrackingTest : AbstractTestTrackingTest(Coverage.NEW_BRANCH, TestTracking.CLASS_DATA)
-internal class ClassDataCondyTrackingTest : AbstractTestTrackingTest(Coverage.CONDY_BRANCH, TestTracking.CLASS_DATA)
-
-
-internal abstract class TestTrackingVerifyInstrumentationTest(
+@RunWith(Parameterized::class)
+internal class TestTrackingVerifyInstrumentationTest(
     override val coverage: Coverage,
     override val testTracking: TestTracking,
 ) : CoverageTest() {
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0} coverage with {1} test tracking")
+        fun data() = allTestTrackingModes()
+    }
+
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
         // just check that instrumentation does not cause runtime issues
     }
@@ -102,9 +110,6 @@ internal abstract class TestTrackingVerifyInstrumentationTest(
     fun testCoroutinesInline() = test("coroutines.inline")
 }
 
-internal class TestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.BRANCH, TestTracking.ARRAY)
-internal class NewTestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.NEW_BRANCH, TestTracking.ARRAY)
-internal class CondyTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.CONDY_BRANCH, TestTracking.ARRAY)
-internal class ClassDataTestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.BRANCH, TestTracking.CLASS_DATA)
-internal class ClassDataNewTestTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.NEW_BRANCH, TestTracking.CLASS_DATA)
-internal class ClassDataCondyTrackingInstrumentationTest : TestTrackingVerifyInstrumentationTest(Coverage.CONDY_BRANCH, TestTracking.CLASS_DATA)
+private fun allTestTrackingModes() = Coverage.valuesWithCondyWhenPossible().toList()
+    .product(TestTracking.values().toList())
+    .map { it.toList().toTypedArray() }.toTypedArray()

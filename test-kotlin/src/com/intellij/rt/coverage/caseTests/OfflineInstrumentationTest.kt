@@ -25,13 +25,22 @@ import com.intellij.rt.coverage.util.ProcessUtil
 import com.intellij.rt.coverage.util.ResourceUtil
 import com.intellij.rt.coverage.util.classFinder.ClassFinder
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
 import java.io.File
 import java.net.URLClassLoader
 import java.util.*
 import java.util.regex.Pattern
 import kotlin.io.path.createTempDirectory
 
-internal abstract class OfflineInstrumentationTest(override val coverage: Coverage) : CoverageTest() {
+@RunWith(Parameterized::class)
+internal class OfflineInstrumentationTest(override val coverage: Coverage) : CoverageTest() {
+    companion object {
+        @JvmStatic
+        @Parameterized.Parameters(name = "{0}")
+        fun data() = arrayOf(Coverage.LINE, Coverage.BRANCH)
+    }
+
     @Test
     fun testCasesJavaSwitch() = test("cases.javaSwitch")
 
@@ -159,6 +168,3 @@ internal fun offlineCoverageTransform(isBranchCoverage: Boolean, test: TestFile,
 
     return outputDir
 }
-
-internal class OfflineLinesInstrumentationTest : OfflineInstrumentationTest(Coverage.LINE)
-internal class OfflineBranchesInstrumentationTest : OfflineInstrumentationTest(Coverage.BRANCH)

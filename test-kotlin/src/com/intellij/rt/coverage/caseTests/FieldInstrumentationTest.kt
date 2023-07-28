@@ -23,13 +23,13 @@ import com.intellij.rt.coverage.util.diff.CoverageDiff
 import org.junit.Assert
 import org.junit.Test
 
-internal class NewInstrumentationTest {
+internal class FieldInstrumentationTest {
 
     @Test
-    fun testNewLineCoverageJoda() = testCoverageJoda(Coverage.LINE, Coverage.NEW_LINE)
+    fun testLineCoverageJoda() = testCoverageJoda(Coverage.LINE, Coverage.LINE_FIELD)
 
     @Test
-    fun testNewBranchCoverageJoda() = testCoverageJoda(Coverage.BRANCH, Coverage.NEW_BRANCH)
+    fun testBranchCoverageJoda() = testCoverageJoda(Coverage.BRANCH, Coverage.BRANCH_FIELD)
 
     private fun testCoverageJoda(before: Coverage, after: Coverage) {
         val exclude = listOf( // exclude non deterministic classes from coverage

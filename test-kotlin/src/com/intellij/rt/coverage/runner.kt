@@ -27,10 +27,15 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 internal enum class Coverage {
-    LINE, NEW_LINE, BRANCH, NEW_BRANCH, CONDY_LINE, CONDY_BRANCH;
+    LINE, LINE_FIELD, BRANCH, BRANCH_FIELD, LINE_CONDY, BRANCH_CONDY;
 
-    fun isBranchCoverage() = name.endsWith("BRANCH")
-    fun isCondyEnabled() = this == CONDY_LINE || this == CONDY_BRANCH
+    fun isBranchCoverage() = this == BRANCH || this == BRANCH_FIELD || this == BRANCH_CONDY
+    fun isCondyEnabled() = this == LINE_CONDY || this == BRANCH_CONDY
+
+    companion object {
+        fun valuesWithCondyWhenPossible() =
+            if (getVMVersion() >= 11) values() else values().filterNot { it.isCondyEnabled() }.toTypedArray()
+    }
 }
 
 internal enum class TestTracking {
@@ -57,7 +62,7 @@ internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage:
                     patterns: String = "$TEST_PACKAGE.*", extraArgs: MutableList<String> = mutableListOf(),
                     mainClass: String = getTestFile(testName).mainClass): ProjectData {
     when (coverage) {
-        Coverage.NEW_LINE, Coverage.NEW_BRANCH -> extraArgs.add("-Dcoverage.condy.enable=false")
+        Coverage.LINE_FIELD, Coverage.BRANCH_FIELD -> extraArgs.add("-Dcoverage.condy.enable=false")
         Coverage.LINE, Coverage.BRANCH -> extraArgs.add("-Didea.new.tracing.coverage=false")
 
         else -> {}
@@ -212,6 +217,19 @@ internal fun extractExtendedInfoFromFile(file: File): Map<Int, String> = Extende
 
 internal fun pathToFile(name: String, vararg names: String): File = Paths.get(name, *names).toFile()
 internal fun String.toSystemIndependent() = replace("\r\n", "\n")
+internal fun <T, U> Iterable<T>.product(other: Iterable<U>): List<Pair<T, U>> = flatMap { l -> other.map { r -> l to r } }
+private fun getVMVersion(): Int {
+    var version = System.getProperty("java.version")
+    if (version.startsWith("1.")) {
+        version = version.substring(2, 3)
+    } else {
+        val dot = version.indexOf(".")
+        if (dot != -1) {
+            version = version.substring(0, dot)
+        }
+    }
+    return version.toInt()
+}
 
 internal fun extractTestConfiguration(file: File): TestConfiguration {
     var coverage = CoverageMatcher()

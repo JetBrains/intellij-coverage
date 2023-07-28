@@ -21,7 +21,9 @@ import com.intellij.rt.coverage.data.ProjectData
 import org.junit.Test
 import java.io.File
 
-internal abstract class InstructionsBranchesTest(override val coverage: Coverage) : CoverageTest() {
+internal class InstructionsBranchesTest : CoverageTest() {
+    override val coverage get() = Coverage.BRANCH_FIELD
+
     init {
         commonExtraArgs.add("-Dcoverage.instructions.enable=true")
     }
@@ -59,6 +61,3 @@ internal abstract class InstructionsBranchesTest(override val coverage: Coverage
 
     //===GENERATED TESTS===
 }
-
-internal class NewInstructionsTest : InstructionsBranchesTest(Coverage.NEW_BRANCH)
-internal class CondyInstructionsTest : InstructionsBranchesTest(Coverage.CONDY_BRANCH)
