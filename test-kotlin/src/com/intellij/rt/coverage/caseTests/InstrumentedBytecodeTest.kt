@@ -32,6 +32,7 @@ import org.junit.Test
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
+import kotlin.test.assertFalse
 
 class InstrumentedBytecodeTest {
     @Test
@@ -45,6 +46,8 @@ class InstrumentedBytecodeTest {
         val outputRoot = pathToFile("build", "classes", "kotlin", "test")
         val path = className.replace(".", File.separator) + ".class"
         val originalBytes = File(outputRoot, path).readBytes()
+
+        assertFalse(originalBytes.isEmpty())
 
         val expectedRoot = "bytecode/${testName.replace(".", "/")}"
         assertBytecode("$expectedRoot/original.txt", originalBytes)

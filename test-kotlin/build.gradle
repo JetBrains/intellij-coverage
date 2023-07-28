@@ -63,7 +63,7 @@ def configureTests(Test task) {
     if (javaVersion < JavaVersion.VERSION_11) {
       print("Condy tests require JDK11")
       exclude("com/intellij/rt/coverage/Condy**")
-      exclude("com/intellij/rt/coverage/caseTests/Condy**")
+      exclude("com/intellij/rt/coverage/caseTests/**Condy**")
     }
     if (rootProject.hasProperty("parallel.tests")) {
       maxParallelForks = Math.min(2, Runtime.getRuntime().availableProcessors())
