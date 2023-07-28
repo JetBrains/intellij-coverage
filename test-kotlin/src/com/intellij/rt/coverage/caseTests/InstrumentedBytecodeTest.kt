@@ -21,11 +21,13 @@ import com.intellij.rt.coverage.Coverage
 import com.intellij.rt.coverage.TestTracking
 import com.intellij.rt.coverage.data.ProjectData
 import com.intellij.rt.coverage.instrumentation.CoverageTransformer
+import com.intellij.rt.coverage.instrumentation.InstrumentationUtils
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingArrayMode
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingClassDataMode
 import com.intellij.rt.coverage.pathToFile
 import com.intellij.rt.coverage.util.OptionsUtil
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader
+import org.jetbrains.coverage.org.objectweb.asm.Opcodes
 import org.jetbrains.coverage.org.objectweb.asm.util.TraceClassVisitor
 import org.junit.Assert
 import org.junit.Test
@@ -52,7 +54,12 @@ class InstrumentedBytecodeTest {
         val expectedRoot = "bytecode/${testName.replace(".", "/")}"
         assertBytecode("$expectedRoot/original.txt", originalBytes)
 
+        val condyPossible = InstrumentationUtils.getBytecodeVersion(ClassReader(originalBytes)) >= Opcodes.V11
         for (coverage in Coverage.values()) {
+            if (coverage.isCondyEnabled() && !condyPossible) {
+                println("Condy test disabled due to low class file version")
+                continue
+            }
             doTest(null, coverage, originalBytes, className, expectedRoot)
         }
         for (testTracking in TestTracking.values()) {

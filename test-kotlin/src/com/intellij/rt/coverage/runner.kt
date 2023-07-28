@@ -30,6 +30,7 @@ internal enum class Coverage {
     LINE, NEW_LINE, BRANCH, NEW_BRANCH, CONDY_LINE, CONDY_BRANCH;
 
     fun isBranchCoverage() = name.endsWith("BRANCH")
+    fun isCondyEnabled() = this == CONDY_LINE || this == CONDY_BRANCH
 }
 
 internal enum class TestTracking {
