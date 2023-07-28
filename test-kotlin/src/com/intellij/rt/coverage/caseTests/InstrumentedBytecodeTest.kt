@@ -82,7 +82,7 @@ class InstrumentedBytecodeTest {
     private fun getExpectedBytecode(expectedFileName: String): String {
         val resource = this::class.java.classLoader.getResource(expectedFileName)
         checkNotNull(resource) { "Expected file $expectedFileName does not exist" }
-        return File(resource.path).readText().replace("\n", System.lineSeparator())
+        return File(resource.path).readText()
     }
 
     private fun assertBytecode(expectedFileName: String, actual: ByteArray) {
@@ -120,10 +120,10 @@ private fun createExpectedFileName(
     append(".txt")
 }
 
-private fun String.preprocess() = this.split(System.lineSeparator())
+private fun String.preprocess() = this.toSystemIndependent().split("\n")
     .filterNot {
         it.contains("@Lkotlin/Metadata;(mv=") || it.startsWith("// class version ")
-    }.joinToString(System.lineSeparator())
+    }.joinToString("\n")
 
 private fun getReadableBytecode(bytes: ByteArray?): String {
     val writer = StringWriter()

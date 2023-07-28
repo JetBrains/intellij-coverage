@@ -210,6 +210,7 @@ internal fun extractExtendedInfoFromFile(file: File): Map<Int, String> = Extende
 }
 
 internal fun pathToFile(name: String, vararg names: String): File = Paths.get(name, *names).toFile()
+internal fun String.toSystemIndependent() = replace("\r\n", "\n")
 
 internal fun extractTestConfiguration(file: File): TestConfiguration {
     var coverage = CoverageMatcher()

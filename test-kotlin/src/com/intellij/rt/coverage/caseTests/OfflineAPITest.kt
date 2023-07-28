@@ -71,8 +71,7 @@ class OfflineAPITest {
 
         val expectedFileName = "${testName.replace('.', '/')}.txt"
         val expected = File(this::class.java.classLoader.getResource(expectedFileName)!!.path).readText()
-            .replace("\n", System.lineSeparator())
         val actual = myDataFile.readText()
-        Assert.assertEquals(expected, actual)
+        Assert.assertEquals(expected.toSystemIndependent(), actual.toSystemIndependent())
     }
 }
