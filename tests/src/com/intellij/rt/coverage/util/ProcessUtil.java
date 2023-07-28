@@ -25,9 +25,12 @@ import java.io.InputStreamReader;
 
 public class ProcessUtil {
   public static void execJavaProcess(String[] cmd) throws InterruptedException, IOException {
-    String javaHome = System.getenv("JAVA_HOME");
+    String javaHome = System.getProperty("java.home");
     if (javaHome == null) {
-      Assert.fail("JAVA_HOME environment variable needs to be set");
+      javaHome = System.getenv("JAVA_HOME");
+    }
+    if (javaHome == null) {
+      Assert.fail("'JAVA_HOME' environment variable or 'java.home' system property needs to be set");
     }
     final String exePath = javaHome + File.separator + "bin" + File.separator + "java";
 
