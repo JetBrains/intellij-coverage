@@ -30,7 +30,7 @@ dependencies {
   testRuntimeOnly files(project(':instrumentation').jar.archivePath)
   testRuntimeOnly files(project(':offline-runtime:api').jar.archivePath)
 
-  externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.21")
+  externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.22")
 
   testImplementation('junit:junit:4.13.2')
   testImplementation(files(project(":tests").sourceSets.test.output))
