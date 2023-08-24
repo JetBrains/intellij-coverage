@@ -55,7 +55,7 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
 
   private CoverageDataAccess createDataAccess(String className, ClassReader cr) {
     if (OptionsUtil.FIELD_INSTRUMENTATION_ENABLED) {
-      if (OptionsUtil.CONDY_ENABLED && InstrumentationUtils.getBytecodeVersion(cr) >= Opcodes.V11) {
+      if (InstrumentationUtils.isCondyEnabled(cr)) {
         return new CondyCoverageDataAccess(createCondyInit(className, cr));
       } else {
         return new FieldCoverageDataAccess(cr, className, createInit(className, cr, false));

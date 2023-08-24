@@ -63,6 +63,10 @@ public class InstrumentationUtils {
     return cr.readInt(4) & 0xFFFF;
   }
 
+  public static boolean isCondyEnabled(ClassReader cr) {
+    return OptionsUtil.CONDY_ENABLED && getBytecodeVersion(cr) >= Opcodes.V11;
+  }
+
   public static void pushInt(MethodVisitor mv, int value) {
     if (value >= -1 && value <= 5) {
       mv.visitInsn(Opcodes.ICONST_0 + value);

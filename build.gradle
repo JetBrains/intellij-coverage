@@ -16,6 +16,7 @@
 
 import com.intellij.rt.coverage.build.Publishing
 import jetbrains.sign.GpgSignSignatoryProvider
+import org.gradle.internal.jvm.Jvm
 
 buildscript {
   repositories {
@@ -42,9 +43,6 @@ ext.coverage_jar_name = 'intellij-coverage-agent'
 ext.offline_jar_name = 'intellij-coverage-offline'
 ext.reporter_jar_name = 'intellij-coverage-reporter'
 
-// use this option to test with JDK11
-ext.release = rootProject.hasProperty("test.configuration") ? "false" == project["test.configuration"] : true
-
 allprojects {
   version calcVersion()
   group = "org.jetbrains.intellij.deps"
@@ -54,8 +52,9 @@ allprojects {
   }
 
   apply plugin: 'java'
-  sourceCompatibility = project.release ? 1.5 : 1.6
-  targetCompatibility = project.release ? 1.5 : 1.6
+  def java5Supported = Jvm.current().javaVersion < JavaVersion.VERSION_11
+  sourceCompatibility = java5Supported ? 1.5 : 1.6
+  targetCompatibility = java5Supported ? 1.5 : 1.6
 
   sourceSets {
     main.java.srcDirs 'src'

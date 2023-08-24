@@ -1,0 +1,172 @@
+// access flags 0x31
+public final class testData/simple/branches/MyBranchedClass {
+
+  // compiled from: test.kt
+
+
+  // access flags 0x1
+  public <init>()V
+    LDC __$hits$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getHitsMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I (6) [testData.simple.branches.MyBranchedClass]
+    CHECKCAST [I
+    ASTORE 1
+    LDC __$classData$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.loadClassData(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object; (6) [testData.simple.branches.MyBranchedClass]
+    ASTORE 2
+   L0
+    LINENUMBER 22 L0
+    ALOAD 1
+    ICONST_0
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 2
+    BIPUSH 22
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
+    ALOAD 0
+    INVOKESPECIAL java/lang/Object.<init> ()V
+    RETURN
+   L1
+    LOCALVARIABLE this LtestData/simple/branches/MyBranchedClass; L0 L1 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L1 1
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L1 2
+    MAXSTACK = 4
+    MAXLOCALS = 3
+
+  // access flags 0x11
+  public final foo(I)V
+    LDC __$hits$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getHitsMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I (6) [testData.simple.branches.MyBranchedClass]
+    CHECKCAST [I
+    ASTORE 2
+    LDC __$classData$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.loadClassData(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object; (6) [testData.simple.branches.MyBranchedClass]
+    ASTORE 3
+   L0
+    LINENUMBER 24 L0
+    ALOAD 2
+    ICONST_1
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 3
+    BIPUSH 24
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
+    ILOAD 1
+    IFGE L1
+    GOTO L2
+   L1
+    ALOAD 2
+    ICONST_2
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L3
+   L2
+    ALOAD 2
+    ICONST_3
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L4
+    LINENUMBER 25 L4
+    ALOAD 2
+    ICONST_4
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 3
+    BIPUSH 25
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
+    LDC "LE"
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    SWAP
+    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/Object;)V
+    GOTO L5
+   L3
+    LINENUMBER 26 L3
+    ALOAD 2
+    ICONST_5
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 3
+    BIPUSH 26
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
+   L6
+   FRAME APPEND [[I java/lang/Object]
+    ILOAD 1
+    IFNE L7
+    GOTO L8
+   L7
+    ALOAD 2
+    BIPUSH 6
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L9
+   L8
+    ALOAD 2
+    BIPUSH 7
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+   L10
+    LINENUMBER 27 L10
+    ALOAD 2
+    BIPUSH 8
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 3
+    BIPUSH 27
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
+    LDC "EQ"
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    SWAP
+    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/Object;)V
+    GOTO L5
+   L9
+    LINENUMBER 29 L9
+    ALOAD 2
+    BIPUSH 9
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    ALOAD 3
+    BIPUSH 29
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
+   L11
+   FRAME SAME
+    LDC "GE"
+    GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
+    SWAP
+    INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/Object;)V
+   L5
+    LINENUMBER 31 L5
+   FRAME SAME
+    RETURN
+   L12
+    LOCALVARIABLE this LtestData/simple/branches/MyBranchedClass; L0 L12 0
+    LOCALVARIABLE value I L0 L12 1
+    LOCALVARIABLE __$coverage_local$__ [I L0 L12 2
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L12 3
+    MAXSTACK = 4
+    MAXLOCALS = 4
+}

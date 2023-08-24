@@ -4,22 +4,38 @@ public final class testData/cases/whenString/TestKt {
   // compiled from: test.kt
 
 
+  // access flags 0x108A
+  private static transient synthetic [I __$hits$__
+
+  // access flags 0x108A
+  private static transient synthetic Ljava/lang/Object; __$classData$__
+
   // access flags 0x19
   public final static foo(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
-    ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
-    ASTORE 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
    L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 1
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    IFNONNULL L1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassData (Ljava/lang/String;)Ljava/lang/Object;
+    PUTSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+   L1
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    ASTORE 2
+   L2
     ALOAD 0
     LDC "x"
     INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
-   L1
-    LINENUMBER 21 L1
+   L3
+    LINENUMBER 21 L3
     ALOAD 1
     ICONST_0
     DUP2
@@ -34,19 +50,10 @@ public final class testData/cases/whenString/TestKt {
     ASTORE 3
     ALOAD 3
     INVOKEVIRTUAL java/lang/String.hashCode ()I
-    GOTO L2
-   L3
-    ALOAD 1
-    ICONST_4
-    DUP2
-    IALOAD
-    ICONST_1
-    IADD
-    IASTORE
     GOTO L4
    L5
     ALOAD 1
-    ICONST_3
+    ICONST_4
     DUP2
     IALOAD
     ICONST_1
@@ -55,7 +62,7 @@ public final class testData/cases/whenString/TestKt {
     GOTO L6
    L7
     ALOAD 1
-    ICONST_2
+    ICONST_3
     DUP2
     IALOAD
     ICONST_1
@@ -64,54 +71,63 @@ public final class testData/cases/whenString/TestKt {
     GOTO L8
    L9
     ALOAD 1
-    ICONST_1
+    ICONST_2
     DUP2
     IALOAD
     ICONST_1
     IADD
     IASTORE
     GOTO L10
-   L2
-    TABLESWITCH
-      97: L3
-      98: L5
-      99: L7
-      default: L9
+   L11
+    ALOAD 1
+    ICONST_1
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L12
    L4
+    TABLESWITCH
+      97: L5
+      98: L7
+      99: L9
+      default: L11
+   L6
    FRAME APPEND [[I java/lang/Object java/lang/String]
     ALOAD 3
     LDC "a"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L11
+    IFNE L13
+    GOTO L14
+   L13
+    GOTO L15
+   L14
     GOTO L12
-   L11
-    GOTO L13
-   L12
-    GOTO L10
-   L6
+   L8
    FRAME SAME
     ALOAD 3
     LDC "b"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L14
+    IFNE L16
+    GOTO L17
+   L16
     GOTO L15
-   L14
-    GOTO L13
-   L15
-    GOTO L10
-   L8
+   L17
+    GOTO L12
+   L10
    FRAME SAME
     ALOAD 3
     LDC "c"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L16
-    GOTO L17
-   L16
-    GOTO L18
-   L17
-    GOTO L10
-   L13
-    LINENUMBER 22 L13
+    IFNE L18
+    GOTO L19
+   L18
+    GOTO L20
+   L19
+    GOTO L12
+   L15
+    LINENUMBER 22 L15
     ALOAD 1
     BIPUSH 11
     DUP2
@@ -122,16 +138,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 22
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L19
+   L21
    FRAME SAME
     ICONST_5
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L20
-   L18
-    LINENUMBER 23 L18
+    GOTO L22
+   L20
+    LINENUMBER 23 L20
     ALOAD 1
     BIPUSH 12
     DUP2
@@ -142,16 +158,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 23
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L21
+   L23
    FRAME SAME
     BIPUSH 6
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L20
-   L10
-    LINENUMBER 24 L10
+    GOTO L22
+   L12
+    LINENUMBER 24 L12
     ALOAD 1
     BIPUSH 13
     DUP2
@@ -162,21 +178,21 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 24
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L22
+   L24
    FRAME SAME
     BIPUSH 7
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-   L20
-    LINENUMBER 25 L20
+   L22
+    LINENUMBER 25 L22
    FRAME APPEND [I]
     RETURN
-   L23
-    LOCALVARIABLE x Ljava/lang/String; L0 L23 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L23 1
-    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L23 2
+   L25
+    LOCALVARIABLE x Ljava/lang/String; L2 L25 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L25 1
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L25 2
     MAXSTACK = 5
     MAXLOCALS = 5
 
@@ -184,14 +200,24 @@ public final class testData/cases/whenString/TestKt {
   public final static foo2(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/Nullable;() // invisible, parameter 0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
-    ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
-    ASTORE 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
    L0
-    LINENUMBER 28 L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 1
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    IFNONNULL L1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassData (Ljava/lang/String;)Ljava/lang/Object;
+    PUTSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+   L1
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    ASTORE 2
+   L2
+    LINENUMBER 28 L2
     ALOAD 1
     BIPUSH 15
     DUP2
@@ -205,26 +231,17 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 0
     ASTORE 3
     ALOAD 3
-    IFNULL L1
-    GOTO L2
-   L1
-    GOTO L3
-   L2
+    IFNULL L3
+    GOTO L4
+   L3
+    GOTO L5
+   L4
     ALOAD 3
     INVOKEVIRTUAL java/lang/String.hashCode ()I
-    GOTO L4
-   L5
-    ALOAD 1
-    BIPUSH 21
-    DUP2
-    IALOAD
-    ICONST_1
-    IADD
-    IASTORE
     GOTO L6
    L7
     ALOAD 1
-    BIPUSH 20
+    BIPUSH 21
     DUP2
     IALOAD
     ICONST_1
@@ -233,7 +250,7 @@ public final class testData/cases/whenString/TestKt {
     GOTO L8
    L9
     ALOAD 1
-    BIPUSH 19
+    BIPUSH 20
     DUP2
     IALOAD
     ICONST_1
@@ -242,54 +259,63 @@ public final class testData/cases/whenString/TestKt {
     GOTO L10
    L11
     ALOAD 1
+    BIPUSH 19
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L12
+   L13
+    ALOAD 1
     BIPUSH 18
     DUP2
     IALOAD
     ICONST_1
     IADD
     IASTORE
-    GOTO L3
-   L4
-    TABLESWITCH
-      97: L5
-      98: L7
-      99: L9
-      default: L11
+    GOTO L5
    L6
+    TABLESWITCH
+      97: L7
+      98: L9
+      99: L11
+      default: L13
+   L8
    FRAME APPEND [[I java/lang/Object java/lang/String]
     ALOAD 3
     LDC "a"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L12
-    GOTO L13
-   L12
-    GOTO L14
-   L13
-    GOTO L3
-   L8
+    IFNE L14
+    GOTO L15
+   L14
+    GOTO L16
+   L15
+    GOTO L5
+   L10
    FRAME SAME
     ALOAD 3
     LDC "b"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L15
+    IFNE L17
+    GOTO L18
+   L17
     GOTO L16
-   L15
-    GOTO L14
-   L16
-    GOTO L3
-   L10
+   L18
+    GOTO L5
+   L12
    FRAME SAME
     ALOAD 3
     LDC "c"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L17
-    GOTO L18
-   L17
-    GOTO L19
-   L18
-    GOTO L3
-   L14
-    LINENUMBER 29 L14
+    IFNE L19
+    GOTO L20
+   L19
+    GOTO L21
+   L20
+    GOTO L5
+   L16
+    LINENUMBER 29 L16
     ALOAD 1
     BIPUSH 28
     DUP2
@@ -300,16 +326,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 29
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L20
+   L22
    FRAME SAME
     ICONST_5
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L21
-   L19
-    LINENUMBER 30 L19
+    GOTO L23
+   L21
+    LINENUMBER 30 L21
     ALOAD 1
     BIPUSH 29
     DUP2
@@ -320,16 +346,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 30
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L22
+   L24
    FRAME SAME
     BIPUSH 6
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L21
-   L3
-    LINENUMBER 31 L3
+    GOTO L23
+   L5
+    LINENUMBER 31 L5
     ALOAD 1
     BIPUSH 30
     DUP2
@@ -340,21 +366,21 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 31
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L23
+   L25
    FRAME SAME
     BIPUSH 7
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-   L21
-    LINENUMBER 32 L21
+   L23
+    LINENUMBER 32 L23
    FRAME APPEND [I]
     RETURN
-   L24
-    LOCALVARIABLE x Ljava/lang/String; L0 L24 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L24 1
-    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L24 2
+   L26
+    LOCALVARIABLE x Ljava/lang/String; L2 L26 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L26 1
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L26 2
     MAXSTACK = 5
     MAXLOCALS = 5
 
@@ -362,18 +388,28 @@ public final class testData/cases/whenString/TestKt {
   public final static foo3(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
-    ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
-    ASTORE 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
    L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 1
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    IFNONNULL L1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassData (Ljava/lang/String;)Ljava/lang/Object;
+    PUTSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+   L1
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    ASTORE 2
+   L2
     ALOAD 0
     LDC "x"
     INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
-   L1
-    LINENUMBER 35 L1
+   L3
+    LINENUMBER 35 L3
     ALOAD 1
     BIPUSH 32
     DUP2
@@ -388,19 +424,10 @@ public final class testData/cases/whenString/TestKt {
     ASTORE 3
     ALOAD 3
     INVOKEVIRTUAL java/lang/String.hashCode ()I
-    GOTO L2
-   L3
-    ALOAD 1
-    BIPUSH 36
-    DUP2
-    IALOAD
-    ICONST_1
-    IADD
-    IASTORE
     GOTO L4
    L5
     ALOAD 1
-    BIPUSH 35
+    BIPUSH 36
     DUP2
     IALOAD
     ICONST_1
@@ -409,7 +436,7 @@ public final class testData/cases/whenString/TestKt {
     GOTO L6
    L7
     ALOAD 1
-    BIPUSH 34
+    BIPUSH 35
     DUP2
     IALOAD
     ICONST_1
@@ -418,52 +445,61 @@ public final class testData/cases/whenString/TestKt {
     GOTO L8
    L9
     ALOAD 1
-    BIPUSH 33
+    BIPUSH 34
     DUP2
     IALOAD
     ICONST_1
     IADD
     IASTORE
     GOTO L10
-   L2
-    TABLESWITCH
-      97: L3
-      98: L5
-      99: L7
-      default: L9
+   L11
+    ALOAD 1
+    BIPUSH 33
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L12
    L4
+    TABLESWITCH
+      97: L5
+      98: L7
+      99: L9
+      default: L11
+   L6
    FRAME APPEND [[I java/lang/Object java/lang/String]
     ALOAD 3
     LDC "a"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L11
+    IFNE L13
+    GOTO L14
+   L13
+    GOTO L15
+   L14
     GOTO L12
-   L11
-    GOTO L13
-   L12
-    GOTO L10
-   L6
+   L8
    FRAME SAME
     ALOAD 3
     LDC "b"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L14
+    IFNE L16
+    GOTO L17
+   L16
     GOTO L15
-   L14
-    GOTO L13
-   L15
-    GOTO L10
-   L8
+   L17
+    GOTO L12
+   L10
    FRAME SAME
     ALOAD 3
     LDC "c"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFEQ L16
-    GOTO L17
-   L16
-    GOTO L10
-   L17
-    LINENUMBER 36 L17
+    IFEQ L18
+    GOTO L19
+   L18
+    GOTO L12
+   L19
+    LINENUMBER 36 L19
     ALOAD 1
     BIPUSH 43
     DUP2
@@ -479,9 +515,9 @@ public final class testData/cases/whenString/TestKt {
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L18
-   L13
-    LINENUMBER 37 L13
+    GOTO L20
+   L15
+    LINENUMBER 37 L15
     ALOAD 1
     BIPUSH 44
     DUP2
@@ -492,16 +528,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 37
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L19
+   L21
    FRAME SAME
     ICONST_5
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L18
-   L10
-    LINENUMBER 38 L10
+    GOTO L20
+   L12
+    LINENUMBER 38 L12
     ALOAD 1
     BIPUSH 45
     DUP2
@@ -512,21 +548,21 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 38
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L20
+   L22
    FRAME SAME
     BIPUSH 7
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-   L18
-    LINENUMBER 39 L18
+   L20
+    LINENUMBER 39 L20
    FRAME APPEND [I]
     RETURN
-   L21
-    LOCALVARIABLE x Ljava/lang/String; L0 L21 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L21 1
-    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L21 2
+   L23
+    LOCALVARIABLE x Ljava/lang/String; L2 L23 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L23 1
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L23 2
     MAXSTACK = 5
     MAXLOCALS = 5
 
@@ -534,18 +570,28 @@ public final class testData/cases/whenString/TestKt {
   public final static boo(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
-    ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
-    ASTORE 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
    L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 1
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    IFNONNULL L1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassData (Ljava/lang/String;)Ljava/lang/Object;
+    PUTSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+   L1
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    ASTORE 2
+   L2
     ALOAD 0
     LDC "x"
     INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
-   L1
-    LINENUMBER 42 L1
+   L3
+    LINENUMBER 42 L3
     ALOAD 1
     BIPUSH 47
     DUP2
@@ -560,19 +606,10 @@ public final class testData/cases/whenString/TestKt {
     ASTORE 3
     ALOAD 3
     INVOKEVIRTUAL java/lang/String.hashCode ()I
-    GOTO L2
-   L3
-    ALOAD 1
-    BIPUSH 53
-    DUP2
-    IALOAD
-    ICONST_1
-    IADD
-    IASTORE
     GOTO L4
    L5
     ALOAD 1
-    BIPUSH 52
+    BIPUSH 53
     DUP2
     IALOAD
     ICONST_1
@@ -581,7 +618,7 @@ public final class testData/cases/whenString/TestKt {
     GOTO L6
    L7
     ALOAD 1
-    BIPUSH 51
+    BIPUSH 52
     DUP2
     IALOAD
     ICONST_1
@@ -590,7 +627,7 @@ public final class testData/cases/whenString/TestKt {
     GOTO L8
    L9
     ALOAD 1
-    BIPUSH 50
+    BIPUSH 51
     DUP2
     IALOAD
     ICONST_1
@@ -599,7 +636,7 @@ public final class testData/cases/whenString/TestKt {
     GOTO L10
    L11
     ALOAD 1
-    BIPUSH 49
+    BIPUSH 50
     DUP2
     IALOAD
     ICONST_1
@@ -608,29 +645,38 @@ public final class testData/cases/whenString/TestKt {
     GOTO L12
    L13
     ALOAD 1
-    BIPUSH 48
+    BIPUSH 49
     DUP2
     IALOAD
     ICONST_1
     IADD
     IASTORE
     GOTO L14
-   L2
+   L15
+    ALOAD 1
+    BIPUSH 48
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L16
+   L4
     LOOKUPSWITCH
-      99: L3
-      100: L5
-      101: L7
-      102: L9
-      2112: L11
-      default: L13
-   L12
+      99: L5
+      100: L7
+      101: L9
+      102: L11
+      2112: L13
+      default: L15
+   L14
    FRAME APPEND [[I java/lang/Object java/lang/String]
     ALOAD 3
     LDC "Aa"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L15
-    GOTO L16
-   L15
+    IFNE L17
+    GOTO L18
+   L17
     ALOAD 1
     BIPUSH 54
     DUP2
@@ -638,8 +684,8 @@ public final class testData/cases/whenString/TestKt {
     ICONST_1
     IADD
     IASTORE
-    GOTO L17
-   L16
+    GOTO L19
+   L18
     ALOAD 1
     BIPUSH 55
     DUP2
@@ -650,58 +696,58 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 3
     LDC "BB"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L18
+    IFNE L20
+    GOTO L21
+   L20
     GOTO L19
-   L18
-    GOTO L17
-   L19
-    GOTO L14
-   L4
+   L21
+    GOTO L16
+   L6
    FRAME SAME
     ALOAD 3
     LDC "c"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L20
-    GOTO L21
-   L20
-    GOTO L22
-   L21
-    GOTO L14
-   L6
+    IFNE L22
+    GOTO L23
+   L22
+    GOTO L24
+   L23
+    GOTO L16
+   L8
    FRAME SAME
     ALOAD 3
     LDC "d"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L23
-    GOTO L24
-   L23
-    GOTO L25
-   L24
-    GOTO L14
-   L8
+    IFNE L25
+    GOTO L26
+   L25
+    GOTO L27
+   L26
+    GOTO L16
+   L10
    FRAME SAME
     ALOAD 3
     LDC "e"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L26
-    GOTO L27
-   L26
-    GOTO L28
-   L27
-    GOTO L14
-   L10
+    IFNE L28
+    GOTO L29
+   L28
+    GOTO L30
+   L29
+    GOTO L16
+   L12
    FRAME SAME
     ALOAD 3
     LDC "f"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L29
-    GOTO L30
-   L29
-    GOTO L31
-   L30
-    GOTO L14
-   L17
-    LINENUMBER 43 L17
+    IFNE L31
+    GOTO L32
+   L31
+    GOTO L33
+   L32
+    GOTO L16
+   L19
+    LINENUMBER 43 L19
     ALOAD 1
     BIPUSH 66
     DUP2
@@ -712,16 +758,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 43
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L32
+   L34
    FRAME SAME
     ICONST_5
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L33
-   L22
-    LINENUMBER 44 L22
+    GOTO L35
+   L24
+    LINENUMBER 44 L24
     ALOAD 1
     BIPUSH 67
     DUP2
@@ -732,16 +778,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 44
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L34
+   L36
    FRAME SAME
     BIPUSH 6
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L33
-   L25
-    LINENUMBER 45 L25
+    GOTO L35
+   L27
+    LINENUMBER 45 L27
     ALOAD 1
     BIPUSH 68
     DUP2
@@ -752,16 +798,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 45
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L35
+   L37
    FRAME SAME
     BIPUSH 7
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L33
-   L28
-    LINENUMBER 46 L28
+    GOTO L35
+   L30
+    LINENUMBER 46 L30
     ALOAD 1
     BIPUSH 69
     DUP2
@@ -772,16 +818,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 46
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L36
+   L38
    FRAME SAME
     BIPUSH 8
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L33
-   L31
-    LINENUMBER 47 L31
+    GOTO L35
+   L33
+    LINENUMBER 47 L33
     ALOAD 1
     BIPUSH 70
     DUP2
@@ -792,16 +838,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 47
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L37
+   L39
    FRAME SAME
     BIPUSH 9
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L33
-   L14
-    LINENUMBER 48 L14
+    GOTO L35
+   L16
+    LINENUMBER 48 L16
     ALOAD 1
     BIPUSH 71
     DUP2
@@ -812,21 +858,21 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 48
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L38
+   L40
    FRAME SAME
     BIPUSH 10
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-   L33
-    LINENUMBER 49 L33
+   L35
+    LINENUMBER 49 L35
    FRAME APPEND [I]
     RETURN
-   L39
-    LOCALVARIABLE x Ljava/lang/String; L0 L39 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L39 1
-    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L39 2
+   L41
+    LOCALVARIABLE x Ljava/lang/String; L2 L41 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L41 1
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L41 2
     MAXSTACK = 5
     MAXLOCALS = 5
 
@@ -834,18 +880,28 @@ public final class testData/cases/whenString/TestKt {
   public final static boo2(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
-    ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
-    ASTORE 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
    L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 1
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    IFNONNULL L1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassData (Ljava/lang/String;)Ljava/lang/Object;
+    PUTSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+   L1
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    ASTORE 2
+   L2
     ALOAD 0
     LDC "x"
     INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
-   L1
-    LINENUMBER 52 L1
+   L3
+    LINENUMBER 52 L3
     ALOAD 1
     BIPUSH 73
     DUP2
@@ -860,19 +916,10 @@ public final class testData/cases/whenString/TestKt {
     ASTORE 3
     ALOAD 3
     INVOKEVIRTUAL java/lang/String.hashCode ()I
-    GOTO L2
-   L3
-    ALOAD 1
-    BIPUSH 79
-    DUP2
-    IALOAD
-    ICONST_1
-    IADD
-    IASTORE
     GOTO L4
    L5
     ALOAD 1
-    BIPUSH 78
+    BIPUSH 79
     DUP2
     IALOAD
     ICONST_1
@@ -881,7 +928,7 @@ public final class testData/cases/whenString/TestKt {
     GOTO L6
    L7
     ALOAD 1
-    BIPUSH 77
+    BIPUSH 78
     DUP2
     IALOAD
     ICONST_1
@@ -890,7 +937,7 @@ public final class testData/cases/whenString/TestKt {
     GOTO L8
    L9
     ALOAD 1
-    BIPUSH 76
+    BIPUSH 77
     DUP2
     IALOAD
     ICONST_1
@@ -899,7 +946,7 @@ public final class testData/cases/whenString/TestKt {
     GOTO L10
    L11
     ALOAD 1
-    BIPUSH 75
+    BIPUSH 76
     DUP2
     IALOAD
     ICONST_1
@@ -908,29 +955,38 @@ public final class testData/cases/whenString/TestKt {
     GOTO L12
    L13
     ALOAD 1
-    BIPUSH 74
+    BIPUSH 75
     DUP2
     IALOAD
     ICONST_1
     IADD
     IASTORE
     GOTO L14
-   L2
+   L15
+    ALOAD 1
+    BIPUSH 74
+    DUP2
+    IALOAD
+    ICONST_1
+    IADD
+    IASTORE
+    GOTO L16
+   L4
     LOOKUPSWITCH
-      99: L3
-      100: L5
-      101: L7
-      102: L9
-      2112: L11
-      default: L13
-   L12
+      99: L5
+      100: L7
+      101: L9
+      102: L11
+      2112: L13
+      default: L15
+   L14
    FRAME APPEND [[I java/lang/Object java/lang/String]
     ALOAD 3
     LDC "Aa"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L15
-    GOTO L16
-   L15
+    IFNE L17
+    GOTO L18
+   L17
     ALOAD 1
     BIPUSH 80
     DUP2
@@ -938,8 +994,8 @@ public final class testData/cases/whenString/TestKt {
     ICONST_1
     IADD
     IASTORE
-    GOTO L17
-   L16
+    GOTO L19
+   L18
     ALOAD 1
     BIPUSH 81
     DUP2
@@ -950,58 +1006,58 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 3
     LDC "BB"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L18
+    IFNE L20
+    GOTO L21
+   L20
     GOTO L19
-   L18
-    GOTO L17
-   L19
-    GOTO L14
-   L4
+   L21
+    GOTO L16
+   L6
    FRAME SAME
     ALOAD 3
     LDC "c"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L20
-    GOTO L21
-   L20
-    GOTO L22
-   L21
-    GOTO L14
-   L6
+    IFNE L22
+    GOTO L23
+   L22
+    GOTO L24
+   L23
+    GOTO L16
+   L8
    FRAME SAME
     ALOAD 3
     LDC "d"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L23
-    GOTO L24
-   L23
-    GOTO L25
-   L24
-    GOTO L14
-   L8
+    IFNE L25
+    GOTO L26
+   L25
+    GOTO L27
+   L26
+    GOTO L16
+   L10
    FRAME SAME
     ALOAD 3
     LDC "e"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L26
-    GOTO L27
-   L26
-    GOTO L28
-   L27
-    GOTO L14
-   L10
+    IFNE L28
+    GOTO L29
+   L28
+    GOTO L30
+   L29
+    GOTO L16
+   L12
    FRAME SAME
     ALOAD 3
     LDC "f"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
-    IFNE L29
-    GOTO L30
-   L29
-    GOTO L31
-   L30
-    GOTO L14
-   L17
-    LINENUMBER 53 L17
+    IFNE L31
+    GOTO L32
+   L31
+    GOTO L33
+   L32
+    GOTO L16
+   L19
+    LINENUMBER 53 L19
     ALOAD 1
     BIPUSH 92
     DUP2
@@ -1012,16 +1068,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 53
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L32
+   L34
    FRAME SAME
     ICONST_5
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L33
-   L22
-    LINENUMBER 54 L22
+    GOTO L35
+   L24
+    LINENUMBER 54 L24
     ALOAD 1
     BIPUSH 93
     DUP2
@@ -1032,16 +1088,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 54
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L34
+   L36
    FRAME SAME
     BIPUSH 6
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L33
-   L25
-    LINENUMBER 55 L25
+    GOTO L35
+   L27
+    LINENUMBER 55 L27
     ALOAD 1
     BIPUSH 94
     DUP2
@@ -1052,16 +1108,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 55
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L35
+   L37
    FRAME SAME
     BIPUSH 7
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L33
-   L28
-    LINENUMBER 56 L28
+    GOTO L35
+   L30
+    LINENUMBER 56 L30
     ALOAD 1
     BIPUSH 95
     DUP2
@@ -1072,16 +1128,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 56
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L36
+   L38
    FRAME SAME
     BIPUSH 8
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L33
-   L31
-    LINENUMBER 57 L31
+    GOTO L35
+   L33
+    LINENUMBER 57 L33
     ALOAD 1
     BIPUSH 96
     DUP2
@@ -1092,16 +1148,16 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 57
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L37
+   L39
    FRAME SAME
     BIPUSH 9
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L33
-   L14
-    LINENUMBER 58 L14
+    GOTO L35
+   L16
+    LINENUMBER 58 L16
     ALOAD 1
     BIPUSH 97
     DUP2
@@ -1112,21 +1168,21 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 58
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L38
+   L40
    FRAME SAME
     BIPUSH 10
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-   L33
-    LINENUMBER 59 L33
+   L35
+    LINENUMBER 59 L35
    FRAME APPEND [I]
     RETURN
-   L39
-    LOCALVARIABLE x Ljava/lang/String; L0 L39 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L39 1
-    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L39 2
+   L41
+    LOCALVARIABLE x Ljava/lang/String; L2 L41 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L41 1
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L41 2
     MAXSTACK = 5
     MAXLOCALS = 5
 
@@ -1134,18 +1190,28 @@ public final class testData/cases/whenString/TestKt {
   public final static voo(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
-    ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
-    ASTORE 2
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
    L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 1
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    IFNONNULL L1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassData (Ljava/lang/String;)Ljava/lang/Object;
+    PUTSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+   L1
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    ASTORE 2
+   L2
     ALOAD 0
     LDC "x"
     INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
-   L1
-    LINENUMBER 62 L1
+   L3
+    LINENUMBER 62 L3
     ALOAD 1
     BIPUSH 99
     DUP2
@@ -1158,8 +1224,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     ALOAD 0
     ASTORE 3
-   L2
-    LINENUMBER 63 L2
+   L4
+    LINENUMBER 63 L4
     ALOAD 1
     BIPUSH 100
     DUP2
@@ -1173,9 +1239,9 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 3
     LDC "Aa"
     INVOKESTATIC kotlin/jvm/internal/Intrinsics.areEqual (Ljava/lang/Object;Ljava/lang/Object;)Z
-    IFEQ L3
-    GOTO L4
-   L3
+    IFEQ L5
+    GOTO L6
+   L5
     ALOAD 1
     BIPUSH 101
     DUP2
@@ -1183,8 +1249,8 @@ public final class testData/cases/whenString/TestKt {
     ICONST_1
     IADD
     IASTORE
-    GOTO L5
-   L4
+    GOTO L7
+   L6
     ALOAD 1
     BIPUSH 102
     DUP2
@@ -1193,17 +1259,17 @@ public final class testData/cases/whenString/TestKt {
     IADD
     IASTORE
     ICONST_1
-    GOTO L6
-   L5
+    GOTO L8
+   L7
    FRAME APPEND [[I java/lang/Object java/lang/String]
     ALOAD 3
     LDC "BB"
     INVOKESTATIC kotlin/jvm/internal/Intrinsics.areEqual (Ljava/lang/Object;Ljava/lang/Object;)Z
-   L6
+   L8
    FRAME SAME1 I
-    IFEQ L7
-    GOTO L8
-   L7
+    IFEQ L9
+    GOTO L10
+   L9
     ALOAD 1
     BIPUSH 103
     DUP2
@@ -1211,8 +1277,8 @@ public final class testData/cases/whenString/TestKt {
     ICONST_1
     IADD
     IASTORE
-    GOTO L9
-   L8
+    GOTO L11
+   L10
     ALOAD 1
     BIPUSH 104
     DUP2
@@ -1225,9 +1291,9 @@ public final class testData/cases/whenString/TestKt {
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-    GOTO L10
-   L9
-    LINENUMBER 64 L9
+    GOTO L12
+   L11
+    LINENUMBER 64 L11
     ALOAD 1
     BIPUSH 105
     DUP2
@@ -1238,34 +1304,44 @@ public final class testData/cases/whenString/TestKt {
     ALOAD 2
     BIPUSH 64
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
-   L11
+   L13
    FRAME SAME
     BIPUSH 10
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     ILOAD 4
     INVOKEVIRTUAL java/io/PrintStream.println (I)V
-   L10
-    LINENUMBER 65 L10
+   L12
+    LINENUMBER 65 L12
    FRAME APPEND [I]
     RETURN
-   L12
-    LOCALVARIABLE x Ljava/lang/String; L0 L12 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L12 1
-    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L12 2
+   L14
+    LOCALVARIABLE x Ljava/lang/String; L2 L14 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L14 1
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L14 2
     MAXSTACK = 4
     MAXLOCALS = 5
 
   // access flags 0x19
   public final static main()V
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
-    ASTORE 0
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
-    ASTORE 1
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
    L0
-    LINENUMBER 68 L0
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    ASTORE 0
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    IFNONNULL L1
+    LDC "testData.cases.whenString.TestKt"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassData (Ljava/lang/String;)Ljava/lang/Object;
+    PUTSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+   L1
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    ASTORE 1
+   L2
+    LINENUMBER 68 L2
     ALOAD 0
     BIPUSH 107
     DUP2
@@ -1278,8 +1354,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "a"
     INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
-   L1
-    LINENUMBER 69 L1
+   L3
+    LINENUMBER 69 L3
     ALOAD 0
     BIPUSH 108
     DUP2
@@ -1292,8 +1368,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "b"
     INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
-   L2
-    LINENUMBER 70 L2
+   L4
+    LINENUMBER 70 L4
     ALOAD 0
     BIPUSH 109
     DUP2
@@ -1306,8 +1382,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "c"
     INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
-   L3
-    LINENUMBER 71 L3
+   L5
+    LINENUMBER 71 L5
     ALOAD 0
     BIPUSH 110
     DUP2
@@ -1320,8 +1396,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "d"
     INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
-   L4
-    LINENUMBER 73 L4
+   L6
+    LINENUMBER 73 L6
     ALOAD 0
     BIPUSH 111
     DUP2
@@ -1334,8 +1410,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "a"
     INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
-   L5
-    LINENUMBER 74 L5
+   L7
+    LINENUMBER 74 L7
     ALOAD 0
     BIPUSH 112
     DUP2
@@ -1348,8 +1424,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "b"
     INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
-   L6
-    LINENUMBER 75 L6
+   L8
+    LINENUMBER 75 L8
     ALOAD 0
     BIPUSH 113
     DUP2
@@ -1362,8 +1438,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "c"
     INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
-   L7
-    LINENUMBER 76 L7
+   L9
+    LINENUMBER 76 L9
     ALOAD 0
     BIPUSH 114
     DUP2
@@ -1376,8 +1452,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "d"
     INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
-   L8
-    LINENUMBER 78 L8
+   L10
+    LINENUMBER 78 L10
     ALOAD 0
     BIPUSH 115
     DUP2
@@ -1390,8 +1466,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "a"
     INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
-   L9
-    LINENUMBER 79 L9
+   L11
+    LINENUMBER 79 L11
     ALOAD 0
     BIPUSH 116
     DUP2
@@ -1404,8 +1480,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "b"
     INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
-   L10
-    LINENUMBER 80 L10
+   L12
+    LINENUMBER 80 L12
     ALOAD 0
     BIPUSH 117
     DUP2
@@ -1418,8 +1494,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "c"
     INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
-   L11
-    LINENUMBER 81 L11
+   L13
+    LINENUMBER 81 L13
     ALOAD 0
     BIPUSH 118
     DUP2
@@ -1432,8 +1508,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "d"
     INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
-   L12
-    LINENUMBER 83 L12
+   L14
+    LINENUMBER 83 L14
     ALOAD 0
     BIPUSH 119
     DUP2
@@ -1446,8 +1522,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "Aa"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
-   L13
-    LINENUMBER 84 L13
+   L15
+    LINENUMBER 84 L15
     ALOAD 0
     BIPUSH 120
     DUP2
@@ -1460,8 +1536,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "BB"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
-   L14
-    LINENUMBER 85 L14
+   L16
+    LINENUMBER 85 L16
     ALOAD 0
     BIPUSH 121
     DUP2
@@ -1474,8 +1550,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "c"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
-   L15
-    LINENUMBER 86 L15
+   L17
+    LINENUMBER 86 L17
     ALOAD 0
     BIPUSH 122
     DUP2
@@ -1488,8 +1564,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "d"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
-   L16
-    LINENUMBER 87 L16
+   L18
+    LINENUMBER 87 L18
     ALOAD 0
     BIPUSH 123
     DUP2
@@ -1502,8 +1578,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "e"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
-   L17
-    LINENUMBER 88 L17
+   L19
+    LINENUMBER 88 L19
     ALOAD 0
     BIPUSH 124
     DUP2
@@ -1516,8 +1592,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "f"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
-   L18
-    LINENUMBER 89 L18
+   L20
+    LINENUMBER 89 L20
     ALOAD 0
     BIPUSH 125
     DUP2
@@ -1530,8 +1606,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "g"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
-   L19
-    LINENUMBER 91 L19
+   L21
+    LINENUMBER 91 L21
     ALOAD 0
     BIPUSH 126
     DUP2
@@ -1544,8 +1620,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "Aa"
     INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
-   L20
-    LINENUMBER 92 L20
+   L22
+    LINENUMBER 92 L22
     ALOAD 0
     BIPUSH 127
     DUP2
@@ -1558,8 +1634,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "c"
     INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
-   L21
-    LINENUMBER 93 L21
+   L23
+    LINENUMBER 93 L23
     ALOAD 0
     SIPUSH 128
     DUP2
@@ -1572,8 +1648,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "d"
     INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
-   L22
-    LINENUMBER 94 L22
+   L24
+    LINENUMBER 94 L24
     ALOAD 0
     SIPUSH 129
     DUP2
@@ -1586,8 +1662,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "e"
     INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
-   L23
-    LINENUMBER 95 L23
+   L25
+    LINENUMBER 95 L25
     ALOAD 0
     SIPUSH 130
     DUP2
@@ -1600,8 +1676,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "f"
     INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
-   L24
-    LINENUMBER 96 L24
+   L26
+    LINENUMBER 96 L26
     ALOAD 0
     SIPUSH 131
     DUP2
@@ -1614,8 +1690,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "g"
     INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
-   L25
-    LINENUMBER 98 L25
+   L27
+    LINENUMBER 98 L27
     ALOAD 0
     SIPUSH 132
     DUP2
@@ -1628,8 +1704,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "Aa"
     INVOKESTATIC testData/cases/whenString/TestKt.voo (Ljava/lang/String;)V
-   L26
-    LINENUMBER 99 L26
+   L28
+    LINENUMBER 99 L28
     ALOAD 0
     SIPUSH 133
     DUP2
@@ -1642,8 +1718,8 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "BB"
     INVOKESTATIC testData/cases/whenString/TestKt.voo (Ljava/lang/String;)V
-   L27
-    LINENUMBER 100 L27
+   L29
+    LINENUMBER 100 L29
     ALOAD 0
     SIPUSH 134
     DUP2
@@ -1656,25 +1732,30 @@ public final class testData/cases/whenString/TestKt {
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
     LDC "g"
     INVOKESTATIC testData/cases/whenString/TestKt.voo (Ljava/lang/String;)V
-   L28
-    LINENUMBER 101 L28
+   L30
+    LINENUMBER 101 L30
     RETURN
-    LOCALVARIABLE __$coverage_local$__ [I L0 L28 0
-    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L28 1
+    LOCALVARIABLE __$coverage_local$__ [I L0 L30 0
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L30 1
     MAXSTACK = 4
     MAXLOCALS = 2
 
   // access flags 0x1009
   public static synthetic main([Ljava/lang/String;)V
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
-    ASTORE 1
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassData (Ljava/lang/String;)Ljava/lang/Object;
+    PUTSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
    L0
+    GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
+    ASTORE 1
+   L1
     INVOKESTATIC testData/cases/whenString/TestKt.main ()V
     RETURN
-   L1
-    LOCALVARIABLE args [Ljava/lang/String; L0 L1 0
-    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L1 1
+   L2
+    LOCALVARIABLE args [Ljava/lang/String; L1 L2 0
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L2 1
     MAXSTACK = 1
     MAXLOCALS = 2
 }

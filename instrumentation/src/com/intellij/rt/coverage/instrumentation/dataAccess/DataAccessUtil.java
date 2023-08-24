@@ -30,7 +30,7 @@ public class DataAccessUtil {
   public static CoverageDataAccess createTestTrackingDataAccess(InstrumentationData data, boolean isArray) {
     String className = data.get(Key.CLASS_NAME);
     boolean fieldInstrumentation = OptionsUtil.FIELD_INSTRUMENTATION_ENABLED;
-    if (fieldInstrumentation && OptionsUtil.CONDY_ENABLED) {
+    if (fieldInstrumentation && InstrumentationUtils.isCondyEnabled(data.get(Key.CLASS_READER))) {
       CoverageDataAccess.Init init = isArray ? createTestTrackingArrayCondyInit(className) : createTestTrackingCondyInit(className);
       return new CondyCoverageDataAccess(init);
     } else {

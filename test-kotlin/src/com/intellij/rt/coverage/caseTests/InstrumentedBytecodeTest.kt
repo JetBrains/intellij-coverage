@@ -56,23 +56,29 @@ class InstrumentedBytecodeTest {
 
         val condyPossible = InstrumentationUtils.getBytecodeVersion(ClassReader(originalBytes)) >= Opcodes.V11
         for (coverage in Coverage.values()) {
-            if (coverage.isCondyEnabled() && !condyPossible) {
-                println("Condy test disabled due to low class file version")
-                continue
-            }
-            doTest(null, coverage, originalBytes, className, expectedRoot)
+            val expectedCoverage = getExpectedCoverage(coverage, condyPossible)
+            val expectedFileName = createExpectedFileName(expectedRoot, expectedCoverage, null)
+            doTest(null, coverage, originalBytes, className, expectedFileName)
         }
         for (testTracking in TestTracking.values()) {
-            doTest(testTracking, Coverage.BRANCH, originalBytes, className, expectedRoot)
+            val coverage = Coverage.BRANCH_CONDY
+            val expectedCoverage = getExpectedCoverage(coverage, condyPossible)
+            val expectedFileName = createExpectedFileName(expectedRoot, expectedCoverage, testTracking)
+            doTest(testTracking, coverage, originalBytes, className, expectedFileName)
         }
     }
+
+    private fun getExpectedCoverage(coverage: Coverage, condyPossible: Boolean): Coverage =
+        if (coverage.isCondyEnabled() && !condyPossible) {
+            if (coverage.isBranchCoverage()) Coverage.BRANCH_FIELD else Coverage.LINE_FIELD
+        } else coverage
 
     private fun doTest(
         testTracking: TestTracking?,
         coverage: Coverage,
         originalBytes: ByteArray,
         className: String,
-        expectedRoot: String
+        expectedFileName: String
     ) {
         val testTrackingMode = testTracking.createMode()
         OptionsUtil.FIELD_INSTRUMENTATION_ENABLED = coverage != Coverage.LINE && coverage != Coverage.BRANCH
@@ -82,7 +88,6 @@ class InstrumentedBytecodeTest {
         val bytes = transformer.instrument(originalBytes, className, null, false)
 
         getReadableBytecode(bytes).preprocess()
-        val expectedFileName = createExpectedFileName(expectedRoot, coverage, testTracking)
         assertBytecode(expectedFileName, bytes)
     }
 

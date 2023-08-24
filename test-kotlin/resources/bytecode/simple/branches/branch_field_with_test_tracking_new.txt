@@ -4,19 +4,43 @@ public final class testData/simple/branches/MyBranchedClass {
   // compiled from: test.kt
 
 
+  // access flags 0x108A
+  private static transient synthetic [I __$hits$__
+
+  // access flags 0x108A
+  private static transient synthetic [Z __$traceMask$__
+
+  // access flags 0x108A
+  private static transient synthetic Ljava/lang/Object; __$classData$__
+
   // access flags 0x1
   public <init>()V
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [I
+    IFNONNULL L0
     LDC "testData.simple.branches.MyBranchedClass"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [I
+   L0
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [I
     ASTORE 1
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$traceMask$__ : [Z
+    IFNONNULL L1
     LDC "testData.simple.branches.MyBranchedClass"
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/simple/branches/MyBranchedClass.__$traceMask$__ : [Z
+   L1
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$traceMask$__ : [Z
     ASTORE 2
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$classData$__ : Ljava/lang/Object;
+    IFNONNULL L2
     LDC "testData.simple.branches.MyBranchedClass"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassData (Ljava/lang/String;)Ljava/lang/Object;
+    PUTSTATIC testData/simple/branches/MyBranchedClass.__$classData$__ : Ljava/lang/Object;
+   L2
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$classData$__ : Ljava/lang/Object;
     ASTORE 3
-   L0
-    LINENUMBER 22 L0
+   L3
+    LINENUMBER 22 L3
     ALOAD 1
     ICONST_0
     DUP2
@@ -34,27 +58,42 @@ public final class testData/simple/branches/MyBranchedClass {
     ALOAD 0
     INVOKESPECIAL java/lang/Object.<init> ()V
     RETURN
-   L1
-    LOCALVARIABLE this LtestData/simple/branches/MyBranchedClass; L0 L1 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L1 1
-    LOCALVARIABLE __$coverage_local$__ [Z L0 L1 2
-    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L1 3
+   L4
+    LOCALVARIABLE this LtestData/simple/branches/MyBranchedClass; L3 L4 0
+    LOCALVARIABLE __$coverage_local$__ [I L0 L4 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L4 2
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L4 3
     MAXSTACK = 4
     MAXLOCALS = 4
 
   // access flags 0x11
   public final foo(I)V
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [I
+    IFNONNULL L0
     LDC "testData.simple.branches.MyBranchedClass"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
+    PUTSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [I
+   L0
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [I
     ASTORE 2
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$traceMask$__ : [Z
+    IFNONNULL L1
     LDC "testData.simple.branches.MyBranchedClass"
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/simple/branches/MyBranchedClass.__$traceMask$__ : [Z
+   L1
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$traceMask$__ : [Z
     ASTORE 3
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$classData$__ : Ljava/lang/Object;
+    IFNONNULL L2
     LDC "testData.simple.branches.MyBranchedClass"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassData (Ljava/lang/String;)Ljava/lang/Object;
+    PUTSTATIC testData/simple/branches/MyBranchedClass.__$classData$__ : Ljava/lang/Object;
+   L2
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$classData$__ : Ljava/lang/Object;
     ASTORE 4
-   L0
-    LINENUMBER 24 L0
+   L3
+    LINENUMBER 24 L3
     ALOAD 2
     ICONST_1
     DUP2
@@ -70,9 +109,9 @@ public final class testData/simple/branches/MyBranchedClass {
     ICONST_1
     BASTORE
     ILOAD 1
-    IFGE L1
-    GOTO L2
-   L1
+    IFGE L4
+    GOTO L5
+   L4
     ALOAD 2
     ICONST_2
     DUP2
@@ -80,8 +119,8 @@ public final class testData/simple/branches/MyBranchedClass {
     ICONST_1
     IADD
     IASTORE
-    GOTO L3
-   L2
+    GOTO L6
+   L5
     ALOAD 2
     ICONST_3
     DUP2
@@ -89,8 +128,8 @@ public final class testData/simple/branches/MyBranchedClass {
     ICONST_1
     IADD
     IASTORE
-   L4
-    LINENUMBER 25 L4
+   L7
+    LINENUMBER 25 L7
     ALOAD 2
     ICONST_4
     DUP2
@@ -109,9 +148,9 @@ public final class testData/simple/branches/MyBranchedClass {
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     SWAP
     INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/Object;)V
-    GOTO L5
-   L3
-    LINENUMBER 26 L3
+    GOTO L8
+   L6
+    LINENUMBER 26 L6
     ALOAD 2
     ICONST_5
     DUP2
@@ -126,12 +165,12 @@ public final class testData/simple/branches/MyBranchedClass {
     BIPUSH 26
     ICONST_1
     BASTORE
-   L6
+   L9
    FRAME APPEND [[I [Z java/lang/Object]
     ILOAD 1
-    IFNE L7
-    GOTO L8
-   L7
+    IFNE L10
+    GOTO L11
+   L10
     ALOAD 2
     BIPUSH 6
     DUP2
@@ -139,8 +178,8 @@ public final class testData/simple/branches/MyBranchedClass {
     ICONST_1
     IADD
     IASTORE
-    GOTO L9
-   L8
+    GOTO L12
+   L11
     ALOAD 2
     BIPUSH 7
     DUP2
@@ -148,8 +187,8 @@ public final class testData/simple/branches/MyBranchedClass {
     ICONST_1
     IADD
     IASTORE
-   L10
-    LINENUMBER 27 L10
+   L13
+    LINENUMBER 27 L13
     ALOAD 2
     BIPUSH 8
     DUP2
@@ -168,9 +207,9 @@ public final class testData/simple/branches/MyBranchedClass {
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     SWAP
     INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/Object;)V
-    GOTO L5
-   L9
-    LINENUMBER 29 L9
+    GOTO L8
+   L12
+    LINENUMBER 29 L12
     ALOAD 2
     BIPUSH 9
     DUP2
@@ -185,22 +224,22 @@ public final class testData/simple/branches/MyBranchedClass {
     BIPUSH 29
     ICONST_1
     BASTORE
-   L11
+   L14
    FRAME SAME
     LDC "GE"
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     SWAP
     INVOKEVIRTUAL java/io/PrintStream.println (Ljava/lang/Object;)V
-   L5
-    LINENUMBER 31 L5
+   L8
+    LINENUMBER 31 L8
    FRAME SAME
     RETURN
-   L12
-    LOCALVARIABLE this LtestData/simple/branches/MyBranchedClass; L0 L12 0
-    LOCALVARIABLE value I L0 L12 1
-    LOCALVARIABLE __$coverage_local$__ [I L0 L12 2
-    LOCALVARIABLE __$coverage_local$__ [Z L0 L12 3
-    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L12 4
+   L15
+    LOCALVARIABLE this LtestData/simple/branches/MyBranchedClass; L3 L15 0
+    LOCALVARIABLE value I L3 L15 1
+    LOCALVARIABLE __$coverage_local$__ [I L0 L15 2
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L15 3
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L15 4
     MAXSTACK = 4
     MAXLOCALS = 5
 }

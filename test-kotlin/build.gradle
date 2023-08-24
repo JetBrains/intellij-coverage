@@ -1,3 +1,5 @@
+import org.gradle.internal.jvm.Jvm
+
 plugins {
   id 'org.jetbrains.kotlin.jvm'
   id 'org.jetbrains.kotlin.plugin.serialization' version '1.8.21'
@@ -9,7 +11,8 @@ sourceSets {
   test.resources.srcDir 'resources'
 }
 
-String testJdkVersion = test.javaVersion >= JavaVersion.VERSION_11 ? 11 : 1.8
+ext.testJdkVersion = Jvm.current().javaVersion >= JavaVersion.VERSION_11 &&
+    (rootProject.hasProperty("test.configuration") ? "true" == project["test.configuration"] : false) ? "11" : "1.8"
 sourceCompatibility = 1.8
 targetCompatibility = testJdkVersion
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
@@ -57,6 +60,8 @@ task generateTests(type: JavaExec) {
 }
 
 def configureTests(Test task) {
+  def kotlinVersion = project.hasProperty("kotlin.version") ? (String)project["kotlin.version"] : ""
+  println "Use Kotlin version $kotlinVersion and java version ${testJdkVersion}"
   task.with {
     group = "verification"
     exclude("testData/**")

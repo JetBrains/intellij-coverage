@@ -8,14 +8,13 @@ public final class testData/cases/whenString/TestKt {
   public final static foo(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    LDC __$hits$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getHitsMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [I
     ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    LDC __$traceMask$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getTraceMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[Z (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [Z
     ASTORE 2
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    LDC __$classData$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.loadClassData(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object; (6) [testData.cases.whenString.TestKt]
     ASTORE 3
    L0
     ALOAD 0
@@ -204,14 +203,13 @@ public final class testData/cases/whenString/TestKt {
   public final static foo2(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/Nullable;() // invisible, parameter 0
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    LDC __$hits$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getHitsMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [I
     ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    LDC __$traceMask$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getTraceMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[Z (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [Z
     ASTORE 2
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    LDC __$classData$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.loadClassData(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object; (6) [testData.cases.whenString.TestKt]
     ASTORE 3
    L0
     LINENUMBER 28 L0
@@ -402,14 +400,13 @@ public final class testData/cases/whenString/TestKt {
   public final static foo3(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    LDC __$hits$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getHitsMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [I
     ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    LDC __$traceMask$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getTraceMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[Z (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [Z
     ASTORE 2
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    LDC __$classData$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.loadClassData(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object; (6) [testData.cases.whenString.TestKt]
     ASTORE 3
    L0
     ALOAD 0
@@ -594,14 +591,13 @@ public final class testData/cases/whenString/TestKt {
   public final static boo(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    LDC __$hits$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getHitsMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [I
     ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    LDC __$traceMask$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getTraceMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[Z (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [Z
     ASTORE 2
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    LDC __$classData$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.loadClassData(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object; (6) [testData.cases.whenString.TestKt]
     ASTORE 3
    L0
     ALOAD 0
@@ -926,14 +922,13 @@ public final class testData/cases/whenString/TestKt {
   public final static boo2(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    LDC __$hits$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getHitsMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [I
     ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    LDC __$traceMask$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getTraceMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[Z (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [Z
     ASTORE 2
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    LDC __$classData$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.loadClassData(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object; (6) [testData.cases.whenString.TestKt]
     ASTORE 3
    L0
     ALOAD 0
@@ -1258,14 +1253,13 @@ public final class testData/cases/whenString/TestKt {
   public final static voo(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    LDC __$hits$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getHitsMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [I
     ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    LDC __$traceMask$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getTraceMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[Z (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [Z
     ASTORE 2
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    LDC __$classData$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.loadClassData(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object; (6) [testData.cases.whenString.TestKt]
     ASTORE 3
    L0
     ALOAD 0
@@ -1398,14 +1392,13 @@ public final class testData/cases/whenString/TestKt {
 
   // access flags 0x19
   public final static main()V
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMaskCached (Ljava/lang/String;)[I
+    LDC __$hits$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getHitsMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [I
     ASTORE 0
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    LDC __$traceMask$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getTraceMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[Z (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [Z
     ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    LDC __$classData$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.loadClassData(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object; (6) [testData.cases.whenString.TestKt]
     ASTORE 2
    L0
     LINENUMBER 68 L0
@@ -1922,11 +1915,10 @@ public final class testData/cases/whenString/TestKt {
 
   // access flags 0x1009
   public static synthetic main([Ljava/lang/String;)V
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    LDC __$traceMask$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getTraceMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[Z (6) [testData.cases.whenString.TestKt]
+    CHECKCAST [Z
     ASTORE 1
-    LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassDataCached (Ljava/lang/String;)Ljava/lang/Object;
+    LDC __$classData$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.loadClassData(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object; (6) [testData.cases.whenString.TestKt]
     ASTORE 2
    L0
     INVOKESTATIC testData/cases/whenString/TestKt.main ()V
