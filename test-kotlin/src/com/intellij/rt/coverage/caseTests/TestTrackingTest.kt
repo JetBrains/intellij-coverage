@@ -35,7 +35,7 @@ internal class TestTrackingTest(
     companion object {
         @JvmStatic
         @Parameterized.Parameters(name = "{0} coverage with {1} test tracking")
-        fun data() = allTestTrackingModes()
+        fun data() = allTestTrackingModes().filter { it[1] != null }.toTypedArray()
     }
 
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
@@ -84,32 +84,3 @@ internal class TestTrackingTest(
         assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
     }
 }
-
-@RunWith(Parameterized::class)
-internal class TestTrackingVerifyInstrumentationTest(
-    override val coverage: Coverage,
-    override val testTracking: TestTracking,
-) : CoverageTest() {
-    companion object {
-        @JvmStatic
-        @Parameterized.Parameters(name = "{0} coverage with {1} test tracking")
-        fun data() = allTestTrackingModes()
-    }
-
-    override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
-        // just check that instrumentation does not cause runtime issues
-    }
-
-    @Test
-    fun testBadCycleClasses() = test("badCycle.classes")
-
-    @Test
-    fun testBadCycleInterfaces() = test("badCycle.interfaces")
-
-    @Test
-    fun testCoroutinesInline() = test("coroutines.inline")
-}
-
-private fun allTestTrackingModes() = Coverage.valuesWithCondyWhenPossible().toList()
-    .product(TestTracking.values().toList())
-    .map { it.toList().toTypedArray() }.toTypedArray()

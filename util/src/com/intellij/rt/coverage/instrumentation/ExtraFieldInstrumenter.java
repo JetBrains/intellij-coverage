@@ -152,6 +152,7 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
 
   private void generateExplicitClinitForInterfaces(ClassVisitor cv) {
     MethodVisitor mv = cv.visitMethod(Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC, "<clinit>", "()V", null, null);
+    mv.visitCode();
     initField(mv);
     mv.visitInsn(Opcodes.RETURN);
     mv.visitMaxs(ADDED_CODE_STACK_SIZE, 0);

@@ -32,11 +32,15 @@ import kotlin.test.*
  * @see [generateTests]
  */
 @RunWith(Parameterized::class)
-internal class CoverageRunTest(override val coverage: Coverage) : CoverageTest() {
+internal class CoverageRunTest(override val coverage: Coverage, override val testTracking: TestTracking?) : CoverageTest() {
     companion object {
+        /**
+         * We run these tests with test tracking to test the test tracking instrumentation issues,
+         * while the test tracking logic is tested in [com.intellij.rt.coverage.caseTests.TestTrackingTest].
+         */
         @JvmStatic
-        @Parameterized.Parameters(name = "{0}")
-        fun data() = Coverage.valuesWithCondyWhenPossible()
+        @Parameterized.Parameters(name = "{0} coverage with {1} test tracking")
+        fun data() = allTestTrackingModes()
     }
 
     override fun preprocessConfiguration(configuration: TestConfiguration) = if (coverage.isBranchCoverage()) {
@@ -250,6 +254,9 @@ internal class CoverageRunTest(override val coverage: Coverage) : CoverageTest()
     fun testInterfaceWithClinit() = test("interfaceWithClinit")
 
     @Test
+    fun testInterfaces() = test("interfaces")
+
+    @Test
     fun testLateinitInternal() = test("lateinit.internal")
 
     @Test
@@ -391,3 +398,7 @@ internal class CoverageRunTest(override val coverage: Coverage) : CoverageTest()
         }
     }
 }
+
+internal fun allTestTrackingModes() = Coverage.valuesWithCondyWhenPossible().toList()
+    .product(TestTracking.values().toList().plus(null))
+    .map { it.toList().toTypedArray() }.toTypedArray()
