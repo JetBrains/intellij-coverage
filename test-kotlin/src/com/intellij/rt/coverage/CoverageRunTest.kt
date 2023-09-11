@@ -40,7 +40,14 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
          */
         @JvmStatic
         @Parameterized.Parameters(name = "{0} coverage with {1} test tracking")
-        fun data() = allTestTrackingModes()
+        fun data() = if (System.getProperty("coverage.run.fast.tests") != null) {
+            arrayOf(
+                arrayOf(Coverage.BRANCH_FIELD, null),
+                arrayOf(Coverage.LINE_CONDY, null)
+            )
+        } else {
+            allTestTrackingModes()
+        }
     }
 
     override fun preprocessConfiguration(configuration: TestConfiguration) = if (coverage.isBranchCoverage()) {

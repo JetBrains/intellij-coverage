@@ -65,6 +65,9 @@ def configureTests(Test task) {
   task.with {
     group = "verification"
     exclude("testData/**")
+    if (project.hasProperty("fast.tests") && project["fast.tests"] == "true") {
+      jvmArgs("-Dcoverage.run.fast.tests=true")
+    }
     if (rootProject.hasProperty("parallel.tests")) {
       maxParallelForks = Math.min(2, Runtime.getRuntime().availableProcessors())
     }
