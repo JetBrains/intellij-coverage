@@ -31,21 +31,23 @@ import org.jetbrains.coverage.org.objectweb.asm.Type;
  * <p>
  * Coroutines call markers:
  * <ol>
- *   <li>COROUTINE_SUSPENDED loaded</li>
+ *   <li>COROUTINE_SUSPENDED loaded
  *   <ol>
  *     <li>It could be loaded via <code>IntrinsicsKt.getCOROUTINE_SUSPENDED</code> call</li>
  *     <li>Or it could be stored to a local variable</li>
  *   </ol>
- *   <li>Suspend call</li>
+ *   </li>
+ *   <li>Suspend call
  *   <ol>
  *     <li>It could be a call with <code>Lkotlin/coroutines/Continuation;</code> last parameter and <code>Object</code> return type</li>
  *     <li>Or it could be a default args call, then it also has default arguments call type suffix</li>
  *     <li>Or suspend lambda call via <code>invoke</code> method</li>
  *   </ol>
- *   <li>Label access</li>
- *   <ol>
- *     <li>Label is stored as a field. It contains the information to resume the coroutine after suspension</li>
- *   </ol>
+ *   </li>
+ *   <li>Label access
+ * <p>
+ *    Label is stored as a field. It contains the information to resume the coroutine after suspension
+ *   </li>
  * </ol>
  * We ignore:
  * <ol>
