@@ -16,7 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.methods;
 
-import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.data.IgnoredStorage;
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.util.OptionsUtil;
@@ -44,12 +44,15 @@ public class KotlinLocalFunctionInsideIgnoredMethodFilter implements MethodFilte
     int idx = -1;
     String name = data.getMethodName();
     String className = data.get(Key.CLASS_NAME);
-    ProjectData projectData = data.get(Key.PROJECT_DATA);
+    IgnoredStorage ignoredStorage = data.get(Key.PROJECT_DATA).getIgnoredStorage();
     while (true) {
       idx = name.indexOf('$', idx + 1);
       if (idx < 0) return false;
       String outerMethodName = name.substring(0, idx);
-      if (projectData.getIgnoredStorage().isMethodIgnored(className, outerMethodName)) return true;
+      if (ignoredStorage.isMethodIgnored(className, outerMethodName)) {
+        ignoredStorage.addIgnoredMethod(className, data.getMethodName(), data.getMethodDesc());
+        return true;
+      }
     }
   }
 }
