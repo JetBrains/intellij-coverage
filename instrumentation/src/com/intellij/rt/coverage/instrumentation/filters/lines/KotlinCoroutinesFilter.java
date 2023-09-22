@@ -27,6 +27,40 @@ import org.jetbrains.coverage.org.objectweb.asm.Type;
 /**
  * Filter out generated Kotlin coroutines state machines.
  * Namely, TABLESWITCH on state and 'if suspend' checks are ignored.
+ * <p>
+ * Coroutines call markers:
+ * <ol>
+ *   <li>COROUTINE_SUSPENDED loaded</li>
+ *   <ol>
+ *     <li>It could be loaded via <code>IntrinsicsKt.getCOROUTINE_SUSPENDED</code> call</li>
+ *     <li>Or it could be stored to a local variable</li>
+ *   </ol>
+ *   <li>Suspend call</li>
+ *   <ol>
+ *     <li>It could be a call with <code>Lkotlin/coroutines/Continuation;</code> last parameter and <code>Object</code> return type</li>
+ *     <li>Or suspend lambda call via <code>invoke</code> method</li>
+ *   </ol>
+ *   <li>Label access</li>
+ *   <ol>
+ *     <li>Label is stored as a field. It contains the information to resume the coroutine after suspension</li>
+ *   </ol>
+ * </ol>
+ * We ignore:
+ * <ol>
+ *   <li>IF_ACMPNE jump, if it happens after coroutines call and compares its result with COROUTINE_SUSPENDED</li>
+ *   <li>TABLESWITCH, if it switches on coroutine label</li>
+ *   <li>ARETURN, if it is generated on the first line</li>
+ *   <li>Generated exception throwing</li>
+ * </ol>
+ * <p>
+ * States for ignoring exception:
+ * <ol>
+ *   <li>new IllegalStateException</li>
+ *   <li>DUP</li>
+ *   <li>LDC exception message</li>
+ *   <li>INVOKESPECIAL exception constructor</li>
+ *   <li>ATHROW</li>
+ * </ol>
  */
 public class KotlinCoroutinesFilter extends CoverageFilter {
   private boolean myGetCoroutinesSuspendedVisited = false;
