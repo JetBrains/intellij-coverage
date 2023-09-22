@@ -210,6 +210,9 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testIgnoreAnnotationAnonymous() = test("ignoreAnnotation.anonymous")
 
     @Test
+    fun testIgnoreAnnotationDefaultArgs() = test("ignoreAnnotation.defaultArgs")
+
+    @Test
     fun testIgnoreAnnotationFullClass() = test("ignoreAnnotation.fullClass")
 
     @Test

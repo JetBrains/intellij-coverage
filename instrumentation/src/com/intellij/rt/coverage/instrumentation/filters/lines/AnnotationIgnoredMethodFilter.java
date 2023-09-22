@@ -16,8 +16,10 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.lines;
 
+import com.intellij.rt.coverage.data.IgnoredStorage;
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Key;
+import com.intellij.rt.coverage.instrumentation.filters.branches.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
 
@@ -49,8 +51,22 @@ public class AnnotationIgnoredMethodFilter extends CoverageFilter {
   @Override
   public void visitCode() {
     super.visitCode();
+    IgnoredStorage ignoredStorage = myContext.get(Key.PROJECT_DATA).getIgnoredStorage();
+    String methodName = myContext.getMethodName();
+    if (!myShouldIgnore && methodName.endsWith(KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX)) {
+      String originalSig = KotlinDefaultArgsBranchFilter.getOriginalNameAndDesc(methodName, myContext.getMethodDesc());
+      int index = originalSig.indexOf('(');
+      if (index > 0) {
+        String originalName = originalSig.substring(0, index);
+        String originalDesc = originalSig.substring(index);
+        if (ignoredStorage.isMethodIgnored(myContext.get(Key.CLASS_NAME), originalName, originalDesc)) {
+          myContext.setIgnoreSection(true);
+          myShouldIgnore = true;
+        }
+      }
+    }
     if (myShouldIgnore) {
-      myContext.get(Key.PROJECT_DATA).getIgnoredStorage().addIgnoredMethod(myContext.get(Key.CLASS_NAME), myContext.getMethodName(), myContext.getMethodDesc());
+      ignoredStorage.addIgnoredMethod(myContext.get(Key.CLASS_NAME), methodName, myContext.getMethodDesc());
     }
   }
 
