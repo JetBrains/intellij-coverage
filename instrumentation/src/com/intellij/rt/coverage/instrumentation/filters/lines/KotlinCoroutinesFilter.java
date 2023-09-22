@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
+import com.intellij.rt.coverage.instrumentation.filters.branches.KotlinDefaultArgsBranchFilter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 import org.jetbrains.coverage.org.objectweb.asm.Type;
@@ -38,6 +39,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Type;
  *   <li>Suspend call</li>
  *   <ol>
  *     <li>It could be a call with <code>Lkotlin/coroutines/Continuation;</code> last parameter and <code>Object</code> return type</li>
+ *     <li>Or it could be a default args call, then it also has default arguments call type suffix</li>
  *     <li>Or suspend lambda call via <code>invoke</code> method</li>
  *   </ol>
  *   <li>Label access</li>
@@ -111,7 +113,15 @@ public class KotlinCoroutinesFilter extends CoverageFilter {
         && owner.equals("kotlin/coroutines/intrinsics/IntrinsicsKt")
         && name.equals("getCOROUTINE_SUSPENDED")
         && descriptor.equals("()" + InstrumentationUtils.OBJECT_TYPE);
-    boolean suspendCallVisited = descriptor.endsWith("Lkotlin/coroutines/Continuation;)" + InstrumentationUtils.OBJECT_TYPE)
+    String originalDesc = descriptor;
+    if (name.endsWith(KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX)) {
+      String desc = KotlinDefaultArgsBranchFilter.getOriginalNameAndDesc(name, descriptor);
+      int index = desc.indexOf('(');
+      if (index > 0) {
+        originalDesc = desc.substring(index);
+      }
+    }
+    boolean suspendCallVisited = originalDesc.endsWith("Lkotlin/coroutines/Continuation;)" + InstrumentationUtils.OBJECT_TYPE)
         || owner.startsWith("kotlin/jvm/functions/Function")
         && name.equals("invoke") && opcode == Opcodes.INVOKEINTERFACE
         && descriptor.endsWith(")" + InstrumentationUtils.OBJECT_TYPE);

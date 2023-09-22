@@ -89,6 +89,9 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testCoroutinesCrossinline() = test("coroutines.crossinline")
 
     @Test
+    fun testCoroutinesDefaultArgs() = test("coroutines.defaultArgs")
+
+    @Test
     @Ignore("To be fixed")
     fun testCoroutinesFix1() = test("coroutines.fix1")
 
