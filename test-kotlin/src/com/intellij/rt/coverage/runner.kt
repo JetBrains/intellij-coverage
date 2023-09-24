@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.ClassData
 import com.intellij.rt.coverage.data.LineData
 import com.intellij.rt.coverage.data.ProjectData
 import com.intellij.rt.coverage.data.instructions.LineInstructions
+import com.intellij.rt.coverage.util.CoverageRunner
 import com.intellij.rt.coverage.util.TestTrackingIOUtil
 import org.junit.Assert
 import java.io.File
@@ -70,7 +71,7 @@ internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage:
     if (testTracking == TestTracking.CLASS_DATA) {
         extraArgs.add("-Didea.new.test.tracking.coverage=false")
     }
-    return CoverageStatusTest.runCoverage(classpath, coverageDataFile, patterns, mainClass,
+    return CoverageRunner.runCoverage(classpath, coverageDataFile, patterns, mainClass,
             coverage.isBranchCoverage(), extraArgs.toTypedArray(), calcUnloaded, testTracking != null)
             .also { assertEmptyLogFile(coverageDataFile) }
 }

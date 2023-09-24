@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2023 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,12 @@ package com.intellij.rt.coverage;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.util.FileUtil;
-import com.intellij.rt.coverage.util.ProcessUtil;
-import com.intellij.rt.coverage.util.ProjectDataLoader;
-import com.intellij.rt.coverage.util.ResourceUtil;
+import com.intellij.rt.coverage.util.*;
 import com.sun.tools.javac.Main;
 import junit.framework.TestCase;
 import org.junit.Assert;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -38,7 +34,6 @@ import java.util.Comparator;
  * @since 22-May-2008
  */
 public class CoverageStatusTest extends TestCase {
-  private static final String[] EMPTY = new String[0];
   private File myDataFile;
   private File myClassFile;
 
@@ -162,7 +157,7 @@ public class CoverageStatusTest extends TestCase {
   public void testNotNullAssertionsAreIgnored() throws Exception {
     final String testDataPath = getTestPath("notNull");
     myDataFile = new File(testDataPath + File.separator + "Test.ic");
-    final ProjectData projectInfo = runCoverage(testDataPath, myDataFile, "WithNotNulls.*", "WithNotNulls", true);
+    final ProjectData projectInfo = CoverageRunner.runCoverage(testDataPath, myDataFile, "WithNotNulls.*", "WithNotNulls", true);
     final ClassData classInfo = projectInfo.getClassData("WithNotNulls");
     assertNotNull(classInfo);
     final LineData line = classInfo.getLineData(6);
@@ -205,7 +200,7 @@ public class CoverageStatusTest extends TestCase {
   private void doTest(final String className, String expected, boolean branchCoverage) throws Exception {
     final String testDataPath = prepareForAgentRun(className);
 
-    final ProjectData projectInfo = runCoverage(testDataPath, myDataFile, "Test(\\$.*)*", "Test", branchCoverage);
+    final ProjectData projectInfo = CoverageRunner.runCoverage(testDataPath, myDataFile, "Test(\\$.*)*", "Test", branchCoverage);
 
     final StringBuilder buf = new StringBuilder();
 
@@ -230,33 +225,5 @@ public class CoverageStatusTest extends TestCase {
     }
 
     assertEquals(expected, buf.toString());
-  }
-
-  public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
-                                        String classToRun, final boolean branchCoverage) throws IOException, InterruptedException {
-    return runCoverage(testDataPath, coverageDataFile, patterns, classToRun, branchCoverage, EMPTY, false, false);
-  }
-
-  public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
-                                        String classToRun, final boolean branchCoverage, String[] extraArgs, boolean calcUnloaded, boolean testTracking) throws IOException, InterruptedException {
-    String coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent");
-
-    String[] commandLine = {
-//        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
-        "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" "
-            + testTracking + " " + calcUnloaded + " false " + !branchCoverage + " " + patterns,
-        "-classpath", testDataPath, classToRun};
-    if (extraArgs.length > 0) {
-      String[] args = new String[extraArgs.length + commandLine.length];
-      System.arraycopy(extraArgs, 0, args, 0, extraArgs.length);
-      System.arraycopy(commandLine, 0, args, extraArgs.length, commandLine.length);
-      commandLine = args;
-    }
-    ProcessUtil.execJavaProcess(commandLine);
-
-    FileUtil.waitUntilFileCreated(coverageDataFile);
-    final ProjectData projectInfo = ProjectDataLoader.loadLocked(coverageDataFile);
-    assert projectInfo != null;
-    return projectInfo;
   }
 }

@@ -52,7 +52,7 @@ class Publishing {
           "${projectName.replace(":", "-")}-"(MavenPublication) { publication ->
             publication.artifactId artifactName
             publication.version root.version
-            publication.artifact proj.jar
+            publication.artifact proj.tasks.named("releaseJar")
             publication.artifact proj.tasks.named("soursesJar").get()
             publication.artifact proj.tasks.named("javadocJar").get()
 

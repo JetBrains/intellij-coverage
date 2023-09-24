@@ -30,7 +30,7 @@ configurations {
 }
 
 dependencies {
-  head files(project(':instrumentation').jar.archivePath)
+  head project(':instrumentation')
   baseline "$group:$coverage_jar_name:$baselineVersion"
 }
 
@@ -48,25 +48,22 @@ def agentParams(Configuration configuration, boolean branchCoverage) {
 def branchCoverage = true
 
 task BaselineCoverage(type: JavaExec) {
-  configureCompare(it, agentParams(configurations.baseline, branchCoverage))
+  configureCompare(it) { agentParams(configurations.baseline, branchCoverage) }
   clear(it)
 }
 
 task HeadCoverage(type: JavaExec) {
-  dependsOn(project(':instrumentation').jar)
-  configureCompare(it, agentParams(configurations.head, branchCoverage))
+  configureCompare(it) { agentParams(configurations.head, branchCoverage) }
   clear(it)
 }
 
 task HeadVsBaselineCoverage(type: JavaExec) {
-  dependsOn(project(':instrumentation').jar)
-  configureCompareWith(it, agentParams(configurations.head, branchCoverage), BaselineCoverage)
+  configureCompareWith(it, { agentParams(configurations.head, branchCoverage) }, BaselineCoverage)
   clear(it)
 }
 
 task LineVsBranchCoverage(type: JavaExec) {
-  dependsOn(project(':instrumentation').jar)
-  configureCompareWith(it, agentParams(configurations.head, false), HeadCoverage)
+  configureCompareWith(it, { agentParams(configurations.head, false) }, HeadCoverage)
   clear(it)
 }
 

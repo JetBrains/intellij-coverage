@@ -44,10 +44,10 @@ def agentParams(Configuration configuration) {
 }
 
 task Baseline(type: JavaExec) {
-  configureCompare(it, agentParams(configurations.baseline))
+  configureCompare(it) { agentParams(configurations.baseline) }
 }
 
 task Head(type: JavaExec) {
   dependsOn configurations.head.buildDependencies
-  configureCompare(it, agentParams(configurations.head))
+  configureCompare(it) { agentParams(configurations.head) }
 }

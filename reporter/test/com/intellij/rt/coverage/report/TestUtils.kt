@@ -15,7 +15,6 @@
  */
 package com.intellij.rt.coverage.report
 
-import com.intellij.rt.coverage.CoverageStatusTest
 import com.intellij.rt.coverage.aggregate.Aggregator
 import com.intellij.rt.coverage.aggregate.api.Request
 import com.intellij.rt.coverage.report.ReportLoadStrategy.AggregatedReportLoadStrategy
@@ -23,6 +22,7 @@ import com.intellij.rt.coverage.report.ReportLoadStrategy.RawReportLoadStrategy
 import com.intellij.rt.coverage.report.api.Filters
 import com.intellij.rt.coverage.report.data.BinaryReport
 import com.intellij.rt.coverage.report.util.FileUtils
+import com.intellij.rt.coverage.util.CoverageRunner
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -47,7 +47,7 @@ object TestUtils {
                 .plus(File(JAVA_OUTPUT).absolutePath)
                 .plus(File(KOTLIN_OUTPUT).absolutePath)
                 .joinToString(File.pathSeparator)
-        CoverageStatusTest.runCoverage(classpath, icFile, "true ${smapFile.absolutePath} $patterns", className, true, emptyArray(), false, false)
+        CoverageRunner.runCoverage(classpath, icFile, "true ${smapFile.absolutePath} $patterns", className, true, emptyArray(), false, false)
         checkLogFile(icFile.parentFile)
         return BinaryReport(icFile, smapFile)
     }

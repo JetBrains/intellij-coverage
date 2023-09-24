@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2018 JetBrains s.r.o.
+ * Copyright 2000-2023 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.CoverageRunner;
 import com.sun.tools.javac.Main;
 import junit.framework.TestCase;
 import org.jetbrains.annotations.NotNull;
@@ -72,7 +73,7 @@ public class CoverageExclusionInclusionTest extends TestCase {
       }
     });
 
-    final ProjectData projectInfo = CoverageStatusTest.runCoverage(testDataPath.getAbsolutePath(), myDataFile, inclusionFilter, "Test", false);
+    final ProjectData projectInfo = CoverageRunner.runCoverage(testDataPath.getAbsolutePath(), myDataFile, inclusionFilter, "Test", false);
     assertEquals(new HashSet<String>(Arrays.asList(expectedClasses)), projectInfo.getClasses().keySet());
   }
 

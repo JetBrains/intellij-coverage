@@ -30,12 +30,10 @@ dependencies {
   testImplementation("org.jetbrains.kotlin:kotlin-test")
   testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
 
-  testImplementation(files(project(":tests").sourceSets.test.output))
+  testImplementation(project(":tests"))
 
-  testRuntimeOnly(files(project(':instrumentation').jar.archivePath))
-  testRuntimeOnly(files(project(':offline-runtime:api').jar.archivePath))
-  testCompileOnly(project(":instrumentation"))
-  testCompileOnly(project(":offline-runtime:api"))
+  testImplementation(project(':instrumentation'))
+  testImplementation(project(':offline-runtime:api'))
 
   testImplementation(project(":reporter"))
   testImplementation(project(":reporter:offline"))

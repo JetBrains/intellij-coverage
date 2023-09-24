@@ -1,5 +1,5 @@
 dependencies {
-  implementation project(":")
-  implementation project(":offline-runtime")
-  implementation project(":offline-runtime:data")
+  compile project(":")
+  compile project(":offline-runtime")
+  compile project(":offline-runtime:data")
 }

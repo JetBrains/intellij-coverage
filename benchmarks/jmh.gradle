@@ -38,7 +38,7 @@ task NoAgent(type: JavaExec) {
   configureBenchmark it as JavaExec
 }
 
-def configureBenchmark(JavaExec benchmark, List<String> jvmArgs = []) {
+def configureBenchmark(JavaExec benchmark, Closure<List<String>> jvmArgs = {[]}) {
   benchmark.with {
     group = 'benchmarks'
     dependsOn ":benchmarks:jmhClasses"
@@ -63,7 +63,7 @@ def configureBenchmark(JavaExec benchmark, List<String> jvmArgs = []) {
       for (String profiler : benchmarkProfilers) {
         args += ['-prof', profiler]
       }
-      for (String arg : jvmArgs) {
+      for (String arg : jvmArgs()) {
         args += ['-jvmArgs', arg]
       }
       benchmarkReport(benchmark).createNewFile()
@@ -78,7 +78,7 @@ def benchmarkReport(Task benchmark) {
 }
 
 
-ext.configureCompareWith = { benchmark, jvmArgs, basicBenchmark ->
+ext.configureCompareWith = { benchmark, Closure<List<String>> jvmArgs, basicBenchmark ->
   configureBenchmark(benchmark, jvmArgs)
   benchmark.with {
     dependsOn(basicBenchmark)
@@ -94,6 +94,6 @@ ext.configureCompareWith = { benchmark, jvmArgs, basicBenchmark ->
   }
 }
 
-ext.configureCompare = { benchmark, jvmArgs ->
+ext.configureCompare = { benchmark, Closure<List<String>> jvmArgs ->
   configureCompareWith(benchmark, jvmArgs, NoAgent)
 }

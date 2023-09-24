@@ -3,13 +3,10 @@ import proguard.gradle.ProGuardTask
 
 dependencies {
   implementation(project(":instrumentation"))
-  implementation(project(":offline-runtime"))
-  implementation(project(":offline-runtime:data"))
   implementation(project(":reporter:offline"))
 }
 
-ArtifactBuilder.setUpArtifactWithProguard(project, offline_jar_name,
-    [":common", ":offline-runtime:java7-utils", ":offline-runtime:data", ":offline-runtime", ":instrumentation", ":reporter:offline"], { ProGuardTask task ->
+ArtifactBuilder.setUpFatArtifactWithProguard(project, offline_jar_name, [":offline-runtime:java7-utils"], { ProGuardTask task ->
   task.keep('public class com.intellij.rt.coverage.offline.** { *; }')
 }) { Jar jar ->
   jar.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)

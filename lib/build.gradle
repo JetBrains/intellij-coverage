@@ -2,10 +2,3 @@ dependencies {
   compile files("trove.jar")
   compile files("asm-all.jar")
 }
-
-jar {
-  from(zipTree(file("trove.jar"))) {
-    exclude("classpath.index")
-  }
-  from(zipTree(file("asm-all.jar")))
-}

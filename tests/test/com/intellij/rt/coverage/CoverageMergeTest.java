@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2023 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.intellij.rt.coverage;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.util.CoverageRunner;
 import com.sun.tools.javac.Main;
 import junit.framework.TestCase;
 
@@ -134,7 +135,7 @@ public class CoverageMergeTest extends TestCase {
     myFiles2Delete.add(new File(testDataPath + File.separator + className + ".class"));
     myFiles2Delete.add(new File(testDataPath + File.separator + COMMON + ".class"));
 
-    return CoverageStatusTest.runCoverage(testDataPath, dataFile, ".*", className, true);
+    return CoverageRunner.runCoverage(testDataPath, dataFile, ".*", className, true);
   }
 
   private void doTest(String testName, String expected1, String expected2, String expectedMerged) throws Exception {

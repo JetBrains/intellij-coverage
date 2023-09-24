@@ -25,37 +25,38 @@ import proguard.gradle.ProGuardTask
 class ArtifactBuilder {
 
   static def setUpArtifact(Project project, String artifactName, List<String> extraDependencyModules, Closure<Jar> configureJar = null) {
-    setUpArtifactInternal(project, artifactName, extraDependencyModules, configureJar, null)
+    setUpArtifactInternal(project, artifactName, extraDependencyModules, configureJar, "releaseJar", false, true)
   }
 
-  private static def setUpArtifactInternal(Project project, String artifactName, List<String> dependencyModules,
-                                           Closure<Jar> configureJar, String alternativeJarTask) {
-    def modules = dependencyModules.collect({ project.project(it).sourceSets.main })
-    modules.add(project.sourceSets.main)
-
-    def jarConfiguration = { Jar jar ->
+  private static def setUpArtifactInternal(Project project, String artifactName, List<String> extraDependencyModules,
+                                           Closure<Jar> configureJar, String alternativeJarTask, boolean fatJar, boolean release) {
+    project.tasks.register(alternativeJarTask, Jar) { Jar jar ->
       jar.archiveBaseName.set(artifactName)
       jar.setDuplicatesStrategy(DuplicatesStrategy.FAIL)
-      if (alternativeJarTask == null) {
+      if (release) {
         jar.destinationDirectory.set(new File(project.rootDir, "dist"))
       }
       if (configureJar != null) configureJar(jar)
       jar.from { project.sourceSets.main.output }
-      for (String module in dependencyModules) {
+      for (String module in extraDependencyModules) {
         def jarTask = (Jar) project.project(module).tasks.named("jar").get()
         jar.dependsOn(jarTask)
         jar.from(project.zipTree(jarTask.archivePath))
       }
+      if (fatJar) {
+        jar.from { project.configurations.runtimeClasspath.collect { it.isDirectory() ? it : project.zipTree(it) } }
+      }
     }
 
-    if (alternativeJarTask == null) {
-      project.tasks.named("jar", Jar, jarConfiguration)
-    } else {
-      project.tasks.register(alternativeJarTask, Jar, jarConfiguration)
+    def modules = extraDependencyModules.collect { project.project(it).sourceSets.main }
+    modules.add(project.sourceSets.main)
+
+    // add sources and javadocs
+    if (artifactName.contains("intellij-coverage-agent")) {
+      [":common", ":", ":util"].forEach { modules.add(project.project(it).sourceSets.main) }
     }
 
     project.tasks.register("soursesJar", Jar) {
-      dependsOn(project.getTasksByName("classes", false))
       archiveBaseName = artifactName
       archiveClassifier = 'sources'
       from(modules.collect { it.allSource })
@@ -101,31 +102,34 @@ class ArtifactBuilder {
     }
   }
 
-  static def setUpArtifactWithProguard(Project project, String artifactName,
-                                       List<String> dependencyModules,
-                                       Closure<ProGuardTask> configureFilters,
-                                       Closure<Jar> configureJar = null) {
+  static def setUpFatArtifactWithProguard(Project project, String artifactName,
+                                          List<String> additionalModules = [],
+                                          Closure<ProGuardTask> configureFilters = null,
+                                          Closure<Jar> configureJar = null) {
     def proguardEnabled = project.rootProject.hasProperty("coverage.proguard.enable") ? "true" == project.rootProject["coverage.proguard.enable"] : true
     if (!proguardEnabled) {
-      setUpArtifact(project, artifactName, dependencyModules, configureJar)
+      setUpArtifactInternal(project, artifactName, additionalModules, configureJar, "releaseJar", true, true)
       return
     }
     def fullName = "full-$artifactName"
     def compressedName = "compressed-$artifactName"
     def fullJarTaskName = "fullJar"
-    setUpArtifactInternal(project, fullName, dependencyModules, configureJar, fullJarTaskName)
+    setUpArtifactInternal(project, fullName, additionalModules, configureJar, fullJarTaskName, true, false)
 
     def fullJarTask = (Jar) project.tasks.named(fullJarTaskName).get()
     setUpProguard(project, fullJarTask, fullName, compressedName, configureFilters)
-    project.tasks.named("jar", Jar) {
+    def originalJar = project.tasks.named("jar", Jar).get()
+    project.tasks.register("releaseJar", Jar) {
+      // force to build release jar when jar is needed
+      originalJar.finalizedBy(it)
       dependsOn("proguard")
       archiveBaseName.set(artifactName)
       destinationDirectory.set(new File(project.rootDir, "dist"))
       // do not copy original class files
       mainSpec.sourcePaths.clear()
-      from {
-        def compressedJar = fullJarTask.archiveFile.get().asFile.absolutePath.replace(fullName, compressedName)
-        project.zipTree(compressedJar)
+      def compressedJar = fullJarTask.archiveFile.get().asFile.absolutePath.replace(fullName, compressedName)
+      from(project.zipTree(compressedJar)) {
+        exclude("classpath.index")
       }
       if (configureJar != null) configureJar(it)
     }
