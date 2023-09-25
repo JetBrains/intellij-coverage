@@ -33,6 +33,7 @@ dependencies {
   testImplementation(project(":tests"))
 
   testImplementation(project(':instrumentation'))
+  testImplementation(project(":java6-utils"))
   testImplementation(project(':offline-runtime:api'))
 
   testImplementation(project(":reporter"))
