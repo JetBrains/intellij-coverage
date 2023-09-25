@@ -59,7 +59,7 @@ public class UnloadedUtil {
           if (is == null) return;
           appendUnloadedClass(projectData, classEntry.getClassName(), new ClassReader(is), branchCoverage, calculateSource, false);
         } catch (Throwable e) {
-          ErrorReporter.reportError("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
+          ErrorReporter.info("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
         }
       }
     });

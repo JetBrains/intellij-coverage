@@ -51,7 +51,7 @@ public class RawProjectInit {
         return getOrCreateHitsInternal(className, length);
       }
     } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data access: " + className, e);
+      ErrorReporter.error("Error in class data access: " + className, e);
       return null;
     }
   }
@@ -82,7 +82,7 @@ public class RawProjectInit {
     RawProjectData projectData = ourProjectData;
     if (projectData == null) {
       ClassLoader loader = RawProjectData.class.getClassLoader();
-      ErrorReporter.reportError("Coverage data is null in RawProjectInit. " +
+      ErrorReporter.error("Coverage data is null in RawProjectInit. " +
           "This can be caused by accessing coverage data before tests' start. " +
           "Alternatively, this could be a class loading issue: the data access method is called in class loaded by "
           + loader);

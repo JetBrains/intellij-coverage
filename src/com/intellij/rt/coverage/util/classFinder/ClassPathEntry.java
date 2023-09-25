@@ -80,16 +80,16 @@ public class ClassPathEntry {
 
   private static class DirectoryEntryProcessor extends AbstractClassPathEntryProcessor {
 
-    public void iterateMatchedClasses(final String classPathEntry, ClassEntry.Consumer consumer) throws IOException {
+    public void iterateMatchedClasses(final String classPathEntry, ClassEntry.Consumer consumer) {
       File dir = new File(classPathEntry);
       final InputStream[] is = new InputStream[] {null};
       collectClasses("", dir, consumer, is);
     }
 
-    private void collectClasses(final String curPath, final File parent, final ClassEntry.Consumer consumer, final InputStream[] is) throws IOException {
+    private void collectClasses(final String curPath, final File parent, final ClassEntry.Consumer consumer, final InputStream[] is) {
       File[] files = parent.listFiles();
       if (files != null) {
-        String prefix = curPath.length() == 0 ? "" : curPath + ".";
+        String prefix = curPath.isEmpty() ? "" : curPath + ".";
         // force anonymous classes to come after its outer class
         Arrays.sort(files, new Comparator<File>() {
           public int compare(File o1, File o2) {

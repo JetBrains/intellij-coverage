@@ -48,7 +48,7 @@ public class BinaryReport {
     try {
       isRaw = RawHitsReport.isRawHitsFile(myDataFile);
     } catch (IOException e) {
-      ErrorReporter.reportError("Failed to check raw report file", e);
+      ErrorReporter.warn("Failed to check raw report file", e);
     }
     myIsRawReport = isRaw ? (byte) 1 : (byte) 0;
     return isRaw;
@@ -65,7 +65,7 @@ public class BinaryReport {
       try {
         CoverageReport.loadAndApplySourceMap(data, mySourceMapFile);
       } catch (IOException e) {
-        ErrorReporter.reportError("Error in processing source map file", e);
+        ErrorReporter.warn("Error in processing source map file", e);
       }
     }
     return data;

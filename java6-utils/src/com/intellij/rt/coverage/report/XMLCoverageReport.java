@@ -262,7 +262,7 @@ public class XMLCoverageReport {
         }
         fOut.close();
       } catch (XMLStreamException e) {
-        ErrorReporter.reportError("Error closing file.", e);
+        ErrorReporter.info("Error closing file.", e);
       }
     }
   }

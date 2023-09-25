@@ -73,9 +73,9 @@ public class CoverageReport {
 
       save(projectData, myDataFile, mySourceMapFile);
     } catch (OutOfMemoryError e) {
-      ErrorReporter.reportError("Out of memory error occurred, try to increase memory available for the JVM, or make include / exclude patterns more specific", e);
+      ErrorReporter.error("Out of memory error occurred, try to increase memory available for the JVM, or make include / exclude patterns more specific", e);
     } catch (Throwable e) {
-      ErrorReporter.reportError("Unexpected error", e);
+      ErrorReporter.error("Unexpected error", e);
     } finally {
       CoverageIOUtil.FileLock.unlock(lock);
     }
@@ -113,7 +113,7 @@ public class CoverageReport {
 
       saveSourceMap(classes, sourceMapFile);
     } catch (IOException e) {
-      ErrorReporter.reportError("Error writing file " + dataFile.getPath(), e);
+      ErrorReporter.error("Error writing file " + dataFile.getPath(), e);
     } finally {
       CoverageIOUtil.close(os);
     }
@@ -136,13 +136,13 @@ public class CoverageReport {
         readNames = loadSourceMapFromFile(classes, sourceMapFile);
       }
     } catch (IOException e) {
-      ErrorReporter.reportError("Error loading source map from " + sourceMapFile.getPath(), e);
+      ErrorReporter.warn("Error loading source map from " + sourceMapFile.getPath(), e);
     }
 
     try {
       doSaveSourceMap(readNames, sourceMapFile, classes);
     } catch (IOException e) {
-      ErrorReporter.reportError("Error writing source map " + sourceMapFile.getPath(), e);
+      ErrorReporter.warn("Error writing source map " + sourceMapFile.getPath(), e);
     }
   }
 

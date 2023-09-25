@@ -23,6 +23,7 @@ import com.intellij.rt.coverage.report.api.Filters
 import com.intellij.rt.coverage.report.data.BinaryReport
 import com.intellij.rt.coverage.report.util.FileUtils
 import com.intellij.rt.coverage.util.CoverageRunner
+import com.intellij.rt.coverage.util.ErrorReporter
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -54,7 +55,7 @@ object TestUtils {
 
     @JvmStatic
     fun clearLogFile(directory: File?): String? {
-        val logFile = File(directory, "coverage-error.log")
+        val logFile = File(directory, ErrorReporter.ERROR_FILE)
         if (logFile.exists()) {
             val content = FileUtils.readAll(logFile)
             logFile.delete()

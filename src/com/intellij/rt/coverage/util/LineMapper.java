@@ -72,7 +72,7 @@ public abstract class LineMapper<T extends CoverageData> {
       }
       return sourceLines;
     } catch (Throwable e) {
-      ErrorReporter.reportError("Error creating line mappings for " + targetClassData.getName(), e);
+      ErrorReporter.warn("Error creating line mappings for " + targetClassData.getName(), e);
       return oldLines;
     }
   }

@@ -336,7 +336,7 @@ public class ClassData implements CoverageData {
         }
       }
     } catch (Throwable e) {
-      ErrorReporter.reportError("Unexpected error during applying hits data to class " + getName(), e);
+      ErrorReporter.warn("Unexpected error during applying hits data to class " + getName(), e);
     }
   }
 

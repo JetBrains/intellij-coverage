@@ -45,11 +45,9 @@ public class Instrumentator {
   }
 
   public void performPremain(String argsString, Instrumentation instrumentation) throws Exception {
-    checkLogLevel();
-
     synchronized (Instrumentator.class) {
       if (ourIsInitialized) {
-        ErrorReporter.reportError("Coverage agent has been applied twice, ignore the second one.");
+        ErrorReporter.info("Coverage agent has been applied twice, ignore the second one.");
         return;
       }
       ourIsInitialized = true;
@@ -59,13 +57,13 @@ public class Instrumentator {
     try {
       args = CoverageArgs.fromString(argsString);
     } catch (IllegalArgumentException e) {
-      ErrorReporter.reportError("Failed to parse agent arguments", e);
+      ErrorReporter.error("Failed to parse agent arguments", e);
       System.exit(1);
       return;
     }
 
-    ErrorReporter.logInfo("---- IntelliJ IDEA coverage runner ---- ");
-    ErrorReporter.logInfo(args.branchCoverage ? ("Branch coverage " + (args.testTracking ? "with tracking per test coverage ..." : "...")) : "Line coverage ...");
+    ErrorReporter.printInfo("---- IntelliJ IDEA coverage runner ---- ");
+    ErrorReporter.printInfo(args.branchCoverage ? ("Branch coverage " + (args.testTracking ? "with tracking per test coverage ..." : "...")) : "Line coverage ...");
     logPatterns(args.includePatterns, "include");
     logPatterns(args.excludePatterns, "exclude");
     logPatterns(args.annotationsToIgnore, "exclude annotations");
@@ -106,17 +104,9 @@ public class Instrumentator {
 
   private void logPatterns(List<Pattern> patterns, String name) {
     if (patterns.isEmpty()) return;
-    ErrorReporter.logInfo(name + " patterns:");
+    ErrorReporter.printInfo(name + " patterns:");
     for (Pattern pattern : patterns) {
-      ErrorReporter.logInfo(pattern.pattern());
-    }
-  }
-
-  private void checkLogLevel() {
-    if ("error".equals(OptionsUtil.LOG_LEVEL)) {
-      ErrorReporter.setLogLevel(ErrorReporter.ERROR);
-    } else {
-      ErrorReporter.setLogLevel(ErrorReporter.INFO);
+      ErrorReporter.printInfo(pattern.pattern());
     }
   }
 
@@ -131,7 +121,7 @@ public class Instrumentator {
     } catch (NoSuchMethodException e) {
       instrumentation.addTransformer(transformer);
     } catch (Exception e) {
-      ErrorReporter.reportError("Adding transformer failed.", e);
+      ErrorReporter.error("Adding transformer failed.", e);
       System.exit(1);
     }
   }

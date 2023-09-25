@@ -44,7 +44,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
         double allTime = 1. * ourTime / CoverageIOUtil.GIGA;
-        ErrorReporter.logInfo("Class transformation time: " + allTime + "s for " +
+        ErrorReporter.printInfo("Class transformation time: " + allTime + "s for " +
             ourClassCount + " classes or " + allTime / ourClassCount + "s per class"
         );
       }
@@ -99,7 +99,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
         return instrument(classFileBuffer, className, loader, computeFrames);
       }
     } catch (Throwable e) {
-      ErrorReporter.reportError("Error during class instrumentation: " + className, e);
+      ErrorReporter.warn("Error during class instrumentation: " + className, e);
     }
     return null;
   }

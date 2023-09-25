@@ -61,7 +61,7 @@ public class ClassFinder {
       try {
         entry.iterateMatchedClasses(myFilter, consumer);
       } catch (IOException e) {
-        ErrorReporter.reportError("Error during iterating classes.", e);
+        ErrorReporter.info("Error during iterating classes.", e);
       }
     }
   }
@@ -88,7 +88,7 @@ public class ClassFinder {
           result.add(new ClassPathEntry(path));
         }
       } catch (Exception e) {
-        ErrorReporter.reportError("Exception occurred on trying collect ClassPath URLs. One of possible reasons is shutting down " +
+        ErrorReporter.info("Exception occurred on trying collect ClassPath URLs. One of possible reasons is shutting down " +
             "Tomcat before finishing tests. Coverage won't be affected but some of uncovered classes could be missing from " +
             "the report.", e);
       }
@@ -100,7 +100,7 @@ public class ClassFinder {
     try {
       result = URLDecoder.decode(path, "UTF-8");
     } catch (UnsupportedEncodingException e) {
-      ErrorReporter.reportError("Could not decode the path: " + path + ", error: " + e.getMessage(), e);
+      ErrorReporter.info("Could not decode the path: " + path + ", error: " + e.getMessage(), e);
     }
 
     if (result.isEmpty()) return result;

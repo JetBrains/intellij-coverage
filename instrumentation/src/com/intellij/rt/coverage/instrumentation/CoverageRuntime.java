@@ -96,7 +96,7 @@ public class CoverageRuntime {
       final Object runtimeObject = getRuntimeObject();
       TRACE_LINE_METHOD.invoke(runtimeObject, new Object[]{classData, line});
     } catch (Exception e) {
-      ErrorReporter.reportError("Error during test tracking in class " + classData.toString(), e);
+      ErrorReporter.error("Error during test tracking in class " + classData.toString(), e);
     }
   }
 
@@ -130,7 +130,7 @@ public class CoverageRuntime {
       final Object runtimeObject = getRuntimeObject();
       REGISTER_CLASS_FOR_TRACE_METHOD.invoke(runtimeObject, new Object[]{classData});
     } catch (Exception e) {
-      ErrorReporter.reportError("Error during test tracking in class " + classData.toString(), e);
+      ErrorReporter.error("Error during test tracking in class " + classData.toString(), e);
     }
   }
 
@@ -146,7 +146,7 @@ public class CoverageRuntime {
       final Object runtimeObject = getRuntimeObject();
       return (int[]) GET_HITS_MASK_METHOD.invoke(runtimeObject, new Object[]{className});
     } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data access: " + className, e);
+      ErrorReporter.error("Error in class data access: " + className, e);
       return null;
     }
   }
@@ -165,7 +165,7 @@ public class CoverageRuntime {
       final Object runtimeObject = getRuntimeObject();
       return (int[]) GET_HITS_MASK_CACHED_METHOD.invoke(runtimeObject, new Object[]{className});
     } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data access: " + className, e);
+      ErrorReporter.error("Error in class data access: " + className, e);
       return null;
     }
   }
@@ -182,7 +182,7 @@ public class CoverageRuntime {
       final Object runtimeObject = getRuntimeObject();
       return (boolean[]) GET_TRACE_MASK_METHOD.invoke(runtimeObject, new Object[]{className});
     } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data access: " + className, e);
+      ErrorReporter.error("Error in class data access: " + className, e);
       return null;
     }
   }
@@ -199,7 +199,7 @@ public class CoverageRuntime {
       final Object runtimeObject = getRuntimeObject();
       return LOAD_CLASS_DATA_METHOD.invoke(runtimeObject, new Object[]{className});
     } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data loading: " + className, e);
+      ErrorReporter.error("Error in class data loading: " + className, e);
       return null;
     }
   }
@@ -218,7 +218,7 @@ public class CoverageRuntime {
       final Object runtimeObject = getRuntimeObject();
       return LOAD_CLASS_DATA_CACHED_METHOD.invoke(runtimeObject, new Object[]{className});
     } catch (Exception e) {
-      ErrorReporter.reportError("Error in class data loading: " + className, e);
+      ErrorReporter.error("Error in class data loading: " + className, e);
       return null;
     }
   }

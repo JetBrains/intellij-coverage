@@ -63,7 +63,7 @@ public class RawHitsReport {
       // file end marker
       CoverageIOUtil.writeUTF(os, "");
     } catch (Throwable e) {
-      ErrorReporter.reportError("Error during coverage report dump", e);
+      ErrorReporter.warn("Error during coverage report dump", e);
     } finally {
       CoverageIOUtil.close(os);
     }

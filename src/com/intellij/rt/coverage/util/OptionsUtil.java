@@ -25,6 +25,4 @@ public class OptionsUtil {
   public static final boolean INSTRUCTIONS_COVERAGE_ENABLED = "true".equals(System.getProperty("coverage.instructions.enable", "false"));
   public static boolean CALCULATE_HITS_COUNT = "true".equals(System.getProperty("idea.coverage.calculate.hits", "true"));
   public static boolean IGNORE_LOCAL_FUNCTIONS_IN_IGNORED_METHODS = "true".equals(System.getProperty("idea.coverage.ignore.local.functions.in.ignored.methods", "true"));
-
-  public static final String LOG_LEVEL = System.getProperty("idea.coverage.log.level");
 }

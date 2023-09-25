@@ -49,7 +49,7 @@ public class CoverageStatusTest extends TestCase {
   }
 
   private File getLogFile() {
-    String logFileName = "coverage-error.log";
+    String logFileName = ErrorReporter.ERROR_FILE;
     File logFile = new File(myDataFile.getParent(), logFileName);
     if (!logFile.exists()) {
       logFile = new File(logFileName);

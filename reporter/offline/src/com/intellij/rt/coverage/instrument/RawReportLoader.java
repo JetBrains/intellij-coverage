@@ -37,7 +37,7 @@ public class RawReportLoader {
     for (RawClassData rawClassData : rawProjectData.getClasses()) {
       final ClassData classData = projectData.getClassData(rawClassData.name);
       if (classData == null) {
-        ErrorReporter.reportError("Tried to apply coverage for class " + rawClassData.name + " but there is no such class in ProjectData");
+        ErrorReporter.warn("Tried to apply coverage for class " + rawClassData.name + " but there is no such class in ProjectData");
         continue;
       }
       int[] hits = ArrayUtil.copy(rawClassData.hits);

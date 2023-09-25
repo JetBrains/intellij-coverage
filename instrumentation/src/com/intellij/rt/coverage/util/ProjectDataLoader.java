@@ -110,7 +110,7 @@ public class ProjectDataLoader {
       }
       loadExtraInfo(projectInfo, in, dict);
     } catch (Exception e) {
-      ErrorReporter.reportError("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath(), e);
+      ErrorReporter.error("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath(), e);
     } finally {
       CoverageIOUtil.close(in);
     }
@@ -141,7 +141,7 @@ public class ProjectDataLoader {
       return;
     }
     if (version > REPORT_VERSION) {
-      ErrorReporter.reportError("Report version " + version + " is greater than agent maximum support version "
+      ErrorReporter.warn("Report version " + version + " is greater than agent maximum support version "
           + REPORT_VERSION + "\n" + "Please try to update coverage agent.");
       return;
     }

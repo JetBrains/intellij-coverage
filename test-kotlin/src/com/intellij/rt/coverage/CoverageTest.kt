@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage
 
 import com.intellij.rt.coverage.data.ProjectData
+import com.intellij.rt.coverage.util.ErrorReporter
 import org.junit.After
 import org.junit.Before
 import java.io.File
@@ -41,7 +42,7 @@ internal data class TestConfiguration(
     val expectedClasses: List<String>? = null,
 )
 
-internal const val LOG_NAME = "coverage-error.log"
+internal const val LOG_NAME = ErrorReporter.ERROR_FILE
 private fun File.ifExists() = takeIf { it.exists() }
 internal fun logFile(dataFile: File) = File(dataFile.parent, LOG_NAME).ifExists()
         ?: File(LOG_NAME).ifExists()

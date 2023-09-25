@@ -84,7 +84,7 @@ public class CoverageIOUtil {
         if (lock.tryLock()) return lock;
         wait(lock, waitTimeMS, "lock");
       }
-      ErrorReporter.reportError("Failed to lock with file lock: " + lock.myLock.getAbsolutePath());
+      ErrorReporter.warn("Failed to lock with file lock: " + lock.myLock.getAbsolutePath());
       return null;
     }
 
@@ -99,7 +99,7 @@ public class CoverageIOUtil {
         if (lock.tryUnlock()) return;
         wait(lock, waitTimeMS, "unlock");
       }
-      ErrorReporter.reportError("Failed to unlock with file lock: " + lock.myLock.getAbsolutePath());
+      ErrorReporter.warn("Failed to unlock with file lock: " + lock.myLock.getAbsolutePath());
     }
 
     private static void wait(final FileLock lock, final long waitTimeMS, final String action) {

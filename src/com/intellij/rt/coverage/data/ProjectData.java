@@ -294,7 +294,7 @@ public class ProjectData implements CoverageData, Serializable {
     try {
       TestTrackingIOUtil.saveTestResults(tracesDir, name, trace);
     } catch (IOException e) {
-      ErrorReporter.reportError("Error writing traces for test '" + name + "' to directory " + tracesDir.getPath(), e);
+      ErrorReporter.warn("Error writing traces for test '" + name + "' to directory " + tracesDir.getPath(), e);
     } finally {
       for (Map.Entry<Object, boolean[]> entry : trace.entrySet()) {
         final ClassData classData = (ClassData) entry.getKey();

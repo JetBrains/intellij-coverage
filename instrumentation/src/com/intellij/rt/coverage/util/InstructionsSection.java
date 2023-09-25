@@ -102,7 +102,7 @@ public class InstructionsSection extends ClassListSection {
           lineCount++;
         }
       }
-      ErrorReporter.reportError("Class " + classData.getName() + " does not have instructions info, while there are " +
+      ErrorReporter.info("Class " + classData.getName() + " does not have instructions info, while there are " +
           lineCount + " lines available", new Throwable());
       return;
     }
