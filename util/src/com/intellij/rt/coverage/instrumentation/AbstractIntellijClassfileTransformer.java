@@ -98,6 +98,8 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
       } else if (inclusionPattern.accept(className)) {
         return instrument(classFileBuffer, className, loader, computeFrames);
       }
+    } catch (ClassWriterImpl.FrameComputationClassNotFoundException e) {
+      ErrorReporter.info("Error during class frame computation: " + className, e);
     } catch (Throwable e) {
       ErrorReporter.warn("Error during class instrumentation: " + className, e);
     }

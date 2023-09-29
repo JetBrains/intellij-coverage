@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation;
 
+import com.intellij.rt.coverage.util.CoverageIOUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
@@ -127,15 +128,19 @@ class ClassWriterImpl extends ClassWriter {
             ? ClassLoader.getSystemResourceAsStream(resource)
             : myClassLoader.getResourceAsStream(resource);
         if (is == null) {
-          throw new IOException("Class " + className + " not found");
+          throw new FrameComputationClassNotFoundException("Class " + className + " not found");
         }
         loaderClassReaders.put(className, classReader = new ClassReader(is));
       } finally {
-        if (is != null) {
-          is.close();
-        }
+        CoverageIOUtil.close(is);
       }
     }
     return classReader;
+  }
+
+  static class FrameComputationClassNotFoundException extends RuntimeException {
+    public FrameComputationClassNotFoundException(String message) {
+      super(message);
+    }
   }
 }
