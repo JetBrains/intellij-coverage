@@ -198,6 +198,9 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testFixesIDEA_323017() = test("fixes.IDEA_323017")
 
     @Test
+    fun testFixesIDEA_332710() = test("fixes.IDEA_332710")
+
+    @Test
     fun testFixesKT_39038() = test("fixes.KT_39038")
 
     @Test
