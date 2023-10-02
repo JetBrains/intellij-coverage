@@ -110,7 +110,7 @@ public class ProjectDataLoader {
       }
       loadExtraInfo(projectInfo, in, dict);
     } catch (Exception e) {
-      ErrorReporter.error("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath(), e);
+      ErrorReporter.warn("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath(), e);
     } finally {
       CoverageIOUtil.close(in);
     }

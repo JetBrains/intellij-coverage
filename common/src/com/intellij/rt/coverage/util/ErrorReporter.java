@@ -26,21 +26,36 @@ import java.util.Date;
 public class ErrorReporter {
   public static final String ERROR_FILE = "coverage-error.log";
   public static final String LOG_LEVEL_SYSTEM_PROPERTY = "idea.coverage.log.level";
+  public static final String PATH_SYSTEM_PROPERTY = "idea.coverage.log.path";
   private static final SimpleDateFormat myDateFormat = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
   public static final int DEBUG = 0;
   public static final int INFO = 1;
   public static final int WARNING = 2;
   public static final int ERROR = 3;
+  public static final int NONE = 4;
 
-  private static String basePath;
+  private static File myFile;
   private static int myLogLevel = WARNING;
 
   static {
-    setUpLogLevel();
+    setUpFromSystemProperties();
   }
 
-  public static void setBasePath(String path) {
-    basePath = path;
+  /**
+   * Set path to the directory where log file should be located, if the path is not configured in other way.
+   * Has no effect if the path has been already set.
+   * The file name is <code>coverage-error.log</code>.
+   */
+  public static void suggestBasePath(String path) {
+    if (myFile != null) return;
+    myFile = new File(path, ERROR_FILE);
+  }
+
+  /**
+   * Set path to the filer where the log file should be located.
+   */
+  public static void setPath(String path) {
+    myFile = new File(path);
   }
 
   public static void setLogLevel(int level) {
@@ -72,10 +87,6 @@ public class ErrorReporter {
     log(INFO, message, t);
   }
 
-  public static void debug(String message) {
-    log(DEBUG, message, null);
-  }
-
   public static void printInfo(String message) {
     if (myLogLevel > INFO) return;
     System.out.println(message);
@@ -100,7 +111,7 @@ public class ErrorReporter {
   }
 
   private static PrintStream getErrorLogStream() throws FileNotFoundException {
-    return new PrintStream(new FileOutputStream(basePath != null ? new File(basePath, ERROR_FILE) : new File(ERROR_FILE), true));
+    return new PrintStream(new FileOutputStream(myFile != null ? myFile : new File(ERROR_FILE), true));
   }
 
   private static String logPrefix(int level) {
@@ -118,6 +129,8 @@ public class ErrorReporter {
       case ERROR:
         levelString = "ERROR";
         break;
+      case NONE:
+        throw new IllegalStateException("Should not get here!");
     }
     return '[' + myDateFormat.format(new Date()) + "] (Coverage " + levelString + "): ";
   }
@@ -144,10 +157,17 @@ public class ErrorReporter {
     }
   }
 
-  private static void setUpLogLevel() {
+  private static void setUpFromSystemProperties() {
+    String path = System.getProperty(PATH_SYSTEM_PROPERTY);
+    if (path != null) {
+      setPath(path);
+    }
+
     String logLevelString = System.getProperty(LOG_LEVEL_SYSTEM_PROPERTY);
     int logLevel;
-    if ("error".equals(logLevelString)) {
+    if ("none".equals(logLevelString)) {
+      logLevel = NONE;
+    } if ("error".equals(logLevelString)) {
       logLevel = ERROR;
     } else if ("warn".equals(logLevelString)) {
       logLevel = WARNING;

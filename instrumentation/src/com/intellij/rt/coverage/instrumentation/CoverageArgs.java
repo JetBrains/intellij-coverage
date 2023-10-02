@@ -71,7 +71,7 @@ class CoverageArgs {
     result.branchCoverage = !Boolean.parseBoolean(args[4]);
 
     // This is a side effect to report exceptions accurately
-    ErrorReporter.setBasePath(result.dataFile.getParent());
+    ErrorReporter.suggestBasePath(result.dataFile.getParent());
 
     int i = 5;
     if (args.length > 5 && Boolean.parseBoolean(args[5])) {

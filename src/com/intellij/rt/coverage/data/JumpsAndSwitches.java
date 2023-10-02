@@ -74,7 +74,7 @@ public class JumpsAndSwitches implements CoverageData {
     if (0 <= switchNumber && switchNumber < mySwitches.size()) {
       mySwitches.remove(switchNumber);
     } else {
-      ErrorReporter.error("Remove switch", new ArrayIndexOutOfBoundsException(switchNumber));
+      ErrorReporter.warn("Remove switch", new ArrayIndexOutOfBoundsException(switchNumber));
     }
   }
 
@@ -101,7 +101,7 @@ public class JumpsAndSwitches implements CoverageData {
     if (0 <= jump && jump < myJumps.size()) {
       myJumps.remove(jump);
     } else {
-      ErrorReporter.error("Remove jump", new ArrayIndexOutOfBoundsException(jump));
+      ErrorReporter.warn("Remove jump", new ArrayIndexOutOfBoundsException(jump));
     }
   }
 

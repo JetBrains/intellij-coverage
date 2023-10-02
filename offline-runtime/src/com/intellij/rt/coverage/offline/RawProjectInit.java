@@ -70,7 +70,7 @@ public class RawProjectInit {
           if (filePath != null) {
             final File file = new File(filePath);
             RawHitsReport.dumpOnExit(file, ourProjectData);
-            ErrorReporter.setBasePath(file.getParent());
+            ErrorReporter.suggestBasePath(file.getParent());
           }
         }
       }
