@@ -19,8 +19,6 @@ package com.intellij.rt.coverage.offline;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.MethodCaller;
 
-import java.io.File;
-
 /**
  * This class is an entry point from instrumented classes.
  * Here all the calls are redirected to system class loader.
@@ -28,6 +26,8 @@ import java.io.File;
  */
 public class RawProjectInit {
   private static final MethodCaller GET_OR_CREATE_HITS_MASK_INTERNAL_METHOD = new MethodCaller("getOrCreateHitsInternal", new Class[]{String.class, int.class});
+
+  private static final String KOVER_INITIALIZER_CLASS_NAME = "kotlinx.kover.offline.runtime.KoverInit";
 
   public static volatile RawProjectData ourProjectData;
 
@@ -66,11 +66,11 @@ public class RawProjectInit {
       synchronized (RawProjectData.class) {
         if (ourProjectData == null) {
           ourProjectData = new RawProjectData();
-          final String filePath = System.getProperty("kover.offline.report.path");
-          if (filePath != null) {
-            final File file = new File(filePath);
-            RawHitsReport.dumpOnExit(file, ourProjectData);
-            ErrorReporter.suggestBasePath(file.getParent());
+          try {
+            // initialize Kover Runtime
+            Class.forName(KOVER_INITIALIZER_CLASS_NAME);
+          } catch (ClassNotFoundException e) {
+            // no Kover Runtime detected
           }
         }
       }

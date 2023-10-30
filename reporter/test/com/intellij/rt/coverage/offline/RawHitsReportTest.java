@@ -20,9 +20,11 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrument.RawReportLoader;
+import com.intellij.rt.coverage.util.CoverageIOUtil;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.nio.file.Files;
 
@@ -35,7 +37,10 @@ public class RawHitsReportTest {
     hits[1] = 3;
 
     final File file = Files.createTempFile("coverage", "ric").toFile();
-    RawHitsReport.dump(file, rawProjectData);
+    DataOutputStream os = CoverageIOUtil.openWriteFile(file);
+
+    RawHitsReport.dump(os, rawProjectData);
+    os.close();
 
     final ProjectData projectData = createProject();
     final ClassData classData = projectData.getClassData("A");

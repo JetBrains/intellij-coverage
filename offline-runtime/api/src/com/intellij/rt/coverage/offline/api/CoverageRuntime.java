@@ -16,18 +16,18 @@
 
 package com.intellij.rt.coverage.offline.api;
 
+import com.intellij.rt.coverage.offline.RawHitsReport;
 import com.intellij.rt.coverage.offline.RawProjectData;
 import com.intellij.rt.coverage.offline.RawProjectInit;
 import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.classFinder.ClassEntry;
 import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import com.intellij.rt.coverage.util.classFinder.OutputClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.util.List;
 
 public class CoverageRuntime {
@@ -41,6 +41,11 @@ public class CoverageRuntime {
     RawProjectData projectData = getProjectData();
     ClassFinder classFinder = new ClassListFinder(null, classFiles);
     return CoverageCollector.collect(projectData, classFinder);
+  }
+
+  public static void dumpIcReport(DataOutput output, File errorFile) throws IOException {
+    ErrorReporter.setPath(errorFile.getPath());
+    RawHitsReport.dump(output, getProjectData());
   }
 
   private static RawProjectData getProjectData() {
