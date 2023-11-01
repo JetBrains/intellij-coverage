@@ -46,8 +46,11 @@ public class CoverageRuntime {
     return CoverageCollector.collect(projectData, classFinder);
   }
 
-  public static void dumpIcReport(DataOutput output, File errorFile) throws IOException {
+  public static void setLogPath(File errorFile) {
     ErrorReporter.setPath(errorFile.getPath());
+  }
+
+  public static void dumpIcReport(DataOutput output) throws IOException {
     RawHitsReport.dump(output, getProjectData());
   }
 
