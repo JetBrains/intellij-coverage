@@ -30,24 +30,41 @@ import java.io.*;
 public class RawHitsReport {
   private static final int MAGIC = 284996684;
 
-  public static void dump(DataOutput output, RawProjectData data) throws IOException {
-    CoverageIOUtil.writeINT(output, MAGIC);
+  static void dump(File file, RawProjectData data) {
+    DataOutputStream os = null;
+    try {
+      if (!file.exists()) {
+        file.getParentFile().mkdirs();
+        file.createNewFile();
+      }
+
+      os = CoverageIOUtil.openWriteFile(file);
+      dump(os, data);
+    } catch (Throwable e) {
+      ErrorReporter.warn("Error during coverage report dump", e);
+    } finally {
+      CoverageIOUtil.close(os);
+    }
+  }
+
+  public static void dump(DataOutput out, RawProjectData data) throws IOException {
+    CoverageIOUtil.writeINT(out, MAGIC);
 
     // leave empty line as a space for format configuration
-    CoverageIOUtil.writeUTF(output, "");
+    CoverageIOUtil.writeUTF(out, "");
 
     for (RawClassData classData : data.getClasses()) {
       final int[] hits = classData.hits;
       if (hits == null || hits.length == 0) continue;
-      CoverageIOUtil.writeUTF(output, classData.name);
-      CoverageIOUtil.writeINT(output, hits.length);
+      CoverageIOUtil.writeUTF(out, classData.name);
+      CoverageIOUtil.writeINT(out, hits.length);
       for (int hit : hits) {
-        CoverageIOUtil.writeINT(output, hit);
+        CoverageIOUtil.writeINT(out, hit);
       }
     }
 
     // file end marker
-    CoverageIOUtil.writeUTF(output, "");
+    CoverageIOUtil.writeUTF(out, "");
   }
 
   public static RawProjectData load(File file) throws IOException {
@@ -87,5 +104,13 @@ public class RawHitsReport {
     } finally {
       CoverageIOUtil.close(is);
     }
+  }
+
+  public static void dumpOnExit(final File file, final RawProjectData data) {
+    Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+      public void run() {
+        dump(file, data);
+      }
+    }));
   }
 }

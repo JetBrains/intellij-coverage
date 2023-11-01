@@ -30,6 +30,9 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import java.io.*;
 import java.util.List;
 
+/**
+ * This class contains API methods that are called at runtime in offline coverage mode.
+ */
 public class CoverageRuntime {
   public static List<ClassCoverage> collectInRoots(List<File> roots) {
     RawProjectData projectData = getProjectData();

@@ -19,6 +19,8 @@ package com.intellij.rt.coverage.offline;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.MethodCaller;
 
+import java.io.File;
+
 /**
  * This class is an entry point from instrumented classes.
  * Here all the calls are redirected to system class loader.
@@ -66,6 +68,12 @@ public class RawProjectInit {
       synchronized (RawProjectData.class) {
         if (ourProjectData == null) {
           ourProjectData = new RawProjectData();
+          final String filePath = System.getProperty("coverage.offline.report.path");
+          if (filePath != null) {
+            final File file = new File(filePath);
+            RawHitsReport.dumpOnExit(file, ourProjectData);
+            ErrorReporter.suggestBasePath(file.getParent());
+          }
           try {
             // initialize Kover Runtime
             Class.forName(KOVER_INITIALIZER_CLASS_NAME);

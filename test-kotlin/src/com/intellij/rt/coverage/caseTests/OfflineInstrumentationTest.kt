@@ -131,7 +131,7 @@ internal class OfflineInstrumentationTest(override val coverage: Coverage) : Cov
         val offlineArtifactPath = ResourceUtil.getAgentPath("intellij-coverage-offline")
         val commandLine = arrayOf(
             "-classpath", offlineArtifactPath + File.pathSeparator + outputDir.absolutePath,
-            "-Dkover.offline.report.path=${myDataFile.absolutePath}",
+            "-Dcoverage.offline.report.path=${myDataFile.absolutePath}",
             test.mainClass
         )
         ProcessUtil.execJavaProcess(commandLine)
