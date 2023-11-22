@@ -29,6 +29,10 @@ object ObjectDeclarationWithField {
     val x: Int = 42 // coverage: FULL
 }
 
+object ObjectDeclarationWithConst {
+    const val X: Int = 42
+}
+
 object UnusedEmptyObjectDeclaration // coverage: NONE
 
 object UnusedObjectDeclarationWithConstructor {
@@ -40,8 +44,13 @@ object UnusedObjectDeclarationWithField {
     val x: Int = 42 // coverage: NONE
 }
 
+object UnusedObjectDeclarationWithConst {
+    const val X: Int = 42
+}
+
 fun main() {
     EmptyObjectDeclaration // coverage: FULL
     ObjectDeclarationWithConstructor // coverage: FULL
     ObjectDeclarationWithField // coverage: FULL
+    println(ObjectDeclarationWithConst.X) // coverage: FULL
 }

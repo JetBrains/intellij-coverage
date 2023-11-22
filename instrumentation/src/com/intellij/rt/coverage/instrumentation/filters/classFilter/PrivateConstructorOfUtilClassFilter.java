@@ -33,7 +33,10 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
   private static final String KOTLIN_OBJECT_CONSTRUCTOR_DESCRIPTOR = "(" + KotlinUtils.KOTLIN_DEFAULT_CONSTRUCTOR_MARKER + ")V";
 
   private boolean myIsAbstractClass;
+  private boolean myHasMethods = false;
   private boolean myAllMethodsStatic = true;
+  private boolean myHasConstFields = false;
+  private boolean myAllFieldsConst = true;
   private boolean myIsKotlinObject = false;
   private boolean myIsKotlinClass = false;
   private boolean myConstructorIsEmpty = true;
@@ -55,9 +58,17 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
 
   @Override
   public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
-    myIsKotlinObject |= (access & (Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL)) != 0
-        && "INSTANCE".equals(name)
-        && myName.equals(Type.getType(descriptor).getInternalName());
+    Type fieldType = Type.getType(descriptor);
+    boolean isPublicStaticFinal = (access & (Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL)) != 0;
+    boolean isInstanceField = isPublicStaticFinal && "INSTANCE".equals(name) && myName.equals(fieldType.getInternalName());
+    myIsKotlinObject |= isInstanceField;
+    if (!isInstanceField) {
+      boolean isPrimitive = Type.BOOLEAN <= fieldType.getSort() && fieldType.getSort() <= Type.DOUBLE;
+      boolean isString = "Ljava/lang/String;".equals(fieldType.getInternalName());
+      boolean isConstField = isPublicStaticFinal && (isPrimitive || isString);
+      myHasConstFields |= isConstField;
+      myAllFieldsConst &= isConstField;
+    }
     return super.visitField(access, name, descriptor, signature, value);
   }
 
@@ -68,7 +79,10 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
         || isKotlinObjectSyntheticConstructor(access, name, descriptor)) {
       return new EmptyConstructorVisitor(mv);
     }
-    myAllMethodsStatic &= (access & Opcodes.ACC_STATIC) != 0;
+    if (!InstrumentationUtils.CLASS_INIT.equals(name)) {
+      myHasMethods = true;
+      myAllMethodsStatic &= (access & Opcodes.ACC_STATIC) != 0;
+    }
     return mv;
   }
 
@@ -79,8 +93,14 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
         && myConstructorLines != null
         && !isSealedClassConstructor()) {
       for (int line : myConstructorLines) {
-        if (myIsKotlinObject && myIsKotlinClass && myContext.getLineCount() <= 1) continue;
-        myContext.removeLine(line);
+        // Do not ignore constructor if it is the only line in the class
+        boolean isKotlinObjectWithSingleLine = myIsKotlinObject && myIsKotlinClass && myContext.getLineCount() <= 1;
+        // However, const fields are inlined by the compiler.
+        // In such a case, object is used just as scope, so we do not need to track coverage for it.
+        boolean hasOnlyConstFields = !myHasMethods && myAllFieldsConst && myHasConstFields;
+        if (!isKotlinObjectWithSingleLine || hasOnlyConstFields) {
+          myContext.removeLine(line);
+        }
       }
     }
     super.visitEnd();
