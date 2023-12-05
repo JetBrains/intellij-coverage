@@ -64,7 +64,7 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
     myIsKotlinObject |= isInstanceField;
     if (!isInstanceField) {
       boolean isPrimitive = Type.BOOLEAN <= fieldType.getSort() && fieldType.getSort() <= Type.DOUBLE;
-      boolean isString = "Ljava/lang/String;".equals(fieldType.getInternalName());
+      boolean isString = "Ljava/lang/String;".equals(descriptor);
       boolean isConstField = isPublicStaticFinal && (isPrimitive || isString);
       myHasConstFields |= isConstField;
       myAllFieldsConst &= isConstField;
