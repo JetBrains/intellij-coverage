@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.report.api;
 import com.intellij.rt.coverage.report.ReportLoadStrategy;
 import com.intellij.rt.coverage.report.Reporter;
 import com.intellij.rt.coverage.report.data.BinaryReport;
+import jetbrains.coverage.report.impl.IOUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -59,5 +60,10 @@ public class ReportApi {
         new ReportLoadStrategy.RawReportLoadStrategy(binaryReports, outputRoots, sourceRoots, filters);
 
     return new Reporter(loadStrategy);
+  }
+
+  public static void setFreemarkerRetry(int repeatMaxCount, long repeatCooldownMs) {
+    IOUtil.repeatMaxCount = repeatMaxCount;
+    IOUtil.repeatCooldownMs = repeatCooldownMs;
   }
 }
