@@ -22,7 +22,6 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.report.TestUtils;
 import com.intellij.rt.coverage.report.data.BinaryReport;
-import com.intellij.rt.coverage.report.api.Filters;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
@@ -30,38 +29,35 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class AggregatorTest {
 
   @Test
   public void testSingleReport() throws IOException {
-    final List<Request> requests = createRequests();
+    List<Request> requests = createRequests();
     runAggregator(requests, "testData.defaultArgs.TestKt");
   }
 
   @Test
   public void testSeveralReport() throws IOException {
-    final List<Request> requests = createRequests();
+    List<Request> requests = createRequests();
     runAggregator(requests, "testData.defaultArgs.TestKt", "testData.branches.TestKt", "testData.crossinline.TestKt");
   }
 
   @NotNull
   private static List<Request> createRequests() throws IOException {
-    final List<Request> requests = new ArrayList<Request>();
-    final Request request1 = new Request(
-        new Filters(
-            Collections.singletonList(Pattern.compile("testData\\..*")),
-            Collections.singletonList(Pattern.compile("testData\\.inline")),
-            Collections.<Pattern>emptyList()),
+    List<Request> requests = new ArrayList<Request>();
+    Request request1 = new Request(
+        TestUtils.createFilters(Pattern.compile("testData\\..*"), Pattern.compile("testData\\.inline")),
         File.createTempFile("request", "ic"), null
     );
-    final Request request2 = new Request(
-        new Filters(
-            Collections.singletonList(Pattern.compile(".*inline.*")),
-            Collections.singletonList(Pattern.compile(".*ss.*")),
-            Collections.<Pattern>emptyList()),
+    Request request2 = new Request(
+        TestUtils.createFilters(Pattern.compile(".*inline.*"), Pattern.compile(".*ss.*")),
         File.createTempFile("request", "ic"), null
     );
     requests.add(request1);
@@ -71,9 +67,9 @@ public class AggregatorTest {
 
 
   public static void runAggregator(List<Request> requests, String... testsClasses) {
-    final List<File> reports = new ArrayList<File>();
+    List<File> reports = new ArrayList<File>();
     for (String test : testsClasses) {
-      final BinaryReport report = TestUtils.runTest("", test);
+      BinaryReport report = TestUtils.runTest("", test);
       reports.add(report.getDataFile());
     }
 
@@ -81,11 +77,11 @@ public class AggregatorTest {
     AggregatorApi.aggregate(requests, reports, TestUtils.getOutputRoots());
     TestUtils.checkLogFile(new File("."));
 
-    final List<ProjectData> projectDataList = new ArrayList<ProjectData>();
-    final Set<String> names = new HashSet<String>();
+    List<ProjectData> projectDataList = new ArrayList<ProjectData>();
+    Set<String> names = new HashSet<String>();
     for (Request request : requests) {
-      final File file = request.outputFile;
-      final ProjectData projectData = ProjectDataLoader.load(file);
+      File file = request.outputFile;
+      ProjectData projectData = ProjectDataLoader.load(file);
       for (ClassData classData : projectData.getClassesCollection()) {
         names.add(classData.getName());
       }
@@ -93,8 +89,8 @@ public class AggregatorTest {
     }
 
     for (int i = 0; i < requests.size(); i++) {
-      final Request request = requests.get(i);
-      final ProjectData projectData = projectDataList.get(i);
+      Request request = requests.get(i);
+      ProjectData projectData = projectDataList.get(i);
       for (String name : names) {
         Assert.assertEquals(request.classFilter.shouldInclude(name), projectData.getClassData(name) != null);
       }

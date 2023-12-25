@@ -26,7 +26,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.regex.Pattern;
 
 import static java.util.Collections.singletonList;
@@ -47,9 +46,9 @@ public class HTMLTest {
 
   @Test
   public void testFileOutOfPackageStructure() throws Throwable {
-    final File htmlDir = runTestAndConvertToHTML("testData.outOfPackageStructure\\..*", "testData.outOfPackageStructure.TestOutOfPackageStructureKt");
+    File htmlDir = runTestAndConvertToHTML("testData.outOfPackageStructure\\..*", "testData.outOfPackageStructure.TestOutOfPackageStructureKt");
     verifyHTMLDir(htmlDir);
-    final File sourcesFile = new File(htmlDir, TestUtils.join("ns-1", "sources", "source-1.html"));
+    File sourcesFile = new File(htmlDir, TestUtils.join("ns-1", "sources", "source-1.html"));
     Assert.assertTrue(sourcesFile.exists());
     Assert.assertFalse(FileUtils.readAll(sourcesFile).contains("Source code is not available"));
     Assert.assertTrue(FileUtils.readAll(sourcesFile).contains("package testData.outOfPackageStructure"));
@@ -57,9 +56,9 @@ public class HTMLTest {
 
   @Test
   public void testTopLevel() throws Throwable {
-    final File htmlDir = runTestAndConvertToHTML("-exclude testData.*", "TestTopLevelKt");
+    File htmlDir = runTestAndConvertToHTML("-exclude testData.*", "TestTopLevelKt");
     verifyHTMLDir(htmlDir);
-    final File sourcesFile = new File(htmlDir, TestUtils.join("ns-1", "sources", "source-1.html"));
+    File sourcesFile = new File(htmlDir, TestUtils.join("ns-1", "sources", "source-1.html"));
     Assert.assertTrue(sourcesFile.exists());
     Assert.assertFalse(FileUtils.readAll(sourcesFile).contains("Source code is not available"));
     Assert.assertTrue(FileUtils.readAll(sourcesFile).contains("fun main() {"));
@@ -67,10 +66,10 @@ public class HTMLTest {
 
   @Test
   public void apiTest() throws Throwable {
-    final BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
-    final File htmlDir = createHtmlDir(report.getDataFile());
+    BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
+    File htmlDir = createHtmlDir(report.getDataFile());
 
-    Filters filters = new Filters(singletonList(Pattern.compile("testData.simple.*")), Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList());
+    Filters filters = TestUtils.createFilters(Pattern.compile("testData.simple.*"));
     ReportApi.htmlReport(htmlDir, DEFAULT_TITLE, null, singletonList(report.getDataFile()), singletonList(new File(TestUtils.JAVA_OUTPUT)), singletonList(new File("test")), filters);
 
     verifyHTMLDir(htmlDir);
@@ -79,12 +78,12 @@ public class HTMLTest {
   public static void verifyHTMLDir(File htmlDir) throws IOException {
     Assert.assertTrue(htmlDir.exists());
     Assert.assertTrue(htmlDir.isDirectory());
-    final File[] children = htmlDir.listFiles();
+    File[] children = htmlDir.listFiles();
     Assert.assertNotNull(children);
     Assert.assertTrue(children.length > 0);
-    final File indexFile = new File(htmlDir, "index.html");
+    File indexFile = new File(htmlDir, "index.html");
     Assert.assertTrue(indexFile.exists());
-    final String content = FileUtils.readAll(indexFile);
+    String content = FileUtils.readAll(indexFile);
     Assert.assertTrue(content.contains("<title>" + DEFAULT_TITLE + " Coverage Report > Summary</title>"));
     Assert.assertTrue(content.contains("<h1>" + DEFAULT_TITLE + ": Overall Coverage Summary </h1>"));
     Assert.assertTrue(content.contains("Current scope: " + DEFAULT_TITLE + "<span class=\"separator\">|</span>    all classes"));
@@ -93,8 +92,8 @@ public class HTMLTest {
   }
 
   private File runTestAndConvertToHTML(String patterns, String className) throws Throwable {
-    final BinaryReport report = TestUtils.runTest(patterns, className);
-    final File htmlDir = createHtmlDir(report.getDataFile());
+    BinaryReport report = TestUtils.runTest(patterns, className);
+    File htmlDir = createHtmlDir(report.getDataFile());
     TestUtils.clearLogFile(new File("."));
     TestUtils.createRawReporter(report, patterns).createHTMLReport(htmlDir, DEFAULT_TITLE, DEFAULT_CHARSET);
     TestUtils.checkLogFile(new File("."));
@@ -103,8 +102,8 @@ public class HTMLTest {
 
   @NotNull
   public static File createHtmlDir(File icFile) {
-    final String dirName = icFile.getName().replace(".ic", "html");
-    final File htmlDir = new File(icFile.getParentFile(), dirName);
+    String dirName = icFile.getName().replace(".ic", "html");
+    File htmlDir = new File(icFile.getParentFile(), dirName);
     htmlDir.mkdir();
     return htmlDir;
   }

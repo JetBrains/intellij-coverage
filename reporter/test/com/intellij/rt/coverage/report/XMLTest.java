@@ -29,7 +29,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.*;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -39,9 +38,9 @@ import static java.util.Collections.singletonList;
 public class XMLTest {
 
   private void test(String testName) throws Throwable {
-    final String patterns = "testData\\." + testName + "\\..*";
-    final String className = "testData." + testName + ".TestKt";
-    final String expectedFileName = "xml/" + testName + ".xml";
+    String patterns = "testData\\." + testName + "\\..*";
+    String className = "testData." + testName + ".TestKt";
+    String expectedFileName = "xml/" + testName + ".xml";
 
     verifyXML(patterns, className, expectedFileName);
   }
@@ -73,8 +72,8 @@ public class XMLTest {
 
   @Test
   public void testExcludeAnnotation() throws Throwable {
-    final String patterns = "testData.excludeAnnotation.* -excludeAnnotations testData.excludeAnnotation.ExcludeFromCoverage";
-    final String className = "testData.excludeAnnotation.TestKt";
+    String patterns = "testData.excludeAnnotation.* -excludeAnnotations testData.excludeAnnotation.ExcludeFromCoverage";
+    String className = "testData.excludeAnnotation.TestKt";
     verifyXML(patterns, className, "xml/excludeAnnotation.xml");
   }
 
@@ -85,15 +84,15 @@ public class XMLTest {
 
   @Test
   public void testNoReport() throws Throwable {
-    final File xmlFile = createXMLFile();
+    File xmlFile = createXMLFile();
     TestUtils.createRawReporter(null, "testData.noReport.*").createXMLReport(xmlFile);
     verifyXMLWithExpected(xmlFile, "xml/noReport.xml");
   }
 
   @Test
   public void testSimple() throws Throwable {
-    final String patterns = "testData.simple.*";
-    final String className = "testData.simple.Main";
+    String patterns = "testData.simple.*";
+    String className = "testData.simple.Main";
     verifyXML(patterns, className, "xml/simple.xml");
   }
 
@@ -104,11 +103,11 @@ public class XMLTest {
 
   @Test
   public void apiTest() throws Throwable {
-    final BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
-    final File xmlFile = createXMLFile();
+    BinaryReport report = TestUtils.runTest("testData.simple.*", "testData.simple.Main");
+    File xmlFile = createXMLFile();
 
     TestUtils.clearLogFile(new File("."));
-    Filters filters = new Filters(singletonList(Pattern.compile("testData.simple.*")), Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList());
+    Filters filters = TestUtils.createFilters(Pattern.compile("testData.simple.*"));
     ReportApi.xmlReport(xmlFile, singletonList(report.getDataFile()), singletonList(new File(TestUtils.JAVA_OUTPUT)), singletonList(new File("test")), filters);
 
     TestUtils.checkLogFile(new File("."));
@@ -117,16 +116,16 @@ public class XMLTest {
 
   @Test
   public void basicTest() throws Throwable {
-    final ProjectData project = new ProjectData();
-    final ClassData classData1 = project.getOrCreateClassData("MyClass");
-    final ClassData classData2 = project.getOrCreateClassData("package.MyClass2");
-    final LineData[] lines1 = new LineData[]{
+    ProjectData project = new ProjectData();
+    ClassData classData1 = project.getOrCreateClassData("MyClass");
+    ClassData classData2 = project.getOrCreateClassData("package.MyClass2");
+    LineData[] lines1 = new LineData[]{
         new LineData(1, "foo(I)V"),
         new LineData(2, "foo(I)V"),
         new LineData(3, "boo()V")
     };
 
-    final LineData[] lines2 = new LineData[]{
+    LineData[] lines2 = new LineData[]{
         new LineData(1, "a(II)I"),
         new LineData(2, "b(J)Z")
     };
@@ -136,7 +135,7 @@ public class XMLTest {
     classData1.setSource("F.java");
     classData2.setSource("A.java");
 
-    final File file = createXMLFile();
+    File file = createXMLFile();
     TestUtils.clearLogFile(new File("."));
     new XMLCoverageReport().write(new FileOutputStream(file), project);
     TestUtils.checkLogFile(new File("."));
@@ -145,33 +144,33 @@ public class XMLTest {
 
   @Test
   public void sameFileNameTest() throws Throwable {
-    final ProjectData project = new ProjectData();
+    ProjectData project = new ProjectData();
     project.setInstructionsCoverage(true);
-    final Map<String, ClassInstructions> projectInstructions = project.getInstructions();
+    Map<String, ClassInstructions> projectInstructions = project.getInstructions();
 
-    final ClassData classData1 = project.getOrCreateClassData("package.A");
-    final LineData lineData1 = new LineData(1, "foo()V");
+    ClassData classData1 = project.getOrCreateClassData("package.A");
+    LineData lineData1 = new LineData(1, "foo()V");
     lineData1.setHits(1);
-    final LineData[] lines1 = new LineData[]{null, lineData1};
+    LineData[] lines1 = new LineData[]{null, lineData1};
     classData1.setLines(lines1);
     classData1.setSource("A.kt");
 
-    final LineInstructions lineInstructions1 = new LineInstructions();
+    LineInstructions lineInstructions1 = new LineInstructions();
     lineInstructions1.setInstructions(1);
     projectInstructions.put("package.A", new ClassInstructions(new LineInstructions[]{null, lineInstructions1}));
 
-    final ClassData classData2 = project.getOrCreateClassData("package.B");
-    final LineData lineData2 = new LineData(1, "foo()V");
+    ClassData classData2 = project.getOrCreateClassData("package.B");
+    LineData lineData2 = new LineData(1, "foo()V");
     lineData2.setHits(1);
-    final LineData[] lines2 = new LineData[]{null, lineData2};
+    LineData[] lines2 = new LineData[]{null, lineData2};
     classData2.setLines(lines2);
     classData2.setSource("A.kt");
 
-    final LineInstructions lineInstructions2 = new LineInstructions();
+    LineInstructions lineInstructions2 = new LineInstructions();
     lineInstructions2.setInstructions(1);
     projectInstructions.put("package.B", new ClassInstructions(new LineInstructions[]{null, lineInstructions2}));
 
-    final File file = createXMLFile();
+    File file = createXMLFile();
     TestUtils.clearLogFile(new File("."));
     new XMLCoverageReport().write(new FileOutputStream(file), project);
     TestUtils.checkLogFile(new File("."));
@@ -180,8 +179,8 @@ public class XMLTest {
 
   @Test
   public void testXMLRead() throws Throwable {
-    final InputStream inputStream = TestUtils.class.getClassLoader().getResourceAsStream("xml/simple.xml");
-    final XMLProjectData report = new XMLCoverageReport().read(inputStream);
+    InputStream inputStream = TestUtils.class.getClassLoader().getResourceAsStream("xml/simple.xml");
+    XMLProjectData report = new XMLCoverageReport().read(inputStream);
 
     Assert.assertEquals(1, report.getClasses().size());
     XMLProjectData.ClassInfo classInfo = report.getClass("testData.simple.Main");
@@ -238,7 +237,7 @@ public class XMLTest {
           lineInfo = new XMLProjectData.LineInfo(line.getLineNumber());
           fileLines.put(line.getLineNumber(), lineInfo);
         }
-        final BranchData branchData = line.getBranchData();
+        BranchData branchData = line.getBranchData();
         if (branchData != null) {
           lineInfo.coveredBranches += branchData.getCoveredBranches();
           lineInfo.missedBranches += branchData.getTotalBranches() - branchData.getCoveredBranches();
@@ -302,10 +301,10 @@ public class XMLTest {
   }
 
   private static Pair<File, ProjectData> runXMLTest(String patterns, String className) throws Throwable {
-    final BinaryReport report = TestUtils.runTest(patterns, className);
-    final File xmlFile = createXMLFile();
+    BinaryReport report = TestUtils.runTest(patterns, className);
+    File xmlFile = createXMLFile();
     TestUtils.clearLogFile(new File("."));
-    final Reporter reporter = TestUtils.createReporter(report, patterns);
+    Reporter reporter = TestUtils.createReporter(report, patterns);
     reporter.createXMLReport(xmlFile);
     TestUtils.checkLogFile(new File("."));
     return new Pair<File, ProjectData>(xmlFile, reporter.getProjectData());
@@ -317,7 +316,7 @@ public class XMLTest {
   }
 
   public static void verifyXMLWithExpected(File file, String expectedFileName) throws Throwable {
-    final File expected = TestUtils.getResourceFile(expectedFileName);
+    File expected = TestUtils.getResourceFile(expectedFileName);
     Assert.assertEquals(FileUtils.readAll(expected), FileUtils.readAll(file));
   }
 

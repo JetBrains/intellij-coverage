@@ -19,7 +19,6 @@ package com.intellij.rt.coverage.verify;
 import com.intellij.rt.coverage.aggregate.AggregatorTest;
 import com.intellij.rt.coverage.aggregate.api.Request;
 import com.intellij.rt.coverage.report.TestUtils;
-import com.intellij.rt.coverage.report.api.Filters;
 import com.intellij.rt.coverage.verify.api.*;
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,17 +35,17 @@ import java.util.regex.Pattern;
 public class VerifierTest {
   @Test
   public void test1() throws IOException, InterruptedException {
-    final List<Rule> rules = new ArrayList<Rule>();
-    final Bound bound1_1 = new Bound(1, Counter.LINE, ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
-    final Bound bound1_2 = new Bound(2, Counter.BRANCH, ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
+    List<Rule> rules = new ArrayList<Rule>();
+    Bound bound1_1 = new Bound(1, Counter.LINE, ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
+    Bound bound1_2 = new Bound(2, Counter.BRANCH, ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
     rules.add(createRule(Target.ALL, bound1_1, bound1_2));
 
-    final Bound bound2_1 = new Bound(1, Counter.INSTRUCTION, ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
-    final Bound bound2_2 = new Bound(2, Counter.BRANCH, ValueType.MISSED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
+    Bound bound2_1 = new Bound(1, Counter.INSTRUCTION, ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
+    Bound bound2_2 = new Bound(2, Counter.BRANCH, ValueType.MISSED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
     rules.add(createRule(Target.CLASS, bound2_1, bound2_2));
 
-    final Bound bound3_1 = new Bound(1, Counter.LINE, ValueType.MISSED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
-    final Bound bound3_2 = new Bound(2, Counter.BRANCH, ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
+    Bound bound3_1 = new Bound(1, Counter.LINE, ValueType.MISSED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
+    Bound bound3_2 = new Bound(2, Counter.BRANCH, ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
     rules.add(createRule(Target.PACKAGE, bound3_1, bound3_2));
 
 
@@ -102,17 +101,17 @@ public class VerifierTest {
 
   @Test
   public void test2() throws IOException, InterruptedException {
-    final List<Rule> rules = new ArrayList<Rule>();
-    final Bound bound1_1 = new Bound(1, Counter.LINE, ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
-    final Bound bound1_2 = new Bound(2, Counter.BRANCH, ValueType.COVERED_RATE, BigDecimal.valueOf(0.0), null);
+    List<Rule> rules = new ArrayList<Rule>();
+    Bound bound1_1 = new Bound(1, Counter.LINE, ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
+    Bound bound1_2 = new Bound(2, Counter.BRANCH, ValueType.COVERED_RATE, BigDecimal.valueOf(0.0), null);
     rules.add(createRule(Target.ALL, bound1_1, bound1_2));
 
-    final Bound bound2_1 = new Bound(1, Counter.INSTRUCTION, ValueType.COVERED, BigDecimal.valueOf(5), BigDecimal.valueOf(52));
-    final Bound bound2_2 = new Bound(2, Counter.BRANCH, ValueType.MISSED_RATE, BigDecimal.valueOf(0.0), null);
+    Bound bound2_1 = new Bound(1, Counter.INSTRUCTION, ValueType.COVERED, BigDecimal.valueOf(5), BigDecimal.valueOf(52));
+    Bound bound2_2 = new Bound(2, Counter.BRANCH, ValueType.MISSED_RATE, BigDecimal.valueOf(0.0), null);
     rules.add(createRule(Target.ALL, bound2_1, bound2_2));
 
-    final Bound bound3_1 = new Bound(1, Counter.LINE, ValueType.MISSED, BigDecimal.valueOf(10), BigDecimal.valueOf(70));
-    final Bound bound3_2 = new Bound(2, Counter.INSTRUCTION, ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
+    Bound bound3_1 = new Bound(1, Counter.LINE, ValueType.MISSED, BigDecimal.valueOf(10), BigDecimal.valueOf(70));
+    Bound bound3_2 = new Bound(2, Counter.INSTRUCTION, ValueType.COVERED_RATE, BigDecimal.valueOf(0.1), BigDecimal.valueOf(0.9));
     rules.add(createRule(Target.ALL, bound3_1, bound3_2));
 
     runVerifier(rules, Collections.<RuleViolation>emptyList());
@@ -120,8 +119,8 @@ public class VerifierTest {
 
   @Test
   public void test3() throws IOException, InterruptedException {
-    final List<Rule> rules = new ArrayList<Rule>();
-    final Bound bound1_1 = new Bound(1, Counter.LINE, ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
+    List<Rule> rules = new ArrayList<Rule>();
+    Bound bound1_1 = new Bound(1, Counter.LINE, ValueType.COVERED, BigDecimal.valueOf(10), BigDecimal.valueOf(15));
     rules.add(createRule(Target.PACKAGE, bound1_1));
 
     BoundViolation boundViolation = new BoundViolation(1);
@@ -149,8 +148,8 @@ public class VerifierTest {
   }
 
   public static void runVerifier(List<Rule> rules, List<RuleViolation> expected) throws IOException, InterruptedException {
-    final List<Request> requests = new ArrayList<Request>();
-    final List<Pattern> includes = new ArrayList<Pattern>();
+    List<Request> requests = new ArrayList<Request>();
+    List<Pattern> includes = new ArrayList<Pattern>();
     includes.add(Pattern.compile("testData\\.branches\\..*"));
     includes.add(Pattern.compile("testData\\.crossinline\\..*"));
     includes.add(Pattern.compile("testData\\.defaultArgs\\..*"));
@@ -160,8 +159,8 @@ public class VerifierTest {
     includes.add(Pattern.compile("testData\\.outOfPackageStructure\\..*"));
     includes.add(Pattern.compile("[^.]*"));
     for (Rule rule : rules) {
-      final Request request = new Request(
-          new Filters(includes, Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList()),
+      Request request = new Request(
+          TestUtils.createFilters(includes),
           rule.reportFile, null);
       requests.add(request);
     }

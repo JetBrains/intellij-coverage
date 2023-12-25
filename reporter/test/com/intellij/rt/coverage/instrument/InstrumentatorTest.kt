@@ -30,16 +30,14 @@ class InstrumentatorTest {
     @Test
     fun test() {
         val (roots, outputRoots) = createInstrumentatorTask()
-        val filters =
-            Filters(emptyList(), emptyList(), emptyList())
+        val filters = Filters.EMPTY
         runInstrumentator(roots, outputRoots, filters)
     }
 
     @Test
     fun apiTest() {
         val (roots, outputRoots) = createInstrumentatorTask()
-        val filters =
-            Filters(emptyList(), emptyList(), emptyList())
+        val filters = Filters.EMPTY
 
         TestUtils.clearLogFile(File("."))
         OfflineInstrumentationApi.instrument(roots, outputRoots, filters, true)
@@ -73,14 +71,14 @@ private fun checkOfflineInstrumentation(roots: List<File>, outputRoots: List<Fil
         Assert.assertEquals(original, transformed)
 
         val actuallyTransformed = transformed
-                .asSequence()
-                .filter { it.endsWith(ClassNameUtil.CLASS_FILE_SUFFIX) }
-                .map { ClassNameUtil.convertToFQName(ClassNameUtil.removeClassSuffix(it)) }
-                .filterNot { it.startsWith("com.intellij.rt.") }
-                .filterNot { ClassNameUtil.matchesPatterns(it, filters.excludeClasses) }
-                .filter { filters.includeClasses.isEmpty() || ClassNameUtil.matchesPatterns(it, filters.includeClasses) }
-                .map { File(outputRoot, it.replace(".", File.separator) + ClassNameUtil.CLASS_FILE_SUFFIX) }
-                .toList()
+            .asSequence()
+            .filter { it.endsWith(ClassNameUtil.CLASS_FILE_SUFFIX) }
+            .map { ClassNameUtil.convertToFQName(ClassNameUtil.removeClassSuffix(it)) }
+            .filterNot { it.startsWith("com.intellij.rt.") }
+            .filterNot { ClassNameUtil.matchesPatterns(it, filters.excludeClasses) }
+            .filter { filters.includeClasses.isEmpty() || ClassNameUtil.matchesPatterns(it, filters.includeClasses) }
+            .map { File(outputRoot, it.replace(".", File.separator) + ClassNameUtil.CLASS_FILE_SUFFIX) }
+            .toList()
         Assert.assertTrue(actuallyTransformed.isNotEmpty())
         val hasInstrumentation = actuallyTransformed.any { it.isInstrumented() }
         Assert.assertTrue(hasInstrumentation)
@@ -92,10 +90,19 @@ private fun File.isInstrumented(): Boolean {
     var hasInstrumentation = false
     var hasCondyInstrumentation = false
     val visitor = object : ClassVisitor(Opcodes.API_VERSION) {
-        override fun visitMethod(access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array<out String>?): MethodVisitor {
+        override fun visitMethod(
+            access: Int, name: String?, descriptor: String?,
+            signature: String?, exceptions: Array<out String>?
+        ): MethodVisitor {
             return object : MethodVisitor(Opcodes.API_VERSION) {
-                override fun visitMethodInsn(opcode: Int, owner: String?, name: String?, descriptor: String?, isInterface: Boolean) {
-                    if (owner == "com/intellij/rt/coverage/offline/RawProjectInit" && name == "getOrCreateHitsMask" && descriptor == "(Ljava/lang/String;I)[I") {
+                override fun visitMethodInsn(
+                    opcode: Int, owner: String?, name: String?,
+                    descriptor: String?, isInterface: Boolean
+                ) {
+                    if (owner == "com/intellij/rt/coverage/offline/RawProjectInit"
+                        && name == "getOrCreateHitsMask"
+                        && descriptor == "(Ljava/lang/String;I)[I"
+                    ) {
                         hasInstrumentation = true
                     }
                 }

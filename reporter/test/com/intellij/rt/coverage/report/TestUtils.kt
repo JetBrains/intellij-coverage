@@ -44,11 +44,15 @@ object TestUtils {
         val icFile = createTmpFile()
         val smapFile = createTmpFile()
         val classpath = System.getProperty("java.class.path").split(File.pathSeparator)
-                .filter { path -> path.contains("kotlin-stdlib") }
-                .plus(File(JAVA_OUTPUT).absolutePath)
-                .plus(File(KOTLIN_OUTPUT).absolutePath)
-                .joinToString(File.pathSeparator)
-        CoverageRunner.runCoverage(classpath, icFile, "true ${smapFile.absolutePath} $patterns", className, true, emptyArray(), false, false)
+            .filter { path -> path.contains("kotlin-stdlib") }
+            .plus(File(JAVA_OUTPUT).absolutePath)
+            .plus(File(KOTLIN_OUTPUT).absolutePath)
+            .joinToString(File.pathSeparator)
+        CoverageRunner.runCoverage(
+            classpath, icFile,
+            "true ${smapFile.absolutePath} $patterns",
+            className, true, emptyArray(), false, false
+        )
         checkLogFile(icFile.parentFile)
         return BinaryReport(icFile, smapFile)
     }
@@ -123,8 +127,23 @@ object TestUtils {
             }
             lists[state].add(Pattern.compile(pattern))
         }
-        return Filters(includes, excludes, excludeAnnotations)
+        return createFilters(includes, excludes, excludeAnnotations = excludeAnnotations)
     }
+
+    @JvmStatic
+    @JvmOverloads
+    fun createFilters(
+        includes: List<Pattern> = emptyList(),
+        excludes: List<Pattern> = emptyList(),
+        excludeAnnotations: List<Pattern> = emptyList()
+    ) = Filters(includes, excludes, excludeAnnotations)
+
+    @JvmStatic
+    @JvmOverloads
+    fun createFilters(includePattern: Pattern, excludePattern: Pattern? = null) = createFilters(
+        listOf(includePattern),
+        excludePattern?.let { listOf(it) } ?: emptyList()
+    )
 
     @JvmStatic
     val outputRoots: List<File> = listOf(File(KOTLIN_OUTPUT), File(JAVA_OUTPUT))

@@ -29,31 +29,31 @@ import java.nio.file.Files;
 public class RawHitsReportTest {
   @Test
   public void testReportSave() throws Throwable {
-    final RawProjectData rawProjectData = new RawProjectData();
-    final int[] hits = rawProjectData.createClassData("A", 2).hits;
+    RawProjectData rawProjectData = new RawProjectData();
+    int[] hits = rawProjectData.createClassData("A", 2).hits;
     hits[0] = 2;
     hits[1] = 3;
 
-    final File file = Files.createTempFile("coverage", "ric").toFile();
+    File file = Files.createTempFile("coverage", "ric").toFile();
     RawHitsReport.dump(file, rawProjectData);
 
-    final ProjectData projectData = createProject();
-    final ClassData classData = projectData.getClassData("A");
+    ProjectData projectData = createProject();
+    ClassData classData = projectData.getClassData("A");
     classData.setHitsMask(hits);
     classData.applyHits();
 
-    final ProjectData loadedProjectData = createProject();
+    ProjectData loadedProjectData = createProject();
     RawReportLoader.load(file, loadedProjectData);
 
-    final ClassData loadedClassData = loadedProjectData.getClassData("A");
+    ClassData loadedClassData = loadedProjectData.getClassData("A");
     for (int i = 0; i < classData.getLines().length; i++) {
       Assert.assertEquals(classData.getLineData(i).getHits(), loadedClassData.getLineData(i).getHits());
     }
   }
 
   private static ProjectData createProject() {
-    final ProjectData projectData = new ProjectData();
-    final ClassData classData = projectData.getOrCreateClassData("A");
+    ProjectData projectData = new ProjectData();
+    ClassData classData = projectData.getOrCreateClassData("A");
     classData.setLines(new LineData[]{
         new LineData(0, "a()"),
         new LineData(1, "a()"),

@@ -20,7 +20,6 @@ import com.intellij.rt.coverage.instrument.InstrumentatorTest.Companion.runInstr
 import com.intellij.rt.coverage.report.TestUtils
 import com.intellij.rt.coverage.report.XMLTest
 import com.intellij.rt.coverage.report.data.BinaryReport
-import com.intellij.rt.coverage.report.api.Filters
 import com.intellij.rt.coverage.util.ProcessUtil
 import com.intellij.rt.coverage.util.ResourceUtil
 import org.junit.Assert
@@ -57,15 +56,16 @@ class OfflineCoverageTest {
     private fun runCoverage(className: String): BinaryReport {
         val offlineCoveragePath = ResourceUtil.getAgentPath("intellij-coverage-offline")
         val classpath = System.getProperty("java.class.path").split(File.pathSeparator)
-                .filter { path -> path.contains("kotlin-stdlib") }
-                .plus(offlineCoveragePath)
-                .plus(roots.map { it.absolutePath })
-                .joinToString(File.pathSeparator)
+            .filter { path -> path.contains("kotlin-stdlib") }
+            .plus(offlineCoveragePath)
+            .plus(roots.map { it.absolutePath })
+            .joinToString(File.pathSeparator)
         val icrFile = TestUtils.createTmpFile()
         val commandLine = arrayOf(
-                "-classpath", classpath,
-                "-Dcoverage.offline.report.path=" + icrFile.absolutePath,
-                className)
+            "-classpath", classpath,
+            "-Dcoverage.offline.report.path=" + icrFile.absolutePath,
+            className
+        )
         TestUtils.clearLogFile(File("."))
         ProcessUtil.execJavaProcess(commandLine)
         TestUtils.checkLogFile(File("."))
@@ -77,12 +77,7 @@ class OfflineCoverageTest {
     private lateinit var roots: List<File>
     private fun instrumentTestClasses() {
         val (first, second) = createInstrumentatorTask()
-        val filters = Filters(
-            listOf(
-                Pattern.compile("testData.*"),
-                Pattern.compile("TestTopLevelKt")
-            ), emptyList(), emptyList()
-        )
+        val filters = TestUtils.createFilters(listOf(Pattern.compile("testData.*"), Pattern.compile("TestTopLevelKt")))
         runInstrumentator(first, second, filters)
         roots = second
     }
