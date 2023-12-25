@@ -18,11 +18,9 @@ package com.intellij.rt.coverage
 
 import com.intellij.rt.coverage.data.ProjectData
 import org.junit.Assert
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import testData.custom.threadSafe.data.THREAD_SAFE_DATA_EXPECTED_HITS
 import testData.custom.threadSafe.structure.THREAD_SAFE_STRUCTURE_CLASSES
 import java.io.File
 import kotlin.test.*
@@ -90,10 +88,6 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
 
     @Test
     fun testCoroutinesDefaultArgs() = test("coroutines.defaultArgs")
-
-    @Test
-    @Ignore("To be fixed")
-    fun testCoroutinesFix1() = test("coroutines.fix1")
 
     @Test
     fun testCoroutinesFunction() = test("coroutines.function")
@@ -300,10 +294,6 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testPropertiesFile() = test("properties.file")
 
     @Test
-    @Ignore("Not implemented")
-    fun testPropertiesGetterAndSetter() = test("properties.getterAndSetter")
-
-    @Test
     fun testRedefine() = test("redefine")
 
     @Test
@@ -359,13 +349,6 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
         configuration = TestConfiguration((1..THREAD_SAFE_STRUCTURE_CLASSES).associateWith { "FULL" },
             (0 until THREAD_SAFE_STRUCTURE_CLASSES).map { "Class$it" })
     )
-
-    @Test
-    @Ignore("Coverage hit increment is not atomic.")
-    fun testThreadSafeData() = test("custom.threadSafe.data", verify = { projectData, _, _ ->
-        val classData = projectData.getClassData("testData.custom.threadSafe.data.SimpleClass")
-        Assert.assertEquals(THREAD_SAFE_DATA_EXPECTED_HITS, getLineHits(classData, 24))
-    })
 
     @Test
     fun test_IDEA_57695() = test(
