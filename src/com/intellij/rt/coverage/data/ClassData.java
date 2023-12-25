@@ -42,7 +42,7 @@ public class ClassData implements CoverageData {
   /**
    * Storage for line and branch hits.
    */
-  private volatile int[] myHitsMask;
+  private volatile Object myHitsMask;
   /**
    * Storage for test tracking data.
    */
@@ -243,11 +243,24 @@ public class ClassData implements CoverageData {
     myFullyAnalysed = value;
   }
 
-  public synchronized void createHitsMask(int size) {
-    if (myHitsMask == null) {
-      myHitsMask = new int[size];
-    } else if (myHitsMask.length < size) {
-      myHitsMask = ArrayUtil.copy(myHitsMask, size);
+  public synchronized void createMask(int size, boolean calculateHits) {
+    Object current = myHitsMask;
+    if (calculateHits) {
+      if (myHitsMask == null) {
+        myHitsMask = new int[size];
+      } else {
+        if (!(current instanceof int[])) throw new IllegalStateException("Int array expected");
+        int[] hits = (int[]) myHitsMask;
+        myHitsMask = ArrayUtil.copy(hits, size);
+      }
+    } else {
+      if (myHitsMask == null) {
+        myHitsMask = new boolean[size];
+      } else {
+        if (!(current instanceof boolean[])) throw new IllegalStateException("Boolean array expected");
+        boolean[] hits = (boolean[]) myHitsMask;
+        myHitsMask = ArrayUtil.copy(hits, size);
+      }
     }
   }
 
@@ -259,7 +272,7 @@ public class ClassData implements CoverageData {
     }
   }
 
-  public int[] getHitsMask() {
+  public Object getHitsMask() {
     return myHitsMask;
   }
 
@@ -281,7 +294,7 @@ public class ClassData implements CoverageData {
   }
 
   public void applyHits() {
-    final int[] hits = myHitsMask;
+    int[] hits = CommonArrayUtil.getIntArray(myHitsMask);
     if (hits == null) return;
 
     for (int i = 0; i < hits.length; ++i) {
@@ -295,7 +308,6 @@ public class ClassData implements CoverageData {
         int lineId = lineData.getId();
         if (lineId != -1) {
           lineData.setHits(lineData.getHits() + hits[lineId]);
-          hits[lineId] = 0;
         }
 
         JumpData[] jumps = lineData.getJumps();
@@ -305,12 +317,10 @@ public class ClassData implements CoverageData {
             int trueId = jumpData.getId(true);
             if (trueId != -1) {
               jumpData.setTrueHits(jumpData.getTrueHits() + hits[trueId]);
-              hits[trueId] = 0;
             }
             int falseId = jumpData.getId(false);
             if (falseId != -1) {
               jumpData.setFalseHits(jumpData.getFalseHits() + hits[falseId]);
-              hits[falseId] = 0;
             }
           }
         }
@@ -322,18 +332,21 @@ public class ClassData implements CoverageData {
             int defaultId = switchData.getId(-1);
             if (defaultId != -1) {
               switchData.setDefaultHits(switchData.getDefaultHits() + hits[defaultId]);
-              hits[defaultId] = 0;
             }
             int[] switchHits = switchData.getHits();
             for (int i = 0; i < switchHits.length; i++) {
               int caseId = switchData.getId(i);
               if (caseId == -1) continue;
               switchHits[i] += hits[caseId];
-              hits[caseId] = 0;
             }
             switchData.setKeysAndHits(switchData.getKeys(), switchHits);
           }
         }
+      }
+      if (myHitsMask instanceof int[]) {
+        Arrays.fill((int[]) myHitsMask, 0);
+      } else if (myHitsMask instanceof boolean[]) {
+        Arrays.fill((boolean[]) myHitsMask, false);
       }
     } catch (Throwable e) {
       ErrorReporter.warn("Unexpected error during applying hits data to class " + getName(), e);

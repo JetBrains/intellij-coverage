@@ -100,8 +100,8 @@ private fun File.isInstrumented(): Boolean {
                     descriptor: String?, isInterface: Boolean
                 ) {
                     if (owner == "com/intellij/rt/coverage/offline/RawProjectInit"
-                        && name == "getOrCreateHitsMask"
-                        && descriptor == "(Ljava/lang/String;I)[I"
+                        && (name == "getOrCreateHitsMask" || name == "getOrCreateHits")
+                        && descriptor!!.startsWith("(Ljava/lang/String;I)[")
                     ) {
                         hasInstrumentation = true
                     }

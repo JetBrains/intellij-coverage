@@ -40,16 +40,20 @@ public class OfflineCoverageTransformer extends CoverageTransformer {
 
   @Override
   protected CoverageDataAccess.Init createInit(String className, ClassReader cr, boolean needCache) {
-    final int length = getRequiredArrayLength(cr);
-    return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, "com/intellij/rt/coverage/offline/RawProjectInit",
-        "getOrCreateHitsMask", "(Ljava/lang/String;I)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className, length});
+    int length = getRequiredArrayLength(cr);
+    String arrayType = calculateHits ? DataAccessUtil.HITS_ARRAY_TYPE : DataAccessUtil.MASK_ARRAY_TYPE;
+    String methodName = calculateHits ? "getOrCreateHits" : "getOrCreateHitsMask";
+    return new CoverageDataAccess.Init("__$hits$__", arrayType, "com/intellij/rt/coverage/offline/RawProjectInit",
+        methodName, "(Ljava/lang/String;I)" + arrayType, new Object[]{className, length});
   }
 
   @Override
   protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr) {
     final int length = getRequiredArrayLength(cr);
-    return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, "com/intellij/rt/coverage/offline/CondyUtils",
-        "getOrCreateHitsMask", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;I)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className, length});
+    String arrayType = calculateHits ? DataAccessUtil.HITS_ARRAY_TYPE : DataAccessUtil.MASK_ARRAY_TYPE;
+    String methodName = calculateHits ? "getOrCreateHits" : "getOrCreateHitsMask";
+    return new CoverageDataAccess.Init("__$hits$__", arrayType, "com/intellij/rt/coverage/offline/CondyUtils",
+        methodName, "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;I)" + arrayType, new Object[]{className, length});
   }
 
   private static int getRequiredArrayLength(ClassReader cr) {

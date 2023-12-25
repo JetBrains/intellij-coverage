@@ -29,20 +29,20 @@ public class InstrumentationUtils {
   public static final String CONSTRUCTOR_DESCRIPTOR = "()V";
 
   /**
-   * Util method for touching coverage counter which is stored in an int array.
+   * Util method for touching coverage counter which is stored in an array.
    * An array must be already loaded on stack.
-   * This method has different strategies basing on <code>OptionsUtil.CALCULATE_HITS_COUNT</code> option:
-   * when option is true, array counter is incremented,
-   * otherwise the value is just set to 1.
+   * This method has different strategies basing on calculateHits option:<br/>
+   * when option is true, int array is expected and array counter is incremented,<br/>
+   * otherwise boolean array is expected and the value is just set to true.
    *
    * @param mv current method visitor
    * @param id index of a hit in the array
    */
-  public static void touchById(MethodVisitor mv, int id) {
-    // stack: int[]
+  public static void touchById(MethodVisitor mv, int id, boolean calculateHits) {
     InstrumentationUtils.pushInt(mv, id);
 
-    if (OptionsUtil.CALCULATE_HITS_COUNT) {
+    if (calculateHits) {
+      // stack: int[], index
       mv.visitInsn(Opcodes.DUP2);
       // load array[index]
       mv.visitInsn(Opcodes.IALOAD);
@@ -54,8 +54,9 @@ public class InstrumentationUtils {
       // stack: array, index, incremented value: store value in array[index]
       mv.visitInsn(Opcodes.IASTORE);
     } else {
+      // stack: boolean[], index
       mv.visitInsn(Opcodes.ICONST_1);
-      mv.visitInsn(Opcodes.IASTORE);
+      mv.visitInsn(Opcodes.BASTORE);
     }
   }
 

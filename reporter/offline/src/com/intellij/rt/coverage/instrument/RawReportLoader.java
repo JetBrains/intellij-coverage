@@ -22,6 +22,7 @@ import com.intellij.rt.coverage.offline.RawClassData;
 import com.intellij.rt.coverage.offline.RawHitsReport;
 import com.intellij.rt.coverage.offline.RawProjectData;
 import com.intellij.rt.coverage.util.ArrayUtil;
+import com.intellij.rt.coverage.util.CommonArrayUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 
 import java.io.File;
@@ -40,7 +41,7 @@ public class RawReportLoader {
         ErrorReporter.warn("Tried to apply coverage for class " + rawClassData.name + " but there is no such class in ProjectData");
         continue;
       }
-      int[] hits = ArrayUtil.copy(rawClassData.hits);
+      int[] hits = ArrayUtil.copy(CommonArrayUtil.getIntArray(rawClassData.hits));
       classData.setHitsMask(hits);
       classData.applyHits();
     }

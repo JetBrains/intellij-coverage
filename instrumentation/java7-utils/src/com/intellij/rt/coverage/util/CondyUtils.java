@@ -22,7 +22,11 @@ import java.lang.invoke.MethodHandles;
 
 @SuppressWarnings("unused")
 public class CondyUtils {
-  public static int[] getHitsMask(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className) {
+  public static int[] getHits(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className) {
+    return CoverageRuntime.getHits(className);
+  }
+
+  public static boolean[] getHitsMask(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className) {
     return CoverageRuntime.getHitsMask(className);
   }
 

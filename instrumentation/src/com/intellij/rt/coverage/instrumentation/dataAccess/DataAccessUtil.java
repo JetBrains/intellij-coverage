@@ -24,6 +24,7 @@ import com.intellij.rt.coverage.util.OptionsUtil;
 
 public class DataAccessUtil {
   public static final String HITS_ARRAY_TYPE = "[I";
+  public static final String MASK_ARRAY_TYPE = "[Z";
   public static final String TEST_MASK_ARRAY_TYPE = "[Z";
 
 

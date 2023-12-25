@@ -21,10 +21,16 @@ package com.intellij.rt.coverage.offline;
  */
 public class RawClassData {
   public final String name;
-  public final int[] hits;
+  public final Object hits;
 
-  public RawClassData(String name, int[] hits) {
+  public RawClassData(String name, Object hits) {
     this.name = name;
     this.hits = hits;
+  }
+
+  public int getLength() {
+    if (hits instanceof int[]) return ((int[]) hits).length;
+    if (hits instanceof boolean[]) return ((boolean[]) hits).length;
+    throw new IllegalStateException();
   }
 }

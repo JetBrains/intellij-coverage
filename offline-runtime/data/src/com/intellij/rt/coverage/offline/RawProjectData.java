@@ -31,28 +31,28 @@ public class RawProjectData {
     return myClasses.values();
   }
 
-  public RawClassData getOrCreateClass(String className, int length) {
+  public RawClassData getOrCreateClass(String className, int length, boolean hits) {
     final RawClassData classData = myClasses.get(className);
     if (classData != null) {
       checkLength(classData, length);
       return classData;
     }
-    return createClassData(className, length);
+    return createClassData(className, length, hits);
   }
 
-  public synchronized RawClassData createClassData(String className, int length) {
+  private synchronized RawClassData createClassData(String className, int length, boolean hits) {
     RawClassData classData = myClasses.get(className);
     if (classData != null) {
       checkLength(classData, length);
       return classData;
     }
-    classData = new RawClassData(className, new int[length]);
+    classData = new RawClassData(className, hits ? new int[length] : new boolean[length]);
     myClasses.put(className, classData);
     return classData;
   }
 
   private static void checkLength(RawClassData classData, int length) {
-    if (classData.hits.length < length) {
+    if (classData.getLength() < length) {
       throw new RuntimeException("Class " + classData.name + " is loaded twice with different hits length");
     }
   }

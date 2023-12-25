@@ -23,6 +23,6 @@ public class OptionsUtil {
   public static final boolean NEW_TEST_TRACKING_ENABLED = "true".equals(System.getProperty("idea.new.test.tracking.coverage", "true"));
   public static boolean CONDY_ENABLED = "true".equals(System.getProperty("coverage.condy.enable", "true"));
   public static final boolean INSTRUCTIONS_COVERAGE_ENABLED = "true".equals(System.getProperty("coverage.instructions.enable", "false"));
-  public static boolean CALCULATE_HITS_COUNT = "true".equals(System.getProperty("idea.coverage.calculate.hits", "true"));
+  public static boolean CALCULATE_HITS_COUNT = "true".equals(System.getProperty("idea.coverage.calculate.hits", "false"));
   public static boolean IGNORE_LOCAL_FUNCTIONS_IN_IGNORED_METHODS = "true".equals(System.getProperty("idea.coverage.ignore.local.functions.in.ignored.methods", "true"));
 }

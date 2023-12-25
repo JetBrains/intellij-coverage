@@ -5,19 +5,19 @@ public final class testData/cases/whenString/TestKt {
 
 
   // access flags 0x108A
-  private static transient synthetic [I __$hits$__
+  private static transient synthetic [Z __$hits$__
 
   // access flags 0x19
   public final static foo(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 1
    L1
     ALOAD 0
@@ -27,11 +27,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 21 L2
     ALOAD 1
     ICONST_0
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 0
     ASTORE 2
     ALOAD 2
@@ -42,7 +39,7 @@ public final class testData/cases/whenString/TestKt {
       99: L5
       default: L6
    L3
-   FRAME APPEND [[I java/lang/String]
+   FRAME APPEND [[Z java/lang/String]
     ALOAD 2
     LDC "a"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
@@ -66,11 +63,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 22 L7
     ALOAD 1
     ICONST_1
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L9
    FRAME SAME
     ICONST_5
@@ -83,11 +77,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 23 L8
     ALOAD 1
     ICONST_2
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L11
    FRAME SAME
     BIPUSH 6
@@ -100,11 +91,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 24 L6
     ALOAD 1
     ICONST_3
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L12
    FRAME SAME
     BIPUSH 7
@@ -118,31 +106,28 @@ public final class testData/cases/whenString/TestKt {
     RETURN
    L13
     LOCALVARIABLE x Ljava/lang/String; L1 L13 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L13 1
-    MAXSTACK = 4
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L13 1
+    MAXSTACK = 3
     MAXLOCALS = 4
 
   // access flags 0x19
   public final static foo2(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/Nullable;() // invisible, parameter 0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 1
    L1
     LINENUMBER 28 L1
     ALOAD 1
     ICONST_5
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 0
     ASTORE 2
     ALOAD 2
@@ -155,7 +140,7 @@ public final class testData/cases/whenString/TestKt {
       99: L5
       default: L2
    L3
-   FRAME APPEND [[I java/lang/String]
+   FRAME APPEND [[Z java/lang/String]
     ALOAD 2
     LDC "a"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
@@ -179,11 +164,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 29 L6
     ALOAD 1
     BIPUSH 6
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L8
    FRAME SAME
     ICONST_5
@@ -196,11 +178,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 30 L7
     ALOAD 1
     BIPUSH 7
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L10
    FRAME SAME
     BIPUSH 6
@@ -213,11 +192,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 31 L2
     ALOAD 1
     BIPUSH 8
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L11
    FRAME SAME
     BIPUSH 7
@@ -231,21 +207,21 @@ public final class testData/cases/whenString/TestKt {
     RETURN
    L12
     LOCALVARIABLE x Ljava/lang/String; L1 L12 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L12 1
-    MAXSTACK = 4
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L12 1
+    MAXSTACK = 3
     MAXLOCALS = 4
 
   // access flags 0x19
   public final static foo3(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 1
    L1
     ALOAD 0
@@ -255,11 +231,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 35 L2
     ALOAD 1
     BIPUSH 10
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 0
     ASTORE 2
     ALOAD 2
@@ -270,7 +243,7 @@ public final class testData/cases/whenString/TestKt {
       99: L5
       default: L6
    L3
-   FRAME APPEND [[I java/lang/String]
+   FRAME APPEND [[Z java/lang/String]
     ALOAD 2
     LDC "a"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
@@ -293,11 +266,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 36 L8
     ALOAD 1
     BIPUSH 11
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     BIPUSH 6
     ISTORE 3
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
@@ -308,11 +278,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 37 L7
     ALOAD 1
     BIPUSH 12
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L10
    FRAME SAME
     ICONST_5
@@ -325,11 +292,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 38 L6
     ALOAD 1
     BIPUSH 13
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L11
    FRAME SAME
     BIPUSH 7
@@ -343,21 +307,21 @@ public final class testData/cases/whenString/TestKt {
     RETURN
    L12
     LOCALVARIABLE x Ljava/lang/String; L1 L12 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L12 1
-    MAXSTACK = 4
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L12 1
+    MAXSTACK = 3
     MAXLOCALS = 4
 
   // access flags 0x19
   public final static boo(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 1
    L1
     ALOAD 0
@@ -367,11 +331,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 42 L2
     ALOAD 1
     BIPUSH 15
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 0
     ASTORE 2
     ALOAD 2
@@ -384,7 +345,7 @@ public final class testData/cases/whenString/TestKt {
       2112: L7
       default: L8
    L7
-   FRAME APPEND [[I java/lang/String]
+   FRAME APPEND [[Z java/lang/String]
     ALOAD 2
     LDC "Aa"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
@@ -426,11 +387,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 43 L9
     ALOAD 1
     BIPUSH 16
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L14
    FRAME SAME
     ICONST_5
@@ -443,11 +401,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 44 L10
     ALOAD 1
     BIPUSH 17
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L16
    FRAME SAME
     BIPUSH 6
@@ -460,11 +415,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 45 L11
     ALOAD 1
     BIPUSH 18
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L17
    FRAME SAME
     BIPUSH 7
@@ -477,11 +429,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 46 L12
     ALOAD 1
     BIPUSH 19
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L18
    FRAME SAME
     BIPUSH 8
@@ -494,11 +443,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 47 L13
     ALOAD 1
     BIPUSH 20
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L19
    FRAME SAME
     BIPUSH 9
@@ -511,11 +457,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 48 L8
     ALOAD 1
     BIPUSH 21
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L20
    FRAME SAME
     BIPUSH 10
@@ -529,21 +472,21 @@ public final class testData/cases/whenString/TestKt {
     RETURN
    L21
     LOCALVARIABLE x Ljava/lang/String; L1 L21 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L21 1
-    MAXSTACK = 4
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L21 1
+    MAXSTACK = 3
     MAXLOCALS = 4
 
   // access flags 0x19
   public final static boo2(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 1
    L1
     ALOAD 0
@@ -553,11 +496,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 52 L2
     ALOAD 1
     BIPUSH 23
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 0
     ASTORE 2
     ALOAD 2
@@ -570,7 +510,7 @@ public final class testData/cases/whenString/TestKt {
       2112: L7
       default: L8
    L7
-   FRAME APPEND [[I java/lang/String]
+   FRAME APPEND [[Z java/lang/String]
     ALOAD 2
     LDC "Aa"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
@@ -612,11 +552,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 53 L9
     ALOAD 1
     BIPUSH 24
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L14
    FRAME SAME
     ICONST_5
@@ -629,11 +566,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 54 L10
     ALOAD 1
     BIPUSH 25
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L16
    FRAME SAME
     BIPUSH 6
@@ -646,11 +580,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 55 L11
     ALOAD 1
     BIPUSH 26
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L17
    FRAME SAME
     BIPUSH 7
@@ -663,11 +594,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 56 L12
     ALOAD 1
     BIPUSH 27
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L18
    FRAME SAME
     BIPUSH 8
@@ -680,11 +608,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 57 L13
     ALOAD 1
     BIPUSH 28
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L19
    FRAME SAME
     BIPUSH 9
@@ -697,11 +622,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 58 L8
     ALOAD 1
     BIPUSH 29
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L20
    FRAME SAME
     BIPUSH 10
@@ -715,21 +637,21 @@ public final class testData/cases/whenString/TestKt {
     RETURN
    L21
     LOCALVARIABLE x Ljava/lang/String; L1 L21 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L21 1
-    MAXSTACK = 4
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L21 1
+    MAXSTACK = 3
     MAXLOCALS = 4
 
   // access flags 0x19
   public final static voo(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 1
    L1
     ALOAD 0
@@ -739,22 +661,16 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 62 L2
     ALOAD 1
     BIPUSH 31
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 0
     ASTORE 2
    L3
     LINENUMBER 63 L3
     ALOAD 1
     BIPUSH 32
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     LDC "Aa"
     INVOKESTATIC kotlin/jvm/internal/Intrinsics.areEqual (Ljava/lang/Object;Ljava/lang/Object;)Z
@@ -762,7 +678,7 @@ public final class testData/cases/whenString/TestKt {
     ICONST_1
     GOTO L5
    L4
-   FRAME APPEND [[I java/lang/String]
+   FRAME APPEND [[Z java/lang/String]
     ALOAD 2
     LDC "BB"
     INVOKESTATIC kotlin/jvm/internal/Intrinsics.areEqual (Ljava/lang/Object;Ljava/lang/Object;)Z
@@ -779,11 +695,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 64 L6
     ALOAD 1
     BIPUSH 33
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
    L8
    FRAME SAME
     BIPUSH 10
@@ -797,333 +710,249 @@ public final class testData/cases/whenString/TestKt {
     RETURN
    L9
     LOCALVARIABLE x Ljava/lang/String; L1 L9 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L9 1
-    MAXSTACK = 4
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L9 1
+    MAXSTACK = 3
     MAXLOCALS = 4
 
   // access flags 0x19
   public final static main()V
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 0
    L1
     LINENUMBER 68 L1
     ALOAD 0
     BIPUSH 35
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "a"
     INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
    L2
     LINENUMBER 69 L2
     ALOAD 0
     BIPUSH 36
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "b"
     INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
    L3
     LINENUMBER 70 L3
     ALOAD 0
     BIPUSH 37
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "c"
     INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
    L4
     LINENUMBER 71 L4
     ALOAD 0
     BIPUSH 38
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "d"
     INVOKESTATIC testData/cases/whenString/TestKt.foo (Ljava/lang/String;)V
    L5
     LINENUMBER 73 L5
     ALOAD 0
     BIPUSH 39
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "a"
     INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
    L6
     LINENUMBER 74 L6
     ALOAD 0
     BIPUSH 40
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "b"
     INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
    L7
     LINENUMBER 75 L7
     ALOAD 0
     BIPUSH 41
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "c"
     INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
    L8
     LINENUMBER 76 L8
     ALOAD 0
     BIPUSH 42
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "d"
     INVOKESTATIC testData/cases/whenString/TestKt.foo2 (Ljava/lang/String;)V
    L9
     LINENUMBER 78 L9
     ALOAD 0
     BIPUSH 43
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "a"
     INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
    L10
     LINENUMBER 79 L10
     ALOAD 0
     BIPUSH 44
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "b"
     INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
    L11
     LINENUMBER 80 L11
     ALOAD 0
     BIPUSH 45
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "c"
     INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
    L12
     LINENUMBER 81 L12
     ALOAD 0
     BIPUSH 46
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "d"
     INVOKESTATIC testData/cases/whenString/TestKt.foo3 (Ljava/lang/String;)V
    L13
     LINENUMBER 83 L13
     ALOAD 0
     BIPUSH 47
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "Aa"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
    L14
     LINENUMBER 84 L14
     ALOAD 0
     BIPUSH 48
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "BB"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
    L15
     LINENUMBER 85 L15
     ALOAD 0
     BIPUSH 49
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "c"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
    L16
     LINENUMBER 86 L16
     ALOAD 0
     BIPUSH 50
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "d"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
    L17
     LINENUMBER 87 L17
     ALOAD 0
     BIPUSH 51
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "e"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
    L18
     LINENUMBER 88 L18
     ALOAD 0
     BIPUSH 52
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "f"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
    L19
     LINENUMBER 89 L19
     ALOAD 0
     BIPUSH 53
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "g"
     INVOKESTATIC testData/cases/whenString/TestKt.boo (Ljava/lang/String;)V
    L20
     LINENUMBER 91 L20
     ALOAD 0
     BIPUSH 54
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "Aa"
     INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
    L21
     LINENUMBER 92 L21
     ALOAD 0
     BIPUSH 55
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "c"
     INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
    L22
     LINENUMBER 93 L22
     ALOAD 0
     BIPUSH 56
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "d"
     INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
    L23
     LINENUMBER 94 L23
     ALOAD 0
     BIPUSH 57
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "e"
     INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
    L24
     LINENUMBER 95 L24
     ALOAD 0
     BIPUSH 58
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "f"
     INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
    L25
     LINENUMBER 96 L25
     ALOAD 0
     BIPUSH 59
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "g"
     INVOKESTATIC testData/cases/whenString/TestKt.boo2 (Ljava/lang/String;)V
    L26
     LINENUMBER 98 L26
     ALOAD 0
     BIPUSH 60
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "Aa"
     INVOKESTATIC testData/cases/whenString/TestKt.voo (Ljava/lang/String;)V
    L27
     LINENUMBER 99 L27
     ALOAD 0
     BIPUSH 61
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "BB"
     INVOKESTATIC testData/cases/whenString/TestKt.voo (Ljava/lang/String;)V
    L28
     LINENUMBER 100 L28
     ALOAD 0
     BIPUSH 62
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     LDC "g"
     INVOKESTATIC testData/cases/whenString/TestKt.voo (Ljava/lang/String;)V
    L29
     LINENUMBER 101 L29
     RETURN
-    LOCALVARIABLE __$coverage_local$__ [I L0 L29 0
-    MAXSTACK = 4
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L29 0
+    MAXSTACK = 3
     MAXLOCALS = 1
 
   // access flags 0x1009

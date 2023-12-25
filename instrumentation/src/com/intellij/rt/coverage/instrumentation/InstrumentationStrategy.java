@@ -40,6 +40,7 @@ public class InstrumentationStrategy {
                                          ClassReader cr, ClassVisitor cw, TestTrackingMode testTrackingMode,
                                          boolean branchCoverage,
                                          boolean shouldSaveSource,
+                                         boolean calculateHits,
                                          CoverageDataAccess dataAccess) {
     // uncomment to get readable bytecode
     // cw = new TraceClassVisitor(cw, new PrintWriter(System.err));
@@ -56,7 +57,7 @@ public class InstrumentationStrategy {
     if (testTrackingMode != null) {
       cw = testTrackingMode.createInstrumenter(cw, data);
     }
-    cw = new Instrumenter(cw, dataAccess, data, projectData, branchCoverage, shouldSaveSource);
+    cw = new Instrumenter(cw, dataAccess, data, projectData, branchCoverage, shouldSaveSource, calculateHits);
     for (ClassFilter cv : FilterUtils.createClassFilters()) {
       if (cv.isApplicable(data)) {
         cv.initFilter(cw, data);

@@ -30,6 +30,8 @@ import java.util.Map;
 public class CoverageRuntime {
 
   public static final String COVERAGE_RUNTIME_OWNER = "com/intellij/rt/coverage/instrumentation/CoverageRuntime";
+  private static final MethodCaller GET_HITS_METHOD = new MethodCaller("getHits", new Class[]{String.class});
+  private static final MethodCaller GET_HITS_CACHED_METHOD = new MethodCaller("getHitsCached", new Class[]{String.class});
   private static final MethodCaller GET_HITS_MASK_METHOD = new MethodCaller("getHitsMask", new Class[]{String.class});
   private static final MethodCaller GET_HITS_MASK_CACHED_METHOD = new MethodCaller("getHitsMaskCached", new Class[]{String.class});
   private static final MethodCaller GET_TRACE_MASK_METHOD = new MethodCaller("getTraceMask", new Class[]{String.class});
@@ -137,14 +139,14 @@ public class CoverageRuntime {
   /**
    * On class initialization at runtime, an instrumented class asks for hits array
    */
-  public static int[] getHitsMask(String className) {
+  public static int[] getHits(String className) {
     CoverageRuntime runtime = ourRuntime;
     if (runtime != null) {
-      return runtime.myProjectData.getClassData(className).getHitsMask();
+      return (int[]) runtime.myProjectData.getClassData(className).getHitsMask();
     }
     try {
       final Object runtimeObject = getRuntimeObject();
-      return (int[]) GET_HITS_MASK_METHOD.invoke(runtimeObject, new Object[]{className});
+      return (int[]) GET_HITS_METHOD.invoke(runtimeObject, new Object[]{className});
     } catch (Exception e) {
       ErrorReporter.error("Error in class data access: " + className, e);
       return null;
@@ -156,14 +158,50 @@ public class CoverageRuntime {
    * This version is used cache when calls are frequent.
    */
   @SuppressWarnings("unused")
-  public static int[] getHitsMaskCached(String className) {
+  public static int[] getHitsCached(String className) {
     CoverageRuntime runtime = ourRuntime;
     if (runtime != null) {
-      return runtime.getClassesMap().get(className, runtime.myProjectData).getHitsMask();
+      return (int[]) runtime.getClassesMap().get(className, runtime.myProjectData).getHitsMask();
     }
     try {
       final Object runtimeObject = getRuntimeObject();
-      return (int[]) GET_HITS_MASK_CACHED_METHOD.invoke(runtimeObject, new Object[]{className});
+      return (int[]) GET_HITS_CACHED_METHOD.invoke(runtimeObject, new Object[]{className});
+    } catch (Exception e) {
+      ErrorReporter.error("Error in class data access: " + className, e);
+      return null;
+    }
+  }
+
+  /**
+   * On class initialization at runtime, an instrumented class asks for hits array
+   */
+  public static boolean[] getHitsMask(String className) {
+    CoverageRuntime runtime = ourRuntime;
+    if (runtime != null) {
+      return (boolean[]) runtime.myProjectData.getClassData(className).getHitsMask();
+    }
+    try {
+      final Object runtimeObject = getRuntimeObject();
+      return (boolean[]) GET_HITS_MASK_METHOD.invoke(runtimeObject, new Object[]{className});
+    } catch (Exception e) {
+      ErrorReporter.error("Error in class data access: " + className, e);
+      return null;
+    }
+  }
+
+  /**
+   * On class initialization at runtime, an instrumented class asks for hits array
+   * This version is used cache when calls are frequent.
+   */
+  @SuppressWarnings("unused")
+  public static boolean[] getHitsMaskCached(String className) {
+    CoverageRuntime runtime = ourRuntime;
+    if (runtime != null) {
+      return (boolean[]) runtime.getClassesMap().get(className, runtime.myProjectData).getHitsMask();
+    }
+    try {
+      final Object runtimeObject = getRuntimeObject();
+      return (boolean[]) GET_HITS_MASK_CACHED_METHOD.invoke(runtimeObject, new Object[]{className});
     } catch (Exception e) {
       ErrorReporter.error("Error in class data access: " + className, e);
       return null;

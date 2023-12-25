@@ -26,6 +26,7 @@ import org.junit.Assert
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.reflect.KMutableProperty
 
 internal enum class Coverage {
     LINE, LINE_FIELD, BRANCH, BRANCH_FIELD, LINE_CONDY, BRANCH_CONDY;
@@ -74,6 +75,16 @@ internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage:
     return CoverageRunner.runCoverage(classpath, coverageDataFile, patterns, mainClass,
             coverage.isBranchCoverage(), extraArgs.toTypedArray(), calcUnloaded, testTracking != null)
             .also { assertEmptyLogFile(coverageDataFile) }
+}
+
+internal inline fun runWithOptions(values: Map<KMutableProperty<Boolean>, Boolean>, action: () -> Unit) {
+    val originalValues = values.mapValues { it.key.getter.call() }
+    values.forEach { (field, value) -> field.setter.call(value) }
+    try {
+        action()
+    } finally {
+        originalValues.forEach { (field, value) -> field.setter.call(value) }
+    }
 }
 
 internal fun assertEmptyLogFile(coverageDataFile: File) {

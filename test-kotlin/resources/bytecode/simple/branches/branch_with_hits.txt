@@ -6,55 +6,70 @@ public final class testData/simple/branches/MyBranchedClass {
 
   // access flags 0x1
   public <init>()V
-    LDC __$hits$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getHitsMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[Z (6) [testData.simple.branches.MyBranchedClass]
-    CHECKCAST [Z
+    LDC "testData.simple.branches.MyBranchedClass"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsCached (Ljava/lang/String;)[I
     ASTORE 1
    L0
     LINENUMBER 22 L0
     ALOAD 1
     ICONST_0
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
     ALOAD 0
     INVOKESPECIAL java/lang/Object.<init> ()V
     RETURN
    L1
     LOCALVARIABLE this LtestData/simple/branches/MyBranchedClass; L0 L1 0
-    LOCALVARIABLE __$coverage_local$__ [Z L0 L1 1
-    MAXSTACK = 3
+    LOCALVARIABLE __$coverage_local$__ [I L0 L1 1
+    MAXSTACK = 4
     MAXLOCALS = 2
 
   // access flags 0x11
   public final foo(I)V
-    LDC __$hits$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getHitsMask(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[Z (6) [testData.simple.branches.MyBranchedClass]
-    CHECKCAST [Z
+    LDC "testData.simple.branches.MyBranchedClass"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsCached (Ljava/lang/String;)[I
     ASTORE 2
    L0
     LINENUMBER 24 L0
     ALOAD 2
     ICONST_1
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
     ILOAD 1
     IFGE L1
     GOTO L2
    L1
     ALOAD 2
     ICONST_2
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
     GOTO L3
    L2
     ALOAD 2
     ICONST_3
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
    L4
     LINENUMBER 25 L4
     ALOAD 2
     ICONST_4
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
     LDC "LE"
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     SWAP
@@ -64,30 +79,42 @@ public final class testData/simple/branches/MyBranchedClass {
     LINENUMBER 26 L3
     ALOAD 2
     ICONST_5
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
    L6
-   FRAME APPEND [[Z]
+   FRAME APPEND [[I]
     ILOAD 1
     IFNE L7
     GOTO L8
    L7
     ALOAD 2
     BIPUSH 6
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
     GOTO L9
    L8
     ALOAD 2
     BIPUSH 7
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
    L10
     LINENUMBER 27 L10
     ALOAD 2
     BIPUSH 8
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
     LDC "EQ"
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     SWAP
@@ -97,8 +124,11 @@ public final class testData/simple/branches/MyBranchedClass {
     LINENUMBER 29 L9
     ALOAD 2
     BIPUSH 9
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
    L11
    FRAME SAME
     LDC "GE"
@@ -112,7 +142,7 @@ public final class testData/simple/branches/MyBranchedClass {
    L12
     LOCALVARIABLE this LtestData/simple/branches/MyBranchedClass; L0 L12 0
     LOCALVARIABLE value I L0 L12 1
-    LOCALVARIABLE __$coverage_local$__ [Z L0 L12 2
-    MAXSTACK = 3
+    LOCALVARIABLE __$coverage_local$__ [I L0 L12 2
+    MAXSTACK = 4
     MAXLOCALS = 3
 }

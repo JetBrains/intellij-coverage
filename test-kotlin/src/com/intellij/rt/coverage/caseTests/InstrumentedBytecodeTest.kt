@@ -17,14 +17,11 @@
 package com.intellij.rt.coverage.caseTests
 
 import com.intellij.rt.coverage.*
-import com.intellij.rt.coverage.Coverage
-import com.intellij.rt.coverage.TestTracking
 import com.intellij.rt.coverage.data.ProjectData
 import com.intellij.rt.coverage.instrumentation.CoverageTransformer
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingArrayMode
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingClassDataMode
-import com.intellij.rt.coverage.pathToFile
 import com.intellij.rt.coverage.util.OptionsUtil
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes
@@ -34,6 +31,7 @@ import org.junit.Test
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
+import kotlin.reflect.KMutableProperty
 import kotlin.test.assertFalse
 
 class InstrumentedBytecodeTest {
@@ -56,15 +54,18 @@ class InstrumentedBytecodeTest {
 
         val condyPossible = InstrumentationUtils.getBytecodeVersion(ClassReader(originalBytes)) >= Opcodes.V11
         for (coverage in Coverage.values()) {
-            val expectedCoverage = getExpectedCoverage(coverage, condyPossible)
-            val expectedFileName = createExpectedFileName(expectedRoot, expectedCoverage, null)
-            doTest(null, coverage, originalBytes, className, expectedFileName)
+            for (hits in listOf(true, false)) {
+                val expectedCoverage = getExpectedCoverage(coverage, condyPossible)
+                val expectedFileName = createExpectedFileName(expectedRoot, expectedCoverage, null, hits)
+                doTest(null, coverage, originalBytes, className, expectedFileName, hits)
+            }
         }
         for (testTracking in TestTracking.values()) {
             val coverage = Coverage.BRANCH_CONDY
+            val hits = false
             val expectedCoverage = getExpectedCoverage(coverage, condyPossible)
-            val expectedFileName = createExpectedFileName(expectedRoot, expectedCoverage, testTracking)
-            doTest(testTracking, coverage, originalBytes, className, expectedFileName)
+            val expectedFileName = createExpectedFileName(expectedRoot, expectedCoverage, testTracking, hits)
+            doTest(testTracking, coverage, originalBytes, className, expectedFileName, hits)
         }
     }
 
@@ -78,38 +79,43 @@ class InstrumentedBytecodeTest {
         coverage: Coverage,
         originalBytes: ByteArray,
         className: String,
-        expectedFileName: String
+        expectedFileName: String,
+        calculateHits: Boolean,
+    ) = runWithOptions(
+        mapOf(
+            OptionsUtil::FIELD_INSTRUMENTATION_ENABLED to (coverage != Coverage.LINE && coverage != Coverage.BRANCH),
+            OptionsUtil::CONDY_ENABLED to coverage.isCondyEnabled(),
+            OptionsUtil::CALCULATE_HITS_COUNT to calculateHits,
+        )
     ) {
         val testTrackingMode = testTracking.createMode()
-        OptionsUtil.FIELD_INSTRUMENTATION_ENABLED = coverage != Coverage.LINE && coverage != Coverage.BRANCH
-        OptionsUtil.CONDY_ENABLED = coverage.isCondyEnabled()
         val projectData = ProjectData(null, coverage.isBranchCoverage(), testTrackingMode?.createTestTrackingCallback())
         val transformer = CoverageTransformer(projectData, false, null, testTrackingMode)
         val bytes = transformer.instrument(originalBytes, className, null, false)
 
-        getReadableBytecode(bytes).preprocess()
         assertBytecode(expectedFileName, bytes)
+//        File("resources", expectedFileName).writeText(getReadableBytecode(bytes).preprocess())
     }
 
-    private fun getExpectedBytecode(expectedFileName: String): String {
+    private fun getExpectedFile(expectedFileName: String): File {
         val resource = this::class.java.classLoader.getResource(expectedFileName)
         checkNotNull(resource) { "Expected file $expectedFileName does not exist" }
-        return File(resource.path).readText()
+        return File(resource.path)
     }
 
     private fun assertBytecode(expectedFileName: String, actual: ByteArray) {
-        val expectedBytecode = getExpectedBytecode(expectedFileName).preprocess()
+        val expectedBytecode = getExpectedFile(expectedFileName).readText().preprocess()
         val actualBytecode = getReadableBytecode(actual).preprocess()
 
         Assert.assertEquals("Bytecode differs at $expectedFileName", expectedBytecode, actualBytecode)
     }
 }
 
-
 private fun createExpectedFileName(
     expectedRoot: String,
     coverage: Coverage,
-    testTracking: TestTracking?
+    testTracking: TestTracking?,
+    hits: Boolean,
 ) = buildString {
     append(expectedRoot)
     append("/")
@@ -122,6 +128,7 @@ private fun createExpectedFileName(
         Coverage.BRANCH_CONDY -> "branch_condy"
     }
     append(coverageName)
+    if (hits) append("_with_hits")
     if (testTracking != null) {
         val testTrackingName = when (testTracking) {
             TestTracking.ARRAY -> "with_test_tracking_new"

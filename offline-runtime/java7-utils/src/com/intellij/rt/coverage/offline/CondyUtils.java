@@ -20,7 +20,11 @@ import java.lang.invoke.MethodHandles;
 
 @SuppressWarnings("unused")
 public class CondyUtils {
-  public static int[] getOrCreateHitsMask(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className, int length) {
+  public static int[] getOrCreateHits(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className, int length) {
+    return RawProjectInit.getOrCreateHits(className, length);
+  }
+
+  public static boolean[] getOrCreateHitsMask(MethodHandles.Lookup lookup, String name, Class<?> clazz, String className, int length) {
     return RawProjectInit.getOrCreateHitsMask(className, length);
   }
 }

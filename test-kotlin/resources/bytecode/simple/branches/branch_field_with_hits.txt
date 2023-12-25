@@ -5,69 +5,84 @@ public final class testData/simple/branches/MyBranchedClass {
 
 
   // access flags 0x108A
-  private static transient synthetic [Z __$hits$__
+  private static transient synthetic [I __$hits$__
 
   // access flags 0x1
   public <init>()V
-    GETSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [Z
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [I
     IFNONNULL L0
     LDC "testData.simple.branches.MyBranchedClass"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
-    PUTSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [Z
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHits (Ljava/lang/String;)[I
+    PUTSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [I
    L0
-    GETSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [Z
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [I
     ASTORE 1
    L1
     LINENUMBER 22 L1
     ALOAD 1
     ICONST_0
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
     ALOAD 0
     INVOKESPECIAL java/lang/Object.<init> ()V
     RETURN
    L2
     LOCALVARIABLE this LtestData/simple/branches/MyBranchedClass; L1 L2 0
-    LOCALVARIABLE __$coverage_local$__ [Z L0 L2 1
-    MAXSTACK = 3
+    LOCALVARIABLE __$coverage_local$__ [I L0 L2 1
+    MAXSTACK = 4
     MAXLOCALS = 2
 
   // access flags 0x11
   public final foo(I)V
-    GETSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [Z
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [I
     IFNONNULL L0
     LDC "testData.simple.branches.MyBranchedClass"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
-    PUTSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [Z
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHits (Ljava/lang/String;)[I
+    PUTSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [I
    L0
-    GETSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [Z
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$hits$__ : [I
     ASTORE 2
    L1
     LINENUMBER 24 L1
     ALOAD 2
     ICONST_1
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
     ILOAD 1
     IFGE L2
     GOTO L3
    L2
     ALOAD 2
     ICONST_2
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
     GOTO L4
    L3
     ALOAD 2
     ICONST_3
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
    L5
     LINENUMBER 25 L5
     ALOAD 2
     ICONST_4
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
     LDC "LE"
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     SWAP
@@ -77,30 +92,42 @@ public final class testData/simple/branches/MyBranchedClass {
     LINENUMBER 26 L4
     ALOAD 2
     ICONST_5
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
    L7
-   FRAME APPEND [[Z]
+   FRAME APPEND [[I]
     ILOAD 1
     IFNE L8
     GOTO L9
    L8
     ALOAD 2
     BIPUSH 6
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
     GOTO L10
    L9
     ALOAD 2
     BIPUSH 7
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
    L11
     LINENUMBER 27 L11
     ALOAD 2
     BIPUSH 8
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
     LDC "EQ"
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
     SWAP
@@ -110,8 +137,11 @@ public final class testData/simple/branches/MyBranchedClass {
     LINENUMBER 29 L10
     ALOAD 2
     BIPUSH 9
+    DUP2
+    IALOAD
     ICONST_1
-    BASTORE
+    IADD
+    IASTORE
    L12
    FRAME SAME
     LDC "GE"
@@ -125,7 +155,7 @@ public final class testData/simple/branches/MyBranchedClass {
    L13
     LOCALVARIABLE this LtestData/simple/branches/MyBranchedClass; L1 L13 0
     LOCALVARIABLE value I L1 L13 1
-    LOCALVARIABLE __$coverage_local$__ [Z L0 L13 2
-    MAXSTACK = 3
+    LOCALVARIABLE __$coverage_local$__ [I L0 L13 2
+    MAXSTACK = 4
     MAXLOCALS = 3
 }

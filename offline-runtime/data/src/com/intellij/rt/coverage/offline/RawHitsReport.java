@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.offline;
 
+import com.intellij.rt.coverage.util.CommonArrayUtil;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
 
@@ -54,7 +55,7 @@ public class RawHitsReport {
     CoverageIOUtil.writeUTF(out, "");
 
     for (RawClassData classData : data.getClasses()) {
-      final int[] hits = classData.hits;
+      int[] hits = CommonArrayUtil.getIntArray(classData.hits);
       if (hits == null || hits.length == 0) continue;
       CoverageIOUtil.writeUTF(out, classData.name);
       CoverageIOUtil.writeINT(out, hits.length);
@@ -84,7 +85,7 @@ public class RawHitsReport {
       String className;
       while (!"".equals(className = CoverageIOUtil.readUTFFast(is))) {
         final int length = CoverageIOUtil.readINT(is);
-        final int[] hits = projectData.getOrCreateClass(className, length).hits;
+        final int[] hits = (int[])projectData.getOrCreateClass(className, length, true).hits;
         for (int i = 0; i < length; i++) {
           hits[i] = CoverageIOUtil.readINT(is);
         }

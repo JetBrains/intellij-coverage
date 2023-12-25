@@ -35,6 +35,7 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
   private final boolean shouldSaveSource;
   private final ClassFinder cf;
   private final TestTrackingMode testTrackingMode;
+  protected final boolean calculateHits;
 
   public CoverageTransformer(ProjectData data, boolean shouldSaveSource) {
     this(data, shouldSaveSource, null, null);
@@ -45,12 +46,13 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
     this.shouldSaveSource = shouldSaveSource;
     this.cf = cf;
     this.testTrackingMode = testTrackingMode;
+    this.calculateHits = OptionsUtil.CALCULATE_HITS_COUNT;
   }
 
   @Override
   protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassVisitor cw) {
     return InstrumentationStrategy.createInstrumenter(data, className, cr, cw, testTrackingMode, data.isBranchCoverage(),
-        shouldSaveSource, createDataAccess(className, cr));
+        shouldSaveSource, calculateHits, createDataAccess(className, cr));
   }
 
   private CoverageDataAccess createDataAccess(String className, ClassReader cr) {
@@ -66,13 +68,18 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
   }
 
   protected CoverageDataAccess.Init createInit(String className, ClassReader cr, boolean needCache) {
-    return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, CoverageRuntime.COVERAGE_RUNTIME_OWNER,
-        needCache ? "getHitsMaskCached" : "getHitsMask", "(Ljava/lang/String;)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className});
+    String arrayType = calculateHits ? DataAccessUtil.HITS_ARRAY_TYPE : DataAccessUtil.MASK_ARRAY_TYPE;
+    String methodName = calculateHits ? (needCache ? "getHitsCached" : "getHits")
+        : (needCache ? "getHitsMaskCached" : "getHitsMask");
+    return new CoverageDataAccess.Init("__$hits$__", arrayType, CoverageRuntime.COVERAGE_RUNTIME_OWNER,
+        methodName, "(Ljava/lang/String;)" + arrayType, new Object[]{className});
   }
 
   protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr) {
-    return new CoverageDataAccess.Init("__$hits$__", DataAccessUtil.HITS_ARRAY_TYPE, "com/intellij/rt/coverage/util/CondyUtils",
-        "getHitsMask", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)" + DataAccessUtil.HITS_ARRAY_TYPE, new Object[]{className});
+    String arrayType = calculateHits ? DataAccessUtil.HITS_ARRAY_TYPE : DataAccessUtil.MASK_ARRAY_TYPE;
+    String methodName = calculateHits ? "getHits" : "getHitsMask";
+    return new CoverageDataAccess.Init("__$hits$__", arrayType, "com/intellij/rt/coverage/util/CondyUtils",
+        methodName, "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)" + arrayType, new Object[]{className});
   }
 
   @Override

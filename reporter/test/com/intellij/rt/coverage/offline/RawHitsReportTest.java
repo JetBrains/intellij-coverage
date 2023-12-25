@@ -30,7 +30,7 @@ public class RawHitsReportTest {
   @Test
   public void testReportSave() throws Throwable {
     RawProjectData rawProjectData = new RawProjectData();
-    int[] hits = rawProjectData.createClassData("A", 2).hits;
+    int[] hits = (int[])rawProjectData.getOrCreateClass("A", 2, true).hits;
     hits[0] = 2;
     hits[1] = 3;
 

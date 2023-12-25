@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.*
 import com.intellij.rt.coverage.assertEmptyLogFile
 import com.intellij.rt.coverage.getTestFile
 import com.intellij.rt.coverage.pathToFile
+import com.intellij.rt.coverage.util.OptionsUtil
 import com.intellij.rt.coverage.util.ProcessUtil
 import com.intellij.rt.coverage.util.ResourceUtil
 import org.junit.After
@@ -51,13 +52,15 @@ class OfflineAPITest {
     fun testConstructor() = test("custom.offline.api.constructor")
 
 
-    private fun test(testName: String) {
+    private fun test(testName: String) = runWithOptions(mapOf(
+        OptionsUtil::CALCULATE_HITS_COUNT to true
+    )) {
         val test = getTestFile(testName)
         val outputRoot = pathToFile("build", "classes", "kotlin", "test")
         val outputDir = offlineCoverageTransform(true, test, outputRoot)
 
         val offlineArtifactPath = ResourceUtil.getAgentPath("intellij-coverage-offline")
-        val classpath = System.getProperty("java.class.path").split(File.pathSeparator)
+        val classpath = System.getProperty("java.class.path").split(File.pathSeparator).asSequence()
             .filter { path -> path.contains("kotlin-stdlib") }
             .plus(offlineArtifactPath).plus(outputDir.absolutePath).plus(outputRoot.absolutePath)
             .joinToString(File.pathSeparator)

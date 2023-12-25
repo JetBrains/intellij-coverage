@@ -46,6 +46,7 @@ public class Instrumenter extends ClassVisitor {
   private final ProjectData myProjectData;
   private final boolean myBranchCoverage;
   private final boolean mySaveSource;
+  private final boolean myCalculateHits;
   private String mySource;
 
 
@@ -54,7 +55,8 @@ public class Instrumenter extends ClassVisitor {
                       final InstrumentationData data,
                       ProjectData projectData,
                       boolean branchCoverage,
-                      boolean saveSource) {
+                      boolean saveSource,
+                      boolean calculateHits) {
     super(Opcodes.API_VERSION, new CoverageDataAccessVisitor(classVisitor, dataAccess) {
       @Override
       protected boolean shouldInstrumentMethod() {
@@ -65,6 +67,7 @@ public class Instrumenter extends ClassVisitor {
     myData = data;
     myProjectData = projectData;
     myBranchCoverage = branchCoverage;
+    myCalculateHits = calculateHits;
     mySaveSource = saveSource;
   }
 
@@ -151,7 +154,7 @@ public class Instrumenter extends ClassVisitor {
     super.visitEnd();
     ClassData classData = myProjectData.getOrCreateClassData(myData.get(Key.CLASS_NAME));
     classData.setLines(LinesUtil.calcLineArray(myData.getMaxSeenLine(), myData.getLines()));
-    classData.createHitsMask(myData.getSize());
+    classData.createMask(myData.getSize(), myCalculateHits);
     classData.setSource(mySource);
     classData.setIgnoredLines(myData.getIgnoredLines());
     if (myProjectData.isInstructionsCoverageEnabled()) {
@@ -221,7 +224,7 @@ public class Instrumenter extends ClassVisitor {
     private void incrementHitById(int id) {
       if (id == -1) return;
       myDataAccess.loadFromLocal();
-      InstrumentationUtils.touchById(mv, id);
+      InstrumentationUtils.touchById(mv, id, myCalculateHits);
     }
   }
 }
