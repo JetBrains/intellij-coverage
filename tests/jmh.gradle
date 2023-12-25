@@ -34,13 +34,12 @@ dependencies {
   baseline "$group:$coverage_jar_name:$baselineVersion"
 }
 
-def findAgent(Configuration configuration) {
-  return configuration.find { it.name.startsWith(coverage_jar_name) }.absolutePath
-}
-
-def agentParams(Configuration configuration, boolean branchCoverage) {
+def ijAgentParams(Configuration configuration, boolean branchCoverage) {
+  def agentPath = configuration == configurations.head
+      ? rootProject.file("dist").listFiles().find { it.name.startsWith(coverage_jar_name) }.absolutePath
+      : configuration.find { it.name.startsWith(coverage_jar_name) }.absolutePath
   return [
-      "-javaagent:${findAgent(configuration)}=${coverageFile} false false false ${!branchCoverage} org.joda.* org.apache.commons.*",
+      "-javaagent:${agentPath}=${coverageFile} false false false ${!branchCoverage} org.joda.* org.apache.commons.*",
       "-Didea.new.sampling.coverage=true", "-Didea.new.tracing.coverage=true"
   ]
 }
@@ -48,22 +47,22 @@ def agentParams(Configuration configuration, boolean branchCoverage) {
 def branchCoverage = true
 
 task BaselineCoverage(type: JavaExec) {
-  configureCompare(it) { agentParams(configurations.baseline, branchCoverage) }
+  configureCompare(it) { ijAgentParams(configurations.baseline, branchCoverage) }
   clear(it)
 }
 
 task HeadCoverage(type: JavaExec) {
-  configureCompare(it) { agentParams(configurations.head, branchCoverage) }
+  configureCompare(it) { ijAgentParams(configurations.head, branchCoverage) }
   clear(it)
 }
 
 task HeadVsBaselineCoverage(type: JavaExec) {
-  configureCompareWith(it, { agentParams(configurations.head, branchCoverage) }, BaselineCoverage)
+  configureCompareWith(it, { ijAgentParams(configurations.head, branchCoverage) }, BaselineCoverage)
   clear(it)
 }
 
 task LineVsBranchCoverage(type: JavaExec) {
-  configureCompareWith(it, { agentParams(configurations.head, false) }, HeadCoverage)
+  configureCompareWith(it, { ijAgentParams(configurations.head, false) }, HeadCoverage)
   clear(it)
 }
 
