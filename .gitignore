@@ -6,3 +6,4 @@ build
 .idea/
 gradle.properties
 /tests/external.jmh.gradle
+/*.patch
