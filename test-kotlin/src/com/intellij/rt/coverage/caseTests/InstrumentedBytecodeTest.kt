@@ -61,7 +61,7 @@ class InstrumentedBytecodeTest {
             }
         }
         for (testTracking in TestTracking.values()) {
-            val coverage = Coverage.BRANCH_CONDY
+            val coverage = Coverage.BRANCH_FIELD
             val hits = false
             val expectedCoverage = getExpectedCoverage(coverage, condyPossible)
             val expectedFileName = createExpectedFileName(expectedRoot, expectedCoverage, testTracking, hits)

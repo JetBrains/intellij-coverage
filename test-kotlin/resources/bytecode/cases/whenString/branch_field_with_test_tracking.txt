@@ -5,7 +5,7 @@ public final class testData/cases/whenString/TestKt {
 
 
   // access flags 0x108A
-  private static transient synthetic [I __$hits$__
+  private static transient synthetic [Z __$hits$__
 
   // access flags 0x108A
   private static transient synthetic Ljava/lang/Object; __$classData$__
@@ -14,13 +14,13 @@ public final class testData/cases/whenString/TestKt {
   public final static foo(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 1
     GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
     IFNONNULL L1
@@ -38,11 +38,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 21 L3
     ALOAD 1
     ICONST_0
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 21
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -54,38 +51,26 @@ public final class testData/cases/whenString/TestKt {
    L5
     ALOAD 1
     ICONST_4
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L6
    L7
     ALOAD 1
     ICONST_3
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L8
    L9
     ALOAD 1
     ICONST_2
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L10
    L11
     ALOAD 1
     ICONST_1
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L12
    L4
     TABLESWITCH
@@ -94,7 +79,7 @@ public final class testData/cases/whenString/TestKt {
       99: L9
       default: L11
    L6
-   FRAME APPEND [[I java/lang/Object java/lang/String]
+   FRAME APPEND [[Z java/lang/Object java/lang/String]
     ALOAD 3
     LDC "a"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
@@ -130,11 +115,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 22 L15
     ALOAD 1
     BIPUSH 11
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 22
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -150,11 +132,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 23 L20
     ALOAD 1
     BIPUSH 12
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 23
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -170,11 +149,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 24 L12
     ALOAD 1
     BIPUSH 13
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 24
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -191,22 +167,22 @@ public final class testData/cases/whenString/TestKt {
     RETURN
    L25
     LOCALVARIABLE x Ljava/lang/String; L2 L25 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L25 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L25 1
     LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L25 2
-    MAXSTACK = 5
+    MAXSTACK = 4
     MAXLOCALS = 5
 
   // access flags 0x19
   public final static foo2(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/Nullable;() // invisible, parameter 0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 1
     GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
     IFNONNULL L1
@@ -220,11 +196,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 28 L2
     ALOAD 1
     BIPUSH 15
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 28
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -242,38 +215,26 @@ public final class testData/cases/whenString/TestKt {
    L7
     ALOAD 1
     BIPUSH 21
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L8
    L9
     ALOAD 1
     BIPUSH 20
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L10
    L11
     ALOAD 1
     BIPUSH 19
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L12
    L13
     ALOAD 1
     BIPUSH 18
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L5
    L6
     TABLESWITCH
@@ -282,7 +243,7 @@ public final class testData/cases/whenString/TestKt {
       99: L11
       default: L13
    L8
-   FRAME APPEND [[I java/lang/Object java/lang/String]
+   FRAME APPEND [[Z java/lang/Object java/lang/String]
     ALOAD 3
     LDC "a"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
@@ -318,11 +279,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 29 L16
     ALOAD 1
     BIPUSH 28
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 29
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -338,11 +296,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 30 L21
     ALOAD 1
     BIPUSH 29
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 30
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -358,11 +313,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 31 L5
     ALOAD 1
     BIPUSH 30
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 31
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -379,22 +331,22 @@ public final class testData/cases/whenString/TestKt {
     RETURN
    L26
     LOCALVARIABLE x Ljava/lang/String; L2 L26 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L26 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L26 1
     LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L26 2
-    MAXSTACK = 5
+    MAXSTACK = 4
     MAXLOCALS = 5
 
   // access flags 0x19
   public final static foo3(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 1
     GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
     IFNONNULL L1
@@ -412,11 +364,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 35 L3
     ALOAD 1
     BIPUSH 32
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 35
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -428,38 +377,26 @@ public final class testData/cases/whenString/TestKt {
    L5
     ALOAD 1
     BIPUSH 36
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L6
    L7
     ALOAD 1
     BIPUSH 35
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L8
    L9
     ALOAD 1
     BIPUSH 34
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L10
    L11
     ALOAD 1
     BIPUSH 33
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L12
    L4
     TABLESWITCH
@@ -468,7 +405,7 @@ public final class testData/cases/whenString/TestKt {
       99: L9
       default: L11
    L6
-   FRAME APPEND [[I java/lang/Object java/lang/String]
+   FRAME APPEND [[Z java/lang/Object java/lang/String]
     ALOAD 3
     LDC "a"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
@@ -502,11 +439,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 36 L19
     ALOAD 1
     BIPUSH 43
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 36
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -520,11 +454,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 37 L15
     ALOAD 1
     BIPUSH 44
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 37
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -540,11 +471,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 38 L12
     ALOAD 1
     BIPUSH 45
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 38
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -561,22 +489,22 @@ public final class testData/cases/whenString/TestKt {
     RETURN
    L23
     LOCALVARIABLE x Ljava/lang/String; L2 L23 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L23 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L23 1
     LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L23 2
-    MAXSTACK = 5
+    MAXSTACK = 4
     MAXLOCALS = 5
 
   // access flags 0x19
   public final static boo(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 1
     GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
     IFNONNULL L1
@@ -594,11 +522,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 42 L3
     ALOAD 1
     BIPUSH 47
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 42
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -610,56 +535,38 @@ public final class testData/cases/whenString/TestKt {
    L5
     ALOAD 1
     BIPUSH 53
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L6
    L7
     ALOAD 1
     BIPUSH 52
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L8
    L9
     ALOAD 1
     BIPUSH 51
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L10
    L11
     ALOAD 1
     BIPUSH 50
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L12
    L13
     ALOAD 1
     BIPUSH 49
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L14
    L15
     ALOAD 1
     BIPUSH 48
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L16
    L4
     LOOKUPSWITCH
@@ -670,7 +577,7 @@ public final class testData/cases/whenString/TestKt {
       2112: L13
       default: L15
    L14
-   FRAME APPEND [[I java/lang/Object java/lang/String]
+   FRAME APPEND [[Z java/lang/Object java/lang/String]
     ALOAD 3
     LDC "Aa"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
@@ -679,20 +586,14 @@ public final class testData/cases/whenString/TestKt {
    L17
     ALOAD 1
     BIPUSH 54
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L19
    L18
     ALOAD 1
     BIPUSH 55
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 3
     LDC "BB"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
@@ -750,11 +651,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 43 L19
     ALOAD 1
     BIPUSH 66
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 43
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -770,11 +668,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 44 L24
     ALOAD 1
     BIPUSH 67
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 44
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -790,11 +685,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 45 L27
     ALOAD 1
     BIPUSH 68
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 45
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -810,11 +702,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 46 L30
     ALOAD 1
     BIPUSH 69
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 46
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -830,11 +719,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 47 L33
     ALOAD 1
     BIPUSH 70
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 47
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -850,11 +736,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 48 L16
     ALOAD 1
     BIPUSH 71
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 48
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -871,22 +754,22 @@ public final class testData/cases/whenString/TestKt {
     RETURN
    L41
     LOCALVARIABLE x Ljava/lang/String; L2 L41 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L41 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L41 1
     LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L41 2
-    MAXSTACK = 5
+    MAXSTACK = 4
     MAXLOCALS = 5
 
   // access flags 0x19
   public final static boo2(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 1
     GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
     IFNONNULL L1
@@ -904,11 +787,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 52 L3
     ALOAD 1
     BIPUSH 73
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 52
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -920,56 +800,38 @@ public final class testData/cases/whenString/TestKt {
    L5
     ALOAD 1
     BIPUSH 79
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L6
    L7
     ALOAD 1
     BIPUSH 78
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L8
    L9
     ALOAD 1
     BIPUSH 77
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L10
    L11
     ALOAD 1
     BIPUSH 76
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L12
    L13
     ALOAD 1
     BIPUSH 75
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L14
    L15
     ALOAD 1
     BIPUSH 74
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L16
    L4
     LOOKUPSWITCH
@@ -980,7 +842,7 @@ public final class testData/cases/whenString/TestKt {
       2112: L13
       default: L15
    L14
-   FRAME APPEND [[I java/lang/Object java/lang/String]
+   FRAME APPEND [[Z java/lang/Object java/lang/String]
     ALOAD 3
     LDC "Aa"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
@@ -989,20 +851,14 @@ public final class testData/cases/whenString/TestKt {
    L17
     ALOAD 1
     BIPUSH 80
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L19
    L18
     ALOAD 1
     BIPUSH 81
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 3
     LDC "BB"
     INVOKEVIRTUAL java/lang/String.equals (Ljava/lang/Object;)Z
@@ -1060,11 +916,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 53 L19
     ALOAD 1
     BIPUSH 92
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 53
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1080,11 +933,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 54 L24
     ALOAD 1
     BIPUSH 93
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 54
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1100,11 +950,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 55 L27
     ALOAD 1
     BIPUSH 94
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 55
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1120,11 +967,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 56 L30
     ALOAD 1
     BIPUSH 95
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 56
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1140,11 +984,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 57 L33
     ALOAD 1
     BIPUSH 96
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 57
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1160,11 +1001,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 58 L16
     ALOAD 1
     BIPUSH 97
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 58
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1181,22 +1019,22 @@ public final class testData/cases/whenString/TestKt {
     RETURN
    L41
     LOCALVARIABLE x Ljava/lang/String; L2 L41 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L41 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L41 1
     LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L41 2
-    MAXSTACK = 5
+    MAXSTACK = 4
     MAXLOCALS = 5
 
   // access flags 0x19
   public final static voo(Ljava/lang/String;)V
     // annotable parameter count: 1 (invisible)
     @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 1
     GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
     IFNONNULL L1
@@ -1214,11 +1052,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 62 L3
     ALOAD 1
     BIPUSH 99
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 62
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1228,11 +1063,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 63 L4
     ALOAD 1
     BIPUSH 100
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 63
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1244,24 +1076,18 @@ public final class testData/cases/whenString/TestKt {
    L5
     ALOAD 1
     BIPUSH 101
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L7
    L6
     ALOAD 1
     BIPUSH 102
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ICONST_1
     GOTO L8
    L7
-   FRAME APPEND [[I java/lang/Object java/lang/String]
+   FRAME APPEND [[Z java/lang/Object java/lang/String]
     ALOAD 3
     LDC "BB"
     INVOKESTATIC kotlin/jvm/internal/Intrinsics.areEqual (Ljava/lang/Object;Ljava/lang/Object;)Z
@@ -1272,20 +1098,14 @@ public final class testData/cases/whenString/TestKt {
    L9
     ALOAD 1
     BIPUSH 103
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     GOTO L11
    L10
     ALOAD 1
     BIPUSH 104
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ICONST_5
     ISTORE 4
     GETSTATIC java/lang/System.out : Ljava/io/PrintStream;
@@ -1296,11 +1116,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 64 L11
     ALOAD 1
     BIPUSH 105
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 2
     BIPUSH 64
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1317,20 +1134,20 @@ public final class testData/cases/whenString/TestKt {
     RETURN
    L14
     LOCALVARIABLE x Ljava/lang/String; L2 L14 0
-    LOCALVARIABLE __$coverage_local$__ [I L0 L14 1
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L14 1
     LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L14 2
-    MAXSTACK = 4
+    MAXSTACK = 3
     MAXLOCALS = 5
 
   // access flags 0x19
   public final static main()V
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     IFNONNULL L0
     LDC "testData.cases.whenString.TestKt"
-    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[I
-    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getHitsMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
    L0
-    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [I
+    GETSTATIC testData/cases/whenString/TestKt.__$hits$__ : [Z
     ASTORE 0
     GETSTATIC testData/cases/whenString/TestKt.__$classData$__ : Ljava/lang/Object;
     IFNONNULL L1
@@ -1344,11 +1161,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 68 L2
     ALOAD 0
     BIPUSH 107
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 68
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1358,11 +1172,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 69 L3
     ALOAD 0
     BIPUSH 108
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 69
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1372,11 +1183,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 70 L4
     ALOAD 0
     BIPUSH 109
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 70
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1386,11 +1194,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 71 L5
     ALOAD 0
     BIPUSH 110
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 71
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1400,11 +1205,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 73 L6
     ALOAD 0
     BIPUSH 111
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 73
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1414,11 +1216,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 74 L7
     ALOAD 0
     BIPUSH 112
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 74
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1428,11 +1227,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 75 L8
     ALOAD 0
     BIPUSH 113
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 75
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1442,11 +1238,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 76 L9
     ALOAD 0
     BIPUSH 114
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 76
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1456,11 +1249,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 78 L10
     ALOAD 0
     BIPUSH 115
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 78
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1470,11 +1260,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 79 L11
     ALOAD 0
     BIPUSH 116
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 79
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1484,11 +1271,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 80 L12
     ALOAD 0
     BIPUSH 117
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 80
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1498,11 +1282,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 81 L13
     ALOAD 0
     BIPUSH 118
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 81
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1512,11 +1293,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 83 L14
     ALOAD 0
     BIPUSH 119
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 83
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1526,11 +1304,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 84 L15
     ALOAD 0
     BIPUSH 120
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 84
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1540,11 +1315,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 85 L16
     ALOAD 0
     BIPUSH 121
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 85
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1554,11 +1326,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 86 L17
     ALOAD 0
     BIPUSH 122
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 86
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1568,11 +1337,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 87 L18
     ALOAD 0
     BIPUSH 123
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 87
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1582,11 +1348,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 88 L19
     ALOAD 0
     BIPUSH 124
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 88
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1596,11 +1359,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 89 L20
     ALOAD 0
     BIPUSH 125
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 89
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1610,11 +1370,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 91 L21
     ALOAD 0
     BIPUSH 126
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 91
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1624,11 +1381,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 92 L22
     ALOAD 0
     BIPUSH 127
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 92
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1638,11 +1392,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 93 L23
     ALOAD 0
     SIPUSH 128
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 93
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1652,11 +1403,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 94 L24
     ALOAD 0
     SIPUSH 129
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 94
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1666,11 +1414,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 95 L25
     ALOAD 0
     SIPUSH 130
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 95
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1680,11 +1425,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 96 L26
     ALOAD 0
     SIPUSH 131
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 96
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1694,11 +1436,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 98 L27
     ALOAD 0
     SIPUSH 132
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 98
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1708,11 +1447,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 99 L28
     ALOAD 0
     SIPUSH 133
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 99
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1722,11 +1458,8 @@ public final class testData/cases/whenString/TestKt {
     LINENUMBER 100 L29
     ALOAD 0
     SIPUSH 134
-    DUP2
-    IALOAD
     ICONST_1
-    IADD
-    IASTORE
+    BASTORE
     ALOAD 1
     BIPUSH 100
     INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.traceLine (Ljava/lang/Object;I)V
@@ -1735,9 +1468,9 @@ public final class testData/cases/whenString/TestKt {
    L30
     LINENUMBER 101 L30
     RETURN
-    LOCALVARIABLE __$coverage_local$__ [I L0 L30 0
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L30 0
     LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L30 1
-    MAXSTACK = 4
+    MAXSTACK = 3
     MAXLOCALS = 2
 
   // access flags 0x1009
