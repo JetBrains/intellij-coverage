@@ -16,10 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.data;
 
-import com.intellij.rt.coverage.data.JumpData;
-import com.intellij.rt.coverage.data.LineData;
-import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.data.SwitchData;
+import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.gnu.trove.TIntArrayList;
 import org.jetbrains.coverage.gnu.trove.TIntHashSet;
@@ -257,4 +254,32 @@ public class InstrumentationData {
   public String getMethodDesc() {
     return get(Key.METHOD_DESC);
   }
+
+  public static void assertIds(ClassData classData) {
+    for (LineData lineData : (LineData[]) classData.getLines()) {
+      if (lineData == null) continue;
+      if (lineData.getId() == -1) {
+        throw new AssertionError();
+      }
+      JumpData[] jumps = lineData.getJumps();
+      if (jumps != null) {
+        for (JumpData jumpData : jumps) {
+          if (jumpData.getId(true) == -1 || jumpData.getId(false) == -1){
+            throw new AssertionError();
+          }
+        }
+      }
+      SwitchData[] switches = lineData.getSwitches();
+      if (switches != null) {
+        for (SwitchData switchData : switches) {
+          for (int i = -1; i < switchData.getHits().length; i++) {
+            if (switchData.getId(i) == -1) {
+              throw new AssertionError();
+            }
+          }
+        }
+      }
+    }
+  }
+
 }

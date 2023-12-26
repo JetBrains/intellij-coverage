@@ -53,6 +53,8 @@ public class JumpData implements CoverageData {
     final JumpData jumpData = (JumpData) data;
     setTrueHits(myTrueHits + jumpData.myTrueHits);
     setFalseHits(myFalseHits + jumpData.myFalseHits);
+    if (jumpData.myFalseId != -1) myFalseId = jumpData.myFalseId;
+    if (jumpData.myTrueId != -1) myTrueId = jumpData.myTrueId;
   }
 
   public void setTrueHits(final int trueHits) {

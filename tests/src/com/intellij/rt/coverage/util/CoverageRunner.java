@@ -37,6 +37,7 @@ public class CoverageRunner {
 //        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
         "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" "
             + testTracking + " " + calcUnloaded + " false " + !branchCoverage + " " + patterns,
+        "-Didea.coverage.test.mode=true",
         "-classpath", testDataPath, classToRun};
     if (extraArgs.length > 0) {
       String[] args = new String[extraArgs.length + commandLine.length];

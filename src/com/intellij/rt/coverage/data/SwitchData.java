@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.util.CoverageIOUtil;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 public class SwitchData implements CoverageData {
   private int[] myKeys;
@@ -73,6 +74,19 @@ public class SwitchData implements CoverageData {
     for (int i = Math.min(myHits.length, switchData.myHits.length) - 1; i >= 0; i--) {
       myHits[i] = ClassData.trimHits(myHits[i] + switchData.myHits[i]);
     }
+    if (switchData.myIds != null) {
+      if (myIds == null) {
+        myIds = new int[myKeys.length + 1];
+      }
+      if (myIds.length < switchData.myIds.length) {
+        myIds = ArrayUtil.copy(myIds, switchData.myIds.length);
+      }
+      for (int i = 0; i < switchData.myIds.length; i++) {
+        if (switchData.myIds[i] != -1) {
+          myIds[i] = switchData.myIds[i];
+        }
+      }
+    }
   }
 
   public void setDefaultHits(final int defaultHits) {
@@ -92,9 +106,9 @@ public class SwitchData implements CoverageData {
   }
 
   public int getId(int index) {
-    if (myIds == null) return 0;
+    if (myIds == null) return -1;
     if (index == -1) return myIds[myIds.length - 1];
-    if (index < 0 || index >= myIds.length) return 0;
+    if (index < 0 || index >= myIds.length) return -1;
     return myIds[index];
   }
 
@@ -104,12 +118,15 @@ public class SwitchData implements CoverageData {
   public void setId(int id, int index) {
     if (myIds == null) {
       myIds = new int[myKeys.length + 1];
+      Arrays.fill(myIds, -1);
     }
     if (index == -1) {
       myIds[myIds.length - 1] = id;
       return;
     }
-    if (index < 0 || index >= myIds.length) return;
+    if (index < 0 || index >= myIds.length) {
+      throw new ArrayIndexOutOfBoundsException("Incorrect index " + index + " length is " + myIds.length);
+    }
     myIds[index] = id;
   }
 }

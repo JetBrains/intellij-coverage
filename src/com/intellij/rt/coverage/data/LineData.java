@@ -114,6 +114,7 @@ public class LineData implements CoverageData {
   public void merge(final CoverageData data) {
     LineData lineData = (LineData) data;
     setHits(myHits + lineData.getHits());
+    if (lineData.myId != -1) myId = lineData.myId;
     if (myJumpsAndSwitches != null || lineData.myJumpsAndSwitches != null) {
       getOrCreateJumpsAndSwitches().merge(lineData.getOrCreateJumpsAndSwitches());
     }

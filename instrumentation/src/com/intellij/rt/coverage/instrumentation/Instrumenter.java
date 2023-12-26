@@ -33,6 +33,7 @@ import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
 import com.intellij.rt.coverage.instrumentation.filters.methods.MethodFilter;
 import com.intellij.rt.coverage.instrumentation.util.LinesUtil;
 import com.intellij.rt.coverage.util.ClassNameUtil;
+import com.intellij.rt.coverage.util.OptionsUtil;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
 import java.util.ArrayList;
@@ -157,6 +158,9 @@ public class Instrumenter extends ClassVisitor {
     classData.createMask(myData.getSize(), myCalculateHits);
     classData.setSource(mySource);
     classData.setIgnoredLines(myData.getIgnoredLines());
+    if (OptionsUtil.TEST_MODE) {
+      InstrumentationData.assertIds(classData);
+    }
     if (myProjectData.isInstructionsCoverageEnabled()) {
       ClassInstructions classInstructions = new ClassInstructions(classData, myData.getInstructions());
       myProjectData.getInstructions().put(classData.getName(), classInstructions);
