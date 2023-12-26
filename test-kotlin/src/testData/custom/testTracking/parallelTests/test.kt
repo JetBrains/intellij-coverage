@@ -84,15 +84,11 @@ private val tasks = List(threads) { iThread ->
                 }
             }
         }.onFailure { it.printStackTrace(System.err); exitProcess(1) }
-        barrier.await()
     }
 }
 
-private val barrier = CyclicBarrier(threads + 1)
-
 fun main() {
-    repeat(threads) { i ->
-        Thread(tasks[i]).start()
-    }
-    barrier.await()
+    val threads = List(threads) {i -> Thread(tasks[i])}
+    threads.forEach(Thread::start)
+    threads.forEach(Thread::join)
 }
