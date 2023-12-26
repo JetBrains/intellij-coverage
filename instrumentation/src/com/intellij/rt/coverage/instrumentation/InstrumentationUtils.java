@@ -31,8 +31,8 @@ public class InstrumentationUtils {
   /**
    * Util method for touching coverage counter which is stored in an array.
    * An array must be already loaded on stack.
-   * This method has different strategies basing on calculateHits option:<br/>
-   * when option is true, int array is expected and array counter is incremented,<br/>
+   * This method has different strategies basing on calculateHits option:<br>
+   * when option is true, int array is expected and array counter is incremented,<br>
    * otherwise boolean array is expected and the value is just set to true.
    *
    * @param mv current method visitor
