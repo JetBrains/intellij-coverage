@@ -89,6 +89,47 @@ public class Test {  // coverage: FULL // stats: 2/2
     }
   }
 
+  void fullAnd(boolean a, boolean b) {
+    if (a && b) {  // coverage: FULL // stats: 4/4 4/4
+      System.out.println("both a and b are true");  // coverage: FULL // stats: 4/4
+    } else {
+      System.out.println("either a or b is false");  // coverage: FULL // stats: 3/3
+    }
+  }
+
+  void andAnd0(boolean a, boolean b, boolean c) {
+    if (a && b && c) { // coverage: PARTIAL // stats: 2/6 1/6
+      System.out.println("All true"); // coverage: NONE // stats: 0/4
+    } else {
+      System.out.println("Some one is false"); // coverage: FULL // stats: 3/3
+    }
+  }
+
+  void andAnd1(boolean a, boolean b, boolean c) {
+    if (a && b && c) { // coverage: PARTIAL // stats: 4/6 3/6
+      System.out.println("All true"); // coverage: NONE // stats: 0/4
+    } else {
+      System.out.println("Some one is false"); // coverage: FULL // stats: 3/3
+    }
+  }
+
+  void andAnd2(boolean a, boolean b, boolean c) {
+    if (a && b && c) { // coverage: PARTIAL // stats: 6/6 5/6
+      System.out.println("All true"); // coverage: NONE // stats: 0/4
+    } else {
+      System.out.println("Some one is false"); // coverage: FULL // stats: 3/3
+    }
+  }
+
+  void andAnd3(boolean a, boolean b, boolean c) {
+    if (a && b && c) { // coverage: FULL // stats: 6/6 6/6
+      System.out.println("All true"); // coverage: FULL // stats: 4/4
+    } else {
+      System.out.println("Some one is false"); // coverage: FULL // stats: 3/3
+    }
+  }
+
+
   void or1(boolean a, boolean b) {
     if (a || b) {  // coverage: PARTIAL // stats: 2/4 1/4
       System.out.println("either a or b is true");  // coverage: FULL // stats: 4/4
@@ -113,6 +154,14 @@ public class Test {  // coverage: FULL // stats: 2/2
     }
   }
 
+  void fullOr(boolean a, boolean b) {
+    if (a || b) {  // coverage: FULL // stats: 4/4 4/4
+      System.out.println("either a or b is true");  // coverage: FULL // stats: 4/4
+    } else {
+      System.out.println("both a and b are false");  // coverage: FULL // stats: 3/3
+    }
+  }
+
   boolean negation(boolean a) {
     return !a; // coverage: FULL // stats: 2/2
   }
@@ -120,6 +169,14 @@ public class Test {  // coverage: FULL // stats: 2/2
   // condition is eliminated as the bytecode is the same as in the previous method
   boolean manualNegation(boolean a) {
     return a == false ? true : false; // coverage: FULL // stats: 2/2
+  }
+
+  boolean andWithoutIf(boolean a, boolean b) {
+    return a && b;   // coverage: PARTIAL // stats: 4/4 1/2
+  }
+
+  boolean orWithoutIf(boolean a, boolean b) {
+    return a || b;   // coverage: PARTIAL // stats: 4/6 1/2
   }
 
   public static void main(String[] args) {
@@ -141,11 +198,38 @@ public class Test {  // coverage: FULL // stats: 2/2
     conditions.and2(false, true);  // coverage: FULL // stats: 4/4
     conditions.and3(true, true);  // coverage: FULL // stats: 4/4
 
+    conditions.fullAnd(true, true); // coverage: FULL // stats: 4/4
+    conditions.fullAnd(true, false); // coverage: FULL // stats: 4/4
+    conditions.fullAnd(false, true); // coverage: FULL // stats: 4/4
+    conditions.fullAnd(false, false); // coverage: FULL // stats: 4/4
+
+    conditions.andAnd0(false, false, false); // coverage: FULL // stats: 5/5
+
+    conditions.andAnd1(false, false, false); // coverage: FULL // stats: 5/5
+    conditions.andAnd1(true, false, false); // coverage: FULL // stats: 5/5
+
+    conditions.andAnd2(false, false, false); // coverage: FULL // stats: 5/5
+    conditions.andAnd2(true, false, false); // coverage: FULL // stats: 5/5
+    conditions.andAnd2(true, true, false); // coverage: FULL // stats: 5/5
+
+    conditions.andAnd3(false, false, false); // coverage: FULL // stats: 5/5
+    conditions.andAnd3(true, false, false); // coverage: FULL // stats: 5/5
+    conditions.andAnd3(true, true, false); // coverage: FULL // stats: 5/5
+    conditions.andAnd3(true, true, true); // coverage: FULL // stats: 5/5
+
     conditions.or1(true, false);  // coverage: FULL // stats: 4/4
     conditions.or2(false, true);  // coverage: FULL // stats: 4/4
     conditions.or3(true, true);  // coverage: FULL // stats: 4/4
 
+    conditions.fullOr(true, true); // coverage: FULL // stats: 4/4
+    conditions.fullOr(true, false); // coverage: FULL // stats: 4/4
+    conditions.fullOr(false, true); // coverage: FULL // stats: 4/4
+    conditions.fullOr(false, false); // coverage: FULL // stats: 4/4
+
     conditions.negation(true); // coverage: FULL // stats: 4/4
     conditions.manualNegation(true); // coverage: FULL // stats: 4/4
+
+    conditions.andWithoutIf(true, false);  // coverage: FULL // stats: 5/5
+    conditions.orWithoutIf(false, true);  // coverage: FULL // stats: 5/5
   }
 }
