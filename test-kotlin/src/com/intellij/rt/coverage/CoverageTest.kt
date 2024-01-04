@@ -40,6 +40,7 @@ internal data class TestConfiguration(
     val extraArgs: MutableList<String> = mutableListOf(),
     val calculateUnloaded: Boolean = false,
     val expectedClasses: List<String>? = null,
+    val fileWithMarkers: File? = null,
 )
 
 internal const val LOG_NAME = ErrorReporter.ERROR_FILE
@@ -75,7 +76,7 @@ internal abstract class CoverageTest {
         testName: String,
         test: TestFile = getTestFile(testName),
         configuration: TestConfiguration = extractTestConfiguration(test.file),
-        verify: (ProjectData, TestConfiguration, File) -> Unit = this::verifyResults
+        verify: (ProjectData, TestConfiguration) -> Unit = this::verifyResults
     ) {
         val config = configuration.setDefaults(test)
         val project = runWithCoverage(
@@ -88,17 +89,11 @@ internal abstract class CoverageTest {
             config.extraArgs,
             test.mainClass
         )
-        verify(project, preprocessConfiguration(config), test.file)
+        verify(project, config)
     }
 
-    /**
-     * Substitute test configuration before calling of a verification method.
-     * For example, line coverage test replaces PARTIAL covered lines with FULL.
-     */
-    internal open fun preprocessConfiguration(configuration: TestConfiguration): TestConfiguration = configuration
-
     /** Verifies coverage results. */
-    internal open fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {}
+    internal open fun verifyResults(projectData: ProjectData, configuration: TestConfiguration) {}
 
     /** Set default values if absent. */
     private fun TestConfiguration.setDefaults(test: TestFile): TestConfiguration {

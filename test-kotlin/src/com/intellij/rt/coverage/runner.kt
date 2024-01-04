@@ -91,20 +91,48 @@ internal fun assertEmptyLogFile(coverageDataFile: File) {
     logFile(coverageDataFile)?.readText()?.also { log -> throw RuntimeException(log) }
 }
 
-internal fun assertEqualsLines(project: ProjectData, expectedLines: Map<Int, String>, classNames: List<String>) {
-    val actualCoverage = coverageLines(project, classNames).associate { it.lineNumber to it.status }.statusToString()
-    logCoverageDiff(expectedLines, actualCoverage)
-    Assert.assertEquals(expectedLines, actualCoverage)
+internal fun assertEqualsLines(project: ProjectData, configuration: TestConfiguration, coverage: Coverage) {
+    val actualCoverage = coverageLines(project, configuration.classes)
+        .associate { it.lineNumber to it.status.statusToString() }
+        .run {
+            if (coverage.isBranchCoverage()) this else remapFullToPartialWhenNeeded(configuration.coverageData)
+        }
+    if (configuration.fileWithMarkers != null) {
+        assertEqualsFiles(configuration.fileWithMarkers, actualCoverage, "// coverage: ", coverageMarkerRegex)
+    }
+    Assert.assertEquals(configuration.coverageData, actualCoverage)
 }
+
+private fun Map<Int, String>.remapFullToPartialWhenNeeded(expected: Map<Int, String>) =
+    mapValues { if (it.value == "FULL" && expected[it.key] == "PARTIAL") "PARTIAL" else it.value }
 
 internal fun assertEqualsTestTracking(coverageDataFile: File, expected: Map<Int, Set<String>>, classNames: List<String>) {
     val actual = testTrackingLines(coverageDataFile, classNames)
     Assert.assertEquals(expected, actual)
 }
 
-internal fun assertEqualsExtendedInfo(project: ProjectData, expected: Map<Int, String>, classNames: List<String>) {
-    val actual = extendedLineInfo(project, classNames)
-    Assert.assertEquals(expected.map { it.toString() }.joinToString("\n"), actual.map { it.toString() }.joinToString("\n"))
+internal fun assertEqualsExtendedInfo(project: ProjectData, configuration: TestConfiguration) {
+    val actual: Map<Int, String> = extendedLineInfo(project, configuration.classes)
+    if (configuration.fileWithMarkers != null) {
+        assertEqualsFiles(configuration.fileWithMarkers, actual, "// stats: ", extendedInfoRegex)
+    }
+    Assert.assertEquals(configuration.coverageData.map { it.toString() }.joinToString("\n"), actual.map { it.toString() }.joinToString("\n"))
+}
+
+private fun assertEqualsFiles(file: File, actual: Map<Int, String>, prefix: String, regex: Regex) {
+    val originalContent = file.readText()
+    val withoutComments = originalContent.lines().map { line ->
+        if (!line.contains(regex)) line to -1 else {
+            val range = regex.find(line)!!.range
+            line.removeRange(range) to range.first
+        }
+    }
+    val withActualComments = withoutComments.mapIndexed { i, (line, offset) ->
+        val coverage = actual[i + 1]
+        if (coverage == null) line else if (offset == -1) "$line $prefix$coverage" else
+            "${line.substring(0, offset)}$prefix$coverage${line.substring(offset)}"
+    }.joinToString("\n")
+    Assert.assertEquals(originalContent, withActualComments)
 }
 
 internal const val all = "ALL CLASSES"
@@ -115,7 +143,7 @@ private fun coverageLines(project: ProjectData, classNames: List<String>): List<
     return allData.getLinesData()
 }
 
-private fun extendedLineInfo(project: ProjectData, classNames: List<String>) = coverageLines(project, classNames)
+private fun extendedLineInfo(project: ProjectData, classNames: List<String>): Map<Int, String> = coverageLines(project, classNames)
         .run {
             val instructionsMap = hashMapOf<Int, LineInstructions>()
             getClasses(classNames, project).forEach { classData ->
@@ -125,7 +153,8 @@ private fun extendedLineInfo(project: ProjectData, classNames: List<String>) = c
             associate { line ->
                 val branches = line.branchData
                 val instructions = instructionsMap[line.lineNumber]!!.getInstructionsData(line)
-                line.lineNumber to "${instructions.coveredBranches}/${instructions.totalBranches} ${branches?.coveredBranches ?: 0}/${branches?.totalBranches ?: 0}"
+                val branchCoverage = if (branches != null) " ${branches.coveredBranches}/${branches.totalBranches}" else ""
+                line.lineNumber to "${instructions.coveredBranches}/${instructions.totalBranches}$branchCoverage"
             }
         }
 
@@ -160,70 +189,22 @@ private fun loadTestTrackingData(coverageDataFile: File): Map<String, Map<String
     }
 }
 
-internal fun getLineHits(data: ClassData, line: Int) = data.getLinesData().single { it.lineNumber == line }.hits
-
-private fun logCoverageDiff(expectedLines: Map<Int, String>, actualCoverage: Map<Int, String>) {
-    val expected = expectedLines.toList()
-    val actual = actualCoverage.toList()
-    compareCoverage(expected, actual, wrongLineCoverage = { i, j ->
-        System.err.println("Line ${expected[i].first}: expected ${expected[i].second} but ${actual[j].second} found")
-    }, missedLine = { i ->
-        System.err.println("Line ${expected[i].first} expected with coverage ${expected[i].second}")
-    }, unexpectedLine = { i ->
-        System.err.println("Unexpected line ${actual[i].first} with coverage ${actual[i].second}")
-    })
-}
-
-private fun compareCoverage(expected: List<Pair<Int, String>>,
-                            actual: List<Pair<Int, String>>,
-                            wrongLineCoverage: (Int, Int) -> Unit,
-                            missedLine: (Int) -> Unit,
-                            unexpectedLine: (Int) -> Unit) {
-    var j = 0
-    var i = 0
-    while (i < expected.size && j < actual.size) {
-        if (expected[i].first == actual[j].first) {
-            if (expected[i].second != actual[j].second) {
-                wrongLineCoverage(i, j)
-            }
-            i++
-            j++
-        } else if (expected[i].first < actual[j].first) {
-            missedLine(i++)
-        } else {
-            unexpectedLine(j++)
-        }
-    }
-    while (i < expected.size) missedLine(i++)
-    while (j < actual.size) unexpectedLine(j++)
-}
-
-private fun Map<Int, Int>.statusToString() = mapValues {
-    when (it.value) {
-        0 -> "NONE"
-        1 -> "PARTIAL"
-        else -> "FULL"
-    }
+private fun Int.statusToString() = when (this) {
+    0 -> "NONE"
+    1 -> "PARTIAL"
+    else -> "FULL"
 }
 
 private fun ClassData.getLinesData() = (lines ?: Array<LineData?>(0) { null })
-        .filterIsInstance(LineData::class.java).sortedBy { it.lineNumber }
+        .filterIsInstance<LineData>().sortedBy { it.lineNumber }
 
-internal fun extractTestTrackingDataFromFile(file: File): Map<Int, Set<String>> =
-    TestTrackingMatcher().let { callback ->
+internal fun extractTestTrackingDataFromFile(file: File): Map<Int, Set<String>> = TestTrackingMatcher().let { callback ->
         processFile(file, callback)
         callback.result
     }
 
 internal fun extractExtendedInfoFromFile(file: File): Map<Int, String> = ExtendedInfoMatcher().let { matcher ->
-    val otherFile = StringMatcher(fileWithCoverageMarkersRegex, 1)
-    processFile(file, otherFile)
-    if (otherFile.value !== null) {
-        val fileWithMarkers = File(file.parentFile, otherFile.value!!)
-        processFile(fileWithMarkers, matcher)
-    } else {
-        processFile(file, matcher)
-    }
+    processFile(file, matcher)
     matcher.result
 }
 
@@ -244,7 +225,7 @@ private fun getVMVersion(): Int {
 }
 
 internal fun extractTestConfiguration(file: File): TestConfiguration {
-    var coverage = CoverageMatcher()
+    val coverage = CoverageMatcher()
     val classes = StringListMatcher(classesMarkerRegex, 1)
     val expectedClasses = StringListMatcher(expectedClassesMarkerRegex, 1)
     val extraArgs = StringListMatcher(extraArgumentsMarkerRegex, 1)
@@ -252,10 +233,12 @@ internal fun extractTestConfiguration(file: File): TestConfiguration {
     val calculateUnloaded = FlagMatcher(calculateUnloadedMarkerRegex, 1)
     val otherFile = StringMatcher(fileWithCoverageMarkersRegex, 1)
 
+    var fileWithMarkers = file
     processFile(file, coverage, classes, expectedClasses, extraArgs, patterns, calculateUnloaded, otherFile)
-    if (otherFile.value !== null) {
-        coverage = CoverageMatcher()
-        val fileWithMarkers = File(file.parentFile, otherFile.value!!)
+    val otherFileName = otherFile.value
+    if (otherFileName !== null) {
+        coverage.result.clear()
+        fileWithMarkers = File(file.parentFile, otherFileName)
         processFile(fileWithMarkers, coverage)
     }
     return TestConfiguration(
@@ -265,6 +248,7 @@ internal fun extractTestConfiguration(file: File): TestConfiguration {
         extraArgs.values ?: mutableListOf(),
         calculateUnloaded.value,
         expectedClasses.values,
+        fileWithMarkers,
     )
 }
 
@@ -278,7 +262,7 @@ internal fun processFile(file: File, vararg callbacks: Matcher) {
     }
 }
 
-private val coverageMarkerRegex = Regex("// coverage: (FULL|PARTIAL|NONE)( .*)?\$")
+private val coverageMarkerRegex = Regex("// coverage: (FULL|PARTIAL|NONE)(?= |$)")
 private val classesMarkerRegex = Regex("// classes: (.*)\$")
 private val expectedClassesMarkerRegex = Regex("// class: (.*)\$")
 private val patternsMarkerRegex = Regex("// patterns: (.*)\$")
@@ -286,7 +270,7 @@ private val calculateUnloadedMarkerRegex = Regex("// calculate unloaded: (.*)\$"
 private val extraArgumentsMarkerRegex = Regex("// extra args: (.*)\$")
 private val testTrackingMarkerRegex = Regex("// tests: ([^/]*)")
 private val fileWithCoverageMarkersRegex = Regex("// markers: (.*)\$")
-private val extendedInfoRegex = Regex("// stats: ([0-9]+)/([0-9]+)(\\s+([0-9]+)/([0-9]+))?")
+private val extendedInfoRegex = Regex("// stats: ([0-9]+)/([0-9]+)(\\s+([0-9]+)/([0-9]+))?(?= |$)")
 
 /**
  * Collect state from found matches in the lines of a file.
@@ -357,8 +341,7 @@ class ExtendedInfoMatcher : Matcher(extendedInfoRegex) {
         val coveredInstructions = match.groupValues[1]
         val totalInstructions = match.groupValues[2]
         val hasBranches = match.groupValues[3].isNotEmpty()
-        val coveredBranches = if (hasBranches) match.groupValues[4] else 0
-        val totalBranches = if (hasBranches) match.groupValues[5] else 0
-        result[line] = "$coveredInstructions/$totalInstructions $coveredBranches/$totalBranches"
+        val branchCoverage = if (hasBranches) " ${match.groupValues[4]}/${match.groupValues[5]}" else ""
+        result[line] = "$coveredInstructions/$totalInstructions$branchCoverage"
     }
 }

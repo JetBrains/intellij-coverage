@@ -24,7 +24,6 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import testData.custom.testTracking.parallelTests.CALLS_PER_LINE
 import testData.custom.testTracking.sequentialTests.TESTS
-import java.io.File
 
 @RunWith(Parameterized::class)
 internal class TestTrackingTest(
@@ -38,10 +37,10 @@ internal class TestTrackingTest(
         fun data() = allTestTrackingModes().filter { it[1] != null }.toTypedArray()
     }
 
-    override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
-        val expected = extractTestTrackingDataFromFile(testFile)
+    override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration) {
+        val expected = extractTestTrackingDataFromFile(configuration.fileWithMarkers!!)
         assertEqualsTestTracking(myDataFile, expected, configuration.classes)
-        assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
+        assertEqualsLines(projectData, configuration, coverage)
     }
 
     @Test(timeout = 20000)
@@ -56,11 +55,11 @@ internal class TestTrackingTest(
         test(
             test.testName,
             configuration = extractTestConfiguration(test.file).copy(extraArgs = mutableListOf("-Dthreads=1"))
-        ) { projectData, configuration, _ ->
+        ) { projectData, configuration ->
             val lines = testTrackingLines(myDataFile, configuration.classes)
             Assert.assertEquals(5, lines.size)
             lines.values.forEach { Assert.assertEquals(CALLS_PER_LINE, it.size) }
-            assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
+            assertEqualsLines(projectData, configuration, coverage)
         }
     }
 
@@ -70,17 +69,17 @@ internal class TestTrackingTest(
         test(
             test.testName,
             configuration = extractTestConfiguration(test.file).copy(extraArgs = mutableListOf("-Dthreads=2"))
-        ) { projectData, configuration, _ ->
+        ) { projectData, configuration ->
             testTrackingLines(myDataFile, configuration.classes)
-            assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
+            assertEqualsLines(projectData, configuration, coverage)
         }
     }
 
     @Test(timeout = 20000)
-    fun testSequentialTests() = test("custom.testTracking.sequentialTests") { projectData, configuration, _ ->
+    fun testSequentialTests() = test("custom.testTracking.sequentialTests") { projectData, configuration ->
         val lines = testTrackingLines(myDataFile, configuration.classes)
         Assert.assertEquals(5, lines.size)
         lines.values.forEach { Assert.assertEquals(TESTS, it.size) }
-        assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
+        assertEqualsLines(projectData, configuration, coverage)
     }
 }

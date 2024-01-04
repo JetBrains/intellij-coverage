@@ -101,8 +101,7 @@ internal class OfflineInstrumentationTest(override val coverage: Coverage) : Cov
         check(patterns == null) { "Offline coverage tests cannot have patterns" }
         check(!calculateUnloaded) { "Offline coverage tests cannot collect unloaded classes" }
         check(extraArgs.isEmpty()) { "Offline coverage tests cannot add extra args" }
-        val expected = if (!coverage.isBranchCoverage()) coverageData.mapValues { (_, v) -> if (v == "PARTIAL") "FULL" else v } else coverageData
-        return copy(classes = fullClassNames, coverageData = expected)
+        return copy(classes = fullClassNames)
     }
 
     private fun runCoverage(test: TestFile, config: TestConfiguration) {
@@ -122,7 +121,7 @@ internal class OfflineInstrumentationTest(override val coverage: Coverage) : Cov
         RawReportLoader.load(myDataFile, projectData)
         projectData.applyLineMappings()
 
-        assertEqualsLines(projectData, config.coverageData, config.classes)
+        assertEqualsLines(projectData, config, coverage)
     }
 
     private fun runOfflineCoverage(test: TestFile, outputRoot: File) {

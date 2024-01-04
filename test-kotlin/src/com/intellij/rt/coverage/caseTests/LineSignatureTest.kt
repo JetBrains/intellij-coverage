@@ -20,21 +20,20 @@ import com.intellij.rt.coverage.*
 import com.intellij.rt.coverage.data.ProjectData
 import org.junit.Assert
 import org.junit.Test
-import java.io.File
 
 internal class LineSignatureTest : CoverageTest() {
     @Test
-    fun test_IDEA_275520Loaded() = test("custom.IDEA_275520.loaded", verify = { projectData, _, _ ->
+    fun test_IDEA_275520Loaded() = test("custom.IDEA_275520.loaded", verify = { projectData, _ ->
         test_IDEA_275520(projectData)
     })
 
     @Test
-    fun test_IDEA_275520Unloaded() = test("custom.IDEA_275520.unloaded", verify = { projectData, _, _ ->
+    fun test_IDEA_275520Unloaded() = test("custom.IDEA_275520.unloaded", verify = { projectData, _ ->
         test_IDEA_275520(projectData)
     })
 
     @Test
-    fun test_IDEA_275520Call() = test("custom.IDEA_275520.call", verify = { projectData, _, _ ->
+    fun test_IDEA_275520Call() = test("custom.IDEA_275520.call", verify = { projectData, _ ->
         test_IDEA_275520(projectData, hashMapOf(
                 "$TEST_PACKAGE.custom.IDEA_275520.call.TestKt" to hashMapOf(
                         "main()V" to 37..39),
@@ -44,7 +43,7 @@ internal class LineSignatureTest : CoverageTest() {
     })
 
     @Test
-    fun test_IDEA_275520Stdlib() = test("custom.IDEA_275520.stdlib", verify = { projectData, _, _ ->
+    fun test_IDEA_275520Stdlib() = test("custom.IDEA_275520.stdlib", verify = { projectData, _ ->
         test_IDEA_275520(projectData, hashMapOf(
                 "$TEST_PACKAGE.custom.IDEA_275520.stdlib.TestKt" to hashMapOf(
                         "main()V" to 23..27,
@@ -72,7 +71,7 @@ internal class LineSignatureTest : CoverageTest() {
     }
 
     override val coverage get() = Coverage.LINE_FIELD
-    override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
-        assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
+    override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration) {
+        assertEqualsLines(projectData, configuration, coverage)
     }
 }

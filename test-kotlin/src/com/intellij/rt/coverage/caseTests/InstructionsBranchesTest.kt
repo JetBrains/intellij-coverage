@@ -19,7 +19,6 @@ package com.intellij.rt.coverage.caseTests
 import com.intellij.rt.coverage.*
 import com.intellij.rt.coverage.data.ProjectData
 import org.junit.Test
-import java.io.File
 
 internal class InstructionsBranchesTest : CoverageTest() {
     override val coverage get() = Coverage.BRANCH_FIELD
@@ -28,9 +27,9 @@ internal class InstructionsBranchesTest : CoverageTest() {
         commonExtraArgs.add("-Dcoverage.instructions.enable=true")
     }
 
-    override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
-        val expected = extractExtendedInfoFromFile(testFile)
-        assertEqualsExtendedInfo(projectData, expected, configuration.classes)
+    override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration) {
+        val expected = extractExtendedInfoFromFile(configuration.fileWithMarkers!!)
+        assertEqualsExtendedInfo(projectData, configuration.copy(coverageData = expected))
     }
 
     //===GENERATED TESTS===

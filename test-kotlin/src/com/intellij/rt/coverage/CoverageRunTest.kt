@@ -48,19 +48,13 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
         }
     }
 
-    override fun preprocessConfiguration(configuration: TestConfiguration) = if (coverage.isBranchCoverage()) {
-        super.preprocessConfiguration(configuration)
-    } else {
-        configuration.copy(coverageData = configuration.coverageData.mapValues { (_, v) -> if (v == "PARTIAL") "FULL" else v })
-    }
-
-    override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
+    override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration) {
         if (configuration.expectedClasses != null) {
             val actualClasses = projectData.classesCollection.map { it.name }
             val expectedClasses = configuration.expectedClasses
             assertEquals(expectedClasses.sorted(), actualClasses.sorted())
         }
-        assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
+        assertEqualsLines(projectData, configuration, coverage)
     }
 
     //===GENERATED TESTS===
@@ -379,8 +373,8 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     @Test
     fun testIDEA_299956() {
         val testName = "custom.IDEA_299956"
-        test(testName) { projectData, config, file ->
-            verifyResults(projectData, config, file)
+        test(testName) { projectData, config ->
+            verifyResults(projectData, config)
             assertTrue { projectData.getClassData("testData.$testName.TestKt").isFullyAnalysed }
             assertFalse { projectData.getClassData("testData.$testName.UnusedClass").isFullyAnalysed }
         }
@@ -389,8 +383,8 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     @Test
     fun testMethodReference() {
         val testName = "custom.methodReference"
-        test(testName) { projectData, config, file ->
-            verifyResults(projectData, config, file)
+        test(testName) { projectData, config ->
+            verifyResults(projectData, config)
             assertEquals(2, projectData.classesNumber)
             assertNotNull(projectData.getClassData("testData.$testName.TestKt"))
             assertNotNull(projectData.getClassData("testData.$testName.Foo"))

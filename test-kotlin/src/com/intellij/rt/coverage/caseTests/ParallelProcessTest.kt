@@ -22,7 +22,6 @@ import com.intellij.rt.coverage.TestConfiguration
 import com.intellij.rt.coverage.assertEqualsLines
 import com.intellij.rt.coverage.data.ProjectData
 import org.junit.Test
-import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
 internal class ParallelProcessTest : CoverageTest() {
@@ -52,7 +51,7 @@ internal class ParallelProcessTest : CoverageTest() {
     }
 
     override val coverage get() = Coverage.BRANCH_FIELD
-    override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration, testFile: File) {
-        assertEqualsLines(projectData, configuration.coverageData, configuration.classes)
+    override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration) {
+        assertEqualsLines(projectData, configuration, coverage)
     }
 }
