@@ -23,15 +23,17 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 /**
  * This filter ignores lines which consist of return statement only.
  * If a method contains only one line, it cannot be ignored.
+ * Also, ignores lines with GOTO statement only (e.g. break in switch).
  */
 public class ClosingBracesFilter extends CoverageFilter {
   private boolean myHasInstructions;
   private int myCurrentLine = -1;
   private boolean mySeenReturn;
+  private boolean mySeenGoto;
   private int myLinesCount = 0;
 
   private void tryRemoveLine() {
-    if (myCurrentLine != -1 && mySeenReturn && !myHasInstructions && myLinesCount > 1) {
+    if (myCurrentLine != -1 && (mySeenReturn || mySeenGoto) && !myHasInstructions && myLinesCount > 1) {
       myContext.removeLine(myCurrentLine);
       myLinesCount--;
       myCurrentLine = -1;
@@ -45,6 +47,7 @@ public class ClosingBracesFilter extends CoverageFilter {
     myCurrentLine = myContext.getLineData(line) == null ? line : -1;
     myHasInstructions = false;
     mySeenReturn = false;
+    mySeenGoto = false;
     super.visitLineNumber(line, start);
   }
 
@@ -82,6 +85,11 @@ public class ClosingBracesFilter extends CoverageFilter {
   @Override
   public void visitJumpInsn(int opcode, Label label) {
     super.visitJumpInsn(opcode, label);
+    // ignore single GOTO instructions (e.g. switch break)
+    if (opcode == Opcodes.GOTO) {
+      mySeenGoto = true;
+      return;
+    }
     setHasInstructions();
   }
 

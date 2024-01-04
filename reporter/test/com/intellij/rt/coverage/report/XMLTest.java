@@ -185,19 +185,19 @@ public class XMLTest {
     Assert.assertEquals(1, report.getClasses().size());
     XMLProjectData.ClassInfo classInfo = report.getClass("testData.simple.Main");
     Assert.assertNotNull(classInfo);
-    Assert.assertEquals(22, classInfo.missedInstructions);
-    Assert.assertEquals(17, classInfo.coveredInstructions);
+    Assert.assertEquals(21, classInfo.missedInstructions);
+    Assert.assertEquals(16, classInfo.coveredInstructions);
     Assert.assertEquals(3, classInfo.missedBranches);
     Assert.assertEquals(2, classInfo.coveredBranches);
-    Assert.assertEquals(5, classInfo.missedLines);
-    Assert.assertEquals(6, classInfo.coveredLines);
+    Assert.assertEquals(4, classInfo.missedLines);
+    Assert.assertEquals(5, classInfo.coveredLines);
     Assert.assertEquals(1, classInfo.missedMethods);
     Assert.assertEquals(1, classInfo.coveredMethods);
 
     Assert.assertEquals(1, report.getFiles().size());
     XMLProjectData.FileInfo fileInfo = report.getFile("testData/simple/Main.java");
     Assert.assertNotNull(fileInfo);
-    Assert.assertEquals(11, fileInfo.lines.size());
+    Assert.assertEquals(9, fileInfo.lines.size());
     XMLProjectData.LineInfo lineInfo = fileInfo.lines.get(0);
     Assert.assertEquals(19, lineInfo.lineNumber);
     Assert.assertEquals(2, lineInfo.missedInstructions);

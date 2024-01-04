@@ -24,7 +24,7 @@ public class Test { // coverage: FULL // stats: 2/2
     switch (x) { // coverage: PARTIAL // stats: 2/2 1/2
       case 1: {
         System.out.println("Case 1"); // coverage: FULL // stats: 3/3
-        break; // coverage: FULL // stats: 1/1
+        break;
       }
       case 2: {
         System.out.println("Case 2"); // coverage: NONE // stats: 0/3
@@ -37,7 +37,7 @@ public class Test { // coverage: FULL // stats: 2/2
     switch (x) { // coverage: PARTIAL // stats: 2/2 1/2
       case 1: {
         System.out.println("Case 1"); // coverage: NONE // stats: 0/3
-        break; // coverage: NONE // stats: 0/1
+        break;
       }
       case 2: {
         System.out.println("Case 2"); // coverage: FULL // stats: 3/3
@@ -50,11 +50,11 @@ public class Test { // coverage: FULL // stats: 2/2
     switch (x) { // coverage: PARTIAL // stats: 2/2 0/2
       case 1: {
         System.out.println("Case 1"); // coverage: NONE // stats: 0/3
-        break; // coverage: NONE // stats: 0/1
+        break;
       }
       case 2: {
         System.out.println("Case 2"); // coverage: NONE // stats: 0/3
-        break; // coverage: NONE // stats: 0/1
+        break;
       }
       default: {
         System.out.println("Default"); // coverage: FULL // stats: 3/3
@@ -67,7 +67,7 @@ public class Test { // coverage: FULL // stats: 2/2
     switch (x) { // coverage: PARTIAL // stats: 2/2 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: FULL // stats: 3/3
-        break; // coverage: FULL // stats: 1/1
+        break;
       }
       case 2: {
         System.out.println("Case 2"); // coverage: FULL // stats: 3/3
@@ -80,11 +80,11 @@ public class Test { // coverage: FULL // stats: 2/2
     switch (x) { // coverage: FULL // stats: 2/2 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: FULL // stats: 3/3
-        break; // coverage: FULL // stats: 1/1
+        break;
       }
       case 2: {
         System.out.println("Case 2"); // coverage: FULL // stats: 3/3
-        break; // coverage: FULL // stats: 1/1
+        break;
       }
       default: {
         System.out.println("Default"); // coverage: FULL // stats: 3/3
@@ -97,11 +97,11 @@ public class Test { // coverage: FULL // stats: 2/2
     switch (x) { // coverage: PARTIAL // stats: 2/2 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: FULL // stats: 3/3
-        break; // coverage: FULL // stats: 1/1
+        break;
       }
       case 2: {
         System.out.println("Case 2"); // coverage: FULL // stats: 3/3
-        break; // coverage: FULL // stats: 1/1
+        break;
       }
       default: {
         System.out.println("Default"); // coverage: NONE // stats: 0/3

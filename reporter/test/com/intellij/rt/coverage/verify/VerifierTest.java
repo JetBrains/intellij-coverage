@@ -69,7 +69,7 @@ public class VerifierTest {
     boundViolation2x1.minViolations.add(new Violation("testData.branches.TestKt", new BigDecimal("5")));
     boundViolation2x1.minViolations.add(new Violation("testData.crossinline.TestKt", new BigDecimal("0")));
 
-    boundViolation2x1.maxViolations.add(new Violation("testData.simple.Main", new BigDecimal("17")));
+    boundViolation2x1.maxViolations.add(new Violation("testData.simple.Main", new BigDecimal("16")));
     boundViolation2x1.maxViolations.add(new Violation("testData.inline.TestKt", new BigDecimal("18")));
 
     BoundViolation boundViolation2x2 = new BoundViolation(2);
@@ -84,7 +84,7 @@ public class VerifierTest {
     boundViolation3x1.minViolations.add(new Violation("testData.inline", new BigDecimal("2")));
     boundViolation3x1.minViolations.add(new Violation("testData.defaultArgs", new BigDecimal("6")));
     boundViolation3x1.minViolations.add(new Violation("testData.outOfPackageStructure", new BigDecimal("1")));
-    boundViolation3x1.minViolations.add(new Violation("testData.simple", new BigDecimal("5")));
+    boundViolation3x1.minViolations.add(new Violation("testData.simple", new BigDecimal("4")));
     boundViolation3x1.minViolations.add(new Violation("testData.crossinline", new BigDecimal("4")));
 
     boundViolation3x1.maxViolations.add(new Violation("testData.noReport.branches", new BigDecimal("23")));
@@ -128,7 +128,7 @@ public class VerifierTest {
     boundViolation.minViolations.add(new Violation("testData.inline", new BigDecimal("3")));
     boundViolation.minViolations.add(new Violation("testData.defaultArgs", BigDecimal.ZERO));
     boundViolation.minViolations.add(new Violation("testData.outOfPackageStructure", BigDecimal.ZERO));
-    boundViolation.minViolations.add(new Violation("testData.simple", new BigDecimal("6")));
+    boundViolation.minViolations.add(new Violation("testData.simple", new BigDecimal("5")));
     boundViolation.minViolations.add(new Violation("testData.crossinline", BigDecimal.ZERO));
     boundViolation.minViolations.add(new Violation("testData.noReport.branches", BigDecimal.ZERO));
     boundViolation.minViolations.add(new Violation("testData.branches", new BigDecimal("4")));

@@ -66,7 +66,6 @@ public class CoverageStatusTest extends TestCase {
             "8:NONE\n" +
             "11:PARTIAL\n" +
             "13:FULL\n" +
-            "14:FULL\n" +
             "16:NONE\n");
   }
 
@@ -80,7 +79,6 @@ public class CoverageStatusTest extends TestCase {
             "8:NONE\n" +
             "11:PARTIAL\n" +
             "13:NONE\n" +
-            "14:NONE\n" +
             "16:FULL\n" +
             "18:FULL\n" +
             "19:FULL\n" +
@@ -96,7 +94,6 @@ public class CoverageStatusTest extends TestCase {
             "8:NONE\n" +
             "11:PARTIAL\n" +
             "13:NONE\n" +
-            "14:NONE\n" +
             "16:FULL\n" +
             "18:FULL\n" +
             "19:FULL\n" +
