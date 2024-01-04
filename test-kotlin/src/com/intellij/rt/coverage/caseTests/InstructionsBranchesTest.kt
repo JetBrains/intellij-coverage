@@ -35,6 +35,9 @@ internal class InstructionsBranchesTest : CoverageTest() {
     //===GENERATED TESTS===
 
     @Test
+    fun testCasesJavaIf() = test("cases.javaIf")
+
+    @Test
     fun testCasesWhenEnum() = test("cases.whenEnum")
 
     @Test

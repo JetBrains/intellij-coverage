@@ -66,6 +66,9 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testBadCycleInterfaces() = test("badCycle.interfaces")
 
     @Test
+    fun testCasesJavaIf() = test("cases.javaIf")
+
+    @Test
     fun testCasesJavaSwitch() = test("cases.javaSwitch")
 
     @Test
