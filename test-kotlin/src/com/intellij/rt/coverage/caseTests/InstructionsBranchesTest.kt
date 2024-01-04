@@ -38,6 +38,9 @@ internal class InstructionsBranchesTest : CoverageTest() {
     fun testCasesJavaIf() = test("cases.javaIf")
 
     @Test
+    fun testCasesJavaSwitch() = test("cases.javaSwitch")
+
+    @Test
     fun testCasesWhenEnum() = test("cases.whenEnum")
 
     @Test
