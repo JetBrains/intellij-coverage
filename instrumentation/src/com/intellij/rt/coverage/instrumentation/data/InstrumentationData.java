@@ -47,6 +47,7 @@ public class InstrumentationData {
   private boolean myLinesInCurrentMethod;
   private Label myLastFalseJump;
   private Label myLastTrueJump;
+  private SwitchLabels myLastSwitchLabels;
   private Map<Label, Jump> myJumps;
   private Map<Label, Switch> mySwitches;
 
@@ -62,6 +63,7 @@ public class InstrumentationData {
     myLinesInCurrentMethod = false;
     myLastFalseJump = null;
     myLastTrueJump = null;
+    myLastSwitchLabels = null;
     if (myJumps != null) myJumps.clear();
     if (mySwitches != null) mySwitches.clear();
   }
@@ -175,12 +177,14 @@ public class InstrumentationData {
     lineData.removeJump(lineData.jumpsCount() - 1);
   }
 
-  public void removeLastSwitch(Label dflt, Label... labels) {
+  public void removeLastSwitch() {
     if (mySwitches == null) return;
-    Switch aSwitch = mySwitches.remove(dflt);
-    for (Label label : labels) {
+    if (myLastSwitchLabels == null) return;
+    Switch aSwitch = mySwitches.remove(myLastSwitchLabels.getDefault());
+    for (Label label : myLastSwitchLabels.getLabels()) {
       mySwitches.remove(label);
     }
+    myLastSwitchLabels = null;
     if (aSwitch == null) return;
     LineData lineData = myLines.get(aSwitch.getLine());
     if (lineData == null) return;
@@ -207,6 +211,7 @@ public class InstrumentationData {
   private List<Switch> rememberSwitchLabels(final int line, final Label dflt, final Label[] labels, int switchIndex) {
     List<Switch> result = new ArrayList<Switch>();
     if (mySwitches == null) mySwitches = new HashMap<Label, Switch>();
+    myLastSwitchLabels = new SwitchLabels(dflt, labels);
 
     Switch aSwitch = new Switch(incrementId(), switchIndex, line, -1);
     result.add(aSwitch);

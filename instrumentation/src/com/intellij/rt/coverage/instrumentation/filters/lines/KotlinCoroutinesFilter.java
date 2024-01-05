@@ -183,7 +183,7 @@ public class KotlinCoroutinesFilter extends CoverageFilter {
     super.visitTableSwitchInsn(min, max, dflt, labels);
     myHasInstructions = true;
     if (myLoadStateLabelVisited) {
-      myContext.removeLastSwitch(dflt, labels);
+      myContext.removeLastSwitch();
       if (!myHadLineDataBefore) {
         onIgnoredLine(myLine);
       }

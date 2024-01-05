@@ -122,6 +122,74 @@ public class Test { // coverage: FULL // stats: 2/2
     }
   }
 
+  void stringSwitch(String s) {
+    switch (s) { // coverage: PARTIAL // stats: 29/29 1/7
+      case "A": {
+        System.out.println("Case A"); // coverage: FULL // stats: 3/3
+        break;
+      }
+      case "B": {
+        System.out.println("Case B"); // coverage: NONE // stats: 0/3
+        break;
+      }
+      case "C": {
+        System.out.println("Case C"); // coverage: NONE // stats: 0/3
+        break;
+      }
+      case "D": {
+        System.out.println("Case D"); // coverage: NONE // stats: 0/3
+        break;
+      }
+      case "E": {
+        System.out.println("Case E"); // coverage: NONE // stats: 0/3
+        break;
+      }
+      case "F": {
+        System.out.println("Case F"); // coverage: NONE // stats: 0/3
+        break;
+      }
+      case "G": {
+        System.out.println("Case G"); // coverage: NONE // stats: 0/3
+        break;
+      }
+    }
+  }
+
+  void fullStringSwitch(String s) {
+    switch (s) { // coverage: FULL // stats: 14/14 2/2
+      case "A": {
+        System.out.println("Case A"); // coverage: FULL // stats: 3/3
+        break;
+      }
+      case "B": {
+        System.out.println("Case B"); // coverage: FULL // stats: 3/3
+        break;
+      }
+      default: {
+        System.out.println("Default"); // coverage: FULL // stats: 3/3
+        break;
+      }
+    }
+  }
+
+  void stringSwitchSameHashCode(String s) {
+    switch (s) { // coverage: FULL // stats: 18/18 2/2
+      case "Aa": {
+        System.out.println("Case A"); // coverage: FULL // stats: 3/3
+        break;
+      }
+      case "BB": {
+        System.out.println("Case B"); // coverage: FULL // stats: 3/3
+        break;
+      }
+      default: {
+        System.out.println("Default"); // coverage: FULL // stats: 3/3
+        break;
+      }
+    }
+  }
+
+
   public static void main(String[] args) {
     Test switches = new Test(); // coverage: FULL // stats: 4/4
 
@@ -140,5 +208,14 @@ public class Test { // coverage: FULL // stats: 2/2
     switches.fullyCoveredSwitchWithoutDefault(2); // coverage: FULL // stats: 3/3
 
     switches.switchWithFallThrough(1); // coverage: FULL // stats: 3/3
+
+    switches.stringSwitch("A"); // coverage: FULL // stats: 3/3
+    switches.fullStringSwitch("A"); // coverage: FULL // stats: 3/3
+    switches.fullStringSwitch("B"); // coverage: FULL // stats: 3/3
+    switches.fullStringSwitch("C"); // coverage: FULL // stats: 3/3
+
+    switches.stringSwitchSameHashCode("Aa"); // coverage: FULL // stats: 3/3
+    switches.stringSwitchSameHashCode("BB"); // coverage: FULL // stats: 3/3
+    switches.stringSwitchSameHashCode("C"); // coverage: FULL // stats: 3/3
   }
 }
