@@ -67,8 +67,12 @@ public class CoverageReport {
 
       lock = CoverageIOUtil.FileLock.lock(myDataFile);
       if (myMergeFile) {
-        final ProjectData load = ProjectDataLoader.load(myDataFile);
-        projectData.merge(load);
+        try {
+          ProjectData load = ProjectDataLoader.load(myDataFile);
+          projectData.merge(load);
+        } catch (OutOfMemoryError e) {
+          ErrorReporter.warn("Out of memory error occurred during previous report loading. Try to increase memory available for the JVM or write new report to a separate file", e);
+        }
       }
 
       save(projectData, myDataFile, mySourceMapFile);

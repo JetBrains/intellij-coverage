@@ -58,11 +58,16 @@ public class UncoveredBranchesSection extends ClassListSection {
       final int switchesNumber = CoverageIOUtil.readINT(in);
       for (int switchId = 0; switchId < switchesNumber; switchId++) {
         final int keysLength = CoverageIOUtil.readINT(in);
-        final int[] keys = new int[keysLength];
-        for (int k = 0; k < keysLength; k++) {
-          keys[k] = k;
+        try {
+          final int[] keys = new int[keysLength];
+          for (int k = 0; k < keysLength; k++) {
+            keys[k] = k;
+          }
+          line.addSwitch(switchId, keys);
+        } catch (OutOfMemoryError e) {
+          ErrorReporter.error("OOM during " + classData + " class loading from report, cannot create switch with " + keysLength + " keys");
+          throw e;
         }
-        line.addSwitch(switchId, keys);
       }
 
       line.fillArrays();
