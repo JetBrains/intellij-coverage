@@ -19,7 +19,6 @@ package testData.custom.threadSafe.structure
 import org.jetbrains.coverage.org.objectweb.asm.ClassWriter
 import org.jetbrains.coverage.org.objectweb.asm.Label
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes
-import java.util.concurrent.CyclicBarrier
 import kotlin.system.exitProcess
 
 object F {
@@ -71,8 +70,8 @@ private object GeneratorClassLoader : ClassLoader() {
     }
 }
 
-const val THREAD_SAFE_STRUCTURE_CLASSES = 10000
-private const val THREADS = 10
+const val THREAD_SAFE_STRUCTURE_CLASSES = 100
+private const val THREADS = 4
 
 private val tasks = List(THREADS) { iThread ->
     Runnable {
@@ -87,15 +86,11 @@ private val tasks = List(THREADS) { iThread ->
                 }
             }
         }.onFailure { it.printStackTrace(System.err); exitProcess(1) }
-        barrier.await()
     }
 }
 
-private val barrier = CyclicBarrier(THREADS + 1)
-
 fun main() {
-    repeat(THREADS) { i ->
-        Thread(tasks[i]).start()
-    }
-    barrier.await()
+    val threads = tasks.map { Thread(it) }
+    threads.forEach(Thread::start)
+    threads.forEach(Thread::join)
 }

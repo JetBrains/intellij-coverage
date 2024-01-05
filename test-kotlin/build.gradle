@@ -82,7 +82,6 @@ task lineStatusTests(type: Test) {
   configureTests(it)
   filter {
     includeTestsMatching("com.intellij.rt.coverage.CoverageRunTest")
-    excludeTestsMatching("com.intellij.rt.coverage.CoverageRunTest.testThreadSafeStructure")
     includeTestsMatching("com.intellij.rt.coverage.caseTests.LineSignatureTest")
     includeTestsMatching("com.intellij.rt.coverage.caseTests.OfflineInstrumentationTest")
   }
