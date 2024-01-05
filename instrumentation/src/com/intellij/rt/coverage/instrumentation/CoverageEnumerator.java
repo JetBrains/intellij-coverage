@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Key;
+import com.intellij.rt.coverage.instrumentation.data.SwitchLabels;
 import com.intellij.rt.coverage.instrumentation.util.SaveLabelsMethodNode;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
@@ -164,23 +165,5 @@ public class CoverageEnumerator extends MethodVisitor implements Opcodes {
       keys[i - min] = i;
     }
     return keys;
-  }
-
-  protected static class SwitchLabels {
-    private final Label myDefault;
-    private final Label[] myLabels;
-
-    private SwitchLabels(Label dflt, Label[] labels) {
-      this.myDefault = dflt;
-      this.myLabels = labels;
-    }
-
-    public Label getDefault() {
-      return myDefault;
-    }
-
-    public Label[] getLabels() {
-      return myLabels;
-    }
   }
 }
