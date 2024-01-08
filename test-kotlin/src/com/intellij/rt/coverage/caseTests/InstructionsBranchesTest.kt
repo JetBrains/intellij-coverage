@@ -35,6 +35,9 @@ internal class InstructionsBranchesTest : CoverageTest() {
     //===GENERATED TESTS===
 
     @Test
+    fun testAssertion() = test("assertion")
+
+    @Test
     fun testCasesJavaIf() = test("cases.javaIf")
 
     @Test

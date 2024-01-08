@@ -16,58 +16,45 @@
 
 package com.intellij.rt.coverage;
 
+import com.intellij.rt.coverage.data.BranchData;
 import com.intellij.rt.coverage.data.ClassData;
-import com.intellij.rt.coverage.data.JumpData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.CoverageTransformer;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
-
-import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class CoverageNotNullInstrumentationTest {
 
-  private byte[] doTransform(final String name, final ProjectData data) throws IOException {
+  private void loadTransformed(String name, ProjectData data) throws Exception {
     final String resource = name.replace('.', '/') + ".class";
-    ClassLoader loader = WithNotNulls.class.getClassLoader();
+    ClassLoader loader = getClass().getClassLoader();
     byte[] bytes = TransformedClassLoader.readBytes(loader.getResourceAsStream(resource));
-    return doTransform(name, bytes, loader, data);
-  }
-
-  private byte[] doTransform(String name, byte[] bytes, ClassLoader loader, final ProjectData data) {
-    return new CoverageTransformer(data, false)
+    byte[] transformedBytes = new CoverageTransformer(data, false)
         .instrument(bytes, name, loader, true);
+    new TransformedClassLoader(getClass().getClassLoader(), name, transformedBytes).loadClass(name, true);
   }
 
   @Test
   public void testNotNullInstrumentation() throws Exception {
-    String name = WithNotNulls.class.getName();
+    String name = "WithNotNulls";
     ProjectData projectData = new ProjectData();
-    new TransformedClassLoader(WithNotNulls.class.getClassLoader(), name, doTransform(name, projectData)).loadClass(name, true);
+    loadTransformed(name, projectData);
     ClassData classData = projectData.getClassData(name);
     assertNotNull(classData);
-    Object[] lines = classData.getLines();
-    int jumpsCount = 0;
-    for (Object line : lines) {
+    LineData[] lines = (LineData[]) classData.getLines();
+    int lineCount = 0;
+    for (LineData line : lines) {
       if (line != null) {
-        JumpData[] jumps = ((LineData) line).getJumps();
-        if (jumps != null && jumps.length > 0) {
-          jumpsCount++;
+        lineCount++;
+        BranchData branchData = line.getBranchData();
+        if (branchData != null) {
+          assertEquals(0, branchData.getTotalBranches());
         }
       }
     }
-    assertEquals(0, jumpsCount);
-  }
-
-
-  static class WithNotNulls {
-    @NotNull
-    public String foo(@NotNull String s) {
-      return "";
-    }
+    assertEquals(4, lineCount);
   }
 }

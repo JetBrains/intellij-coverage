@@ -152,10 +152,11 @@ public class CoverageStatusTest extends TestCase {
   }
 
   public void testNotNullAssertionsAreIgnored() throws Exception {
-    final String testDataPath = getTestPath("notNull");
-    myDataFile = new File(testDataPath + File.separator + "Test.ic");
-    final ProjectData projectInfo = CoverageRunner.runCoverage(testDataPath, myDataFile, "WithNotNulls.*", "WithNotNulls", true);
-    final ClassData classInfo = projectInfo.getClassData("WithNotNulls");
+    String className = "WithNotNulls";
+    String testDataPath = new File(getClass().getClassLoader().getResource(className + ".class").getPath()).getParent();
+    myDataFile = new File( getTestPath("notNull") + File.separator + "Test.ic");
+    final ProjectData projectInfo = CoverageRunner.runCoverage(testDataPath, myDataFile, className + ".*", className, true);
+    final ClassData classInfo = projectInfo.getClassData(className);
     assertNotNull(classInfo);
     final LineData line = classInfo.getLineData(6);
     assertNotNull(line);

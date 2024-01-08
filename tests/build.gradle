@@ -19,6 +19,7 @@ import org.gradle.internal.jvm.Jvm
 sourceSets {
   main.java.srcDirs = [file('src')]
   test.java.srcDirs = [file('test')]
+  test.resources.srcDirs = [file('resources')]
 }
 
 sourceCompatibility = 1.7

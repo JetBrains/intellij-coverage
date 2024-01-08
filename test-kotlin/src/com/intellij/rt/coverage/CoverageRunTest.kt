@@ -60,6 +60,9 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     //===GENERATED TESTS===
 
     @Test
+    fun testAssertion() = test("assertion")
+
+    @Test
     fun testBadCycleClasses() = test("badCycle.classes")
 
     @Test

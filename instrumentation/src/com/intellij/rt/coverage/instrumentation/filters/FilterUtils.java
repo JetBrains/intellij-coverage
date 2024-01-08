@@ -55,6 +55,7 @@ public class FilterUtils {
   public static List<CoverageFilter> createBranchFilters() {
     List<CoverageFilter> result = KotlinUtils.createBranchFilters();
     result.add(new NotNullAssertionsFilter());
+    result.add(new AssertFilter());
     result.add(new BooleanOperatorFilter());
     result.add(new JavaStringSwitchFilter());
     return result;
