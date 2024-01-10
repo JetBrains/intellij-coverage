@@ -58,15 +58,15 @@ public abstract class LineMapper<T extends CoverageData> {
             }
           }
           for (int targetLineNumber = mapData.getMappingStart(index); targetLineNumber < mapData.getMappingEnd(index); targetLineNumber++) {
+            // if this is a mapping inside one class, there is no need to map the line to itself
+            if (sourceClassData == targetClassData && sourceLineNumber == targetLineNumber) continue;
             final T source = ArrayUtil.safeLoad(sourceLines, sourceLineNumber);
             final T target = ArrayUtil.safeLoad(targetLines, targetLineNumber);
             if (target == null) continue;
             if (source != null) {
               source.merge(target);
             }
-            if (sourceClassData != targetClassData || targetLineNumber != sourceLineNumber) {
-              targetLines[targetLineNumber] = null;
-            }
+            targetLines[targetLineNumber] = null;
           }
         }
       }
