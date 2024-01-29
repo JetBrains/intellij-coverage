@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.instrumentation.filters.branches;
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
+import org.jetbrains.coverage.org.objectweb.asm.Handle;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -121,6 +122,18 @@ public class NotNullAssertionsFilter extends CoverageFilter {
   @Override
   public void visitMultiANewArrayInsn(final String desc, final int dims) {
     super.visitMultiANewArrayInsn(desc, dims);
+    myState = 0;
+  }
+
+  @Override
+  public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
+    super.visitFieldInsn(opcode, owner, name, descriptor);
+    myState = 0;
+  }
+
+  @Override
+  public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
+    super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
     myState = 0;
   }
 }
