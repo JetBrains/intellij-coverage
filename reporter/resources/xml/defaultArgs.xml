@@ -3,14 +3,14 @@
 <package name="testData/defaultArgs">
 <class name="testData/defaultArgs/Example" sourcefilename="test.kt">
 <method name="&lt;init&gt;" desc="(Ljava/lang/String;)V">
-<counter type="INSTRUCTION" missed="2" covered="9"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
 <counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="1" covered="1"/>
+<counter type="LINE" missed="1" covered="0"/>
 </method>
-<counter type="INSTRUCTION" missed="2" covered="9"/>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
 <counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="1" covered="1"/>
-<counter type="METHOD" missed="0" covered="1"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
 </class>
 <class name="testData/defaultArgs/TestKt" sourcefilename="test.kt">
 <method name="method" desc="(Ljava/lang/String;)Ljava/lang/String;">
@@ -29,25 +29,24 @@
 <counter type="METHOD" missed="0" covered="2"/>
 </class>
 <sourcefile name="test.kt">
-<line nr="19" mi="0" ci="9" mb="0" cb="0"/>
 <line nr="20" mi="2" ci="0" mb="0" cb="0"/>
 <line nr="24" mi="2" ci="0" mb="0" cb="0"/>
 <line nr="26" mi="0" ci="1" mb="0" cb="0"/>
 <line nr="30" mi="0" ci="5" mb="0" cb="0"/>
 <line nr="31" mi="0" ci="3" mb="0" cb="0"/>
-<counter type="INSTRUCTION" missed="4" covered="18"/>
+<counter type="INSTRUCTION" missed="4" covered="9"/>
 <counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="2" covered="4"/>
+<counter type="LINE" missed="2" covered="3"/>
 </sourcefile>
-<counter type="INSTRUCTION" missed="4" covered="18"/>
+<counter type="INSTRUCTION" missed="4" covered="9"/>
 <counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="2" covered="4"/>
-<counter type="METHOD" missed="0" covered="3"/>
-<counter type="CLASS" missed="0" covered="2"/>
+<counter type="LINE" missed="2" covered="3"/>
+<counter type="METHOD" missed="1" covered="2"/>
+<counter type="CLASS" missed="1" covered="1"/>
 </package>
-<counter type="INSTRUCTION" missed="4" covered="18"/>
+<counter type="INSTRUCTION" missed="4" covered="9"/>
 <counter type="BRANCH" missed="0" covered="0"/>
-<counter type="LINE" missed="2" covered="4"/>
-<counter type="METHOD" missed="0" covered="3"/>
-<counter type="CLASS" missed="0" covered="2"/>
+<counter type="LINE" missed="2" covered="3"/>
+<counter type="METHOD" missed="1" covered="2"/>
+<counter type="CLASS" missed="1" covered="1"/>
 </report>

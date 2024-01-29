@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.filters.branches.KotlinDefaultArgsBranchFilter;
+import org.jetbrains.coverage.org.objectweb.asm.Handle;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
@@ -36,6 +37,7 @@ public class KotlinDefaultArgsLineFilter extends CoverageFilter {
   private boolean myHasInstructions = false;
   private String myName;
   private String myNameDesc;
+  private String myInternalName;
 
   /**
    * Index of first mask variable.
@@ -59,15 +61,17 @@ public class KotlinDefaultArgsLineFilter extends CoverageFilter {
     String desc = context.getMethodDesc();
     myNameDesc = KotlinDefaultArgsBranchFilter.getOriginalNameAndDesc(name, desc);
     myName = myNameDesc.substring(0, myNameDesc.indexOf('('));
+    myInternalName = KotlinImplementerDefaultInterfaceMemberFilter
+        .removeDefaultMarkerSuffix(myContext.get(Key.CLASS_INTERNAL_NAME));
     final int[] range = KotlinDefaultArgsBranchFilter.getMaskIndexRange(name, desc);
     myMinMaskIndex = range[0];
     myMaxMaskIndex = range[1];
+    myHasInstructions = false;
   }
 
   @Override
   public void visitLineNumber(int line, Label start) {
-    if (myFirstLine == -1 && myContext.getLineData(line) == null) {
-      myHasInstructions = false;
+    if (myFirstLine == -1) {
       myFirstLine = line;
     }
     myCurrentLine = line;
@@ -92,15 +96,15 @@ public class KotlinDefaultArgsLineFilter extends CoverageFilter {
   public void visitVarInsn(int opcode, int var) {
     super.visitVarInsn(opcode, var);
     if (myCurrentLine != myFirstLine) return;
-    if (myState == 0 && myMinMaskIndex <= var && var <= myMaxMaskIndex) {
+    if ((myState == 0 || myState == 4) && myMinMaskIndex <= var && var <= myMaxMaskIndex) {
       myState = 1;
       return;
     }
-    if ((myState == 0 || myState == 10) && var < myMinMaskIndex) {
+    if ((myState == 4 || myState == 10) && var < myMinMaskIndex) {
       myState = 10; // default method invocation started
       return;
     }
-    myHasInstructions = true;
+    markHasInstructions();
   }
 
   @Override
@@ -118,7 +122,7 @@ public class KotlinDefaultArgsLineFilter extends CoverageFilter {
     if (myState == 11 && Opcodes.IRETURN <= opcode && opcode <= Opcodes.RETURN) {
       return;
     }
-    myHasInstructions = true;
+    markHasInstructions();
   }
 
   @Override
@@ -129,7 +133,7 @@ public class KotlinDefaultArgsLineFilter extends CoverageFilter {
       myState = 2;
       return;
     }
-    myHasInstructions = true;
+    markHasInstructions();
   }
 
   @Override
@@ -140,7 +144,7 @@ public class KotlinDefaultArgsLineFilter extends CoverageFilter {
       myState = 2;
       return;
     }
-    myHasInstructions = true;
+    markHasInstructions();
   }
 
   @Override
@@ -148,62 +152,70 @@ public class KotlinDefaultArgsLineFilter extends CoverageFilter {
     super.visitJumpInsn(opcode, label);
     if (myCurrentLine != myFirstLine) return;
     if (myState == 3 && opcode == Opcodes.IFEQ) {
-      myState = 0;
+      myState = 4;
       return;
     }
-    myHasInstructions = true;
-  }
-
-  @Override
-  public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
-    super.visitFieldInsn(opcode, owner, name, descriptor);
-    if (myCurrentLine != myFirstLine) return;
-    myHasInstructions = true;
-  }
-
-  @Override
-  public void visitIincInsn(int var, int increment) {
-    super.visitIincInsn(var, increment);
-    if (myCurrentLine != myFirstLine) return;
-    myHasInstructions = true;
-  }
-
-  @Override
-  public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-    super.visitLookupSwitchInsn(dflt, keys, labels);
-    if (myCurrentLine != myFirstLine) return;
-    myHasInstructions = true;
+    markHasInstructions();
   }
 
   @Override
   public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
     super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
     if (myCurrentLine != myFirstLine) return;
-    if (myState == 10 && myName.equals(name) && myContext.get(Key.CLASS_INTERNAL_NAME).equals(owner)) {
+    if (myState == 10 && myName.equals(name) && myInternalName.equals(owner)) {
       myState = 11;
       return;
     }
-    myHasInstructions = true;
+    markHasInstructions();
+  }
+
+  @Override
+  public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
+    super.visitFieldInsn(opcode, owner, name, descriptor);
+    markHasInstructions();
+  }
+
+  @Override
+  public void visitIincInsn(int var, int increment) {
+    super.visitIincInsn(var, increment);
+    markHasInstructions();
+  }
+
+  @Override
+  public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
+    super.visitLookupSwitchInsn(dflt, keys, labels);
+    markHasInstructions();
   }
 
   @Override
   public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
     super.visitMultiANewArrayInsn(descriptor, numDimensions);
-    if (myCurrentLine != myFirstLine) return;
-    myHasInstructions = true;
+    markHasInstructions();
   }
 
   @Override
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
     super.visitTableSwitchInsn(min, max, dflt, labels);
-    if (myCurrentLine != myFirstLine) return;
-    myHasInstructions = true;
+    markHasInstructions();
   }
 
   @Override
   public void visitTypeInsn(int opcode, String type) {
     super.visitTypeInsn(opcode, type);
+    markHasInstructions();
+  }
+
+  @Override
+  public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
+    super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
+    markHasInstructions();
+  }
+
+  private void markHasInstructions() {
+    // We care only about the first line here, as only it may be generated
     if (myCurrentLine != myFirstLine) return;
+    // Do not care about the code before the users code, as it is all generated
+    if (myState < 4) return;
     myHasInstructions = true;
   }
 }

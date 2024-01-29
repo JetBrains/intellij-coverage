@@ -82,7 +82,7 @@ public class VerifierTest {
     BoundViolation boundViolation3x1 = new BoundViolation(1);
     boundViolation3x1.minViolations.add(new Violation("", BigDecimal.ZERO));
     boundViolation3x1.minViolations.add(new Violation("testData.inline", new BigDecimal("2")));
-    boundViolation3x1.minViolations.add(new Violation("testData.defaultArgs", new BigDecimal("6")));
+    boundViolation3x1.minViolations.add(new Violation("testData.defaultArgs", new BigDecimal("5")));
     boundViolation3x1.minViolations.add(new Violation("testData.outOfPackageStructure", new BigDecimal("1")));
     boundViolation3x1.minViolations.add(new Violation("testData.simple", new BigDecimal("4")));
     boundViolation3x1.minViolations.add(new Violation("testData.crossinline", new BigDecimal("4")));

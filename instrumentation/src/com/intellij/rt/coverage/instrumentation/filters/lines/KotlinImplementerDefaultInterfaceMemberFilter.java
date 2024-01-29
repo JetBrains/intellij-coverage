@@ -40,6 +40,8 @@ import org.jetbrains.coverage.org.objectweb.asm.Type;
  * A method is filtered out if its instructions list matches this structure.
  */
 public class KotlinImplementerDefaultInterfaceMemberFilter extends CoverageFilter {
+  private static final String DEFAULT_IMPLS_SUFFIX = "$DefaultImpls";
+
   private enum State {
     SHOULD_COVER, SHOULD_NOT_COVER, UNKNOWN
   }
@@ -120,7 +122,7 @@ public class KotlinImplementerDefaultInterfaceMemberFilter extends CoverageFilte
   public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
     super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
     if (completed()) return;
-    if (matchedInstructions == 3 && owner.endsWith("$DefaultImpls")) {
+    if (matchedInstructions == 3 && owner.endsWith(DEFAULT_IMPLS_SUFFIX)) {
       matchedInstructions = 4;
     } else {
       myState = State.SHOULD_COVER;
@@ -136,6 +138,13 @@ public class KotlinImplementerDefaultInterfaceMemberFilter extends CoverageFilte
     } else {
       myState = State.SHOULD_COVER;
     }
+  }
+
+  public static String removeDefaultMarkerSuffix(String internalName) {
+    if (internalName.endsWith(DEFAULT_IMPLS_SUFFIX)) {
+      return internalName.substring(0, internalName.length() - DEFAULT_IMPLS_SUFFIX.length());
+    }
+    return internalName;
   }
 
   private static boolean isLoadOpcode(int opcode) {

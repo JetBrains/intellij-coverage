@@ -17,7 +17,9 @@
 package testData.defaultArgs.openMethod
 
 interface IFace {
-    fun func(value: Int = 0) { // coverage: FULL
+    fun func(
+        value: Int = 0 // coverage: FULL
+    ) {
         println(value) // coverage: FULL
     }
 }
@@ -25,7 +27,9 @@ interface IFace {
 class Implementation: IFace // coverage: FULL
 
 open class OFace { // coverage: FULL
-    fun func(value: Int = 0) { // coverage: FULL
+    fun func(
+        value: Int = 0 // coverage: FULL
+    ) {
         println(value) // coverage: FULL
     }
 }
