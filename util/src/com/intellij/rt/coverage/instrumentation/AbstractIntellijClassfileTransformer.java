@@ -77,12 +77,9 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
       //and do not instrument packages which are used during instrumented method invocation
       //(inside methods touch, save, etc from ProjectData)
       if (className.startsWith("com.intellij.rt.")
-          || className.startsWith("java.")
-          || className.startsWith("sun.")
-          || className.startsWith("com.sun.")
-          || className.startsWith("jdk.")
           || className.startsWith("org.jetbrains.coverage.gnu.trove.")
-          || className.startsWith("org.jetbrains.coverage.org.objectweb.")) {
+          || className.startsWith("org.jetbrains.coverage.org.objectweb.")
+          || isInternalJavaClass(className)) {
         return null;
       }
 
@@ -104,6 +101,13 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
       ErrorReporter.warn("Error during class instrumentation: " + className, e);
     }
     return null;
+  }
+
+  protected boolean isInternalJavaClass(String className) {
+    return className.startsWith("java.")
+        || className.startsWith("sun.")
+        || className.startsWith("com.sun.")
+        || className.startsWith("jdk.");
   }
 
   //public for test
