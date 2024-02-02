@@ -92,7 +92,7 @@ public class CoverageReport {
     mySourceMapFile = sourceMapFile;
   }
 
-  private static void finalizeCoverage(ProjectData projectData, boolean appendUnloaded, ClassFinder cf, boolean calculateSource) {
+  public static void finalizeCoverage(ProjectData projectData, boolean appendUnloaded, ClassFinder cf, boolean calculateSource) {
     projectData.applyHits();
     if (appendUnloaded) {
       UnloadedUtil.appendUnloaded(projectData, cf, calculateSource, projectData.isBranchCoverage());
