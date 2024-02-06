@@ -245,12 +245,20 @@ public class XMLCoverageReport {
     return value;
   }
 
-  public void write(FileOutputStream fOut, ProjectData project) throws IOException {
+  public void write(FileOutputStream fOut, ProjectData project, String title) throws IOException {
     XMLOutputFactory factory = XMLOutputFactory.newInstance();
     try {
       myOut = factory.createXMLStreamWriter(new BufferedOutputStream(fOut));
       myFiles.clear();
+
+      myOut.writeStartDocument();
+      newLine();
+      myOut.writeStartElement(REPORT_TAG);
+      String reportName = title != null ? title : IJ_REPORT_NAME;
+      myOut.writeAttribute(NAME_TAG, reportName);
+      newLine();
       writeProject(project);
+      myOut.writeEndDocument();
     } catch (XMLStreamException e) {
       throw wrapIOException(e);
     } finally {
@@ -272,12 +280,6 @@ public class XMLCoverageReport {
   }
 
   private void writeProject(ProjectData project) throws XMLStreamException {
-    myOut.writeStartDocument();
-    newLine();
-    myOut.writeStartElement(REPORT_TAG);
-    myOut.writeAttribute(NAME_TAG, IJ_REPORT_NAME);
-    newLine();
-
     final HashMap<String, List<ClassData>> packages = mapClassesToPackages(project, true);
 
     final Counter counter = new Counter();
@@ -290,7 +292,6 @@ public class XMLCoverageReport {
     writeCounter(counter, INSTRUCTION_MASK | LINE_MASK | BRANCH_MASK | METHOD_MASK | CLASS_MASK);
     myOut.writeEndElement();
     newLine();
-    myOut.writeEndDocument();
   }
 
   private Counter writePackage(ProjectData project, String packageName, List<ClassData> classes) throws XMLStreamException {

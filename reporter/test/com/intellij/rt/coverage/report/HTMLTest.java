@@ -95,7 +95,7 @@ public class HTMLTest {
     BinaryReport report = TestUtils.runTest(patterns, className);
     File htmlDir = createHtmlDir(report.getDataFile());
     TestUtils.clearLogFile(new File("."));
-    TestUtils.createRawReporter(report, patterns).createHTMLReport(htmlDir, DEFAULT_TITLE, DEFAULT_CHARSET);
+    TestUtils.createRawReporter(report, patterns, DEFAULT_TITLE).createHTMLReport(htmlDir, DEFAULT_CHARSET);
     TestUtils.checkLogFile(new File("."));
     return htmlDir;
   }

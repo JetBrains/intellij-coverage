@@ -33,9 +33,11 @@ import java.io.IOException;
  */
 public class Reporter {
   private final ReportLoadStrategy myLoad;
+  private final String myTitle;
 
-  public Reporter(ReportLoadStrategy loadStrategy) {
+  public Reporter(ReportLoadStrategy loadStrategy, String title) {
     myLoad = loadStrategy;
+    myTitle = title;
   }
 
   public void createXMLReport(File xmlFile) throws IOException {
@@ -44,19 +46,19 @@ public class Reporter {
     try {
       xmlFile.getParentFile().mkdirs();
       out = new FileOutputStream(xmlFile);
-      report.write(out, myLoad.getProjectData());
+      report.write(out, myLoad.getProjectData(), myTitle);
     } finally {
       CoverageIOUtil.close(out);
     }
   }
 
-  public void createHTMLReport(File htmlDir, String title, String charset) throws IOException {
+  public void createHTMLReport(File htmlDir, String charset) throws IOException {
     htmlDir.mkdirs();
     final HTMLReportBuilder builder = ReportBuilderFactory.createHTMLReportBuilderForKover();
     builder.setReportDir(htmlDir);
     if (builder instanceof HTMLReportBuilderImpl) {
-      if (title != null) {
-        ((HTMLReportBuilderImpl) builder).setReportTitle(title);
+      if (myTitle != null) {
+        ((HTMLReportBuilderImpl) builder).setReportTitle(myTitle);
       }
 
       if (charset != null) {

@@ -82,20 +82,22 @@ object TestUtils {
         return File(expectedPath)
     }
 
+    @JvmOverloads
     @JvmStatic
-    fun createRawReporter(report: BinaryReport?, patterns: String): Reporter {
+    fun createRawReporter(report: BinaryReport?, patterns: String, title: String? = null): Reporter {
         val reports = if (report == null) emptyList() else listOf(report)
         val filters = getFilters(patterns)
-        return Reporter(RawReportLoadStrategy(reports, outputRoots, sourceRoots, filters))
+        return Reporter(RawReportLoadStrategy(reports, outputRoots, sourceRoots, filters), title)
     }
 
+    @JvmOverloads
     @JvmStatic
-    fun createReporter(report: BinaryReport, patterns: String): Reporter {
+    fun createReporter(report: BinaryReport, patterns: String, title: String? = null): Reporter {
         val smapFile = File(report.dataFile.absolutePath + ".sm")
         val aggregatedReport = BinaryReport(report.dataFile, smapFile)
         runAggregator(aggregatedReport, patterns)
         val reports = listOf(aggregatedReport)
-        return Reporter(AggregatedReportLoadStrategy(reports, outputRoots, sourceRoots))
+        return Reporter(AggregatedReportLoadStrategy(reports, outputRoots, sourceRoots), title)
     }
 
     @JvmStatic

@@ -32,8 +32,8 @@ public class ReportApi {
     // no-op
   }
 
-  public static void xmlReport(File xmlReportFile, List<File> reports, List<File> outputRoots, List<File> sourceRoots, Filters filters) throws IOException {
-    Reporter reporter = createReporter(reports, outputRoots, sourceRoots, filters);
+  public static void xmlReport(File xmlReportFile, String title, List<File> reports, List<File> outputRoots, List<File> sourceRoots, Filters filters) throws IOException {
+    Reporter reporter = createReporter(title, reports, outputRoots, sourceRoots, filters);
     reporter.createXMLReport(xmlReportFile);
   }
 
@@ -46,11 +46,11 @@ public class ReportApi {
       List<File> sourceRoots,
       Filters filters
   ) throws IOException {
-    Reporter reporter = createReporter(reports, outputRoots, sourceRoots, filters);
-    reporter.createHTMLReport(htmlReportDir, title, charset);
+    Reporter reporter = createReporter(title, reports, outputRoots, sourceRoots, filters);
+    reporter.createHTMLReport(htmlReportDir, charset);
   }
 
-  private static Reporter createReporter(List<File> reports, List<File> outputRoots, List<File> sourceRoots, Filters filters) {
+  private static Reporter createReporter(String title, List<File> reports, List<File> outputRoots, List<File> sourceRoots, Filters filters) {
     List<BinaryReport> binaryReports = new ArrayList<BinaryReport>();
     for (File report : reports) {
       binaryReports.add(new BinaryReport(report, null));
@@ -59,7 +59,7 @@ public class ReportApi {
     ReportLoadStrategy loadStrategy =
         new ReportLoadStrategy.RawReportLoadStrategy(binaryReports, outputRoots, sourceRoots, filters);
 
-    return new Reporter(loadStrategy);
+    return new Reporter(loadStrategy, title);
   }
 
   public static void setFreemarkerRetry(int repeatMaxCount, long repeatCooldownMs) {

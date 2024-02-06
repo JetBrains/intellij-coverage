@@ -108,7 +108,7 @@ public class XMLTest {
 
     TestUtils.clearLogFile(new File("."));
     Filters filters = TestUtils.createFilters(Pattern.compile("testData.simple.*"));
-    ReportApi.xmlReport(xmlFile, singletonList(report.getDataFile()), singletonList(new File(TestUtils.JAVA_OUTPUT)), singletonList(new File("test")), filters);
+    ReportApi.xmlReport(xmlFile, null, singletonList(report.getDataFile()), singletonList(new File(TestUtils.JAVA_OUTPUT)), singletonList(new File("test")), filters);
 
     TestUtils.checkLogFile(new File("."));
     XMLTest.verifyXMLWithExpected(xmlFile, "xml/simple.xml");
@@ -137,7 +137,7 @@ public class XMLTest {
 
     File file = createXMLFile();
     TestUtils.clearLogFile(new File("."));
-    new XMLCoverageReport().write(new FileOutputStream(file), project);
+    new XMLCoverageReport().write(new FileOutputStream(file), project, "TITLE");
     TestUtils.checkLogFile(new File("."));
     verifyXMLWithExpected(file, "xml/xmlTest.xml");
   }
@@ -172,7 +172,7 @@ public class XMLTest {
 
     File file = createXMLFile();
     TestUtils.clearLogFile(new File("."));
-    new XMLCoverageReport().write(new FileOutputStream(file), project);
+    new XMLCoverageReport().write(new FileOutputStream(file), project, null);
     TestUtils.checkLogFile(new File("."));
     verifyXMLWithExpected(file, "xml/sameSource.xml");
   }
