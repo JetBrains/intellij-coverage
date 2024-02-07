@@ -20,6 +20,7 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.MethodCaller;
+import com.intellij.rt.coverage.util.OptionsUtil;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -263,7 +264,8 @@ public class CoverageRuntime {
 
   private static Object getRuntimeObject() throws ClassNotFoundException, IllegalAccessException, NoSuchFieldException {
     if (ourRuntimeObject == null) {
-      final Class<?> runtimeClass = Class.forName(CoverageRuntime.class.getName(), false, null);
+      final ClassLoader classLoader = OptionsUtil.USE_SYSTEM_CLASS_LOADER ? ClassLoader.getSystemClassLoader() : null;
+      final Class<?> runtimeClass = Class.forName(CoverageRuntime.class.getName(), false, classLoader);
       ourRuntimeObject = runtimeClass.getDeclaredField("ourRuntime").get(null);
     }
     return ourRuntimeObject;

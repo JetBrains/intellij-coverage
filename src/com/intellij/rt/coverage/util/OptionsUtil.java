@@ -26,4 +26,5 @@ public class OptionsUtil {
   public static boolean CALCULATE_HITS_COUNT = "true".equals(System.getProperty("idea.coverage.calculate.hits", "false"));
   public static boolean IGNORE_LOCAL_FUNCTIONS_IN_IGNORED_METHODS = "true".equals(System.getProperty("idea.coverage.ignore.local.functions.in.ignored.methods", "true"));
   public static final boolean TEST_MODE = "true".equals(System.getProperty("idea.coverage.test.mode", "false"));
+  public static final boolean USE_SYSTEM_CLASS_LOADER = "true".equals(System.getProperty("idea.coverage.use.system.classloader", "false"));
 }
