@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.instrumentation.CoverageTransformer;
 import com.intellij.rt.coverage.report.api.Filters;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.OptionsUtil;
+import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,13 +49,35 @@ public class Instrumentator {
       final File root = myRoots.get(i);
       final File outputRoot = myOutputRoots.get(i);
 
-      final boolean calculateHitsCount = OptionsUtil.CALCULATE_HITS_COUNT;
-      try {
-        OptionsUtil.CALCULATE_HITS_COUNT = countHits;
-        new InstrumentationVisitor(root, outputRoot).visitFiles();
-      } finally {
-        OptionsUtil.CALCULATE_HITS_COUNT = calculateHitsCount;
+      withHitsSet(countHits, new Runnable() {
+        public void run() {
+          new InstrumentationVisitor(root, outputRoot).visitFiles();
+        }
+      });
+    }
+  }
+
+  public static byte[] instrument(final byte[] bytes, boolean countHits) {
+    final CoverageTransformer transformer = new OfflineCoverageTransformer(new ProjectData(), false);
+    final byte[][] instrumented = new byte[1][];
+    withHitsSet(countHits, new Runnable() {
+      public void run() {
+        String className = new ClassReader(bytes).getClassName();
+        // This loader is not user actually, just need some not null loader
+        final ClassLoader loader = ClassLoader.getSystemClassLoader();
+        instrumented[0] = transformer.transform(loader, className, bytes);
       }
+    });
+    return instrumented[0];
+  }
+
+  private static void withHitsSet(boolean countHits, Runnable action) {
+    final boolean calculateHitsCount = OptionsUtil.CALCULATE_HITS_COUNT;
+    try {
+      OptionsUtil.CALCULATE_HITS_COUNT = countHits;
+      action.run();
+    } finally {
+      OptionsUtil.CALCULATE_HITS_COUNT = calculateHitsCount;
     }
   }
 

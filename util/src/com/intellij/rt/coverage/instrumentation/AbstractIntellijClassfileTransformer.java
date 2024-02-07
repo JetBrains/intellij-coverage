@@ -61,40 +61,45 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     }
   }
 
+  public final byte[] transform(ClassLoader loader, String className, byte[] classFileBuffer) {
+    if (className == null) {
+      return null;
+    }
+    className = ClassNameUtil.removeClassSuffix(className);
+    className = ClassNameUtil.convertToFQName(className);
+
+    // do not instrument itself
+    // and do not instrument packages which are used during instrumented method invocation
+    // (inside methods touch, save, etc. from ProjectData)
+    if (className.startsWith("com.intellij.rt.")
+        || className.startsWith("org.jetbrains.coverage.gnu.trove.")
+        || className.startsWith("org.jetbrains.coverage.org.objectweb.")
+        || isInternalJavaClass(className)) {
+      return null;
+    }
+
+    if (shouldExclude(className)) return null;
+
+    visitClassLoader(loader);
+
+    InclusionPattern inclusionPattern = getInclusionPattern();
+    if (inclusionPattern == null) {
+      if (loader != null) {
+        return instrument(classFileBuffer, className, loader, computeFrames);
+      }
+    } else if (inclusionPattern.accept(className)) {
+      return instrument(classFileBuffer, className, loader, computeFrames);
+    }
+    return null;
+  }
+
   private byte[] transformInner(ClassLoader loader, String className, byte[] classFileBuffer) {
     if (isStopped()) {
       return null;
     }
 
     try {
-      if (className == null) {
-        return null;
-      }
-      className = ClassNameUtil.removeClassSuffix(className);
-      className = ClassNameUtil.convertToFQName(className);
-
-      //do not instrument itself
-      //and do not instrument packages which are used during instrumented method invocation
-      //(inside methods touch, save, etc from ProjectData)
-      if (className.startsWith("com.intellij.rt.")
-          || className.startsWith("org.jetbrains.coverage.gnu.trove.")
-          || className.startsWith("org.jetbrains.coverage.org.objectweb.")
-          || isInternalJavaClass(className)) {
-        return null;
-      }
-
-      if (shouldExclude(className)) return null;
-
-      visitClassLoader(loader);
-
-      InclusionPattern inclusionPattern = getInclusionPattern();
-      if (inclusionPattern == null) {
-        if (loader != null) {
-          return instrument(classFileBuffer, className, loader, computeFrames);
-        }
-      } else if (inclusionPattern.accept(className)) {
-        return instrument(classFileBuffer, className, loader, computeFrames);
-      }
+      return transform(loader, className, classFileBuffer);
     } catch (ClassWriterImpl.FrameComputationClassNotFoundException e) {
       ErrorReporter.info("Error during class frame computation: " + className, e);
     } catch (Throwable e) {

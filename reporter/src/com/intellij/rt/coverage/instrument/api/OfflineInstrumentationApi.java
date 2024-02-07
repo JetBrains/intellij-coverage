@@ -16,10 +16,13 @@
 
 package com.intellij.rt.coverage.instrument.api;
 
+import com.intellij.rt.coverage.instrument.IOUtil;
 import com.intellij.rt.coverage.instrument.Instrumentator;
 import com.intellij.rt.coverage.report.api.Filters;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public class OfflineInstrumentationApi {
@@ -29,5 +32,10 @@ public class OfflineInstrumentationApi {
 
   public static void instrument(List<File> roots, List<File> outputRoots, Filters filters, boolean countHits) {
     new Instrumentator(roots, outputRoots, filters).instrument(countHits);
+  }
+
+  public static byte[] instrument(InputStream input, boolean countHits) throws IOException {
+    byte[] bytes = IOUtil.readBytes(input);
+    return Instrumentator.instrument(bytes, countHits);
   }
 }

@@ -21,22 +21,29 @@ import com.intellij.rt.coverage.util.CoverageIOUtil;
 import java.io.*;
 
 public class IOUtil {
-  public static byte[] readBytes(File file) throws IOException {
-    InputStream is = null;
+  public static byte[] readBytes(InputStream is) throws IOException {
     ByteArrayOutputStream os = null;
     try {
       final byte[] buffer = new byte[4096];
-      is = new BufferedInputStream(new FileInputStream(file));
       os = new ByteArrayOutputStream();
       int read;
       while ((read = is.read(buffer)) != -1) {
         os.write(buffer, 0, read);
       }
     } finally {
-      CoverageIOUtil.close(is);
       CoverageIOUtil.close(os);
     }
     return os.toByteArray();
+  }
+
+  public static byte[] readBytes(File file) throws IOException {
+    InputStream is = null;
+    try {
+      is = new BufferedInputStream(new FileInputStream(file));
+      return readBytes(is);
+    } finally {
+      CoverageIOUtil.close(is);
+    }
   }
 
   public static void writeBytes(File file, byte[] bytes) throws IOException {

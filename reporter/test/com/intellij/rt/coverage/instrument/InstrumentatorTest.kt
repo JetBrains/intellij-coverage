@@ -45,6 +45,18 @@ class InstrumentatorTest {
         checkOfflineInstrumentation(roots, outputRoots, filters)
     }
 
+    @Test
+    fun singleClassApiTest() {
+        val file = File(TestUtils.JAVA_OUTPUT).walk().first { it.name.endsWith(".class") }
+
+        TestUtils.clearLogFile(File("."))
+        file.inputStream().use { inputStream ->
+            val bytes = OfflineInstrumentationApi.instrument(inputStream, true)
+            Assert.assertTrue(bytes.isInstrumented())
+        }
+        TestUtils.checkLogFile(File("."))
+    }
+
     companion object {
         fun runInstrumentator(roots: List<File>, outputRoots: List<File>, filters: Filters) {
             val inst = Instrumentator(roots, outputRoots, filters)
@@ -80,13 +92,12 @@ private fun checkOfflineInstrumentation(roots: List<File>, outputRoots: List<Fil
             .map { File(outputRoot, it.replace(".", File.separator) + ClassNameUtil.CLASS_FILE_SUFFIX) }
             .toList()
         Assert.assertTrue(actuallyTransformed.isNotEmpty())
-        val hasInstrumentation = actuallyTransformed.any { it.isInstrumented() }
+        val hasInstrumentation = actuallyTransformed.any { it.readBytes().isInstrumented() }
         Assert.assertTrue(hasInstrumentation)
     }
 }
 
-private fun File.isInstrumented(): Boolean {
-    val bytes = readBytes()
+private fun ByteArray.isInstrumented(): Boolean {
     var hasInstrumentation = false
     var hasCondyInstrumentation = false
     val visitor = object : ClassVisitor(Opcodes.API_VERSION) {
@@ -115,7 +126,7 @@ private fun File.isInstrumented(): Boolean {
             }
         }
     }
-    ClassReader(bytes).accept(visitor, ClassReader.SKIP_FRAMES or ClassReader.SKIP_DEBUG)
+    ClassReader(this).accept(visitor, ClassReader.SKIP_FRAMES or ClassReader.SKIP_DEBUG)
     check(!(hasInstrumentation && hasCondyInstrumentation))
     return hasInstrumentation || hasCondyInstrumentation
 }
