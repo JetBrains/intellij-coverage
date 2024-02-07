@@ -47,7 +47,7 @@ class InstrumentatorTest {
 
     @Test
     fun singleClassApiTest() {
-        val file = File(TestUtils.JAVA_OUTPUT).walk().first { it.name.endsWith(".class") }
+        val file = File(TestUtils.JAVA_OUTPUT).walk().first { it.name == "Main.class" }
 
         TestUtils.clearLogFile(File("."))
         file.inputStream().use { inputStream ->
