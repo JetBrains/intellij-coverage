@@ -46,8 +46,16 @@ public class CoverageRuntime {
     return CoverageCollector.collect(projectData, classFinder);
   }
 
+  /**
+   * Set file where to write logs
+   * @param errorFile file to save logs or <code>null</code> to prevent log file creation.
+   */
   public static void setLogPath(File errorFile) {
-    ErrorReporter.setPath(errorFile.getPath());
+    ErrorReporter.setPath(errorFile == null ? null : errorFile.getPath());
+  }
+
+  public static void setLogLevel(int level) {
+    ErrorReporter.setLogLevel(level);
   }
 
   public static void dumpIcReport(DataOutput output) throws IOException {

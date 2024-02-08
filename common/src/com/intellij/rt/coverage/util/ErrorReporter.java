@@ -52,10 +52,11 @@ public class ErrorReporter {
   }
 
   /**
-   * Set path to the filer where the log file should be located.
+   * Set path to the file where the log file should be located.
+   * @param path path to save logs or <code>null</code> to prevent log file creation.
    */
   public static void setPath(String path) {
-    myFile = new File(path);
+    myFile = path == null ? null : new File(path);
   }
 
   public static void setLogLevel(int level) {
@@ -97,8 +98,10 @@ public class ErrorReporter {
 
     PrintStream os = null;
     try {
-      os = getErrorLogStream();
-      printLogMessage(os, prefix, message, t);
+      if (myFile != null) {
+        os = new PrintStream(new FileOutputStream(myFile, true));
+        printLogMessage(os, prefix, message, t);
+      }
 
       if (level >= myLogLevel) {
         String consoleMessage = getConsoleMessage(prefix, message, t);
@@ -108,10 +111,6 @@ public class ErrorReporter {
     } finally {
       CoverageIOUtil.close(os);
     }
-  }
-
-  private static PrintStream getErrorLogStream() throws FileNotFoundException {
-    return new PrintStream(new FileOutputStream(myFile != null ? myFile : new File(ERROR_FILE), true));
   }
 
   private static String logPrefix(int level) {
@@ -167,7 +166,7 @@ public class ErrorReporter {
     int logLevel;
     if ("none".equals(logLevelString)) {
       logLevel = NONE;
-    } if ("error".equals(logLevelString)) {
+    } else if ("error".equals(logLevelString)) {
       logLevel = ERROR;
     } else if ("warn".equals(logLevelString)) {
       logLevel = WARNING;

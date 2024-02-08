@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.data.ProjectData
 import com.intellij.rt.coverage.logFile
 import com.intellij.rt.coverage.util.CoverageIOUtil
 import com.intellij.rt.coverage.util.CoverageReport
+import com.intellij.rt.coverage.util.ErrorReporter
 import com.intellij.rt.coverage.util.ProjectDataLoader
 import org.junit.After
 import org.junit.Assert
@@ -39,6 +40,7 @@ class ReportFormatTest {
     @Before
     fun setUp() {
         file = createTmpFile(".ic")
+        ErrorReporter.suggestBasePath(file.parent)
         out = DataOutputStream(FileOutputStream(file))
     }
 
@@ -46,6 +48,7 @@ class ReportFormatTest {
     fun tearDown() {
         out.close()
         logFile(file)?.delete()
+        ErrorReporter.setPath(null)
         file.delete()
     }
 
