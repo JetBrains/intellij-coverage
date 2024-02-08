@@ -139,7 +139,7 @@ internal class OfflineInstrumentationTest(override val coverage: Coverage) : Cov
 }
 
 private fun createProjectData(isBranchCoverage: Boolean, includes: List<Pattern>, excludes: List<Pattern>): ProjectData =
-    ProjectData(null, isBranchCoverage, null).apply {
+    ProjectData(isBranchCoverage, null).apply {
         setIncludePatterns(includes)
         excludePatterns = excludes
     }

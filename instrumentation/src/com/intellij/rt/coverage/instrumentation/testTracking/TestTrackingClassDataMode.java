@@ -26,12 +26,14 @@ import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
+import java.io.File;
+
 /**
  * Test tracking mode that stores classData.
  */
 public class TestTrackingClassDataMode implements TestTrackingMode {
-  public TestTrackingCallback createTestTrackingCallback() {
-    return new TestTrackingCallback() {
+  public TestTrackingCallback createTestTrackingCallback(File file) {
+    return new TestTrackingCallback(file) {
       public void clearTrace(ClassData classData) {
         classData.setTraceMask(null);
       }

@@ -21,6 +21,8 @@ import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
 
+import java.io.File;
+
 /**
  * Test tracking strategy.
  * <p>
@@ -31,7 +33,7 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
  * @see ProjectData#testEnded
  */
 public interface TestTrackingMode {
-  TestTrackingCallback createTestTrackingCallback();
+  TestTrackingCallback createTestTrackingCallback(File file);
 
   ClassVisitor createInstrumenter(ClassVisitor classVisitor, InstrumentationData data);
 }

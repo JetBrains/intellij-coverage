@@ -31,7 +31,6 @@ import org.junit.Test
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
-import kotlin.reflect.KMutableProperty
 import kotlin.test.assertFalse
 
 class InstrumentedBytecodeTest {
@@ -89,7 +88,7 @@ class InstrumentedBytecodeTest {
         )
     ) {
         val testTrackingMode = testTracking.createMode()
-        val projectData = ProjectData(null, coverage.isBranchCoverage(), testTrackingMode?.createTestTrackingCallback())
+        val projectData = ProjectData(coverage.isBranchCoverage(), testTrackingMode?.createTestTrackingCallback(null))
         val transformer = CoverageTransformer(projectData, false, null, testTrackingMode)
         val bytes = transformer.instrument(originalBytes, className, null, false)
 

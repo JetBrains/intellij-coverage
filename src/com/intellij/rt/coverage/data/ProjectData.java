@@ -20,12 +20,9 @@ import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.util.*;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 /**
@@ -34,7 +31,6 @@ import java.util.regex.Pattern;
 public class ProjectData implements CoverageData, Serializable {
   public static ProjectData ourProjectData;
 
-  private final File myDataFile;
   private final boolean myBranchCoverage;
   private List<Pattern> myIncludePatterns;
   private List<Pattern> myExcludePatterns;
@@ -44,14 +40,7 @@ public class ProjectData implements CoverageData, Serializable {
   private final IgnoredStorage myIgnoredStorage = new IgnoredStorage();
   private volatile Map<String, FileMapData[]> myLinesMap;
 
-  /**
-   * Test tracking trace storage. Test tracking supports only sequential tests (but code inside one test could be parallel).
-   * Nevertheless, in case of parallel tests run setting storage to null truncates coverage significantly.
-   * Using CAS for the storage update slightly improves test tracking coverage as the data are not cleared too frequently.
-   */
-  private final AtomicReference<Map<Object, boolean[]>> myTrace = new AtomicReference<Map<Object, boolean[]>>();
-  private final TestTrackingCallback myTestTrackingCallback;
-  private File myTracesDir;
+  public final TestTrackingCallback myTestTrackingCallback;
 
   private boolean myCollectInstructions;
   private Map<String, ClassInstructions> myInstructions;
@@ -59,13 +48,10 @@ public class ProjectData implements CoverageData, Serializable {
   private boolean myStopped;
 
   public ProjectData() {
-    this(null, true, null);
+    this(true, null);
   }
 
-  public ProjectData(File dataFile,
-                     boolean branchCoverage,
-                     TestTrackingCallback testTrackingCallback) {
-    myDataFile = dataFile;
+  public ProjectData(boolean branchCoverage, TestTrackingCallback testTrackingCallback) {
     myBranchCoverage = branchCoverage;
     myTestTrackingCallback = testTrackingCallback;
   }
@@ -168,15 +154,6 @@ public class ProjectData implements CoverageData, Serializable {
 
   public String getFromPool(String s) {
     return myStringPool.getFromPool(s);
-  }
-
-  public Map<Object, boolean[]> getTraces() {
-    return myTrace.get();
-  }
-
-  public boolean[] traceLineByTest(ClassData classData, int line) {
-    if (myTestTrackingCallback == null) return null;
-    return myTestTrackingCallback.traceLine(classData, line);
   }
 
   public void merge(final CoverageData data) {
@@ -288,53 +265,15 @@ public class ProjectData implements CoverageData, Serializable {
    * This method could be called in test tracking mode by test engine listeners
    */
   public void testEnded(final String name) {
-    final Map<Object, boolean[]> trace = myTrace.getAndSet(null);
-    if (trace == null) return;
-    File tracesDir = getTracesDir();
-    try {
-      TestTrackingIOUtil.saveTestResults(tracesDir, name, trace);
-    } catch (IOException e) {
-      ErrorReporter.warn("Error writing traces for test '" + name + "' to directory " + tracesDir.getPath(), e);
-    } finally {
-      for (Map.Entry<Object, boolean[]> entry : trace.entrySet()) {
-        final ClassData classData = (ClassData) entry.getKey();
-        final boolean[] touched = entry.getValue();
-        final Object[] lines = classData.getLines();
-        final int lineCount = Math.min(lines.length, touched.length);
-        for (int i = 1; i < lineCount; i++) {
-          final LineData lineData = (LineData) lines[i];
-          if (lineData == null || !touched[i]) continue;
-          lineData.setTestName(name);
-        }
-        myTestTrackingCallback.clearTrace(classData);
-      }
-    }
+    if (myTestTrackingCallback != null) myTestTrackingCallback.testEnded(name);
   }
 
   /**
    * This method could be called in test tracking mode by test engine listeners
    */
-  public void testStarted(final String ignoredName) {
-    if (isTestTracking()) myTrace.compareAndSet(null, new ConcurrentHashMap<Object, boolean[]>());
+  public void testStarted(final String name) {
+    if (myTestTrackingCallback != null) myTestTrackingCallback.testStarted(name);
   }
   //---------------------------------------------------------- //
 
-
-  private File getTracesDir() {
-    if (myTracesDir == null) {
-      myTracesDir = createTracesDir(myDataFile);
-    }
-    return myTracesDir;
-  }
-
-  public static File createTracesDir(File dataFile) {
-    final String fileName = dataFile.getName();
-    final int i = fileName.lastIndexOf('.');
-    final String dirName = i != -1 ? fileName.substring(0, i) : fileName;
-    final File result = new File(dataFile.getParent(), dirName);
-    if (!result.exists()) {
-      result.mkdirs();
-    }
-    return result;
-  }
 }

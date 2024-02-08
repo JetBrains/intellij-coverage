@@ -63,15 +63,15 @@ public class Instrumentator {
     }
 
     ErrorReporter.printInfo("---- IntelliJ IDEA coverage runner ---- ");
-    ErrorReporter.printInfo(args.branchCoverage ? ("Branch coverage " + (args.testTracking ? "with tracking per test coverage ..." : "...")) : "Line coverage ...");
+    ErrorReporter.printInfo((args.branchCoverage ? "Branch coverage " : "Line coverage ") + (args.testTracking ? "with tracking per test coverage ..." : "..."));
     logPatterns(args.includePatterns, "include");
     logPatterns(args.excludePatterns, "exclude");
     logPatterns(args.annotationsToIgnore, "exclude annotations");
 
     final TestTrackingMode testTrackingMode = createTestTrackingMode(args.testTracking);
-    final TestTrackingCallback callback = testTrackingMode == null ? null : testTrackingMode.createTestTrackingCallback();
+    final TestTrackingCallback callback = testTrackingMode == null ? null : testTrackingMode.createTestTrackingCallback(args.dataFile);
 
-    final ProjectData data = new ProjectData(args.dataFile, args.branchCoverage, callback);
+    final ProjectData data = new ProjectData(args.branchCoverage, callback);
     data.setIncludePatterns(args.includePatterns);
     data.setExcludePatterns(args.excludePatterns);
     data.setAnnotationsToIgnore(args.annotationsToIgnore);

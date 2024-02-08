@@ -21,9 +21,7 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.MethodCaller;
 import com.intellij.rt.coverage.util.OptionsUtil;
-
-import java.util.Arrays;
-import java.util.Map;
+import com.intellij.rt.coverage.util.TestTrackingCallback;
 
 /**
  * This class is used to access coverage data at runtime.
@@ -86,12 +84,9 @@ public class CoverageRuntime {
   @SuppressWarnings("unused")
   public static void traceLine(Object classData, int line) {
     if (ourRuntime != null) {
-      final Map<Object, boolean[]> traces = ourRuntime.myProjectData.getTraces();
-      if (traces != null) {
-        final boolean[] lines = ourRuntime.myProjectData.traceLineByTest((ClassData) classData, line);
-        if (lines != null) {
-          traces.put(classData, lines);
-        }
+      TestTrackingCallback callback = ourRuntime.myProjectData.myTestTrackingCallback;
+      if (callback != null) {
+        callback.traceLineByTest(classData, line);
       }
       return;
     }
@@ -116,16 +111,9 @@ public class CoverageRuntime {
    */
   public static void registerClassForTrace(Object classData) {
     if (ourRuntime != null) {
-      final Map<Object, boolean[]> traces = ourRuntime.myProjectData.getTraces();
-      if (traces != null) {
-        synchronized (classData) {
-          final boolean[] trace = ((ClassData) classData).getTraceMask();
-          if (traces.put(classData, trace) == null) {
-            // clear trace on register for a new test to prevent reporting about code running between tests
-            Arrays.fill(trace, false);
-          }
-          trace[0] = true;
-        }
+      TestTrackingCallback callback = ourRuntime.myProjectData.myTestTrackingCallback;
+      if (callback != null) {
+        callback.registerForTrace(classData);
       }
       return;
     }

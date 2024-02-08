@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.data.LineData
 import com.intellij.rt.coverage.data.ProjectData
 import com.intellij.rt.coverage.data.instructions.LineInstructions
 import com.intellij.rt.coverage.util.CoverageRunner
+import com.intellij.rt.coverage.util.TestTrackingCallback
 import com.intellij.rt.coverage.util.TestTrackingIOUtil
 import org.junit.Assert
 import java.io.File
@@ -181,7 +182,7 @@ internal fun testTrackingLines(coverageDataFile: File, classNames: List<String>)
 }
 
 private fun loadTestTrackingData(coverageDataFile: File): Map<String, Map<String, IntArray>> {
-    val tracesDir = ProjectData.createTracesDir(coverageDataFile)
+    val tracesDir = TestTrackingCallback.createTracesDir(coverageDataFile)
     return try {
         TestTrackingIOUtil.loadTestTrackingData(tracesDir)
     } finally {

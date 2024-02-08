@@ -30,6 +30,8 @@ import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
+import java.io.File;
+
 /**
  * Instrument class code with a boolean array field.
  * Zero element of this array is used as a flag for class registration for the current running test.
@@ -42,8 +44,8 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * If absent volatile semantic leads to errors, use com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingClassDataMode instead.
  */
 public class TestTrackingArrayMode implements TestTrackingMode {
-  public TestTrackingCallback createTestTrackingCallback() {
-    return new TestTrackingCallback() {
+  public TestTrackingCallback createTestTrackingCallback(File file) {
+    return new TestTrackingCallback(file) {
       public void clearTrace(ClassData classData) {
         classData.getTraceMask()[0] = false;
       }
