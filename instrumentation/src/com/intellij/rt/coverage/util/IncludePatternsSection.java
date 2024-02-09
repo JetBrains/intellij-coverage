@@ -18,6 +18,7 @@ package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 
@@ -40,7 +41,7 @@ public class IncludePatternsSection extends ReportSection {
   }
 
   @Override
-  public boolean isEngaged(ProjectData projectData) {
+  public boolean isEngaged(ProjectData projectData, InstrumentationOptions options) {
     return true;
   }
 
@@ -53,7 +54,7 @@ public class IncludePatternsSection extends ReportSection {
 
   @Override
   protected void saveInternal(ProjectData projectData, DataOutput out, TObjectIntHashMap<String> dict) throws IOException {
-    dumpPatterns(out, projectData.getIncudePatterns());
+    dumpPatterns(out, projectData.getIncludePatterns());
     dumpPatterns(out, projectData.getExcludePatterns());
     dumpPatterns(out, projectData.getAnnotationsToIgnore());
   }

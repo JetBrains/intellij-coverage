@@ -18,6 +18,7 @@ package com.intellij.rt.coverage.caseTests
 
 import com.intellij.rt.coverage.createTmpFile
 import com.intellij.rt.coverage.data.ProjectData
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions
 import com.intellij.rt.coverage.logFile
 import com.intellij.rt.coverage.util.CoverageIOUtil
 import com.intellij.rt.coverage.util.CoverageReport
@@ -159,13 +160,13 @@ class ReportFormatTest {
         val annotations = listOf(Pattern.compile("a.b.C.*\$"))
 
         val projectData = ProjectData()
-        projectData.setIncludePatterns(includeFilters)
+        projectData.includePatterns = includeFilters
         projectData.excludePatterns = excludeFilters
         projectData.annotationsToIgnore = annotations
-        CoverageReport.save(projectData, file, null)
+        CoverageReport.save(projectData, InstrumentationOptions.Builder().setDataFile(file).build())
 
         val readProjectData = ProjectDataLoader.load(file)
-        assertEquals(includeFilters.toString(), readProjectData.incudePatterns.toString())
+        assertEquals(includeFilters.toString(), readProjectData.includePatterns.toString())
         assertEquals(excludeFilters.toString(), readProjectData.excludePatterns.toString())
         assertEquals(annotations.toString(), readProjectData.annotationsToIgnore.toString())
     }

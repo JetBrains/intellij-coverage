@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.util;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions;
 
 import java.io.DataInputStream;
 import java.io.DataOutput;
@@ -40,8 +41,8 @@ public class UncoveredBranchesSection extends ClassListSection {
   }
 
   @Override
-  public boolean isEngaged(ProjectData projectData) {
-    return projectData.isBranchCoverage();
+  public boolean isEngaged(ProjectData projectData, InstrumentationOptions options) {
+    return options.isBranchCoverage;
   }
 
   @Override

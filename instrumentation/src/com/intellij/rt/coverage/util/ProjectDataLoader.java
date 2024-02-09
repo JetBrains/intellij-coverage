@@ -52,12 +52,14 @@ public class ProjectDataLoader {
     if (sessionDataFile.length() == 0) {
       return projectInfo;
     }
+    final StringsPool pool = new StringsPool();
     try {
       in = CoverageIOUtil.openReadFile(sessionDataFile);
       final TIntObjectHashMap<ClassData> dict = new TIntObjectHashMap<ClassData>(1000, 0.99f);
       final int classCount = CoverageIOUtil.readINT(in);
       for (int c = 0; c < classCount; c++) {
-        final ClassData classInfo = projectInfo.getOrCreateClassData(CoverageIOUtil.readUTFFast(in));
+        final String className = pool.getFromPool(CoverageIOUtil.readUTFFast(in));
+        final ClassData classInfo = projectInfo.getOrCreateClassData(className);
         dict.put(c, classInfo);
       }
       for (int c = 0; c < classCount; c++) {
@@ -66,18 +68,18 @@ public class ProjectDataLoader {
         final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
         int maxLine = -1;
         for (int m = 0; m < methCount; m++) {
-          final String methodSig = expand(in, dict);
+          final String methodSig = pool.getFromPool(expand(in, dict));
           final int lineCount = CoverageIOUtil.readINT(in);
           for (int l = 0; l < lineCount; l++) {
             final int line = CoverageIOUtil.readINT(in);
             LineData lineInfo = lines.get(line);
             if (lineInfo == null) {
-              lineInfo = new LineData(line, projectInfo.getFromPool(methodSig));
+              lineInfo = new LineData(line, methodSig);
               lines.put(line, lineInfo);
               if (line > maxLine) maxLine = line;
             }
             classInfo.registerMethodSignature(lineInfo);
-            String testName = CoverageIOUtil.readUTFFast(in);
+            String testName = pool.getFromPool(CoverageIOUtil.readUTFFast(in));
             if (testName != null && !testName.isEmpty()) {
               lineInfo.setTestName(testName);
             }

@@ -34,14 +34,14 @@ public class AnnotationIgnoredMethodFilter extends CoverageFilter {
 
   @Override
   public boolean isApplicable(InstrumentationData context) {
-    List<Pattern> annotations = context.get(Key.PROJECT_DATA).getAnnotationsToIgnore();
+    List<Pattern> annotations = context.getProjectContext().getOptions().excludeAnnotations;
     return annotations != null && !annotations.isEmpty();
   }
 
   @Override
   public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
     final String annotationName = ClassNameUtil.convertVMNameToFQN(descriptor);
-    if (!myShouldIgnore && ClassNameUtil.matchesPatterns(annotationName, myContext.get(Key.PROJECT_DATA).getAnnotationsToIgnore())) {
+    if (!myShouldIgnore && ClassNameUtil.matchesPatterns(annotationName, myContext.getProjectContext().getOptions().excludeAnnotations)) {
       myContext.setIgnoreSection(true);
       myShouldIgnore = true;
     }
@@ -51,7 +51,7 @@ public class AnnotationIgnoredMethodFilter extends CoverageFilter {
   @Override
   public void visitCode() {
     super.visitCode();
-    IgnoredStorage ignoredStorage = myContext.get(Key.PROJECT_DATA).getIgnoredStorage();
+    IgnoredStorage ignoredStorage = myContext.getProjectContext().getIgnoredStorage();
     String methodName = myContext.getMethodName();
     if (!myShouldIgnore && methodName.endsWith(KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX)) {
       String originalSig = KotlinDefaultArgsBranchFilter.getOriginalNameAndDesc(methodName, myContext.getMethodDesc());

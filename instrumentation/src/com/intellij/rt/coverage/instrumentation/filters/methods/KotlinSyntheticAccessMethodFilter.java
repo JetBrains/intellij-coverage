@@ -21,9 +21,9 @@ import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class KotlinSyntheticAccessMethodFilter implements MethodFilter {
-  public boolean shouldFilter(InstrumentationData data) {
-    return (data.getMethodAccess() & Opcodes.ACC_SYNTHETIC) != 0
-        && KotlinUtils.isKotlinClass(data)
-        && data.getMethodName().startsWith("access$");
+  public boolean shouldFilter(InstrumentationData context) {
+    return (context.getMethodAccess() & Opcodes.ACC_SYNTHETIC) != 0
+        && KotlinUtils.isKotlinClass(context)
+        && context.getMethodName().startsWith("access$");
   }
 }

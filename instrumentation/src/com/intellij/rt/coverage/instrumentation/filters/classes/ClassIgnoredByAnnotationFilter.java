@@ -16,8 +16,9 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.classes;
 
-import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions;
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
@@ -32,39 +33,39 @@ public class ClassIgnoredByAnnotationFilter implements ClassSignatureFilter {
   private static final String COMPANION_SUFFIX = "$Companion";
 
   @Override
-  public boolean shouldFilter(ClassReader cr, ProjectData projectData) {
-    boolean ignoredAnonymous = isAnonymousClassInIgnoredMethod(cr, projectData);
-    final List<Pattern> annotations = projectData.getAnnotationsToIgnore();
-    if (!(annotations != null && !annotations.isEmpty()) && !ignoredAnonymous) return false;
+  public boolean shouldFilter(ClassReader cr, ProjectContext context) {
+    boolean ignoredAnonymous = isAnonymousClassInIgnoredMethod(cr, context);
+    List<Pattern> annotations = context.getOptions().excludeAnnotations;
+    if ((annotations == null || annotations.isEmpty()) && !ignoredAnonymous) return false;
     String className = ClassNameUtil.convertToFQName(cr.getClassName());
     boolean ignored = ignoredAnonymous
-        || isIgnoredCompanionObject(className, projectData)
-        || isClassIgnoredByAnnotation(projectData, InstrumentationUtils.getClassAnnotations(cr));
+        || isIgnoredCompanionObject(className, context)
+        || isClassIgnoredByAnnotation(context.getOptions(), InstrumentationUtils.getClassAnnotations(cr));
     if (ignored) {
-      projectData.getIgnoredStorage().addIgnoredClass(className);
+      context.getIgnoredStorage().addIgnoredClass(className);
     }
     return ignored;
   }
 
-  private boolean isIgnoredCompanionObject(String className, ProjectData projectData) {
+  private boolean isIgnoredCompanionObject(String className, ProjectContext context) {
     if (!className.endsWith(COMPANION_SUFFIX)) return false;
     String subjectName = className.substring(0, className.indexOf(COMPANION_SUFFIX));
-    return projectData.getIgnoredStorage().isClassIgnored(subjectName);
+    return context.getIgnoredStorage().isClassIgnored(subjectName);
   }
 
-  private boolean isAnonymousClassInIgnoredMethod(ClassReader cr, ProjectData projectData) {
+  private boolean isAnonymousClassInIgnoredMethod(ClassReader cr, ProjectContext context) {
     InstrumentationUtils.MethodDescriptor outerMethod = InstrumentationUtils.getOuterClass(cr);
     if (outerMethod == null) return false;
     String ownerName = ClassNameUtil.convertToFQName(outerMethod.owner);
-    return projectData.getIgnoredStorage().isMethodIgnored(ownerName, outerMethod.name, outerMethod.descriptor);
+    return context.getIgnoredStorage().isMethodIgnored(ownerName, outerMethod.name, outerMethod.descriptor);
   }
 
-  public static boolean isClassIgnoredByAnnotation(ProjectData projectData, List<String> classAnnotations) {
-    List<Pattern> ignoreAnnotations = projectData.getAnnotationsToIgnore();
-    if (ignoreAnnotations == null || ignoreAnnotations.isEmpty()) return false;
+  public static boolean isClassIgnoredByAnnotation(InstrumentationOptions options, List<String> classAnnotations) {
+    List<Pattern> excludeAnnotations = options.excludeAnnotations;
+    if (excludeAnnotations == null || excludeAnnotations.isEmpty()) return false;
     for (String classAnnotation : classAnnotations) {
       final String annotationName = ClassNameUtil.convertVMNameToFQN(classAnnotation);
-      if (ClassNameUtil.matchesPatterns(annotationName, ignoreAnnotations)) {
+      if (ClassNameUtil.matchesPatterns(annotationName, excludeAnnotations)) {
         return true;
       }
     }

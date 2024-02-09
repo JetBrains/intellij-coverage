@@ -33,6 +33,7 @@ import java.util.Map;
  * This class is used to set branch ids during instrumentation.
  */
 public class InstrumentationData {
+  private final ProjectContext myProjectContext;
   // Class level data
   private final TIntObjectHashMap<LineData> myLines = new TIntObjectHashMap<LineData>();
   private final Map<Key<?>, Object> myProperties = new HashMap<Key<?>, Object>();
@@ -51,8 +52,13 @@ public class InstrumentationData {
   private Map<Label, Jump> myJumps;
   private Map<Label, Switch> mySwitches;
 
-  public InstrumentationData(ProjectData projectData) {
-    myInstructions = projectData.isInstructionsCoverageEnabled() ? new TIntArrayList() : null;
+  public InstrumentationData(ProjectContext projectContext) {
+    myProjectContext = projectContext;
+    myInstructions = projectContext.getOptions().isInstructionCoverage ? new TIntArrayList() : null;
+  }
+
+  public ProjectContext getProjectContext() {
+    return myProjectContext;
   }
 
   public int getSize() {

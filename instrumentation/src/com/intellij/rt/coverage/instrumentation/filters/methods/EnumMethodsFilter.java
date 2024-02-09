@@ -21,13 +21,13 @@ import com.intellij.rt.coverage.instrumentation.data.Key;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class EnumMethodsFilter implements MethodFilter {
-  public boolean shouldFilter(InstrumentationData data) {
-    int classAccess = data.get(Key.CLASS_ACCESS);
+  public boolean shouldFilter(InstrumentationData context) {
+    int classAccess = context.get(Key.CLASS_ACCESS);
     if ((classAccess & Opcodes.ACC_ENUM) == 0) return false;
-    String name = data.getMethodName();
-    String desc = data.getMethodDesc();
-    String signature = data.get(Key.METHOD_SIGNATURE);
-    final String internalName = data.get(Key.CLASS_INTERNAL_NAME);
+    String name = context.getMethodName();
+    String desc = context.getMethodDesc();
+    String signature = context.get(Key.METHOD_SIGNATURE);
+    final String internalName = context.get(Key.CLASS_INTERNAL_NAME);
     return name.equals("values") && desc.equals("()[L" + internalName + ";") ||
         name.equals("valueOf") && desc.equals("(Ljava/lang/String;)L" + internalName + ";") ||
         name.equals("<init>") && signature != null && signature.equals("()V");

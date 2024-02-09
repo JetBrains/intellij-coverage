@@ -19,6 +19,7 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Key;
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.ClassFilter;
@@ -37,30 +38,29 @@ public class InstrumentationStrategy {
    * Create instrumenter for class or return null if class should be ignored.
    */
   static ClassVisitor createInstrumenter(ProjectData projectData, String className,
-                                         ClassReader cr, ClassVisitor cw, TestTrackingMode testTrackingMode,
-                                         boolean branchCoverage,
-                                         boolean shouldSaveSource,
-                                         boolean calculateHits,
+                                         ClassReader cr, ClassVisitor cw,
+                                         ProjectContext projectContext,
                                          CoverageDataAccess dataAccess) {
     // uncomment to get readable bytecode
     // cw = new TraceClassVisitor(cw, new PrintWriter(System.err));
 
     for (ClassSignatureFilter filter : ourFilters) {
-      if (filter.shouldFilter(cr, projectData)) return null;
+      if (filter.shouldFilter(cr, projectContext)) return null;
     }
-    InstrumentationData data = new InstrumentationData(projectData);
-    data.put(Key.PROJECT_DATA, projectData);
-    data.put(Key.CLASS_READER, cr);
-    data.put(Key.CLASS_NAME, className);
-    data.put(Key.CLASS_INTERNAL_NAME, ClassNameUtil.convertToInternalName(className));
+    InstrumentationData context = new InstrumentationData(projectContext);
+    context.put(Key.PROJECT_DATA, projectData);
+    context.put(Key.CLASS_READER, cr);
+    context.put(Key.CLASS_NAME, projectContext.getFromPool(className));
+    context.put(Key.CLASS_INTERNAL_NAME, ClassNameUtil.convertToInternalName(className));
 
+    TestTrackingMode testTrackingMode = projectContext.getOptions().testTrackingMode;
     if (testTrackingMode != null) {
-      cw = testTrackingMode.createInstrumenter(cw, data);
+      cw = testTrackingMode.createInstrumenter(cw, context);
     }
-    cw = new Instrumenter(cw, dataAccess, data, projectData, branchCoverage, shouldSaveSource, calculateHits);
+    cw = new InstrumentationVisitor(projectData, context, cw, dataAccess);
     for (ClassFilter cv : FilterUtils.createClassFilters()) {
-      if (cv.isApplicable(data)) {
-        cv.initFilter(cw, data);
+      if (cv.isApplicable(context)) {
+        cv.initFilter(cw, context);
         cw = cv;
       }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2014 JetBrains s.r.o.
+ * Copyright 2000-2024 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package com.intellij.rt.coverage;
+package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.ClassData;
-import com.intellij.rt.coverage.util.CoverageReport;
 import junit.framework.TestCase;
 
 import java.io.File;

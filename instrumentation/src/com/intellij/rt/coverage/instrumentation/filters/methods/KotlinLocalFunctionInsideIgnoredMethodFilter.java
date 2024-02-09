@@ -35,22 +35,22 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 public class KotlinLocalFunctionInsideIgnoredMethodFilter implements MethodFilter {
 
   @Override
-  public boolean shouldFilter(InstrumentationData data) {
+  public boolean shouldFilter(InstrumentationData context) {
     if (!OptionsUtil.IGNORE_LOCAL_FUNCTIONS_IN_IGNORED_METHODS) return false;
-    int access = data.getMethodAccess();
+    int access = context.getMethodAccess();
     if (!((access & Opcodes.ACC_PRIVATE) != 0
         && (access & Opcodes.ACC_FINAL) != 0
         && (access & Opcodes.ACC_STATIC) != 0)) return false;
     int idx = -1;
-    String name = data.getMethodName();
-    String className = data.get(Key.CLASS_NAME);
-    IgnoredStorage ignoredStorage = data.get(Key.PROJECT_DATA).getIgnoredStorage();
+    String name = context.getMethodName();
+    String className = context.get(Key.CLASS_NAME);
+    IgnoredStorage ignoredStorage = context.getProjectContext().getIgnoredStorage();
     while (true) {
       idx = name.indexOf('$', idx + 1);
       if (idx < 0) return false;
       String outerMethodName = name.substring(0, idx);
       if (ignoredStorage.isMethodIgnored(className, outerMethodName)) {
-        ignoredStorage.addIgnoredMethod(className, data.getMethodName(), data.getMethodDesc());
+        ignoredStorage.addIgnoredMethod(className, context.getMethodName(), context.getMethodDesc());
         return true;
       }
     }

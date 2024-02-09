@@ -24,6 +24,7 @@ import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.data.instructions.JumpInstructions;
 import com.intellij.rt.coverage.data.instructions.LineInstructions;
 import com.intellij.rt.coverage.data.instructions.SwitchInstructions;
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 
 import java.io.DataInputStream;
@@ -52,8 +53,8 @@ public class InstructionsSection extends ClassListSection {
   }
 
   @Override
-  public boolean isEngaged(ProjectData projectData) {
-    return projectData.isBranchCoverage() && projectData.isInstructionsCoverageEnabled();
+  public boolean isEngaged(ProjectData projectData, InstrumentationOptions options) {
+    return options.isBranchCoverage && projectData.isInstructionsCoverageEnabled();
   }
 
   @Override

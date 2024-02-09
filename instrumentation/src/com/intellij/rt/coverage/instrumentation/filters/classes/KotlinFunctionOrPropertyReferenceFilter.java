@@ -16,7 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.classes;
 
-import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -25,7 +25,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  * Line numbers in this class are uncovered when a reference is not called.
  */
 public class KotlinFunctionOrPropertyReferenceFilter implements ClassSignatureFilter {
-  public boolean shouldFilter(ClassReader cr, ProjectData projectData) {
+  public boolean shouldFilter(ClassReader cr, ProjectContext context) {
     final String superClass = cr.getSuperName();
     final int access = cr.getAccess();
     return (access & Opcodes.ACC_SYNTHETIC) != 0

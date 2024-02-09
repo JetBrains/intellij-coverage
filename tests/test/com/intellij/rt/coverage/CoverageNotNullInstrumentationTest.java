@@ -21,6 +21,8 @@ import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.CoverageTransformer;
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions;
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -32,7 +34,7 @@ public class CoverageNotNullInstrumentationTest {
     final String resource = name.replace('.', '/') + ".class";
     ClassLoader loader = getClass().getClassLoader();
     byte[] bytes = TransformedClassLoader.readBytes(loader.getResourceAsStream(resource));
-    byte[] transformedBytes = new CoverageTransformer(data, false)
+    byte[] transformedBytes = new CoverageTransformer(data, new ProjectContext(InstrumentationOptions.DEFAULT))
         .instrument(bytes, name, loader, true);
     new TransformedClassLoader(getClass().getClassLoader(), name, transformedBytes).loadClass(name, true);
   }

@@ -18,7 +18,9 @@ package com.intellij.rt.coverage.offline.api;
 
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.instrument.RawReportLoader;
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions;
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import com.intellij.rt.coverage.offline.RawProjectData;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 
@@ -53,9 +55,14 @@ public class CoverageCollector {
 
   private static ProjectData collectRawData(RawProjectData rawData, ClassFinder classFinder) {
     ProjectData projectData = new ProjectData();
-    UnloadedUtil.appendUnloaded(projectData, classFinder, true, true);
+    InstrumentationOptions options = new InstrumentationOptions.Builder()
+        .setBranchCoverage(true)
+        .setSaveSource(true)
+        .build();
+    ProjectContext context = new ProjectContext(options, classFinder);
+    UnloadedUtil.appendUnloaded(projectData, context);
     RawReportLoader.apply(projectData, rawData);
-    projectData.applyLineMappings();
+    context.applyLineMappings(projectData);
     return projectData;
   }
 

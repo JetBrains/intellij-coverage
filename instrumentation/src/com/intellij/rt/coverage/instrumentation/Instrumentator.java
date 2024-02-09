@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingArrayMode;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingClassDataMode;
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
@@ -24,7 +25,6 @@ import com.intellij.rt.coverage.util.CoverageReport;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.TestTrackingCallback;
-import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,26 +71,33 @@ public class Instrumentator {
     final TestTrackingMode testTrackingMode = createTestTrackingMode(args.testTracking);
     final TestTrackingCallback callback = testTrackingMode == null ? null : testTrackingMode.createTestTrackingCallback(args.dataFile);
 
-    final ProjectData data = new ProjectData(args.branchCoverage, callback);
-    data.setIncludePatterns(args.includePatterns);
-    data.setExcludePatterns(args.excludePatterns);
-    data.setAnnotationsToIgnore(args.annotationsToIgnore);
-    data.setInstructionsCoverage(OptionsUtil.INSTRUCTIONS_COVERAGE_ENABLED);
+    final InstrumentationOptions options = new InstrumentationOptions.Builder()
+        .setBranchCoverage(args.branchCoverage)
+        .setIsMergeData(args.mergeData)
+        .setIsCalculateUnloaded(args.calcUnloaded)
+        .setInstructionCoverage(OptionsUtil.INSTRUCTIONS_COVERAGE_ENABLED)
+        .setIsCalculateHits(OptionsUtil.CALCULATE_HITS_COUNT)
+        .setIncludePatterns(args.includePatterns)
+        .setExcludePatterns(args.excludePatterns)
+        .setExcludeAnnotations(args.annotationsToIgnore)
+        .setDataFile(args.dataFile)
+        .setSourceMapFile(args.sourceMap)
+        .setTestTrackingMode(testTrackingMode)
+        .build();
+
     createDataFile(args.dataFile);
+    final ProjectData data = new ProjectData(callback);
     CoverageRuntime.installRuntime(data);
 
-    final ClassFinder cf = new ClassFinder(args.includePatterns, args.excludePatterns);
-
-    final CoverageReport report = new CoverageReport(args.dataFile, args.calcUnloaded, cf, args.mergeData);
-    report.setSourceMapFile(args.sourceMap);
+    final ProjectContext instrumentationData = new ProjectContext(options);
+    final CoverageTransformer transformer = new CoverageTransformer(data, instrumentationData);
     Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
       public void run() {
-        report.save(data);
+        transformer.stop();
+        CoverageReport.save(data, instrumentationData);
       }
     }));
 
-    final boolean shouldSaveSource = args.sourceMap != null;
-    final CoverageTransformer transformer = new CoverageTransformer(data, shouldSaveSource, cf, testTrackingMode);
     addTransformer(instrumentation, transformer);
   }
 

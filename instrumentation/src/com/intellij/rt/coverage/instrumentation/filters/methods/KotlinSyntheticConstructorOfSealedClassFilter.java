@@ -23,12 +23,12 @@ import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class KotlinSyntheticConstructorOfSealedClassFilter implements MethodFilter {
-  public boolean shouldFilter(InstrumentationData data) {
-    if ((data.getMethodAccess() & Opcodes.ACC_SYNTHETIC) != 0
-        && InstrumentationUtils.CONSTRUCTOR.equals(data.getMethodName())
-        && data.getMethodDesc().endsWith(KotlinUtils.KOTLIN_DEFAULT_CONSTRUCTOR_MARKER + ")V")
-        && (data.get(Key.CLASS_ACCESS) & Opcodes.ACC_ABSTRACT) != 0) {
-      data.put(Key.IS_SEALED_CLASS, true);
+  public boolean shouldFilter(InstrumentationData context) {
+    if ((context.getMethodAccess() & Opcodes.ACC_SYNTHETIC) != 0
+        && InstrumentationUtils.CONSTRUCTOR.equals(context.getMethodName())
+        && context.getMethodDesc().endsWith(KotlinUtils.KOTLIN_DEFAULT_CONSTRUCTOR_MARKER + ")V")
+        && (context.get(Key.CLASS_ACCESS) & Opcodes.ACC_ABSTRACT) != 0) {
+      context.put(Key.IS_SEALED_CLASS, true);
       return true;
     }
     return false;

@@ -18,8 +18,9 @@ package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions;
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
-import com.intellij.rt.coverage.util.classFinder.ClassFinder;
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import org.jetbrains.coverage.gnu.trove.TObjectIntHashMap;
 
 import java.io.*;
@@ -34,48 +35,28 @@ import java.util.Map;
  * @since 26-Feb-2010
  */
 public class CoverageReport {
-  private final File myDataFile;
-  private File mySourceMapFile;
-  private final boolean myAppendUnloaded;
-  private final ClassFinder myClassFinder;
-  private final boolean myMergeFile;
-
-  /**
-   * Create coverage report class.
-   *
-   * @param dataFile       file where to save a coverage report
-   * @param appendUnloaded a flag to collect coverage information from unloaded classes
-   * @param classFinder    helper class to locate classes on disk
-   * @param mergeFile      a flag to merge new report with coverage stored in the <code>dataFile</code>
-   */
-  public CoverageReport(File dataFile, boolean appendUnloaded, ClassFinder classFinder, boolean mergeFile) {
-    myDataFile = dataFile;
-    myAppendUnloaded = appendUnloaded;
-    myClassFinder = classFinder;
-    myMergeFile = mergeFile;
-  }
 
   /**
    * Saves project data into a coverage report.
    * This method firstly collect all internal information to be ready for save.
    */
-  public void save(ProjectData projectData) {
-    projectData.stop();
+  public static void save(ProjectData projectData, ProjectContext projectContext) {
     CoverageIOUtil.FileLock lock = null;
     try {
-      finalizeCoverage(projectData, myAppendUnloaded, myClassFinder, mySourceMapFile != null);
+      finalizeCoverage(projectData, projectContext);
 
-      lock = CoverageIOUtil.FileLock.lock(myDataFile);
-      if (myMergeFile) {
+      InstrumentationOptions options = projectContext.getOptions();
+      lock = CoverageIOUtil.FileLock.lock(options.dataFile);
+      if (options.isMergeData) {
         try {
-          ProjectData load = ProjectDataLoader.load(myDataFile);
+          ProjectData load = ProjectDataLoader.load(options.dataFile);
           projectData.merge(load);
         } catch (OutOfMemoryError e) {
           ErrorReporter.warn("Out of memory error occurred during previous report loading. Try to increase memory available for the JVM or write new report to a separate file", e);
         }
       }
 
-      save(projectData, myDataFile, mySourceMapFile);
+      save(projectData, options);
     } catch (OutOfMemoryError e) {
       ErrorReporter.warn("Out of memory error occurred, try to increase memory available for the JVM, or make include / exclude patterns more specific", e);
     } catch (Throwable e) {
@@ -85,26 +66,25 @@ public class CoverageReport {
     }
   }
 
-  /**
-   * Set file to save mapping from class to source file name.
-   */
-  public void setSourceMapFile(File sourceMapFile) {
-    mySourceMapFile = sourceMapFile;
-  }
+  public static void finalizeCoverage(ProjectData projectData, ProjectContext projectContext) {
+    InstrumentationOptions options = projectContext.getOptions();
+    projectData.setIncludePatterns(options.includePatterns);
+    projectData.setExcludePatterns(options.excludePatterns);
+    projectData.setAnnotationsToIgnore(options.excludeAnnotations);
+    projectData.setInstructionsCoverage(options.isInstructionCoverage);
 
-  public static void finalizeCoverage(ProjectData projectData, boolean appendUnloaded, ClassFinder cf, boolean calculateSource) {
-    projectData.applyHits();
-    if (appendUnloaded) {
-      UnloadedUtil.appendUnloaded(projectData, cf, calculateSource, projectData.isBranchCoverage());
+    projectContext.applyHits(projectData);
+    if (options.isCalculateUnloaded) {
+      UnloadedUtil.appendUnloaded(projectData, projectContext);
     }
-    projectData.applyLineMappings();
-    projectData.dropIgnoredLines();
+    projectContext.applyLineMappings(projectData);
+    projectContext.dropIgnoredLines(projectData);
   }
 
-  public static void save(ProjectData projectData, File dataFile, File sourceMapFile) {
+  public static void save(ProjectData projectData, InstrumentationOptions options) {
     DataOutputStream os = null;
     try {
-      os = CoverageIOUtil.openWriteFile(dataFile);
+      os = CoverageIOUtil.openWriteFile(options.dataFile);
       final TObjectIntHashMap<String> dict = new TObjectIntHashMap<String>();
       final Map<String, ClassData> classes = new HashMap<String, ClassData>(projectData.getClasses());
       CoverageIOUtil.writeINT(os, classes.size());
@@ -113,11 +93,11 @@ public class CoverageReport {
 
       CoverageIOUtil.writeINT(os, ProjectDataLoader.REPORT_VERSION);
       CoverageIOUtil.writeUTF(os, getExtraInfoString());
-      ReportSectionsUtil.saveSections(projectData, os, dict);
+      ReportSectionsUtil.saveSections(projectData, os, dict, options);
 
-      saveSourceMap(classes, sourceMapFile);
+      saveSourceMap(classes, options.sourceMapFile);
     } catch (IOException e) {
-      ErrorReporter.warn("Error writing file " + dataFile.getPath(), e);
+      ErrorReporter.warn("Error writing file " + options.dataFile.getPath(), e);
     } finally {
       CoverageIOUtil.close(os);
     }
@@ -132,7 +112,7 @@ public class CoverageReport {
     return "";
   }
 
-  public static void saveSourceMap(Map<String, ClassData> classes, File sourceMapFile) {
+  static void saveSourceMap(Map<String, ClassData> classes, File sourceMapFile) {
     if (sourceMapFile == null) return;
     Map<String, String> readNames = Collections.emptyMap();
     try {
@@ -163,7 +143,7 @@ public class CoverageReport {
     }
   }
 
-  public static Map<String, String> loadSourceMapFromFile(Map<String, ClassData> classes, File sourceMapFile) throws IOException {
+  static Map<String, String> loadSourceMapFromFile(Map<String, ClassData> classes, File sourceMapFile) throws IOException {
     DataInputStream in = null;
     try {
       in = new DataInputStream(new FileInputStream(sourceMapFile));
@@ -204,7 +184,7 @@ public class CoverageReport {
     }
   }
 
-  public static void doSaveSourceMap(Map<String, String> classNameToFile, File sourceMapFile, Map<String, ClassData> classes) throws IOException {
+  static void doSaveSourceMap(Map<String, String> classNameToFile, File sourceMapFile, Map<String, ClassData> classes) throws IOException {
     final HashMap<String, String> sources = new HashMap<String, String>(classNameToFile);
     for (ClassData classData : classes.values()) {
       if (!sources.containsKey(classData.getName())) {

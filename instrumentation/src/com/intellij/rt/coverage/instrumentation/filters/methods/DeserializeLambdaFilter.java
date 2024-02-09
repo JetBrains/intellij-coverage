@@ -20,11 +20,11 @@ import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class DeserializeLambdaFilter implements MethodFilter {
-  public boolean shouldFilter(InstrumentationData data) {
-    int access = data.getMethodAccess();
+  public boolean shouldFilter(InstrumentationData context) {
+    int access = context.getMethodAccess();
     return (access & Opcodes.ACC_STATIC) != 0
         && (access & Opcodes.ACC_SYNTHETIC) != 0
-        && "$deserializeLambda$".equals(data.getMethodName())
-        && "(Ljava/lang/invoke/SerializedLambda;)Ljava/lang/Object;".equals(data.getMethodDesc());
+        && "$deserializeLambda$".equals(context.getMethodName())
+        && "(Ljava/lang/invoke/SerializedLambda;)Ljava/lang/Object;".equals(context.getMethodDesc());
   }
 }

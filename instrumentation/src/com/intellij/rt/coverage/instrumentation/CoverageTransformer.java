@@ -17,42 +17,30 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import com.intellij.rt.coverage.instrumentation.dataAccess.*;
-import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingMode;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.OptionsUtil;
 import com.intellij.rt.coverage.util.classFinder.ClassFinder;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
+  private final ProjectData myProjectData;
+  protected final ProjectContext myProjectContext;
+  private boolean myStop;
 
-  private final ProjectData data;
-  private final boolean shouldSaveSource;
-  private final ClassFinder cf;
-  private final TestTrackingMode testTrackingMode;
-  protected final boolean calculateHits;
-
-  public CoverageTransformer(ProjectData data, boolean shouldSaveSource) {
-    this(data, shouldSaveSource, null, null);
-  }
-
-  public CoverageTransformer(ProjectData data, boolean shouldSaveSource, ClassFinder cf, TestTrackingMode testTrackingMode) {
-    this.data = data;
-    this.shouldSaveSource = shouldSaveSource;
-    this.cf = cf;
-    this.testTrackingMode = testTrackingMode;
-    this.calculateHits = OptionsUtil.CALCULATE_HITS_COUNT;
+  public CoverageTransformer(ProjectData projectData, ProjectContext projectContext) {
+    myProjectData = projectData;
+    myProjectContext = projectContext;
   }
 
   @Override
   protected ClassVisitor createClassVisitor(String className, ClassLoader loader, ClassReader cr, ClassVisitor cw) {
-    return InstrumentationStrategy.createInstrumenter(data, className, cr, cw, testTrackingMode, data.isBranchCoverage(),
-        shouldSaveSource, calculateHits, createDataAccess(className, cr));
+    return InstrumentationStrategy.createInstrumenter(myProjectData, className, cr, cw, myProjectContext, createDataAccess(className, cr));
   }
 
   private CoverageDataAccess createDataAccess(String className, ClassReader cr) {
@@ -68,6 +56,7 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
   }
 
   protected CoverageDataAccess.Init createInit(String className, ClassReader cr, boolean needCache) {
+    boolean calculateHits = myProjectContext.getOptions().isCalculateHits;
     String arrayType = calculateHits ? DataAccessUtil.HITS_ARRAY_TYPE : DataAccessUtil.MASK_ARRAY_TYPE;
     String methodName = calculateHits ? (needCache ? "getHitsCached" : "getHits")
         : (needCache ? "getHitsMaskCached" : "getHitsMask");
@@ -76,6 +65,7 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
   }
 
   protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr) {
+    boolean calculateHits = myProjectContext.getOptions().isCalculateHits;
     String arrayType = calculateHits ? DataAccessUtil.HITS_ARRAY_TYPE : DataAccessUtil.MASK_ARRAY_TYPE;
     String methodName = calculateHits ? "getHits" : "getHitsMask";
     return new CoverageDataAccess.Init("__$hits$__", arrayType, "com/intellij/rt/coverage/util/CondyUtils",
@@ -84,12 +74,12 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
 
   @Override
   protected boolean shouldExclude(String className) {
-    return ClassNameUtil.matchesPatterns(className, data.getExcludePatterns());
+    return ClassNameUtil.matchesPatterns(className, myProjectContext.getOptions().excludePatterns);
   }
 
   @Override
   protected InclusionPattern getInclusionPattern() {
-    final List<Pattern> includes = data.getIncudePatterns();
+    final List<Pattern> includes = myProjectContext.getOptions().includePatterns;
     return includes == null || includes.isEmpty() ? null : new InclusionPattern() {
       public boolean accept(String className) {
         return ClassNameUtil.matchesPatterns(className, includes);
@@ -99,13 +89,18 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
 
   @Override
   protected void visitClassLoader(ClassLoader classLoader) {
-    if (cf != null) {
-      cf.addClassLoader(classLoader);
+    ClassFinder classFinder = myProjectContext.getClassFinder();
+    if (classFinder != null) {
+      classFinder.addClassLoader(classLoader);
     }
   }
 
   @Override
   protected boolean isStopped() {
-    return data.isStopped();
+    return myStop;
+  }
+
+  public void stop() {
+    myStop = true;
   }
 }

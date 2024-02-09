@@ -16,13 +16,15 @@
 
 package com.intellij.rt.coverage.instrumentation.dataAccess;
 
+import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 
 /**
  * This data access may be used for class analysis without actual transform and further usage.
  *
- * @see UnloadedUtil#appendUnloaded
+ * @see UnloadedUtil#appendUnloaded(ProjectData, ProjectContext)
  */
 public class EmptyCoverageDataAccess extends CoverageDataAccess {
   public static final EmptyCoverageDataAccess INSTANCE = new EmptyCoverageDataAccess();

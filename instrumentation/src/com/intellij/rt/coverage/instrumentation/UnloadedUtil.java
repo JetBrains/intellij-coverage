@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import com.intellij.rt.coverage.instrumentation.dataAccess.EmptyCoverageDataAccess;
 import com.intellij.rt.coverage.util.ErrorReporter;
 import com.intellij.rt.coverage.util.classFinder.ClassEntry;
@@ -48,16 +49,25 @@ public class UnloadedUtil {
     }
   };
 
-  public static void appendUnloaded(final ProjectData projectData, final ClassFinder classFinder,
-                                    final boolean calculateSource, final boolean branchCoverage) {
-    classFinder.iterateMatchedClasses(new ClassEntry.Consumer() {
+  @SuppressWarnings("unused") // used in IntelliJ
+  public static void appendUnloaded(ProjectData projectData, ClassFinder classFinder, boolean branchCoverage) {
+    InstrumentationOptions options = new InstrumentationOptions.Builder().setBranchCoverage(branchCoverage).build();
+    appendUnloaded(projectData, new ProjectContext(options, classFinder), true);
+  }
+
+  public static void appendUnloaded(ProjectData projectData, ProjectContext context) {
+    appendUnloaded(projectData, context, false);
+  }
+
+  private static void appendUnloaded(final ProjectData projectData, final ProjectContext context, final boolean finalizeCoverage) {
+    context.getClassFinder().iterateMatchedClasses(new ClassEntry.Consumer() {
       public void consume(ClassEntry classEntry) {
         final ClassData cd = projectData.getClassData(classEntry.getClassName());
         if (cd != null && cd.getLines() != null && cd.isFullyAnalysed()) return;
         try {
           final InputStream is = classEntry.getClassInputStream();
           if (is == null) return;
-          appendUnloadedClass(projectData, classEntry.getClassName(), new ClassReader(is), branchCoverage, calculateSource, false);
+          appendUnloadedClass(projectData, classEntry.getClassName(), new ClassReader(is), context, finalizeCoverage);
         } catch (Throwable e) {
           ErrorReporter.info("Failed to process unloaded class: " + classEntry.getClassName() + ", error: " + e.getMessage(), e);
         }
@@ -66,16 +76,16 @@ public class UnloadedUtil {
   }
 
   @SuppressWarnings("unused") // used in IntelliJ
-  public static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean branchCoverage, boolean calculateSource) {
-    appendUnloadedClass(projectData, className, reader, branchCoverage, calculateSource, true);
+  public static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean branchCoverage) {
+    InstrumentationOptions options = new InstrumentationOptions.Builder().setBranchCoverage(branchCoverage).build();
+    appendUnloadedClass(projectData, className, reader, new ProjectContext(options), true);
   }
 
-  private static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean branchCoverage, boolean calculateSource, boolean checkLineMappings) {
-    final ClassVisitor visitor = InstrumentationStrategy.createInstrumenter(
-        projectData, className, reader, EMPTY_CLASS_VISITOR,
-        null, branchCoverage, calculateSource, false, EmptyCoverageDataAccess.INSTANCE);
-    if (visitor == null) return;
-    reader.accept(visitor, ClassReader.SKIP_FRAMES);
+  private static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, ProjectContext context, boolean finalizeCoverage) {
+    ClassVisitor cv = InstrumentationStrategy.createInstrumenter(projectData, className, reader,
+        EMPTY_CLASS_VISITOR, context, EmptyCoverageDataAccess.INSTANCE);
+    if (cv == null) return;
+    reader.accept(cv, ClassReader.SKIP_FRAMES);
     final ClassData classData = projectData.getClassData(className);
     if (classData == null || classData.getLines() == null) return;
     classData.dropIgnoredLines();
@@ -84,8 +94,8 @@ public class UnloadedUtil {
       if (line == null) continue;
       classData.registerMethodSignature(line);
     }
-    if (!checkLineMappings) return;
-    final Map<String, FileMapData[]> linesMap = projectData.getLinesMap();
+    if (!finalizeCoverage) return;
+    final Map<String, FileMapData[]> linesMap = context.getLinesMap();
     if (linesMap == null) return;
     final FileMapData[] mappings = linesMap.remove(className);
     if (mappings == null) return;

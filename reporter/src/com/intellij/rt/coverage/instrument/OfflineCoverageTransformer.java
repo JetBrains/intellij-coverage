@@ -18,6 +18,8 @@ package com.intellij.rt.coverage.instrument;
 
 import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.CoverageTransformer;
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions;
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import com.intellij.rt.coverage.instrumentation.dataAccess.CoverageDataAccess;
 import com.intellij.rt.coverage.instrumentation.dataAccess.DataAccessUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
@@ -34,13 +36,14 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
  * @see com.intellij.rt.coverage.offline.RawProjectInit
  */
 public class OfflineCoverageTransformer extends CoverageTransformer {
-  public OfflineCoverageTransformer(ProjectData data, boolean shouldSaveSource) {
-    super(data, shouldSaveSource);
+  public OfflineCoverageTransformer(InstrumentationOptions options) {
+    super(new ProjectData(), new ProjectContext(options, null));
   }
 
   @Override
   protected CoverageDataAccess.Init createInit(String className, ClassReader cr, boolean needCache) {
     int length = getRequiredArrayLength(cr);
+    boolean calculateHits = myProjectContext.getOptions().isCalculateHits;
     String arrayType = calculateHits ? DataAccessUtil.HITS_ARRAY_TYPE : DataAccessUtil.MASK_ARRAY_TYPE;
     String methodName = calculateHits ? "getOrCreateHits" : "getOrCreateHitsMask";
     return new CoverageDataAccess.Init("__$hits$__", arrayType, "com/intellij/rt/coverage/offline/RawProjectInit",
@@ -50,6 +53,7 @@ public class OfflineCoverageTransformer extends CoverageTransformer {
   @Override
   protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr) {
     final int length = getRequiredArrayLength(cr);
+    boolean calculateHits = myProjectContext.getOptions().isCalculateHits;
     String arrayType = calculateHits ? DataAccessUtil.HITS_ARRAY_TYPE : DataAccessUtil.MASK_ARRAY_TYPE;
     String methodName = calculateHits ? "getOrCreateHits" : "getOrCreateHitsMask";
     return new CoverageDataAccess.Init("__$hits$__", arrayType, "com/intellij/rt/coverage/offline/CondyUtils",

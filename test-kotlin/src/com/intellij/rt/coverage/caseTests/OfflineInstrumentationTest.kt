@@ -21,9 +21,10 @@ import com.intellij.rt.coverage.data.ProjectData
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil
 import com.intellij.rt.coverage.instrument.OfflineCoverageTransformer
 import com.intellij.rt.coverage.instrument.RawReportLoader
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext
 import com.intellij.rt.coverage.util.ProcessUtil
 import com.intellij.rt.coverage.util.ResourceUtil
-import com.intellij.rt.coverage.util.classFinder.ClassFinder
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -108,18 +109,21 @@ internal class OfflineInstrumentationTest(override val coverage: Coverage) : Cov
         val rootName = if (test.file.name.endsWith(".kt")) "kotlin" else "java"
         val outputRoot = pathToFile("build", "classes", rootName, "test")
 
-        val includes = Collections.singletonList(Pattern.compile(test.mainClass))
-        val excludes = Collections.emptyList<Pattern>()
-
         runOfflineCoverage(test, outputRoot)
 
-        val projectData = createProjectData(coverage.isBranchCoverage(), includes, excludes)
-        val cf = ClassFinder(includes, excludes)
-        cf.addClassLoader(URLClassLoader(arrayOf(outputRoot.toURI().toURL())))
-        UnloadedUtil.appendUnloaded(projectData, cf, false, coverage.isBranchCoverage())
+        val options = InstrumentationOptions.Builder()
+            .setBranchCoverage(coverage.isBranchCoverage())
+            .setIncludePatterns(Collections.singletonList(Pattern.compile(test.mainClass)))
+            .build()
+
+        val projectData = ProjectData()
+        val projectContext = ProjectContext(options).apply {
+            classFinder.addClassLoader(URLClassLoader(arrayOf(outputRoot.toURI().toURL())))
+        }
+        UnloadedUtil.appendUnloaded(projectData, projectContext)
 
         RawReportLoader.load(myDataFile, projectData)
-        projectData.applyLineMappings()
+        projectContext.applyLineMappings(projectData)
 
         assertEqualsLines(projectData, config, coverage)
     }
@@ -138,13 +142,7 @@ internal class OfflineInstrumentationTest(override val coverage: Coverage) : Cov
     }
 }
 
-private fun createProjectData(isBranchCoverage: Boolean, includes: List<Pattern>, excludes: List<Pattern>): ProjectData =
-    ProjectData(isBranchCoverage, null).apply {
-        setIncludePatterns(includes)
-        excludePatterns = excludes
-    }
-
-internal fun offlineCoverageTransform(isBranchCoverage: Boolean, test: TestFile, outputRoot: File): File {
+internal fun offlineCoverageTransform(branchCoverage: Boolean, test: TestFile, outputRoot: File): File {
     val className = test.mainClass
     val packageName = className.substring(0, className.lastIndexOf('.'))
     val path = className.replace(".", File.separator) + ".class"
@@ -152,11 +150,11 @@ internal fun offlineCoverageTransform(isBranchCoverage: Boolean, test: TestFile,
     val outputDir = createTempDirectory("output").toFile()
     val packageRoot = File(outputDir, packageName.replace(".", File.separator)).apply { mkdirs() }
 
-    val includes = Collections.singletonList(Pattern.compile("$packageName\\..*"))
-    val excludes = Collections.emptyList<Pattern>()
-
-    val projectData = createProjectData(isBranchCoverage, includes, excludes)
-    val transformer = OfflineCoverageTransformer(projectData, false)
+    val options = InstrumentationOptions.Builder()
+        .setBranchCoverage(branchCoverage)
+        .setIncludePatterns(Collections.singletonList(Pattern.compile("$packageName\\..*")))
+        .build()
+    val transformer = OfflineCoverageTransformer(options)
 
     for (file in parentDir.listFiles()!!) {
         if (!file.isFile) continue

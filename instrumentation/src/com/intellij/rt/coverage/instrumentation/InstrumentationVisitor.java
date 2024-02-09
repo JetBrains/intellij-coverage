@@ -39,75 +39,67 @@ import org.jetbrains.coverage.org.objectweb.asm.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Instrumenter extends ClassVisitor {
+public class InstrumentationVisitor extends ClassVisitor {
   private static final List<MethodFilter> ourMethodFilters = FilterUtils.createMethodFilters();
 
-  private final InstrumentationData myData;
+  private final InstrumentationData myContext;
   private final CoverageDataAccessVisitor myDataAccess;
   private final ProjectData myProjectData;
-  private final boolean myBranchCoverage;
-  private final boolean mySaveSource;
-  private final boolean myCalculateHits;
   private String mySource;
 
 
-  public Instrumenter(ClassVisitor classVisitor,
-                      CoverageDataAccess dataAccess,
-                      final InstrumentationData data,
-                      ProjectData projectData,
-                      boolean branchCoverage,
-                      boolean saveSource,
-                      boolean calculateHits) {
+  public InstrumentationVisitor(ProjectData projectData,
+                                final InstrumentationData context,
+                                ClassVisitor classVisitor,
+                                CoverageDataAccess dataAccess) {
     super(Opcodes.API_VERSION, new CoverageDataAccessVisitor(classVisitor, dataAccess) {
       @Override
       protected boolean shouldInstrumentMethod() {
-        return !data.hasNoLinesInCurrentMethod();
+        return !context.hasNoLinesInCurrentMethod();
       }
     });
     myDataAccess = (CoverageDataAccessVisitor) cv;
-    myData = data;
+    myContext = context;
     myProjectData = projectData;
-    myBranchCoverage = branchCoverage;
-    myCalculateHits = calculateHits;
-    mySaveSource = saveSource;
   }
 
   @Override
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-    myData.put(Key.CLASS_ACCESS, access);
-    myData.put(Key.INTERFACES, interfaces);
+    myContext.put(Key.CLASS_ACCESS, access);
+    myContext.put(Key.INTERFACES, interfaces);
     super.visit(version, access, name, signature, superName, interfaces);
   }
 
   @Override
   public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-    List<String> annotations = myData.get(Key.CLASS_ANNOTATIONS);
+    List<String> annotations = myContext.get(Key.CLASS_ANNOTATIONS);
     if (annotations == null) {
       annotations = new ArrayList<String>();
-      myData.put(Key.CLASS_ANNOTATIONS, annotations);
+      myContext.put(Key.CLASS_ANNOTATIONS, annotations);
     }
-    annotations.add(myProjectData.getFromPool(descriptor));
+    annotations.add(myContext.getProjectContext().getFromPool(descriptor));
     return super.visitAnnotation(descriptor, visible);
   }
 
 
   @Override
   public MethodVisitor visitMethod(final int access, final String name, final String descriptor, final String signature, final String[] exceptions) {
-    myData.resetMethod();
+    myContext.resetMethod();
 
-    myData.put(Key.METHOD_ACCESS, access);
-    myData.put(Key.METHOD_NAME, name);
-    myData.put(Key.METHOD_DESC, descriptor);
-    myData.put(Key.METHOD_SIGNATURE, signature);
-    myData.put(Key.EXCEPTIONS, exceptions);
+    myContext.put(Key.METHOD_ACCESS, access);
+    myContext.put(Key.METHOD_NAME, name);
+    myContext.put(Key.METHOD_DESC, descriptor);
+    myContext.put(Key.METHOD_SIGNATURE, signature);
+    myContext.put(Key.EXCEPTIONS, exceptions);
 
     if (!shouldInstrumentMethod(access)) return super.visitMethod(access, name, descriptor, signature, exceptions);
 
-    final CoverageEnumerator enumerator = myProjectData.isInstructionsCoverageEnabled()
-        ? new CoverageEnumeratorWithInstructions(myData, myBranchCoverage)
-        : new CoverageEnumerator(myData, myBranchCoverage);
+    boolean branchCoverage = getOptions().isBranchCoverage;
+    final CoverageEnumerator enumerator = getOptions().isInstructionCoverage
+        ? new CoverageEnumeratorWithInstructions(myContext, branchCoverage)
+        : new CoverageEnumerator(myContext, branchCoverage);
     MethodVisitor mv = chainFilters(enumerator, FilterUtils.createLineFilters());
-    if (myBranchCoverage) {
+    if (branchCoverage) {
       mv = chainFilters(mv, FilterUtils.createBranchFilters());
     }
 
@@ -116,8 +108,8 @@ public class Instrumenter extends ClassVisitor {
       public void visitEnd() {
         super.visitEnd();
         if (myDataAccess.getDataAccess() != EmptyCoverageDataAccess.INSTANCE) {
-          MethodVisitor methodVisitor = Instrumenter.super.visitMethod(access, name, descriptor, signature, exceptions);
-          enumerator.accept(myData.hasNoLinesInCurrentMethod() ? methodVisitor : new HitsVisitor(methodVisitor));
+          MethodVisitor methodVisitor = InstrumentationVisitor.super.visitMethod(access, name, descriptor, signature, exceptions);
+          enumerator.accept(myContext.hasNoLinesInCurrentMethod() ? methodVisitor : new HitsVisitor(methodVisitor));
         }
       }
     };
@@ -133,7 +125,7 @@ public class Instrumenter extends ClassVisitor {
     if ((access & Opcodes.ACC_ABSTRACT) != 0) return false;
 
     for (MethodFilter filter : ourMethodFilters) {
-      if (filter.shouldFilter(myData)) {
+      if (filter.shouldFilter(myContext)) {
         return false;
       }
     }
@@ -142,8 +134,8 @@ public class Instrumenter extends ClassVisitor {
 
   private MethodVisitor chainFilters(MethodVisitor root, List<CoverageFilter> filters) {
     for (CoverageFilter filter : filters) {
-      if (filter.isApplicable(myData)) {
-        filter.initFilter(root, myData);
+      if (filter.isApplicable(myContext)) {
+        filter.initFilter(root, myContext);
         root = filter;
       }
     }
@@ -153,16 +145,16 @@ public class Instrumenter extends ClassVisitor {
   @Override
   public void visitEnd() {
     super.visitEnd();
-    ClassData classData = myProjectData.getOrCreateClassData(myData.get(Key.CLASS_NAME));
-    classData.setLines(LinesUtil.calcLineArray(myData.getMaxSeenLine(), myData.getLines()));
-    classData.createMask(myData.getSize(), myCalculateHits);
+    ClassData classData = myProjectData.getOrCreateClassData(myContext.get(Key.CLASS_NAME));
+    classData.setLines(LinesUtil.calcLineArray(myContext.getMaxSeenLine(), myContext.getLines()));
+    classData.createMask(myContext.getSize(), getOptions().isCalculateHits);
     classData.setSource(mySource);
-    classData.setIgnoredLines(myData.getIgnoredLines());
+    classData.setIgnoredLines(myContext.getIgnoredLines());
     if (OptionsUtil.TEST_MODE) {
       InstrumentationData.assertIds(classData);
     }
-    if (myProjectData.isInstructionsCoverageEnabled()) {
-      ClassInstructions classInstructions = new ClassInstructions(classData, myData.getInstructions());
+    if (getOptions().isInstructionCoverage) {
+      ClassInstructions classInstructions = new ClassInstructions(classData, myContext.getInstructions());
       myProjectData.getInstructions().put(classData.getName(), classInstructions);
     }
   }
@@ -170,23 +162,23 @@ public class Instrumenter extends ClassVisitor {
   @Override
   public void visitSource(String source, String debug) {
     super.visitSource(source, debug);
-    String className = myData.get(Key.CLASS_NAME);
-    if (mySaveSource) {
-      mySource = source;
+    String className = myContext.get(Key.CLASS_NAME);
+    if (getOptions().isSaveSource) {
+      mySource = myContext.getProjectContext().getFromPool(source);
     }
     if (debug != null) {
       FileMapData[] mapping = JSR45Util.extractLineMapping(debug, className);
       if (mapping != null) {
-        myProjectData.addLineMaps(className, mapping);
+        myContext.getProjectContext().addLineMaps(className, mapping);
       }
     }
   }
 
   @Override
   public void visitOuterClass(String outerClassName, String methodName, String methodSig) {
-    if (mySaveSource) {
+    if (getOptions().isSaveSource) {
       String fqnName = ClassNameUtil.convertToFQName(outerClassName);
-      ClassData outerClass = myProjectData.getOrCreateClassData(fqnName);
+      ClassData outerClass = myProjectData.getOrCreateClassData(myContext.getProjectContext().getFromPool(fqnName));
       if (outerClass.getSource() == null) {
         outerClass.setSource(mySource);
       }
@@ -194,6 +186,9 @@ public class Instrumenter extends ClassVisitor {
     super.visitOuterClass(outerClassName, methodName, methodSig);
   }
 
+  private InstrumentationOptions getOptions() {
+    return myContext.getProjectContext().getOptions();
+  }
 
   private class HitsVisitor extends MethodVisitor {
 
@@ -203,7 +198,7 @@ public class Instrumenter extends ClassVisitor {
 
     @Override
     public void visitLineNumber(int line, Label start) {
-      LineData lineData = myData.getLineData(line);
+      LineData lineData = myContext.getLineData(line);
       if (lineData != null) {
         incrementHitById(lineData.getId());
       }
@@ -214,12 +209,12 @@ public class Instrumenter extends ClassVisitor {
     public void visitLabel(Label label) {
       super.visitLabel(label);
 
-      Jump jump = myData.getJump(label);
+      Jump jump = myContext.getJump(label);
       if (jump != null) {
         incrementHitById(jump.getId());
       }
 
-      Switch aSwitch = myData.getSwitch(label);
+      Switch aSwitch = myContext.getSwitch(label);
       if (aSwitch != null) {
         incrementHitById(aSwitch.getId());
       }
@@ -228,7 +223,7 @@ public class Instrumenter extends ClassVisitor {
     private void incrementHitById(int id) {
       if (id == -1) return;
       myDataAccess.loadFromLocal();
-      InstrumentationUtils.touchById(mv, id, myCalculateHits);
+      InstrumentationUtils.touchById(mv, id, getOptions().isCalculateHits);
     }
   }
 }

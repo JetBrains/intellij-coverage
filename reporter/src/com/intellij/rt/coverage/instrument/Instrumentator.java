@@ -16,11 +16,10 @@
 
 package com.intellij.rt.coverage.instrument;
 
-import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.CoverageTransformer;
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions;
 import com.intellij.rt.coverage.report.api.Filters;
 import com.intellij.rt.coverage.util.ClassNameUtil;
-import com.intellij.rt.coverage.util.OptionsUtil;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
 import java.io.File;
@@ -44,53 +43,35 @@ public class Instrumentator {
     myFilters = filters;
   }
 
-  public void instrument(boolean countHits) {
+  public void instrument(final boolean countHits) {
     for (int i = 0; i < myRoots.size(); i++) {
       final File root = myRoots.get(i);
       final File outputRoot = myOutputRoots.get(i);
-
-      withHitsSet(countHits, new Runnable() {
-        public void run() {
-          new InstrumentationVisitor(root, outputRoot).visitFiles();
-        }
-      });
+      new InstrumentationVisitor(root, outputRoot, countHits).visitFiles();
     }
   }
 
   public static byte[] instrument(final byte[] bytes, boolean countHits) {
-    final CoverageTransformer transformer = new OfflineCoverageTransformer(new ProjectData(), false);
-    final byte[][] instrumented = new byte[1][];
-    withHitsSet(countHits, new Runnable() {
-      public void run() {
-        String className = new ClassReader(bytes).getClassName();
-        // This loader is not user actually, just need some not null loader
-        final ClassLoader loader = ClassLoader.getSystemClassLoader();
-        instrumented[0] = transformer.transform(loader, className, bytes);
-      }
-    });
-    return instrumented[0];
-  }
-
-  private static void withHitsSet(boolean countHits, Runnable action) {
-    final boolean calculateHitsCount = OptionsUtil.CALCULATE_HITS_COUNT;
-    try {
-      OptionsUtil.CALCULATE_HITS_COUNT = countHits;
-      action.run();
-    } finally {
-      OptionsUtil.CALCULATE_HITS_COUNT = calculateHitsCount;
-    }
+    InstrumentationOptions options = new InstrumentationOptions.Builder().setIsCalculateHits(countHits).build();
+    CoverageTransformer transformer = new OfflineCoverageTransformer(options);
+    String className = new ClassReader(bytes).getClassName();
+    // This loader is not user actually, just need some not null loader
+    ClassLoader loader = ClassLoader.getSystemClassLoader();
+    return transformer.transform(loader, className, bytes);
   }
 
   private class InstrumentationVisitor extends DirectoryVisitor {
     private final File myOutput;
     private final CoverageTransformer myTransformer;
 
-    private InstrumentationVisitor(File root, File output) {
+    private InstrumentationVisitor(File root, File output, boolean countHits) {
       super(root);
       myOutput = output;
-      final ProjectData projectData = new ProjectData();
-      projectData.setAnnotationsToIgnore(myFilters.excludeAnnotations);
-      myTransformer = new OfflineCoverageTransformer(projectData, false);
+      InstrumentationOptions options = new InstrumentationOptions.Builder()
+          .setIsCalculateHits(countHits)
+          .setExcludeAnnotations(myFilters.excludeAnnotations)
+          .build();
+      myTransformer = new OfflineCoverageTransformer(options);
     }
 
     @Override

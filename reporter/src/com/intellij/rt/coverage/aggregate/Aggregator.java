@@ -19,8 +19,10 @@ package com.intellij.rt.coverage.aggregate;
 import com.intellij.rt.coverage.aggregate.api.Request;
 import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions;
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
 import com.intellij.rt.coverage.instrument.RawReportLoader;
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.util.CoverageReport;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
@@ -66,9 +68,10 @@ public class Aggregator {
     // Note that instructions collection is done only inside this method
     // to ensure that instructions count in inline methods
     // correspond to method definition, not method call
-    final ProjectData projectData = collectCoverageInformationFromOutputs();
+    final ProjectData projectData = new ProjectData();
+    final ProjectContext context = collectCoverageInformationFromOutputs(projectData);
     final ProjectData projectDataCopy = hasRawHitsReport ? copyProjectData(projectData) : null;
-    projectData.dropLineMappings();
+    context.dropLineMappings(projectData);
 
     for (BinaryReport report : myReports) {
       if (report.isRawHitsReport()) {
@@ -83,7 +86,7 @@ public class Aggregator {
       }
     }
     if (projectDataCopy != null) {
-      projectDataCopy.applyLineMappings();
+      context.applyLineMappings(projectDataCopy);
       mergeHits(projectData, projectDataCopy);
     }
     myProjectData = projectData;
@@ -127,12 +130,6 @@ public class Aggregator {
         lineCopy.fillArrays();
       }
     }
-    final Map<String, FileMapData[]> mappings = projectData.getLinesMap();
-    if (mappings != null) {
-      for (Map.Entry<String, FileMapData[]> entry : mappings.entrySet()) {
-        projectDataCopy.addLineMaps(entry.getKey(), entry.getValue());
-      }
-    }
     return projectDataCopy;
   }
 
@@ -166,20 +163,29 @@ public class Aggregator {
         }
       }
       InstructionsUtil.merge(projectData, requestProjectData, request.classFilter);
-      CoverageReport.save(requestProjectData, request.outputFile, request.smapFile);
+      InstrumentationOptions options = new InstrumentationOptions.Builder()
+          .setDataFile(request.outputFile)
+          .setSourceMapFile(request.smapFile)
+          .build();
+      CoverageReport.save(requestProjectData, options);
     }
   }
 
-  private ProjectData collectCoverageInformationFromOutputs() {
-    final ProjectData projectData = new ProjectData();
+  private ProjectContext collectCoverageInformationFromOutputs(ProjectData projectData) {
     final List<Pattern> excludeAnnotations = new ArrayList<Pattern>();
     for (Request request : myRequests) {
       excludeAnnotations.addAll(request.excludeAnnotations);
     }
     projectData.setInstructionsCoverage(true);
-    projectData.setAnnotationsToIgnore(excludeAnnotations);
-    UnloadedUtil.appendUnloaded(projectData, createClassFinder(), true, true);
-    return projectData;
+    InstrumentationOptions options = new InstrumentationOptions.Builder()
+        .setBranchCoverage(true)
+        .setSaveSource(true)
+        .setInstructionCoverage(true)
+        .setExcludeAnnotations(excludeAnnotations)
+        .build();
+    ProjectContext context = new ProjectContext(options, createClassFinder());
+    UnloadedUtil.appendUnloaded(projectData, context);
+    return context;
   }
 
   private OutputClassFinder createClassFinder() {

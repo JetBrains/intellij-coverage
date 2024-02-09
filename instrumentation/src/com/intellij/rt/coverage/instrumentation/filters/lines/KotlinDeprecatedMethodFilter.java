@@ -83,7 +83,7 @@ public class KotlinDeprecatedMethodFilter extends CoverageFilter {
   public void visitCode() {
     super.visitCode();
     if (myShouldIgnore) {
-      myContext.get(Key.PROJECT_DATA).getIgnoredStorage().addIgnoredMethod(myContext.get(Key.CLASS_NAME), myContext.getMethodName(), myContext.getMethodDesc());
+      myContext.getProjectContext().getIgnoredStorage().addIgnoredMethod(myContext.get(Key.CLASS_NAME), myContext.getMethodName(), myContext.getMethodDesc());
     }
   }
 

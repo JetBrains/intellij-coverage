@@ -22,5 +22,5 @@ import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
  * Filters out coverage from method if it's signature matches filter.
  */
 public interface MethodFilter {
-  boolean shouldFilter(InstrumentationData data);
+  boolean shouldFilter(InstrumentationData context);
 }

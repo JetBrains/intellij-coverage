@@ -18,8 +18,10 @@ package com.intellij.rt.coverage.caseTests
 
 import com.intellij.rt.coverage.*
 import com.intellij.rt.coverage.data.ProjectData
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions
 import com.intellij.rt.coverage.instrumentation.CoverageTransformer
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils
+import com.intellij.rt.coverage.instrumentation.data.ProjectContext
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingArrayMode
 import com.intellij.rt.coverage.instrumentation.testTracking.TestTrackingClassDataMode
 import com.intellij.rt.coverage.util.OptionsUtil
@@ -88,8 +90,12 @@ class InstrumentedBytecodeTest {
         )
     ) {
         val testTrackingMode = testTracking.createMode()
-        val projectData = ProjectData(coverage.isBranchCoverage(), testTrackingMode?.createTestTrackingCallback(null))
-        val transformer = CoverageTransformer(projectData, false, null, testTrackingMode)
+        val projectData = ProjectData(testTrackingMode?.createTestTrackingCallback(null))
+        val options = InstrumentationOptions.Builder()
+            .setBranchCoverage(coverage.isBranchCoverage())
+            .setTestTrackingMode(testTrackingMode)
+            .build()
+        val transformer = CoverageTransformer(projectData, ProjectContext(options))
         val bytes = transformer.instrument(originalBytes, className, null, false)
 
         assertBytecode(expectedFileName, bytes)

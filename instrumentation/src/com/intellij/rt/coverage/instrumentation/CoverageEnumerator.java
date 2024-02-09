@@ -17,7 +17,6 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.LineData;
-import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.data.SwitchLabels;
@@ -47,8 +46,7 @@ public class CoverageEnumerator extends MethodVisitor implements Opcodes {
     myMethodNode = (MethodNode) super.mv;
     myData = data;
 
-    ProjectData projectData = myData.get(Key.PROJECT_DATA);
-    myMethodDesc = projectData.getFromPool(myData.getMethodName() + myData.getMethodDesc());
+    myMethodDesc = data.getProjectContext().getFromPool(myData.getMethodName() + myData.getMethodDesc());
     myBranchCoverage = branchCoverage;
   }
 
