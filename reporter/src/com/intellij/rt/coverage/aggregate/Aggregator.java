@@ -82,11 +82,12 @@ public class Aggregator {
         }
       } else {
         final ProjectData data = ProjectDataLoader.load(report.getDataFile());
+        context.dropIgnoredLines(data);
         mergeHits(projectData, data);
       }
     }
     if (projectDataCopy != null) {
-      context.applyLineMappings(projectDataCopy);
+      context.finalizeCoverage(projectDataCopy);
       mergeHits(projectData, projectDataCopy);
     }
     myProjectData = projectData;

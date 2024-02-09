@@ -123,7 +123,7 @@ internal class OfflineInstrumentationTest(override val coverage: Coverage) : Cov
         UnloadedUtil.appendUnloaded(projectData, projectContext)
 
         RawReportLoader.load(myDataFile, projectData)
-        projectContext.applyLineMappings(projectData)
+        projectContext.finalizeCoverage(projectData)
 
         assertEqualsLines(projectData, config, coverage)
     }

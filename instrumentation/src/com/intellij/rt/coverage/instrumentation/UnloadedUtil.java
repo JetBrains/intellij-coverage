@@ -88,18 +88,13 @@ public class UnloadedUtil {
     reader.accept(cv, ClassReader.SKIP_FRAMES);
     final ClassData classData = projectData.getClassData(className);
     if (classData == null || classData.getLines() == null) return;
-    classData.dropIgnoredLines();
     final LineData[] lines = (LineData[]) classData.getLines();
     for (LineData line : lines) {
       if (line == null) continue;
       classData.registerMethodSignature(line);
     }
-    if (!finalizeCoverage) return;
-    final Map<String, FileMapData[]> linesMap = context.getLinesMap();
-    if (linesMap == null) return;
-    final FileMapData[] mappings = linesMap.remove(className);
-    if (mappings == null) return;
-    classData.dropMappedLines(mappings);
-    InstructionsUtil.dropMappedLines(projectData, classData.getName(), mappings);
+    if (finalizeCoverage) {
+      context.dropLineMappings(projectData, classData);
+    }
   }
 }

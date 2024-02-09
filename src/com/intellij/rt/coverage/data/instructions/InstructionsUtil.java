@@ -40,7 +40,7 @@ public class InstructionsUtil {
         classInstructions = new ClassInstructions();
         instructions.put(className, classInstructions);
       }
-      classInstructions.merge(mergedInstructions, classData);
+      classInstructions.merge(mergedInstructions);
     }
   }
 

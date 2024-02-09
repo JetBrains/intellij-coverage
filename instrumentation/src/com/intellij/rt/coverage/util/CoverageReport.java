@@ -77,8 +77,7 @@ public class CoverageReport {
     if (options.isCalculateUnloaded) {
       UnloadedUtil.appendUnloaded(projectData, projectContext);
     }
-    projectContext.applyLineMappings(projectData);
-    projectContext.dropIgnoredLines(projectData);
+    projectContext.finalizeCoverage(projectData);
   }
 
   public static void save(ProjectData projectData, InstrumentationOptions options) {

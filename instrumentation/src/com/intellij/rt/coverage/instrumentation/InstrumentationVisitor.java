@@ -145,11 +145,12 @@ public class InstrumentationVisitor extends ClassVisitor {
   @Override
   public void visitEnd() {
     super.visitEnd();
-    ClassData classData = myProjectData.getOrCreateClassData(myContext.get(Key.CLASS_NAME));
+    String className = myContext.get(Key.CLASS_NAME);
+    ClassData classData = myProjectData.getOrCreateClassData(className);
     classData.setLines(LinesUtil.calcLineArray(myContext.getMaxSeenLine(), myContext.getLines()));
     classData.createMask(myContext.getSize(), getOptions().isCalculateHits);
     classData.setSource(mySource);
-    classData.setIgnoredLines(myContext.getIgnoredLines());
+    myContext.getProjectContext().addIgnoredLines(className, myContext.getIgnoredLines());
     if (OptionsUtil.TEST_MODE) {
       InstrumentationData.assertIds(classData);
     }

@@ -50,7 +50,7 @@ public abstract class LineMapper<T extends CoverageData> {
       for (final LineMapData mapData : linesMap) {
         for (int index = 0; index < mapData.getCount(); index++) {
           final int sourceLineNumber = mapData.getSourceLine(index);
-          if (!sourceClassData.isIgnoredLine(sourceLineNumber) && ArrayUtil.safeLoad(sourceLines, sourceLineNumber) == null) {
+          if (ArrayUtil.safeLoad(sourceLines, sourceLineNumber) == null) {
             final T targetLineData = ArrayUtil.safeLoad(targetLines, mapData.getMappingStart(index));
             if (targetLineData != null) {
               final T source = createNewLine(targetLineData, sourceLineNumber);

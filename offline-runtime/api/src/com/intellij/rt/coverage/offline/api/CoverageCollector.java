@@ -62,7 +62,7 @@ public class CoverageCollector {
     ProjectContext context = new ProjectContext(options, classFinder);
     UnloadedUtil.appendUnloaded(projectData, context);
     RawReportLoader.apply(projectData, rawData);
-    context.applyLineMappings(projectData);
+    context.finalizeCoverage(projectData);
     return projectData;
   }
 

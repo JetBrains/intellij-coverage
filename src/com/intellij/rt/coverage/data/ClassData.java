@@ -18,8 +18,7 @@ package com.intellij.rt.coverage.data;
 
 
 import com.intellij.rt.coverage.util.*;
-import org.jetbrains.coverage.gnu.trove.TIntHashSet;
-import org.jetbrains.coverage.gnu.trove.TIntProcedure;
+
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -47,12 +46,6 @@ public class ClassData implements CoverageData {
    * Storage for test tracking data.
    */
   private volatile boolean[] myTraceMask;
-
-  /**
-   * Set of lines that were ignored during instrumentation.
-   * Storing this lines helps to correctly merge when a class has inline functions.
-   */
-  private TIntHashSet myIgnoredLines;
 
   /**
    * This flag shows whether the bytecode this class
@@ -134,7 +127,6 @@ public class ClassData implements CoverageData {
       if (mergedData == null) continue;
       LineData lineData = myLinesArray[i];
       if (lineData == null) {
-        if (isIgnoredLine(i)) continue;
         lineData = new LineData(mergedData.getLineNumber(), mergedData.getMethodSignature());
         registerMethodSignature(lineData);
         myLinesArray[i] = lineData;
@@ -211,20 +203,8 @@ public class ClassData implements CoverageData {
     setFullyAnalysed(true);
   }
 
-  /**
-   * Apply line mappings: move hits from original line in bytecode to the mapped line.
-   *
-   * @param linesMap        line mappings from target class to source class
-   * @param sourceClassData the class to which the mapped lines are moved
-   * @param targetClassData the class which initially contains the mapped lines,
-   *                        at the end of this method all mapped lines in this class are set to null
-   */
-  public static void checkLineMappings(LineMapData[] linesMap, ClassData sourceClassData, ClassData targetClassData) {
-    sourceClassData.myLinesArray = new BasicLineMapper().mapLines(linesMap, sourceClassData, targetClassData);
-  }
-
-  public void dropMappedLines(FileMapData[] mappings) {
-    LineMapper.dropMappedLines(mappings, myLinesArray, myClassName);
+  public void resetLines(LineData[] lines) {
+    myLinesArray = lines;
   }
 
   public void setSource(String source) {
@@ -350,44 +330,6 @@ public class ClassData implements CoverageData {
       }
     } catch (Throwable e) {
       ErrorReporter.warn("Unexpected error during applying hits data to class " + getName(), e);
-    }
-  }
-
-  public void dropIgnoredLines() {
-    if (myIgnoredLines == null) return;
-    myIgnoredLines.forEach(new TIntProcedure() {
-      public boolean execute(int line) {
-        ArrayUtil.safeStore(myLinesArray, line, null);
-        return true;
-      }
-    });
-  }
-
-  public void setIgnoredLines(TIntHashSet ignoredLines) {
-    if (ignoredLines != null && !ignoredLines.isEmpty()) {
-      myIgnoredLines = ignoredLines;
-    }
-  }
-
-  public boolean isIgnoredLine(final int line) {
-    return myIgnoredLines != null && myIgnoredLines.contains(line);
-  }
-
-  private static class BasicLineMapper extends LineMapper<LineData> {
-
-    @Override
-    protected LineData createNewLine(LineData targetLine, int line) {
-      return new LineData(line, targetLine.getMethodSignature());
-    }
-
-    @Override
-    protected LineData[] createArray(int size) {
-      return new LineData[size];
-    }
-
-    @Override
-    protected LineData[] getLines(ClassData classData) {
-      return classData.myLinesArray;
     }
   }
 }
