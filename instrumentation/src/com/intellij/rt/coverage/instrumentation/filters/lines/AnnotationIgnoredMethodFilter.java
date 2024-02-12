@@ -16,13 +16,12 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.lines;
 
-import com.intellij.rt.coverage.data.IgnoredStorage;
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Key;
-import com.intellij.rt.coverage.instrumentation.filters.branches.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import org.jetbrains.coverage.org.objectweb.asm.AnnotationVisitor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -41,33 +40,22 @@ public class AnnotationIgnoredMethodFilter extends CoverageFilter {
   @Override
   public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
     final String annotationName = ClassNameUtil.convertVMNameToFQN(descriptor);
-    if (!myShouldIgnore && ClassNameUtil.matchesPatterns(annotationName, myContext.getProjectContext().getOptions().excludeAnnotations)) {
-      myContext.setIgnoreSection(true);
-      myShouldIgnore = true;
+    List<String> methodAnnotations = myContext.get(Key.METHOD_ANNOTATIONS);
+    if (methodAnnotations == null) {
+      methodAnnotations = new ArrayList<String>();
+      myContext.put(Key.METHOD_ANNOTATIONS, methodAnnotations);
     }
+    methodAnnotations.add(annotationName);
     return super.visitAnnotation(descriptor, visible);
   }
 
   @Override
   public void visitCode() {
+    if (!myContext.getProjectContext().getFilteredStorage().checkMethodIncluded(myContext)) {
+      myContext.setIgnoreSection(true);
+      myShouldIgnore = true;
+    }
     super.visitCode();
-    IgnoredStorage ignoredStorage = myContext.getProjectContext().getIgnoredStorage();
-    String methodName = myContext.getMethodName();
-    if (!myShouldIgnore && methodName.endsWith(KotlinDefaultArgsBranchFilter.DEFAULT_ARGS_SUFFIX)) {
-      String originalSig = KotlinDefaultArgsBranchFilter.getOriginalNameAndDesc(methodName, myContext.getMethodDesc());
-      int index = originalSig.indexOf('(');
-      if (index > 0) {
-        String originalName = originalSig.substring(0, index);
-        String originalDesc = originalSig.substring(index);
-        if (ignoredStorage.isMethodIgnored(myContext.get(Key.CLASS_NAME), originalName, originalDesc)) {
-          myContext.setIgnoreSection(true);
-          myShouldIgnore = true;
-        }
-      }
-    }
-    if (myShouldIgnore) {
-      ignoredStorage.addIgnoredMethod(myContext.get(Key.CLASS_NAME), methodName, myContext.getMethodDesc());
-    }
   }
 
   @Override
@@ -76,5 +64,6 @@ public class AnnotationIgnoredMethodFilter extends CoverageFilter {
     if (myShouldIgnore) {
       myContext.setIgnoreSection(false);
     }
+    myContext.put(Key.METHOD_ANNOTATIONS, null);
   }
 }

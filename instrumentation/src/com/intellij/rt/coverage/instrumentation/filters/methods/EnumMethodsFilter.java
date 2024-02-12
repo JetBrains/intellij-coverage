@@ -21,7 +21,7 @@ import com.intellij.rt.coverage.instrumentation.data.Key;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class EnumMethodsFilter implements MethodFilter {
-  public boolean shouldFilter(InstrumentationData context) {
+  public boolean shouldIgnore(InstrumentationData context) {
     int classAccess = context.get(Key.CLASS_ACCESS);
     if ((classAccess & Opcodes.ACC_ENUM) == 0) return false;
     String name = context.getMethodName();

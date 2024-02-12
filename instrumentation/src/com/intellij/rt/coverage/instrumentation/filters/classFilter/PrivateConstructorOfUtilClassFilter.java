@@ -38,7 +38,6 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
   private boolean myHasConstFields = false;
   private boolean myAllFieldsConst = true;
   private boolean myIsKotlinObject = false;
-  private boolean myIsKotlinClass = false;
   private boolean myConstructorIsEmpty = true;
   private List<Integer> myConstructorLines;
   private String myName;
@@ -52,7 +51,7 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
     super.visit(version, access, name, signature, superName, interfaces);
     myName = name;
-    myIsKotlinObject |= name != null && name.endsWith("$Companion");
+    myIsKotlinObject |= name != null && name.endsWith(KotlinUtils.COMPANION_SUFFIX);
     myIsAbstractClass = (access & Opcodes.ACC_ABSTRACT) != 0;
   }
 
@@ -88,13 +87,13 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
 
   @Override
   public void visitEnd() {
-    if ((myAllMethodsStatic || myIsKotlinObject && myIsKotlinClass)
+    if ((myAllMethodsStatic || myIsKotlinObject && KotlinUtils.isKotlinClass(myContext))
         && myConstructorIsEmpty
         && myConstructorLines != null
         && !isSealedClassConstructor()) {
       for (int line : myConstructorLines) {
         // Do not ignore constructor if it is the only line in the class
-        boolean isKotlinObjectWithSingleLine = myIsKotlinObject && myIsKotlinClass && myContext.getLineCount() <= 1;
+        boolean isKotlinObjectWithSingleLine = myIsKotlinObject && KotlinUtils.isKotlinClass(myContext) && myContext.getLineCount() <= 1;
         // However, const fields are inlined by the compiler.
         // In such a case, object is used just as scope, so we do not need to track coverage for it.
         boolean hasOnlyConstFields = !myHasMethods && myAllFieldsConst && myHasConstFields;
@@ -106,12 +105,6 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
     super.visitEnd();
   }
 
-  @Override
-  public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-    myIsKotlinClass |= KotlinUtils.KOTLIN_METADATA.equals(descriptor);
-    return super.visitAnnotation(descriptor, visible);
-  }
-
   /**
    * Do not filter generated sealed class private constructor, as it is unrelated to util classes
    */
@@ -120,7 +113,7 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
     if (value != null && value) return true;
     // if a sealed class has no derived classes, it is not marked,
     // so we have to filter such a case here
-    return myIsAbstractClass && myIsKotlinClass;
+    return myIsAbstractClass && KotlinUtils.isKotlinClass(myContext);
   }
 
   //    ALOAD 0

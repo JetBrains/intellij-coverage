@@ -18,6 +18,7 @@ package com.intellij.rt.coverage.instrumentation.filters.branches;
 
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Key;
+import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
 import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
 import org.jetbrains.coverage.org.objectweb.asm.Handle;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
@@ -35,7 +36,7 @@ public class AssertFilter extends CoverageFilter {
 
   @Override
   public boolean isApplicable(InstrumentationData context) {
-    return !context.get(Key.IS_KOTLIN);
+    return !KotlinUtils.isKotlinClass(context);
   }
 
   @Override

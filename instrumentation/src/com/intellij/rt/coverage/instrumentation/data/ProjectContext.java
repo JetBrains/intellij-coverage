@@ -37,7 +37,7 @@ public class ProjectContext {
   private final ClassFinder myClassFinder;
 
   private final StringsPool myStringPool = new StringsPool();
-  private final IgnoredStorage myIgnoredStorage = new IgnoredStorage();
+  private final FilteredMethodStorage myAnnotationStorage = new FilteredMethodStorage();
 
   /**
    * Set of lines that were ignored during instrumentation.
@@ -59,8 +59,8 @@ public class ProjectContext {
     return myOptions;
   }
 
-  public IgnoredStorage getIgnoredStorage() {
-    return myIgnoredStorage;
+  public FilteredMethodStorage getFilteredStorage() {
+    return myAnnotationStorage;
   }
 
   public String getFromPool(String s) {

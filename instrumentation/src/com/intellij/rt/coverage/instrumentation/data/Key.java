@@ -22,6 +22,7 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 import java.util.List;
 import java.util.Set;
 
+@SuppressWarnings({"InstantiationOfUtilityClass"})
 public class Key<T> {
   public static final Key<ProjectData> PROJECT_DATA = new Key<ProjectData>();
 
@@ -30,16 +31,15 @@ public class Key<T> {
   public static final Key<String> CLASS_INTERNAL_NAME = new Key<String>();
   public static final Key<Integer> CLASS_ACCESS = new Key<Integer>();
   public static final Key<String[]> INTERFACES = new Key<String[]>();
-  public static final Key<List<String>> CLASS_ANNOTATIONS = new Key<List<String>>();
 
   public static final Key<Integer> METHOD_ACCESS = new Key<Integer>();
   public static final Key<String> METHOD_NAME = new Key<String>();
   public static final Key<String> METHOD_DESC = new Key<String>();
   public static final Key<String> METHOD_SIGNATURE = new Key<String>();
   public static final Key<String[]> EXCEPTIONS = new Key<String[]>();
+  public static final Key<List<String>> METHOD_ANNOTATIONS = new Key<List<String>>();
 
 
   public static final Key<Boolean> IS_KOTLIN = new Key<Boolean>();
   public static final Key<Boolean> IS_SEALED_CLASS = new Key<Boolean>();
-  public static final Key<Set<String>> DEPRECATED_METHODS = new Key<Set<String>>();
 }

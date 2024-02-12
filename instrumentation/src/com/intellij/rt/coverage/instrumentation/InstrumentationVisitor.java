@@ -36,7 +36,6 @@ import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.OptionsUtil;
 import org.jetbrains.coverage.org.objectweb.asm.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class InstrumentationVisitor extends ClassVisitor {
@@ -69,18 +68,6 @@ public class InstrumentationVisitor extends ClassVisitor {
     myContext.put(Key.INTERFACES, interfaces);
     super.visit(version, access, name, signature, superName, interfaces);
   }
-
-  @Override
-  public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-    List<String> annotations = myContext.get(Key.CLASS_ANNOTATIONS);
-    if (annotations == null) {
-      annotations = new ArrayList<String>();
-      myContext.put(Key.CLASS_ANNOTATIONS, annotations);
-    }
-    annotations.add(myContext.getProjectContext().getFromPool(descriptor));
-    return super.visitAnnotation(descriptor, visible);
-  }
-
 
   @Override
   public MethodVisitor visitMethod(final int access, final String name, final String descriptor, final String signature, final String[] exceptions) {
@@ -125,7 +112,7 @@ public class InstrumentationVisitor extends ClassVisitor {
     if ((access & Opcodes.ACC_ABSTRACT) != 0) return false;
 
     for (MethodFilter filter : ourMethodFilters) {
-      if (filter.shouldFilter(myContext)) {
+      if (filter.shouldIgnore(myContext)) {
         return false;
       }
     }

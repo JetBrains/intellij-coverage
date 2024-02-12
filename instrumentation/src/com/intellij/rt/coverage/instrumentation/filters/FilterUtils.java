@@ -22,6 +22,7 @@ import com.intellij.rt.coverage.instrumentation.filters.classes.*;
 import com.intellij.rt.coverage.instrumentation.filters.lines.*;
 import com.intellij.rt.coverage.instrumentation.filters.methods.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class FilterUtils {
@@ -34,8 +35,13 @@ public class FilterUtils {
   }
 
   public static List<ClassSignatureFilter> createClassSignatureFilters() {
-    List<ClassSignatureFilter> result = KotlinUtils.createClassSignatureFilters();
+    List<ClassSignatureFilter> result = new ArrayList<ClassSignatureFilter>();
     result.add(new ClassIgnoredByAnnotationFilter());
+    result.addAll(KotlinUtils.createClassSignatureFilters());
+
+    if (!(result.get(0) instanceof  ClassIgnoredByAnnotationFilter)) {
+      throw new AssertionError("ClassIgnoredByAnnotationFilter filter should be the first one in the list of filters");
+    }
     return result;
   }
 
@@ -49,6 +55,10 @@ public class FilterUtils {
     List<CoverageFilter> result = KotlinUtils.createLineFilters();
     result.add(new ClosingBracesFilter());
     result.add(new AnnotationIgnoredMethodFilter());
+
+    if (!(result.get(result.size() - 1) instanceof  AnnotationIgnoredMethodFilter)) {
+      throw new AssertionError("AnnotationIgnoredMethodFilter should be the last one in the list of filters");
+    }
     return result;
   }
 

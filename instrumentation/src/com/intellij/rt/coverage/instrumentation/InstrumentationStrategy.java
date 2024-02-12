@@ -44,14 +44,15 @@ public class InstrumentationStrategy {
     // uncomment to get readable bytecode
     // cw = new TraceClassVisitor(cw, new PrintWriter(System.err));
 
-    for (ClassSignatureFilter filter : ourFilters) {
-      if (filter.shouldFilter(cr, projectContext)) return null;
-    }
     InstrumentationData context = new InstrumentationData(projectContext);
     context.put(Key.PROJECT_DATA, projectData);
     context.put(Key.CLASS_READER, cr);
     context.put(Key.CLASS_NAME, projectContext.getFromPool(className));
     context.put(Key.CLASS_INTERNAL_NAME, ClassNameUtil.convertToInternalName(className));
+
+    for (ClassSignatureFilter filter : ourFilters) {
+      if (filter.shouldIgnore(context)) return null;
+    }
 
     TestTrackingMode testTrackingMode = projectContext.getOptions().testTrackingMode;
     if (testTrackingMode != null) {

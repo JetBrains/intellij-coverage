@@ -16,7 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.methods;
 
-import com.intellij.rt.coverage.data.IgnoredStorage;
+import com.intellij.rt.coverage.instrumentation.data.FilteredMethodStorage;
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.util.OptionsUtil;
@@ -35,7 +35,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 public class KotlinLocalFunctionInsideIgnoredMethodFilter implements MethodFilter {
 
   @Override
-  public boolean shouldFilter(InstrumentationData context) {
+  public boolean shouldIgnore(InstrumentationData context) {
     if (!OptionsUtil.IGNORE_LOCAL_FUNCTIONS_IN_IGNORED_METHODS) return false;
     int access = context.getMethodAccess();
     if (!((access & Opcodes.ACC_PRIVATE) != 0
@@ -44,13 +44,13 @@ public class KotlinLocalFunctionInsideIgnoredMethodFilter implements MethodFilte
     int idx = -1;
     String name = context.getMethodName();
     String className = context.get(Key.CLASS_NAME);
-    IgnoredStorage ignoredStorage = context.getProjectContext().getIgnoredStorage();
+    FilteredMethodStorage storage = context.getProjectContext().getFilteredStorage();
     while (true) {
       idx = name.indexOf('$', idx + 1);
       if (idx < 0) return false;
       String outerMethodName = name.substring(0, idx);
-      if (ignoredStorage.isMethodIgnored(className, outerMethodName)) {
-        ignoredStorage.addIgnoredMethod(className, context.getMethodName(), context.getMethodDesc());
+      if (storage.isMethodNameIgnored(className, outerMethodName)) {
+        storage.addIgnoredMethod(className, context.getMethodName() + context.getMethodDesc());
         return true;
       }
     }

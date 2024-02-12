@@ -20,7 +20,7 @@ import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 public class DeserializeLambdaFilter implements MethodFilter {
-  public boolean shouldFilter(InstrumentationData context) {
+  public boolean shouldIgnore(InstrumentationData context) {
     int access = context.getMethodAccess();
     return (access & Opcodes.ACC_STATIC) != 0
         && (access & Opcodes.ACC_SYNTHETIC) != 0

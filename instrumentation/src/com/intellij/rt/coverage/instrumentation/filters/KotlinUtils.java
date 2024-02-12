@@ -30,16 +30,11 @@ import java.util.List;
 
 public class KotlinUtils {
   public static final String KOTLIN_DEFAULT_CONSTRUCTOR_MARKER = "Lkotlin/jvm/internal/DefaultConstructorMarker;";
-  public static final String KOTLIN_METADATA = "Lkotlin/Metadata;";
+  public static final String COMPANION_SUFFIX = "$Companion";
 
   public static boolean isKotlinClass(InstrumentationData data) {
     Boolean isKotlin = data.get(Key.IS_KOTLIN);
-    if (isKotlin == null) {
-      List<String> annotations = data.get(Key.CLASS_ANNOTATIONS);
-      isKotlin = annotations != null && annotations.contains(KOTLIN_METADATA);
-      data.put(Key.IS_KOTLIN, isKotlin);
-    }
-    return isKotlin;
+    return isKotlin != null && isKotlin;
   }
 
   private static final boolean ourKotlinEnabled = !"false".equals(System.getProperty("coverage.kotlin.enable", "true"));
@@ -86,6 +81,7 @@ public class KotlinUtils {
   public static List<ClassFilter> createClassFilters() {
     if (!ourKotlinEnabled) return Collections.emptyList();
     List<ClassFilter> result = new ArrayList<ClassFilter>();
+    result.add(new KotlinClassMarkerFilter());
     result.add(new KotlinValueClassFilter());
     return result;
   }

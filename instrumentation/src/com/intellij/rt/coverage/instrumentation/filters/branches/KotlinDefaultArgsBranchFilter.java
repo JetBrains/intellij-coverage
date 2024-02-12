@@ -85,6 +85,13 @@ public class KotlinDefaultArgsBranchFilter extends CoverageFilter {
     myMaxMaskIndex = range[1];
   }
 
+  public static String getOriginalNameAndDesc(InstrumentationData context) {
+    if (!isFilterApplicable(context)) {
+      return context.getMethodName() + context.getMethodDesc();
+    }
+    return getOriginalNameAndDesc(context.getMethodName(), context.getMethodDesc());
+  }
+
   public static String getOriginalNameAndDesc(String name, String desc) {
     final Type type = Type.getType(desc);
     final Type[] parameters = type.getArgumentTypes();
