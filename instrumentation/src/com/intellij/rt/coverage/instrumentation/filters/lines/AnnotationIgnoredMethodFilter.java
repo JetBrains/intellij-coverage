@@ -33,8 +33,10 @@ public class AnnotationIgnoredMethodFilter extends CoverageFilter {
 
   @Override
   public boolean isApplicable(InstrumentationData context) {
-    List<Pattern> annotations = context.getProjectContext().getOptions().excludeAnnotations;
-    return annotations != null && !annotations.isEmpty();
+    List<Pattern> includeAnnotations = context.getProjectContext().getOptions().includeAnnotations;
+    List<Pattern> excludeAnnotations = context.getProjectContext().getOptions().excludeAnnotations;
+    return includeAnnotations != null && !includeAnnotations.isEmpty()
+        || excludeAnnotations != null && !excludeAnnotations.isEmpty();
   }
 
   @Override

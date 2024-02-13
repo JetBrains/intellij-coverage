@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package testData.includeAnnotation
 
-package testData.ignoreAnnotation;
-
-public @interface IgnoreCoverage {
-}
+annotation class IncludeCoverage

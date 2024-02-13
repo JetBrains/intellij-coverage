@@ -17,6 +17,7 @@ package com.intellij.rt.coverage.report
 
 import com.intellij.rt.coverage.aggregate.Aggregator
 import com.intellij.rt.coverage.aggregate.api.Request
+import com.intellij.rt.coverage.instrumentation.CoverageArgs
 import com.intellij.rt.coverage.report.ReportLoadStrategy.AggregatedReportLoadStrategy
 import com.intellij.rt.coverage.report.ReportLoadStrategy.RawReportLoadStrategy
 import com.intellij.rt.coverage.report.api.Filters
@@ -111,25 +112,9 @@ object TestUtils {
         Aggregator(listOf(report), outputRoots, request).processRequests()
     }
 
-    private fun getFilters(patterns: String): Filters {
-        val includes: MutableList<Pattern> = ArrayList()
-        val excludes: MutableList<Pattern> = ArrayList()
-        val excludeAnnotations: MutableList<Pattern> = ArrayList()
-        val lists = arrayOf(includes, excludes, excludeAnnotations)
-        var state = 0
-        for (pattern in patterns.split(" ".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
-            if (pattern.isEmpty()) continue
-            if (pattern == "-exclude") {
-                state = 1
-                continue
-            }
-            if (pattern == "-excludeAnnotations") {
-                state = 2
-                continue
-            }
-            lists[state].add(Pattern.compile(pattern))
-        }
-        return createFilters(includes, excludes, excludeAnnotations = excludeAnnotations)
+    private fun getFilters(patterns: String): Filters = CoverageArgs().run {
+        readPatterns(patterns.split(" ").filter(String::isNotBlank).toTypedArray(), 0)
+        createFilters(includePatterns, excludePatterns, annotationsToInclude, annotationsToIgnore)
     }
 
     @JvmStatic
@@ -137,8 +122,9 @@ object TestUtils {
     fun createFilters(
         includes: List<Pattern> = emptyList(),
         excludes: List<Pattern> = emptyList(),
-        excludeAnnotations: List<Pattern> = emptyList()
-    ) = Filters(includes, excludes, excludeAnnotations)
+        includeAnnotations: List<Pattern> = emptyList(),
+        excludeAnnotations: List<Pattern> = emptyList(),
+    ) = Filters(includes, excludes, includeAnnotations, excludeAnnotations)
 
     @JvmStatic
     @JvmOverloads

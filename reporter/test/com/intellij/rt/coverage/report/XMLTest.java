@@ -78,6 +78,13 @@ public class XMLTest {
   }
 
   @Test
+  public void testIncludeAnnotation() throws Throwable {
+    String patterns = "testData.includeAnnotation.* -includeAnnotations testData.includeAnnotation.IncludeCoverage";
+    String className = "testData.includeAnnotation.TestKt";
+    verifyXML(patterns, className, "xml/includeAnnotation.xml");
+  }
+
+  @Test
   public void testInline() throws Throwable {
     test("inline");
   }

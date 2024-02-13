@@ -49,9 +49,11 @@ public class KotlinLocalFunctionInsideIgnoredMethodFilter implements MethodFilte
       idx = name.indexOf('$', idx + 1);
       if (idx < 0) return false;
       String outerMethodName = name.substring(0, idx);
-      if (storage.isMethodNameIgnored(className, outerMethodName)) {
-        storage.addIgnoredMethod(className, context.getMethodName() + context.getMethodDesc());
-        return true;
+      for (boolean included : new boolean[]{false, true}) {
+        if (storage.isMethodNameRegistered(className, outerMethodName, included)) {
+          storage.addMethod(className, context.getMethodName() + context.getMethodDesc(), included);
+          return !included;
+        }
       }
     }
   }

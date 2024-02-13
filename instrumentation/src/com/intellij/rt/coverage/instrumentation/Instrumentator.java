@@ -66,6 +66,7 @@ public class Instrumentator {
     ErrorReporter.printInfo((args.branchCoverage ? "Branch coverage " : "Line coverage ") + (args.testTracking ? "with tracking per test coverage ..." : "..."));
     logPatterns(args.includePatterns, "include");
     logPatterns(args.excludePatterns, "exclude");
+    logPatterns(args.annotationsToInclude, "include annotations");
     logPatterns(args.annotationsToIgnore, "exclude annotations");
 
     final TestTrackingMode testTrackingMode = createTestTrackingMode(args.testTracking);
@@ -79,6 +80,7 @@ public class Instrumentator {
         .setIsCalculateHits(OptionsUtil.CALCULATE_HITS_COUNT)
         .setIncludePatterns(args.includePatterns)
         .setExcludePatterns(args.excludePatterns)
+        .setIncludeAnnotations(args.annotationsToInclude)
         .setExcludeAnnotations(args.annotationsToIgnore)
         .setDataFile(args.dataFile)
         .setSourceMapFile(args.sourceMap)

@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-class CoverageArgs {
+public class CoverageArgs {
   public File dataFile;
   public boolean testTracking;
   public boolean calcUnloaded;
@@ -34,6 +34,7 @@ class CoverageArgs {
   public File sourceMap;
   public List<Pattern> includePatterns = new ArrayList<Pattern>();
   public List<Pattern> excludePatterns = new ArrayList<Pattern>();
+  public List<Pattern> annotationsToInclude = new ArrayList<Pattern>();
   public List<Pattern> annotationsToIgnore = new ArrayList<Pattern>();
 
   public static CoverageArgs fromString(String argsString) throws IllegalArgumentException {
@@ -78,17 +79,27 @@ class CoverageArgs {
       result.sourceMap = new File(args[6]);
       i = 7;
     }
-    i = readPatterns(result.includePatterns, i, args, "include");
+
+    result.readPatterns(args, i);
+
+    return result;
+  }
+
+  public void readPatterns(String[] args, int i) {
+    i = readPatterns(includePatterns, i, args, "include");
 
     if (i < args.length && "-exclude".equals(args[i])) {
-      i = readPatterns(result.excludePatterns, i + 1, args, "exclude");
+      i = readPatterns(excludePatterns, i + 1, args, "exclude");
+    }
+
+    if (i < args.length && "-includeAnnotations".equals(args[i])) {
+      i = readPatterns(annotationsToInclude, i + 1, args, "include annotations");
     }
 
     if (i < args.length && "-excludeAnnotations".equals(args[i])) {
-      readPatterns(result.annotationsToIgnore, i + 1, args, "exclude annotations");
+      //noinspection UnusedAssignment
+      i = readPatterns(annotationsToIgnore, i + 1, args, "exclude annotations");
     }
-
-    return result;
   }
 
   private static String[] tokenize(String argumentString) {

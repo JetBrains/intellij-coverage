@@ -36,6 +36,7 @@ public class InstrumentationOptions {
 
   public final List<Pattern> includePatterns;
   public final List<Pattern> excludePatterns;
+  public final List<Pattern> includeAnnotations;
   public final List<Pattern> excludeAnnotations;
 
   public final File dataFile;
@@ -46,7 +47,8 @@ public class InstrumentationOptions {
   public InstrumentationOptions(
       boolean isBranchCoverage, boolean isMergeData, boolean isCalculateUnloaded, boolean isInstructionCoverage,
       boolean isCalculateHits, boolean isSaveSource,
-      List<Pattern> includePatterns, List<Pattern> excludePatterns, List<Pattern> excludeAnnotations,
+      List<Pattern> includePatterns, List<Pattern> excludePatterns,
+      List<Pattern> includeAnnotations, List<Pattern> excludeAnnotations,
       File dataFile, File sourceMapFile,
       TestTrackingMode testTrackingMode) {
     this.isBranchCoverage = isBranchCoverage;
@@ -57,6 +59,7 @@ public class InstrumentationOptions {
     this.isSaveSource = isSaveSource;
     this.includePatterns = includePatterns;
     this.excludePatterns = excludePatterns;
+    this.includeAnnotations = includeAnnotations;
     this.excludeAnnotations = excludeAnnotations;
     this.dataFile = dataFile;
     this.sourceMapFile = sourceMapFile;
@@ -76,6 +79,7 @@ public class InstrumentationOptions {
     private boolean isSaveSource = false;
     private List<Pattern> includePatterns = Collections.emptyList();
     private List<Pattern> excludePatterns = Collections.emptyList();
+    private List<Pattern> includeAnnotations = Collections.emptyList();
     private List<Pattern> excludeAnnotations = Collections.emptyList();
     private File dataFile = null;
     private File sourceMapFile = null;
@@ -121,6 +125,11 @@ public class InstrumentationOptions {
       return this;
     }
 
+    public Builder setIncludeAnnotations(List<Pattern> includeAnnotations) {
+      this.includeAnnotations = includeAnnotations;
+      return this;
+    }
+
     public Builder setExcludeAnnotations(List<Pattern> excludeAnnotations) {
       this.excludeAnnotations = excludeAnnotations;
       return this;
@@ -145,7 +154,7 @@ public class InstrumentationOptions {
       return new InstrumentationOptions(
           isBranchCoverage, isMergeData, isCalculateUnloaded, isInstructionCoverage, isCalculateHits,
           isSaveSource || sourceMapFile != null,
-          includePatterns, excludePatterns, excludeAnnotations,
+          includePatterns, excludePatterns, includeAnnotations, excludeAnnotations,
           dataFile, sourceMapFile, testTrackingMode);
     }
   }

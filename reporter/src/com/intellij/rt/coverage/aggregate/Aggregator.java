@@ -173,20 +173,25 @@ public class Aggregator {
   }
 
   private ProjectContext collectCoverageInformationFromOutputs(ProjectData projectData) {
-    final List<Pattern> excludeAnnotations = new ArrayList<Pattern>();
-    for (Request request : myRequests) {
-      excludeAnnotations.addAll(request.excludeAnnotations);
-    }
     projectData.setInstructionsCoverage(true);
     InstrumentationOptions options = new InstrumentationOptions.Builder()
         .setBranchCoverage(true)
         .setSaveSource(true)
         .setInstructionCoverage(true)
-        .setExcludeAnnotations(excludeAnnotations)
+        .setIncludeAnnotations(collectAnnotations(true))
+        .setExcludeAnnotations(collectAnnotations(false))
         .build();
     ProjectContext context = new ProjectContext(options, createClassFinder());
     UnloadedUtil.appendUnloaded(projectData, context);
     return context;
+  }
+
+  private List<Pattern> collectAnnotations(boolean include) {
+    List<Pattern> annotations = new ArrayList<Pattern>();
+    for (Request request : myRequests) {
+      annotations.addAll(include ? request.includeAnnotations : request.excludeAnnotations);
+    }
+    return annotations;
   }
 
   private OutputClassFinder createClassFinder() {

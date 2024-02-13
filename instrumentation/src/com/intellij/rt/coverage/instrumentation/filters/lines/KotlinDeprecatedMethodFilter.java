@@ -54,13 +54,15 @@ public class KotlinDeprecatedMethodFilter extends CoverageFilter {
   @Override
   public void visitCode() {
     super.visitCode();
-    if (!myShouldIgnore) {
-      // Need an explicit check here as AnnotationIgnoredMethodFilter can be disabled
+    if (myShouldIgnore) {
+      myContext.getProjectContext().getFilteredStorage().addIgnoredMethod(myContext.get(Key.CLASS_NAME), myContext.getMethodName() + myContext.getMethodDesc());
+    } else {
+      // Need an explicit check here as AnnotationIgnoredMethodFilter can be disabled.
+      // We need this call to handle special cases like default methods.
       myShouldIgnore = !myContext.getProjectContext().getFilteredStorage().checkMethodIncluded(myContext);
     }
     if (myShouldIgnore) {
       myContext.setIgnoreSection(true);
-      myContext.getProjectContext().getFilteredStorage().addIgnoredMethod(myContext.get(Key.CLASS_NAME), myContext.getMethodName() + myContext.getMethodDesc());
     }
   }
 

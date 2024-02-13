@@ -213,6 +213,15 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testIgnoreAnnotationFullClass() = test("ignoreAnnotation.fullClass")
 
     @Test
+    fun testIgnoreAnnotationIncludeAnnotationConflicting() = test("ignoreAnnotation.includeAnnotation.conflicting")
+
+    @Test
+    fun testIgnoreAnnotationIncludeAnnotationFullClass() = test("ignoreAnnotation.includeAnnotation.fullClass")
+
+    @Test
+    fun testIgnoreAnnotationIncludeAnnotationMethod() = test("ignoreAnnotation.includeAnnotation.method")
+
+    @Test
     fun testIgnoreAnnotationInline() = test("ignoreAnnotation.inline")
 
     @Test

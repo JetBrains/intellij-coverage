@@ -1,0 +1,74 @@
+<?xml version="1.0" ?>
+<report name="Intellij Coverage Report">
+<package name="testData/includeAnnotation">
+<class name="testData/includeAnnotation/AbsolutelyUnusedClass" sourcefilename="test.kt">
+<method name="foo" desc="()V">
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+<counter type="METHOD" missed="1" covered="0"/>
+</class>
+<class name="testData/includeAnnotation/Boo" sourcefilename="test.kt">
+<method name="boo" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="4"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="2"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="6"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="2"/>
+<counter type="METHOD" missed="0" covered="2"/>
+</class>
+<class name="testData/includeAnnotation/TestKt" sourcefilename="test.kt">
+<method name="boo" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="4"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="4"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<class name="testData/includeAnnotation/UnusedClass" sourcefilename="test.kt">
+<method name="foo" desc="()V">
+<counter type="INSTRUCTION" missed="0" covered="4"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+</method>
+<counter type="INSTRUCTION" missed="0" covered="4"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="0" covered="1"/>
+<counter type="METHOD" missed="0" covered="1"/>
+</class>
+<sourcefile name="test.kt">
+<line nr="26" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="35" mi="0" ci="2" mb="0" cb="0"/>
+<line nr="38" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="46" mi="0" ci="4" mb="0" cb="0"/>
+<line nr="59" mi="4" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="14"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="4"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="4" covered="14"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="4"/>
+<counter type="METHOD" missed="1" covered="4"/>
+<counter type="CLASS" missed="1" covered="3"/>
+</package>
+<counter type="INSTRUCTION" missed="4" covered="14"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="4"/>
+<counter type="METHOD" missed="1" covered="4"/>
+<counter type="CLASS" missed="1" covered="3"/>
+</report>
