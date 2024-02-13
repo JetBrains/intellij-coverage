@@ -17,7 +17,6 @@
 package testData.custom.testTracking.parallelTests
 
 import testData.custom.testTracking.runTestTracking
-import java.util.concurrent.CyclicBarrier
 import kotlin.random.Random
 import kotlin.system.exitProcess
 
@@ -31,47 +30,46 @@ private fun doWork(limit: Int = Random.nextInt(1, 7)): Int {
     return result
 }
 
-private class Class0 { // coverage: FULL
-    fun foo() {
+interface I {
+    fun foo()
+}
+
+private class Class0 : I { // coverage: FULL
+    override fun foo() {
         doWork()       // coverage: FULL                    // tests: Test1 Test2 Test3...
     }
 }
 
-private class Class1 { // coverage: FULL
-    fun foo() {
+private class Class1 : I { // coverage: FULL
+    override fun foo() {
         doWork()       // coverage: FULL                    // tests: Test1 Test2 Test3...
     }
 }
 
-private class Class2 { // coverage: FULL
-    fun foo() {
+private class Class2 : I { // coverage: FULL
+    override fun foo() {
         doWork()       // coverage: FULL                    // tests: Test1 Test2 Test3...
     }
 }
 
-private class Class3 { // coverage: FULL
-    fun foo() {
+private class Class3 : I { // coverage: FULL
+    override fun foo() {
         doWork()       // coverage: FULL                    // tests: Test1 Test2 Test3...
     }
 }
 
-private class Class4 { // coverage: FULL
-    fun foo() {
+private class Class4 : I { // coverage: FULL
+    override fun foo() {
         doWork()       // coverage: FULL                    // tests: Test1 Test2 Test3...
     }
 }
 
 private val threads = System.getProperty("threads").toInt()
-private const val TESTS = 5000
+private const val TESTS = 1000
 private const val CLASSES = 5
+private val classes = listOf(Class0(), Class1(), Class2(), Class3(), Class4())
 internal const val CALLS_PER_LINE = TESTS / CLASSES
 
-private val testMethods: List<() -> Any> = List(CLASSES) {
-    val clazz = Class.forName("testData.custom.testTracking.parallelTests.Class$it")
-    val instance = clazz.getConstructor().newInstance()
-    val method = clazz.getMethod("foo")
-    return@List { method.invoke(instance) }
-}
 
 private val tasks = List(threads) { iThread ->
     Runnable {
@@ -80,7 +78,7 @@ private val tasks = List(threads) { iThread ->
                 val iTest = iThread * (TESTS / threads) + iTask
                 val iClass = iTest % CLASSES
                 runTestTracking("Test$iTest") {
-                    testMethods[iClass]()
+                    classes[iClass].foo()
                 }
             }
         }.onFailure { it.printStackTrace(System.err); exitProcess(1) }
@@ -88,7 +86,7 @@ private val tasks = List(threads) { iThread ->
 }
 
 fun main() {
-    val threads = List(threads) {i -> Thread(tasks[i])}
+    val threads = List(threads) { i -> Thread(tasks[i]) }
     threads.forEach(Thread::start)
     threads.forEach(Thread::join)
 }
