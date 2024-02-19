@@ -69,7 +69,7 @@ public class CoverageEnumerator extends MethodVisitor implements Opcodes {
 
   @Override
   public void visitJumpInsn(final int opcode, final Label label) {
-    if (myData.hasNoLinesInCurrentMethod() || !myBranchCoverage) {
+    if (myData.hasNoLinesInCurrentMethod() || !myBranchCoverage || myData.isIgnoreSection()) {
       super.visitJumpInsn(opcode, label);
       return;
     }
@@ -128,7 +128,7 @@ public class CoverageEnumerator extends MethodVisitor implements Opcodes {
 
   @Override
   public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-    if (myData.hasNoLinesInCurrentMethod() || !myBranchCoverage) {
+    if (myData.hasNoLinesInCurrentMethod() || !myBranchCoverage || myData.isIgnoreSection()) {
       super.visitLookupSwitchInsn(dflt, keys, labels);
       return;
     }
@@ -138,7 +138,7 @@ public class CoverageEnumerator extends MethodVisitor implements Opcodes {
 
   @Override
   public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
-    if (myData.hasNoLinesInCurrentMethod() || !myBranchCoverage) {
+    if (myData.hasNoLinesInCurrentMethod() || !myBranchCoverage || myData.isIgnoreSection()) {
       super.visitTableSwitchInsn(min, max, dflt, labels);
       return;
     }

@@ -31,7 +31,7 @@ public class KotlinSerializerFilter implements ClassSignatureFilter {
   @Override
   public boolean shouldIgnore(InstrumentationData context) {
     ClassReader cr = context.get(Key.CLASS_READER);
-    String className = cr.getClassName();
+    String className = context.get(Key.CLASS_INTERNAL_NAME);
     if (!className.endsWith(SERIALIZER_SUFFIX)) return false;
     String[] interfaces = cr.getInterfaces();
     if (interfaces.length != 1 ||
