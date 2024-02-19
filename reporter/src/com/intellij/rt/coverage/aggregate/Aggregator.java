@@ -18,7 +18,6 @@ package com.intellij.rt.coverage.aggregate;
 
 import com.intellij.rt.coverage.aggregate.api.Request;
 import com.intellij.rt.coverage.data.*;
-import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.instrumentation.InstrumentationOptions;
 import com.intellij.rt.coverage.instrumentation.UnloadedUtil;
 import com.intellij.rt.coverage.instrument.RawReportLoader;
@@ -26,13 +25,11 @@ import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.util.CoverageReport;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
-import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 import com.intellij.rt.coverage.util.classFinder.OutputClassFinder;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * Collects results from different modules into a number of intermediate binary reports and collects coverage in unloaded classes
@@ -41,9 +38,6 @@ public class Aggregator {
   private final List<BinaryReport> myReports;
   private final List<File> myOutputs;
   private final List<Request> myRequests;
-
-  /** This is a merged project data for all requests. */
-  private ProjectData myProjectData;
 
   public Aggregator(List<BinaryReport> reports, List<File> outputRoots, List<Request> requests) {
     myReports = reports;
@@ -59,8 +53,7 @@ public class Aggregator {
    * Collect a merged project data from all output roots and all binary reports.
    * Collecting this data once ensures that unloaded classes will not be analysed several times.
    */
-  public ProjectData getProjectData() {
-    if (myProjectData != null) return myProjectData;
+  public ProjectData getProjectData(Request request) {
     boolean hasRawHitsReport = false;
     for (BinaryReport report : myReports) {
       hasRawHitsReport |= report.isRawHitsReport();
@@ -69,7 +62,7 @@ public class Aggregator {
     // to ensure that instructions count in inline methods
     // correspond to method definition, not method call
     final ProjectData projectData = new ProjectData();
-    final ProjectContext context = collectCoverageInformationFromOutputs(projectData);
+    final ProjectContext context = collectCoverageInformationFromOutputs(projectData, request);
     final ProjectData projectDataCopy = hasRawHitsReport ? copyProjectData(projectData) : null;
     context.dropLineMappings(projectData);
 
@@ -90,7 +83,6 @@ public class Aggregator {
       context.finalizeCoverage(projectDataCopy);
       mergeHits(projectData, projectDataCopy);
     }
-    myProjectData = projectData;
     return projectData;
   }
 
@@ -150,55 +142,30 @@ public class Aggregator {
    * Processing request is selecting required classes from a global project data.
    */
   public void processRequests() {
-    final ProjectData projectData = getProjectData();
 
     for (Request request : myRequests) {
       if (request.outputFile == null) continue;
-      final ProjectData requestProjectData = new ProjectData();
-      requestProjectData.setInstructionsCoverage(true);
-
-      for (ClassData classData : projectData.getClassesCollection()) {
-        if (request.classFilter.shouldInclude(classData.getName())) {
-          final ClassData newClassData = requestProjectData.getOrCreateClassData(classData.getName());
-          newClassData.merge(classData);
-        }
-      }
-      InstructionsUtil.merge(projectData, requestProjectData, request.classFilter);
+      ProjectData projectData = getProjectData(request);
       InstrumentationOptions options = new InstrumentationOptions.Builder()
           .setDataFile(request.outputFile)
           .setSourceMapFile(request.smapFile)
           .build();
-      CoverageReport.save(requestProjectData, options);
+      CoverageReport.save(projectData, options);
     }
   }
 
-  private ProjectContext collectCoverageInformationFromOutputs(ProjectData projectData) {
+  private ProjectContext collectCoverageInformationFromOutputs(ProjectData projectData, Request request) {
     projectData.setInstructionsCoverage(true);
     InstrumentationOptions options = new InstrumentationOptions.Builder()
         .setBranchCoverage(true)
         .setSaveSource(true)
         .setInstructionCoverage(true)
-        .setIncludeAnnotations(collectAnnotations(true))
-        .setExcludeAnnotations(collectAnnotations(false))
+        .setIncludeAnnotations(request.includeAnnotations)
+        .setExcludeAnnotations(request.excludeAnnotations)
         .build();
-    ProjectContext context = new ProjectContext(options, createClassFinder());
+    ProjectContext context = new ProjectContext(options, new OutputClassFinder(request.classFilter, myOutputs));
     UnloadedUtil.appendUnloaded(projectData, context);
     return context;
   }
 
-  private List<Pattern> collectAnnotations(boolean include) {
-    List<Pattern> annotations = new ArrayList<Pattern>();
-    for (Request request : myRequests) {
-      annotations.addAll(include ? request.includeAnnotations : request.excludeAnnotations);
-    }
-    return annotations;
-  }
-
-  private OutputClassFinder createClassFinder() {
-    final List<ClassFilter.PatternFilter> filters = new ArrayList<ClassFilter.PatternFilter>();
-    for (Request request : myRequests) {
-      filters.add(request.classFilter);
-    }
-    return new OutputClassFinder(new GroupPatternFilter(filters), myOutputs);
-  }
 }

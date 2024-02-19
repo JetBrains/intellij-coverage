@@ -65,8 +65,9 @@ public abstract class ReportLoadStrategy {
 
     @Override
     protected ProjectData loadProjectData() {
-      final Aggregator aggregator = new Aggregator(myReports, myOutputRoots, new Request(myFilters, null, null));
-      return aggregator.getProjectData();
+      Request request = new Request(myFilters, null, null);
+      final Aggregator aggregator = new Aggregator(myReports, myOutputRoots, request);
+      return aggregator.getProjectData(request);
     }
   }
 
