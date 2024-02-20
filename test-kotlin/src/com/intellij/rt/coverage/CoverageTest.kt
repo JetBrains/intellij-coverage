@@ -119,7 +119,7 @@ internal abstract class CoverageTest {
  * @param testName test package name without [TEST_PACKAGE]
  */
 internal fun getTestFile(testName: String): TestFile {
-    fun getFile(name: String) = pathToFile("src", TEST_PACKAGE, *testName.split('.').toTypedArray(), name)
+    fun getFile(name: String) = pathToFile("test-sources", "src", TEST_PACKAGE, *testName.split('.').toTypedArray(), name)
     val testKtCandidate = getFile("test.kt")
     if (testKtCandidate.isFile && testKtCandidate.exists()) {
         return TestFile(testName, testKtCandidate, getFQN(testName, "TestKt"))

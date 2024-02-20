@@ -2,6 +2,7 @@ pluginManagement {
   def kotlinVersion = settings.hasProperty("kotlin.version") ? (String)settings["kotlin.version"] : "1.8.10"
   plugins {
     id 'org.jetbrains.kotlin.jvm' version kotlinVersion
+    id 'org.jetbrains.kotlin.plugin.serialization' version kotlinVersion
   }
 }
 
@@ -24,3 +25,5 @@ include ':offline-runtime:java7-utils'
 include ':offline-runtime:api'
 include ':common'
 include ':lib'
+include ':test-kotlin:test-sources'
+

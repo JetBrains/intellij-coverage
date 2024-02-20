@@ -109,7 +109,7 @@ fun main() {
 private fun generateTests(testClass: KClass<*>, ignoreCondition: ((TestFile) -> Boolean)? = null) {
     val ignoredDirectories = listOf("custom")
     val marker = "    //===GENERATED TESTS==="
-    val tests = generateTests(File("src", TEST_PACKAGE), ignoredDirectories, ignoreCondition)
+    val tests = generateTests(pathToFile("test-sources", "src", TEST_PACKAGE), ignoredDirectories, ignoreCondition)
     val testFile = getTestFile(testClass)
     replaceGeneratedTests(tests, testFile, marker)
 }

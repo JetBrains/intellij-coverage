@@ -17,11 +17,9 @@
 package com.intellij.rt.coverage
 
 import com.intellij.rt.coverage.data.ProjectData
-import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import testData.custom.threadSafe.structure.THREAD_SAFE_STRUCTURE_CLASSES
 import java.io.File
 import kotlin.test.*
 
@@ -355,8 +353,8 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     @Test
     fun testThreadSafeStructure() = test(
         "custom.threadSafe.structure",
-        configuration = TestConfiguration((1..THREAD_SAFE_STRUCTURE_CLASSES).associateWith { "FULL" },
-            (0 until THREAD_SAFE_STRUCTURE_CLASSES).map { "Class$it" })
+        configuration = TestConfiguration((1..100).associateWith { "FULL" },
+            (0 until 100).map { "Class$it" })
     )
 
     @Test
@@ -377,7 +375,7 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     @Test
     fun testReflection() {
         if (coverage == Coverage.LINE_FIELD || coverage == Coverage.BRANCH_FIELD) {
-            Assert.assertThrows(RuntimeException::class.java) {
+            assertFailsWith(RuntimeException::class) {
                 test("custom.reflection")
             }
         } else {

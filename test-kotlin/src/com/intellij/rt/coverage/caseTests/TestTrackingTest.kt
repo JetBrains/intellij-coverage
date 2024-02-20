@@ -22,8 +22,6 @@ import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import testData.custom.testTracking.parallelTests.CALLS_PER_LINE
-import testData.custom.testTracking.sequentialTests.TESTS
 
 @RunWith(Parameterized::class)
 internal class TestTrackingTest(
@@ -58,7 +56,7 @@ internal class TestTrackingTest(
         ) { projectData, configuration ->
             val lines = testTrackingLines(myDataFile, configuration.classes)
             Assert.assertEquals(5, lines.size)
-            lines.values.forEach { Assert.assertEquals(CALLS_PER_LINE, it.size) }
+            lines.values.forEach { Assert.assertEquals(200, it.size) }
             assertEqualsLines(projectData, configuration, coverage)
         }
     }
@@ -79,7 +77,7 @@ internal class TestTrackingTest(
     fun testSequentialTests() = test("custom.testTracking.sequentialTests") { projectData, configuration ->
         val lines = testTrackingLines(myDataFile, configuration.classes)
         Assert.assertEquals(5, lines.size)
-        lines.values.forEach { Assert.assertEquals(TESTS, it.size) }
+        lines.values.forEach { Assert.assertEquals(1000, it.size) }
         assertEqualsLines(projectData, configuration, coverage)
     }
 }

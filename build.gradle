@@ -42,6 +42,8 @@ ext.test_discovery_jar_name = 'intellij-test-discovery-agent'
 ext.coverage_jar_name = 'intellij-coverage-agent'
 ext.offline_jar_name = 'intellij-coverage-offline'
 ext.reporter_jar_name = 'intellij-coverage-reporter'
+ext.testJdkVersion = Jvm.current().javaVersion >= JavaVersion.VERSION_11 &&
+    (rootProject.hasProperty("test.configuration") ? "true" == project["test.configuration"] : false) ? "11" : "1.8"
 
 allprojects {
   version calcVersion()
@@ -57,8 +59,10 @@ allprojects {
   targetCompatibility = java5Supported ? 1.5 : 1.6
 
   sourceSets {
-    main.java.srcDirs 'src'
+    main.java.srcDirs = [file('src')]
+    main.resources.srcDirs = []
     test.java.srcDirs = []
+    test.resources.srcDirs = []
   }
 
   tasks.withType(JavaCompile) {

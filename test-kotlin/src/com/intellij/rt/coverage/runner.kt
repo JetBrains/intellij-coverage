@@ -57,8 +57,8 @@ private val libs = listOf("kotlin-stdlib", "kotlinx-coroutines-core", "kotlin-re
         "byte-buddy", "junit", "jmockit", "hamcrest", "joda")
 private val classpath = System.getProperty("java.class.path").split(File.pathSeparator)
         .filter { path -> libs.any { path.contains(it) } }
-        .plus(pathToFile("build", "classes", "kotlin", "test").absolutePath)
-        .plus(pathToFile("build", "classes", "java", "test").absolutePath)
+        .plus(pathToFile("test-sources", "build", "classes", "kotlin", "main").absolutePath)
+        .plus(pathToFile("test-sources", "build", "classes", "java", "main").absolutePath)
         .joinToString(File.pathSeparator)
 
 internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false, testTracking: TestTracking? = null,

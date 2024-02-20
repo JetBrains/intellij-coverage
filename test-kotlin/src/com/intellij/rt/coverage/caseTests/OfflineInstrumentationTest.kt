@@ -107,7 +107,7 @@ internal class OfflineInstrumentationTest(override val coverage: Coverage) : Cov
 
     private fun runCoverage(test: TestFile, config: TestConfiguration) {
         val rootName = if (test.file.name.endsWith(".kt")) "kotlin" else "java"
-        val outputRoot = pathToFile("build", "classes", rootName, "test")
+        val outputRoot = pathToFile("test-sources", "build", "classes", rootName, "main")
 
         runOfflineCoverage(test, outputRoot)
 

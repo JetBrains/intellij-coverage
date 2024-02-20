@@ -44,7 +44,7 @@ class InstrumentedBytecodeTest {
 
     private fun test(testName: String, simpleCLassName: String = "TestKt") {
         val className = "$TEST_PACKAGE.$testName.$simpleCLassName"
-        val outputRoot = pathToFile("build", "classes", "kotlin", "test")
+        val outputRoot = pathToFile("test-sources", "build", "classes", "kotlin", "main")
         val path = className.replace(".", File.separator) + ".class"
         val originalBytes = File(outputRoot, path).readBytes()
 

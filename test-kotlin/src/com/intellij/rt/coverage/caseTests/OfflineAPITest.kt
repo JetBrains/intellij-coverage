@@ -56,7 +56,7 @@ class OfflineAPITest {
         OptionsUtil::CALCULATE_HITS_COUNT to true
     )) {
         val test = getTestFile(testName)
-        val outputRoot = pathToFile("build", "classes", "kotlin", "test")
+        val outputRoot = pathToFile("test-sources", "build", "classes", "kotlin", "main")
         val outputDir = offlineCoverageTransform(true, test, outputRoot)
 
         val offlineArtifactPath = ResourceUtil.getAgentPath("intellij-coverage-offline")

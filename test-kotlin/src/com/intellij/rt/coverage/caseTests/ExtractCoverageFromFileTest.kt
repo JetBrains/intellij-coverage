@@ -33,7 +33,7 @@ internal class ExtractCoverageFromFileTest {
             6 to "NONE",
             10 to "FULL"
         )
-        val testFile = pathToFile("src", TEST_PACKAGE, "custom", "testFileExtraction", "extractionTest.txt")
+        val testFile = pathToFile("test-sources", "src", TEST_PACKAGE, "custom", "testFileExtraction", "extractionTest.txt")
         val testConfiguration = extractTestConfiguration(testFile)
         assertEquals(expected, testConfiguration.coverageData)
         assertEquals(listOf("A", "B", "C", "D"), testConfiguration.classes)

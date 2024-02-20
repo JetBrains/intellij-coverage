@@ -1,0 +1,45 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'org.jetbrains.kotlin.plugin.serialization'
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = testJdkVersion
+tasks.withType(KotlinCompile).configureEach {
+    kotlinOptions.jvmTarget = testJdkVersion
+    if (rootProject.hasProperty("kotlin.version")
+        && !rootProject["kotlin.version"].startsWith("1.5")
+        && !rootProject["kotlin.version"].startsWith("1.6")
+        && !rootProject["kotlin.version"].startsWith("1.7")) {
+        compilerOptions {
+            freeCompilerArgs.add("-nowarn")
+        }
+    }
+}
+
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    def coroutinesVersion = rootProject.hasProperty("kotlin.version") &&
+        rootProject["kotlin.version"].startsWith("1.5") ? "1.5.2" : "1.6.4"
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlin:kotlin-test")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+
+    implementation("net.bytebuddy:byte-buddy:1.11.12")
+    implementation("net.bytebuddy:byte-buddy-agent:1.11.12")
+
+    implementation("org.jmockit:jmockit:1.49")
+    compileOnly('org.projectlombok:lombok:1.18.24')
+    annotationProcessor('org.projectlombok:lombok:1.18.24')
+    implementation('junit:junit:4.13.2')
+    implementation(fileTree(project(":benchmarks").file("lib")))
+
+    implementation(project(':instrumentation'))
+    implementation(project(":java6-utils"))
+    implementation(project(':offline-runtime:api'))
+    implementation(project(":reporter"))
+    implementation(project(":reporter:offline"))
+}

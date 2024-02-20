@@ -17,8 +17,8 @@
 package testData.custom.offline.api
 
 import com.intellij.rt.coverage.offline.api.CoverageRuntime
-import com.intellij.rt.coverage.pathToFile
 import java.io.File
+import java.nio.file.Paths
 
 private fun getPackageName(): String {
     val e = Throwable()
@@ -52,9 +52,9 @@ internal fun collectCoverageAndDump() {
 }
 
 fun collectClassFiles(packageName: String): List<ByteArray> {
-    val parts = mutableListOf("classes", "kotlin", "test")
+    val parts = mutableListOf("build", "classes", "kotlin", "main")
     parts.addAll(packageName.split('.'))
-    val packageRoot = pathToFile("build", *parts.toTypedArray())
+    val packageRoot = Paths.get("test-sources", *parts.toTypedArray()).toFile()
     check(packageRoot.exists()) { "Incorrect class files root $packageRoot" }
     return packageRoot.walk()
         .filter { it.isFile }
