@@ -61,7 +61,7 @@ public class Aggregator {
     // Note that instructions collection is done only inside this method
     // to ensure that instructions count in inline methods
     // correspond to method definition, not method call
-    final ProjectData projectData = new ProjectData();
+    ProjectData projectData = new ProjectData();
     final ProjectContext context = collectCoverageInformationFromOutputs(projectData, request);
     final ProjectData projectDataCopy = hasRawHitsReport ? copyProjectData(projectData) : null;
     context.dropLineMappings(projectData);
@@ -83,7 +83,25 @@ public class Aggregator {
       context.finalizeCoverage(projectDataCopy);
       mergeHits(projectData, projectDataCopy);
     }
+
+    if (context.getInherits() != null) {
+      projectData = filterInheritance(request, context, projectData);
+    }
+
     return projectData;
+  }
+
+  private static ProjectData filterInheritance(Request request, ProjectContext context, ProjectData projectData) {
+    InheritanceFilter filter = new InheritanceFilter(context.getInherits());
+    List<String> filteredNames = filter.filterInherits(projectData.getClasses().keySet(), request.filters.includeInherits, request.filters.excludeInherits);
+    ProjectData copy = new ProjectData();
+    for (String className : filteredNames) {
+      ClassData classData = projectData.getClassData(className);
+      if (classData != null) {
+        copy.addClassData(classData);
+      }
+    }
+    return copy;
   }
 
   private static ProjectData copyProjectData(ProjectData projectData) {
@@ -142,7 +160,6 @@ public class Aggregator {
    * Processing request is selecting required classes from a global project data.
    */
   public void processRequests() {
-
     for (Request request : myRequests) {
       if (request.outputFile == null) continue;
       ProjectData projectData = getProjectData(request);
@@ -160,10 +177,11 @@ public class Aggregator {
         .setBranchCoverage(true)
         .setSaveSource(true)
         .setInstructionCoverage(true)
-        .setIncludeAnnotations(request.includeAnnotations)
-        .setExcludeAnnotations(request.excludeAnnotations)
+        .setIncludeAnnotations(request.filters.includeAnnotations)
+        .setExcludeAnnotations(request.filters.excludeAnnotations)
         .build();
     ProjectContext context = new ProjectContext(options, new OutputClassFinder(request.classFilter, myOutputs));
+    context.setCollectInherits(request.filters.shouldCheckInherits());
     UnloadedUtil.appendUnloaded(projectData, context);
     return context;
   }

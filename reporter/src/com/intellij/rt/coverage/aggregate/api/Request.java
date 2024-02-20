@@ -28,15 +28,13 @@ import java.util.regex.Pattern;
  */
 public class Request {
   public final ClassFilter.PatternFilter classFilter;
-  public final List<Pattern> includeAnnotations;
-  public final List<Pattern> excludeAnnotations;
+  public final Filters filters;
   public final File outputFile;
   public final File smapFile;
 
   public Request(Filters filters, File outputFile, File smapFile) {
     this.classFilter = new ClassFilter.PatternFilter(filters.includeClasses, filters.excludeClasses);
-    this.includeAnnotations = filters.includeAnnotations;
-    this.excludeAnnotations = filters.excludeAnnotations;
+    this.filters = filters;
     this.outputFile = outputFile;
     this.smapFile = smapFile;
   }

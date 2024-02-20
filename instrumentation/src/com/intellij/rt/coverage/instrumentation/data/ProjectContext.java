@@ -45,6 +45,7 @@ public class ProjectContext {
    */
   private volatile Map<String, TIntHashSet> myIgnoredLines;
   private volatile Map<String, FileMapData[]> myLinesMap;
+  private volatile Map<String, String[]> myInherits;
 
   public ProjectContext(InstrumentationOptions options) {
     this(options, new ClassFinder(options.includePatterns, options.excludePatterns));
@@ -151,6 +152,27 @@ public class ProjectContext {
       if (classData == null) continue;
       dropIgnoredLines(classData, e.getValue());
     }
+  }
+
+  public synchronized void setCollectInherits(boolean collectInherits) {
+    if (collectInherits) {
+      myInherits = new ConcurrentHashMap<String, String[]>();
+    } else {
+      myInherits = null;
+    }
+  }
+
+  public Map<String, String[]> getInherits() {
+    return myInherits;
+  }
+
+  public void addInherits(String className, String[] inherits) {
+    if (myInherits == null) return;
+    myInherits.put(className, inherits);
+  }
+
+  public boolean shouldCollectInherits() {
+    return myInherits != null;
   }
 
   /**

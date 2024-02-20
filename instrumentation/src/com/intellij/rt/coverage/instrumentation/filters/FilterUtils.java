@@ -48,6 +48,7 @@ public class FilterUtils {
   public static List<ClassFilter> createClassFilters() {
     List<ClassFilter> result = KotlinUtils.createClassFilters();
     result.add(new PrivateConstructorOfUtilClassFilter());
+    result.add(new InheritanceCollectorFilter());
     return result;
   }
 

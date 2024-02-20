@@ -62,6 +62,10 @@ public class ProjectData implements CoverageData, Serializable {
     return classData;
   }
 
+  public void addClassData(ClassData classData) {
+    myClasses.put(classData.getName(), classData);
+  }
+
   public int getClassesNumber() {
     return myClasses.size();
   }

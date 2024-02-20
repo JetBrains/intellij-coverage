@@ -124,7 +124,9 @@ object TestUtils {
         excludes: List<Pattern> = emptyList(),
         includeAnnotations: List<Pattern> = emptyList(),
         excludeAnnotations: List<Pattern> = emptyList(),
-    ) = Filters(includes, excludes, includeAnnotations, excludeAnnotations)
+        includeInherits: List<Pattern> = emptyList(),
+        excludeInherits: List<Pattern> = emptyList(),
+    ) = Filters(includes, excludes, includeAnnotations, excludeAnnotations, includeInherits, excludeInherits)
 
     @JvmStatic
     @JvmOverloads

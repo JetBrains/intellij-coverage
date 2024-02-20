@@ -25,17 +25,26 @@ public class Filters {
   public final List<Pattern> excludeClasses;
   public final List<Pattern> includeAnnotations;
   public final List<Pattern> excludeAnnotations;
+  public final List<Pattern> includeInherits;
+  public final List<Pattern> excludeInherits;
 
   public Filters(List<Pattern> includeClasses, List<Pattern> excludeClasses,
-                 List<Pattern> includeAnnotations,
-                 List<Pattern> excludeAnnotations) {
+                 List<Pattern> includeAnnotations, List<Pattern> excludeAnnotations,
+                 List<Pattern> includeInherits, List<Pattern> excludeInherits) {
     this.includeClasses = includeClasses;
     this.excludeClasses = excludeClasses;
     this.includeAnnotations = includeAnnotations;
     this.excludeAnnotations = excludeAnnotations;
+    this.includeInherits = includeInherits;
+    this.excludeInherits = excludeInherits;
+  }
+
+  public boolean shouldCheckInherits() {
+    return !includeInherits.isEmpty() || !excludeInherits.isEmpty();
   }
 
   public static final Filters EMPTY = new Filters(
+      Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(),
       Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList(),
       Collections.<Pattern>emptyList(), Collections.<Pattern>emptyList());
 }
