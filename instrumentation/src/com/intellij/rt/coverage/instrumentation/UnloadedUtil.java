@@ -17,10 +17,8 @@
 package com.intellij.rt.coverage.instrumentation;
 
 import com.intellij.rt.coverage.data.ClassData;
-import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
 import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import com.intellij.rt.coverage.instrumentation.dataAccess.EmptyCoverageDataAccess;
 import com.intellij.rt.coverage.util.ErrorReporter;
@@ -32,7 +30,6 @@ import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
 import java.io.InputStream;
-import java.util.Map;
 
 /**
  * Some classes may be untouched during application execution, so these classes

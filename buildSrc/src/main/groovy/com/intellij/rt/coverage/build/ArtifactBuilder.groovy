@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2023 JetBrains s.r.o.
+ * Copyright 2000-2024 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ class ArtifactBuilder {
 
     // add sources and javadocs
     if (artifactName.contains("intellij-coverage-agent")) {
-      [":common", ":", ":util"].forEach { modules.add(project.project(it).sourceSets.main) }
+      [":common", ":util"].forEach { modules.add(project.project(it).sourceSets.main) }
     }
 
     project.tasks.register("soursesJar", Jar) {

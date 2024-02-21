@@ -8,22 +8,26 @@ pluginManagement {
 
 rootProject.name = 'intellij-coverage'
 
+include ':common'
+include ':lib'
+include ':util'
+
 include ':instrumentation'
 include ':instrumentation:java7-utils'
+include ':instrumentation:java6-utils'
+include ':instrumentation:full'
+
 include ':test-discovery'
 include ':junit4-test-discovery-launcher'
-include ':tests'
-include ':util'
-include ':test-kotlin'
+
 include ':reporter'
-include ':reporter:offline'
-include ':benchmarks'
-include ':java6-utils'
 include ':offline-runtime'
 include ':offline-runtime:data'
 include ':offline-runtime:java7-utils'
-include ':offline-runtime:api'
-include ':common'
-include ':lib'
+include ':offline-runtime:full'
+
+include ':benchmarks'
+include ':tests'
+include ':test-kotlin'
 include ':test-kotlin:test-sources'
 

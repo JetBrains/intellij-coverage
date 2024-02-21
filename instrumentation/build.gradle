@@ -1,13 +1,13 @@
-import com.intellij.rt.coverage.build.ArtifactBuilder
+//import com.intellij.rt.coverage.build.ArtifactBuilder
 
 dependencies {
-  compile project(":")
+  compile project(":util")
 }
 
-ArtifactBuilder.setUpFatArtifactWithProguard(project, coverage_jar_name, [":instrumentation:java7-utils", ":java6-utils"], null) { Jar jar ->
-  jar.manifest.attributes(
-      "Premain-Class": "com.intellij.rt.coverage.main.CoveragePremain",
-      "Boot-Class-Path": "${jar.archivePath.name}",
-      "Can-Retransform-Classes": "true"
-  )
-}
+//ArtifactBuilder.setUpFatArtifactWithProguard(project, coverage_jar_name, [":instrumentation:java7-utils", ":instrumentation:java6-utils"], null) { Jar jar ->
+//  jar.manifest.attributes(
+//      "Premain-Class": "com.intellij.rt.coverage.main.CoveragePremain",
+//      "Boot-Class-Path": "${jar.archivePath.name}",
+//      "Can-Retransform-Classes": "true"
+//  )
+//}

@@ -27,12 +27,12 @@ sourceSets {
   test.java.srcDirs = [file('test')]
 }
 
-ArtifactBuilder.setUpFatArtifactWithProguard(project, test_discovery_jar_name, [], null) { Jar jar ->
-  jar.manifest.attributes(
-      "Premain-Class": "com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain",
-      "Boot-Class-Path": "${jar.archiveName}",
-      "Can-Retransform-Classes": "true",
-  )
-}
+//ArtifactBuilder.setUpFatArtifactWithProguard(project, test_discovery_jar_name, [], null) { Jar jar ->
+//  jar.manifest.attributes(
+//      "Premain-Class": "com.intellij.rt.coverage.testDiscovery.main.TestDiscoveryPremain",
+//      "Boot-Class-Path": "${jar.archiveName}",
+//      "Can-Retransform-Classes": "true",
+//  )
+//}
 
 apply from: 'jmh.gradle'

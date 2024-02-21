@@ -18,7 +18,7 @@ package com.intellij.rt.coverage.data;
 
 import com.intellij.rt.coverage.data.instructions.ClassInstructions;
 import com.intellij.rt.coverage.data.instructions.InstructionsUtil;
-import com.intellij.rt.coverage.util.*;
+import com.intellij.rt.coverage.util.TestTrackingCallback;
 
 import java.io.Serializable;
 import java.util.*;

@@ -20,8 +20,6 @@ import com.intellij.rt.coverage.report.api.Filters;
 import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 
 import java.io.File;
-import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * A request to collect all classes that match filter to a specified binary report file.

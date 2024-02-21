@@ -16,11 +16,11 @@
 
 package com.intellij.rt.coverage.data.instructions;
 
+import com.intellij.rt.coverage.util.LineMapper;
 import com.intellij.rt.coverage.data.ClassData;
 import com.intellij.rt.coverage.data.FileMapData;
 import com.intellij.rt.coverage.data.LineMapData;
 import com.intellij.rt.coverage.data.ProjectData;
-import com.intellij.rt.coverage.util.LineMapper;
 import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 
 import java.util.Map;

@@ -1,5 +1,0 @@
-dependencies {
-  compile project(":")
-  compile project(":offline-runtime")
-  compile project(":offline-runtime:data")
-}

@@ -20,7 +20,6 @@ import com.intellij.rt.coverage.data.ProjectData;
 import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
 import java.util.List;
-import java.util.Set;
 
 @SuppressWarnings({"InstantiationOfUtilityClass"})
 public class Key<T> {

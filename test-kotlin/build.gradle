@@ -17,9 +17,8 @@ dependencies {
   testImplementation(project(":tests"))
 
   testImplementation(project(':instrumentation'))
-  testImplementation(project(':offline-runtime:api'))
+  testImplementation(project(':offline-runtime'))
   testImplementation(project(":reporter"))
-  testImplementation(project(":reporter:offline"))
   testImplementation(project(":test-kotlin:test-sources"))
 
   testImplementation('junit:junit:4.13.2')

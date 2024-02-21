@@ -17,14 +17,13 @@ configurations {
 }
 
 dependencies {
-  implementation project(":reporter:offline")
+  implementation project(":offline-runtime:data")
   implementation project(":instrumentation")
-  implementation project(":java6-utils")
-  implementation project(":offline-runtime:api")
+  implementation project(":instrumentation:java6-utils")
   externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.23")
 
   testImplementation('junit:junit:4.13.2')
   testImplementation(files(project(":tests").sourceSets.main.output))
 }
 
-ArtifactBuilder.setUpArtifact(project, reporter_jar_name, [":reporter:offline", ":offline-runtime:data"])
+//ArtifactBuilder.setUpArtifact(project, reporter_jar_name, [":offline-runtime:data"])

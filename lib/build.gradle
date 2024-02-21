@@ -2,3 +2,7 @@ dependencies {
   compile files("trove.jar")
   compile files("asm-all.jar")
 }
+
+sourceSets {
+  main.java.srcDirs = []
+}

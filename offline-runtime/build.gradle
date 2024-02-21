@@ -1,4 +1,11 @@
 dependencies {
-  compile(project(":common"))
   compile(project(":offline-runtime:data"))
+  implementation(project(":instrumentation"))
 }
+
+
+//ArtifactBuilder.setUpFatArtifactWithProguard(project, offline_jar_name, [":offline-runtime:java7-utils"], { ProGuardTask task ->
+//  task.keep('public class com.intellij.rt.coverage.offline.** { *; }')
+//}) { Jar jar ->
+//  jar.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+//}

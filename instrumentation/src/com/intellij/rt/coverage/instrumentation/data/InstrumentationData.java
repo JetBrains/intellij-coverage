@@ -16,8 +16,11 @@
 
 package com.intellij.rt.coverage.instrumentation.data;
 
-import com.intellij.rt.coverage.data.*;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
+import com.intellij.rt.coverage.data.ClassData;
+import com.intellij.rt.coverage.data.JumpData;
+import com.intellij.rt.coverage.data.LineData;
+import com.intellij.rt.coverage.data.SwitchData;
 import org.jetbrains.coverage.gnu.trove.TIntArrayList;
 import org.jetbrains.coverage.gnu.trove.TIntHashSet;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;

@@ -37,9 +37,7 @@ dependencies {
     implementation('junit:junit:4.13.2')
     implementation(fileTree(project(":benchmarks").file("lib")))
 
-    implementation(project(':instrumentation'))
-    implementation(project(":java6-utils"))
-    implementation(project(':offline-runtime:api'))
+    implementation(project(':instrumentation:full'))
+    implementation(project(':offline-runtime'))
     implementation(project(":reporter"))
-    implementation(project(":reporter:offline"))
 }
