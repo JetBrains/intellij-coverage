@@ -183,6 +183,8 @@ public class ProjectContext {
     for (Map.Entry<String, FileMapData[]> entry : myLinesMap.entrySet()) {
       final String className = entry.getKey();
       final ClassData classData = projectData.getClassData(className);
+      if (classData == null) continue;
+
       final FileMapData[] fileData = entry.getValue();
       //postpone process main file because its lines would be reset and next files won't be processed correctly
       FileMapData mainData = null;
