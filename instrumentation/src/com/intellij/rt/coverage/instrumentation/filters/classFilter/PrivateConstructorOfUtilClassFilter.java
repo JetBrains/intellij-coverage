@@ -37,6 +37,7 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
   private boolean myAllMethodsStatic = true;
   private boolean myHasConstFields = false;
   private boolean myAllFieldsConst = true;
+  private boolean myIsCompanionObject = false;
   private boolean myIsKotlinObject = false;
   private boolean myConstructorIsEmpty = true;
   private List<Integer> myConstructorLines;
@@ -51,7 +52,7 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
   public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
     super.visit(version, access, name, signature, superName, interfaces);
     myName = name;
-    myIsKotlinObject |= name != null && name.endsWith(KotlinUtils.COMPANION_SUFFIX);
+    myIsCompanionObject |= name != null && name.endsWith(KotlinUtils.COMPANION_SUFFIX);
     myIsAbstractClass = (access & Opcodes.ACC_ABSTRACT) != 0;
   }
 
@@ -59,7 +60,9 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
   public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
     Type fieldType = Type.getType(descriptor);
     boolean isPublicStaticFinal = (access & (Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL)) != 0;
-    boolean isInstanceField = isPublicStaticFinal && "INSTANCE".equals(name) && myName.equals(fieldType.getInternalName());
+    boolean isInstanceField = isPublicStaticFinal
+        && isObjectInstanceFieldName(name)
+        && myName.equals(fieldType.getInternalName());
     myIsKotlinObject |= isInstanceField;
     if (!isInstanceField) {
       boolean isPrimitive = Type.BOOLEAN <= fieldType.getSort() && fieldType.getSort() <= Type.DOUBLE;
@@ -87,16 +90,16 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
 
   @Override
   public void visitEnd() {
-    if ((myAllMethodsStatic || myIsKotlinObject && KotlinUtils.isKotlinClass(myContext))
+    if ((myAllMethodsStatic || isKotlinObjectOrCompanion() && KotlinUtils.isKotlinClass(myContext))
         && myConstructorIsEmpty
         && myConstructorLines != null
         && !isSealedClassConstructor()) {
       for (int line : myConstructorLines) {
         // Do not ignore constructor if it is the only line in the class
-        boolean isKotlinObjectWithSingleLine = myIsKotlinObject && KotlinUtils.isKotlinClass(myContext) && myContext.getLineCount() <= 1;
+        boolean isKotlinObjectWithSingleLine = isKotlinObjectOrCompanion() && KotlinUtils.isKotlinClass(myContext) && myContext.getLineCount() <= 1;
         // However, const fields are inlined by the compiler.
         // In such a case, object is used just as scope, so we do not need to track coverage for it.
-        boolean hasOnlyConstFields = !myHasMethods && myAllFieldsConst && myHasConstFields;
+        boolean hasOnlyConstFields = !myHasMethods && myAllFieldsConst && (myHasConstFields || myIsCompanionObject);
         if (!isKotlinObjectWithSingleLine || hasOnlyConstFields) {
           myContext.removeLine(line);
         }
@@ -114,6 +117,14 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
     // if a sealed class has no derived classes, it is not marked,
     // so we have to filter such a case here
     return myIsAbstractClass && KotlinUtils.isKotlinClass(myContext);
+  }
+
+  private boolean isObjectInstanceFieldName(String name) {
+    return "INSTANCE".equals(name) || "$$INSTANCE".equals(name);
+  }
+
+  private boolean isKotlinObjectOrCompanion() {
+    return myIsCompanionObject || myIsKotlinObject;
   }
 
   //    ALOAD 0

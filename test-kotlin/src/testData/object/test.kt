@@ -29,6 +29,18 @@ object ObjectDeclarationWithField {
     val x: Int = 42 // coverage: FULL
 }
 
+interface I {
+    companion object {
+        const val X: Int = 42
+    }
+}
+
+class IC { // coverage: NONE
+    companion object {
+        const val X: Int = 42
+    }
+}
+
 object ObjectDeclarationWithConst {
     const val X: Int = 42
 }
