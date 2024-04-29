@@ -34,16 +34,16 @@ val ALL_CLASSES: Set<String> = INHERITS.keys + INHERITS.values.flatMap { it.toLi
 
 class InheritanceFilterTest {
     @Test
-    fun `test include 1`() = doTest("B, BC, C, IA, IB, IC", Pattern.compile("IA"))
+    fun `test include 1`() = doTest("B, BC, C, IB, IC", Pattern.compile("IA"))
 
     @Test
-    fun `test include 2`() = doTest("E, O", Pattern.compile("O"))
+    fun `test include 2`() = doTest("E", Pattern.compile("O"))
 
     @Test
-    fun `test include 3`() = doTest("B, BC, C, IB, IC", Pattern.compile("I[BC]"))
+    fun `test include 3`() = doTest("B, BC, C", Pattern.compile("I[BC]"))
 
     @Test
-    fun `test include and exclude partly`() = doTest("B, IA, IB", Pattern.compile("IA"), Pattern.compile("IC"))
+    fun `test include and exclude partly`() = doTest("B, IB", Pattern.compile("IA"), Pattern.compile("IC"))
 
     @Test
     fun `test exclude 1`() = doTest("B, D, D1, E, IA, IB, ID, IF, O", excluded = Pattern.compile("IC"))
