@@ -34,7 +34,7 @@ public class InheritanceFilter {
     myStatus.clear();
     for (String className : classes) {
       IncludeStatus status = isIncluded(className, includePatterns, excludePatterns);
-      if (status == IncludeStatus.INCLUDED
+      if (status == IncludeStatus.INCLUDED || status == IncludeStatus.EXCLUDED_SELF
           || status == IncludeStatus.UNKNOWN && includePatterns.isEmpty()) {
         result.add(className);
       }
@@ -53,16 +53,23 @@ public class InheritanceFilter {
   }
 
   private IncludeStatus isIncludedInternal(String className, List<Pattern> includePatterns, List<Pattern> excludePatterns) {
-    if (ClassNameUtil.matchesPatterns(className, excludePatterns)) return IncludeStatus.EXCLUDED;
-    if (ClassNameUtil.matchesPatterns(className, includePatterns)) return IncludeStatus.INCLUDED_SELF;
+    IncludeStatus status = IncludeStatus.UNKNOWN;
+    if (ClassNameUtil.matchesPatterns(className, includePatterns)) {
+      status = IncludeStatus.INCLUDED_SELF;
+    }
+    if (ClassNameUtil.matchesPatterns(className, excludePatterns)) {
+      status = IncludeStatus.EXCLUDED_SELF;
+    }
 
     String[] inherits = myInherits.get(className);
-    IncludeStatus status = IncludeStatus.UNKNOWN;
     if (inherits != null) {
       for (String inherit : inherits) {
         IncludeStatus inheritStatus = isIncluded(inherit, includePatterns, excludePatterns);
-        if (inheritStatus == IncludeStatus.EXCLUDED) return IncludeStatus.EXCLUDED;
-        if (inheritStatus == IncludeStatus.INCLUDED || inheritStatus == IncludeStatus.INCLUDED_SELF) {
+        if (inheritStatus == IncludeStatus.EXCLUDED || inheritStatus == IncludeStatus.EXCLUDED_SELF) {
+          return IncludeStatus.EXCLUDED;
+        }
+        if ((inheritStatus == IncludeStatus.INCLUDED || inheritStatus == IncludeStatus.INCLUDED_SELF)
+            && !(status == IncludeStatus.INCLUDED_SELF || status == IncludeStatus.EXCLUDED_SELF)) {
           status = IncludeStatus.INCLUDED;
         }
       }
@@ -72,10 +79,9 @@ public class InheritanceFilter {
   }
 
   enum IncludeStatus {
-    INCLUDED,
-    // Do not include classes matched by filter, only their inheritants
-    INCLUDED_SELF,
-    EXCLUDED,
+    INCLUDED, EXCLUDED,
+    // Do not match classes matched by filter, only their inheritants
+    INCLUDED_SELF, EXCLUDED_SELF,
     UNKNOWN
   }
 }

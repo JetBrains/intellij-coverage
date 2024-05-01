@@ -43,13 +43,20 @@ class InheritanceFilterTest {
     fun `test include 3`() = doTest("B, BC, C", Pattern.compile("I[BC]"))
 
     @Test
-    fun `test include and exclude partly`() = doTest("B, IB", Pattern.compile("IA"), Pattern.compile("IC"))
+    fun `test include and exclude partly`() = doTest("B, IB, IC", Pattern.compile("IA"), Pattern.compile("IC"))
 
     @Test
-    fun `test exclude 1`() = doTest("B, D, D1, E, IA, IB, ID, IF, O", excluded = Pattern.compile("IC"))
+    fun `test include overlap`() = doTest("B, BC, C, IC", listOf(Pattern.compile("IA"), Pattern.compile("IB")), emptyList())
 
     @Test
-    fun `test exclude 2`() = doTest("BC, C, D, D1, E, IA, IB, IC, ID, IF, O", excluded = Pattern.compile("B"))
+    fun `test exclude 1`() = doTest("B, D, D1, E, IA, IB, IC, ID, IF, O", excluded = Pattern.compile("IC"))
+
+    @Test
+    fun `test exclude 2`() = doTest("B, BC, C, D, D1, E, IA, IB, IC, ID, IF, O", excluded = Pattern.compile("B"))
+
+    @Test
+    fun `test exclude 3`() = doTest("D, D1, E, IA, ID, IF, O", excluded = Pattern.compile("IA"))
+
 
     private fun doTest(expected: String, included: Pattern? = null, excluded: Pattern? = null) =
         doTest(expected, included.asList(), excluded.asList())
