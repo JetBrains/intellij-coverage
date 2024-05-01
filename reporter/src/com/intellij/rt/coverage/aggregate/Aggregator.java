@@ -25,6 +25,7 @@ import com.intellij.rt.coverage.instrumentation.data.ProjectContext;
 import com.intellij.rt.coverage.report.data.BinaryReport;
 import com.intellij.rt.coverage.util.CoverageReport;
 import com.intellij.rt.coverage.util.ProjectDataLoader;
+import com.intellij.rt.coverage.util.classFinder.ClassFilter;
 import com.intellij.rt.coverage.util.classFinder.OutputClassFinder;
 
 import java.io.File;
@@ -96,6 +97,7 @@ public class Aggregator {
     List<String> filteredNames = filter.filterInherits(projectData.getClasses().keySet(), request.filters.includeInherits, request.filters.excludeInherits);
     ProjectData copy = new ProjectData();
     for (String className : filteredNames) {
+      if (!request.classFilter.shouldInclude(className)) continue;
       ClassData classData = projectData.getClassData(className);
       if (classData != null) {
         copy.addClassData(classData);
@@ -180,8 +182,12 @@ public class Aggregator {
         .setIncludeAnnotations(request.filters.includeAnnotations)
         .setExcludeAnnotations(request.filters.excludeAnnotations)
         .build();
-    ProjectContext context = new ProjectContext(options, new OutputClassFinder(request.classFilter, myOutputs));
-    context.setCollectInherits(request.filters.shouldCheckInherits());
+    boolean collectInherits = request.filters.shouldCheckInherits();
+    // Cannot filter classes by name, as we need to collect inheritance hierarchy.
+    // Class pattern will be applied later.
+    ClassFilter.PatternFilter classFilter = collectInherits ? null : request.classFilter;
+    ProjectContext context = new ProjectContext(options, new OutputClassFinder(classFilter, myOutputs));
+    context.setCollectInherits(collectInherits);
     UnloadedUtil.appendUnloaded(projectData, context);
     return context;
   }

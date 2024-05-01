@@ -1,0 +1,56 @@
+<?xml version="1.0" ?>
+<report name="Intellij Coverage Report">
+<package name="testData/classAndInheritanceFilter">
+<class name="testData/classAndInheritanceFilter/AChild" sourcefilename="test.kt">
+<method name="functionAA" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<class name="testData/classAndInheritanceFilter/BChild" sourcefilename="test.kt">
+<method name="functionBB" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<method name="&lt;init&gt;" desc="()V">
+<counter type="INSTRUCTION" missed="1" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="1" covered="0"/>
+</method>
+<counter type="INSTRUCTION" missed="2" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="2" covered="0"/>
+<counter type="METHOD" missed="2" covered="0"/>
+</class>
+<sourcefile name="test.kt">
+<line nr="59" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="61" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="66" mi="1" ci="0" mb="0" cb="0"/>
+<line nr="68" mi="1" ci="0" mb="0" cb="0"/>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+</sourcefile>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+<counter type="CLASS" missed="2" covered="0"/>
+</package>
+<counter type="INSTRUCTION" missed="4" covered="0"/>
+<counter type="BRANCH" missed="0" covered="0"/>
+<counter type="LINE" missed="4" covered="0"/>
+<counter type="METHOD" missed="4" covered="0"/>
+<counter type="CLASS" missed="2" covered="0"/>
+</report>
