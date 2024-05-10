@@ -195,6 +195,9 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testFixesKT_39038() = test("fixes.KT_39038")
 
     @Test
+    fun testFixesClassReload() = test("fixes.classReload")
+
+    @Test
     fun testFixesIntMaxSwitch() = test("fixes.intMaxSwitch")
 
     @Test

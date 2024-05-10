@@ -226,20 +226,28 @@ public class ClassData implements CoverageData {
   public synchronized void createMask(int size, boolean calculateHits) {
     Object current = myHitsMask;
     if (calculateHits) {
-      if (myHitsMask == null) {
+      if (current == null) {
         myHitsMask = new int[size];
       } else {
         if (!(current instanceof int[])) throw new IllegalStateException("Int array expected");
-        int[] hits = (int[]) myHitsMask;
-        myHitsMask = ArrayUtil.copy(hits, size);
+        int[] hits = (int[]) current;
+        if (hits.length < size) {
+          // Overwriting this field may cause incomplete coverage,
+          // as the reference to this array is cached in the instrumented class field/condy.
+          myHitsMask = ArrayUtil.copy(hits, size);
+        }
       }
     } else {
-      if (myHitsMask == null) {
+      if (current == null) {
         myHitsMask = new boolean[size];
       } else {
         if (!(current instanceof boolean[])) throw new IllegalStateException("Boolean array expected");
-        boolean[] hits = (boolean[]) myHitsMask;
-        myHitsMask = ArrayUtil.copy(hits, size);
+        boolean[] hits = (boolean[]) current;
+        if (hits.length < size) {
+          // Overwriting this field may cause incomplete coverage,
+          // as the reference to this array is cached in the instrumented class field/condy.
+          myHitsMask = ArrayUtil.copy(hits, size);
+        }
       }
     }
   }
