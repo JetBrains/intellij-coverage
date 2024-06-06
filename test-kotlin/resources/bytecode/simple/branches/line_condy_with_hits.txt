@@ -4,6 +4,11 @@ public final class testData/simple/branches/MyBranchedClass {
   // compiled from: test.kt
 
 
+  @Landroidx/compose/runtime/internal/StabilityInferred;(parameters=1) // invisible
+
+  // access flags 0x19
+  public final static I $stable
+
   // access flags 0x1
   public <init>()V
     LDC __$hits$__ : Ljava/lang/Object; com/intellij/rt/coverage/util/CondyUtils.getHits(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/Class;Ljava/lang/String;)[I (6) [testData.simple.branches.MyBranchedClass]
@@ -109,4 +114,10 @@ public final class testData/simple/branches/MyBranchedClass {
     LOCALVARIABLE __$coverage_local$__ [I L0 L8 2
     MAXSTACK = 4
     MAXLOCALS = 3
+
+  // access flags 0x8
+  static <clinit>()V
+    RETURN
+    MAXSTACK = 0
+    MAXLOCALS = 0
 }

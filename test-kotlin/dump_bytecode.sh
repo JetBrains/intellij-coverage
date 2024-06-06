@@ -26,7 +26,7 @@ fi
 TEST_CASE="${TEST_CASE//.//}"
 echo "Test case: file://$(pwd)/src/testData/${TEST_CASE}/test.kt"
 
-../gradlew :test-kotlin:classes > /dev/null || exit 2
+../gradlew :test-kotlin:testClasses > /dev/null || exit 2
 
 javap -v -l -p build/classes/kotlin/test/testData/"$TEST_CASE"/*.class > bytecode.txt || exit 3
 echo "file://$(pwd)"/bytecode.txt

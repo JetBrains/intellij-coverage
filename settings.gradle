@@ -1,7 +1,9 @@
 pluginManagement {
   def kotlinVersion = settings.hasProperty("kotlin.version") ? (String)settings["kotlin.version"] : "2.0.0"
+  def composeVersion = kotlinVersion.startsWith("1.8") ? "1.6.0" : "1.6.11"
   plugins {
     id 'org.jetbrains.kotlin.jvm' version kotlinVersion
+    id "org.jetbrains.compose" version(composeVersion)
   }
 }
 

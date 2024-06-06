@@ -21,6 +21,7 @@ import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.filters.branches.*;
 import com.intellij.rt.coverage.instrumentation.filters.classFilter.*;
 import com.intellij.rt.coverage.instrumentation.filters.classes.*;
+import com.intellij.rt.coverage.instrumentation.filters.compose.ComposeUtils;
 import com.intellij.rt.coverage.instrumentation.filters.lines.*;
 import com.intellij.rt.coverage.instrumentation.filters.methods.*;
 
@@ -63,6 +64,8 @@ public class KotlinUtils {
     result.add(new KotlinCoroutinesFilter());
     result.add(new KotlinDeprecatedMethodFilter());
     result.add(new KotlinDefaultArgsLineFilter());
+
+    result.addAll(ComposeUtils.createLineFilters());
     return result;
   }
 
@@ -75,6 +78,8 @@ public class KotlinUtils {
     result.add(new KotlinOpenMemberWithDefaultArgsFilter());
     result.add(new KotlinUnsafeCastFilter());
     result.add(new KotlinWhenStringFilter());
+
+    result.addAll(ComposeUtils.createBranchFilters());
     return result;
   }
 

@@ -1,9 +1,22 @@
 import org.gradle.internal.jvm.Jvm
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+buildscript {
+  dependencies {
+    if (!rootProject.hasProperty("kotlin.version") || rootProject["kotlin.version"].startsWith("2.")) {
+      classpath("org.jetbrains.kotlin:compose-compiler-gradle-plugin")
+    }
+  }
+}
+
 plugins {
   id 'org.jetbrains.kotlin.jvm'
   id 'org.jetbrains.kotlin.plugin.serialization' version '1.8.21'
+  id("org.jetbrains.compose")
+}
+
+if (!rootProject.hasProperty("kotlin.version") || rootProject["kotlin.version"].startsWith("2.")) {
+  apply(plugin: "org.jetbrains.kotlin.plugin.compose")
 }
 
 sourceSets {
@@ -24,6 +37,10 @@ tasks.withType(KotlinCompile).configureEach {
       freeCompilerArgs += "-Xlambdas=indy"
     }
   }
+}
+
+repositories {
+  google()
 }
 
 dependencies {
@@ -52,6 +69,9 @@ dependencies {
   testImplementation("org.jmockit:jmockit:1.49")
   testCompileOnly('org.projectlombok:lombok:1.18.24')
   testAnnotationProcessor('org.projectlombok:lombok:1.18.24')
+
+  testImplementation(compose.desktop.uiTestJUnit4)
+  testImplementation(compose.desktop.currentOs)
 }
 
 task generateTests(type: JavaExec) {
@@ -62,7 +82,7 @@ task generateTests(type: JavaExec) {
 }
 
 def configureTests(Test task) {
-  def kotlinVersion = project.hasProperty("kotlin.version") ? (String)project["kotlin.version"] : ""
+  def kotlinVersion = project.hasProperty("kotlin.version") ? (String) project["kotlin.version"] : ""
   println "Use Kotlin version $kotlinVersion and java version ${testJdkVersion}"
   task.with {
     group = "verification"

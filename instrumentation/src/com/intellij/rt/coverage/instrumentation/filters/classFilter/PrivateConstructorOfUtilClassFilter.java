@@ -60,6 +60,10 @@ public class PrivateConstructorOfUtilClassFilter extends ClassFilter {
   public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
     Type fieldType = Type.getType(descriptor);
     boolean isPublicStaticFinal = (access & (Opcodes.ACC_PUBLIC | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL)) != 0;
+    // added by compose
+    if (isPublicStaticFinal && "$stable".equals(name) && "I".equals(descriptor)) {
+      return super.visitField(access, name, descriptor, signature, value);
+    }
     boolean isInstanceField = isPublicStaticFinal
         && isObjectInstanceFieldName(name)
         && myName.equals(fieldType.getInternalName());

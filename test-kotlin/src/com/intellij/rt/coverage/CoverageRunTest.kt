@@ -105,6 +105,12 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testCasesWhenString() = test("cases.whenString")
 
     @Test
+    fun testComposeBasic() = test("compose.basic")
+
+    @Test
+    fun testComposeSynthetic() = test("compose.synthetic")
+
+    @Test
     fun testCoroutinesAsync() = test("coroutines.async")
 
     @Test

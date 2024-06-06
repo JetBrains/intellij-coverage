@@ -4,6 +4,11 @@ public final class testData/simple/branches/MyBranchedClass {
   // compiled from: test.kt
 
 
+  @Landroidx/compose/runtime/internal/StabilityInferred;(parameters=1) // invisible
+
+  // access flags 0x19
+  public final static I $stable
+
   // access flags 0x108A
   private static transient synthetic [Z __$hits$__
 
@@ -212,4 +217,28 @@ public final class testData/simple/branches/MyBranchedClass {
     LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L15 4
     MAXSTACK = 3
     MAXLOCALS = 5
+
+  // access flags 0x8
+  static <clinit>()V
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$traceMask$__ : [Z
+    IFNONNULL L0
+    LDC "testData.simple.branches.MyBranchedClass"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.getTraceMask (Ljava/lang/String;)[Z
+    PUTSTATIC testData/simple/branches/MyBranchedClass.__$traceMask$__ : [Z
+   L0
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$traceMask$__ : [Z
+    ASTORE 0
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$classData$__ : Ljava/lang/Object;
+    IFNONNULL L1
+    LDC "testData.simple.branches.MyBranchedClass"
+    INVOKESTATIC com/intellij/rt/coverage/instrumentation/CoverageRuntime.loadClassData (Ljava/lang/String;)Ljava/lang/Object;
+    PUTSTATIC testData/simple/branches/MyBranchedClass.__$classData$__ : Ljava/lang/Object;
+   L1
+    GETSTATIC testData/simple/branches/MyBranchedClass.__$classData$__ : Ljava/lang/Object;
+    ASTORE 1
+    RETURN
+    LOCALVARIABLE __$coverage_local$__ [Z L0 L0 0
+    LOCALVARIABLE __$coverage_local$__ Ljava/lang/Object; L0 L1 1
+    MAXSTACK = 1
+    MAXLOCALS = 2
 }
