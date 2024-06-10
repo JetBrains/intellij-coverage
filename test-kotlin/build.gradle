@@ -1,4 +1,5 @@
 import org.gradle.internal.jvm.Jvm
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   id 'org.jetbrains.kotlin.jvm'
@@ -15,9 +16,13 @@ ext.testJdkVersion = Jvm.current().javaVersion >= JavaVersion.VERSION_11 &&
     (rootProject.hasProperty("test.configuration") ? "true" == project["test.configuration"] : false) ? "11" : "1.8"
 sourceCompatibility = 1.8
 targetCompatibility = testJdkVersion
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+tasks.withType(KotlinCompile).configureEach {
   kotlinOptions {
     jvmTarget = testJdkVersion
+    def isKotlin15 = rootProject.hasProperty("kotlin.version") && rootProject["kotlin.version"].startsWith("1.5")
+    if (!isKotlin15) {
+      freeCompilerArgs += "-Xlambdas=indy"
+    }
   }
 }
 
