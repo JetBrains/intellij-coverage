@@ -51,14 +51,14 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
   public final byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) {
     long s = System.nanoTime();
     try {
-      return transformInner(loader, className, classFileBuffer);
+      return transformInner(loader, className, classFileBuffer, classBeingRedefined);
     } finally {
       ourClassCount++;
       ourTime += System.nanoTime() - s;
     }
   }
 
-  public final byte[] transform(ClassLoader loader, String className, byte[] classFileBuffer) {
+  public final byte[] transform(ClassLoader loader, String className, byte[] classFileBuffer, Class<?> classBeingRedefined) {
     if (className == null) {
       return null;
     }
@@ -75,7 +75,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
       return null;
     }
 
-    if (classAlreadyHasCoverage(classFileBuffer)) return null;
+    if (classBeingRedefined != null && classAlreadyHasCoverage(classFileBuffer)) return null;
 
     if (shouldExclude(className)) return null;
 
@@ -123,13 +123,13 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     return hasCoverage[0];
   }
 
-  private byte[] transformInner(ClassLoader loader, String className, byte[] classFileBuffer) {
+  private byte[] transformInner(ClassLoader loader, String className, byte[] classFileBuffer, Class<?> classBeingRedefined) {
     if (isStopped()) {
       return null;
     }
 
     try {
-      return transform(loader, className, classFileBuffer);
+      return transform(loader, className, classFileBuffer, classBeingRedefined);
     } catch (ClassWriterImpl.FrameComputationClassNotFoundException e) {
       ErrorReporter.info("Error during class frame computation: " + className, e);
     } catch (Throwable e) {
