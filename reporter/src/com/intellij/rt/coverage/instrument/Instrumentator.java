@@ -57,7 +57,7 @@ public class Instrumentator {
     String className = new ClassReader(bytes).getClassName();
     // This loader is not user actually, just need some not null loader
     ClassLoader loader = ClassLoader.getSystemClassLoader();
-    return transformer.transform(loader, className, bytes);
+    return transformer.transform(loader, className, bytes, null);
   }
 
   private class InstrumentationVisitor extends DirectoryVisitor {

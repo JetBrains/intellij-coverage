@@ -19,10 +19,7 @@ package com.intellij.rt.coverage.instrumentation;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 import com.intellij.rt.coverage.util.ErrorReporter;
-import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
-import org.jetbrains.coverage.org.objectweb.asm.ClassVisitor;
-import org.jetbrains.coverage.org.objectweb.asm.ClassWriter;
-import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
+import org.jetbrains.coverage.org.objectweb.asm.*;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
@@ -54,14 +51,14 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
   public final byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classFileBuffer) {
     long s = System.nanoTime();
     try {
-      return transformInner(loader, className, classFileBuffer);
+      return transformInner(loader, className, classFileBuffer, classBeingRedefined);
     } finally {
       ourClassCount++;
       ourTime += System.nanoTime() - s;
     }
   }
 
-  public final byte[] transform(ClassLoader loader, String className, byte[] classFileBuffer) {
+  public final byte[] transform(ClassLoader loader, String className, byte[] classFileBuffer, Class<?> classBeingRedefined) {
     if (className == null) {
       return null;
     }
@@ -78,6 +75,8 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
       return null;
     }
 
+    if (classBeingRedefined != null && classAlreadyHasCoverage(classFileBuffer)) return null;
+
     if (shouldExclude(className)) return null;
 
     visitClassLoader(loader);
@@ -93,13 +92,53 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     return null;
   }
 
-  private byte[] transformInner(ClassLoader loader, String className, byte[] classFileBuffer) {
+  private boolean classAlreadyHasCoverage(byte[] classFileBuffer) {
+    final boolean[] hasCoverage = new boolean[]{false};
+
+    new ClassReader(classFileBuffer).accept(new ClassVisitor(Opcodes.API_VERSION) {
+      @Override
+      public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+        if ("__$hits$__".equals(name)) {
+          hasCoverage[0] = true;
+        }
+        return super.visitField(access, name, descriptor, signature, value);
+      }
+
+      @Override
+      public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+        MethodVisitor methodVisitor = super.visitMethod(access, name, descriptor, signature, exceptions);
+        return new MethodVisitor(Opcodes.API_VERSION, methodVisitor) {
+          @Override
+          public void visitLdcInsn(Object value) {
+            super.visitLdcInsn(value);
+            if (value instanceof ConstantDynamic) {
+              ConstantDynamic condy = (ConstantDynamic) value;
+              if ("com/intellij/rt/coverage/util/CondyUtils".equals(condy.getDescriptor())) {
+                hasCoverage[0] = true;
+              }
+            }
+          }
+
+          @Override
+          public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
+            super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+            if ("com/intellij/rt/coverage/instrumentation/CoverageRuntime".equals(owner)) {
+              hasCoverage[0] = true;
+            }
+          }
+        };
+      }
+    }, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
+    return hasCoverage[0];
+  }
+
+  private byte[] transformInner(ClassLoader loader, String className, byte[] classFileBuffer, Class<?> classBeingRedefined) {
     if (isStopped()) {
       return null;
     }
 
     try {
-      return transform(loader, className, classFileBuffer);
+      return transform(loader, className, classFileBuffer, classBeingRedefined);
     } catch (ClassWriterImpl.FrameComputationClassNotFoundException e) {
       ErrorReporter.info("Error during class frame computation: " + className, e);
     } catch (Throwable e) {
