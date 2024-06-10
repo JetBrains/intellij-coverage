@@ -35,12 +35,12 @@ enum class SimpleEnum {
 
 fun simpleF(v: SimpleEnum) =
     when (v) {                  // coverage: FULL
-        SimpleEnum.Single -> 42 // coverage: FULL // branches: 2/2
+        SimpleEnum.Single -> 42 // coverage: FULL
     }
 
 fun noneF(v: SimpleEnum) =
     when (v) {                  // coverage: NONE
-        SimpleEnum.Single -> 42 // coverage: NONE // branches: 0/2
+        SimpleEnum.Single -> 42 // coverage: NONE
     }
 
 fun main() {

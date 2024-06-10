@@ -59,7 +59,6 @@ public class KotlinWhenMappingExceptionFilter extends CoverageFilter {
     if (myState == 2 && label == myJumpLabel) {
       myContext.removeLastJump();
     }
-    myState = 0;
   }
 
   @Override
