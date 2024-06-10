@@ -16,6 +16,7 @@
 
 package com.intellij.rt.coverage.instrumentation.filters.branches;
 
+import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
@@ -53,7 +54,7 @@ public class NotNullAssertionsFilter extends CoverageFilter {
   @Override
   public void visitInsn(int opcode) {
     super.visitInsn(opcode);
-    if (myState == 1 && Opcodes.ICONST_0 <= opcode && opcode <= Opcodes.ICONST_5) {
+    if (myState == 1 && InstrumentationUtils.isIntConstLoading(opcode)) {
       myState++;
     } else {
       myState = 0;
@@ -63,7 +64,7 @@ public class NotNullAssertionsFilter extends CoverageFilter {
   @Override
   public void visitIntInsn(final int opcode, final int operand) {
     super.visitIntInsn(opcode, operand);
-    if (myState == 1 && (opcode == Opcodes.BIPUSH || opcode == Opcodes.SIPUSH)) {
+    if (myState == 1 && InstrumentationUtils.isIntConstLoading(opcode)) {
       myState++;
     } else {
       myState = 0;

@@ -68,6 +68,12 @@ public class InstrumentationUtils {
     return OptionsUtil.CONDY_ENABLED && getBytecodeVersion(cr) >= Opcodes.V11;
   }
 
+  public static boolean isIntConstLoading(int opcode) {
+    return Opcodes.ICONST_M1 <= opcode && opcode <= Opcodes.ICONST_5
+        || opcode == Opcodes.BIPUSH
+        || opcode == Opcodes.SIPUSH;
+  }
+
   public static void pushInt(MethodVisitor mv, int value) {
     if (value >= -1 && value <= 5) {
       mv.visitInsn(Opcodes.ICONST_0 + value);

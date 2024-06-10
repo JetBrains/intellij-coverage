@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage.instrumentation.filters.lines;
 
 import com.intellij.rt.coverage.data.LineData;
+import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.data.Key;
 import com.intellij.rt.coverage.instrumentation.filters.branches.KotlinDefaultArgsBranchFilter;
@@ -129,7 +130,7 @@ public class KotlinDefaultArgsLineFilter extends CoverageFilter {
   public void visitIntInsn(int opcode, int operand) {
     super.visitIntInsn(opcode, operand);
     if (myCurrentLine != myFirstLine) return;
-    if (myState == 1 && (opcode == Opcodes.BIPUSH || opcode == Opcodes.SIPUSH)) {
+    if (myState == 1 && InstrumentationUtils.isIntConstLoading(opcode)) {
       myState = 2;
       return;
     }

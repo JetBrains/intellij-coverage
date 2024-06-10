@@ -75,7 +75,7 @@ public class JavaStringSwitchFilter extends CoverageFilter {
     super.visitInsn(opcode);
     if (opcode == Opcodes.ICONST_M1) {
       myState = 1;
-    } else if (myState == 9 && Opcodes.ICONST_0 <= opcode && opcode <= Opcodes.ICONST_5) {
+    } else if (myState == 9 && InstrumentationUtils.isIntConstLoading(opcode)) {
       myState++;
     } else {
       myState = 0;
@@ -85,7 +85,7 @@ public class JavaStringSwitchFilter extends CoverageFilter {
   @Override
   public void visitIntInsn(int opcode, int operand) {
     super.visitIntInsn(opcode, operand);
-    if (myState == 9 && opcode == Opcodes.BIPUSH && operand >= 0) {
+    if (myState == 9 && InstrumentationUtils.isIntConstLoading(opcode) && operand >= 0) {
       myState++;
     } else {
       myState = 0;
