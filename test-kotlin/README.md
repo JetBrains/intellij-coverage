@@ -2,7 +2,7 @@
 
 ## Test sources
 Test sources are located in the `testData` package. Each test case is located in a 
-separate subpackage. Main class should be `test.kt` for Kotlin or `Test.java` for Java, then it can be detected automatically in the `CoverageTest` test.
+separate subpackage. Main class should be `test.kt` for Kotlin or `Test.java` for Java, then it can be detected automatically in the [CoverageTest.kt](src/com/intellij/rt/coverage/CoverageTest.kt) test.
 Most of the test cases could be configured in source files, but `custom` subpackage is used for special manual test.
 
 ## Test configuration
@@ -14,13 +14,15 @@ Test configuration is set with comments in source files. The supported settings 
 * `// extra args: -Dflag=true` - space-separated list of VM options
 * `// calculate unloaded: [true|false]` - a flag to include unloaded classes into a coverage report, false by default
 * `// markers: [file]` - relative path to a file with `coverage` markers
-* `// test: ...` - list of tests that are covering a line in test tracking mode, see `caseTests/TestTrackingTest.kt`
-* `// instructions & branches` - enable instruction and branch coverage counters testing, see `caseTests/InstructionsBranchesTest.kt`
+* `// test: ...` - list of tests that are covering a line in test tracking mode, see [TestTrackingTest.kt](src/com/intellij/rt/coverage/caseTests/TestTrackingTest.kt)
+* `// with branches` - enable exact branches count testing, see [BranchesTest.kt](src/com/intellij/rt/coverage/caseTests/BranchesTest.kt)
+  * `// branches: COVERED_BRANCHES/TOTAL_BRANCHES`
+* `// instructions & branches` - enable instruction and branch coverage counters testing, see [InstructionsBranchesTest.kt](src/com/intellij/rt/coverage/caseTests/InstructionsBranchesTest.kt)
   * `// stats: COVERED_INSTRUCTIONS/TOTAL_INSTRUCTIONS [COVERED_BRANCHES/TOTAL_BRANCHES]` - instructions and branch coverage
 
-See runner.kt for source file processing details.
+See [runner.kt](src/com/intellij/rt/coverage/runner.kt) for source file processing details.
 
 ## Generated tests
-Most of the test are marked up in source files, so these tests' invocations could be generated automatically with testGeneration.kt code. 
+Most of the tests are marked up in source files, so these tests' invocations could be generated automatically with [testGeneration.kt](src/com/intellij/rt/coverage/testGeneration.kt) code. 
 `custom` subpackage is ignored by test generation.
 

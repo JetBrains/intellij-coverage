@@ -7,3 +7,4 @@ build
 gradle.properties
 /tests/external.jmh.gradle
 /*.patch
+test-kotlin/bytecode.txt

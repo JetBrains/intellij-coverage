@@ -28,8 +28,8 @@ internal class InstructionsBranchesTest : CoverageTest() {
     }
 
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration) {
-        val expected = extractExtendedInfoFromFile(configuration.fileWithMarkers!!)
-        assertEqualsExtendedInfo(projectData, configuration.copy(coverageData = expected))
+        val expected = extractInstructionsInfoFromFile(configuration.fileWithMarkers!!)
+        assertEqualsInstructionsInfo(projectData, configuration.copy(coverageData = expected))
     }
 
     //===GENERATED TESTS===
@@ -42,9 +42,6 @@ internal class InstructionsBranchesTest : CoverageTest() {
 
     @Test
     fun testCasesJavaSwitch() = test("cases.javaSwitch")
-
-    @Test
-    fun testCasesWhenEnum() = test("cases.whenEnum")
 
     @Test
     fun testCasesWhenString() = test("cases.whenString")

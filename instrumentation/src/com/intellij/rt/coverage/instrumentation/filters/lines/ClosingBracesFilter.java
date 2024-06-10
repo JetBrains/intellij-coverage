@@ -67,6 +67,7 @@ public class ClosingBracesFilter extends CoverageFilter {
     }
     // ignore code like: POP; LOAD Unit.INSTANCE; ARETURN
     if (opcode == Opcodes.POP) return;
+    if (opcode == Opcodes.NOP) return;
     setHasInstructions();
   }
 

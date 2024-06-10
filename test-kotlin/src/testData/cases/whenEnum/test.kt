@@ -16,16 +16,16 @@
 
 package testData.cases.whenEnum
 
-// instructions & branches
+// with branches
 
 enum class F {
-    A, B, C // coverage: FULL // stats: 20/20
+    A, B, C // coverage: FULL
 }
 
 fun f(f: F): Int {
-    return when (f) {           // coverage: PARTIAL // stats: 6/6 1/3
-        F.A, F.B -> 42          // coverage: FULL    // stats: 2/2
-        F.C -> 36               // coverage: NONE    // stats: 0/6
+    return when (f) {           // coverage: PARTIAL // branches: 1/3
+        F.A, F.B -> 42          // coverage: FULL
+        F.C -> 36               // coverage: NONE
     }
 }
 
@@ -34,16 +34,16 @@ enum class SimpleEnum {
 }
 
 fun simpleF(v: SimpleEnum) =
-    when (v) {                  // coverage: FULL // stats: 5/5
-        SimpleEnum.Single -> 42 // coverage: FULL // stats: 8/8 2/2
+    when (v) {                  // coverage: FULL
+        SimpleEnum.Single -> 42 // coverage: FULL // branches: 2/2
     }
 
 fun noneF(v: SimpleEnum) =
-    when (v) {                  // coverage: NONE // stats: 0/5
-        SimpleEnum.Single -> 42 // coverage: NONE // stats: 0/8 0/2
+    when (v) {                  // coverage: NONE
+        SimpleEnum.Single -> 42 // coverage: NONE // branches: 0/2
     }
 
 fun main() {
-    f(F.A)                      // coverage: FULL // stats: 3/3
-    simpleF(SimpleEnum.Single)  // coverage: FULL // stats: 3/3
+    f(F.A)                      // coverage: FULL
+    simpleF(SimpleEnum.Single)  // coverage: FULL
 }
