@@ -28,8 +28,9 @@ public class EnumMethodsFilter implements MethodFilter {
     String desc = context.getMethodDesc();
     String signature = context.get(Key.METHOD_SIGNATURE);
     final String internalName = context.get(Key.CLASS_INTERNAL_NAME);
-    return name.equals("values") && desc.equals("()[L" + internalName + ";") ||
-        name.equals("valueOf") && desc.equals("(Ljava/lang/String;)L" + internalName + ";") ||
-        name.equals("<init>") && signature != null && signature.equals("()V");
+    return name.equals("values") && desc.equals("()[L" + internalName + ";")
+        || name.equals("valueOf") && desc.equals("(Ljava/lang/String;)L" + internalName + ";")
+        || name.equals("<init>") && signature != null && signature.equals("()V")
+        || name.equals("getEntries") && desc.equals("()Lkotlin/enums/EnumEntries;");
   }
 }
