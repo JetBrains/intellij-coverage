@@ -26,8 +26,7 @@ class BImplementation : A<Int> {
     override fun get() = 42
 }
 
-class BDelegation                // coverage: FULL
-(): A<Int> by BImplementation()  // coverage: FULL
+class BDelegation: A<Int> by BImplementation()  // coverage: FULL
 
 fun main() {
     BDelegation().get()

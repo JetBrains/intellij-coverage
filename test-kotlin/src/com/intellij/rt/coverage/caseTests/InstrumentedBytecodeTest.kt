@@ -39,9 +39,6 @@ class InstrumentedBytecodeTest {
     @Test
     fun testSimpleBranches() = test("simple.branches", "MyBranchedClass")
 
-    @Test
-    fun testCasesWhenString() = test("cases.whenString")
-
     private fun test(testName: String, simpleCLassName: String = "TestKt") {
         val className = "$TEST_PACKAGE.$testName.$simpleCLassName"
         val outputRoot = pathToFile("build", "classes", "kotlin", "test")

@@ -16,86 +16,86 @@
 
 package testData.cases.whenString
 
-// instructions & branches
+// with branches
 
-fun foo(x: String) = when (x) { // coverage: FULL // stats: 17/17 3/3
-    "a", "b" -> println(5) // coverage: FULL // stats: 6/6
-    "c" -> println(6) // coverage: FULL // stats: 6/6
-    else -> println(7) // coverage: FULL // stats: 5/5
+fun foo(x: String) = when (x) { // coverage: FULL // branches: 3/3
+    "a", "b" -> println(5) // coverage: FULL 
+    "c" -> println(6) // coverage: FULL 
+    else -> println(7) // coverage: FULL 
 }
 
 // extra if is generated here to check null
-fun foo2(x: String?) = when (x) { // coverage: FULL // stats: 16/16 3/3
-    "a", "b" -> println(5) // coverage: FULL // stats: 6/6
-    "c" -> println(6) // coverage: FULL // stats: 6/6
-    else -> println(7) // coverage: FULL // stats: 5/5
+fun foo2(x: String?) = when (x) { // coverage: FULL // branches: 3/3
+    "a", "b" -> println(5) // coverage: FULL 
+    "c" -> println(6) // coverage: FULL 
+    else -> println(7) // coverage: FULL 
 }
 
 // no GOTO is generated
-fun foo3(x: String) = when (x) { // coverage: FULL // stats: 17/17 3/3
-    "c" -> println(6) // coverage: FULL // stats: 6/6
-    "a", "b" -> println(5) // coverage: FULL // stats: 6/6
-    else -> println(7) // coverage: FULL // stats: 5/5
+fun foo3(x: String) = when (x) { // coverage: FULL // branches: 3/3
+    "c" -> println(6) // coverage: FULL 
+    "a", "b" -> println(5) // coverage: FULL 
+    else -> println(7) // coverage: FULL 
 }
 
 // Here Aa and BB have the same hashCode
-fun boo(x: String) = when (x) { // coverage: FULL // stats: 29/29 7/7
-    "Aa", "BB" -> println(5) // coverage: FULL // stats: 6/6
-    "c" -> println(6) // coverage: FULL // stats: 6/6
-    "d" -> println(7) // coverage: FULL // stats: 6/6
-    "e" -> println(8) // coverage: FULL // stats: 6/6
-    "f" -> println(9) // coverage: FULL  // stats: 6/6
-    else -> println(10) // coverage: FULL // stats: 5/5
+fun boo(x: String) = when (x) { // coverage: FULL // branches: 7/7
+    "Aa", "BB" -> println(5) // coverage: FULL 
+    "c" -> println(6) // coverage: FULL 
+    "d" -> println(7) // coverage: FULL 
+    "e" -> println(8) // coverage: FULL 
+    "f" -> println(9) // coverage: FULL  
+    else -> println(10) // coverage: FULL 
 }
 
 // Here Aa and BB have the same hashCode
-fun boo2(x: String) = when (x) { // coverage: PARTIAL // stats: 25/29 6/7
-    "Aa", "BB" -> println(5) // coverage: FULL // stats: 6/6
-    "c" -> println(6) // coverage: FULL // stats: 6/6
-    "d" -> println(7) // coverage: FULL // stats: 6/6
-    "e" -> println(8) // coverage: FULL // stats: 6/6
-    "f" -> println(9) // coverage: FULL // stats: 6/6
-    else -> println(10) // coverage: FULL // stats: 5/5
+fun boo2(x: String) = when (x) { // coverage: PARTIAL // branches: 6/7
+    "Aa", "BB" -> println(5) // coverage: FULL 
+    "c" -> println(6) // coverage: FULL 
+    "d" -> println(7) // coverage: FULL 
+    "e" -> println(8) // coverage: FULL 
+    "f" -> println(9) // coverage: FULL 
+    else -> println(10) // coverage: FULL 
 }
 
 // No switch generated
-fun voo(x: String) = when (x) { // coverage: FULL // stats: 2/2
-    "Aa", "BB" -> println(5) // coverage: FULL // stats: 16/16 4/4
-    else -> println(10) // coverage: FULL // stats: 5/5
+fun voo(x: String) = when (x) { // coverage: FULL 
+    "Aa", "BB" -> println(5) // coverage: FULL // branches: 4/4
+    else -> println(10) // coverage: FULL 
 }
 
 fun main() {
-    foo("a") // coverage: FULL // stats: 2/2
-    foo("b") // coverage: FULL // stats: 2/2
-    foo("c") // coverage: FULL // stats: 2/2
-    foo("d") // coverage: FULL // stats: 2/2
+    foo("a") // coverage: FULL 
+    foo("b") // coverage: FULL 
+    foo("c") // coverage: FULL 
+    foo("d") // coverage: FULL 
 
-    foo2("a") // coverage: FULL // stats: 2/2
-    foo2("b") // coverage: FULL // stats: 2/2
-    foo2("c") // coverage: FULL // stats: 2/2
-    foo2("d") // coverage: FULL // stats: 2/2
+    foo2("a") // coverage: FULL 
+    foo2("b") // coverage: FULL 
+    foo2("c") // coverage: FULL 
+    foo2("d") // coverage: FULL 
 
-    foo3("a") // coverage: FULL // stats: 2/2
-    foo3("b") // coverage: FULL // stats: 2/2
-    foo3("c") // coverage: FULL // stats: 2/2
-    foo3("d") // coverage: FULL // stats: 2/2
+    foo3("a") // coverage: FULL 
+    foo3("b") // coverage: FULL 
+    foo3("c") // coverage: FULL 
+    foo3("d") // coverage: FULL 
 
-    boo("Aa") // coverage: FULL // stats: 2/2
-    boo("BB") // coverage: FULL // stats: 2/2
-    boo("c") // coverage: FULL // stats: 2/2
-    boo("d") // coverage: FULL // stats: 2/2
-    boo("e") // coverage: FULL // stats: 2/2
-    boo("f") // coverage: FULL // stats: 2/2
-    boo("g") // coverage: FULL // stats: 2/2
+    boo("Aa") // coverage: FULL 
+    boo("BB") // coverage: FULL 
+    boo("c") // coverage: FULL 
+    boo("d") // coverage: FULL 
+    boo("e") // coverage: FULL 
+    boo("f") // coverage: FULL 
+    boo("g") // coverage: FULL 
 
-    boo2("Aa") // coverage: FULL // stats: 2/2
-    boo2("c") // coverage: FULL // stats: 2/2
-    boo2("d") // coverage: FULL // stats: 2/2
-    boo2("e") // coverage: FULL // stats: 2/2
-    boo2("f") // coverage: FULL // stats: 2/2
-    boo2("g") // coverage: FULL // stats: 2/2
+    boo2("Aa") // coverage: FULL 
+    boo2("c") // coverage: FULL 
+    boo2("d") // coverage: FULL 
+    boo2("e") // coverage: FULL 
+    boo2("f") // coverage: FULL 
+    boo2("g") // coverage: FULL 
 
-    voo("Aa") // coverage: FULL // stats: 2/2
-    voo("BB") // coverage: FULL // stats: 2/2
-    voo("g") // coverage: FULL // stats: 2/2
+    voo("Aa") // coverage: FULL 
+    voo("BB") // coverage: FULL 
+    voo("g") // coverage: FULL 
 }

@@ -29,8 +29,7 @@ class BaseImpl(private val x: Int) : Base {
     }
 }
 
-class Derived             // coverage: FULL
-    (b: Base) : Base by b // coverage: FULL
+class Derived(b: Base) : Base by b // coverage: FULL
 
 fun main() {
     val b = BaseImpl(10)

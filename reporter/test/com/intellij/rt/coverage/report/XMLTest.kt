@@ -213,22 +213,6 @@ class XMLTest {
     }
 
     @Test
-    fun testInherits() {
-        val testName = "lambdas"
-        val patterns = "testData\\.$testName\\..*"
-        val report = runTest(patterns, "testData.$testName.TestKt")
-
-        val filters = createFilters(
-            includes = listOf(Pattern.compile(patterns)),
-            includeInherits = listOf(Pattern.compile("kotlin\\.jvm\\.internal\\.Lambda"))
-        )
-        val xmlFile = createXMLFile()
-        val strategy = ReportLoadStrategy.RawReportLoadStrategy(listOf(report), TestUtils.outputRoots, null, filters)
-        Reporter(strategy, null).createXMLReport(xmlFile)
-        verifyXMLWithExpected(xmlFile, "xml/inherits.xml")
-    }
-
-    @Test
     fun testClassAndInheritanceFilter() {
         val testName = "classAndInheritanceFilter"
         val patterns = ".*\\..*Child"

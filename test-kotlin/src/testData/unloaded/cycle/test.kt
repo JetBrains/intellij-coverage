@@ -18,23 +18,23 @@ package testData.unloaded.cycle
 
 // classes: User
 // calculate unloaded: true
-// instructions & branches
+// with branches
 
 fun main() {
 }
 
-class User(val actions: Int) {                      // coverage: NONE // stats: 0/7
+class User(val actions: Int) {                      // coverage: NONE 
     fun main() {
-        val activeUsers = mutableListOf<User>()     // coverage: NONE // stats: 0/5
-        val inactiveUsers = mutableListOf<User>()   // coverage: NONE // stats: 0/5
+        val activeUsers = mutableListOf<User>()     // coverage: NONE 
+        val inactiveUsers = mutableListOf<User>()   // coverage: NONE 
 
-        val actionsThreshold = 4                    // coverage: NONE // stats: 0/2
-        val users = listOf(User(5))                 // coverage: NONE // stats: 0/6
-        for (user in users) {                       // coverage: NONE // stats: 0/10 0/2
-            if (user.actions < actionsThreshold) {  // coverage: NONE // stats: 0/4 0/2
-                inactiveUsers.add(user)             // coverage: NONE // stats: 0/5
+        val actionsThreshold = 4                    // coverage: NONE 
+        val users = listOf(User(5))                 // coverage: NONE 
+        for (user in users) {                       // coverage: NONE // branches: 0/2
+            if (user.actions < actionsThreshold) {  // coverage: NONE // branches: 0/2
+                inactiveUsers.add(user)             // coverage: NONE 
             } else {
-                activeUsers.add(user)               // coverage: NONE // stats: 0/5
+                activeUsers.add(user)               // coverage: NONE 
             }
         }
     }

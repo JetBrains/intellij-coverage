@@ -22,9 +22,7 @@ interface I {
     fun m(x: Int, y: Int) = Unit
 }
 
-// ignored only in Kotlin <= 1.4
-class C // coverage: FULL
-(): I
+class C: I // coverage: FULL
 
 fun main() {
     C().m(3, 4)

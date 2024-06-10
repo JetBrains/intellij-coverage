@@ -33,5 +33,11 @@ internal class BranchesTest : CoverageTest() {
     @Test
     fun testCasesWhenEnum() = test("cases.whenEnum")
 
+    @Test
+    fun testCasesWhenString() = test("cases.whenString")
+
+    @Test
+    fun testUnloadedCycle() = test("unloaded.cycle")
+
     //===GENERATED TESTS===
 }

@@ -31,9 +31,8 @@ interface Foo {
         println() // coverage: NONE
     }
 }
-// this line is invisible only in Kotlin <= 1.4 for coverage as default member is covered in Foo
-class Bar         // coverage: FULL
-() : Foo {
+
+class Bar : Foo {    // coverage: FULL
     override fun foo1() {
         println() // coverage: NONE
     }

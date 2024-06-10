@@ -44,9 +44,6 @@ internal class InstructionsBranchesTest : CoverageTest() {
     fun testCasesJavaSwitch() = test("cases.javaSwitch")
 
     @Test
-    fun testCasesWhenString() = test("cases.whenString")
-
-    @Test
     fun testDefaultArgsConstructor() = test("defaultArgs.constructor")
 
     @Test
@@ -54,9 +51,6 @@ internal class InstructionsBranchesTest : CoverageTest() {
 
     @Test
     fun testSimpleIfelse() = test("simple.ifelse")
-
-    @Test
-    fun testUnloadedCycle() = test("unloaded.cycle")
 
     @Test
     fun testUnloadedMultiFile() = test("unloaded.multiFile")

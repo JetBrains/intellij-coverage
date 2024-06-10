@@ -17,17 +17,14 @@
 package testData.sealedClassConstructor
 
 sealed class SealedClass                      // coverage: FULL
-()
 
-sealed class SealedClassWithArgs              // coverage: FULL
-(private val x: Int)                          // coverage: FULL
+sealed class SealedClassWithArgs(private val x: Int)                          // coverage: FULL
 
 data class Derived(private val x: Int) : SealedClass()           // coverage: FULL
 
 data class Derived2(private val x: Int) : SealedClassWithArgs(x) // coverage: FULL
 
-class ClassWithPrivateDefaultConstructor                         // coverage: FULL
-private constructor(val x: Int) {                                // coverage: FULL
+class ClassWithPrivateDefaultConstructor private constructor(val x: Int) { // coverage: FULL
     constructor(x: String) : this(x.toInt())                     // coverage: FULL
 }
 
