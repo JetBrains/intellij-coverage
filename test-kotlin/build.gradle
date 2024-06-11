@@ -44,8 +44,6 @@ dependencies {
   testImplementation(project(":reporter"))
   testImplementation(project(":reporter:offline"))
 
-  testImplementation(fileTree(project(":benchmarks").file("lib")))
-
   testImplementation('junit:junit:4.13.2')
 
   testImplementation("net.bytebuddy:byte-buddy:1.11.12")
