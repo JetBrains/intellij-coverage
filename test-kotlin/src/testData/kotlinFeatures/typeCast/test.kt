@@ -44,13 +44,13 @@ fun main() {
     assertIs<B>(A.getInstance("B")) // coverage: FULL
     f("Hi") // coverage: FULL
 
-    val result: String? = if (Random(2).nextBoolean()) "hello" else null // coverage: PARTIAL
-    if (result == null) { // coverage: PARTIAL
+    val result: String? = if (Random(2).nextBoolean()) "hello" else null // coverage: PARTIAL // branches: 1/2
+    if (result == null) { // coverage: PARTIAL // branches: 1/2
         throw NullPointerException("") // coverage: NONE
     }
 
-    val result2: String? = if (Random(2).nextBoolean()) "hello" else null // coverage: PARTIAL
-    if (result2 == null) { // coverage: PARTIAL
+    val result2: String? = if (Random(2).nextBoolean()) "hello" else null // coverage: PARTIAL // branches: 1/2
+    if (result2 == null) { // coverage: PARTIAL // branches: 1/2
         throw NullPointerException("null cannot be cast to non-null type kotlin.String") // coverage: NONE
     }
 }

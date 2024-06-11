@@ -54,7 +54,7 @@ value class MyValueClass4(val data: String) { // coverage: NONE
 
 fun main() {
     val v = MyValueClass("ABC") // coverage: FULL
-    if (v.data != "ABC") // coverage: PARTIAL
+    if (v.data != "ABC") // coverage: PARTIAL // branches: 1/2
         error("not abc") // coverage: NONE
     v.foo() // coverage: FULL
     val v2 = MyValueClass2("DEF") // coverage: FULL

@@ -18,7 +18,6 @@ package testData.unloaded.cycle
 
 // classes: User
 // calculate unloaded: true
-// with branches
 
 fun main() {
 }

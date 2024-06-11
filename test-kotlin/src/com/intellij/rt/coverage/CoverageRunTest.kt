@@ -41,6 +41,7 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
         fun data() = if (System.getProperty("coverage.run.fast.tests") != null) {
             arrayOf(
                 arrayOf(Coverage.BRANCH_FIELD, null),
+                arrayOf(Coverage.LINE_CONDY, null),
             )
         } else {
             allTestTrackingModes()
@@ -353,15 +354,18 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
 
     @Test
     fun testThreadSafeStructure() = test(
-        "custom.threadSafe.structure",
-        configuration = TestConfiguration((1..THREAD_SAFE_STRUCTURE_CLASSES).associateWith { "FULL" },
-            (0 until THREAD_SAFE_STRUCTURE_CLASSES).map { "Class$it" })
+        "custom.threadSafe.structure", configuration = TestConfiguration(
+            coverageData = (1..THREAD_SAFE_STRUCTURE_CLASSES).associateWith { "FULL" },
+            classes = (0 until THREAD_SAFE_STRUCTURE_CLASSES).map { "Class$it" },
+        )
     )
 
     @Test
     fun test_IDEA_57695() = test(
-        "custom.IDEA_57695",
-        configuration = TestConfiguration(hashMapOf(1 to "PARTIAL", 2 to "FULL"), listOf("TestClass"))
+        "custom.IDEA_57695", configuration = TestConfiguration(
+            coverageData = hashMapOf(1 to "PARTIAL", 2 to "FULL"),
+            classes = listOf("TestClass"),
+        )
     )
 
     @Test

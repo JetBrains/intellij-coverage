@@ -25,10 +25,10 @@ public class Test {                          // coverage: FULL
   }
 
   void doTest(int a, int b, int c) {
-    if (a < b) {                             // coverage: FULL
+    if (a < b) {                             // coverage: FULL // branches: 2/2
       System.out.println("a < b");           // coverage: FULL
     }
-    else if (b < c) {                        // coverage: FULL
+    else if (b < c) {                        // coverage: FULL // branches: 2/2
       System.out.println("a >= b && b < c"); // coverage: FULL
     }
   }

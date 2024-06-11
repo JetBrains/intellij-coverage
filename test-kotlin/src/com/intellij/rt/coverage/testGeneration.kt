@@ -16,7 +16,6 @@
 
 package com.intellij.rt.coverage
 
-import com.intellij.rt.coverage.caseTests.BranchesTest
 import com.intellij.rt.coverage.caseTests.InstructionsBranchesTest
 import java.io.File
 import kotlin.reflect.KClass
@@ -107,9 +106,6 @@ fun main() {
     generateTests(InstructionsBranchesTest::class) { test ->
         IncludeInstructionsMatcher().also { processFile(test.file, it) }.result
     }
-    generateTests(BranchesTest::class) { test ->
-        IncludeBranchesMatcher().also { processFile(test.file, it) }.result
-    }
 }
 
 private fun generateTests(testClass: KClass<*>, ignoreCondition: ((TestFile) -> Boolean)? = null) {
@@ -127,15 +123,4 @@ private class IgnoreTestMatcher : SingleGroupMatcher<String>(Regex("// ignore: (
         ignore = "    @Ignore(\"$match\")\n"
     }
 }
-
-private open class DirectiveMatcher(directive: String) : Matcher<Boolean>(Regex(directive)) {
-    private var matchFound = false
-    override val result get() = matchFound
-    override fun onMatchFound(line: Int, match: MatchResult) {
-        matchFound = true
-    }
-}
-
-private class IncludeInstructionsMatcher : DirectiveMatcher("// instructions & branches")
-private class IncludeBranchesMatcher : DirectiveMatcher("// with branches")
 

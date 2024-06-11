@@ -17,21 +17,21 @@
 package testData.inline.reified
 
 inline fun <reified T> createArray(size: Int): Any = when (T::class) { // coverage: FULL
-    Int::class ->                                                      // coverage: FULL
+    Int::class ->                                                      // coverage: FULL // branches: 2/2
         IntArray(size)                                                 // coverage: FULL
-    Long::class ->                                                     // coverage: PARTIAL
+    Long::class ->                                                     // coverage: PARTIAL // branches: 1/2
         LongArray(size)                                                // coverage: NONE
     else ->
-        Array<T?>(size) { null }                                       // coverage: FULL
+        Array<T?>(size) { null }                                       // coverage: FULL // branches: 2/2
 }
 
 inline fun <reified T> get(key: String): String = when (T::class) { // coverage: FULL
-    String::class -> "String"                                       // coverage: PARTIAL
+    String::class -> "String"                                       // coverage: PARTIAL // branches: 1/2
     else -> "no"                                                    // coverage: NONE
 }
 
 fun main() {
     val a = createArray<Int>(10)                                       // coverage: FULL
     val b = createArray<Any>(30)                                       // coverage: FULL
-    assert(get<String>("String") == "String")                       // coverage: PARTIAL
+    assert(get<String>("String") == "String")                       // coverage: PARTIAL // branches: 1/4
 }

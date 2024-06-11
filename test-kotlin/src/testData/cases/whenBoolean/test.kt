@@ -20,29 +20,29 @@ import kotlin.random.Random
 
 fun test(value: Boolean) {
     return when (value) {                            // coverage: FULL
-        true -> Unit                                 // coverage: FULL
+        true -> Unit                                 // coverage: FULL // branches: 2/2
         false -> Unit                                // coverage: FULL
     }
 }
 
 fun testTrue(value: Boolean) {
     return when (value) {                            // coverage: FULL
-        true -> Unit                                 // coverage: PARTIAL
+        true -> Unit                                 // coverage: PARTIAL // branches: 1/2
         false -> Unit                                // coverage: FULL
     }
 }
 
 fun testFalse(value: Boolean) {
     return when (value) {                            // coverage: FULL
-        true -> Unit                                 // coverage: PARTIAL
+        true -> Unit                                 // coverage: PARTIAL // branches: 1/2
         false -> Unit                                // coverage: NONE
     }
 }
 
 fun testNestedWhen(value: Boolean) {
     return when (value) {                            // coverage: FULL
-        true ->                                      // coverage: FULL
-            if (Random.nextBoolean()) Unit else Unit // coverage: PARTIAL
+        true ->                                      // coverage: FULL // branches: 2/2
+            if (Random.nextBoolean()) Unit else Unit // coverage: PARTIAL // branches: 1/2
         false -> Unit                                // coverage: FULL
     }
 }

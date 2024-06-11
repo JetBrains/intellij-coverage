@@ -19,49 +19,49 @@ package testData.cases.ifelse
 // instructions & branches
 
 fun test(x: Boolean, y: Boolean, z: Boolean) {
-    if (x) {                            // coverage: PARTIAL // stats: 2/2 1/2
+    if (x) {                            // coverage: PARTIAL // branches: 1/2 // stats: 2/2
         println("X is true")            // coverage: FULL    // stats: 5/5
     } else {
         println("X is false")           // coverage: NONE    // stats: 0/4
     }
-    if (y) {                            // coverage: PARTIAL // stats: 2/2 1/2
+    if (y) {                            // coverage: PARTIAL // branches: 1/2 // stats: 2/2
         println("Y is true")            // coverage: NONE    // stats: 0/4
     }
-    if (z) {                            // coverage: PARTIAL // stats: 2/2 1/2
+    if (z) {                            // coverage: PARTIAL // branches: 1/2 // stats: 2/2
         println("Y is true")            // coverage: FULL    // stats: 4/4
         return
     }
 }
 
 fun test2(x: Boolean, y: Boolean) {
-    if (x) {                            // coverage: FULL    // stats: 2/2 2/2
+    if (x) {                            // coverage: FULL // branches: 2/2 // stats: 2/2
         println("X is true")            // coverage: FULL    // stats: 5/5
     } else {
         println("X is false")           // coverage: FULL    // stats: 4/4
     }
-    if (y) {                            // coverage: PARTIAL // stats: 2/2 1/2
+    if (y) {                            // coverage: PARTIAL // branches: 1/2 // stats: 2/2
         println("Y is true")            // coverage: FULL    // stats: 4/4
     }
 }
 
 
 fun test3(b: Boolean) {
-    if (!b) {                           // coverage: PARTIAL // stats: 2/2 1/2
-        while (b) {                     // coverage: PARTIAL // stats: 2/2 1/2
+    if (!b) {                           // coverage: PARTIAL // branches: 1/2 // stats: 2/2
+        while (b) {                     // coverage: PARTIAL // branches: 1/2 // stats: 2/2
             println("")                 // coverage: NONE    // stats: 0/5
         }
     }
 }
 
-fun foo(x: Boolean): Int? = if (x) 3 else null  // coverage: FULL    // stats: 6/6 2/2
-fun foo1(x: Boolean): Int? = if (x) 3 else null // coverage: PARTIAL // stats: 5/6 1/2
-fun foo2(x: Boolean): Int? = if (x) 3 else null // coverage: PARTIAL // stats: 3/6 1/2
+fun foo(x: Boolean): Int? = if (x) 3 else null  // coverage: FULL // branches: 2/2 // stats: 6/6
+fun foo1(x: Boolean): Int? = if (x) 3 else null // coverage: PARTIAL // branches: 1/2 // stats: 5/6
+fun foo2(x: Boolean): Int? = if (x) 3 else null // coverage: PARTIAL // branches: 1/2 // stats: 3/6
 
 fun test4() {
-    foo(true) ?: foo(false)  // coverage: PARTIAL // stats: 5/8 1/2
-    foo(false) ?: foo(true)  // coverage: PARTIAL // stats: 7/8 1/2
-    foo(false) ?: foo(false) // coverage: PARTIAL // stats: 7/8 1/2
-    foo(true) ?: foo(true)   // coverage: PARTIAL // stats: 5/8 1/2
+    foo(true) ?: foo(false)  // coverage: PARTIAL // branches: 1/2 // stats: 5/8
+    foo(false) ?: foo(true)  // coverage: PARTIAL // branches: 1/2 // stats: 7/8
+    foo(false) ?: foo(false) // coverage: PARTIAL // branches: 1/2 // stats: 7/8
+    foo(true) ?: foo(true)   // coverage: PARTIAL // branches: 1/2 // stats: 5/8
     foo1(true)               // coverage: FULL    // stats: 3/3
     foo2(false)              // coverage: FULL    // stats: 3/3
 }

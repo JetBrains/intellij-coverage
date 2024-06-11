@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2022 JetBrains s.r.o.
+ * Copyright 2000-2024 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import kotlin.math.absoluteValue
 
 fun main() {
     val x = -Thread.currentThread().id.toInt().absoluteValue // coverage: FULL
-    when (x) {                                  // coverage: PARTIAL
+    when (x) {                                  // coverage: PARTIAL // branches: 0/3
         2147483645 -> println("Very low value") // coverage: NONE
         2147483646 -> println("Low value")      // coverage: NONE
         2147483647 -> println("Cool!")          // coverage: NONE

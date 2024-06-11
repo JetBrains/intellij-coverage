@@ -30,7 +30,7 @@ class MyService {                       // coverage: FULL
         email.send()                    // coverage: FULL
     }
 
-    class SimpleEmail {                 // coverage: PARTIAL
+    class SimpleEmail {                 // coverage: PARTIAL // branches: 1/2
         fun send() {
             println("The email is sent.") // coverage: NONE this method is mocked
         }

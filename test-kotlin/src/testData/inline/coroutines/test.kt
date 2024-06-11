@@ -23,7 +23,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.yield
 
 suspend fun foo1(flag: Boolean) {
-    if (flag) {                                          // coverage: FULL
+    if (flag) {                                          // coverage: FULL // branches: 2/2
         foo1(false)                                      // coverage: FULL
     } else {
         println(foo {                                    // coverage: FULL

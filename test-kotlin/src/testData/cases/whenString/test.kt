@@ -16,8 +16,6 @@
 
 package testData.cases.whenString
 
-// with branches
-
 fun foo(x: String) = when (x) { // coverage: FULL // branches: 3/3
     "a", "b" -> println(5) // coverage: FULL 
     "c" -> println(6) // coverage: FULL 

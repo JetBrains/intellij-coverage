@@ -28,8 +28,7 @@ internal class InstructionsBranchesTest : CoverageTest() {
     }
 
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration) {
-        val expected = extractInstructionsInfoFromFile(configuration.fileWithMarkers!!)
-        assertEqualsInstructionsInfo(projectData, configuration.copy(coverageData = expected))
+        assertEqualsFiles(configuration.fileWithMarkers!!, CollectedData.InstructionResults, projectData, configuration, coverage)
     }
 
     //===GENERATED TESTS===

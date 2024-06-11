@@ -25,12 +25,12 @@ interface GraderI {
 class Grader : GraderI { // coverage: FULL
     override fun determineLetterGrade(numberGrade: Int): Char {
         return when { // coverage: FULL
-            numberGrade < 0 ->  // coverage: PARTIAL
+            numberGrade < 0 ->  // coverage: PARTIAL // branches: 1/2
                 throw IllegalArgumentException("Number Grade cannot be <0")  // coverage: NONE
-            numberGrade < 60 -> 'F' // coverage: FULL
-            numberGrade < 70 -> 'D' // coverage: FULL
-            numberGrade < 80 -> 'C' // coverage: FULL
-            numberGrade < 90 -> 'B' // coverage: FULL
+            numberGrade < 60 -> 'F' // coverage: FULL // branches: 2/2
+            numberGrade < 70 -> 'D' // coverage: FULL // branches: 2/2
+            numberGrade < 80 -> 'C' // coverage: FULL // branches: 2/2
+            numberGrade < 90 -> 'B' // coverage: FULL // branches: 2/2
             else -> 'A'  // coverage: FULL
         }
     }
@@ -39,11 +39,11 @@ class Grader : GraderI { // coverage: FULL
 class Grader2 : GraderI { // coverage: FULL
     override fun determineLetterGrade(numberGrade: Int): Char {
         return when { // coverage: FULL
-            numberGrade < 0 -> throw IllegalArgumentException("Number Grade cannot be <0")  // coverage: PARTIAL
-            numberGrade < 60 -> 'F' // coverage: FULL
-            numberGrade < 70 -> 'D' // coverage: FULL
-            numberGrade < 80 -> 'C' // coverage: FULL
-            numberGrade < 90 -> 'B' // coverage: FULL
+            numberGrade < 0 -> throw IllegalArgumentException("Number Grade cannot be <0")  // coverage: PARTIAL // branches: 1/2
+            numberGrade < 60 -> 'F' // coverage: FULL // branches: 2/2
+            numberGrade < 70 -> 'D' // coverage: FULL // branches: 2/2
+            numberGrade < 80 -> 'C' // coverage: FULL // branches: 2/2
+            numberGrade < 90 -> 'B' // coverage: FULL // branches: 2/2
             else -> 'A'  // coverage: FULL
         }
     }

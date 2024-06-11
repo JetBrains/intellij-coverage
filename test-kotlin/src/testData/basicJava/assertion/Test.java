@@ -22,7 +22,7 @@ package testData.basicJava.assertion;
 public class Test { // coverage: FULL // stats: 6/6
 
   static void doAssert(boolean x) {
-    assert x; // coverage: FULL // stats: 8/8 2/2
+    assert x; // coverage: FULL // branches: 2/2 // stats: 8/8
   }
 
   public static void main(String[] args) {

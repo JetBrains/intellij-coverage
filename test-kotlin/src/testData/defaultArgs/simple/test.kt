@@ -39,7 +39,7 @@ private fun functionWithDefaultArguments(
 private fun functionWithDefaultArgumentsWithIf(
     x: Int = 2,                                 // coverage: FULL , generated if is ignored
     y: Int = 42,                                // coverage: FULL
-    z: Int = if (Random.nextBoolean()) 3 else 4 // coverage: PARTIAL
+    z: Int = if (Random.nextBoolean()) 3 else 4 // coverage: PARTIAL // branches: 1/2
 ): Int {
     return x + y                                // coverage: FULL
 }

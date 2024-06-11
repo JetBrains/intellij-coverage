@@ -34,13 +34,13 @@ internal class TestFile(val testName: String, val file: File, val mainClass: Str
  * @see [extractTestConfiguration]
  */
 internal data class TestConfiguration(
-    val coverageData: Map<Int, String> = emptyMap(),
     val classes: List<String> = emptyList(),
     val patterns: String? = null,
     val extraArgs: MutableList<String> = mutableListOf(),
     val calculateUnloaded: Boolean = false,
     val expectedClasses: List<String>? = null,
     val fileWithMarkers: File? = null,
+    val coverageData: Map<Int, String>? = null,
 )
 
 internal const val LOG_NAME = ErrorReporter.ERROR_FILE

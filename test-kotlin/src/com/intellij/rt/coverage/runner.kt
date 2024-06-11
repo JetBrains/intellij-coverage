@@ -45,6 +45,106 @@ internal enum class TestTracking {
     ARRAY, CLASS_DATA
 }
 
+internal sealed class CollectedData {
+    abstract val prefix: String
+    abstract fun collectActualData(project: ProjectData, configuration: TestConfiguration, ): Map<Int, String>
+    abstract fun provideMatcher(): Matcher<Map<Int, String>>
+
+    open fun collectExpectedData(configuration: TestConfiguration, coverage: Coverage): Map<Int, String> {
+        val fileWithMarkers = configuration.fileWithMarkers!!
+        return provideMatcher().also { processFile(fileWithMarkers, it) }.result
+    }
+
+    internal data object CoverageResults : CollectedData() {
+        override val prefix: String get() = "// coverage: "
+        override fun collectActualData(
+            project: ProjectData,
+            configuration: TestConfiguration,
+        ): Map<Int, String> {
+            return coverageLines(project, configuration.classes)
+                .associate { it.lineNumber to it.status.statusToString() }
+        }
+
+        override fun provideMatcher(): Matcher<Map<Int, String>> = CoverageMatcher()
+        override fun collectExpectedData(configuration: TestConfiguration, coverage: Coverage): Map<Int, String> {
+            val result = configuration.coverageData ?: super.collectExpectedData(configuration, coverage)
+            return  if (coverage.isBranchCoverage()) result else result.remapPartialToFull()
+        }
+
+        private fun Int.statusToString() = when (this) {
+            0 -> "NONE"
+            1 -> "PARTIAL"
+            else -> "FULL"
+        }
+
+        private fun Map<Int, String>.remapPartialToFull() = mapValues { if (it.value == "PARTIAL") "FULL" else it.value }
+    }
+
+    internal data object BranchResults : CollectedData() {
+        override val prefix: String get() = "// branches: "
+        override fun collectActualData(project: ProjectData, configuration: TestConfiguration): Map<Int, String> {
+            return coverageLines(project, configuration.classes)
+                .filter { it.branchData != null && it.branchData.totalBranches > 0 }
+                .associate { lineData ->
+                    val branches = lineData.branchData!!
+                    lineData.lineNumber to "${branches.coveredBranches}/${branches.totalBranches}"
+                }
+        }
+
+        override fun collectExpectedData(configuration: TestConfiguration, coverage: Coverage): Map<Int, String> {
+            if (!coverage.isBranchCoverage()) return emptyMap()
+            return super.collectExpectedData(configuration, coverage)
+        }
+
+        override fun provideMatcher(): Matcher<Map<Int, String>> = BranchesInfoMatcher()
+    }
+
+    protected fun coverageLines(project: ProjectData, classNames: List<String>): List<LineData> {
+        val allData = ClassData("")
+        getClasses(classNames, project).forEach { allData.merge(it) }
+        return allData.getLinesData()
+    }
+
+    internal data object InstructionResults : CollectedData() {
+        override val prefix: String
+            get() = "// stats: "
+
+        override fun collectActualData(project: ProjectData, configuration: TestConfiguration): Map<Int, String> {
+            val classNames = configuration.classes
+            val instructions = collectInstructions(project, classNames)
+            return coverageLines(project, classNames)
+                .associate { line ->
+                    val instruction = instructions[line.lineNumber]!!.getInstructionsData(line)
+                    line.lineNumber to "${instruction.coveredBranches}/${instruction.totalBranches}"
+                }
+        }
+
+        override fun provideMatcher(): Matcher<Map<Int, String>> = InstructionsInfoMatcher()
+
+        private fun collectInstructions(project: ProjectData, classNames: List<String>): Map<Int, LineInstructions> {
+            val instructions = hashMapOf<Int, LineInstructions>()
+            getClasses(classNames, project).forEach { classData ->
+                val classInstructions = project.instructions[classData.name]!!
+                classData.lines.filterIsInstance<LineData>().forEach {
+                    instructions.getOrPut(it.lineNumber) { LineInstructions() }
+                        .merge(classInstructions.getlines()[it.lineNumber])
+                }
+            }
+            return instructions
+        }
+    }
+
+    companion object {
+        private val ONLY_COVERAGE = listOf(CoverageResults)
+        private val WITH_BRANCHES = listOf(CoverageResults, BranchResults)
+        fun expectedData(configuration: TestConfiguration, coverage: Coverage): List<CollectedData> {
+            if (configuration.fileWithMarkers == null) return ONLY_COVERAGE
+            val result = if (coverage.isBranchCoverage()) WITH_BRANCHES else ONLY_COVERAGE
+            return result
+        }
+    }
+}
+
 /**
  * Creates temporary file in a separate directory
  */
@@ -57,21 +157,29 @@ private val classpath = System.getProperty("java.class.path").split(File.pathSep
     .filter { !it.contains("intellij-coverage") || it.contains("test-kotlin") || it.contains("benchmark") }
     .joinToString(File.pathSeparator)
 
-internal fun runWithCoverage(coverageDataFile: File, testName: String, coverage: Coverage, calcUnloaded: Boolean = false, testTracking: TestTracking? = null,
-                    patterns: String = "$TEST_PACKAGE.*", extraArgs: MutableList<String> = mutableListOf(),
-                    mainClass: String = getTestFile(testName).mainClass): ProjectData {
+internal fun runWithCoverage(
+    coverageDataFile: File,
+    testName: String,
+    coverage: Coverage,
+    calcUnloaded: Boolean = false,
+    testTracking: TestTracking? = null,
+    patterns: String = "$TEST_PACKAGE.*",
+    extraArgs: MutableList<String> = mutableListOf(),
+    mainClass: String = getTestFile(testName).mainClass
+): ProjectData {
     when (coverage) {
         Coverage.LINE_FIELD, Coverage.BRANCH_FIELD -> extraArgs.add("-Dcoverage.condy.enable=false")
         Coverage.LINE, Coverage.BRANCH -> extraArgs.add("-Didea.new.tracing.coverage=false")
-
         else -> {}
     }
     if (testTracking == TestTracking.CLASS_DATA) {
         extraArgs.add("-Didea.new.test.tracking.coverage=false")
     }
-    return CoverageRunner.runCoverage(classpath, coverageDataFile, patterns, mainClass,
-            coverage.isBranchCoverage(), extraArgs.toTypedArray(), calcUnloaded, testTracking != null)
-            .also { assertEmptyLogFile(coverageDataFile) }
+    return CoverageRunner.runCoverage(
+        classpath, coverageDataFile, patterns, mainClass,
+        coverage.isBranchCoverage(), extraArgs.toTypedArray(), calcUnloaded, testTracking != null
+    )
+        .also { assertEmptyLogFile(coverageDataFile) }
 }
 
 internal inline fun runWithOptions(values: Map<KMutableProperty<Boolean>, Boolean>, action: () -> Unit) {
@@ -89,36 +197,34 @@ internal fun assertEmptyLogFile(coverageDataFile: File) {
 }
 
 internal fun assertEqualsLines(project: ProjectData, configuration: TestConfiguration, coverage: Coverage) {
-    val actualCoverage = coverageLines(project, configuration.classes)
-        .associate { it.lineNumber to it.status.statusToString() }
-        .run {
-            if (coverage.isBranchCoverage()) this else remapFullToPartialWhenNeeded(configuration.coverageData)
-        }
+    val checks = CollectedData.expectedData(configuration, coverage)
     if (configuration.fileWithMarkers != null) {
-        assertEqualsFiles(configuration.fileWithMarkers, actualCoverage, "// coverage: ", coverageMarkerRegex)
+        for (check in checks) {
+            assertEqualsFiles(configuration.fileWithMarkers, check, project, configuration, coverage)
+        }
+    } else {
+        for (check in checks) {
+            val expected = check.collectExpectedData(configuration, coverage)
+            val actual = check.collectActualData(project, configuration)
+            Assert.assertEquals(expected, actual)
+        }
     }
-    Assert.assertEquals(configuration.coverageData, actualCoverage)
 }
 
-private fun Map<Int, String>.remapFullToPartialWhenNeeded(expected: Map<Int, String>) =
-    mapValues { if (it.value == "FULL" && expected[it.key] == "PARTIAL") "PARTIAL" else it.value }
-
-internal fun assertEqualsTestTracking(coverageDataFile: File, expected: Map<Int, Set<String>>, classNames: List<String>) {
+internal fun assertEqualsTestTracking(
+    coverageDataFile: File,
+    expected: Map<Int, Set<String>>,
+    classNames: List<String>
+) {
     val actual = testTrackingLines(coverageDataFile, classNames)
     Assert.assertEquals(expected, actual)
 }
 
-internal fun assertEqualsInstructionsInfo(project: ProjectData, configuration: TestConfiguration) {
-    val actual: Map<Int, String> = collectInstructionsInfo(project, configuration.classes)
-    assertEqualsFiles(configuration.fileWithMarkers!!, actual, "// stats: ", instructionsInfoRegex)
-}
-
-internal fun assertEqualsBranchesInfo(project: ProjectData, configuration: TestConfiguration) {
-    val actual: Map<Int, String> = collectBranchesInfo(project, configuration.classes)
-    assertEqualsFiles(configuration.fileWithMarkers!!, actual, "// branches: ", branchesInfoRegex)
-}
-
-private fun assertEqualsFiles(file: File, actual: Map<Int, String>, prefix: String, regex: Regex) {
+internal fun assertEqualsFiles(file: File, check: CollectedData, project: ProjectData, configuration: TestConfiguration, coverage: Coverage) {
+    val regex = check.provideMatcher().regex
+    val prefix = check.prefix
+    val actual = check.collectActualData(project, configuration)
+    val expected = check.collectExpectedData(configuration, coverage)
     val originalContent = file.readText()
     val withoutComments = originalContent.lines().map { line ->
         if (!line.contains(regex)) line to -1 else {
@@ -126,49 +232,32 @@ private fun assertEqualsFiles(file: File, actual: Map<Int, String>, prefix: Stri
             line.removeRange(range) to range.first
         }
     }
+    val withActualComments = replaceData(withoutComments, actual, prefix)
+    val withExpectedComments = replaceData(withoutComments, expected, prefix)
+    Assert.assertEquals(withExpectedComments, withActualComments)
+}
+
+private fun replaceData(
+    withoutComments: List<Pair<String, Int>>,
+    data: Map<Int, String>,
+    prefix: String
+): String {
     val withActualComments = withoutComments.mapIndexed { i, (line, offset) ->
-        val coverage = actual[i + 1]
-        if (coverage == null) line else if (offset == -1) "$line $prefix$coverage" else
-            "${line.substring(0, offset)}$prefix$coverage${line.substring(offset)}"
+        val mark = data[i + 1]
+        if (mark == null) line else if (offset == -1) "$line $prefix$mark" else
+            "${line.substring(0, offset)}$prefix$mark${line.substring(offset)}"
     }.joinToString("\n")
-    Assert.assertEquals(originalContent, withActualComments)
+    return withActualComments
 }
 
 internal const val all = "ALL CLASSES"
-
-private fun coverageLines(project: ProjectData, classNames: List<String>): List<LineData> {
-    val allData = ClassData("")
-    getClasses(classNames, project).forEach { allData.merge(it) }
-    return allData.getLinesData()
-}
-
-private fun collectInstructionsInfo(project: ProjectData, classNames: List<String>): Map<Int, String> = coverageLines(project, classNames)
-        .run {
-            val instructionsMap = hashMapOf<Int, LineInstructions>()
-            getClasses(classNames, project).forEach { classData ->
-                val classInstructions = project.instructions[classData.name]!!
-                classData.lines.filterIsInstance<LineData>().forEach { instructionsMap.getOrPut(it.lineNumber) { LineInstructions() }.merge(classInstructions.getlines()[it.lineNumber]) }
-            }
-            associate { line ->
-                val branches = line.branchData
-                val instructions = instructionsMap[line.lineNumber]!!.getInstructionsData(line)
-                val branchCoverage = if (branches != null) " ${branches.coveredBranches}/${branches.totalBranches}" else ""
-                line.lineNumber to "${instructions.coveredBranches}/${instructions.totalBranches}$branchCoverage"
-            }
-        }
-
-private fun collectBranchesInfo(project: ProjectData, classNames: List<String>): Map<Int, String> = coverageLines(project, classNames)
-    .filter { it.branchData != null }
-    .associate { lineData ->
-        val branches = lineData.branchData!!
-        lineData.lineNumber to "${branches.coveredBranches}/${branches.totalBranches}"
-    }
-
 private fun getClasses(classNames: List<String>, project: ProjectData) = if (classNames.contains(all)) {
     project.classes.values.filter { it.name.startsWith(TEST_PACKAGE) }
 } else {
-    classNames.map { name -> project.getClassData(name)
-        .also { checkNotNull(it) {"Class $name has not been found in the coverage report!"} } }
+    classNames.map { name ->
+        project.getClassData(name)
+            .also { checkNotNull(it) { "Class $name has not been found in the coverage report!" } }
+    }
 }
 
 internal fun testTrackingLines(coverageDataFile: File, classNames: List<String>): Map<Int, Set<String>> {
@@ -195,14 +284,8 @@ private fun loadTestTrackingData(coverageDataFile: File): Map<String, Map<String
     }
 }
 
-private fun Int.statusToString() = when (this) {
-    0 -> "NONE"
-    1 -> "PARTIAL"
-    else -> "FULL"
-}
-
 private fun ClassData.getLinesData() = (lines ?: Array<LineData?>(0) { null })
-        .filterIsInstance<LineData>().sortedBy { it.lineNumber }
+    .filterIsInstance<LineData>().sortedBy { it.lineNumber }
 
 internal fun extractTestTrackingDataFromFile(file: File): Map<Int, Set<String>> =
     extractInfoFromFile(file, TestTrackingMatcher())
@@ -220,7 +303,9 @@ private fun <T> extractInfoFromFile(file: File, matcher: Matcher<T>): T {
 
 internal fun pathToFile(name: String, vararg names: String): File = Paths.get(name, *names).toFile()
 internal fun String.toSystemIndependent() = replace("\r\n", "\n")
-internal fun <T, U> Iterable<T>.product(other: Iterable<U>): List<Pair<T, U>> = flatMap { l -> other.map { r -> l to r } }
+internal fun <T, U> Iterable<T>.product(other: Iterable<U>): List<Pair<T, U>> =
+    flatMap { l -> other.map { r -> l to r } }
+
 private fun getVMVersion(): Int {
     var version = System.getProperty("java.version")
     if (version.startsWith("1.")) {
@@ -235,7 +320,6 @@ private fun getVMVersion(): Int {
 }
 
 internal fun extractTestConfiguration(file: File): TestConfiguration {
-    val coverage = CoverageMatcher()
     val classes = StringListMatcher(classesMarkerRegex, 1)
     val expectedClasses = StringListMatcher(expectedClassesMarkerRegex, 1)
     val extraArgs = StringListMatcher(extraArgumentsMarkerRegex, 1)
@@ -243,16 +327,10 @@ internal fun extractTestConfiguration(file: File): TestConfiguration {
     val calculateUnloaded = FlagMatcher(calculateUnloadedMarkerRegex, 1)
     val otherFile = StringMatcher(fileWithCoverageMarkersRegex, 1)
 
-    var fileWithMarkers = file
-    processFile(file, coverage, classes, expectedClasses, extraArgs, patterns, calculateUnloaded, otherFile)
+    processFile(file, classes, expectedClasses, extraArgs, patterns, calculateUnloaded, otherFile)
     val otherFileName = otherFile.result
-    if (otherFileName !== null) {
-        coverage.result.clear()
-        fileWithMarkers = File(file.parentFile, otherFileName)
-        processFile(fileWithMarkers, coverage)
-    }
+    val fileWithMarkers = if (otherFileName != null) File(file.parentFile, otherFileName) else file
     return TestConfiguration(
-        coverage.result,
         classes.result ?: emptyList(),
         patterns.result,
         extraArgs.result ?: mutableListOf(),
@@ -280,13 +358,13 @@ private val calculateUnloadedMarkerRegex = Regex("// calculate unloaded: (.*)\$"
 private val extraArgumentsMarkerRegex = Regex("// extra args: (.*)\$")
 private val testTrackingMarkerRegex = Regex("// tests: ([^/]*)")
 private val fileWithCoverageMarkersRegex = Regex("// markers: (.*)\$")
-private val instructionsInfoRegex = Regex("// stats: ([0-9]+)/([0-9]+)(\\s+([0-9]+)/([0-9]+))?(?= |$)")
-private val branchesInfoRegex = Regex("// branches: ([0-9]+)/([0-9]+)")
+private val instructionsInfoRegex = Regex("// stats: ([0-9]+)/([0-9]+)(?= |$)")
+private val branchesInfoRegex = Regex("// branches: ([0-9]+)/([0-9]+)(?= |$)")
 
 /**
  * Collect state from found matches in the lines of a file.
  */
-internal abstract class Matcher<T>(private val regex: Regex) {
+internal abstract class Matcher<T>(val regex: Regex) {
     abstract val result: T
     abstract fun onMatchFound(line: Int, match: MatchResult)
     fun match(line: Int, s: String) {
@@ -334,17 +412,17 @@ private class FlagMatcher(regex: Regex, group: Int = 1) : SingleGroupMatcher<Boo
     }
 }
 
-private class CoverageMatcher : SingleGroupMatcher<Map<Int, String>>(coverageMarkerRegex, 1) {
-    override val result = linkedMapOf<Int, String>()
-    override fun onMatchFound(line: Int, match: String) {
-        result[line] = match
-    }
-}
-
 private class TestTrackingMatcher : SingleGroupMatcher<Map<Int, Set<String>>>(testTrackingMarkerRegex, 1) {
     override val result = linkedMapOf<Int, Set<String>>()
     override fun onMatchFound(line: Int, match: String) {
         this.result[line] = match.trim().split(' ').toSet()
+    }
+}
+
+private class CoverageMatcher : SingleGroupMatcher<Map<Int, String>>(coverageMarkerRegex, 1) {
+    override val result = linkedMapOf<Int, String>()
+    override fun onMatchFound(line: Int, match: String) {
+        result[line] = match
     }
 }
 
@@ -353,9 +431,7 @@ private class InstructionsInfoMatcher : Matcher<Map<Int, String>>(instructionsIn
     override fun onMatchFound(line: Int, match: MatchResult) {
         val coveredInstructions = match.groupValues[1]
         val totalInstructions = match.groupValues[2]
-        val hasBranches = match.groupValues[3].isNotEmpty()
-        val branchCoverage = if (hasBranches) " ${match.groupValues[4]}/${match.groupValues[5]}" else ""
-        result[line] = "$coveredInstructions/$totalInstructions$branchCoverage"
+        result[line] = "$coveredInstructions/$totalInstructions"
     }
 }
 
@@ -367,3 +443,13 @@ private class BranchesInfoMatcher : Matcher<Map<Int, String>>(branchesInfoRegex)
         result[line] = "$covered/$total"
     }
 }
+
+internal open class DirectiveMatcher(directive: String) : Matcher<Boolean>(Regex(directive)) {
+    private var matchFound = false
+    override val result get() = matchFound
+    override fun onMatchFound(line: Int, match: MatchResult) {
+        matchFound = true
+    }
+}
+
+internal class IncludeInstructionsMatcher : DirectiveMatcher("// instructions & branches")

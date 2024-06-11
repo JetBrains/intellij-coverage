@@ -15,8 +15,7 @@ Test configuration is set with comments in source files. The supported settings 
 * `// calculate unloaded: [true|false]` - a flag to include unloaded classes into a coverage report, false by default
 * `// markers: [file]` - relative path to a file with `coverage` markers
 * `// test: ...` - list of tests that are covering a line in test tracking mode, see [TestTrackingTest.kt](src/com/intellij/rt/coverage/caseTests/TestTrackingTest.kt)
-* `// with branches` - enable exact branches count testing, see [BranchesTest.kt](src/com/intellij/rt/coverage/caseTests/BranchesTest.kt)
-  * `// branches: COVERED_BRANCHES/TOTAL_BRANCHES`
+* `// branches: COVERED_BRANCHES/TOTAL_BRANCHES`
 * `// instructions & branches` - enable instruction and branch coverage counters testing, see [InstructionsBranchesTest.kt](src/com/intellij/rt/coverage/caseTests/InstructionsBranchesTest.kt)
   * `// stats: COVERED_INSTRUCTIONS/TOTAL_INSTRUCTIONS [COVERED_BRANCHES/TOTAL_BRANCHES]` - instructions and branch coverage
 

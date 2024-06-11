@@ -16,8 +16,6 @@
 
 package testData.cases.whenEnum
 
-// with branches
-
 enum class F {
     A, B, C // coverage: FULL
 }

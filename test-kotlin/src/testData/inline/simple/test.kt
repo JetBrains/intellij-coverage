@@ -27,7 +27,7 @@ private inline fun a() {
 }
 
 inline fun funWithCondition() {
-    if (Random.nextBoolean()) { // coverage: NONE
+    if (Random.nextBoolean()) { // coverage: NONE // branches: 0/2
         println("Success")      // coverage: NONE
     } else {
         println("Fail")         // coverage: NONE

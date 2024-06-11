@@ -29,7 +29,7 @@ public class Test {  // coverage: NONE
   public static void main(String[] args) throws IllegalAccessException {
     final A instance = new A();                         // coverage: FULL
     final Field[] fields = A.class.getDeclaredFields(); // coverage: FULL
-    for (Field field : fields) {                        // coverage: FULL
+    for (Field field : fields) {                        // coverage: FULL // branches: 2/2
       System.out.println(field.getInt(instance));       // coverage: FULL
     }
   }

@@ -31,7 +31,7 @@ public class Test {                    // coverage: FULL
   }
 
   public void testCovered(int x) {
-    switch (x) {                       // coverage: FULL
+    switch (x) {                       // coverage: FULL // branches: 2/2
       case 1:
       case 2:
         System.out.println("1 or 2");  // coverage: FULL
@@ -41,7 +41,7 @@ public class Test {                    // coverage: FULL
   }
 
   public void testUncovered1(int x) {
-    switch (x) {                       // coverage: PARTIAL
+    switch (x) {                       // coverage: PARTIAL // branches: 1/2
       case 1:
       case 2:
         System.out.println("1 or 2");  // coverage: FULL
@@ -51,7 +51,7 @@ public class Test {                    // coverage: FULL
   }
 
   public void testUncovered2(int x) {
-    switch (x) {                       // coverage: PARTIAL
+    switch (x) {                       // coverage: PARTIAL // branches: 1/2
       case 1:
       case 2:
         System.out.println("1 or 2");  // coverage: FULL

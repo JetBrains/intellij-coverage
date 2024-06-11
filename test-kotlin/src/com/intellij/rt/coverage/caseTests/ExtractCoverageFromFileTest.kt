@@ -16,7 +16,7 @@
 
 package com.intellij.rt.coverage.caseTests
 
-import com.intellij.rt.coverage.TEST_PACKAGE
+import com.intellij.rt.coverage.*
 import com.intellij.rt.coverage.extractTestConfiguration
 import com.intellij.rt.coverage.pathToFile
 import org.junit.Assert.assertEquals
@@ -35,9 +35,9 @@ internal class ExtractCoverageFromFileTest {
         )
         val testFile = pathToFile("src", TEST_PACKAGE, "custom", "testFileExtraction", "extractionTest.txt")
         val testConfiguration = extractTestConfiguration(testFile)
-        assertEquals(expected, testConfiguration.coverageData)
         assertEquals(listOf("A", "B", "C", "D"), testConfiguration.classes)
         assertEquals(listOf("-hello", "bye"), testConfiguration.extraArgs)
         assertTrue(testConfiguration.calculateUnloaded)
+        assertEquals(expected, CollectedData.CoverageResults.collectExpectedData(testConfiguration, Coverage.BRANCH))
     }
 }

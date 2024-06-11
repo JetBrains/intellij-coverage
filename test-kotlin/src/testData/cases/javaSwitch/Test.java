@@ -21,7 +21,7 @@ package testData.cases.javaSwitch;
 public class Test { // coverage: FULL // stats: 2/2
 
   void singleBranchSwitch1(int x) {
-    switch (x) { // coverage: PARTIAL // stats: 2/2 1/2
+    switch (x) { // coverage: PARTIAL // branches: 1/2 // stats: 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: FULL // stats: 3/3
         break;
@@ -34,7 +34,7 @@ public class Test { // coverage: FULL // stats: 2/2
   }
 
   void singleBranchSwitch2(int x) {
-    switch (x) { // coverage: PARTIAL // stats: 2/2 1/2
+    switch (x) { // coverage: PARTIAL // branches: 1/2 // stats: 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: NONE // stats: 0/3
         break;
@@ -47,7 +47,7 @@ public class Test { // coverage: FULL // stats: 2/2
   }
 
   void defaultBranchSwitch(int x) {
-    switch (x) { // coverage: PARTIAL // stats: 2/2 0/2
+    switch (x) { // coverage: PARTIAL // branches: 0/2 // stats: 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: NONE // stats: 0/3
         break;
@@ -64,7 +64,7 @@ public class Test { // coverage: FULL // stats: 2/2
   }
 
   void fullyCoveredSwitch(int x) {
-    switch (x) { // coverage: PARTIAL // stats: 2/2 2/2
+    switch (x) { // coverage: PARTIAL // branches: 2/2 // stats: 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: FULL // stats: 3/3
         break;
@@ -77,7 +77,7 @@ public class Test { // coverage: FULL // stats: 2/2
   }
 
   void fullyCoveredSwitchWithDefault(int x) {
-    switch (x) { // coverage: FULL // stats: 2/2 2/2
+    switch (x) { // coverage: FULL // branches: 2/2 // stats: 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: FULL // stats: 3/3
         break;
@@ -94,7 +94,7 @@ public class Test { // coverage: FULL // stats: 2/2
   }
 
   void fullyCoveredSwitchWithoutDefault(int x) {
-    switch (x) { // coverage: PARTIAL // stats: 2/2 2/2
+    switch (x) { // coverage: PARTIAL // branches: 2/2 // stats: 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: FULL // stats: 3/3
         break;
@@ -111,7 +111,7 @@ public class Test { // coverage: FULL // stats: 2/2
   }
 
   void switchWithFallThrough(int x) {
-    switch (x) { // coverage: PARTIAL // stats: 2/2 1/2
+    switch (x) { // coverage: PARTIAL // branches: 1/2 // stats: 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: FULL // stats: 3/3
       }
@@ -123,7 +123,7 @@ public class Test { // coverage: FULL // stats: 2/2
   }
 
   void stringSwitch(String s) {
-    switch (s) { // coverage: PARTIAL // stats: 29/29 1/7
+    switch (s) { // coverage: PARTIAL // branches: 1/7 // stats: 29/29
       case "A": {
         System.out.println("Case A"); // coverage: FULL // stats: 3/3
         break;
@@ -156,7 +156,7 @@ public class Test { // coverage: FULL // stats: 2/2
   }
 
   void fullStringSwitch(String s) {
-    switch (s) { // coverage: FULL // stats: 14/14 2/2
+    switch (s) { // coverage: FULL // branches: 2/2 // stats: 14/14
       case "A": {
         System.out.println("Case A"); // coverage: FULL // stats: 3/3
         break;
@@ -173,7 +173,7 @@ public class Test { // coverage: FULL // stats: 2/2
   }
 
   void stringSwitchSameHashCode(String s) {
-    switch (s) { // coverage: FULL // stats: 18/18 2/2
+    switch (s) { // coverage: FULL // branches: 2/2 // stats: 18/18
       case "Aa": {
         System.out.println("Case A"); // coverage: FULL // stats: 3/3
         break;
