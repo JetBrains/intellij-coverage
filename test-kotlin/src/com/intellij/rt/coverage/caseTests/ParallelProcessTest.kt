@@ -35,9 +35,9 @@ internal class ParallelProcessTest : CoverageTest() {
             stop.set(true)
         }
         threads
-                .onEach { it.uncaughtExceptionHandler = exceptionHandler }
-                .onEach { it.start() }
-                .onEach { it.join() }
+            .onEach { it.uncaughtExceptionHandler = exceptionHandler }
+            .onEach { it.start() }
+            .onEach { it.join() }
         if (exception != null) {
             throw exception!!
         }
@@ -46,7 +46,7 @@ internal class ParallelProcessTest : CoverageTest() {
     private fun runProcess(stop: AtomicBoolean) {
         repeat(10) {
             if (stop.get()) return
-            test("simple.ifelse")
+            test("simple.branches")
         }
     }
 

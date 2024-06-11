@@ -60,19 +60,43 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     //===GENERATED TESTS===
 
     @Test
-    fun testAssertion() = test("assertion")
+    fun testBasicJavaAssertion() = test("basicJava.assertion")
 
     @Test
-    fun testBadCycleClasses() = test("badCycle.classes")
+    fun testBasicJavaBadCycleClasses() = test("basicJava.badCycle.classes")
 
     @Test
-    fun testBadCycleInterfaces() = test("badCycle.interfaces")
+    fun testBasicJavaBadCycleInterfaces() = test("basicJava.badCycle.interfaces")
+
+    @Test
+    fun testBasicJavaDeserializeLambda() = test("basicJava.deserializeLambda")
+
+    @Test
+    fun testBasicJavaInterfaces() = test("basicJava.interfaces")
+
+    @Test
+    fun testBasicJavaLombok() = test("basicJava.lombok")
+
+    @Test
+    fun testCasesElseif() = test("cases.elseif")
+
+    @Test
+    fun testCasesFallthrough() = test("cases.fallthrough")
+
+    @Test
+    fun testCasesIfelse() = test("cases.ifelse")
+
+    @Test
+    fun testCasesIntMaxSwitch() = test("cases.intMaxSwitch")
 
     @Test
     fun testCasesJavaIf() = test("cases.javaIf")
 
     @Test
     fun testCasesJavaSwitch() = test("cases.javaSwitch")
+
+    @Test
+    fun testCasesWhenBoolean() = test("cases.whenBoolean")
 
     @Test
     fun testCasesWhenEnum() = test("cases.whenEnum")
@@ -85,6 +109,9 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
 
     @Test
     fun testCoroutinesCrossinline() = test("coroutines.crossinline")
+
+    @Test
+    fun testCoroutinesCrossinlineCall() = test("coroutines.crossinlineCall")
 
     @Test
     fun testCoroutinesDefaultArgs() = test("coroutines.defaultArgs")
@@ -114,7 +141,52 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testCoroutinesTailSuspendCall() = test("coroutines.tailSuspendCall")
 
     @Test
-    fun testDataClass() = test("dataClass")
+    fun testCoverageFeaturesIgnoreAnnotationAnonInLocalFun() = test("coverageFeatures.ignoreAnnotation.anonInLocalFun")
+
+    @Test
+    fun testCoverageFeaturesIgnoreAnnotationAnonymous() = test("coverageFeatures.ignoreAnnotation.anonymous")
+
+    @Test
+    fun testCoverageFeaturesIgnoreAnnotationDefaultArgs() = test("coverageFeatures.ignoreAnnotation.defaultArgs")
+
+    @Test
+    fun testCoverageFeaturesIgnoreAnnotationDeprecated() = test("coverageFeatures.ignoreAnnotation.deprecated")
+
+    @Test
+    fun testCoverageFeaturesIgnoreAnnotationFullClass() = test("coverageFeatures.ignoreAnnotation.fullClass")
+
+    @Test
+    fun testCoverageFeaturesIgnoreAnnotationIncludeAnnotationConflicting() = test("coverageFeatures.ignoreAnnotation.includeAnnotation.conflicting")
+
+    @Test
+    fun testCoverageFeaturesIgnoreAnnotationIncludeAnnotationFullClass() = test("coverageFeatures.ignoreAnnotation.includeAnnotation.fullClass")
+
+    @Test
+    fun testCoverageFeaturesIgnoreAnnotationIncludeAnnotationMethod() = test("coverageFeatures.ignoreAnnotation.includeAnnotation.method")
+
+    @Test
+    fun testCoverageFeaturesIgnoreAnnotationInline() = test("coverageFeatures.ignoreAnnotation.inline")
+
+    @Test
+    fun testCoverageFeaturesIgnoreAnnotationInlineUnloaded() = test("coverageFeatures.ignoreAnnotation.inlineUnloaded")
+
+    @Test
+    fun testCoverageFeaturesIgnoreAnnotationInlined() = test("coverageFeatures.ignoreAnnotation.inlined")
+
+    @Test
+    fun testCoverageFeaturesIgnoreAnnotationMethod() = test("coverageFeatures.ignoreAnnotation.method")
+
+    @Test
+    fun testCoverageFeaturesNotJava() = test("coverageFeatures.not.java")
+
+    @Test
+    fun testCoverageFeaturesNotKotlin() = test("coverageFeatures.not.kotlin")
+
+    @Test
+    fun testCoverageFeaturesRedefine() = test("coverageFeatures.redefine")
+
+    @Test
+    fun testCoverageFeaturesReturnTest() = test("coverageFeatures.returnTest")
 
     @Test
     fun testDefaultArgsArgs32() = test("defaultArgs.args32")
@@ -144,109 +216,31 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testDefaultArgsUncovered() = test("defaultArgs.uncovered")
 
     @Test
-    fun testDefaultInterfaceMemberJava() = test("defaultInterfaceMember.java")
-
-    @Test
-    fun testDefaultInterfaceMemberKotlin() = test("defaultInterfaceMember.kotlin")
-
-    @Test
-    fun testDefaultInterfaceMemberRemoveOnlyDefaultInterfaceMember() = test("defaultInterfaceMember.removeOnlyDefaultInterfaceMember")
-
-    @Test
-    fun testDeprecated() = test("deprecated")
-
-    @Test
-    fun testDeserializeLambda() = test("deserializeLambda")
-
-    @Test
     fun testEnum_Java() = test("enum_.java")
 
     @Test
     fun testEnum_Kotlin() = test("enum_.kotlin")
 
     @Test
-    fun testFixesIDEA_250825() = test("fixes.IDEA_250825")
-
-    @Test
-    fun testFixesIDEA_258370() = test("fixes.IDEA_258370")
-
-    @Test
-    fun testFixesIDEA_259332() = test("fixes.IDEA_259332")
-
-    @Test
-    fun testFixesIDEA_259731() = test("fixes.IDEA_259731")
-
-    @Test
-    fun testFixesIDEA_264534() = test("fixes.IDEA_264534")
-
-    @Test
-    fun testFixesIDEA_268006Exclude() = test("fixes.IDEA_268006.exclude")
-
-    @Test
-    fun testFixesIDEA_268006NoInclude() = test("fixes.IDEA_268006.noInclude")
-
-    @Test
-    fun testFixesIDEA_295404() = test("fixes.IDEA_295404")
-
-    @Test
     fun testFixesIDEA_323017() = test("fixes.IDEA_323017")
-
-    @Test
-    fun testFixesKT_39038() = test("fixes.KT_39038")
 
     @Test
     fun testFixesClassReload() = test("fixes.classReload")
 
     @Test
-    fun testFixesIntMaxSwitch() = test("fixes.intMaxSwitch")
-
-    @Test
-    fun testFunInterface() = test("funInterface")
-
-    @Test
-    fun testIgnoreAnnotationAnonInLocalFun() = test("ignoreAnnotation.anonInLocalFun")
-
-    @Test
-    fun testIgnoreAnnotationAnonymous() = test("ignoreAnnotation.anonymous")
-
-    @Test
-    fun testIgnoreAnnotationDefaultArgs() = test("ignoreAnnotation.defaultArgs")
-
-    @Test
-    fun testIgnoreAnnotationFullClass() = test("ignoreAnnotation.fullClass")
-
-    @Test
-    fun testIgnoreAnnotationIncludeAnnotationConflicting() = test("ignoreAnnotation.includeAnnotation.conflicting")
-
-    @Test
-    fun testIgnoreAnnotationIncludeAnnotationFullClass() = test("ignoreAnnotation.includeAnnotation.fullClass")
-
-    @Test
-    fun testIgnoreAnnotationIncludeAnnotationMethod() = test("ignoreAnnotation.includeAnnotation.method")
-
-    @Test
-    fun testIgnoreAnnotationInline() = test("ignoreAnnotation.inline")
-
-    @Test
-    fun testIgnoreAnnotationInlineUnloaded() = test("ignoreAnnotation.inlineUnloaded")
-
-    @Test
-    fun testIgnoreAnnotationInlined() = test("ignoreAnnotation.inlined")
-
-    @Test
-    fun testIgnoreAnnotationMethod() = test("ignoreAnnotation.method")
-
-    @Test
-    fun testImplementationByDelegation() = test("implementationByDelegation")
-
-    @Test
-    fun testImplementationByDelegationGeneric() = test("implementationByDelegationGeneric")
+    fun testFixesLineIgnore() = test("fixes.lineIgnore")
 
     @Test
     fun testInlineCoroutines() = test("inline.coroutines")
 
     @Test
     fun testInlineCrossinline() = test("inline.crossinline")
+
+    @Test
+    fun testInlineFilteringExclude() = test("inline.filtering.exclude")
+
+    @Test
+    fun testInlineFilteringNoInclude() = test("inline.filtering.noInclude")
 
     @Test
     fun testInlineInlineInline() = test("inline.inlineInline")
@@ -273,58 +267,61 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testInlineWithReturn() = test("inline.withReturn")
 
     @Test
-    fun testInterfaceWithClinit() = test("interfaceWithClinit")
+    fun testKotlinFeaturesDataClass() = test("kotlinFeatures.dataClass")
 
     @Test
-    fun testInterfaces() = test("interfaces")
+    fun testKotlinFeaturesDefaultInterfaceMemberJava() = test("kotlinFeatures.defaultInterfaceMember.java")
 
     @Test
-    fun testLateinitInternal() = test("lateinit.internal")
+    fun testKotlinFeaturesDefaultInterfaceMemberKotlin() = test("kotlinFeatures.defaultInterfaceMember.kotlin")
 
     @Test
-    fun testLateinitSimple() = test("lateinit.simple")
+    fun testKotlinFeaturesDefaultInterfaceMemberRemoveOnlyDefaultInterfaceMember() = test("kotlinFeatures.defaultInterfaceMember.removeOnlyDefaultInterfaceMember")
 
     @Test
-    fun testLombok() = test("lombok")
+    fun testKotlinFeaturesDefaultInterfaceMemberWithArgs() = test("kotlinFeatures.defaultInterfaceMember.withArgs")
 
     @Test
-    fun testNotJava() = test("not.java")
+    fun testKotlinFeaturesFunInterface() = test("kotlinFeatures.funInterface")
 
     @Test
-    fun testNotKotlin() = test("not.kotlin")
+    fun testKotlinFeaturesImplementationByDelegationBasic() = test("kotlinFeatures.implementationByDelegation.basic")
 
     @Test
-    fun testNullability() = test("nullability")
+    fun testKotlinFeaturesImplementationByDelegationGeneric() = test("kotlinFeatures.implementationByDelegation.generic")
 
     @Test
-    fun testObject() = test("object")
+    fun testKotlinFeaturesInterfaceWithClinit() = test("kotlinFeatures.interfaceWithClinit")
 
     @Test
-    fun testPropertiesConstructor() = test("properties.constructor")
+    fun testKotlinFeaturesLateinitInternal() = test("kotlinFeatures.lateinit.internal")
 
     @Test
-    fun testPropertiesFile() = test("properties.file")
+    fun testKotlinFeaturesLateinitSimple() = test("kotlinFeatures.lateinit.simple")
 
     @Test
-    fun testRedefine() = test("redefine")
+    fun testKotlinFeaturesNullability() = test("kotlinFeatures.nullability")
 
     @Test
-    fun testReturnTest() = test("returnTest")
+    fun testKotlinFeaturesPropertiesConstructor() = test("kotlinFeatures.properties.constructor")
 
     @Test
-    fun testSealed() = test("sealed")
+    fun testKotlinFeaturesPropertiesFile() = test("kotlinFeatures.properties.file")
 
     @Test
-    fun testSealedClassConstructor() = test("sealedClassConstructor")
+    fun testKotlinFeaturesSealedBasic() = test("kotlinFeatures.sealed.basic")
+
+    @Test
+    fun testKotlinFeaturesSealedConstructor() = test("kotlinFeatures.sealed.constructor")
+
+    @Test
+    fun testKotlinFeaturesTypeCast() = test("kotlinFeatures.typeCast")
+
+    @Test
+    fun testKotlinFeaturesValueClass() = test("kotlinFeatures.valueClass")
 
     @Test
     fun testSimpleBranches() = test("simple.branches")
-
-    @Test
-    fun testSimpleIfelse() = test("simple.ifelse")
-
-    @Test
-    fun testTypeCast() = test("typeCast")
 
     @Test
     fun testUnloadedCycle() = test("unloaded.cycle")
@@ -348,10 +345,10 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testUtilClassKotlin() = test("utilClass.kotlin")
 
     @Test
-    fun testUtilClassThrowing() = test("utilClass.throwing")
+    fun testUtilClassObject() = test("utilClass.object")
 
     @Test
-    fun testValueClass() = test("valueClass")
+    fun testUtilClassThrowing() = test("utilClass.throwing")
 
     //===GENERATED TESTS===
 

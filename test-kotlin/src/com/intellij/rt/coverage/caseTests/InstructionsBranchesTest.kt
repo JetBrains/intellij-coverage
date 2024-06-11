@@ -35,7 +35,10 @@ internal class InstructionsBranchesTest : CoverageTest() {
     //===GENERATED TESTS===
 
     @Test
-    fun testAssertion() = test("assertion")
+    fun testBasicJavaAssertion() = test("basicJava.assertion")
+
+    @Test
+    fun testCasesIfelse() = test("cases.ifelse")
 
     @Test
     fun testCasesJavaIf() = test("cases.javaIf")
@@ -48,9 +51,6 @@ internal class InstructionsBranchesTest : CoverageTest() {
 
     @Test
     fun testSimpleBranches() = test("simple.branches")
-
-    @Test
-    fun testSimpleIfelse() = test("simple.ifelse")
 
     @Test
     fun testUnloadedMultiFile() = test("unloaded.multiFile")
