@@ -94,7 +94,16 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
 
   private boolean classAlreadyHasCoverage(byte[] classFileBuffer) {
     final boolean[] hasCoverage = new boolean[]{false};
+
     new ClassReader(classFileBuffer).accept(new ClassVisitor(Opcodes.API_VERSION) {
+      @Override
+      public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+        if ("__$hits$__".equals(name)) {
+          hasCoverage[0] = true;
+        }
+        return super.visitField(access, name, descriptor, signature, value);
+      }
+
       @Override
       public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         MethodVisitor methodVisitor = super.visitMethod(access, name, descriptor, signature, exceptions);
