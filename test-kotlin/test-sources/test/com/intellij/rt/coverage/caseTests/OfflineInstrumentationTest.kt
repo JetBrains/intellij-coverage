@@ -42,8 +42,13 @@ internal class OfflineInstrumentationTest(override val coverage: Coverage) : Cov
         fun data() = arrayOf(Coverage.LINE, Coverage.BRANCH)
     }
 
+    //===GENERATED TESTS===
+
     @Test
     fun testCasesElseif() = test("cases.elseif")
+
+    @Test
+    fun testCasesFallthrough() = test("cases.fallthrough")
 
     @Test
     fun testCasesIfelse() = test("cases.ifelse")
@@ -52,10 +57,10 @@ internal class OfflineInstrumentationTest(override val coverage: Coverage) : Cov
     fun testCasesIntMaxSwitch() = test("cases.intMaxSwitch")
 
     @Test
-    fun testCasesFallthrough() = test("cases.fallthrough")
+    fun testCasesJavaSwitch() = test("cases.javaSwitch")
 
     @Test
-    fun testCasesJavaSwitch() = test("cases.javaSwitch")
+    fun testCoverageFeaturesReturnTest() = test("coverageFeatures.returnTest")
 
     @Test
     fun testDefaultArgsArgs32() = test("defaultArgs.args32")
@@ -81,8 +86,7 @@ internal class OfflineInstrumentationTest(override val coverage: Coverage) : Cov
     @Test
     fun testKotlinFeaturesPropertiesFile() = test("kotlinFeatures.properties.file")
 
-    @Test
-    fun testCoverageFeaturesReturnTest() = test("coverageFeatures.returnTest")
+    //===GENERATED TESTS===
 
 
     private fun test(testName: String) {

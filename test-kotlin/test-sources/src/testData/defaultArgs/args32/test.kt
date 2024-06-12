@@ -16,6 +16,8 @@
 
 package testData.defaultArgs.args32
 
+// offline instrumentation
+
 fun emptyFunction() = Unit // coverage: NONE
 
 fun functionWithSoManyParams(

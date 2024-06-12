@@ -16,6 +16,8 @@
 
 package testData.cases.elseif;
 
+// offline instrumentation
+
 public class Test {                          // coverage: FULL
   public static void main(String[] args) {
     Test test = new Test();                  // coverage: FULL

@@ -16,6 +16,7 @@
 
 package testData.kotlinFeatures.properties.file
 
+// offline instrumentation
 
 private const val x = 42   // invisible as property is const
 private val x2 = 42        // coverage: FULL as value is written in <cinit>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2020 JetBrains s.r.o.
+ * Copyright 2000-2024 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package testData.defaultArgs.defaultArgs32
+
+// offline instrumentation
 
 // functions with more than 32 default parameters have more than one extra mask parameter
 private fun functionWithSoManyDefaultArguments(

@@ -18,6 +18,8 @@ package testData.inline.simple
 
 import kotlin.random.Random
 
+// offline instrumentation
+
 private inline fun a(x: Int) {
     println(x) // coverage: FULL
 }

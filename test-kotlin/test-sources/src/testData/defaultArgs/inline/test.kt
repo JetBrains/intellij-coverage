@@ -16,6 +16,7 @@
 
 package testData.defaultArgs.inline
 
+// offline instrumentation
 
 private inline fun inlineFunWithDefaultArgs(param: Int = 0) { // coverage: FULL
     // after inline Kotlin store this variable into var 2,3

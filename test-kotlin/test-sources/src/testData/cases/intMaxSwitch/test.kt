@@ -18,6 +18,8 @@ package testData.cases.intMaxSwitch
 
 import kotlin.math.absoluteValue
 
+// offline instrumentation
+
 fun main() {
     val x = -Thread.currentThread().id.toInt().absoluteValue // coverage: FULL
     when (x) {                                  // coverage: PARTIAL // branches: 0/3

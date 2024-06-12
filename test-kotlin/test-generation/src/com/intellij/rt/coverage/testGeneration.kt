@@ -98,9 +98,17 @@ fun main() {
     generateTests("../test-sources", "test/com/intellij/rt/coverage/CoverageRunTest.kt")
     generateTests("../test-sources11", "test/com/intellij/rt/coverage/Jdk11CoverageRunTest.kt")
     generateTests("../test-sources","test/com/intellij/rt/coverage/caseTests/InstructionsBranchesTest.kt") { test ->
-        IncludeInstructionsMatcher().also { processFile(test.file, it) }.result
+        hasDirective(IncludeInstructionsMatcher(), test)
+    }
+    generateTests("../test-sources","test/com/intellij/rt/coverage/caseTests/OfflineInstrumentationTest.kt") { test ->
+        hasDirective(OfflineInstrumentationMatcher(), test)
     }
 }
+
+private fun hasDirective(
+    matcher: Matcher<Boolean>,
+    test: TestFile
+) = matcher.also { processFile(test.file, it) }.result
 
 private fun generateTests(module: String, testFilePath: String, ignoreCondition: ((TestFile) -> Boolean)? = null) {
     val ignoredDirectories = listOf("custom")
@@ -110,6 +118,8 @@ private fun generateTests(module: String, testFilePath: String, ignoreCondition:
     replaceGeneratedTests(tests, testFile, marker)
 }
 
+private class IncludeInstructionsMatcher : DirectiveMatcher("// instructions & branches")
+private class OfflineInstrumentationMatcher : DirectiveMatcher("// offline instrumentation")
 private class IgnoreTestMatcher : SingleGroupMatcher<String>(Regex("// ignore: (.*)\$"), 1) {
     override val result get() = ignore
     private var ignore = ""

@@ -16,6 +16,8 @@
 
 package testData.defaultArgs.uncovered
 
+// offline instrumentation
+
 private fun functionWithDefaultArgument(x: Int = 3): Int { // coverage: NONE
     return x + 5                                           // coverage: FULL
 }

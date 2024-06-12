@@ -374,5 +374,3 @@ open class DirectiveMatcher(directive: String) : Matcher<Boolean>(Regex(directiv
         matchFound = true
     }
 }
-
-class IncludeInstructionsMatcher : DirectiveMatcher("// instructions & branches")

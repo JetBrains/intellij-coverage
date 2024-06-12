@@ -16,6 +16,8 @@
 
 package testData.cases.fallthrough;
 
+// offline instrumentation
+
 public class Test {                    // coverage: FULL
   public static void main(String[] args) {
     Test t = new Test();               // coverage: FULL

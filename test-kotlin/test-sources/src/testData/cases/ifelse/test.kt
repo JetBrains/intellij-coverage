@@ -17,6 +17,7 @@
 package testData.cases.ifelse
 
 // instructions & branches
+// offline instrumentation
 
 fun test(x: Boolean, y: Boolean, z: Boolean) {
     if (x) {                            // coverage: PARTIAL // branches: 1/2 // stats: 2/2

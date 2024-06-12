@@ -16,6 +16,8 @@
 
 package testData.inline.inlineInline
 
+// offline instrumentation
+
 private inline fun a() {
     print("Hello")    // coverage: FULL
     b()               // coverage: FULL

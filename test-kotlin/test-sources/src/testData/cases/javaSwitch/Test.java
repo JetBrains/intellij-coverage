@@ -17,6 +17,7 @@
 package testData.cases.javaSwitch;
 
 // instructions & branches
+// offline instrumentation
 
 public class Test { // coverage: FULL // stats: 2/2
 

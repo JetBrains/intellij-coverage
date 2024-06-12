@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2020 JetBrains s.r.o.
+ * Copyright 2000-2024 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package testData.defaultArgs.severalArguments
+
+// offline instrumentation
 
 private fun functionWithDefaultArguments(
     x: Int = 3,                     // coverage: NONE
