@@ -22,47 +22,14 @@ import com.intellij.rt.coverage.data.ProjectData
 import com.intellij.rt.coverage.data.instructions.LineInstructions
 import com.intellij.rt.coverage.util.CoverageRunner
 import com.intellij.rt.coverage.util.ResourceUtil
-import com.intellij.rt.coverage.util.TestTrackingCallback
-import com.intellij.rt.coverage.util.TestTrackingIOUtil
 import org.junit.Assert
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 import kotlin.reflect.KMutableProperty
 
-enum class Coverage {
-    LINE, LINE_FIELD, BRANCH, BRANCH_FIELD, LINE_CONDY, BRANCH_CONDY;
-
-    fun isBranchCoverage() = this == BRANCH || this == BRANCH_FIELD || this == BRANCH_CONDY
-    fun isCondyEnabled() = this == LINE_CONDY || this == BRANCH_CONDY
-
-    companion object {
-        fun valuesWithCondyWhenPossible() =
-            if (getVMVersion() >= 11) values() else values().filterNot { it.isCondyEnabled() }.toTypedArray()
-    }
-}
-
-enum class TestTracking {
-    ARRAY, CLASS_DATA
-}
-
-fun getCoverageConfigurations() = if (System.getProperty("coverage.run.fast.tests") != null) {
-    listOfNotNull(
-        arrayOf(Coverage.BRANCH_FIELD, null),
-        arrayOf(Coverage.LINE_CONDY, null).takeIf { getVMVersion() >= 11 },
-    ).toTypedArray()
-} else {
-    allTestTrackingModes()
-}
-
-fun allTestTrackingModes() = Coverage.valuesWithCondyWhenPossible().toList()
-    .product(TestTracking.values().toList().plus(null))
-    .map { it.toList().toTypedArray() }.toTypedArray()
 
 abstract class TestResult {
     abstract val prefix: String
-    abstract fun collectActualData(project: ProjectData, configuration: TestConfiguration, ): Map<Int, String>
+    abstract fun collectActualData(project: ProjectData, configuration: TestConfiguration): Map<Int, String>
     abstract fun provideMatcher(): Matcher<Map<Int, String>>
 
     open fun collectExpectedData(configuration: TestConfiguration, coverage: Coverage): Map<Int, String> {
@@ -83,7 +50,7 @@ abstract class TestResult {
         override fun provideMatcher(): Matcher<Map<Int, String>> = CoverageMatcher()
         override fun collectExpectedData(configuration: TestConfiguration, coverage: Coverage): Map<Int, String> {
             val result = configuration.coverageData ?: super.collectExpectedData(configuration, coverage)
-            return  if (coverage.isBranchCoverage()) result else result.remapPartialToFull()
+            return if (coverage.isBranchCoverage()) result else result.remapPartialToFull()
         }
 
         private fun Int.statusToString() = when (this) {
@@ -92,7 +59,8 @@ abstract class TestResult {
             else -> "FULL"
         }
 
-        private fun Map<Int, String>.remapPartialToFull() = mapValues { if (it.value == "PARTIAL") "FULL" else it.value }
+        private fun Map<Int, String>.remapPartialToFull() =
+            mapValues { if (it.value == "PARTIAL") "FULL" else it.value }
     }
 
     internal object BranchResults : TestResult() {
@@ -158,14 +126,6 @@ abstract class TestResult {
     }
 }
 
-/**
- * Creates temporary file in a separate directory
- */
-fun createTmpFile(suffix: String): File {
-    val directory = Files.createTempDirectory("coverage")
-    return Files.createTempFile(directory, "", suffix).toFile()
-}
-
 private val classpath = System.getProperty("java.class.path").split(File.pathSeparator)
     .filter { !it.contains("intellij-coverage") || it.contains("test-kotlin") || it.contains("benchmark") }
     .joinToString(File.pathSeparator)
@@ -189,7 +149,7 @@ internal fun runWithCoverage(
         extraArgs.add("-Didea.new.test.tracking.coverage=false")
     }
     return CoverageRunner.runCoverage(
-        ResourceUtil.getAgentPath(pathToFile("..", "..", "dist"),"intellij-coverage-agent"),
+        ResourceUtil.getAgentPath(pathToFile("..", "..", "dist"), "intellij-coverage-agent"),
         classpath, coverageDataFile, patterns, mainClass,
         coverage.isBranchCoverage(), extraArgs.toTypedArray(), calcUnloaded, testTracking != null
     )
@@ -226,16 +186,14 @@ fun assertEqualsLines(project: ProjectData, configuration: TestConfiguration, co
     }
 }
 
-fun assertEqualsTestTracking(
-    coverageDataFile: File,
-    expected: Map<Int, Set<String>>,
-    classNames: List<String>
-) {
-    val actual = testTrackingLines(coverageDataFile, classNames)
-    Assert.assertEquals(expected, actual)
-}
 
-fun assertEqualsFiles(file: File, testResult: TestResult, project: ProjectData, configuration: TestConfiguration, coverage: Coverage) {
+fun assertEqualsFiles(
+    file: File,
+    testResult: TestResult,
+    project: ProjectData,
+    configuration: TestConfiguration,
+    coverage: Coverage
+) {
     val regex = testResult.provideMatcher().regex
     val prefix = testResult.prefix
     val actual = testResult.collectActualData(project, configuration)
@@ -265,7 +223,7 @@ private fun replaceData(
     return withActualComments
 }
 
-internal const val all = "ALL CLASSES"
+const val all = "ALL CLASSES"
 private fun getClasses(classNames: List<String>, project: ProjectData) = if (classNames.contains(all)) {
     project.classes.values.filter { it.name.startsWith(TEST_PACKAGE) }
 } else {
@@ -275,63 +233,13 @@ private fun getClasses(classNames: List<String>, project: ProjectData) = if (cla
     }
 }
 
-fun testTrackingLines(coverageDataFile: File, classNames: List<String>): Map<Int, Set<String>> {
-    val result = hashMapOf<Int, MutableSet<String>>()
-    val data = loadTestTrackingData(coverageDataFile)
-    for ((testName, testData) in data) {
-        for ((className, coveredLines) in testData) {
-            if (all in classNames || className in classNames) {
-                for (line in coveredLines) {
-                    result.computeIfAbsent(line) { hashSetOf() }.add(testName)
-                }
-            }
-        }
-    }
-    return result
-}
-
-private fun loadTestTrackingData(coverageDataFile: File): Map<String, Map<String, IntArray>> {
-    val tracesDir = TestTrackingCallback.createTracesDir(coverageDataFile)
-    return try {
-        TestTrackingIOUtil.loadTestTrackingData(tracesDir)
-    } finally {
-        tracesDir.deleteRecursively()
-    }
-}
-
 private fun ClassData.getLinesData() = (lines ?: Array<LineData?>(0) { null })
     .filterIsInstance<LineData>().sortedBy { it.lineNumber }
 
-fun extractTestTrackingDataFromFile(file: File): Map<Int, Set<String>> =
-    extractInfoFromFile(file, TestTrackingMatcher())
-
-internal fun extractInstructionsInfoFromFile(file: File): Map<Int, String> =
-    extractInfoFromFile(file, InstructionsInfoMatcher())
-
-internal fun extractBranchesInfoFromFile(file: File): Map<Int, String> =
-    extractInfoFromFile(file, BranchesInfoMatcher())
-
-private fun <T> extractInfoFromFile(file: File, matcher: Matcher<T>): T {
+fun extractTestTrackingDataFromFile(file: File): Map<Int, Set<String>> {
+    val matcher = TestTrackingMatcher()
     processFile(file, matcher)
     return matcher.result
-}
-
-fun pathToFile(name: String, vararg names: String): File = Paths.get(name, *names).toFile()
-fun String.toSystemIndependent() = replace("\r\n", "\n")
-fun <T, U> Iterable<T>.product(other: Iterable<U>): List<Pair<T, U>> =
-    flatMap { l -> other.map { r -> l to r } }
-
-private fun getVMVersion(): Int {
-    var version = System.getProperty("java.version")
-    if (version.startsWith("1.")) {
-        version = version.substring(2, 3)
-    } else {
-        val dot = version.indexOf(".")
-        if (dot != -1) {
-            version = version.substring(0, dot)
-        }
-    }
-    return version.toInt()
 }
 
 fun extractTestConfiguration(file: File): TestConfiguration {

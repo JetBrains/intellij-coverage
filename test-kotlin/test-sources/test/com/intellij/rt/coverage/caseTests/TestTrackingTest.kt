@@ -18,12 +18,15 @@ package com.intellij.rt.coverage.caseTests
 
 import com.intellij.rt.coverage.*
 import com.intellij.rt.coverage.data.ProjectData
+import com.intellij.rt.coverage.util.TestTrackingCallback
+import com.intellij.rt.coverage.util.TestTrackingIOUtil
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import testData.custom.testTracking.parallelTests.CALLS_PER_LINE
 import testData.custom.testTracking.sequentialTests.TESTS
+import java.io.File
 
 @RunWith(Parameterized::class)
 internal class TestTrackingTest(
@@ -81,5 +84,38 @@ internal class TestTrackingTest(
         Assert.assertEquals(5, lines.size)
         lines.values.forEach { Assert.assertEquals(TESTS, it.size) }
         assertEqualsLines(projectData, configuration, coverage)
+    }
+}
+
+private fun assertEqualsTestTracking(
+    coverageDataFile: File,
+    expected: Map<Int, Set<String>>,
+    classNames: List<String>
+) {
+    val actual = testTrackingLines(coverageDataFile, classNames)
+    Assert.assertEquals(expected, actual)
+}
+
+private fun testTrackingLines(coverageDataFile: File, classNames: List<String>): Map<Int, Set<String>> {
+    val result = hashMapOf<Int, MutableSet<String>>()
+    val data = loadTestTrackingData(coverageDataFile)
+    for ((testName, testData) in data) {
+        for ((className, coveredLines) in testData) {
+            if (all in classNames || className in classNames) {
+                for (line in coveredLines) {
+                    result.computeIfAbsent(line) { hashSetOf() }.add(testName)
+                }
+            }
+        }
+    }
+    return result
+}
+
+private fun loadTestTrackingData(coverageDataFile: File): Map<String, Map<String, IntArray>> {
+    val tracesDir = TestTrackingCallback.createTracesDir(coverageDataFile)
+    return try {
+        TestTrackingIOUtil.loadTestTrackingData(tracesDir)
+    } finally {
+        tracesDir.deleteRecursively()
     }
 }
