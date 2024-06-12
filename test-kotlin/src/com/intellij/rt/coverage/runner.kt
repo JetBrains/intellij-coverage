@@ -45,7 +45,7 @@ internal enum class TestTracking {
     ARRAY, CLASS_DATA
 }
 
-internal sealed class CollectedData {
+internal abstract class TestResult {
     abstract val prefix: String
     abstract fun collectActualData(project: ProjectData, configuration: TestConfiguration, ): Map<Int, String>
     abstract fun provideMatcher(): Matcher<Map<Int, String>>
@@ -55,7 +55,7 @@ internal sealed class CollectedData {
         return provideMatcher().also { processFile(fileWithMarkers, it) }.result
     }
 
-    internal data object CoverageResults : CollectedData() {
+    internal object CoverageResults : TestResult() {
         override val prefix: String get() = "// coverage: "
         override fun collectActualData(
             project: ProjectData,
@@ -80,7 +80,7 @@ internal sealed class CollectedData {
         private fun Map<Int, String>.remapPartialToFull() = mapValues { if (it.value == "PARTIAL") "FULL" else it.value }
     }
 
-    internal data object BranchResults : CollectedData() {
+    internal object BranchResults : TestResult() {
         override val prefix: String get() = "// branches: "
         override fun collectActualData(project: ProjectData, configuration: TestConfiguration): Map<Int, String> {
             return coverageLines(project, configuration.classes)
@@ -105,7 +105,7 @@ internal sealed class CollectedData {
         return allData.getLinesData()
     }
 
-    internal data object InstructionResults : CollectedData() {
+    internal object InstructionResults : TestResult() {
         override val prefix: String
             get() = "// stats: "
 
@@ -135,12 +135,10 @@ internal sealed class CollectedData {
     }
 
     companion object {
-        private val ONLY_COVERAGE = listOf(CoverageResults)
-        private val WITH_BRANCHES = listOf(CoverageResults, BranchResults)
-        fun expectedData(configuration: TestConfiguration, coverage: Coverage): List<CollectedData> {
-            if (configuration.fileWithMarkers == null) return ONLY_COVERAGE
-            val result = if (coverage.isBranchCoverage()) WITH_BRANCHES else ONLY_COVERAGE
-            return result
+        fun collectTestResults(configuration: TestConfiguration, coverage: Coverage): List<TestResult> {
+            if (configuration.fileWithMarkers == null) return listOf(CoverageResults)
+            if (coverage.isBranchCoverage()) return listOf(CoverageResults, BranchResults)
+            return listOf(CoverageResults)
         }
     }
 }
@@ -197,15 +195,16 @@ internal fun assertEmptyLogFile(coverageDataFile: File) {
 }
 
 internal fun assertEqualsLines(project: ProjectData, configuration: TestConfiguration, coverage: Coverage) {
-    val checks = CollectedData.expectedData(configuration, coverage)
-    if (configuration.fileWithMarkers != null) {
-        for (check in checks) {
-            assertEqualsFiles(configuration.fileWithMarkers, check, project, configuration, coverage)
+    val testResults = TestResult.collectTestResults(configuration, coverage)
+    val fileWithMarkers = configuration.fileWithMarkers
+    if (fileWithMarkers != null) {
+        for (testResult in testResults) {
+            assertEqualsFiles(fileWithMarkers, testResult, project, configuration, coverage)
         }
     } else {
-        for (check in checks) {
-            val expected = check.collectExpectedData(configuration, coverage)
-            val actual = check.collectActualData(project, configuration)
+        for (testResult in testResults) {
+            val expected = testResult.collectExpectedData(configuration, coverage)
+            val actual = testResult.collectActualData(project, configuration)
             Assert.assertEquals(expected, actual)
         }
     }
@@ -220,11 +219,11 @@ internal fun assertEqualsTestTracking(
     Assert.assertEquals(expected, actual)
 }
 
-internal fun assertEqualsFiles(file: File, check: CollectedData, project: ProjectData, configuration: TestConfiguration, coverage: Coverage) {
-    val regex = check.provideMatcher().regex
-    val prefix = check.prefix
-    val actual = check.collectActualData(project, configuration)
-    val expected = check.collectExpectedData(configuration, coverage)
+internal fun assertEqualsFiles(file: File, testResult: TestResult, project: ProjectData, configuration: TestConfiguration, coverage: Coverage) {
+    val regex = testResult.provideMatcher().regex
+    val prefix = testResult.prefix
+    val actual = testResult.collectActualData(project, configuration)
+    val expected = testResult.collectExpectedData(configuration, coverage)
     val originalContent = file.readText()
     val withoutComments = originalContent.lines().map { line ->
         if (!line.contains(regex)) line to -1 else {

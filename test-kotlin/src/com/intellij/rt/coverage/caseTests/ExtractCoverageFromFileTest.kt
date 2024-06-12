@@ -38,6 +38,6 @@ internal class ExtractCoverageFromFileTest {
         assertEquals(listOf("A", "B", "C", "D"), testConfiguration.classes)
         assertEquals(listOf("-hello", "bye"), testConfiguration.extraArgs)
         assertTrue(testConfiguration.calculateUnloaded)
-        assertEquals(expected, CollectedData.CoverageResults.collectExpectedData(testConfiguration, Coverage.BRANCH))
+        assertEquals(expected, TestResult.CoverageResults.collectExpectedData(testConfiguration, Coverage.BRANCH))
     }
 }

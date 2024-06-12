@@ -28,7 +28,7 @@ internal class InstructionsBranchesTest : CoverageTest() {
     }
 
     override fun verifyResults(projectData: ProjectData, configuration: TestConfiguration) {
-        assertEqualsFiles(configuration.fileWithMarkers!!, CollectedData.InstructionResults, projectData, configuration, coverage)
+        assertEqualsFiles(configuration.fileWithMarkers!!, TestResult.InstructionResults, projectData, configuration, coverage)
     }
 
     //===GENERATED TESTS===
