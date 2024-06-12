@@ -64,6 +64,12 @@ allprojects {
   tasks.withType(JavaCompile) {
     options.compilerArgs << '-Xlint:-options'
   }
+
+  if (rootProject.hasProperty("parallel.tests")) {
+    tasks.withType(Test).configureEach {
+      maxParallelForks = Math.min(2, Runtime.getRuntime().availableProcessors())
+    }
+  }
 }
 
 dependencies {

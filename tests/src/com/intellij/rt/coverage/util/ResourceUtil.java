@@ -33,6 +33,10 @@ public class ResourceUtil {
 
   public static String getAgentPath(final String agentName) throws IOException {
     File dist = new File("../dist");
+    return getAgentPath(dist, agentName);
+  }
+
+  public static String getAgentPath(File dist, final String agentName) throws IOException {
     File[] jars = dist.listFiles(new FilenameFilter() {
       public boolean accept(File dir, String name) {
         return name.startsWith(agentName) && new File(dir, name).isFile();

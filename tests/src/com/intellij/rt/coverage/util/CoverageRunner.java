@@ -30,8 +30,16 @@ public class CoverageRunner {
   }
 
   public static ProjectData runCoverage(String testDataPath, File coverageDataFile, final String patterns,
-                                        String classToRun, final boolean branchCoverage, String[] extraArgs, boolean calcUnloaded, boolean testTracking) throws IOException, InterruptedException {
+                                        String classToRun, final boolean branchCoverage, String[] extraArgs,
+                                        boolean calcUnloaded, boolean testTracking) throws IOException, InterruptedException {
     String coverageAgentPath = ResourceUtil.getAgentPath("intellij-coverage-agent");
+    return runCoverage(coverageAgentPath, testDataPath, coverageDataFile, patterns, classToRun, branchCoverage, extraArgs, calcUnloaded, testTracking);
+  }
+
+  public static ProjectData runCoverage(String coverageAgentPath,
+                                        String testDataPath, File coverageDataFile, final String patterns,
+                                        String classToRun, final boolean branchCoverage, String[] extraArgs,
+                                        boolean calcUnloaded, boolean testTracking) throws IOException, InterruptedException {
 
     String[] commandLine = {
 //        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
