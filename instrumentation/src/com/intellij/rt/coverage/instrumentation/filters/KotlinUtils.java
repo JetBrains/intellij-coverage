@@ -64,6 +64,7 @@ public class KotlinUtils {
     result.add(new KotlinCoroutinesFilter());
     result.add(new KotlinDeprecatedMethodFilter());
     result.add(new KotlinDefaultArgsLineFilter());
+    result.add(new KotlinTryFinallyLineFilter());
 
     result.addAll(ComposeUtils.createLineFilters());
     return result;

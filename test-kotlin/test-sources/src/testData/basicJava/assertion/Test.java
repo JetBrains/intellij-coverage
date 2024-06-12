@@ -29,7 +29,7 @@ public class Test { // coverage: FULL // stats: 6/6
     doAssert(true); // coverage: FULL // stats: 2/2
     try {
       doAssert(false); // coverage: FULL // stats: 2/2
-    } catch (AssertionError ignore) { // coverage: FULL // stats: 1/1
+    } catch (AssertionError ignore) {
     }
   }
 }
