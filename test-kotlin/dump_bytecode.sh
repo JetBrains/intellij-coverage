@@ -17,16 +17,29 @@
 #
 
 TEST_CASE="$1"
+MODULE="$2"
+
+if [ -z "$MODULE" ]; then
+  MODULE="test-sources"
+fi
 
 if [ -z "$TEST_CASE" ]; then
   echo "No test case provided"
   exit 1
 fi
 
+SOURCE="kotlin"
+
+if [ "$SOURCE" = "kotlin" ]; then
+    TEST_FILE="test.kt"
+else
+    TEST_FILE="Test.java"
+fi
+
 TEST_CASE="${TEST_CASE//.//}"
-echo "Test case: file://$(pwd)/src/testData/${TEST_CASE}/test.kt"
+echo "Test case: file://$(pwd)/${MODULE}/src/testData/${TEST_CASE}/$TEST_FILE"
 
-../gradlew :test-kotlin:testClasses > /dev/null || exit 2
+../gradlew :test-kotlin:classes > /dev/null || exit 2
 
-javap -v -l -p build/classes/kotlin/test/testData/"$TEST_CASE"/*.class > bytecode.txt || exit 3
+javap -v -l -p "${MODULE}"/build/classes/"$SOURCE"/main/testData/"$TEST_CASE"/*.class > bytecode.txt || exit 3
 echo "file://$(pwd)"/bytecode.txt
