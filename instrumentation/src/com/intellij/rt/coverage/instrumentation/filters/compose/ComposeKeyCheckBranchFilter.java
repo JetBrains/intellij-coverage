@@ -27,7 +27,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Type;
 /**
  * Skip the branch caused by the current key comparison. The key is passed as an additional last argument.
  * <ol>
- *   <li>ILOAD <last parameter></li>
+ *   <li>ILOAD [last parameter]</li>
  *   <li>ICONST/BIPUSH</li>
  *   <li>IAND</li>
  *   <li>ICONST/BIPUSH</li>
@@ -35,7 +35,7 @@ import org.jetbrains.coverage.org.objectweb.asm.Type;
  * </ol>
  * Or alternatively,
  * <ol>
- *   <li>ILOAD <last parameter></li>
+ *   <li>ILOAD [last parameter]</li>
  *   <li>IF_NE</li>
  * </ol>
  */
