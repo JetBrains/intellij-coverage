@@ -31,7 +31,7 @@ fun Counter() {                                 // coverage: FULL
     }) {                                        // coverage: FULL 
         Text("count = $count")                  // coverage: FULL 
     }
-}                                               // coverage: NONE 
+}                                               // coverage: FULL
 
 @Composable
 @Preview
@@ -46,7 +46,7 @@ fun App() {                                                  // coverage: FULL
         }
     }
     Counter()                                               // coverage: FULL 
-}                                                           // coverage: NONE 
+}                                                           // coverage: FULL
 
 private fun assert(value: Boolean) {
     if (!value) error("Assertion failed") // coverage: PARTIAL // branches: 1/2

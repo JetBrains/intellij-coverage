@@ -31,6 +31,7 @@ import com.intellij.rt.coverage.instrumentation.dataAccess.EmptyCoverageDataAcce
 import com.intellij.rt.coverage.instrumentation.filters.FilterUtils;
 import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
 import com.intellij.rt.coverage.instrumentation.filters.methods.MethodFilter;
+import com.intellij.rt.coverage.instrumentation.util.InsertLineAfterJumpVisitor;
 import com.intellij.rt.coverage.instrumentation.util.LinesUtil;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.OptionsUtil;
@@ -96,7 +97,8 @@ public class InstrumentationVisitor extends ClassVisitor {
         super.visitEnd();
         if (myDataAccess.getDataAccess() != EmptyCoverageDataAccess.INSTANCE) {
           MethodVisitor methodVisitor = InstrumentationVisitor.super.visitMethod(access, name, descriptor, signature, exceptions);
-          enumerator.accept(myContext.hasNoLinesInCurrentMethod() ? methodVisitor : new HitsVisitor(methodVisitor));
+          MethodVisitor hitsVisitor = new InsertLineAfterJumpVisitor(new HitsVisitor(methodVisitor));
+          enumerator.accept(myContext.hasNoLinesInCurrentMethod() ? methodVisitor : hitsVisitor);
         }
       }
     };

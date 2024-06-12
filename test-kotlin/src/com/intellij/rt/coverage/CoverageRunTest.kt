@@ -129,6 +129,9 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testCoroutinesInline() = test("coroutines.inline")
 
     @Test
+    fun testCoroutinesJumpAfterCondition() = test("coroutines.jumpAfterCondition")
+
+    @Test
     fun testCoroutinesLambda() = test("coroutines.lambda")
 
     @Test

@@ -29,7 +29,7 @@ private fun Foo(): Int {
 @Composable
 private fun Boo() {   // coverage: FULL 
     Foo()             // coverage: FULL 
-}                     // coverage: NONE 
+}                     // coverage: FULL
 
 @OptIn(ExperimentalTestApi::class)
 fun main() {
