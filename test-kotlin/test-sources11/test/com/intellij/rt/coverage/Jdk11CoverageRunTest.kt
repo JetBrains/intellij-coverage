@@ -36,6 +36,12 @@ internal class Jdk11CoverageRunTest(override val coverage: Coverage, override va
     //===GENERATED TESTS===
 
     @Test
+    fun testBasicJavaTryWithResourcesJava() = test("basicJava.tryWithResources.java")
+
+    @Test
+    fun testBasicJavaTryWithResourcesKotlin() = test("basicJava.tryWithResources.kotlin")
+
+    @Test
     fun testComposeBasic() = test("compose.basic")
 
     @Test

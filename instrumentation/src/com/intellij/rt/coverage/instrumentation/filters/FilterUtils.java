@@ -56,6 +56,7 @@ public class FilterUtils {
     List<CoverageFilter> result = KotlinUtils.createLineFilters();
     result.add(new ClosingBracesFilter());
     result.add(new TryFinallyLineFilter());
+    result.add(new TryWithResourcesLineFilter());
     result.add(new AnnotationIgnoredMethodFilter());
 
     if (!(result.get(result.size() - 1) instanceof  AnnotationIgnoredMethodFilter)) {
