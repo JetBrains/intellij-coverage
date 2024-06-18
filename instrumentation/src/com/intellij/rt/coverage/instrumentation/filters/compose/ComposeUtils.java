@@ -27,11 +27,8 @@ import java.util.List;
 public class ComposeUtils {
   public static List<CoverageFilter> createBranchFilters() {
     List<CoverageFilter> result = new ArrayList<CoverageFilter>();
-    result.add(new ComposeSkippingBranchFilter());
-    result.add(new ComposeTracingBranchFilter());
+    result.add(new ComposeCheckingBranchFilter());
     result.add(new ComposeKeyCheckBranchFilter());
-    result.add(new ComposeSourceInfoBranchFilter());
-    result.add(new ComposeEndRestartGroupBranchFilter());
     return result;
   }
 

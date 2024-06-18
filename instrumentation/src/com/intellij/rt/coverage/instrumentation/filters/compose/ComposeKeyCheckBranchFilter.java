@@ -26,22 +26,21 @@ import org.jetbrains.coverage.org.objectweb.asm.Type;
 
 /**
  * Skip the branch caused by the current key comparison. The key is passed as an additional last argument.
- * <ol>
- *   <li>ILOAD [last parameter]</li>
- *   <li>ICONST/BIPUSH</li>
- *   <li>IAND</li>
- *   <li>ICONST/BIPUSH</li>
- *   <li>if_icmpne</li>
- * </ol>
- * Or alternatively,
- * <ol>
- *   <li>ILOAD [last parameter]</li>
- *   <li>IF_NE</li>
- * </ol>
  */
 public class ComposeKeyCheckBranchFilter extends CoverageFilter {
   private int myKeyIndex;
-  private int myState = 0;
+  private State myState = State.INITIAL;
+  private int mySavedVarIndex = -1;
+
+  //            SAVE_LAST
+  //               ↕
+  // INITIAL -> LOAD_LAST → LOAD_CONST → AND →  LOAD_CONST_2
+  //               |                      |          |
+  //               ↓                      |          |
+  //            COMPARE <-----------------|<---------|
+  private enum State {
+    INITIAL, LOAD_LAST, SAVE_LAST, LOAD_CONST, AND, LOAD_CONST_2, COMPARE
+  }
 
   @Override
   public boolean isApplicable(InstrumentationData context) {
@@ -57,44 +56,55 @@ public class ComposeKeyCheckBranchFilter extends CoverageFilter {
   @Override
   public void visitVarInsn(int opcode, int varIndex) {
     super.visitVarInsn(opcode, varIndex);
-    if (varIndex == myKeyIndex) {
-      myState = 1;
+    if ((varIndex == myKeyIndex || varIndex == mySavedVarIndex) && opcode == Opcodes.ILOAD) {
+      myState = State.LOAD_LAST;
+    } else if (myState == State.LOAD_LAST && opcode == Opcodes.ISTORE) {
+      mySavedVarIndex = varIndex;
+      myState = State.SAVE_LAST;
     } else {
-      myState = 0;
+      myState = State.INITIAL;
     }
   }
 
   @Override
   public void visitInsn(int opcode) {
     super.visitInsn(opcode);
-    if (InstrumentationUtils.isIntConstLoading(opcode) && (myState == 1 || myState == 3)) {
-      myState++;
-    } else if (opcode == Opcodes.IAND && myState == 2) {
-      myState = 3;
+    boolean isConst = InstrumentationUtils.isIntConstLoading(opcode);
+    if (isConst && myState == State.LOAD_LAST) {
+      myState = State.LOAD_CONST;
+    } else if (isConst && myState == State.AND) {
+      myState = State.LOAD_CONST_2;
+    } else if (opcode == Opcodes.IAND && myState == State.LOAD_CONST) {
+      myState = State.AND;
     } else {
-      myState = 0;
+      myState = State.INITIAL;
     }
   }
 
   @Override
   public void visitIntInsn(int opcode, int operand) {
     super.visitIntInsn(opcode, operand);
-    if (InstrumentationUtils.isIntConstLoading(opcode) && (myState == 1 || myState == 3)) {
-      myState++;
+    boolean isConst = InstrumentationUtils.isIntConstLoading(opcode);
+    if (isConst && myState == State.LOAD_LAST) {
+      myState = State.LOAD_CONST;
+    } else if (isConst && myState == State.AND) {
+      myState = State.LOAD_CONST_2;
     } else {
-      myState = 0;
+      myState = State.INITIAL;
     }
   }
 
   @Override
   public void visitJumpInsn(int opcode, Label label) {
     super.visitJumpInsn(opcode, label);
-    if (opcode == Opcodes.IF_ICMPNE && myState == 4) {
+    if (opcode == Opcodes.IF_ICMPNE && myState == State.LOAD_CONST_2) {
       myContext.removeLastJump();
-    } else if (opcode == Opcodes.IFNE && myState == 1) {
+      myState = State.COMPARE;
+    } else if (opcode == Opcodes.IFNE && (myState == State.LOAD_LAST || myState == State.AND)) {
       myContext.removeLastJump();
+      myState = State.COMPARE;
     } else {
-      myState = 0;
+      myState = State.INITIAL;
     }
   }
 
