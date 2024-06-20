@@ -57,6 +57,7 @@ public class FilterUtils {
     result.add(new ClosingBracesFilter());
     result.add(new TryFinallyLineFilter());
     result.add(new TryWithResourcesLineFilter());
+    result.add(new TryWithResourcesJava8LineFilter());
     result.add(new AnnotationIgnoredMethodFilter());
 
     if (!(result.get(result.size() - 1) instanceof  AnnotationIgnoredMethodFilter)) {

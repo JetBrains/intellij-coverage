@@ -27,15 +27,45 @@ public class Test { // coverage: NONE
   }
 
   public static void main(String[] args) throws IOException {
-    test1(); // coverage: FULL
+    test2(); // coverage: FULL
+    test3(); // coverage: FULL
+    test4(); // coverage: FULL
+    test5(); // coverage: FULL
   }
 
-  private static void test1() {
-    var y = new AutoCloseableImpl(); // coverage: FULL
-    try (y) {
+  private static void test2() throws IOException {
+    try (
+        Closeable x = new AutoCloseableImpl() // coverage: FULL
+    ) {
       System.out.println("action"); // coverage: FULL
     }
     System.out.println(); // coverage: FULL
   }
 
+  private static int test3() throws IOException {
+    try (
+        Closeable x = new AutoCloseableImpl(); // coverage: FULL
+    ) {
+      return 42; // coverage: FULL
+    }
+  }
+
+  private static int test4() throws IOException {
+    try (
+        Closeable x = new AutoCloseableImpl() // coverage: FULL
+    ) {
+      return 42; // coverage: FULL
+    } catch (Exception e) {
+      throw new RuntimeException(e); // coverage: NONE
+    }
+  }
+
+  private static int test5() throws IOException {
+    try (
+          Closeable y = new AutoCloseableImpl(); // coverage: FULL
+          Closeable x = new AutoCloseableImpl() // coverage: FULL
+    ) {
+      return 42; // coverage: FULL
+    }
+  }
 }

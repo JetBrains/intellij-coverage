@@ -28,9 +28,9 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  */
 public class TryWithResourcesLineFilter extends CoverageFilter {
   private State myState = State.INITIAL;
-  private boolean myJumpVisited = false;
   private boolean myHasInstructions = false;
   private int myCurrentLine = -1;
+  private int myJumpsToRemove = 0;
 
   // INITIAL → STORE_INITIAL_EXCEPTION <--------|
   //    ↘         ↓                             |
@@ -46,11 +46,13 @@ public class TryWithResourcesLineFilter extends CoverageFilter {
   //          ↓                                 |
   //  LOAD_ADDITIONAL_EXCEPTION                 |
   //          ↓                                 |
-  //  CALL_ADD_SUPPRESSED                       |
-  //          ↓                                 |
-  //  LOAD_INITIAL_EXCEPTION_2                  |
-  //          ↓                                 |
-  //        THROW ------------------------------|
+  //  CALL_ADD_SUPPRESSED     ↘                 |
+  //          ↓                 GOTO_2          |
+  //  LOAD_INITIAL_EXCEPTION_2 ↙                |
+  //      ↕             ↘                       |
+  // CALL_CLOSE_2       THROW ------------------|
+  //    ↓
+  //   GOTO_3
   private enum State {
     INITIAL,
     STORE_INITIAL_EXCEPTION,
@@ -62,8 +64,11 @@ public class TryWithResourcesLineFilter extends CoverageFilter {
     LOAD_INITIAL_EXCEPTION,
     LOAD_ADDITIONAL_EXCEPTION,
     CALL_ADD_SUPPRESSED,
+    GOTO_2, // java 8
     LOAD_INITIAL_EXCEPTION_2,
     THROW, // final
+    CALL_CLOSE_2, // java 8
+    GOTO_3, // java 8
   }
 
   @Override
@@ -73,7 +78,7 @@ public class TryWithResourcesLineFilter extends CoverageFilter {
 
   private void tryRemoveLine() {
     if (myCurrentLine != -1 && !myHasInstructions
-        && (myState == State.GOTO || myState == State.THROW || myState == State.CALL_CLOSE)) {
+        && (myState == State.GOTO || myState == State.THROW || myState == State.CALL_CLOSE || myState == State.GOTO_3)) {
       myContext.removeLine(myCurrentLine);
       myCurrentLine = -1;
     }
@@ -86,7 +91,7 @@ public class TryWithResourcesLineFilter extends CoverageFilter {
     myCurrentLine = line;
     myState = State.INITIAL;
     myHasInstructions = false;
-    myJumpVisited = false;
+    myJumpsToRemove = 0;
   }
 
   @Override
@@ -110,8 +115,11 @@ public class TryWithResourcesLineFilter extends CoverageFilter {
       myState = State.LOAD_INITIAL_EXCEPTION;
     } else if (myState == State.LOAD_INITIAL_EXCEPTION && opcode == Opcodes.ALOAD) {
       myState = State.LOAD_ADDITIONAL_EXCEPTION;
-    } else if (myState == State.CALL_ADD_SUPPRESSED && opcode == Opcodes.ALOAD) {
+    } else if ((myState == State.CALL_ADD_SUPPRESSED || myState == State.GOTO_2 || myState == State.CALL_CLOSE_2)
+        && opcode == Opcodes.ALOAD) {
       myState = State.LOAD_INITIAL_EXCEPTION_2;
+    } else if (myState == State.CALL_CLOSE_2 && opcode == Opcodes.GOTO) {
+      myState = State.GOTO_3;
     } else {
       myState = State.INITIAL;
       myHasInstructions = true;
@@ -123,13 +131,14 @@ public class TryWithResourcesLineFilter extends CoverageFilter {
     super.visitJumpInsn(opcode, label);
     if (myState == State.LOAD_RESOURCE && opcode == Opcodes.IFNULL) {
       myState = State.CHECK_RESOURCE_NULL;
-      myJumpVisited = true;
+      myJumpsToRemove++;
     } else if (myState == State.CALL_CLOSE && opcode == Opcodes.GOTO) {
       myState = State.GOTO;
-      if (myJumpVisited) {
+      while (myJumpsToRemove-- > 0) {
         myContext.removeLastJump();
-        myJumpVisited = false;
       }
+    } else if (myState == State.CALL_ADD_SUPPRESSED && opcode == Opcodes.GOTO) {
+      myState = State.GOTO_2;
     } else {
       myState = State.INITIAL;
       myHasInstructions = true;
@@ -139,21 +148,26 @@ public class TryWithResourcesLineFilter extends CoverageFilter {
   @Override
   public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
     super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
-    if (myState == State.LOAD_RESOURCE
-        && (opcode == Opcodes.INVOKEINTERFACE || opcode == Opcodes.INVOKEVIRTUAL)
+    if ((opcode == Opcodes.INVOKEINTERFACE || opcode == Opcodes.INVOKEVIRTUAL)
         && "close".equals(name)
         && "()V".equals(descriptor)) {
-      myState = State.CALL_CLOSE;
+      if (myState == State.LOAD_RESOURCE) {
+        myState = State.CALL_CLOSE;
+        return;
+      } else if (myState == State.LOAD_INITIAL_EXCEPTION_2) {
+        myState = State.CALL_CLOSE_2;
+        return;
+      }
     } else if (myState == State.LOAD_ADDITIONAL_EXCEPTION
         && opcode == Opcodes.INVOKEVIRTUAL
         && "java/lang/Throwable".equals(owner)
         && "addSuppressed".equals(name)
         && "(Ljava/lang/Throwable;)V".equals(descriptor)) {
       myState = State.CALL_ADD_SUPPRESSED;
-    } else {
-      myState = State.INITIAL;
-      myHasInstructions = true;
+      return;
     }
+    myState = State.INITIAL;
+    myHasInstructions = true;
   }
 
   @Override
