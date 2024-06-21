@@ -4,6 +4,7 @@ out
 build
 .gradle
 .idea/
+.kotlin/
 gradle.properties
 /tests/external.jmh.gradle
 /*.patch
