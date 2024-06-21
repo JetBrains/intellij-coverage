@@ -71,6 +71,9 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
     fun testBasicJavaTryWithResourcesJava() = test("basicJava.tryWithResources.java")
 
     @Test
+    fun testBasicJavaTryWithResourcesKotlin() = test("basicJava.tryWithResources.kotlin")
+
+    @Test
     fun testCasesElseif() = test("cases.elseif")
 
     @Test
