@@ -38,6 +38,11 @@ public abstract class BaseLineFilter extends CoverageFilter {
   private boolean myHasInstructions;
   private int myCurrentLine = -1;
 
+  // Fields used only for debug purposes.
+  // It is convenient to debug by adding conditional breakpoints to `tryRemoveLine` and `setHasInstructions`.
+  private static final int DEBUG_LINE = -1;
+  private static final Class<?> DEBUG_FILTER_CLASS = BaseLineFilter.class;
+
   private void tryRemoveLine() {
     if (myCurrentLine != -1 && !myHasInstructions && shouldRemoveLine()) {
       myContext.removeLine(myCurrentLine);
@@ -63,12 +68,16 @@ public abstract class BaseLineFilter extends CoverageFilter {
     return myCurrentLine;
   }
 
+  protected boolean wasLineSeenBefore() {
+    // do not remove lines that are previously used
+    return myContext.getLineData(myCurrentLine) != null;
+  }
+
   @Override
   public void visitLineNumber(int line, Label start) {
     tryRemoveLine();
-    // do not remove lines that are previously used
-    myHasInstructions = myContext.getLineData(line) != null;
     myCurrentLine = line;
+    myHasInstructions = wasLineSeenBefore();
     super.visitLineNumber(line, start);
   }
 

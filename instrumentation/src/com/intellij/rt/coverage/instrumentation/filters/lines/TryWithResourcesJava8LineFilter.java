@@ -45,6 +45,12 @@ public class TryWithResourcesJava8LineFilter extends BaseLineFilter {
   }
 
   @Override
+  protected boolean wasLineSeenBefore() {
+    int previousState = myCandidates.get(getCurrentLine());
+    return previousState == -1;
+  }
+
+  @Override
   public void visitLineNumber(int line, Label start) {
     myCandidates.put(getCurrentLine(), hasInstructions() ? -1 : myState);
     super.visitLineNumber(line, start);

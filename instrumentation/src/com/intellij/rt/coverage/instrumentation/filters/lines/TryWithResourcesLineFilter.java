@@ -28,31 +28,31 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 public class TryWithResourcesLineFilter extends BaseLineFilter {
   private State myState = State.INITIAL;
   private int myJumpsToRemove = 0;
+  private int myExceptionVarIndex = -1;
 
-  // INITIAL → STORE_INITIAL_EXCEPTION <--------|
-  //    ↘         ↓                             |
-  //     LOAD_RESOURCE ↔ CHECK_RESOURCE_NULL    |
-  //          ↕                                 |
-  //       CALL_CLOSE                           |
-  //          ↓                                 |
-  //         GOTO                               |
-  //          ↓                                 |
-  //  STORE_ADDITIONAL_EXCEPTION                |
-  //          ↓                                 |
-  //  LOAD_INITIAL_EXCEPTION                    |
-  //          ↓                                 |
-  //  LOAD_ADDITIONAL_EXCEPTION                 |
-  //          ↓                                 |
-  //  CALL_ADD_SUPPRESSED     ↘                 |
-  //          ↓                 GOTO_2          |
-  //  LOAD_INITIAL_EXCEPTION_2 ↙                |
-  //      ↕             ↘                       |
-  // CALL_CLOSE_2       THROW ------------------|
-  //    ↓
-  //   GOTO_3
+  // INITIAL → STORE_INITIAL_EXCEPTION/2 <-----|
+  //    ↘         ↓                            |
+  // ---->LOAD_RESOURCE ↔ CHECK_RESOURCE_NULL  |
+  // |         ↕                               |
+  // |      CALL_CLOSE---------------|         |
+  // |         ↓                     |         |
+  // |        GOTO                   |         |
+  // |         ↓                     |         |
+  // |   STORE_ADDITIONAL_EXCEPTION  |         |
+  // |         ↓                     |         |
+  // |   LOAD_INITIAL_EXCEPTION      |         |
+  // |         ↓                     |         |
+  // |   LOAD_ADDITIONAL_EXCEPTION   |         |
+  // |         ↓                     |         |
+  // |     CALL_ADD_SUPPRESSED       |         |
+  // |     ↙          ↓             ↙          |
+  // GOTO_2  LOAD_INITIAL_EXCEPTION_2          |
+  //                  ↓                        |
+  //                 THROW --------------------|
   private enum State {
     INITIAL,
     STORE_INITIAL_EXCEPTION,
+    STORE_INITIAL_EXCEPTION_2, // final
     LOAD_RESOURCE,
     CHECK_RESOURCE_NULL,
     CALL_CLOSE, // final
@@ -64,8 +64,6 @@ public class TryWithResourcesLineFilter extends BaseLineFilter {
     GOTO_2, // java 8
     LOAD_INITIAL_EXCEPTION_2,
     THROW, // final
-    CALL_CLOSE_2, // java 8
-    GOTO_3, // java 8
   }
 
   @Override
@@ -75,7 +73,8 @@ public class TryWithResourcesLineFilter extends BaseLineFilter {
 
   @Override
   protected boolean shouldRemoveLine() {
-    return myState == State.GOTO || myState == State.THROW || myState == State.CALL_CLOSE || myState == State.GOTO_3;
+    return myState == State.GOTO || myState == State.THROW || myState == State.CALL_CLOSE
+        || myState == State.STORE_INITIAL_EXCEPTION_2;
   }
 
   @Override
@@ -83,31 +82,48 @@ public class TryWithResourcesLineFilter extends BaseLineFilter {
     super.visitLineNumber(line, start);
     myState = State.INITIAL;
     myJumpsToRemove = 0;
+    myExceptionVarIndex = -1;
   }
 
   @Override
   public void visitVarInsn(int opcode, int var) {
     mv.visitVarInsn(opcode, var);
-    if ((myState == State.INITIAL || myState == State.THROW) && opcode == Opcodes.ASTORE) {
-      myState = State.STORE_INITIAL_EXCEPTION;
-    } else if (opcode == Opcodes.ALOAD
-        && (myState == State.STORE_INITIAL_EXCEPTION || myState == State.CHECK_RESOURCE_NULL
-        || myState == State.INITIAL || myState == State.CALL_CLOSE)) {
-      myState = State.LOAD_RESOURCE;
-    } else if (myState == State.GOTO && opcode == Opcodes.ASTORE) {
-      myState = State.STORE_ADDITIONAL_EXCEPTION;
-    } else if (myState == State.STORE_ADDITIONAL_EXCEPTION && opcode == Opcodes.ALOAD) {
-      myState = State.LOAD_INITIAL_EXCEPTION;
-    } else if (myState == State.LOAD_INITIAL_EXCEPTION && opcode == Opcodes.ALOAD) {
-      myState = State.LOAD_ADDITIONAL_EXCEPTION;
-    } else if ((myState == State.CALL_ADD_SUPPRESSED || myState == State.GOTO_2 || myState == State.CALL_CLOSE_2)
-        && opcode == Opcodes.ALOAD) {
-      myState = State.LOAD_INITIAL_EXCEPTION_2;
-    } else if (myState == State.CALL_CLOSE_2 && opcode == Opcodes.GOTO) {
-      myState = State.GOTO_3;
+    if (opcode == Opcodes.ASTORE) {
+      if (myState == State.INITIAL) {
+        myState = State.STORE_INITIAL_EXCEPTION;
+        myExceptionVarIndex = var;
+      } else if (myState == State.THROW) {
+        myState = State.STORE_INITIAL_EXCEPTION_2;
+        myExceptionVarIndex = var;
+      } else if (myState == State.GOTO) {
+        myState = State.STORE_ADDITIONAL_EXCEPTION;
+      } else {
+        setHasInstructions();
+        myState = State.INITIAL;
+      }
+    } else if (opcode == Opcodes.ALOAD) {
+      if (myExceptionVarIndex == var && myState == State.CALL_CLOSE) {
+        myState = State.LOAD_INITIAL_EXCEPTION_2;
+      } else if (myState == State.INITIAL
+          || myState == State.STORE_INITIAL_EXCEPTION
+          || myState == State.STORE_INITIAL_EXCEPTION_2
+          || myState == State.CHECK_RESOURCE_NULL
+          || myState == State.GOTO_2
+          || myState == State.CALL_CLOSE) {
+        myState = State.LOAD_RESOURCE;
+      } else if (myState == State.STORE_ADDITIONAL_EXCEPTION) {
+        myState = State.LOAD_INITIAL_EXCEPTION;
+      } else if (myState == State.LOAD_INITIAL_EXCEPTION) {
+        myState = State.LOAD_ADDITIONAL_EXCEPTION;
+      } else if (myState == State.CALL_ADD_SUPPRESSED) {
+        myState = State.LOAD_INITIAL_EXCEPTION_2;
+      } else {
+        setHasInstructions();
+        myState = State.INITIAL;
+      }
     } else {
-      myState = State.INITIAL;
       setHasInstructions();
+      myState = State.INITIAL;
     }
   }
 
@@ -125,8 +141,8 @@ public class TryWithResourcesLineFilter extends BaseLineFilter {
     } else if (myState == State.CALL_ADD_SUPPRESSED && opcode == Opcodes.GOTO) {
       myState = State.GOTO_2;
     } else {
-      myState = State.INITIAL;
       setHasInstructions();
+      myState = State.INITIAL;
     }
   }
 
@@ -135,24 +151,19 @@ public class TryWithResourcesLineFilter extends BaseLineFilter {
     mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
     if ((opcode == Opcodes.INVOKEINTERFACE || opcode == Opcodes.INVOKEVIRTUAL)
         && "close".equals(name)
-        && "()V".equals(descriptor)) {
-      if (myState == State.LOAD_RESOURCE) {
-        myState = State.CALL_CLOSE;
-        return;
-      } else if (myState == State.LOAD_INITIAL_EXCEPTION_2) {
-        myState = State.CALL_CLOSE_2;
-        return;
-      }
+        && "()V".equals(descriptor)
+        && myState == State.LOAD_RESOURCE) {
+      myState = State.CALL_CLOSE;
     } else if (myState == State.LOAD_ADDITIONAL_EXCEPTION
         && opcode == Opcodes.INVOKEVIRTUAL
         && "java/lang/Throwable".equals(owner)
         && "addSuppressed".equals(name)
         && "(Ljava/lang/Throwable;)V".equals(descriptor)) {
       myState = State.CALL_ADD_SUPPRESSED;
-      return;
+    } else {
+      setHasInstructions();
+      myState = State.INITIAL;
     }
-    myState = State.INITIAL;
-    setHasInstructions();
   }
 
   @Override
@@ -161,8 +172,8 @@ public class TryWithResourcesLineFilter extends BaseLineFilter {
     if (myState == State.LOAD_INITIAL_EXCEPTION_2 && opcode == Opcodes.ATHROW) {
       myState = State.THROW;
     } else {
-      myState = State.INITIAL;
       setHasInstructions();
+      myState = State.INITIAL;
     }
   }
 }
