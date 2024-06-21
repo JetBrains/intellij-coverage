@@ -52,12 +52,13 @@ public class TryWithResourcesJava8LineFilter extends CoverageFilter {
   public void visitLineNumber(int line, Label start) {
     myCandidates.put(myCurrentLine, myHasInstructions ? -1 : myState);
     tryRemoveLine();
+    // do not remove lines that are previously used
+    myHasInstructions = myContext.getLineData(line) != null;
     super.visitLineNumber(line, start);
     myCurrentLine = line;
 
     int previousState = myCandidates.get(myCurrentLine);
     myState = previousState == 0 ? 1 : previousState;
-    myHasInstructions = false;
   }
 
   @Override

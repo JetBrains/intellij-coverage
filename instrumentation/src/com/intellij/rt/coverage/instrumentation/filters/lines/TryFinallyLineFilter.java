@@ -114,9 +114,10 @@ public class TryFinallyLineFilter extends CoverageFilter {
   @Override
   public void visitLineNumber(int line, Label start) {
     tryRemoveLine();
+    // do not remove lines that are previously used
+    myState = myContext.getLineData(line) == null ? State.INITIAL : State.USER_CODE;
     super.visitLineNumber(line, start);
     myCurrentLine = line;
-    myState = State.INITIAL;
   }
 
   @Override

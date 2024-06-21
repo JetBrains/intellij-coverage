@@ -87,10 +87,11 @@ public class TryWithResourcesLineFilter extends CoverageFilter {
   @Override
   public void visitLineNumber(int line, Label start) {
     tryRemoveLine();
+    // do not remove lines that are previously used
+    myHasInstructions = myContext.getLineData(line) != null;
     super.visitLineNumber(line, start);
     myCurrentLine = line;
     myState = State.INITIAL;
-    myHasInstructions = false;
     myJumpsToRemove = 0;
   }
 

@@ -45,6 +45,9 @@ internal class Jdk11CoverageRunTest(override val coverage: Coverage, override va
     fun testComposeDefaultArgs() = test("compose.defaultArgs")
 
     @Test
+    fun testComposeInline() = test("compose.inline")
+
+    @Test
     fun testComposeSynthetic() = test("compose.synthetic")
 
     @Test

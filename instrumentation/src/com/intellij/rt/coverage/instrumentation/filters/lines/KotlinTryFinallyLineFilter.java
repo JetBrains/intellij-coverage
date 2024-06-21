@@ -84,9 +84,13 @@ public class KotlinTryFinallyLineFilter extends CoverageFilter {
   @Override
   public void visitLineNumber(int line, Label start) {
     tryRemoveLine();
+    boolean lineExists = myContext.getLineData(line) != null;
     super.visitLineNumber(line, start);
     myCurrentLine = line;
-    if (myState == State.USER_CODE) {
+    if (lineExists) {
+      // do not remove lines that are previously used
+      myState = State.USER_CODE;
+    } else if (myState == State.USER_CODE) {
       myState = State.INITIAL;
     } else if (myState == State.TRY_START_USER) {
       myState = State.TRY_START;

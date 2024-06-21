@@ -32,8 +32,8 @@ public class Test { // coverage: NONE
 
   private static void test1() {
     var y = new AutoCloseableImpl(); // coverage: FULL
-    try (y) {
-      System.out.println("action"); // coverage: FULL
+    try (y) {                        // coverage: FULL
+      System.out.println("action");  // coverage: FULL
     }
     System.out.println(); // coverage: FULL
   }

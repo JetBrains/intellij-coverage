@@ -72,7 +72,8 @@ public class ComposeSkipGroupLineFilter extends CoverageFilter {
   @Override
   public void visitLineNumber(int line, Label start) {
     tryRemoveLine();
-    myState = -1;
+    // do not remove lines that are previously used
+    myState = myContext.getLineData(line) == null ? -1 : 0;
     myCurrentLine = line;
     super.visitLineNumber(line, start);
   }
