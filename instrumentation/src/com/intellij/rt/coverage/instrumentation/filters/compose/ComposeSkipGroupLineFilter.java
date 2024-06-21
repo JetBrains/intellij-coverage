@@ -17,8 +17,7 @@
 package com.intellij.rt.coverage.instrumentation.filters.compose;
 
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
-import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
-import org.jetbrains.coverage.org.objectweb.asm.Handle;
+import com.intellij.rt.coverage.instrumentation.filters.lines.BaseLineFilter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -29,9 +28,8 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  *   <li>invokeinterface androidx/compose/runtime/Composer.skipToGroupEnd:()V</li>
  * </ol>
  */
-public class ComposeSkipGroupLineFilter extends CoverageFilter {
+public class ComposeSkipGroupLineFilter extends BaseLineFilter {
   private int myState = -1;
-  private int myCurrentLine = -1;
 
   @Override
   public boolean isApplicable(InstrumentationData context) {
@@ -39,18 +37,30 @@ public class ComposeSkipGroupLineFilter extends CoverageFilter {
   }
 
   @Override
+  protected boolean shouldRemoveLine() {
+    return myState == 2;
+  }
+
+  @Override
+  public void visitLineNumber(int line, Label start) {
+    super.visitLineNumber(line, start);
+    myState = -1;
+  }
+
+  @Override
   public void visitVarInsn(int opcode, int varIndex) {
-    super.visitVarInsn(opcode, varIndex);
+    mv.visitVarInsn(opcode, varIndex);
     if (myState == -1 && opcode == Opcodes.ALOAD) {
       myState = 1;
     } else {
       myState = 0;
+      setHasInstructions();
     }
   }
 
   @Override
   public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-    super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+    mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
     if (myState == 1
         && opcode == Opcodes.INVOKEINTERFACE
         && "androidx/compose/runtime/Composer".equals(owner)
@@ -59,94 +69,7 @@ public class ComposeSkipGroupLineFilter extends CoverageFilter {
       myState = 2;
     } else {
       myState = 0;
+      setHasInstructions();
     }
-  }
-
-  private void tryRemoveLine() {
-    if (myCurrentLine != -1 && myState == 2) {
-      myContext.removeLine(myCurrentLine);
-      myCurrentLine = -1;
-    }
-  }
-
-  @Override
-  public void visitLineNumber(int line, Label start) {
-    tryRemoveLine();
-    // do not remove lines that are previously used
-    myState = myContext.getLineData(line) == null ? -1 : 0;
-    myCurrentLine = line;
-    super.visitLineNumber(line, start);
-  }
-
-  @Override
-  public void visitEnd() {
-    super.visitEnd();
-    tryRemoveLine();
-  }
-
-  @Override
-  public void visitJumpInsn(int opcode, Label label) {
-    super.visitJumpInsn(opcode, label);
-    myState = 0;
-  }
-
-  @Override
-  public void visitIntInsn(int opcode, int operand) {
-    super.visitIntInsn(opcode, operand);
-    myState = 0;
-  }
-
-  @Override
-  public void visitInsn(int opcode) {
-    super.visitInsn(opcode);
-    myState = 0;
-  }
-
-  @Override
-  public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
-    super.visitFieldInsn(opcode, owner, name, descriptor);
-    myState = 0;
-  }
-
-  @Override
-  public void visitIincInsn(int varIndex, int increment) {
-    super.visitIincInsn(varIndex, increment);
-    myState = 0;
-  }
-
-  @Override
-  public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
-    super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
-    myState = 0;
-  }
-
-  @Override
-  public void visitLdcInsn(Object value) {
-    super.visitLdcInsn(value);
-    myState = 0;
-  }
-
-  @Override
-  public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-    super.visitLookupSwitchInsn(dflt, keys, labels);
-    myState = 0;
-  }
-
-  @Override
-  public void visitTypeInsn(int opcode, String type) {
-    super.visitTypeInsn(opcode, type);
-    myState = 0;
-  }
-
-  @Override
-  public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
-    super.visitMultiANewArrayInsn(descriptor, numDimensions);
-    myState = 0;
-  }
-
-  @Override
-  public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-    super.visitTableSwitchInsn(min, max, dflt, labels);
-    myState = 0;
   }
 }

@@ -18,7 +18,6 @@ package com.intellij.rt.coverage.instrumentation.filters.lines;
 
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
 import com.intellij.rt.coverage.instrumentation.filters.KotlinUtils;
-import org.jetbrains.coverage.org.objectweb.asm.Handle;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -28,14 +27,13 @@ import java.util.Set;
 /**
  * Ignore NOP instruction generated on a separate line by the kotlin compiler at the beginning of try-finally block.
  */
-public class KotlinTryFinallyLineFilter extends CoverageFilter {
+public class KotlinTryFinallyLineFilter extends BaseLineFilter {
   private final Set<Label> myTryBlockStartLabels = new HashSet<Label>();
   private State myState = State.INITIAL;
-  private int myCurrentLine = -1;
 
   private enum State {
-    INITIAL, USER_CODE,
-    TRY_START, TRY_START_USER, NOP,
+    INITIAL,
+    TRY_START, NOP,
   }
 
   @Override
@@ -43,12 +41,9 @@ public class KotlinTryFinallyLineFilter extends CoverageFilter {
     return KotlinUtils.isKotlinClass(context);
   }
 
-  private void tryRemoveLine() {
-    boolean isFinalState = myState == State.NOP;
-    if (myCurrentLine != -1 && isFinalState) {
-      myContext.removeLine(myCurrentLine);
-      myCurrentLine = -1;
-    }
+  @Override
+  protected boolean shouldRemoveLine() {
+    return myState == State.NOP;
   }
 
   @Override
@@ -63,8 +58,6 @@ public class KotlinTryFinallyLineFilter extends CoverageFilter {
     if (myTryBlockStartLabels.contains(label)) {
       if (myState == State.INITIAL) {
         myState = State.TRY_START;
-      } else if (myState == State.USER_CODE) {
-        myState = State.TRY_START_USER;
       } else {
         myState = State.INITIAL;
       }
@@ -73,99 +66,19 @@ public class KotlinTryFinallyLineFilter extends CoverageFilter {
 
   @Override
   public void visitInsn(int opcode) {
-    super.visitInsn(opcode);
+    mv.visitInsn(opcode);
     if (opcode == Opcodes.NOP && myState == State.TRY_START) {
       myState = State.NOP;
     } else {
-      myState = State.USER_CODE;
+      setHasInstructions();
     }
   }
 
   @Override
   public void visitLineNumber(int line, Label start) {
-    tryRemoveLine();
-    boolean lineExists = myContext.getLineData(line) != null;
     super.visitLineNumber(line, start);
-    myCurrentLine = line;
-    if (lineExists) {
-      // do not remove lines that are previously used
-      myState = State.USER_CODE;
-    } else if (myState == State.USER_CODE) {
+    if (myState != State.TRY_START) {
       myState = State.INITIAL;
-    } else if (myState == State.TRY_START_USER) {
-      myState = State.TRY_START;
     }
-  }
-
-  @Override
-  public void visitEnd() {
-    tryRemoveLine();
-    super.visitEnd();
-  }
-
-  @Override
-  public void visitVarInsn(int opcode, int varIndex) {
-    super.visitVarInsn(opcode, varIndex);
-    myState = State.USER_CODE;
-  }
-
-  @Override
-  public void visitJumpInsn(int opcode, Label label) {
-    super.visitJumpInsn(opcode, label);
-    myState = State.USER_CODE;
-  }
-
-  @Override
-  public void visitIntInsn(int opcode, int operand) {
-    super.visitIntInsn(opcode, operand);
-    myState = State.USER_CODE;
-  }
-
-  @Override
-  public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
-    super.visitFieldInsn(opcode, owner, name, descriptor);
-    myState = State.USER_CODE;
-  }
-
-  @Override
-  public void visitIincInsn(int varIndex, int increment) {
-    super.visitIincInsn(varIndex, increment);
-    myState = State.USER_CODE;
-  }
-
-  @Override
-  public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
-    super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
-    myState = State.USER_CODE;
-  }
-
-  @Override
-  public void visitLdcInsn(Object value) {
-    super.visitLdcInsn(value);
-    myState = State.USER_CODE;
-  }
-
-  @Override
-  public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-    super.visitLookupSwitchInsn(dflt, keys, labels);
-    myState = State.USER_CODE;
-  }
-
-  @Override
-  public void visitTypeInsn(int opcode, String type) {
-    super.visitTypeInsn(opcode, type);
-    myState = State.USER_CODE;
-  }
-
-  @Override
-  public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
-    super.visitMultiANewArrayInsn(descriptor, numDimensions);
-    myState = State.USER_CODE;
-  }
-
-  @Override
-  public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-    super.visitTableSwitchInsn(min, max, dflt, labels);
-    myState = State.USER_CODE;
   }
 }

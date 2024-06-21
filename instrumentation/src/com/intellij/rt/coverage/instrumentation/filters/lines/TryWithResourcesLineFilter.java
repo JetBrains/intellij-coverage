@@ -17,7 +17,6 @@
 package com.intellij.rt.coverage.instrumentation.filters.lines;
 
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
-import org.jetbrains.coverage.org.objectweb.asm.Handle;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
 
@@ -26,10 +25,8 @@ import org.jetbrains.coverage.org.objectweb.asm.Opcodes;
  *
  * @see TryWithResourcesLineFilter.State
  */
-public class TryWithResourcesLineFilter extends CoverageFilter {
+public class TryWithResourcesLineFilter extends BaseLineFilter {
   private State myState = State.INITIAL;
-  private boolean myHasInstructions = false;
-  private int myCurrentLine = -1;
   private int myJumpsToRemove = 0;
 
   // INITIAL → STORE_INITIAL_EXCEPTION <--------|
@@ -76,34 +73,21 @@ public class TryWithResourcesLineFilter extends CoverageFilter {
     return true;
   }
 
-  private void tryRemoveLine() {
-    if (myCurrentLine != -1 && !myHasInstructions
-        && (myState == State.GOTO || myState == State.THROW || myState == State.CALL_CLOSE || myState == State.GOTO_3)) {
-      myContext.removeLine(myCurrentLine);
-      myCurrentLine = -1;
-    }
+  @Override
+  protected boolean shouldRemoveLine() {
+    return myState == State.GOTO || myState == State.THROW || myState == State.CALL_CLOSE || myState == State.GOTO_3;
   }
 
   @Override
   public void visitLineNumber(int line, Label start) {
-    tryRemoveLine();
-    // do not remove lines that are previously used
-    myHasInstructions = myContext.getLineData(line) != null;
     super.visitLineNumber(line, start);
-    myCurrentLine = line;
     myState = State.INITIAL;
     myJumpsToRemove = 0;
   }
 
   @Override
-  public void visitEnd() {
-    tryRemoveLine();
-    super.visitEnd();
-  }
-
-  @Override
   public void visitVarInsn(int opcode, int var) {
-    super.visitVarInsn(opcode, var);
+    mv.visitVarInsn(opcode, var);
     if ((myState == State.INITIAL || myState == State.THROW) && opcode == Opcodes.ASTORE) {
       myState = State.STORE_INITIAL_EXCEPTION;
     } else if (opcode == Opcodes.ALOAD
@@ -123,13 +107,13 @@ public class TryWithResourcesLineFilter extends CoverageFilter {
       myState = State.GOTO_3;
     } else {
       myState = State.INITIAL;
-      myHasInstructions = true;
+      setHasInstructions();
     }
   }
 
   @Override
   public void visitJumpInsn(int opcode, Label label) {
-    super.visitJumpInsn(opcode, label);
+    mv.visitJumpInsn(opcode, label);
     if (myState == State.LOAD_RESOURCE && opcode == Opcodes.IFNULL) {
       myState = State.CHECK_RESOURCE_NULL;
       myJumpsToRemove++;
@@ -142,13 +126,13 @@ public class TryWithResourcesLineFilter extends CoverageFilter {
       myState = State.GOTO_2;
     } else {
       myState = State.INITIAL;
-      myHasInstructions = true;
+      setHasInstructions();
     }
   }
 
   @Override
   public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
-    super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+    mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
     if ((opcode == Opcodes.INVOKEINTERFACE || opcode == Opcodes.INVOKEVIRTUAL)
         && "close".equals(name)
         && "()V".equals(descriptor)) {
@@ -168,71 +152,17 @@ public class TryWithResourcesLineFilter extends CoverageFilter {
       return;
     }
     myState = State.INITIAL;
-    myHasInstructions = true;
+    setHasInstructions();
   }
 
   @Override
   public void visitInsn(int opcode) {
-    super.visitInsn(opcode);
+    mv.visitInsn(opcode);
     if (myState == State.LOAD_INITIAL_EXCEPTION_2 && opcode == Opcodes.ATHROW) {
       myState = State.THROW;
     } else {
       myState = State.INITIAL;
-      myHasInstructions = true;
+      setHasInstructions();
     }
-  }
-
-  @Override
-  public void visitIntInsn(int opcode, int operand) {
-    super.visitIntInsn(opcode, operand);
-    myHasInstructions = true;
-  }
-
-  @Override
-  public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
-    super.visitFieldInsn(opcode, owner, name, descriptor);
-    myHasInstructions = true;
-  }
-
-  @Override
-  public void visitIincInsn(int varIndex, int increment) {
-    super.visitIincInsn(varIndex, increment);
-    myHasInstructions = true;
-  }
-
-  @Override
-  public void visitInvokeDynamicInsn(String name, String descriptor, Handle bootstrapMethodHandle, Object... bootstrapMethodArguments) {
-    super.visitInvokeDynamicInsn(name, descriptor, bootstrapMethodHandle, bootstrapMethodArguments);
-    myHasInstructions = true;
-  }
-
-  @Override
-  public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-    super.visitLookupSwitchInsn(dflt, keys, labels);
-    myHasInstructions = true;
-  }
-
-  @Override
-  public void visitTypeInsn(int opcode, String type) {
-    super.visitTypeInsn(opcode, type);
-    myHasInstructions = true;
-  }
-
-  @Override
-  public void visitMultiANewArrayInsn(String descriptor, int numDimensions) {
-    super.visitMultiANewArrayInsn(descriptor, numDimensions);
-    myHasInstructions = true;
-  }
-
-  @Override
-  public void visitTableSwitchInsn(int min, int max, Label dflt, Label... labels) {
-    super.visitTableSwitchInsn(min, max, dflt, labels);
-    myHasInstructions = true;
-  }
-
-  @Override
-  public void visitLdcInsn(Object value) {
-    super.visitLdcInsn(value);
-    myHasInstructions = true;
   }
 }
