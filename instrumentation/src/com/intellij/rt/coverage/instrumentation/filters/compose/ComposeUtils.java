@@ -51,7 +51,17 @@ public class ComposeUtils {
     int n = parameters.length;
 
     if (n < 2) return false;
-    return "Landroidx/compose/runtime/Composer;".equals(parameters[n - 2].getDescriptor())
-        && "I".equals(parameters[n - 1].getDescriptor());
+    int composerIndex = getComposerIndex(parameters);
+    return composerIndex != -1;
+  }
+
+  static int getComposerIndex(Type[] parameters) {
+    int i = parameters.length - 1;
+    if (i < 0) return -1;
+    while (i >= 0 && "I".equals(parameters[i].getDescriptor())) {
+      i--;
+    }
+    if (i < 0 || i == parameters.length - 1) return -1;
+    return "Landroidx/compose/runtime/Composer;".equals(parameters[i].getDescriptor()) ? i : -1;
   }
 }

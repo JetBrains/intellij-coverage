@@ -18,6 +18,7 @@ package com.intellij.rt.coverage.instrumentation.filters.compose;
 
 import com.intellij.rt.coverage.instrumentation.InstrumentationUtils;
 import com.intellij.rt.coverage.instrumentation.data.InstrumentationData;
+import com.intellij.rt.coverage.instrumentation.filters.branches.KotlinDefaultArgsBranchFilter;
 import com.intellij.rt.coverage.instrumentation.filters.lines.CoverageFilter;
 import org.jetbrains.coverage.org.objectweb.asm.Label;
 import org.jetbrains.coverage.org.objectweb.asm.MethodVisitor;
@@ -49,8 +50,11 @@ public class ComposeKeyCheckBranchFilter extends CoverageFilter {
 
   @Override
   public void initFilter(MethodVisitor methodVisitor, InstrumentationData context) {
-    super.initFilter(methodVisitor, context);
-    myKeyIndex = getLastParameterIndex();
+    // Default args are inserted directly in the method, no $default method is generated
+    KotlinDefaultArgsBranchFilter defaultArgsFilter = new KotlinDefaultArgsBranchFilter();
+    defaultArgsFilter.initFilter(methodVisitor, context);
+    super.initFilter(defaultArgsFilter, context);
+    myKeyIndex = getKeyParameterVarIndex();
   }
 
   @Override
@@ -108,11 +112,13 @@ public class ComposeKeyCheckBranchFilter extends CoverageFilter {
     }
   }
 
-  private int getLastParameterIndex() {
+  private int getKeyParameterVarIndex() {
     String desc = myContext.getMethodDesc();
     Type[] types = Type.getArgumentTypes(desc);
+    int composerIndex = ComposeUtils.getComposerIndex(types);
+    if (composerIndex < 0) return -1;
     int index = 0;
-    for (int i = 0; i < types.length - 1; i++) {
+    for (int i = 0; i <= composerIndex; i++) {
       index += types[i].getSize();
     }
     if ((Opcodes.ACC_STATIC & myContext.getMethodAccess()) == 0) {

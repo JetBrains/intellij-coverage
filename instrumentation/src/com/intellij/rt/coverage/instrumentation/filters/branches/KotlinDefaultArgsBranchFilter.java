@@ -113,9 +113,13 @@ public class KotlinDefaultArgsBranchFilter extends CoverageFilter {
 
   public static int[] getMaskIndexRange(String name, String desc) {
     final Type[] parameters = Type.getType(desc).getArgumentTypes();
-    final int sourceCount = sourceParametersCount(parameters.length);
+    // Object param may be omitted in Kotlin compose code with default args.
+    String lastParam = parameters[parameters.length - 1].getDescriptor();
+    boolean lastObjectParam = InstrumentationUtils.OBJECT_TYPE.equals(lastParam)
+        || KotlinUtils.KOTLIN_DEFAULT_CONSTRUCTOR_MARKER.equals(lastParam);
+    int sourceCount = sourceParametersCount(parameters.length) + (lastObjectParam ? 0 : 1);
     int size = 0, minIndex = -1;
-    for (int i = 0; i < parameters.length - 2; i++) {
+    for (int i = 0; i < parameters.length - (lastObjectParam ? 2 : 1); i++) {
       size += parameters[i].getSize();
       if (i == sourceCount - 1) {
         minIndex = size;
