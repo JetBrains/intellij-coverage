@@ -24,7 +24,7 @@ import com.intellij.rt.coverage.util.CoverageRunner
 import com.intellij.rt.coverage.util.ResourceUtil
 import org.junit.Assert
 import java.io.File
-import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KMutableProperty0
 
 
 abstract class TestResult {
@@ -156,13 +156,13 @@ internal fun runWithCoverage(
         .also { assertEmptyLogFile(coverageDataFile) }
 }
 
-inline fun runWithOptions(values: Map<KMutableProperty<Boolean>, Boolean>, action: () -> Unit) {
-    val originalValues = values.mapValues { it.key.getter.call() }
-    values.forEach { (field, value) -> field.setter.call(value) }
+inline fun runWithOptions(values: Map<KMutableProperty0<Boolean>, Boolean>, action: () -> Unit) {
+    val originalValues = values.mapValues { it.key.get() }
+    values.forEach { (field, value) -> field.set(value) }
     try {
         action()
     } finally {
-        originalValues.forEach { (field, value) -> field.setter.call(value) }
+        originalValues.forEach { (field, value) -> field.set(value) }
     }
 }
 
