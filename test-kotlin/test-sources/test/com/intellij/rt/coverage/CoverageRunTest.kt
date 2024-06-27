@@ -407,4 +407,24 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
             assertNotNull(projectData.getClassData("testData.$testName.Foo"))
         }
     }
+
+    @Test
+    fun testBranchNumeration() {
+        val testName = "custom.branchNumeration"
+        test(testName) { projectData, config ->
+            verifyResults(projectData, config)
+            val classData = projectData.getClassData("testData.$testName.TestKt")!!
+
+            fun assertSingleBranchCovered(line: Int, trueBranchCovered : Boolean) {
+                val jumpData = classData.getLineData(line).getJumpData(0)!!
+                assertEquals(if (trueBranchCovered) 1 else 0, jumpData.trueHits)
+                assertEquals(if (trueBranchCovered) 0 else 1, jumpData.falseHits)
+            }
+
+            assertSingleBranchCovered(20, true)
+            assertSingleBranchCovered(28, false)
+            assertSingleBranchCovered(36, true)
+            assertSingleBranchCovered(44, false)
+        }
+    }
 }
