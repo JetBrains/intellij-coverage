@@ -21,7 +21,7 @@ dependencies {
   implementation project(":instrumentation")
   implementation project(":java6-utils")
   implementation project(":offline-runtime:api")
-  externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.23")
+  externalDependencies("org.jetbrains.intellij.deps:coverage-report:1.0.25")
 
   testImplementation('junit:junit:4.13.2')
   testImplementation(files(project(":tests").sourceSets.main.output))
