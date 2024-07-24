@@ -7,7 +7,7 @@ per-test coverage tracking.
 
 * in IDEA: [run with coverage action](https://www.jetbrains.com/help/idea/running-test-with-coverage.html)
 * in TeamCity: [add coverage report to your build](https://www.jetbrains.com/help/teamcity/intellij-idea.html)
-* in Gradle projects: use [Kover plugin](https://github.com/Kotlin/kotlinx-kover)
+* in Gradle and Maven projects: use [Kover plugin](https://github.com/Kotlin/kotlinx-kover)
 
 ## Compiling
 
