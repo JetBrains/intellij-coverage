@@ -161,4 +161,20 @@ public class ProjectData implements CoverageData, Serializable {
   }
   //---------------------------------------------------------- //
 
+  private void resetCoverageDataInternal() {
+    for (ClassData classData : myClasses.values()) {
+      Object hits = classData.getHitsMask();
+      if (hits instanceof int[]) {
+        Arrays.fill((int[]) hits, 0);
+      } else if (hits instanceof boolean[]) {
+        Arrays.fill((boolean[]) hits, false);
+      }
+    }
+  }
+
+  public static void resetCoverageData() {
+    ProjectData projectData = ourProjectData;
+    if (projectData == null) return;
+    projectData.resetCoverageDataInternal();
+  }
 }
