@@ -51,6 +51,19 @@ public class OfflineCoverageTransformer extends CoverageTransformer {
   }
 
   @Override
+  protected CoverageDataAccess.Init createIndyInit(String className, ClassReader cr) {
+    final int length = getRequiredArrayLength(cr);
+    boolean calculateHits = myProjectContext.getOptions().isCalculateHits;
+    String arrayType = calculateHits ? DataAccessUtil.HITS_ARRAY_TYPE : DataAccessUtil.MASK_ARRAY_TYPE;
+    String methodName = calculateHits ? "getOrCreateHits" : "getOrCreateHitsMask";
+    return new CoverageDataAccess.Init(
+        "__$hits$__", arrayType, "com/intellij/rt/coverage/offline/IndyUtils", methodName,
+        "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;I)Ljava/lang/invoke/CallSite;",
+        new Object[]{className, length}
+    );
+  }
+
+  @Override
   protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr) {
     final int length = getRequiredArrayLength(cr);
     boolean calculateHits = myProjectContext.getOptions().isCalculateHits;
