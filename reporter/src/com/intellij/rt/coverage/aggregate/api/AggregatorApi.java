@@ -54,6 +54,6 @@ public class AggregatorApi {
       result.merge(report);
     }
 
-    CoverageReport.save(result, (new InstrumentationOptions.Builder()).setDataFile(resultReport).build());
+    CoverageReport.save(result, new InstrumentationOptions.Builder().setDataFile(resultReport).build());
   }
 }
