@@ -17,7 +17,11 @@
 package com.intellij.rt.coverage.aggregate.api;
 
 import com.intellij.rt.coverage.aggregate.Aggregator;
+import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.InstrumentationOptions;
 import com.intellij.rt.coverage.report.data.BinaryReport;
+import com.intellij.rt.coverage.util.CoverageReport;
+import com.intellij.rt.coverage.util.ProjectDataLoader;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,5 +39,21 @@ public class AggregatorApi {
     }
 
     new Aggregator(binaryReports, outputRoots, requests).processRequests();
+  }
+
+  public static void merge(List<File> reports, File resultReport) {
+    if (reports.isEmpty()) {
+      // output file isn't created if no inputs
+      return;
+    }
+    File firstFile = reports.get(0);
+
+    ProjectData result = ProjectDataLoader.load(firstFile);
+    for (int i = 1; i < reports.size(); i++) {
+      ProjectData report = ProjectDataLoader.load(reports.get(i));
+      result.merge(report);
+    }
+
+    CoverageReport.save(result, (new InstrumentationOptions.Builder()).setDataFile(resultReport).build());
   }
 }

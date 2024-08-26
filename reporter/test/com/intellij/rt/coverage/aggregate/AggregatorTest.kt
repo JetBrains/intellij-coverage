@@ -48,6 +48,20 @@ class AggregatorTest {
         )
     }
 
+    @Test
+    fun testMergeReport() {
+        val report1 = runTest("", "testData.defaultArgs.TestKt").dataFile
+        val report2 = runTest("", "testData.branches.TestKt").dataFile
+
+        val mergedReport = File.createTempFile("merged", "ic")
+
+        AggregatorApi.merge(listOf(report1, report2), mergedReport)
+
+        val projectData = ProjectDataLoader.load(mergedReport)
+        Assert.assertNotNull(projectData.getClassData("testData.defaultArgs.TestKt"))
+        Assert.assertNotNull(projectData.getClassData("testData.branches.TestKt"))
+    }
+
     companion object {
         private fun createRequests(): List<Request> {
             val requests: MutableList<Request> = ArrayList()
