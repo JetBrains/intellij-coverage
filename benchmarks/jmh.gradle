@@ -41,10 +41,11 @@ task NoAgent(type: JavaExec) {
 def configureBenchmark(JavaExec benchmark, Closure<List<String>> jvmArgs = {[]}) {
   benchmark.with {
     group = 'benchmarks'
-    dependsOn ":benchmarks:jmhClasses"
+    dependsOn(":benchmarks:jmhClasses", ":benchmarks:upgradeJmhClasspath")
     main = 'org.openjdk.jmh.Main'
     doFirst {
-      classpath = project(":benchmarks").sourceSets.jmh.runtimeClasspath
+      classpath = fileTree(project(":benchmarks").upgradeJmhClasspath.outputs.files.singleFile)
+      classpath += project(":benchmarks").sourceSets.jmh.output.classesDirs
       args = [
           '-jvmArgs', '-Dfile.encoding=UTF-8',
           // benchmarks
