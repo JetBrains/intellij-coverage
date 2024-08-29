@@ -74,27 +74,38 @@ def configureBenchmark(JavaExec benchmark, Closure<List<String>> jvmArgs = {[]})
   }
 }
 
+ext.configureBenchmark = this.&configureBenchmark
+
 def benchmarkReport(Task benchmark) {
   file("$benchmark.temporaryDir/${benchmark.name}.json")
 }
 
-
-ext.configureCompareWith = { benchmark, Closure<List<String>> jvmArgs, basicBenchmark ->
-  configureBenchmark(benchmark, jvmArgs)
-  benchmark.with {
-    dependsOn(basicBenchmark)
+ext.configureComparison = { combined, benchmark1, benchmark2 ->
+  combined.with {
+    group = 'benchmarks'
+    if (benchmark1 != combined) {
+      dependsOn benchmark1
+    }
+    if (benchmark2 != combined) {
+      dependsOn benchmark2
+    }
     doLast {
-      def noAgentReport = ResourceGroovyMethods.getText(benchmarkReport(basicBenchmark), 'UTF-8')
-      def currentReport = ResourceGroovyMethods.getText(benchmarkReport(benchmark), 'UTF-8')
+      def firstReport = ResourceGroovyMethods.getText(benchmarkReport(benchmark1), 'UTF-8')
+      def secondReport = ResourceGroovyMethods.getText(benchmarkReport(benchmark2), 'UTF-8')
 
       project.logger.quiet """Benchmark score:
-      $basicBenchmark.name vs $benchmark.name:
-      ${ReportReader.readScore(noAgentReport, currentReport, secondaryMetrics)}
+      $benchmark1.name vs $benchmark2.name:
+      ${ReportReader.readScore(firstReport, secondReport, secondaryMetrics)}
       """
     }
   }
 }
 
-ext.configureCompare = { benchmark, Closure<List<String>> jvmArgs ->
+ext.configureCompareWith = { benchmark, Closure<List<String>> jvmArgs, basicBenchmark ->
+  configureBenchmark(benchmark, jvmArgs)
+  configureComparison(benchmark, basicBenchmark, benchmark)
+}
+
+ext.configureCompareWithNoAgent = { benchmark, Closure<List<String>> jvmArgs ->
   configureCompareWith(benchmark, jvmArgs, NoAgent)
 }
