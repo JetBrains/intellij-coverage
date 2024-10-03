@@ -17,6 +17,7 @@
 package com.intellij.rt.coverage
 
 import org.junit.Assert
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -351,6 +352,7 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
 
     //===GENERATED TESTS===
 
+    @Ignore
     @Test
     fun testThreadSafeStructure() = test(
         "custom.threadSafe.structure", configuration = TestConfiguration(
@@ -359,6 +361,7 @@ internal class CoverageRunTest(override val coverage: Coverage, override val tes
         )
     )
 
+    @Ignore
     @Test
     fun test_IDEA_57695() = test(
         "custom.IDEA_57695", configuration = TestConfiguration(

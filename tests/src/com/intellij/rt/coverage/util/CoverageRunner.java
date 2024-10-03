@@ -17,9 +17,15 @@
 package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.ProjectData;
+import com.intellij.rt.coverage.instrumentation.CoverageArgs;
+import org.jacoco.agent.AgentJar;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
 
 public class CoverageRunner {
   private static final String[] EMPTY = new String[0];
@@ -40,12 +46,24 @@ public class CoverageRunner {
                                         String testDataPath, File coverageDataFile, final String patterns,
                                         String classToRun, final boolean branchCoverage, String[] extraArgs,
                                         boolean calcUnloaded, boolean testTracking) throws IOException, InterruptedException {
-
+    String jacocoAgentPath = AgentJar.extractToTempLocation().getPath();
+    CoverageArgs coverageArgs = new CoverageArgs();
+    coverageArgs.readPatterns(Arrays.stream(patterns.split(" ")).filter(s -> !s.isEmpty()).toArray(String[]::new), 0);
+    StringBuilder jacocoArgs = new StringBuilder();
+    jacocoArgs.append("-javaagent:").append(jacocoAgentPath).append("=")
+        .append("destfile=").append(coverageDataFile.getPath())
+        .append(",append=false");
+    if (!coverageArgs.includePatterns.isEmpty()) {
+      jacocoArgs.append(",includes=")
+          .append(String.join(":", extractPatterns(coverageArgs.includePatterns)));
+    }
+    if (!coverageArgs.excludePatterns.isEmpty()) {
+      jacocoArgs.append(",excludes=")
+          .append(String.join(":", extractPatterns(coverageArgs.excludePatterns)));
+    }
     String[] commandLine = {
 //        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5007",
-        "-javaagent:" + coverageAgentPath + "=\"" + coverageDataFile.getPath() + "\" "
-            + testTracking + " " + calcUnloaded + " false " + !branchCoverage + " " + patterns,
-        "-Didea.coverage.test.mode=true",
+        jacocoArgs.toString(),
         "-classpath", testDataPath, classToRun};
     if (extraArgs.length > 0) {
       String[] args = new String[extraArgs.length + commandLine.length];
@@ -56,8 +74,14 @@ public class CoverageRunner {
     ProcessUtil.execJavaProcess(commandLine);
 
     FileUtil.waitUntilFileCreated(coverageDataFile);
-    final ProjectData projectInfo = ProjectDataLoader.loadLocked(coverageDataFile);
+    final ProjectData projectInfo = JacocoUtils.loadExecData(coverageDataFile, testDataPath, coverageArgs);
     assert projectInfo != null;
     return projectInfo;
+  }
+
+  private static String @NotNull [] extractPatterns(List<Pattern> includePatterns) {
+    return includePatterns.stream().map(Pattern::pattern).map(p ->
+        p.replace("\\.", ".").replace(".*", "*")
+    ).toArray(String[]::new);
   }
 }

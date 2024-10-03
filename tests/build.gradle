@@ -22,13 +22,14 @@ sourceSets {
   test.resources.srcDirs = [file('resources')]
 }
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 dependencies {
   implementation project(':instrumentation')
   implementation project(':test-discovery')
   implementation project(':junit4-test-discovery-launcher')
+  compile files("/Users/maksim.zuev/IdeaProjects/jacoco/org.jacoco.ant/target/org.jacoco.ant-0.8.13-SNAPSHOT-nodeps.jar")
 
   implementation 'junit:junit:4.13.1'
   implementation 'org.jetbrains:annotations:15.0'

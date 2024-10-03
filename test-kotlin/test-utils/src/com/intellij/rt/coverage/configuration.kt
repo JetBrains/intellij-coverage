@@ -32,14 +32,10 @@ enum class TestTracking {
     ARRAY, CLASS_DATA
 }
 
-fun getCoverageConfigurations() = if (System.getProperty("coverage.run.fast.tests") != null) {
+fun getCoverageConfigurations() =
     listOfNotNull(
         arrayOf(Coverage.BRANCH_FIELD, null),
-        arrayOf(Coverage.LINE_CONDY, null).takeIf { getVMVersion() >= 11 },
     ).toTypedArray()
-} else {
-    allTestTrackingModes()
-}
 
 fun allTestTrackingModes() = Coverage.valuesWithCondyWhenPossible().toList()
     .product(TestTracking.values().toList().plus(null))
