@@ -24,15 +24,15 @@ public class Test {
 
   public static void help1() {
     System.out.println("I'm help 1"); // coverage: FULL
-  }
+  } // coverage: FULL
 
   private static void help2() {
     System.out.println("I'm help 2"); // coverage: NONE
-  }
+  } // coverage: NONE
 
   public static void main(String[] args) {
     help1();                          // coverage: FULL
-  }
+  } // coverage: FULL
 
   public static class UnusedJavaTest {
     private UnusedJavaTest() {    // should be ignored

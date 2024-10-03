@@ -28,7 +28,7 @@ class MyBranchedClass {           // coverage: FULL // stats: 2/2
         } else {
             println("GE")         // coverage: NONE    // stats: 0/4
         }
-    }
+    } // coverage: FULL
 }
 
 fun main() {

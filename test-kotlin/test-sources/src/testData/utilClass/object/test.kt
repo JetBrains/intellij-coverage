@@ -22,7 +22,7 @@ object EmptyObjectDeclaration // coverage: FULL
 
 object ObjectDeclarationWithConstructor {
     init { // coverage: FULL
-    }
+    } // coverage: FULL
 }
 
 object ObjectDeclarationWithField {
@@ -53,7 +53,7 @@ object UnusedEmptyObjectDeclaration // coverage: NONE
 
 object UnusedObjectDeclarationWithConstructor {
     init { // coverage: NONE
-    }
+    } // coverage: NONE
 }
 
 object UnusedObjectDeclarationWithField {
@@ -75,4 +75,4 @@ fun main() {
     ObjectDeclarationWithField // coverage: FULL
     println(ObjectDeclarationWithConst.X) // coverage: FULL
     println(ObjectDeclarationWithStringConst.s) // coverage: FULL
-}
+} // coverage: FULL

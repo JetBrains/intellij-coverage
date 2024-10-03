@@ -24,4 +24,4 @@ private fun functionWithDefaultArgument(x: Int = 3): Int { // coverage: NONE
 
 fun main() {
     functionWithDefaultArgument(4)                         // coverage: FULL
-}
+} // coverage: FULL

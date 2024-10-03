@@ -24,7 +24,7 @@ class A {                   // coverage: FULL
     fun foo() {
         y = "42"            // coverage: FULL
         println(y)          // coverage: FULL
-    }
+    } // coverage: FULL
 }
 
 

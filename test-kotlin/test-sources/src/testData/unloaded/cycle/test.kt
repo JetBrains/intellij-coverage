@@ -36,6 +36,6 @@ class User(val actions: Int) {                      // coverage: NONE
                 activeUsers.add(user)               // coverage: NONE 
             }
         }
-    }
+    } // coverage: NONE
 }
 

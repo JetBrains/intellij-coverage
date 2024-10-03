@@ -30,9 +30,9 @@ fun test(x: Boolean, y: Boolean, z: Boolean) {
     }
     if (z) {                            // coverage: PARTIAL // branches: 1/2 // stats: 2/2
         println("Y is true")            // coverage: FULL    // stats: 4/4
-        return
+        return // coverage: FULL
     }
-}
+} // coverage: NONE
 
 fun test2(x: Boolean, y: Boolean) {
     if (x) {                            // coverage: FULL // branches: 2/2 // stats: 2/2
@@ -43,7 +43,7 @@ fun test2(x: Boolean, y: Boolean) {
     if (y) {                            // coverage: PARTIAL // branches: 1/2 // stats: 2/2
         println("Y is true")            // coverage: FULL    // stats: 4/4
     }
-}
+} // coverage: FULL
 
 
 fun test3(b: Boolean) {
@@ -52,7 +52,7 @@ fun test3(b: Boolean) {
             println("")                 // coverage: NONE    // stats: 0/5
         }
     }
-}
+} // coverage: FULL
 
 fun foo(x: Boolean): Int? = if (x) 3 else null  // coverage: FULL // branches: 2/2 // stats: 6/6
 fun foo1(x: Boolean): Int? = if (x) 3 else null // coverage: PARTIAL // branches: 1/2 // stats: 5/6
@@ -65,7 +65,7 @@ fun test4() {
     foo(true) ?: foo(true)   // coverage: PARTIAL // branches: 1/2 // stats: 5/8
     foo1(true)               // coverage: FULL    // stats: 3/3
     foo2(false)              // coverage: FULL    // stats: 3/3
-}
+} // coverage: FULL
 
 fun main() {
     test(x = true, y = false, z = true) // coverage: FULL // stats: 4/4
@@ -73,4 +73,4 @@ fun main() {
     test2(x = false, y = true)          // coverage: FULL // stats: 3/3
     test3(false)                        // coverage: FULL // stats: 2/2
     test4()                             // coverage: FULL // stats: 1/1
-}
+} // coverage: FULL

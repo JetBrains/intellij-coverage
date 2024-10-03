@@ -23,7 +23,7 @@ public class Test {              // coverage: NONE
     } finally {
       System.out.println("Finally"); // coverage: FULL
     }
-  }
+  } // coverage: FULL
 
   static int testWithReturn(Runnable runnable) {
     try {
@@ -42,11 +42,11 @@ public class Test {              // coverage: NONE
     } finally {
       System.out.println("Finally"); // coverage: FULL
     }
-  }
+  } // coverage: FULL
 
   public static void main(String[] args) {
     test(() -> {});           // coverage: FULL
     testWithReturn(() -> {}); // coverage: FULL
     testWithCatch(() -> {});  // coverage: FULL
-  }
+  } // coverage: FULL
 }

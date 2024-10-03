@@ -21,7 +21,7 @@ interface IFace {
         value: Int = 0 // coverage: FULL
     ) {
         println(value) // coverage: FULL
-    }
+    } // coverage: FULL
 }
 
 class Implementation: IFace // coverage: FULL
@@ -31,7 +31,7 @@ open class OFace { // coverage: FULL
         value: Int = 0 // coverage: FULL
     ) {
         println(value) // coverage: FULL
-    }
+    } // coverage: FULL
 }
 
 class OImplementation: OFace() // coverage: FULL
@@ -44,4 +44,4 @@ fun main() {
     val impl2 = OImplementation() // coverage: FULL
     impl2.func(1) // coverage: FULL
     impl2.func() // coverage: FULL
-}
+} // coverage: FULL

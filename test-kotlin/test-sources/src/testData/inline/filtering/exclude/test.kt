@@ -26,4 +26,4 @@ object ExcludedClass {
 
 fun main() {
     ExcludedClass.foo() // coverage: FULL
-}
+} // coverage: FULL

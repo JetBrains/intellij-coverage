@@ -21,11 +21,11 @@ package testData.fixes.classReload
 class A {  // coverage: FULL
     fun foo() {
         val x = 1 // coverage: FULL
-    }
+    } // coverage: FULL
 
     fun boo() {
         val x = 1 // coverage: FULL
-    }
+    } // coverage: FULL
 }
 
 class CustomClassLoader(private val bytes: ByteArray) : ClassLoader() {

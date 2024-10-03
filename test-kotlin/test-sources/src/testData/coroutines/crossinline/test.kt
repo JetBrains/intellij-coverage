@@ -18,14 +18,14 @@ package testData.coroutines.crossinline
 
 suspend fun call(action: suspend () -> Unit) {
     action()           // coverage: FULL
-}
+} // coverage: FULL
 
 suspend inline fun run(crossinline action: suspend () -> Unit) {
     call {             // coverage: FULL
         action()       // coverage: FULL
-    }
-}
+    } // coverage: FULL
+} // coverage: FULL
 
 suspend fun main() {
     run { println() }  // coverage: FULL
-}
+} // coverage: FULL

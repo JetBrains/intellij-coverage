@@ -35,5 +35,5 @@ public class Test {  // coverage: NONE
   public static void main(String[] args) throws Exception {
     Class.forName("testData.basicJava.interfaces.Test$InterfaceWithoutClinit"); // coverage: FULL
     Class.forName("testData.basicJava.interfaces.Test$InterfaceWithClinit");  // coverage: FULL
-  }
+  } // coverage: FULL
 }

@@ -21,8 +21,8 @@ import kotlinx.coroutines.runBlocking
 
 suspend fun test() {
     delay(10L)                   // coverage: FULL
-}
+} // coverage: NONE
 
 fun main(): Unit = runBlocking { // coverage: FULL
     test()                       // coverage: FULL
-}
+} // coverage: FULL

@@ -23,5 +23,5 @@ public class Test { // coverage: NONE
 
     boolean y = args.length == 0; // coverage: FULL
     System.out.println(!y);       // coverage: FULL
-  }
+  } // coverage: FULL
 }

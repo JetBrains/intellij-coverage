@@ -27,4 +27,4 @@ private fun functionWithDefaultArguments(
 
 fun main() {
     functionWithDefaultArguments(4) // coverage: FULL
-}
+} // coverage: FULL

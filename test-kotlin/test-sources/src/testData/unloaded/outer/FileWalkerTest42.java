@@ -28,11 +28,11 @@ class FileWalkerTest42 {                   // coverage: NONE
   static void walker(Path path) throws IOException {
     final Runnable x = () -> {             // coverage: NONE
       System.out.println(42);              // coverage: NONE
-    };
+    }; // coverage: NONE
     Files.walkFileTree(path, new SimpleFileVisitor<Path>() {  // coverage: NONE
       public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
         return FileVisitResult.CONTINUE;                      // coverage: NONE
       }
     });
-  }
+  } // coverage: NONE
 }

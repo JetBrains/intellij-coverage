@@ -34,14 +34,14 @@ enum class SimpleEnum {
 fun simpleF(v: SimpleEnum) =
     when (v) {                  // coverage: FULL
         SimpleEnum.Single -> 42 // coverage: FULL
-    }
+    } // coverage: FULL
 
 fun noneF(v: SimpleEnum) =
     when (v) {                  // coverage: NONE
         SimpleEnum.Single -> 42 // coverage: NONE
-    }
+    } // coverage: NONE
 
 fun main() {
     f(F.A)                      // coverage: FULL
     simpleF(SimpleEnum.Single)  // coverage: FULL
-}
+} // coverage: FULL

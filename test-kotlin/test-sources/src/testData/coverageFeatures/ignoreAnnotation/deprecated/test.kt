@@ -21,7 +21,7 @@ package testData.coverageFeatures.ignoreAnnotation.deprecated
 @Deprecated("", level = DeprecationLevel.WARNING)
 fun deprecatedFunction1() {
     println() // coverage: NONE
-}
+} // coverage: NONE
 
 @Deprecated("", level = DeprecationLevel.ERROR)
 fun deprecatedFunction2() {
@@ -92,7 +92,7 @@ object A {
 
 fun functionWithLambda(lambda: (Int) -> Int) {
     print(lambda(5)) // coverage: NONE
-}
+} // coverage: NONE
 
 interface Foo {
     fun foo()

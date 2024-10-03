@@ -21,7 +21,7 @@ package testData.defaultArgs.inline
 private inline fun inlineFunWithDefaultArgs(param: Int = 0) { // coverage: FULL
     // after inline Kotlin store this variable into var 2,3
     val v = 42L                                               // coverage: FULL
-}
+} // coverage: FULL
 
 private fun test(): Int {
     inlineFunWithDefaultArgs()                                // coverage: FULL
@@ -30,4 +30,4 @@ private fun test(): Int {
 
 fun main() {
     test()                                                    // coverage: FULL
-}
+} // coverage: FULL

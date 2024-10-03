@@ -20,10 +20,10 @@ import kotlinx.coroutines.runBlocking
 
 suspend fun call(action: () -> Unit) {
     action()                   // coverage: FULL
-}
+} // coverage: FULL
 
 fun main() = runBlocking {     // coverage: FULL
     call {                     // coverage: FULL
         println("hi")          // coverage: FULL
-    }
-}
+    } // coverage: FULL
+} // coverage: FULL

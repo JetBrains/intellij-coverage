@@ -27,4 +27,4 @@ fun main() {
         2147483646 -> println("Low value")      // coverage: NONE
         2147483647 -> println("Cool!")          // coverage: NONE
     }
-}
+} // coverage: FULL

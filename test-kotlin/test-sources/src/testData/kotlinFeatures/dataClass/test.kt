@@ -24,7 +24,7 @@ data class A(                  // coverage: FULL
 ) {
     fun foo() {
         println("Hello world") // coverage: FULL
-    }
+    } // coverage: FULL
 }
 
 fun main() {

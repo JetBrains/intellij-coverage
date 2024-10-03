@@ -53,4 +53,4 @@ fun main() {
     if (result2 == null) { // coverage: PARTIAL // branches: 1/2
         throw NullPointerException("null cannot be cast to non-null type kotlin.String") // coverage: NONE
     }
-}
+} // coverage: FULL

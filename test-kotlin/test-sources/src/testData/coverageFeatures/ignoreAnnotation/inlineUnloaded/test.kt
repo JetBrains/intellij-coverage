@@ -32,7 +32,7 @@ object UnusedClass {
     @JvmStatic
     fun boo() {
         println("boo")    // coverage: NONE
-    }
+    } // coverage: NONE
 }
 
 // class: AbsolutelyUnusedClass
@@ -47,10 +47,10 @@ object AbsolutelyUnusedClass {
     fun boo() {
         foo()             // coverage: NONE
         println("boo")    // coverage: NONE
-    }
+    } // coverage: NONE
 }
 
 // class: TestKt
 fun main() {
     UnusedClass.foo() // coverage: FULL
-}
+} // coverage: FULL

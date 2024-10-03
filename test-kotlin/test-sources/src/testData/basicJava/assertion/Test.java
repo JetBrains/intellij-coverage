@@ -23,7 +23,7 @@ public class Test { // coverage: FULL // stats: 6/6
 
   static void doAssert(boolean x) {
     assert x; // coverage: FULL // branches: 2/2 // stats: 8/8
-  }
+  } // coverage: FULL
 
   public static void main(String[] args) {
     doAssert(true); // coverage: FULL // stats: 2/2
@@ -31,5 +31,5 @@ public class Test { // coverage: FULL // stats: 6/6
       doAssert(false); // coverage: FULL // stats: 2/2
     } catch (AssertionError ignore) {
     }
-  }
+  } // coverage: FULL
 }

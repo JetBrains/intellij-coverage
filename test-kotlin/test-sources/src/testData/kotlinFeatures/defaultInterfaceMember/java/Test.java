@@ -21,15 +21,15 @@ package testData.kotlinFeatures.defaultInterfaceMember.java;
 interface Foo {
   default void foo1() {
     System.out.println(); // coverage: NONE
-  }
+  } // coverage: NONE
 
   default void foo2() {
     System.out.println(); // coverage: FULL
-  }
+  } // coverage: FULL
 
   default void foo3() {
     System.out.println(); // coverage: NONE
-  }
+  } // coverage: NONE
 }
 
 public class Test {
@@ -40,10 +40,10 @@ public class Test {
 
 class Bar implements Foo {
   public Bar() {          // coverage: FULL
-  }
+  } // coverage: FULL
 
   @Override
   public void foo1() {
     System.out.println(); // coverage: NONE
-  }
+  } // coverage: NONE
 }

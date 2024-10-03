@@ -22,12 +22,12 @@ import testData.coverageFeatures.ignoreAnnotation.IgnoreCoverage
 
 inline fun foo() {
     println("foo") // coverage: FULL
-}
+} // coverage: FULL
 
 
 inline fun boo() {
     println("boo") // coverage: FULL
-}
+} // coverage: FULL
 
 @IgnoreCoverage
 fun main() {

@@ -21,21 +21,21 @@ package testData.kotlinFeatures.defaultInterfaceMember.kotlin
 interface Foo {
     fun foo1() {
         println() // coverage: NONE
-    }
+    } // coverage: NONE
 
     fun foo2() {
         println() // coverage: FULL
-    }
+    } // coverage: FULL
 
     fun foo3() {
         println() // coverage: NONE
-    }
+    } // coverage: NONE
 }
 
 class Bar : Foo {    // coverage: FULL
     override fun foo1() {
         println() // coverage: NONE
-    }
+    } // coverage: NONE
 }
 
 fun main() {

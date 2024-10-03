@@ -22,11 +22,11 @@ import kotlin.random.Random
 
 private inline fun a(x: Int) {
     println(x) // coverage: FULL
-}
+} // coverage: FULL
 
 private inline fun a() {
     println()  // coverage: FULL
-}
+} // coverage: FULL
 
 inline fun funWithCondition() {
     if (Random.nextBoolean()) { // coverage: NONE // branches: 0/2
@@ -34,9 +34,9 @@ inline fun funWithCondition() {
     } else {
         println("Fail")         // coverage: NONE
     }
-}
+} // coverage: NONE
 
 fun main() {
     a(4)       // coverage: FULL
     a()        // coverage: FULL
-}
+} // coverage: FULL

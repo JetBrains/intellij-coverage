@@ -23,7 +23,7 @@ object Util {        // should be ignored
     var y = 4                                     // coverage: FULL
     fun foo1() {
         print(x)                                  // coverage: FULL
-    }
+    } // coverage: FULL
 
     private fun foo2(): Int {
         y = 3                                     // coverage: FULL
@@ -40,11 +40,11 @@ class SimpleClassWithDefaultConstructor {         // coverage: NONE
     companion object {
         fun staticFoo() {
             println()                             // coverage: FULL
-        }
+        } // coverage: FULL
     }
 }
 
 fun main() {
     Util.foo1()                                   // coverage: FULL
     SimpleClassWithDefaultConstructor.staticFoo() // coverage: FULL
-}
+} // coverage: FULL

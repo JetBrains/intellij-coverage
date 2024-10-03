@@ -22,8 +22,8 @@ import kotlinx.coroutines.runBlocking
 fun test() = runBlocking {       // coverage: FULL
     foo {                        // coverage: FULL
         34                       // coverage: FULL
-    }
-}
+    } // coverage: FULL
+} // coverage: FULL
 
 suspend inline fun foo(f: () -> Int): Int {
     delay(100)                   // coverage: FULL
@@ -32,4 +32,4 @@ suspend inline fun foo(f: () -> Int): Int {
 
 fun main(): Unit = runBlocking { // coverage: FULL
     test()                       // coverage: FULL
-}
+} // coverage: FULL

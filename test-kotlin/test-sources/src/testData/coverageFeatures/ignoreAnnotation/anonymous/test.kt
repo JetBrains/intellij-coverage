@@ -52,16 +52,16 @@ fun booWithInner(x: Int) {
         println()
     }
     println("boo") // coverage: FULL
-}
+} // coverage: FULL
 
 
 fun functionWithLambda(lambda: (Int) -> Int) {
     print(lambda(5)) // coverage: FULL
-}
+} // coverage: FULL
 
 // class: TestKt
 fun main() {
     boo() // coverage: FULL
     booWithInner() // coverage: FULL
     booWithInner(2) // coverage: FULL
-}
+} // coverage: FULL

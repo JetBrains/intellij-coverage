@@ -54,4 +54,4 @@ fun main() {
     testTrue(false)                                  // coverage: FULL
     testNestedWhen(true)                             // coverage: FULL
     testNestedWhen(false)                            // coverage: FULL
-}
+} // coverage: FULL

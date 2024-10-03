@@ -24,8 +24,8 @@ suspend fun foo(flag: Boolean) {
         yield()        // coverage: NONE
     }
     println(42)        // coverage: FULL
-}
+} // coverage: FULL
 
 fun main() = runBlocking { // coverage: FULL
     foo(false) // coverage: FULL
-}
+} // coverage: FULL

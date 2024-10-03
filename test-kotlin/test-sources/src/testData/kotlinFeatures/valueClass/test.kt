@@ -21,7 +21,7 @@ value class MyValueClass(val data: String) {  // coverage: FULL
     val boo get() = 42 // coverage: NONE
     fun foo() {
         println(data) // coverage: FULL
-    }
+    } // coverage: FULL
 }
 
 @JvmInline
@@ -31,7 +31,7 @@ value class MyValueClass2( // coverage: FULL
     val boo get() = 42 // coverage: NONE
     fun foo() {
         println(data) // coverage: FULL
-    }
+    } // coverage: FULL
 }
 
 @JvmInline
@@ -41,7 +41,7 @@ value class MyValueClass3( // coverage: NONE
     val boo get() = 42 // coverage: NONE
     fun foo() {
         println(data) // coverage: NONE
-    }
+    } // coverage: NONE
 }
 
 @JvmInline
@@ -49,7 +49,7 @@ value class MyValueClass4(val data: String) { // coverage: NONE
     val boo get() = 42 // coverage: NONE
     fun foo() {
         println(data) // coverage: NONE
-    }
+    } // coverage: NONE
 }
 
 fun main() {
@@ -61,4 +61,4 @@ fun main() {
     v2.foo() // coverage: FULL
     Class.forName(MyValueClass3::class.qualifiedName) // coverage: FULL
     Class.forName(MyValueClass4::class.qualifiedName) // coverage: FULL
-}
+} // coverage: FULL

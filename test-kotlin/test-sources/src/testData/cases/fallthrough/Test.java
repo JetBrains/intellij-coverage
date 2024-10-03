@@ -30,7 +30,7 @@ public class Test {                    // coverage: FULL
 
     t.testUncovered2(2);               // coverage: FULL
     t.testUncovered2(3);               // coverage: FULL
-  }
+  } // coverage: FULL
 
   public void testCovered(int x) {
     switch (x) {                       // coverage: FULL // branches: 2/2
@@ -40,7 +40,7 @@ public class Test {                    // coverage: FULL
       default:
         System.out.println("default"); // coverage: FULL
     }
-  }
+  } // coverage: FULL
 
   public void testUncovered1(int x) {
     switch (x) {                       // coverage: PARTIAL // branches: 1/2
@@ -50,7 +50,7 @@ public class Test {                    // coverage: FULL
       default:
         System.out.println("default"); // coverage: FULL
     }
-  }
+  } // coverage: FULL
 
   public void testUncovered2(int x) {
     switch (x) {                       // coverage: PARTIAL // branches: 1/2
@@ -60,5 +60,5 @@ public class Test {                    // coverage: FULL
       default:
         System.out.println("default"); // coverage: FULL
     }
-  }
+  } // coverage: FULL
 }

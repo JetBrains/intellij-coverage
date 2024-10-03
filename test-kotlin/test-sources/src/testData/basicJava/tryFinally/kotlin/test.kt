@@ -22,7 +22,7 @@ fun test(runnable: Runnable) {
     } finally {
         println("Finally") // coverage: FULL
     }
-}
+} // coverage: FULL
 
 fun testWithReturn(runnable: Runnable): Int {
     try {
@@ -41,10 +41,10 @@ fun testWithCatch(runnable: Runnable) {
     } finally {
         println("Finally") // coverage: FULL
     }
-}
+} // coverage: FULL
 
 fun main() {
     test {} // coverage: FULL
     testWithReturn {} // coverage: FULL
     testWithCatch {} // coverage: FULL
-}
+} // coverage: FULL

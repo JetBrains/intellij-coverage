@@ -24,7 +24,7 @@ fun test(a: A?) {
     println(a?.x)             // coverage: PARTIAL // branches: 1/2
     println(a ?: "a is null") // coverage: PARTIAL // branches: 1/2
     println(a!!.x)            // coverage: FULL
-}
+} // coverage: FULL
 
 fun test2(nullableField: String?) {
     // See https://github.com/Kotlin/kotlinx-kover/issues/368
@@ -32,13 +32,13 @@ fun test2(nullableField: String?) {
     val name = (nullableField?.let { "Hello : $it" })    // coverage: PARTIAL // branches: 3/4
         ?: "Nobody?"          // coverage: FULL
     println(name)             // coverage: FULL
-}
+} // coverage: FULL
 
 fun test3(nullableField: String?) {
     val fooBar = nullableField?.let { "Hello : $it" } // coverage: FULL // branches: 2/2
     val name = fooBar ?: "Nobody?"                    // coverage: FULL // branches: 2/2
     println(name)             // coverage: FULL
-}
+} // coverage: FULL
 
 fun main() {
     test(A(42))               // coverage: FULL
@@ -46,4 +46,4 @@ fun main() {
     test2("X")                // coverage: FULL
     test3(null)               // coverage: FULL
     test3("X")                // coverage: FULL
-}
+} // coverage: FULL

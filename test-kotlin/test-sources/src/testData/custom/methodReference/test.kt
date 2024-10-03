@@ -24,7 +24,7 @@ class Foo {         // coverage: FULL
 
     fun bar() {
         print("hello") // coverage: NONE
-    }
+    } // coverage: NONE
 }
 
 fun biz() {
@@ -32,6 +32,6 @@ fun biz() {
     println(foo::bar) // coverage: FULL
     println(foo::x)   // coverage: FULL
     println(foo::y)   // coverage: FULL
-}
+} // coverage: FULL
 
 fun main() = biz() // coverage: FULL

@@ -23,17 +23,17 @@ import org.junit.runner.JUnitCore
 class MyService {                       // coverage: FULL
     fun doBusinessOperationXyz() {
         sendNotificationEmail()         // coverage: FULL
-    }
+    } // coverage: FULL
 
     private fun sendNotificationEmail() {
         val email = SimpleEmail()       // coverage: FULL
         email.send()                    // coverage: FULL
-    }
+    } // coverage: FULL
 
     class SimpleEmail {                 // coverage: PARTIAL // branches: 1/2
         fun send() {
             println("The email is sent.") // coverage: NONE this method is mocked
-        }
+        } // coverage: FULL
     }
 }
 

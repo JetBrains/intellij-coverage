@@ -29,15 +29,15 @@ class DummyService { // coverage: FULL
         service2 = DummyService2() // coverage: FULL
         help {   // coverage: FULL
             service2.foo() // coverage: FULL
-        }
-    }
+        } // coverage: FULL
+    } // coverage: FULL
 
 
     private fun <T> help(handler: (String) -> T) {
         handler("i'm truc") // coverage: FULL
-    }
+    } // coverage: FULL
 }
 
 fun main() {
     DummyService().exec()  // coverage: FULL
-}
+} // coverage: FULL

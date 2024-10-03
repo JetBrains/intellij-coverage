@@ -24,14 +24,14 @@ fun interface Foo {
 
 fun fooConsumer(f: Foo) {
     f.foo()         // coverage: FULL
-}
+} // coverage: FULL
 
 fun test() {
     fooConsumer {   // coverage: FULL
         println(42) // coverage: FULL
-    }
-}
+    } // coverage: FULL
+} // coverage: FULL
 
 fun main() {
     test()          // coverage: FULL
-}
+} // coverage: FULL

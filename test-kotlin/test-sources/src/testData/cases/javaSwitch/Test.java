@@ -25,91 +25,91 @@ public class Test { // coverage: FULL // stats: 2/2
     switch (x) { // coverage: PARTIAL // branches: 1/2 // stats: 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: FULL // stats: 3/3
-        break;
+        break; // coverage: FULL
       }
       case 2: {
         System.out.println("Case 2"); // coverage: NONE // stats: 0/3
         break;
       }
     }
-  }
+  } // coverage: FULL
 
   void singleBranchSwitch2(int x) {
     switch (x) { // coverage: PARTIAL // branches: 1/2 // stats: 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: NONE // stats: 0/3
-        break;
+        break; // coverage: NONE
       }
       case 2: {
         System.out.println("Case 2"); // coverage: FULL // stats: 3/3
         break;
       }
     }
-  }
+  } // coverage: FULL
 
   void defaultBranchSwitch(int x) {
     switch (x) { // coverage: PARTIAL // branches: 0/2 // stats: 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: NONE // stats: 0/3
-        break;
+        break; // coverage: NONE
       }
       case 2: {
         System.out.println("Case 2"); // coverage: NONE // stats: 0/3
-        break;
+        break; // coverage: NONE
       }
       default: {
         System.out.println("Default"); // coverage: FULL // stats: 3/3
         break;
       }
     }
-  }
+  } // coverage: FULL
 
   void fullyCoveredSwitch(int x) {
     switch (x) { // coverage: PARTIAL // branches: 2/2 // stats: 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: FULL // stats: 3/3
-        break;
+        break; // coverage: FULL
       }
       case 2: {
         System.out.println("Case 2"); // coverage: FULL // stats: 3/3
         break;
       }
     }
-  }
+  } // coverage: FULL
 
   void fullyCoveredSwitchWithDefault(int x) {
     switch (x) { // coverage: FULL // branches: 2/2 // stats: 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: FULL // stats: 3/3
-        break;
+        break; // coverage: FULL
       }
       case 2: {
         System.out.println("Case 2"); // coverage: FULL // stats: 3/3
-        break;
+        break; // coverage: FULL
       }
       default: {
         System.out.println("Default"); // coverage: FULL // stats: 3/3
         break;
       }
     }
-  }
+  } // coverage: FULL
 
   void fullyCoveredSwitchWithoutDefault(int x) {
     switch (x) { // coverage: PARTIAL // branches: 2/2 // stats: 2/2
       case 1: {
         System.out.println("Case 1"); // coverage: FULL // stats: 3/3
-        break;
+        break; // coverage: FULL
       }
       case 2: {
         System.out.println("Case 2"); // coverage: FULL // stats: 3/3
-        break;
+        break; // coverage: FULL
       }
       default: {
         System.out.println("Default"); // coverage: NONE // stats: 0/3
         break;
       }
     }
-  }
+  } // coverage: FULL
 
   void switchWithFallThrough(int x) {
     switch (x) { // coverage: PARTIAL // branches: 1/2 // stats: 2/2
@@ -121,74 +121,74 @@ public class Test { // coverage: FULL // stats: 2/2
         break;
       }
     }
-  }
+  } // coverage: FULL
 
   void stringSwitch(String s) {
     switch (s) { // coverage: PARTIAL // branches: 1/7 // stats: 29/29
       case "A": {
         System.out.println("Case A"); // coverage: FULL // stats: 3/3
-        break;
+        break; // coverage: FULL
       }
       case "B": {
         System.out.println("Case B"); // coverage: NONE // stats: 0/3
-        break;
+        break; // coverage: NONE
       }
       case "C": {
         System.out.println("Case C"); // coverage: NONE // stats: 0/3
-        break;
+        break; // coverage: NONE
       }
       case "D": {
         System.out.println("Case D"); // coverage: NONE // stats: 0/3
-        break;
+        break; // coverage: NONE
       }
       case "E": {
         System.out.println("Case E"); // coverage: NONE // stats: 0/3
-        break;
+        break; // coverage: NONE
       }
       case "F": {
         System.out.println("Case F"); // coverage: NONE // stats: 0/3
-        break;
+        break; // coverage: NONE
       }
       case "G": {
         System.out.println("Case G"); // coverage: NONE // stats: 0/3
         break;
       }
     }
-  }
+  } // coverage: FULL
 
   void fullStringSwitch(String s) {
     switch (s) { // coverage: FULL // branches: 2/2 // stats: 14/14
       case "A": {
         System.out.println("Case A"); // coverage: FULL // stats: 3/3
-        break;
+        break; // coverage: FULL
       }
       case "B": {
         System.out.println("Case B"); // coverage: FULL // stats: 3/3
-        break;
+        break; // coverage: FULL
       }
       default: {
         System.out.println("Default"); // coverage: FULL // stats: 3/3
         break;
       }
     }
-  }
+  } // coverage: FULL
 
   void stringSwitchSameHashCode(String s) {
     switch (s) { // coverage: FULL // branches: 2/2 // stats: 18/18
       case "Aa": {
         System.out.println("Case A"); // coverage: FULL // stats: 3/3
-        break;
+        break; // coverage: FULL
       }
       case "BB": {
         System.out.println("Case B"); // coverage: FULL // stats: 3/3
-        break;
+        break; // coverage: FULL
       }
       default: {
         System.out.println("Default"); // coverage: FULL // stats: 3/3
         break;
       }
     }
-  }
+  } // coverage: FULL
 
 
   public static void main(String[] args) {
@@ -218,5 +218,5 @@ public class Test { // coverage: FULL // stats: 2/2
     switches.stringSwitchSameHashCode("Aa"); // coverage: FULL // stats: 3/3
     switches.stringSwitchSameHashCode("BB"); // coverage: FULL // stats: 3/3
     switches.stringSwitchSameHashCode("C"); // coverage: FULL // stats: 3/3
-  }
+  } // coverage: FULL
 }

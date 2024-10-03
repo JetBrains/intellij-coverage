@@ -48,4 +48,4 @@ fun main() {
     functionWithDefaultArguments()              // coverage: FULL
     X().functionWithDefaultArguments()          // coverage: FULL
     functionWithDefaultArgumentsWithIf()        // coverage: FULL
-}
+} // coverage: FULL

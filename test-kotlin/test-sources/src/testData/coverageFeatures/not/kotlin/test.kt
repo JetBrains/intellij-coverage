@@ -21,4 +21,4 @@ fun main() {
     val y = x.isNotEmpty()  // coverage: FULL
     println(!y)  // coverage: FULL
     println(!!y) // coverage: FULL
-}
+} // coverage: FULL

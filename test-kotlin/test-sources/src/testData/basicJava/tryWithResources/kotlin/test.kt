@@ -20,10 +20,10 @@ fun main() {
     val closable = object : AutoCloseable { // coverage: FULL
         override fun close() {
             println("Close") // coverage: FULL
-        }
+        } // coverage: FULL
     }
 
     closable.use { // coverage: FULL
         println("Use resource") // coverage: FULL
     }              // coverage: FULL
-}
+} // coverage: FULL

@@ -26,7 +26,7 @@ fun main() {
         println("World!")          // coverage: FULL
         delay(10)                  // coverage: FULL
         println("From coroutines") // coverage: FULL
-    }
+    } // coverage: FULL
     println("Hello,")              // coverage: FULL
     Thread.sleep(100L)             // coverage: FULL
-}
+} // coverage: FULL

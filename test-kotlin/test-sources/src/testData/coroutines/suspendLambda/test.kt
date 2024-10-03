@@ -19,8 +19,8 @@ package testData.coroutines.suspendLambda
 fun foo(lambda: suspend () -> Unit) {} // coverage: FULL
 fun bar() {
     foo {} // coverage: FULL
-}
+} // coverage: FULL
 
 fun main() {
     bar() // coverage: FULL
-}
+} // coverage: FULL

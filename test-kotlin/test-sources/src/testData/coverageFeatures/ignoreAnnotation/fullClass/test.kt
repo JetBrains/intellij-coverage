@@ -27,7 +27,7 @@ import testData.coverageFeatures.ignoreAnnotation.IgnoreCoverage
 class Foo { // coverage: FULL
     fun foo() {
         println("foo") // coverage: FULL
-    }
+    } // coverage: FULL
 }
 
 @IgnoreCoverage
@@ -47,7 +47,7 @@ class Boo {
     class Foo { // coverage: FULL
         fun foo() {
             println() // coverage: FULL
-        }
+        } // coverage: FULL
     }
 }
 
@@ -62,7 +62,7 @@ data class DataClass(val i: Int) {
 
 fun functionWithLambda(lambda: (Int) -> Int) {
     print(lambda(5)) // coverage: FULL
-}
+} // coverage: FULL
 
 // class: TestKt
 fun main() {
@@ -70,4 +70,4 @@ fun main() {
     Boo().boo() // coverage: FULL
     Boo.staticBoo() // coverage: FULL
     Boo.Foo().foo() // coverage: FULL
-}
+} // coverage: FULL

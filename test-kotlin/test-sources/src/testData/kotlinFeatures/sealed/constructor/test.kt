@@ -32,4 +32,4 @@ fun main() {
     Derived(5)                                                   // coverage: FULL
     Derived2(10)                                                 // coverage: FULL
     ClassWithPrivateDefaultConstructor("42").x                   // coverage: FULL
-}
+} // coverage: FULL

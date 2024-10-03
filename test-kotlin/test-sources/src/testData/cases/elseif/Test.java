@@ -24,7 +24,7 @@ public class Test {                          // coverage: FULL
     test.doTest(1, 2, 2);                    // coverage: FULL
     test.doTest(2, 2, 3);                    // coverage: FULL
     test.doTest(2, 2, 1);                    // coverage: FULL
-  }
+  } // coverage: FULL
 
   void doTest(int a, int b, int c) {
     if (a < b) {                             // coverage: FULL // branches: 2/2
@@ -33,5 +33,5 @@ public class Test {                          // coverage: FULL
     else if (b < c) {                        // coverage: FULL // branches: 2/2
       System.out.println("a >= b && b < c"); // coverage: FULL
     }
-  }
+  } // coverage: FULL
 }

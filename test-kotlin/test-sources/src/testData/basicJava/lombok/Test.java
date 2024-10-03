@@ -33,7 +33,7 @@ class User {
 
   public void foo() {
     System.out.println("Hello"); // coverage: FULL
-  }
+  } // coverage: FULL
 }
 
 @Builder
@@ -48,7 +48,7 @@ class User2 {
 
   public void foo() {
     System.out.println("Hello"); // coverage: NONE
-  }
+  } // coverage: NONE
 }
 
 public class Test { // coverage: NONE
@@ -57,5 +57,5 @@ public class Test { // coverage: NONE
     new User(42).getEmail(); // coverage: FULL
     new User(42).foo(); // coverage: FULL
     User.builder().email("hello").build(); // coverage: FULL
-  }
+  } // coverage: FULL
 }

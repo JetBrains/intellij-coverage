@@ -24,17 +24,17 @@ import testData.coverageFeatures.ignoreAnnotation.IncludeCoverage
 @IncludeCoverage
 fun foo() {
     println("foo") // coverage: FULL
-}
+} // coverage: FULL
 
 @IncludeCoverage
 fun inlineFoo() {
     println("foo") // coverage: FULL
-}
+} // coverage: FULL
 
 @IncludeCoverage
 fun booWithDefault(x: Int = 2) { // coverage: NONE
     println("boo") // coverage: NONE
-}
+} // coverage: NONE
 
 fun boo() {
     println("boo")
@@ -55,7 +55,7 @@ object AbsolutelyUnusedClass {
     fun boo() {
         foo()             // coverage: NONE
         println("boo")    // coverage: NONE
-    }
+    } // coverage: NONE
 }
 
 @IncludeCoverage
@@ -64,9 +64,9 @@ fun fooWithInternal() {
         functionWithLambda { // coverage: NONE
             it + 2 // coverage: NONE
         }
-    }
+    } // coverage: NONE
     local() // coverage: NONE
-}
+} // coverage: NONE
 
 fun functionWithLambda(lambda: (Int) -> Int) {
     print(lambda(5))

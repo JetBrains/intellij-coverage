@@ -54,7 +54,7 @@ public class FilterUtils {
 
   public static List<CoverageFilter> createLineFilters() {
     List<CoverageFilter> result = KotlinUtils.createLineFilters();
-    result.add(new ClosingBracesFilter());
+//    result.add(new ClosingBracesFilter());
     result.add(new TryFinallyLineFilter());
     result.add(new TryWithResourcesLineFilter());
     result.add(new TryWithResourcesJava8LineFilter());

@@ -19,7 +19,7 @@ package testData.inline.withReturn
 fun main() {
     MyClass().f { testF() } // coverage: FULL
     MyClass().f2(fun() { testF() }) // coverage: FULL
-}
+} // coverage: FULL
 
 class MyClass {             // coverage: FULL
     inline fun f(f1Param: () -> Unit): MyClass {

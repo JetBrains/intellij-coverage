@@ -20,4 +20,4 @@ package testData.fixes.lineIgnore
 
 fun main() {
     Class.forName("kotlin.reflect.jvm.internal.impl.builtins.jvm.JavaToKotlinClassMap") // coverage: FULL
-}
+} // coverage: FULL

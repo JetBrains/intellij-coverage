@@ -22,7 +22,7 @@ fun coveredTrueBranch(x: Boolean) {
     } else {
         println() // coverage: NONE
     }
-}
+} // coverage: FULL
 
 fun coveredFalseBranch(x: Boolean) {
     if (x) { // coverage: PARTIAL // branches: 1/2
@@ -30,7 +30,7 @@ fun coveredFalseBranch(x: Boolean) {
     } else {
         println() // coverage: FULL
     }
-}
+} // coverage: FULL
 
 fun coveredTrueBranch2(x: Boolean) {
     if (!x) { // coverage: PARTIAL // branches: 1/2
@@ -38,7 +38,7 @@ fun coveredTrueBranch2(x: Boolean) {
     } else {
         println() // coverage: NONE
     }
-}
+} // coverage: FULL
 
 fun coveredFalseBranch2(x: Boolean) {
     if (!x) { // coverage: PARTIAL // branches: 1/2
@@ -46,11 +46,11 @@ fun coveredFalseBranch2(x: Boolean) {
     } else {
         println() // coverage: FULL
     }
-}
+} // coverage: FULL
 
 fun main() {
     coveredTrueBranch(true) // coverage: FULL
     coveredFalseBranch(false) // coverage: FULL
     coveredTrueBranch2(false) // coverage: FULL
     coveredFalseBranch2(true) // coverage: FULL
-}
+} // coverage: FULL

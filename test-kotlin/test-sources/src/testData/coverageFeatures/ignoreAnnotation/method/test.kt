@@ -22,7 +22,7 @@ import testData.coverageFeatures.ignoreAnnotation.IgnoreCoverage
 
 fun foo() {
     println("foo") // coverage: FULL
-}
+} // coverage: FULL
 
 @IgnoreCoverage
 fun boo() {
@@ -32,4 +32,4 @@ fun boo() {
 fun main() {
     foo() // coverage: FULL
     boo() // coverage: FULL
-}
+} // coverage: FULL

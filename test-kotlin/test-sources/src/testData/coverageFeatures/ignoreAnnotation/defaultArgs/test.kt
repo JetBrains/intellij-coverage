@@ -28,4 +28,4 @@ fun booWithDefault(x: Int = 2) {
 
 fun main() {
     booWithDefault() // coverage: FULL
-}
+} // coverage: FULL

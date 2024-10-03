@@ -31,4 +31,4 @@ suspend fun test(): Int {
 
 fun main(): Unit = runBlocking { // coverage: FULL
     test()                       // coverage: FULL
-}
+} // coverage: FULL

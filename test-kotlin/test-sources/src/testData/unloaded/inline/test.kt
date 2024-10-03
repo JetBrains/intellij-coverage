@@ -23,12 +23,12 @@ object UnusedClass {
     @JvmStatic
     inline fun foo() {
         println("foo")    // coverage: FULL
-    }
+    } // coverage: FULL
 
     fun boo() {
         foo()             // coverage: NONE
         println("boo")    // coverage: NONE
-    }
+    } // coverage: NONE
 }
 
 fun main() {

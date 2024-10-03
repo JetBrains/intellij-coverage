@@ -25,12 +25,12 @@ interface Foo { // generated $deserializeLambda$ is ignored here
       System.out.println("I am covered..."); // coverage: FULL
       return null; // coverage: FULL
     }).get(); // coverage: FULL
-  }
+  } // coverage: FULL
 }
 
 public class Test { // coverage: NONE
 
   public static void main(String[] args) {
     new Foo() {}.bar(); // coverage: FULL
-  }
+  } // coverage: FULL
 }

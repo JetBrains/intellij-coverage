@@ -23,15 +23,15 @@ inline fun <reified T> createArray(size: Int): Any = when (T::class) { // covera
         LongArray(size)                                                // coverage: NONE
     else ->
         Array<T?>(size) { null }                                       // coverage: FULL // branches: 2/2
-}
+} // coverage: FULL
 
 inline fun <reified T> get(key: String): String = when (T::class) { // coverage: FULL
     String::class -> "String"                                       // coverage: PARTIAL // branches: 1/2
     else -> "no"                                                    // coverage: NONE
-}
+} // coverage: FULL
 
 fun main() {
     val a = createArray<Int>(10)                                       // coverage: FULL
     val b = createArray<Any>(30)                                       // coverage: FULL
     assert(get<String>("String") == "String")                       // coverage: PARTIAL // branches: 1/4
-}
+} // coverage: FULL

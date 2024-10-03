@@ -60,4 +60,4 @@ private fun functionWithSoManyDefaultArguments(
 
 fun main() {
     functionWithSoManyDefaultArguments()                                                                                // coverage: FULL
-}
+} // coverage: FULL

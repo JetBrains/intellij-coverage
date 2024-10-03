@@ -207,6 +207,7 @@ fun assertEqualsFiles(
     }
     val withActualComments = replaceData(withoutComments, actual, prefix)
     val withExpectedComments = replaceData(withoutComments, expected, prefix)
+//    file.writeText(withActualComments)
     Assert.assertEquals(withExpectedComments, withActualComments)
 }
 

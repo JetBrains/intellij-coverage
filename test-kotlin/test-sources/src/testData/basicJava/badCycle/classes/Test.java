@@ -28,20 +28,20 @@ public class Test {
     static {
       System.out.println("Base class static init");   // coverage: FULL
       new DerivedClass().method();                    // coverage: FULL
-    }
+    } // coverage: FULL
   }
 
   public static class DerivedClass extends BaseClass {
     static {
       System.out.println("DerivedClass static init"); // coverage: FULL
-    }
+    } // coverage: FULL
 
     public DerivedClass() {                           // coverage: FULL
       System.out.println("DerivedClass constructor"); // coverage: FULL
-    }
+    } // coverage: FULL
 
     void method() {
       System.out.println("DerivedClass method");      // coverage: FULL
-    }
+    } // coverage: FULL
   }
 }

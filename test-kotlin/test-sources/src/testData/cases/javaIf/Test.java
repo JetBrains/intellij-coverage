@@ -25,7 +25,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("case 2");  // coverage: NONE // stats: 0/3
     }
-  }
+  } // coverage: FULL
 
   void oneBranch2(int x) {
     if (x == 1) {  // coverage: PARTIAL // branches: 1/2 // stats: 3/3
@@ -33,7 +33,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("case 2");  // coverage: FULL // stats: 3/3
     }
-  }
+  } // coverage: FULL
 
   void allBranches(int x) {
     if (x == 1) {  // coverage: FULL // branches: 2/2 // stats: 3/3
@@ -41,21 +41,21 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("case 2");  // coverage: FULL // stats: 3/3
     }
-  }
+  } // coverage: FULL
 
   void singleBranch1(int x) {
     if (x == 1) {  // coverage: PARTIAL // branches: 1/2 // stats: 3/3
       System.out.println("case 1");  // coverage: FULL // stats: 3/3
     }
     System.out.println("case 2");  // coverage: FULL // stats: 3/3
-  }
+  } // coverage: FULL
 
   void singleBranch2(int x) {
     if (x == 1) {  // coverage: PARTIAL // branches: 1/2 // stats: 3/3
       System.out.println("case 1");  // coverage: NONE // stats: 0/3
     }
     System.out.println("case 2");  // coverage: FULL // stats: 3/3
-  }
+  } // coverage: FULL
 
   void empty(int x) {
     if (x == 1) {  // coverage: NONE // branches: 0/2 // stats: 0/3
@@ -63,7 +63,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("case 2");  // coverage: NONE // stats: 0/3
     }
-  }
+  } // coverage: NONE
 
   void and1(boolean a, boolean b) {
     if (a && b) {  // coverage: PARTIAL // branches: 2/4 // stats: 4/4
@@ -71,7 +71,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("either a or b is false");  // coverage: FULL // stats: 3/3
     }
-  }
+  } // coverage: FULL
 
   void and2(boolean a, boolean b) {
     if (a && b) {  // coverage: PARTIAL // branches: 1/4 // stats: 2/4
@@ -79,7 +79,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("either a or b is false");  // coverage: FULL // stats: 3/3
     }
-  }
+  } // coverage: FULL
 
   void and3(boolean a, boolean b) {
     if (a && b) {  // coverage: PARTIAL // branches: 2/4 // stats: 4/4
@@ -87,7 +87,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("either a or b is false");  // coverage: NONE // stats: 0/3
     }
-  }
+  } // coverage: FULL
 
   void fullAnd(boolean a, boolean b) {
     if (a && b) {  // coverage: FULL // branches: 4/4 // stats: 4/4
@@ -95,7 +95,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("either a or b is false");  // coverage: FULL // stats: 3/3
     }
-  }
+  } // coverage: FULL
 
   void andAnd0(boolean a, boolean b, boolean c) {
     if (a && b && c) { // coverage: PARTIAL // branches: 1/6 // stats: 2/6
@@ -103,7 +103,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("Some one is false"); // coverage: FULL // stats: 3/3
     }
-  }
+  } // coverage: FULL
 
   void andAnd1(boolean a, boolean b, boolean c) {
     if (a && b && c) { // coverage: PARTIAL // branches: 3/6 // stats: 4/6
@@ -111,7 +111,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("Some one is false"); // coverage: FULL // stats: 3/3
     }
-  }
+  } // coverage: FULL
 
   void andAnd2(boolean a, boolean b, boolean c) {
     if (a && b && c) { // coverage: PARTIAL // branches: 5/6 // stats: 6/6
@@ -119,7 +119,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("Some one is false"); // coverage: FULL // stats: 3/3
     }
-  }
+  } // coverage: FULL
 
   void andAnd3(boolean a, boolean b, boolean c) {
     if (a && b && c) { // coverage: FULL // branches: 6/6 // stats: 6/6
@@ -127,7 +127,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("Some one is false"); // coverage: FULL // stats: 3/3
     }
-  }
+  } // coverage: FULL
 
 
   void or1(boolean a, boolean b) {
@@ -136,7 +136,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("both a and b are false");  // coverage: NONE // stats: 0/3
     }
-  }
+  } // coverage: FULL
 
   void or2(boolean a, boolean b) {
     if (a || b) {  // coverage: PARTIAL // branches: 2/4 // stats: 4/4
@@ -144,7 +144,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("both a and b are false");  // coverage: NONE // stats: 0/3
     }
-  }
+  } // coverage: FULL
 
   void or3(boolean a, boolean b) {
     if (a || b) {  // coverage: PARTIAL // branches: 1/4 // stats: 2/4
@@ -152,7 +152,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("both a and b are false");  // coverage: NONE // stats: 0/3
     }
-  }
+  } // coverage: FULL
 
   void fullOr(boolean a, boolean b) {
     if (a || b) {  // coverage: FULL // branches: 4/4 // stats: 4/4
@@ -160,7 +160,7 @@ public class Test {  // coverage: FULL // stats: 2/2
     } else {
       System.out.println("both a and b are false");  // coverage: FULL // stats: 3/3
     }
-  }
+  } // coverage: FULL
 
   boolean negation(boolean a) {
     return !a; // coverage: FULL // stats: 2/2
@@ -231,5 +231,5 @@ public class Test {  // coverage: FULL // stats: 2/2
 
     conditions.andWithoutIf(true, false);  // coverage: FULL // stats: 5/5
     conditions.orWithoutIf(false, true);  // coverage: FULL // stats: 5/5
-  }
+  } // coverage: FULL
 }

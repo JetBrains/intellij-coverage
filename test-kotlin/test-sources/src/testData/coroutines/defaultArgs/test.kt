@@ -21,10 +21,10 @@ import kotlinx.coroutines.runBlocking
 
 fun main() = runBlocking { // coverage: FULL
     funWithDefault() // coverage: FULL
-}
+} // coverage: FULL
 
 suspend fun funWithDefault(x: Int = 3) { // coverage: FULL
     println(x) // coverage: FULL
     delay(1) // coverage: FULL
     println(x) // coverage: FULL
-}
+} // coverage: FULL

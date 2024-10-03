@@ -31,7 +31,7 @@ public class Test { // coverage: NONE
     test3(); // coverage: FULL
     test4(); // coverage: FULL
     test5(); // coverage: FULL
-  }
+  } // coverage: FULL
 
   private static void test2() throws IOException {
     try (
@@ -40,7 +40,7 @@ public class Test { // coverage: NONE
       System.out.println("action"); // coverage: FULL
     }
     System.out.println(); // coverage: FULL
-  }
+  } // coverage: FULL
 
   private static int test3() throws IOException {
     try (

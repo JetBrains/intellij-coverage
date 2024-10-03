@@ -20,4 +20,4 @@ package testData.coverageFeatures.returnTest
 
 fun main() {
     println("Hello world!") // coverage: FULL
-}
+} // coverage: FULL

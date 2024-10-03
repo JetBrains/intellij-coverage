@@ -37,8 +37,8 @@ fun test() {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // coverage: FULL
         0, 0                          // coverage: FULL
     )
-}
+} // coverage: FULL
 
 fun main() {
     test()                            // coverage: FULL
-}
+} // coverage: FULL

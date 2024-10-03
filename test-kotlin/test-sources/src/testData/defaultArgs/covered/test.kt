@@ -30,4 +30,4 @@ private fun functionWithDefaultArgument(x: Int = 3): Int { // coverage: FULL
 fun main() {
     functionWithDefaultArgument()                          // coverage: FULL
     A().functionWithDefaultArgument()                      // coverage: FULL
-}
+} // coverage: FULL

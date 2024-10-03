@@ -25,7 +25,7 @@ suspend fun test(): Int {
 
 suspend fun noSuspend() {
     println("Hello")             // coverage: FULL
-}
+} // coverage: FULL
 
 suspend fun f(): Int {
     delay(1)                     // coverage: FULL
@@ -35,4 +35,4 @@ suspend fun f(): Int {
 fun main(): Unit = runBlocking { // coverage: FULL
     test()                       // coverage: FULL
     noSuspend()                  // coverage: FULL
-}
+} // coverage: FULL

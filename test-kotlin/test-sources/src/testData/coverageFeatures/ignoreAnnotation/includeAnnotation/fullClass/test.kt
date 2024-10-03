@@ -33,12 +33,12 @@ class Boo {
     fun boo() {
         println("boo") // coverage: FULL
         functionWithLambda { 42 } // coverage: FULL
-    }
+    } // coverage: FULL
 
     companion object {
         fun staticBoo() {
             println() // coverage: FULL
-        }
+        } // coverage: FULL
     }
 
     class Foo {
