@@ -51,8 +51,17 @@ public class UnloadedUtil {
 
   @SuppressWarnings("unused") // used in IntelliJ
   public static void appendUnloaded(ProjectData projectData, ClassFinder classFinder, boolean branchCoverage) {
-    InstrumentationOptions options = new InstrumentationOptions.Builder().setBranchCoverage(branchCoverage).build();
+    InstrumentationOptions options = createOptionsFromProject(projectData, branchCoverage);
     appendUnloaded(projectData, new ProjectContext(options, classFinder), true);
+  }
+
+  private static InstrumentationOptions createOptionsFromProject(ProjectData projectData, boolean branchCoverage) {
+    return new InstrumentationOptions.Builder()
+        .setBranchCoverage(branchCoverage)
+        .setIncludePatterns(projectData.getIncludePatterns())
+        .setExcludePatterns(projectData.getExcludePatterns())
+        .setExcludeAnnotations(projectData.getAnnotationsToIgnore())
+        .build();
   }
 
   public static void appendUnloaded(ProjectData projectData, ProjectContext context) {
@@ -77,7 +86,7 @@ public class UnloadedUtil {
 
   @SuppressWarnings("unused") // used in IntelliJ
   public static void appendUnloadedClass(ProjectData projectData, String className, ClassReader reader, boolean branchCoverage) {
-    InstrumentationOptions options = new InstrumentationOptions.Builder().setBranchCoverage(branchCoverage).build();
+    InstrumentationOptions options = createOptionsFromProject(projectData, branchCoverage);
     appendUnloadedClass(projectData, className, reader, new ProjectContext(options), true);
   }
 

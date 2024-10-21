@@ -116,22 +116,22 @@ public class InstrumentationOptions {
     }
 
     public Builder setIncludePatterns(List<Pattern> includePatterns) {
-      this.includePatterns = includePatterns;
+      this.includePatterns = listOrEmpty(includePatterns);
       return this;
     }
 
     public Builder setExcludePatterns(List<Pattern> excludePatterns) {
-      this.excludePatterns = excludePatterns;
+      this.excludePatterns = listOrEmpty(excludePatterns);
       return this;
     }
 
     public Builder setIncludeAnnotations(List<Pattern> includeAnnotations) {
-      this.includeAnnotations = includeAnnotations;
+      this.includeAnnotations = listOrEmpty(includeAnnotations);
       return this;
     }
 
     public Builder setExcludeAnnotations(List<Pattern> excludeAnnotations) {
-      this.excludeAnnotations = excludeAnnotations;
+      this.excludeAnnotations = listOrEmpty(excludeAnnotations);
       return this;
     }
 
@@ -157,5 +157,9 @@ public class InstrumentationOptions {
           includePatterns, excludePatterns, includeAnnotations, excludeAnnotations,
           dataFile, sourceMapFile, testTrackingMode);
     }
+  }
+
+  private static <T> List<T> listOrEmpty(List<T> list) {
+    return list == null || list.isEmpty() ? Collections.<T>emptyList() : list;
   }
 }
