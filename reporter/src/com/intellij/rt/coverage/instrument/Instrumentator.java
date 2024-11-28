@@ -24,6 +24,9 @@ import org.jetbrains.coverage.org.objectweb.asm.ClassReader;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.List;
 
 /**
@@ -35,12 +38,28 @@ public class Instrumentator {
   private final List<File> myRoots;
   private final List<File> myOutputRoots;
   private final Filters myFilters;
-
+  /**
+   * This loader is provided to the instrumenter for correct frames computation in ClassWriterImpl.
+   */
+  private final ClassLoader myLoader;
 
   public Instrumentator(List<File> roots, List<File> outputRoots, Filters filters) {
     myRoots = roots;
     myOutputRoots = outputRoots;
     myFilters = filters;
+    myLoader = createClassLoader(roots);
+  }
+
+  private ClassLoader createClassLoader(List<File> roots) {
+    URL[] urls = new URL[roots.size()];
+    for (int i = 0; i < roots.size(); i++) {
+      try {
+        urls[i] = myRoots.get(i).toURI().toURL();
+      } catch (MalformedURLException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return new URLClassLoader(urls);
   }
 
   public void instrument(final boolean countHits) {
@@ -84,9 +103,7 @@ public class Instrumentator {
           final String className = packageName.isEmpty()
               ? classSimpleName
               : ClassNameUtil.convertToInternalName(packageName) + "/" + classSimpleName;
-          // This loader is not user actually, just need some not null loader
-          final ClassLoader loader = ClassLoader.getSystemClassLoader();
-          final byte[] transformed = myTransformer.transform(loader, className, null, null, bytes);
+          final byte[] transformed = myTransformer.transform(myLoader, className, null, null, bytes);
           if (transformed != null) {
             bytes = transformed;
           }
