@@ -19,7 +19,10 @@ package com.intellij.rt.coverage.util.classFinder;
 import com.intellij.rt.coverage.util.ClassNameUtil;
 import com.intellij.rt.coverage.util.CoverageIOUtil;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -125,32 +128,48 @@ public class ClassPathEntry {
   private static class ZipEntryProcessor extends AbstractClassPathEntryProcessor {
     public void iterateMatchedClasses(final String classPathEntry, ClassEntry.Consumer consumer) throws IOException {
       final ZipFile zipFile = new ZipFile(new File(classPathEntry));
+      // Force the order of classes within one package to ensure that inner classes are processed after
+      // its outer class. This order is important to exclude annotation processing.
+      final Map<String, ZipEntry> packageClasses = new TreeMap<String, ZipEntry>();
       try {
-        final InputStream[] is = new InputStream[] {null};
         Enumeration<? extends ZipEntry> zenum = zipFile.entries();
         while (zenum.hasMoreElements()) {
           ZipEntry ze = zenum.nextElement();
-          if (!ze.isDirectory() && ze.getName().endsWith(ClassNameUtil.CLASS_FILE_SUFFIX)) {
-            final String className = ClassNameUtil.convertToFQName(ClassNameUtil.removeClassSuffix(ze.getName()));
-            if (shouldInclude(className)) {
-              is[0] = null;
-              try {
-                final ZipEntry zipEntry = ze;
-                consumer.consume(new ClassEntry(className) {
-                  public InputStream getClassInputStream() throws IOException {
-                    is[0] = zipFile.getInputStream(zipEntry);
-                    return is[0];
-                  }
-                });
-              } finally {
-                CoverageIOUtil.close(is[0]);
-              }
-            }
+          if (ze.isDirectory()) {
+            flushClassesInPackage(packageClasses, consumer, zipFile);
+          } else {
+            String name = ze.getName();
+            if (!name.endsWith(ClassNameUtil.CLASS_FILE_SUFFIX)) continue;
+            final String className = ClassNameUtil.convertToFQName(ClassNameUtil.removeClassSuffix(name));
+            if (!shouldInclude(className)) continue;
+            packageClasses.put(className, ze);
           }
         }
+        flushClassesInPackage(packageClasses, consumer, zipFile);
       } finally {
         zipFile.close();
       }
+    }
+
+    private void flushClassesInPackage(Map<String, ZipEntry> packageClasses,
+                                       ClassEntry.Consumer consumer,
+                                       final ZipFile zipFile) {
+      for (Map.Entry<String, ZipEntry> entry : packageClasses.entrySet()) {
+        final InputStream[] is = new InputStream[]{null};
+        try {
+          final String className = entry.getKey();
+          final ZipEntry zipEntry = entry.getValue();
+          consumer.consume(new ClassEntry(className) {
+            public InputStream getClassInputStream() throws IOException {
+              is[0] = zipFile.getInputStream(zipEntry);
+              return is[0];
+            }
+          });
+        } finally {
+          CoverageIOUtil.close(is[0]);
+        }
+      }
+      packageClasses.clear();
     }
   }
 
