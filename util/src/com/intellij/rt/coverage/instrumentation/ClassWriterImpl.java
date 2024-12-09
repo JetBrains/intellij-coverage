@@ -37,6 +37,12 @@ class ClassWriterImpl extends ClassWriter {
     myClassReaders = classReaders;
   }
 
+  @Override
+  protected ClassLoader getClassLoader() {
+    if (myClassLoader != null) return myClassLoader;
+    return super.getClassLoader();
+  }
+
   protected String getCommonSuperClass(String type1, String type2) {
     try {
       ClassReader info1 = getOrLoadClassReader(type1);
@@ -68,6 +74,12 @@ class ClassWriterImpl extends ClassWriter {
         } else {
           return result;
         }
+      }
+    } catch (FrameComputationClassNotFoundException e) {
+      try {
+        return super.getCommonSuperClass(type1, type2);
+      } catch (TypeNotPresentException ignored) {
+        throw e;
       }
     } catch (IOException e) {
       throw new RuntimeException(e.toString());
@@ -124,9 +136,12 @@ class ClassWriterImpl extends ClassWriter {
       InputStream is = null;
       try {
         String resource = className + ".class";
-        is = myClassLoader == null
-            ? ClassLoader.getSystemResourceAsStream(resource)
-            : myClassLoader.getResourceAsStream(resource);
+        if (myClassLoader != null) {
+          is = myClassLoader.getResourceAsStream(resource);
+        }
+        if (is == null) {
+          is = ClassLoader.getSystemResourceAsStream(resource);
+        }
         if (is == null) {
           throw new FrameComputationClassNotFoundException("Class " + className + " not found");
         }
