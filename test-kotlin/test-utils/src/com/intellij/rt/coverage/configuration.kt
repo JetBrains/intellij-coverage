@@ -17,14 +17,24 @@
 package com.intellij.rt.coverage
 
 enum class Coverage {
-    LINE, LINE_FIELD, BRANCH, BRANCH_FIELD, LINE_CONDY, BRANCH_CONDY;
+    LINE, LINE_FIELD, BRANCH, BRANCH_FIELD, LINE_INDY, BRANCH_INDY, LINE_CONDY, BRANCH_CONDY;
 
-    fun isBranchCoverage() = this == BRANCH || this == BRANCH_FIELD || this == BRANCH_CONDY
+    fun isBranchCoverage() = this == BRANCH || this == BRANCH_FIELD || this == BRANCH_INDY || this == BRANCH_CONDY
+    fun isIndyEnabled() = this == LINE_INDY || this == BRANCH_INDY
     fun isCondyEnabled() = this == LINE_CONDY || this == BRANCH_CONDY
 
     companion object {
-        fun valuesWithCondyWhenPossible() =
-            if (getVMVersion() >= 11) values() else values().filterNot { it.isCondyEnabled() }.toTypedArray()
+        fun valuesForCurrentRuntime(): List<Coverage> {
+            val result = entries.toMutableList()
+            val vmVersion = getVMVersion()
+            if (vmVersion < 11) {
+                result.removeAll { it.isCondyEnabled() }
+            }
+            if (vmVersion < 7) {
+                result.removeAll { it.isIndyEnabled() }
+            }
+            return result
+        }
     }
 }
 
@@ -35,13 +45,14 @@ enum class TestTracking {
 fun getCoverageConfigurations() = if (System.getProperty("coverage.run.fast.tests") != null) {
     listOfNotNull(
         arrayOf(Coverage.BRANCH_FIELD, null),
+        arrayOf(Coverage.BRANCH_INDY, null).takeIf { getVMVersion() >= 7 },
         arrayOf(Coverage.LINE_CONDY, null).takeIf { getVMVersion() >= 11 },
     ).toTypedArray()
 } else {
     allTestTrackingModes()
 }
 
-fun allTestTrackingModes() = Coverage.valuesWithCondyWhenPossible().toList()
+fun allTestTrackingModes() = Coverage.valuesForCurrentRuntime()
     .product(TestTracking.values().toList().plus(null))
     .map { it.toList().toTypedArray() }.toTypedArray()
 

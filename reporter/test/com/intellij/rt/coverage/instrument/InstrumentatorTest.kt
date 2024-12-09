@@ -99,6 +99,7 @@ private fun checkOfflineInstrumentation(roots: List<File>, outputRoots: List<Fil
 
 private fun ByteArray.isInstrumented(): Boolean {
     var hasInstrumentation = false
+    var hasIndyInstrumentation = false
     var hasCondyInstrumentation = false
     val visitor = object : ClassVisitor(Opcodes.API_VERSION) {
         override fun visitMethod(
@@ -123,10 +124,24 @@ private fun ByteArray.isInstrumented(): Boolean {
                         hasCondyInstrumentation = true
                     }
                 }
+
+                override fun visitInvokeDynamicInsn(
+                    name: String?,
+                    descriptor: String?,
+                    bootstrapMethodHandle: Handle?,
+                    vararg bootstrapMethodArguments: Any?
+                ) {
+                    if (name == "__\$hits\$__") {
+                        hasIndyInstrumentation = true
+                    }
+                }
             }
         }
     }
     ClassReader(this).accept(visitor, ClassReader.SKIP_FRAMES or ClassReader.SKIP_DEBUG)
-    check(!(hasInstrumentation && hasCondyInstrumentation))
-    return hasInstrumentation || hasCondyInstrumentation
+    val instrumentationsFound = booleanArrayOf(
+        hasInstrumentation, hasIndyInstrumentation, hasCondyInstrumentation
+    ).count { it }
+    check(instrumentationsFound <= 1)
+    return instrumentationsFound == 1
 }
