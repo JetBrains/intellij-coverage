@@ -47,6 +47,8 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
     if (OptionsUtil.FIELD_INSTRUMENTATION_ENABLED) {
       if (InstrumentationUtils.isCondyEnabled(cr)) {
         return new CondyCoverageDataAccess(createCondyInit(className, cr));
+      } else if (InstrumentationUtils.isIndyEnabled(cr)) {
+        return new IndyCoverageDataAccess(createIndyInit(className, cr));
       } else {
         return new FieldCoverageDataAccess(cr, className, createInit(className, cr, false));
       }
@@ -62,6 +64,17 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
         : (needCache ? "getHitsMaskCached" : "getHitsMask");
     return new CoverageDataAccess.Init("__$hits$__", arrayType, CoverageRuntime.COVERAGE_RUNTIME_OWNER,
         methodName, "(Ljava/lang/String;)" + arrayType, new Object[]{className});
+  }
+
+  protected CoverageDataAccess.Init createIndyInit(String className, ClassReader cr) {
+    boolean calculateHits = myProjectContext.getOptions().isCalculateHits;
+    String arrayType = calculateHits ? DataAccessUtil.HITS_ARRAY_TYPE : DataAccessUtil.MASK_ARRAY_TYPE;
+    String methodName = calculateHits ? "getHits" : "getHitsMask";
+    return new CoverageDataAccess.Init(
+        "__$hits$__", arrayType, "com/intellij/rt/coverage/util/IndyUtils", methodName,
+        "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/String;)Ljava/lang/invoke/CallSite;",
+        new Object[]{className}
+    );
   }
 
   protected CoverageDataAccess.Init createCondyInit(String className, ClassReader cr) {
