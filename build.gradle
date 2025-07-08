@@ -15,22 +15,7 @@
  */
 
 import com.intellij.rt.coverage.build.Publishing
-import jetbrains.sign.GpgSignSignatoryProvider
 import org.gradle.internal.jvm.Jvm
-
-buildscript {
-  repositories {
-    maven { url 'https://packages.jetbrains.team/maven/p/jcs/maven' }
-  }
-  dependencies {
-    classpath 'com.jetbrains:jet-sign:38'
-  }
-}
-
-plugins {
-  id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
-}
-apply plugin: 'signing'
 
 private calcVersion() {
   hasProperty("teamcity") ? "1.0.${teamcity["build.number"]}" : ""
@@ -80,15 +65,6 @@ clean.doFirst {
   delete "dist"
 }
 
-signing {
-  sign publishing.publications
-  signatories = new GpgSignSignatoryProvider()
-}
-
-tasks.withType(Sign) {
-  onlyIf { System.getenv("TEAMCITY_VERSION") != null }
-}
-
 static def getPublishDependencies(Project project) {
   project.configurations.named("externalDependencies").get().getResolvedConfiguration().getFirstLevelModuleDependencies()
 }
@@ -101,14 +77,5 @@ project(":reporter").afterEvaluate { Project project ->
   reporterDependencies.add(new Publishing.MyDependency(group, coverage_jar_name, version))
 
   Publishing.setUpPublication(rootProject, ":reporter", reporter_jar_name, "Intellij Coverage Report", "Library for presenting coverage results", reporterDependencies)
-}
-
-nexusPublishing {
-  repositories {
-    sonatype {
-      username = System.getenv('PUBLISHING_USER')
-      password = System.getenv('PUBLISHING_PASSWORD')
-    }
-  }
 }
 
