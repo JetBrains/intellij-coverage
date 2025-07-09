@@ -18,7 +18,7 @@ import com.intellij.rt.coverage.build.Publishing
 import org.gradle.internal.jvm.Jvm
 
 private calcVersion() {
-  hasProperty("teamcity") ? "1.0.${teamcity["build.number"]}" : ""
+  hasProperty("teamcity") ? "1.0.${teamcity["build.number"]}" : "1.0.SNAPSHOT"
 }
 
 apply plugin: 'maven-publish'
