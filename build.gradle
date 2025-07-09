@@ -79,3 +79,26 @@ project(":reporter").afterEvaluate { Project project ->
   Publishing.setUpPublication(rootProject, ":reporter", reporter_jar_name, "Intellij Coverage Report", "Library for presenting coverage results", reporterDependencies)
 }
 
+def mavenCentralArtifactsFolder = layout.buildDirectory.dir('maven-central-artifacts')
+publishing {
+  repositories {
+    maven {
+      url = mavenCentralArtifactsFolder
+    }
+  }
+}
+
+task buildMavenCentralArtifacts {
+  dependsOn publish
+  doLast {
+    delete {
+      delete fileTree(mavenCentralArtifactsFolder).include("**/maven-metadata.xml*")
+    }
+  }
+}
+
+allprojects {
+  it.tasks.withType(Test).configureEach {
+    it.dependsOn buildMavenCentralArtifacts
+  }
+}
