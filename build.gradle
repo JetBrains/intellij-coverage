@@ -88,17 +88,8 @@ publishing {
   }
 }
 
-task buildMavenCentralArtifacts {
-  dependsOn publish
-  doLast {
-    delete {
-      delete fileTree(mavenCentralArtifactsFolder).include("**/maven-metadata.xml*")
-    }
-  }
-}
-
 allprojects {
   it.tasks.withType(Test).configureEach {
-    it.dependsOn buildMavenCentralArtifacts
+    it.dependsOn publish
   }
 }
