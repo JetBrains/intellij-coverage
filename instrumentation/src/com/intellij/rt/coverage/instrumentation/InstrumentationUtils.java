@@ -68,6 +68,10 @@ public class InstrumentationUtils {
     return OptionsUtil.CONDY_ENABLED && getBytecodeVersion(cr) >= Opcodes.V11;
   }
 
+  public static boolean isIndyEnabled(ClassReader cr) {
+    return OptionsUtil.INDY_ENABLED && getBytecodeVersion(cr) >= Opcodes.V1_7;
+  }
+
   public static boolean isIntConstLoading(int opcode) {
     return Opcodes.ICONST_M1 <= opcode && opcode <= Opcodes.ICONST_5
         || opcode == Opcodes.BIPUSH

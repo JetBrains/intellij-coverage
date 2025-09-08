@@ -50,10 +50,10 @@ class InstrumentedBytecodeTest {
         val expectedRoot = "bytecode/${testName.replace(".", "/")}"
         assertBytecode("$expectedRoot/original.txt", originalBytes)
 
-        val condyPossible = InstrumentationUtils.getBytecodeVersion(ClassReader(originalBytes)) >= Opcodes.V11
+        val classVersion = InstrumentationUtils.getBytecodeVersion(ClassReader(originalBytes))
         for (coverage in Coverage.values()) {
             for (hits in listOf(true, false)) {
-                val expectedCoverage = getExpectedCoverage(coverage, condyPossible)
+                val expectedCoverage = getExpectedCoverage(coverage, classVersion)
                 val expectedFileName = createExpectedFileName(expectedRoot, expectedCoverage, null, hits)
                 doTest(null, coverage, originalBytes, className, expectedFileName, hits)
             }
@@ -61,16 +61,22 @@ class InstrumentedBytecodeTest {
         for (testTracking in TestTracking.values()) {
             val coverage = Coverage.BRANCH_FIELD
             val hits = false
-            val expectedCoverage = getExpectedCoverage(coverage, condyPossible)
+            val expectedCoverage = getExpectedCoverage(coverage, classVersion)
             val expectedFileName = createExpectedFileName(expectedRoot, expectedCoverage, testTracking, hits)
             doTest(testTracking, coverage, originalBytes, className, expectedFileName, hits)
         }
     }
 
-    private fun getExpectedCoverage(coverage: Coverage, condyPossible: Boolean): Coverage =
-        if (coverage.isCondyEnabled() && !condyPossible) {
-            if (coverage.isBranchCoverage()) Coverage.BRANCH_FIELD else Coverage.LINE_FIELD
-        } else coverage
+    private fun getExpectedCoverage(attempted: Coverage, classVersion: Int): Coverage {
+        var result = attempted
+        if (result.isCondyEnabled() && classVersion < Opcodes.V11) {
+            result = if (result.isBranchCoverage()) Coverage.BRANCH_INDY else Coverage.LINE_INDY
+        }
+        if (result.isIndyEnabled() && classVersion < Opcodes.V1_7) {
+            result = if (result.isBranchCoverage()) Coverage.BRANCH_FIELD else Coverage.LINE_FIELD
+        }
+        return result
+    }
 
     private fun doTest(
         testTracking: TestTracking?,
@@ -79,24 +85,30 @@ class InstrumentedBytecodeTest {
         className: String,
         expectedFileName: String,
         calculateHits: Boolean,
-    ) = runWithOptions(
-        mapOf(
+    ) {
+        val systemProps = mutableMapOf(
             OptionsUtil::FIELD_INSTRUMENTATION_ENABLED to (coverage != Coverage.LINE && coverage != Coverage.BRANCH),
-            OptionsUtil::CONDY_ENABLED to coverage.isCondyEnabled(),
             OptionsUtil::CALCULATE_HITS_COUNT to calculateHits,
         )
-    ) {
-        val testTrackingMode = testTracking.createMode()
-        val projectData = ProjectData(testTrackingMode?.createTestTrackingCallback(null))
-        val options = InstrumentationOptions.Builder()
-            .setBranchCoverage(coverage.isBranchCoverage())
-            .setTestTrackingMode(testTrackingMode)
-            .build()
-        val transformer = CoverageTransformer(projectData, ProjectContext(options))
-        val bytes = transformer.instrument(originalBytes, className, null, false)
+        if (!coverage.isCondyEnabled()) {
+            systemProps[OptionsUtil::CONDY_ENABLED] = false
+            if (!coverage.isIndyEnabled()) {
+                systemProps[OptionsUtil::INDY_ENABLED] = false
+            }
+        }
+        runWithOptions(systemProps) {
+            val testTrackingMode = testTracking.createMode()
+            val projectData = ProjectData(testTrackingMode?.createTestTrackingCallback(null))
+            val options = InstrumentationOptions.Builder()
+                .setBranchCoverage(coverage.isBranchCoverage())
+                .setTestTrackingMode(testTrackingMode)
+                .build()
+            val transformer = CoverageTransformer(projectData, ProjectContext(options))
+            val bytes = transformer.instrument(originalBytes, className, null, false)
 
-        assertBytecode(expectedFileName, bytes)
+            assertBytecode(expectedFileName, bytes)
 //        File("resources", expectedFileName).writeText(getReadableBytecode(bytes).preprocess())
+        }
     }
 
     private fun getExpectedFile(expectedFileName: String): File {
@@ -126,6 +138,8 @@ private fun createExpectedFileName(
         Coverage.LINE_FIELD -> "line_field"
         Coverage.BRANCH -> "branch"
         Coverage.BRANCH_FIELD -> "branch_field"
+        Coverage.LINE_INDY -> "line_indy"
+        Coverage.BRANCH_INDY -> "branch_indy"
         Coverage.LINE_CONDY -> "line_condy"
         Coverage.BRANCH_CONDY -> "branch_condy"
     }

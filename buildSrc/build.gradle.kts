@@ -24,4 +24,7 @@ repositories {
 
 dependencies {
     implementation("com.guardsquare:proguard-gradle:7.3.0")
+    implementation("org.ow2.asm:asm-tree:9.7")
+    implementation("org.ow2.asm:asm-commons:9.7")
+    implementation("commons-io:commons-io:2.16.1")
 }
