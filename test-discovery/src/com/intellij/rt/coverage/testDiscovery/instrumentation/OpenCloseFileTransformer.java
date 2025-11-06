@@ -25,17 +25,14 @@ import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipFile;
 
 import static org.jetbrains.coverage.org.objectweb.asm.ClassReader.SKIP_FRAMES;
 import static org.jetbrains.coverage.org.objectweb.asm.Opcodes.*;
 
 public class OpenCloseFileTransformer implements ClassFileTransformer {
-  private static final List<ClassTransformation> CLASS_TRANSFORMATIONS = new LinkedList<ClassTransformation>() {
+  private static final List<ClassTransformation> CLASS_TRANSFORMATIONS = new ArrayList<ClassTransformation>() {
     {
       add(classTransformation(FileOutputStream.class, "(Ljava/io/File;Z)V"));
       add(classTransformation(FileInputStream.class, "(Ljava/io/File;)V"));
@@ -63,7 +60,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
     if (ct == null) return classfileBuffer;
 
     ClassReader cr = new ClassReader(classfileBuffer);
-    ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+    ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_FRAMES);
     cr.accept(new ClassVisitor(Opcodes.API_VERSION, cw) {
       @Override
       public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
@@ -74,7 +71,7 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
 
         return methodTransformer.createVisitor(base);
       }
-    }, SKIP_FRAMES);
+    }, ClassReader.EXPAND_FRAMES);
 
     System.out.println("Injected open/close file listeners into " + className);
 
@@ -82,9 +79,14 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
   }
 
   public Class<?>[] classesToTransform() {
-    List<Class<?>> classes = new LinkedList<Class<?>>();
-    for (ClassTransformation t : myClassTransformations.values()) classes.add(t.myClass);
-    return classes.toArray(new Class<?>[]{});
+    Collection<ClassTransformation> values = myClassTransformations.values();
+    Class<?>[] classes = new Class[values.size()];
+    int iterator = 0;
+    for (ClassTransformation t : values) {
+      classes[iterator] = t.myClass;
+      iterator++;
+    }
+    return classes;
   }
 
   private static ClassTransformation classTransformation(Class<?> c, String ctor) {
@@ -229,12 +231,13 @@ public class OpenCloseFileTransformer implements ClassFileTransformer {
         for (int i = 0; i < argTypes.length; i++) {
           visitInsn(DUP);
           putConst(i);
-          visitIntInsn(ALOAD, i);
+          visitVarInsn(ALOAD, i);
           visitInsn(AASTORE);
         }
 
         visitMethodInsn(INVOKEVIRTUAL, "java/lang/reflect/Method", "invoke",
             "(Ljava/lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;", false);
+        visitInsn(POP);
       }
     }
   }
