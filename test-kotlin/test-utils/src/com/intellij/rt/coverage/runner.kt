@@ -141,7 +141,11 @@ internal fun runWithCoverage(
     mainClass: String = getTestFile(testName).mainClass
 ): ProjectData {
     when (coverage) {
-        Coverage.LINE_FIELD, Coverage.BRANCH_FIELD -> extraArgs.add("-Dcoverage.condy.enable=false")
+        Coverage.LINE_INDY, Coverage.BRANCH_INDY -> extraArgs.add("-Dcoverage.condy.enable=false")
+        Coverage.LINE_FIELD, Coverage.BRANCH_FIELD -> {
+            extraArgs.add("-Dcoverage.condy.enable=false")
+            extraArgs.add("-Dcoverage.indy.enable=false")
+        }
         Coverage.LINE, Coverage.BRANCH -> extraArgs.add("-Didea.new.tracing.coverage=false")
         else -> {}
     }

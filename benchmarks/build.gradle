@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import com.intellij.rt.coverage.utils.ClassFileUpgradeTask
+
 sourceSets {
     jmh.java.srcDirs = [file('jmh')]
     main.java.srcDirs = []
@@ -33,4 +35,14 @@ dependencies {
     jmhImplementation 'org.joda:joda-convert:1.2'
     jmhImplementation 'junit:junit:4.13.1'
     jmhImplementation fileTree('lib')
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+task upgradeJmhClasspath(type: ClassFileUpgradeTask) {
+    inputFiles = sourceSets.jmh.runtimeClasspath
+    outputDirectory = layout.buildDirectory.dir("jmhClasspath").get()
 }
