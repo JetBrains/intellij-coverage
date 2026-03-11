@@ -44,12 +44,11 @@ public class CoverageTransformer extends AbstractIntellijClassfileTransformer {
   }
 
   private CoverageDataAccess createDataAccess(String className, ClassReader cr) {
-    if (OptionsUtil.FIELD_INSTRUMENTATION_ENABLED) {
-      if (InstrumentationUtils.isCondyEnabled(cr)) {
+    boolean fieldInstrumentation = OptionsUtil.FIELD_INSTRUMENTATION_ENABLED;
+    if (fieldInstrumentation && InstrumentationUtils.isCondyEnabled(cr)) {
         return new CondyCoverageDataAccess(createCondyInit(className, cr));
-      } else {
+    } else if (fieldInstrumentation && InstrumentationUtils.isFieldInstrumentationPossible(cr)) {
         return new FieldCoverageDataAccess(cr, className, createInit(className, cr, false));
-      }
     } else {
       return new NameCoverageDataAccess(createInit(className, cr, true));
     }

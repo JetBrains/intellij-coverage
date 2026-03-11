@@ -65,7 +65,7 @@ public abstract class ExtraFieldInstrumenter extends ClassVisitor {
     myFieldName = fieldName;
     myFieldType = fieldType;
     myInternalClassName = ClassNameUtil.convertToInternalName(className);
-    myInterface = (cr.getAccess() & Opcodes.ACC_INTERFACE) != 0;
+    myInterface = AbstractIntellijClassfileTransformer.isInterface(cr);
     myJava8AndAbove = (cr.readInt(4) & 0xFFFF) >= Opcodes.V1_8;
     myShouldCoverClinit = shouldCoverClinit;
   }

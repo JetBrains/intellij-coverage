@@ -200,4 +200,8 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
   private static int getClassFileVersion(ClassReader reader) {
     return reader.readInt(4);
   }
+
+  public static boolean isInterface(ClassReader cr) {
+    return (cr.getAccess() & Opcodes.ACC_INTERFACE) != 0;
+  }
 }

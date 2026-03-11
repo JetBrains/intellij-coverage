@@ -68,6 +68,15 @@ public class InstrumentationUtils {
     return OptionsUtil.CONDY_ENABLED && getBytecodeVersion(cr) >= Opcodes.V11;
   }
 
+  /**
+   * Field instrumentation may require generating static init methods into interfaces,
+   * which breaks other instrumentation tools.
+   * Instead, we fall back to a safer alternative which is less invasive.
+   */
+  public static boolean isFieldInstrumentationPossible(ClassReader cr) {
+    return OptionsUtil.FIELD_INSTRUMENTATION_ENABLED && !AbstractIntellijClassfileTransformer.isInterface(cr);
+  }
+
   public static boolean isIntConstLoading(int opcode) {
     return Opcodes.ICONST_M1 <= opcode && opcode <= Opcodes.ICONST_5
         || opcode == Opcodes.BIPUSH
