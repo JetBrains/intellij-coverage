@@ -70,40 +70,40 @@ public class TextCoverageStatistics {
       return;
     }
 
-    Map<String, int[]> packageCounters = new TreeMap<String, int[]>();
-    List<int[]> classRows = new ArrayList<int[]>();
+    Map<String, CoverageCounters> packageCounters = new TreeMap<String, CoverageCounters>();
+    List<CoverageCounters> classRows = new ArrayList<CoverageCounters>();
     final List<String> classNames = new ArrayList<String>();
     final List<ClassData> allClassData = new ArrayList<ClassData>();
-    int[] totals = new int[10]; // lines, covLines, branches, covBranches, methods, covMethods, instr, covInstr, classes, covClasses
+    CoverageCounters totals = new CoverageCounters();
 
     for (Map.Entry<String, List<ClassData>> entry : packages.entrySet()) {
       String pkg = entry.getKey();
-      int[] pkgCounters = new int[8]; // lines, covLines, branches, covBranches, methods, covMethods, instr, covInstr
+      CoverageCounters pkgCounters = new CoverageCounters();
 
       for (ClassData classData : entry.getValue()) {
-        int[] cls = computeClassCounters(project, classData);
+        CoverageCounters cls = computeClassCounters(project, classData);
         classNames.add(classData.getName());
         classRows.add(cls);
         allClassData.add(classData);
 
-        for (int i = 0; i < 8; i++) pkgCounters[i] += cls[i];
+        pkgCounters.add(cls);
 
-        totals[8]++; // totalClasses
-        if (cls[5] > 0) totals[9]++; // coveredClasses (has covered methods)
+        totals.totalClasses++;
+        if (cls.coveredMethods > 0) totals.coveredClasses++;
       }
 
       packageCounters.put(pkg, pkgCounters);
-      for (int i = 0; i < 8; i++) totals[i] += pkgCounters[i];
+      totals.add(pkgCounters);
     }
 
     // Overall summary
     out.println("=== Coverage Summary ===");
     out.println();
-    printCounter(out, "Instructions", totals[7], totals[6]);
-    printCounter(out, "Branches    ", totals[3], totals[2]);
-    printCounter(out, "Lines       ", totals[1], totals[0]);
-    printCounter(out, "Methods     ", totals[5], totals[4]);
-    printCounter(out, "Classes     ", totals[9], totals[8]);
+    printCounter(out, "Instructions", totals.coveredInstructions, totals.totalInstructions);
+    printCounter(out, "Branches    ", totals.coveredBranches, totals.totalBranches);
+    printCounter(out, "Lines       ", totals.coveredLines, totals.totalLines);
+    printCounter(out, "Methods     ", totals.coveredMethods, totals.totalMethods);
+    printCounter(out, "Classes     ", totals.coveredClasses, totals.totalClasses);
     out.println();
 
     // Per-package breakdown
@@ -111,12 +111,12 @@ public class TextCoverageStatistics {
     out.println();
     out.printf("%-50s %8s %8s %8s %8s%n", "Package", "Lines", "Line%", "Branch", "Branch%");
     out.println(repeat('-', 82));
-    for (Map.Entry<String, int[]> entry : packageCounters.entrySet()) {
-      int[] c = entry.getValue();
+    for (Map.Entry<String, CoverageCounters> entry : packageCounters.entrySet()) {
+      CoverageCounters c = entry.getValue();
       out.printf("%-50s %4d/%-3d %7s %4d/%-3d %7s%n",
           truncate(entry.getKey(), 50),
-          c[1], c[0], percent(c[1], c[0]),
-          c[3], c[2], percent(c[3], c[2]));
+          c.coveredLines, c.totalLines, percent(c.coveredLines, c.totalLines),
+          c.coveredBranches, c.totalBranches, percent(c.coveredBranches, c.totalBranches));
     }
     out.println();
 
@@ -134,11 +134,11 @@ public class TextCoverageStatistics {
       }
     });
     for (int idx : indices) {
-      int[] c = classRows.get(idx);
+      CoverageCounters c = classRows.get(idx);
       out.printf("%-60s %4d/%-3d %7s %4d/%-3d %7s%n",
           truncate(classNames.get(idx), 60),
-          c[1], c[0], percent(c[1], c[0]),
-          c[5], c[4], percent(c[5], c[4]));
+          c.coveredLines, c.totalLines, percent(c.coveredLines, c.totalLines),
+          c.coveredMethods, c.totalMethods, percent(c.coveredMethods, c.totalMethods));
     }
 
     // Per-class line hit counts
@@ -176,11 +176,9 @@ public class TextCoverageStatistics {
 
   /**
    * Computes coverage counters for a single class directly from ProjectData.
-   * Returns [totalLines, coveredLines, totalBranches, coveredBranches,
-   *          totalMethods, coveredMethods, totalInstructions, coveredInstructions].
    * Uses the same logic as {@link XMLCoverageReport}.
    */
-  private static int[] computeClassCounters(ProjectData project, ClassData classData) {
+  private static CoverageCounters computeClassCounters(ProjectData project, ClassData classData) {
     int totalLines = 0, coveredLines = 0;
     int totalBranches = 0, coveredBranches = 0;
     int totalMethods = 0, coveredMethods = 0;
@@ -227,8 +225,16 @@ public class TextCoverageStatistics {
       coveredInstructions += mCovInstr;
     }
 
-    return new int[]{totalLines, coveredLines, totalBranches, coveredBranches,
-        totalMethods, coveredMethods, totalInstructions, coveredInstructions};
+    CoverageCounters counters = new CoverageCounters();
+    counters.totalLines = totalLines;
+    counters.coveredLines = coveredLines;
+    counters.totalBranches = totalBranches;
+    counters.coveredBranches = coveredBranches;
+    counters.totalMethods = totalMethods;
+    counters.coveredMethods = coveredMethods;
+    counters.totalInstructions = totalInstructions;
+    counters.coveredInstructions = coveredInstructions;
+    return counters;
   }
 
   private static void printCounter(PrintStream out, String label, int covered, int total) {
@@ -249,5 +255,31 @@ public class TextCoverageStatistics {
     char[] chars = new char[count];
     Arrays.fill(chars, c);
     return new String(chars);
+  }
+}
+
+class CoverageCounters {
+  int totalLines;
+  int coveredLines;
+  int totalBranches;
+  int coveredBranches;
+  int totalMethods;
+  int coveredMethods;
+  int totalInstructions;
+  int coveredInstructions;
+  int totalClasses;
+  int coveredClasses;
+
+  void add(CoverageCounters other) {
+    totalLines += other.totalLines;
+    coveredLines += other.coveredLines;
+    totalBranches += other.totalBranches;
+    coveredBranches += other.coveredBranches;
+    totalMethods += other.totalMethods;
+    coveredMethods += other.coveredMethods;
+    totalInstructions += other.totalInstructions;
+    coveredInstructions += other.coveredInstructions;
+    totalClasses += other.totalClasses;
+    coveredClasses += other.coveredClasses;
   }
 }
