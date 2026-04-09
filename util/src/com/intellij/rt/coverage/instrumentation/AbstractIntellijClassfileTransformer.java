@@ -68,7 +68,7 @@ public abstract class AbstractIntellijClassfileTransformer implements ClassFileT
     // do not instrument itself
     // and do not instrument packages which are used during instrumented method invocation
     // (inside methods touch, save, etc. from ProjectData)
-    if (className.startsWith("com.intellij.rt.")
+    if (className.startsWith("com.intellij.rt.coverage")
         || className.startsWith("org.jetbrains.coverage.gnu.trove.")
         || className.startsWith("org.jetbrains.coverage.org.objectweb.")
         || isInternalJavaClass(className)) {
