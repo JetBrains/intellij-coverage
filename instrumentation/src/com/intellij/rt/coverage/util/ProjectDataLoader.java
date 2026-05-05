@@ -22,10 +22,7 @@ import com.intellij.rt.coverage.data.ProjectData;
 import com.intellij.rt.coverage.instrumentation.util.LinesUtil;
 import org.jetbrains.coverage.gnu.trove.TIntObjectHashMap;
 
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Load binary coverage report
@@ -46,77 +43,104 @@ public class ProjectDataLoader {
     }
   }
 
+  /**
+   * Loads coverage data from the given session data file.
+   * The file stream opened by this method is closed before returning.
+   */
   public static ProjectData load(File sessionDataFile) {
     final ProjectData projectInfo = new ProjectData();
     DataInputStream in = null;
     if (sessionDataFile.length() == 0) {
       return projectInfo;
     }
-    final StringsPool pool = new StringsPool();
     try {
       in = CoverageIOUtil.openReadFile(sessionDataFile);
-      final TIntObjectHashMap<ClassData> dict = new TIntObjectHashMap<ClassData>(1000, 0.99f);
-      final int classCount = CoverageIOUtil.readINT(in);
-      for (int c = 0; c < classCount; c++) {
-        final String className = pool.getFromPool(CoverageIOUtil.readUTFFast(in));
-        final ClassData classInfo = projectInfo.getOrCreateClassData(className);
-        dict.put(c, classInfo);
-      }
-      for (int c = 0; c < classCount; c++) {
-        final ClassData classInfo = dict.get(CoverageIOUtil.readINT(in));
-        final int methCount = CoverageIOUtil.readINT(in);
-        final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
-        int maxLine = -1;
-        for (int m = 0; m < methCount; m++) {
-          final String methodSig = pool.getFromPool(expand(in, dict));
-          final int lineCount = CoverageIOUtil.readINT(in);
-          for (int l = 0; l < lineCount; l++) {
-            final int line = CoverageIOUtil.readINT(in);
-            LineData lineInfo = lines.get(line);
-            if (lineInfo == null) {
-              lineInfo = new LineData(line, methodSig);
-              lines.put(line, lineInfo);
-              if (line > maxLine) maxLine = line;
-            }
-            classInfo.registerMethodSignature(lineInfo);
-            String testName = pool.getFromPool(CoverageIOUtil.readUTFFast(in));
-            if (testName != null && !testName.isEmpty()) {
-              lineInfo.setTestName(testName);
-            }
-            final int hits = CoverageIOUtil.readINT(in);
-            lineInfo.setHits(hits);
-            if (hits > 0) {
-              final int jumpsNumber = CoverageIOUtil.readINT(in);
-              for (int j = 0; j < jumpsNumber; j++) {
-                lineInfo.setTrueHits(j, CoverageIOUtil.readINT(in));
-                lineInfo.setFalseHits(j, CoverageIOUtil.readINT(in));
-              }
-              final int switchesNumber = CoverageIOUtil.readINT(in);
-              for (int s = 0; s < switchesNumber; s++) {
-                final int defaultHit = CoverageIOUtil.readINT(in);
-                final int keysLength = CoverageIOUtil.readINT(in);
-                final int[] keys = new int[keysLength];
-                final int[] keysHits = new int[keysLength];
-                for (int k = 0; k < keysLength; k++) {
-                  keys[k] = CoverageIOUtil.readINT(in);
-                  keysHits[k] = CoverageIOUtil.readINT(in);
-                }
-                lineInfo.setDefaultHits(s, keys, defaultHit);
-                lineInfo.setSwitchHits(s, keys, keysHits);
-              }
-            }
-            lineInfo.fillArrays();
-          }
-        }
-        classInfo.setLines(LinesUtil.calcLineArray(maxLine, lines));
-      }
-      loadExtraInfo(projectInfo, in, dict);
+      load(projectInfo, in);
     } catch (Exception e) {
       ErrorReporter.warn("Failed to load coverage data from file: " + sessionDataFile.getAbsolutePath(), e);
     } finally {
       CoverageIOUtil.close(in);
     }
     return projectInfo;
+  }
+
+  /**
+   * Loads coverage data from the given input stream.
+   * The input stream is owned by the caller and is not closed by this method.
+   */
+  public static ProjectData load(InputStream inputStream) {
+    final ProjectData projectInfo = new ProjectData();
+    try {
+      load(projectInfo, CoverageIOUtil.openDataStream(inputStream));
+    } catch (Exception e) {
+      ErrorReporter.warn("Failed to load coverage data from input stream", e);
+    }
+    return projectInfo;
+  }
+
+  private static void load(ProjectData projectInfo, DataInputStream in) throws IOException {
+    final StringsPool pool = new StringsPool();
+    final TIntObjectHashMap<ClassData> dict = new TIntObjectHashMap<ClassData>(1000, 0.99f);
+    final int classCount;
+    try {
+      classCount = CoverageIOUtil.readINT(in);
+    } catch (EOFException ignored) {
+      return;
+    }
+    for (int c = 0; c < classCount; c++) {
+      final String className = pool.getFromPool(CoverageIOUtil.readUTFFast(in));
+      final ClassData classInfo = projectInfo.getOrCreateClassData(className);
+      dict.put(c, classInfo);
+    }
+    for (int c = 0; c < classCount; c++) {
+      final ClassData classInfo = dict.get(CoverageIOUtil.readINT(in));
+      final int methCount = CoverageIOUtil.readINT(in);
+      final TIntObjectHashMap<LineData> lines = new TIntObjectHashMap<LineData>(4, 0.99f);
+      int maxLine = -1;
+      for (int m = 0; m < methCount; m++) {
+        final String methodSig = pool.getFromPool(expand(in, dict));
+        final int lineCount = CoverageIOUtil.readINT(in);
+        for (int l = 0; l < lineCount; l++) {
+          final int line = CoverageIOUtil.readINT(in);
+          LineData lineInfo = lines.get(line);
+          if (lineInfo == null) {
+            lineInfo = new LineData(line, methodSig);
+            lines.put(line, lineInfo);
+            if (line > maxLine) maxLine = line;
+          }
+          classInfo.registerMethodSignature(lineInfo);
+          String testName = pool.getFromPool(CoverageIOUtil.readUTFFast(in));
+          if (testName != null && !testName.isEmpty()) {
+            lineInfo.setTestName(testName);
+          }
+          final int hits = CoverageIOUtil.readINT(in);
+          lineInfo.setHits(hits);
+          if (hits > 0) {
+            final int jumpsNumber = CoverageIOUtil.readINT(in);
+            for (int j = 0; j < jumpsNumber; j++) {
+              lineInfo.setTrueHits(j, CoverageIOUtil.readINT(in));
+              lineInfo.setFalseHits(j, CoverageIOUtil.readINT(in));
+            }
+            final int switchesNumber = CoverageIOUtil.readINT(in);
+            for (int s = 0; s < switchesNumber; s++) {
+              final int defaultHit = CoverageIOUtil.readINT(in);
+              final int keysLength = CoverageIOUtil.readINT(in);
+              final int[] keys = new int[keysLength];
+              final int[] keysHits = new int[keysLength];
+              for (int k = 0; k < keysLength; k++) {
+                keys[k] = CoverageIOUtil.readINT(in);
+                keysHits[k] = CoverageIOUtil.readINT(in);
+              }
+              lineInfo.setDefaultHits(s, keys, defaultHit);
+              lineInfo.setSwitchHits(s, keys, keysHits);
+            }
+          }
+          lineInfo.fillArrays();
+        }
+      }
+      classInfo.setLines(LinesUtil.calcLineArray(maxLine, lines));
+    }
+    loadExtraInfo(projectInfo, in, dict);
   }
 
   private static String expand(DataInputStream in, final TIntObjectHashMap<ClassData> dict) throws IOException {

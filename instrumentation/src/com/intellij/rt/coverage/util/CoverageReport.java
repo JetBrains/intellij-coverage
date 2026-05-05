@@ -129,9 +129,27 @@ public class CoverageReport {
     }
   }
 
-  @SuppressWarnings("unused") // used in IntelliJ
+  /**
+   * Loads a source map from the given file and applies it to the project data.
+   * The file stream opened by this method is closed before returning.
+   */
+  // used in IntelliJ
   public static void loadAndApplySourceMap(ProjectData projectData, File sourceMapFile) throws IOException {
     final Map<String, String> map = loadSourceMapFromFile(new HashMap<String, ClassData>(), sourceMapFile);
+    applySourceMap(projectData, map);
+  }
+
+  /**
+   * Loads a source map from the given input stream and applies it to the project data.
+   * The input stream is owned by the caller and is not closed by this method.
+   */
+  // used in IntelliJ
+  public static void loadAndApplySourceMap(ProjectData projectData, InputStream sourceMap) throws IOException {
+    final Map<String, String> map = loadSourceMap(new HashMap<String, ClassData>(), CoverageIOUtil.openDataStream(sourceMap));
+    applySourceMap(projectData, map);
+  }
+
+  private static void applySourceMap(ProjectData projectData, Map<String, String> map) {
     for (Map.Entry<String, String> entry : map.entrySet()) {
       String className = entry.getKey();
       String source = entry.getValue();
@@ -145,24 +163,28 @@ public class CoverageReport {
   static Map<String, String> loadSourceMapFromFile(Map<String, ClassData> classes, File sourceMapFile) throws IOException {
     DataInputStream in = null;
     try {
-      in = new DataInputStream(new FileInputStream(sourceMapFile));
-      final int classNumber = CoverageIOUtil.readINT(in);
-      final HashMap<String, String> readNames = new HashMap<String, String>(classNumber);
-      for (int i = 0; i < classNumber; ++i) {
-        final String className = CoverageIOUtil.readUTFFast(in);
-        final String classSource = CoverageIOUtil.readUTFFast(in);
-        if ("".equals(classSource)) {
-          continue;
-        }
-        final ClassData data = classes.get(className);
-        if (data == null || data.getSource() == null || !data.getSource().equals(classSource)) {
-          readNames.put(className, classSource);
-        }
-      }
-      return readNames;
+      in = CoverageIOUtil.openDataStream(new FileInputStream(sourceMapFile));
+      return loadSourceMap(classes, in);
     } finally {
       CoverageIOUtil.close(in);
     }
+  }
+
+  private static Map<String, String> loadSourceMap(Map<String, ClassData> classes, DataInputStream in) throws IOException {
+    final int classNumber = CoverageIOUtil.readINT(in);
+    final HashMap<String, String> readNames = new HashMap<String, String>(classNumber);
+    for (int i = 0; i < classNumber; ++i) {
+      final String className = CoverageIOUtil.readUTFFast(in);
+      final String classSource = CoverageIOUtil.readUTFFast(in);
+      if ("".equals(classSource)) {
+        continue;
+      }
+      final ClassData data = classes.get(className);
+      if (data == null || data.getSource() == null || !data.getSource().equals(classSource)) {
+        readNames.put(className, classSource);
+      }
+    }
+    return readNames;
   }
 
   private static void saveData(DataOutputStream os, final TObjectIntHashMap<String> dict, Map<String, ClassData> classes) throws IOException {

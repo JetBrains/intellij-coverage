@@ -283,7 +283,11 @@ public class CoverageIOUtil {
   }
 
   public static DataInputStream openReadFile(File file) throws FileNotFoundException {
-    return new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
+    return openDataStream(new BufferedInputStream(new FileInputStream(file)));
+  }
+
+  public static DataInputStream openDataStream(InputStream is) {
+    return new DataInputStream(is);
   }
 
   public static void close(Closeable out) {

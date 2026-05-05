@@ -17,8 +17,11 @@
 package com.intellij.rt.coverage.util;
 
 import com.intellij.rt.coverage.data.ClassData;
+import com.intellij.rt.coverage.data.ProjectData;
 import junit.framework.TestCase;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -133,6 +136,38 @@ public class SourceMapTest extends TestCase {
     assertEquals("filename.java1", map.get("someclass"));
   }
 
+  public void test_load_and_apply_source_map_does_not_close_input_stream() throws IOException {
+    final ProjectData projectData = new ProjectData();
+    projectData.getOrCreateClassData("someclass");
+    final TrackingInputStream inputStream = new TrackingInputStream(createSourceMapBytes("someclass", "filename.java"));
+
+    CoverageReport.loadAndApplySourceMap(projectData, inputStream);
+
+    assertFalse("Input stream should not be closed by loadAndApplySourceMap", inputStream.isClosed());
+    assertEquals("filename.java", projectData.getClassData("someclass").getSource());
+  }
+
+  public void test_load_and_apply_source_map_from_file() throws IOException {
+    final File tempFile = File.createTempFile("source_map", "ideacovtest");
+    final ProjectData projectData = new ProjectData();
+    projectData.getOrCreateClassData("someclass");
+    CoverageReport.doSaveSourceMap(Collections.<String, String>emptyMap(), tempFile, createMap(new String[]{"someclass", "filename.java"}));
+
+    CoverageReport.loadAndApplySourceMap(projectData, tempFile);
+
+    assertEquals("filename.java", projectData.getClassData("someclass").getSource());
+  }
+
+  private static byte[] createSourceMapBytes(String className, String source) throws IOException {
+    final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+    final DataOutputStream out = new DataOutputStream(bytes);
+    CoverageIOUtil.writeINT(out, 1);
+    CoverageIOUtil.writeUTF(out, className);
+    CoverageIOUtil.writeUTF(out, source);
+    out.flush();
+    return bytes.toByteArray();
+  }
+
   private Map<String, ClassData> createMap(final String[] strings) {
     HashMap<String, ClassData> map = new HashMap<String, ClassData>(strings.length / 2);
     for (int i = 0; i < strings.length; i += 2) {
@@ -160,4 +195,5 @@ public class SourceMapTest extends TestCase {
       assertEquals("Class's source filename didn't match. init: " + initSourceFilename + ", result: " + clName, initSourceFilename, clName);
     }
   }
+
 }
