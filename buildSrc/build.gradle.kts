@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 
-plugins {
-    `kotlin-dsl`
-}
-
 repositories {
     mavenCentral()
 }
